@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../call/call_reject_reason.dart';
 import '../errors/video_error.dart';
 
 @immutable
@@ -15,6 +16,7 @@ abstract class DisconnectReason extends Equatable {
 
   const factory DisconnectReason.rejected({
     required String byUserId,
+    CallRejectReason? reason,
   }) = DisconnectReasonRejected;
 
   const factory DisconnectReason.cancelled({
@@ -27,6 +29,10 @@ abstract class DisconnectReason extends Equatable {
 
   factory DisconnectReason.lastParticipantLeft() {
     return DisconnectReasonLastParticipantLeft();
+  }
+
+  factory DisconnectReason.reconnectionFailed() {
+    return DisconnectReasonReconnectionFailed();
   }
 
   @override
@@ -59,12 +65,14 @@ class DisconnectReasonFailure extends DisconnectReason {
 class DisconnectReasonRejected extends DisconnectReason {
   const DisconnectReasonRejected({
     required this.byUserId,
+    this.reason,
   });
 
   final String byUserId;
+  final CallRejectReason? reason;
 
   @override
-  List<Object?> get props => [byUserId];
+  List<Object?> get props => [byUserId, reason];
 
   @override
   String toString() {
@@ -117,6 +125,22 @@ class DisconnectReasonLastParticipantLeft extends DisconnectReason {
   @override
   String toString() {
     return 'LastParticipantLeft';
+  }
+}
+
+class DisconnectReasonReconnectionFailed extends DisconnectReason {
+  factory DisconnectReasonReconnectionFailed() {
+    return _instance;
+  }
+
+  const DisconnectReasonReconnectionFailed._internal();
+
+  static const DisconnectReasonReconnectionFailed _instance =
+      DisconnectReasonReconnectionFailed._internal();
+
+  @override
+  String toString() {
+    return 'ReconnectionFailed';
   }
 }
 

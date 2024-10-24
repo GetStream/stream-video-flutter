@@ -37,6 +37,14 @@ abstract class CallStatus extends Equatable {
     );
   }
 
+  factory CallStatus.migrating() {
+    return const CallStatusMigrating();
+  }
+
+  factory CallStatus.reconnectingFailed() {
+    return CallStatusReconnectionFailed();
+  }
+
   factory CallStatus.connected() {
     return CallStatusConnected();
   }
@@ -168,7 +176,8 @@ class CallStatusConnecting extends CallStatusActive {
   String toString() => 'Connecting';
 }
 
-class CallStatusReconnecting extends CallStatusConnecting {
+class CallStatusReconnecting extends CallStatusConnecting
+    implements CallStatusConnectable {
   const CallStatusReconnecting({
     required this.attempt,
     this.isFastReconnectAttempt = false,
@@ -186,7 +195,22 @@ class CallStatusReconnecting extends CallStatusConnecting {
   }
 }
 
-class CallStatusMigrating extends CallStatusConnecting {
+class CallStatusReconnectionFailed extends CallStatus {
+  factory CallStatusReconnectionFailed() {
+    return _instance;
+  }
+
+  const CallStatusReconnectionFailed._internal();
+
+  static const CallStatusReconnectionFailed _instance =
+      CallStatusReconnectionFailed._internal();
+
+  @override
+  String toString() => 'Reconnect failed';
+}
+
+class CallStatusMigrating extends CallStatusConnecting
+    implements CallStatusConnectable {
   const CallStatusMigrating() : super._internal();
 
   @override

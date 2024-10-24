@@ -6,7 +6,7 @@ const _maxJitterMs = 500;
 const _minDelay = Duration(milliseconds: 200);
 const _defaultRpcMaxRetries = 5;
 const _defaultMaxBackoff = Duration(seconds: 3);
-const _defaultRejoinTimeout = Duration(seconds: 15);
+const _defaultRejoinTimeout = Duration(minutes: 5);
 
 final Random _rnd = Random();
 

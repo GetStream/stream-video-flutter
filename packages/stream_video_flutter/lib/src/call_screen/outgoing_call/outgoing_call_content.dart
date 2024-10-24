@@ -167,7 +167,6 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       widget.onCancelCallTap!();
     } else {
       await widget.call.reject(reason: CallRejectReason.cancel());
-      await widget.call.leave();
     }
   }
 

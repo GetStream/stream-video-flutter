@@ -239,7 +239,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall({
     required StreamCallCid callCid,
-    String? datacenterId,
     bool? ringing,
     bool? create,
     String? migratingFrom,
@@ -248,7 +247,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
     return _retryManager.execute(
       () => _delegate.joinCall(
         callCid: callCid,
-        datacenterId: datacenterId,
         ringing: ringing,
         create: create,
         migratingFrom: migratingFrom,
@@ -569,6 +567,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     StreamTranscriptionSettings? transcription,
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
+    StreamLimitsSettings? limits,
   }) {
     return _retryManager.execute(
       () => _delegate.updateCall(
@@ -582,6 +581,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         transcription: transcription,
         backstage: backstage,
         geofencing: geofencing,
+        limits: limits,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('updateCall', error, nextAttemptDelay);

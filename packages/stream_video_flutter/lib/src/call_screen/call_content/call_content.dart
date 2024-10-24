@@ -153,7 +153,9 @@ class _StreamCallContentState extends State<StreamCallContent>
     }
 
     final Widget bodyWidget;
-    if (callState.status.isConnected || callState.status.isFastReconnecting) {
+    if (callState.status.isConnected ||
+        callState.status.isFastReconnecting ||
+        callState.status.isMigrating) {
       bodyWidget = Stack(
         children: [
           if (CurrentPlatform.isIos &&
@@ -182,13 +184,8 @@ class _StreamCallContentState extends State<StreamCallContent>
         ],
       );
     } else {
-      final isMigrating = callState.status.isMigrating;
       final isReconnecting = callState.status.isReconnecting;
-      final statusText = isMigrating
-          ? 'Migrating'
-          : isReconnecting
-              ? 'Reconnecting'
-              : 'Connecting';
+      final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
       bodyWidget = Center(
         child: Text(
           statusText,

@@ -87,6 +87,9 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuJoinResponseEvent(
           callState: joinResponse.callState.toDomain(),
           isReconnected: joinResponse.reconnected,
+          fastReconnectDeadline: Duration(
+            seconds: joinResponse.fastReconnectDeadlineSeconds,
+          ),
         );
       case sfu_events.SfuEvent_EventPayload.participantJoined:
         return SfuParticipantJoinedEvent(
@@ -127,6 +130,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
             code: error.error.code.toDomain(),
             message: error.error.message,
             shouldRetry: error.error.shouldRetry,
+            reconnectStrategy: error.reconnectStrategy.toDomain(),
           ),
         );
       case sfu_events.SfuEvent_EventPayload.callGrantsUpdated:
@@ -150,6 +154,8 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           callCid: payload.callCid,
           participant: payload.participant.toDomain(),
         );
+      case sfu_events.SfuEvent_EventPayload.participantMigrationComplete:
+        return const SfuParticipantMigrationCompleteEvent();
       default:
         return const SfuUnknownEvent();
     }
@@ -288,6 +294,28 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.unauthenticated;
       default:
         throw StateError('unexpected error code: $this');
+    }
+  }
+}
+
+extension SfuWebsocketReconnectStrategyExtension
+    on sfu_models.WebsocketReconnectStrategy {
+  SfuReconnectionStrategy toDomain() {
+    switch (this) {
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
+        return SfuReconnectionStrategy.disconnect;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST:
+        return SfuReconnectionStrategy.fast;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN:
+        return SfuReconnectionStrategy.rejoin;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
+        return SfuReconnectionStrategy.migrate;
+      default:
+        return SfuReconnectionStrategy.unspecified;
     }
   }
 }

@@ -1,18 +1,21 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: video/sfu/event/events.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import '../models/models.pb.dart' as $0;
-import '../signal_rpc/signal.pb.dart' as $1;
-
 import '../models/models.pbenum.dart' as $0;
+import '../signal_rpc/signal.pb.dart' as $1;
 import 'events.pbenum.dart';
 
 export 'events.pbenum.dart';
@@ -38,59 +41,12 @@ enum SfuEvent_EventPayload {
   pinsUpdated, 
   callEnded, 
   participantUpdated, 
+  participantMigrationComplete, 
   notSet
 }
 
+/// SFUEvent is a message that is sent from the SFU to the client.
 class SfuEvent extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, SfuEvent_EventPayload> _SfuEvent_EventPayloadByTag = {
-    1 : SfuEvent_EventPayload.subscriberOffer,
-    2 : SfuEvent_EventPayload.publisherAnswer,
-    3 : SfuEvent_EventPayload.connectionQualityChanged,
-    4 : SfuEvent_EventPayload.audioLevelChanged,
-    5 : SfuEvent_EventPayload.iceTrickle,
-    6 : SfuEvent_EventPayload.changePublishQuality,
-    10 : SfuEvent_EventPayload.participantJoined,
-    11 : SfuEvent_EventPayload.participantLeft,
-    12 : SfuEvent_EventPayload.dominantSpeakerChanged,
-    13 : SfuEvent_EventPayload.joinResponse,
-    14 : SfuEvent_EventPayload.healthCheckResponse,
-    16 : SfuEvent_EventPayload.trackPublished,
-    17 : SfuEvent_EventPayload.trackUnpublished,
-    18 : SfuEvent_EventPayload.error,
-    19 : SfuEvent_EventPayload.callGrantsUpdated,
-    20 : SfuEvent_EventPayload.goAway,
-    21 : SfuEvent_EventPayload.iceRestart,
-    22 : SfuEvent_EventPayload.pinsUpdated,
-    23 : SfuEvent_EventPayload.callEnded,
-    24 : SfuEvent_EventPayload.participantUpdated,
-    0 : SfuEvent_EventPayload.notSet
-  };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24])
-    ..aOM<SubscriberOffer>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
-    ..aOM<PublisherAnswer>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
-    ..aOM<ConnectionQualityChanged>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
-    ..aOM<AudioLevelChanged>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioLevelChanged', subBuilder: AudioLevelChanged.create)
-    ..aOM<$0.ICETrickle>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceTrickle', subBuilder: $0.ICETrickle.create)
-    ..aOM<ChangePublishQuality>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'changePublishQuality', subBuilder: ChangePublishQuality.create)
-    ..aOM<ParticipantJoined>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantJoined', subBuilder: ParticipantJoined.create)
-    ..aOM<ParticipantLeft>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantLeft', subBuilder: ParticipantLeft.create)
-    ..aOM<DominantSpeakerChanged>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dominantSpeakerChanged', subBuilder: DominantSpeakerChanged.create)
-    ..aOM<JoinResponse>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'joinResponse', subBuilder: JoinResponse.create)
-    ..aOM<HealthCheckResponse>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthCheckResponse', subBuilder: HealthCheckResponse.create)
-    ..aOM<TrackPublished>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackPublished', subBuilder: TrackPublished.create)
-    ..aOM<TrackUnpublished>(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackUnpublished', subBuilder: TrackUnpublished.create)
-    ..aOM<Error>(18, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
-    ..aOM<CallGrantsUpdated>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callGrantsUpdated', subBuilder: CallGrantsUpdated.create)
-    ..aOM<GoAway>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'goAway', subBuilder: GoAway.create)
-    ..aOM<ICERestart>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceRestart', subBuilder: ICERestart.create)
-    ..aOM<PinsChanged>(22, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pinsUpdated', subBuilder: PinsChanged.create)
-    ..aOM<CallEnded>(23, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callEnded', subBuilder: CallEnded.create)
-    ..aOM<ParticipantUpdated>(24, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantUpdated', subBuilder: ParticipantUpdated.create)
-    ..hasRequiredFields = false
-  ;
-
-  SfuEvent._() : super();
   factory SfuEvent({
     SubscriberOffer? subscriberOffer,
     PublisherAnswer? publisherAnswer,
@@ -112,72 +68,128 @@ class SfuEvent extends $pb.GeneratedMessage {
     PinsChanged? pinsUpdated,
     CallEnded? callEnded,
     ParticipantUpdated? participantUpdated,
+    ParticipantMigrationComplete? participantMigrationComplete,
   }) {
-    final _result = create();
+    final $result = create();
     if (subscriberOffer != null) {
-      _result.subscriberOffer = subscriberOffer;
+      $result.subscriberOffer = subscriberOffer;
     }
     if (publisherAnswer != null) {
-      _result.publisherAnswer = publisherAnswer;
+      $result.publisherAnswer = publisherAnswer;
     }
     if (connectionQualityChanged != null) {
-      _result.connectionQualityChanged = connectionQualityChanged;
+      $result.connectionQualityChanged = connectionQualityChanged;
     }
     if (audioLevelChanged != null) {
-      _result.audioLevelChanged = audioLevelChanged;
+      $result.audioLevelChanged = audioLevelChanged;
     }
     if (iceTrickle != null) {
-      _result.iceTrickle = iceTrickle;
+      $result.iceTrickle = iceTrickle;
     }
     if (changePublishQuality != null) {
-      _result.changePublishQuality = changePublishQuality;
+      $result.changePublishQuality = changePublishQuality;
     }
     if (participantJoined != null) {
-      _result.participantJoined = participantJoined;
+      $result.participantJoined = participantJoined;
     }
     if (participantLeft != null) {
-      _result.participantLeft = participantLeft;
+      $result.participantLeft = participantLeft;
     }
     if (dominantSpeakerChanged != null) {
-      _result.dominantSpeakerChanged = dominantSpeakerChanged;
+      $result.dominantSpeakerChanged = dominantSpeakerChanged;
     }
     if (joinResponse != null) {
-      _result.joinResponse = joinResponse;
+      $result.joinResponse = joinResponse;
     }
     if (healthCheckResponse != null) {
-      _result.healthCheckResponse = healthCheckResponse;
+      $result.healthCheckResponse = healthCheckResponse;
     }
     if (trackPublished != null) {
-      _result.trackPublished = trackPublished;
+      $result.trackPublished = trackPublished;
     }
     if (trackUnpublished != null) {
-      _result.trackUnpublished = trackUnpublished;
+      $result.trackUnpublished = trackUnpublished;
     }
     if (error != null) {
-      _result.error = error;
+      $result.error = error;
     }
     if (callGrantsUpdated != null) {
-      _result.callGrantsUpdated = callGrantsUpdated;
+      $result.callGrantsUpdated = callGrantsUpdated;
     }
     if (goAway != null) {
-      _result.goAway = goAway;
+      $result.goAway = goAway;
     }
     if (iceRestart != null) {
-      _result.iceRestart = iceRestart;
+      $result.iceRestart = iceRestart;
     }
     if (pinsUpdated != null) {
-      _result.pinsUpdated = pinsUpdated;
+      $result.pinsUpdated = pinsUpdated;
     }
     if (callEnded != null) {
-      _result.callEnded = callEnded;
+      $result.callEnded = callEnded;
     }
     if (participantUpdated != null) {
-      _result.participantUpdated = participantUpdated;
+      $result.participantUpdated = participantUpdated;
     }
-    return _result;
+    if (participantMigrationComplete != null) {
+      $result.participantMigrationComplete = participantMigrationComplete;
+    }
+    return $result;
   }
+  SfuEvent._() : super();
   factory SfuEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SfuEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static const $core.Map<$core.int, SfuEvent_EventPayload> _SfuEvent_EventPayloadByTag = {
+    1 : SfuEvent_EventPayload.subscriberOffer,
+    2 : SfuEvent_EventPayload.publisherAnswer,
+    3 : SfuEvent_EventPayload.connectionQualityChanged,
+    4 : SfuEvent_EventPayload.audioLevelChanged,
+    5 : SfuEvent_EventPayload.iceTrickle,
+    6 : SfuEvent_EventPayload.changePublishQuality,
+    10 : SfuEvent_EventPayload.participantJoined,
+    11 : SfuEvent_EventPayload.participantLeft,
+    12 : SfuEvent_EventPayload.dominantSpeakerChanged,
+    13 : SfuEvent_EventPayload.joinResponse,
+    14 : SfuEvent_EventPayload.healthCheckResponse,
+    16 : SfuEvent_EventPayload.trackPublished,
+    17 : SfuEvent_EventPayload.trackUnpublished,
+    18 : SfuEvent_EventPayload.error,
+    19 : SfuEvent_EventPayload.callGrantsUpdated,
+    20 : SfuEvent_EventPayload.goAway,
+    21 : SfuEvent_EventPayload.iceRestart,
+    22 : SfuEvent_EventPayload.pinsUpdated,
+    23 : SfuEvent_EventPayload.callEnded,
+    24 : SfuEvent_EventPayload.participantUpdated,
+    25 : SfuEvent_EventPayload.participantMigrationComplete,
+    0 : SfuEvent_EventPayload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SfuEvent', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25])
+    ..aOM<SubscriberOffer>(1, _omitFieldNames ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
+    ..aOM<PublisherAnswer>(2, _omitFieldNames ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
+    ..aOM<ConnectionQualityChanged>(3, _omitFieldNames ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
+    ..aOM<AudioLevelChanged>(4, _omitFieldNames ? '' : 'audioLevelChanged', subBuilder: AudioLevelChanged.create)
+    ..aOM<$0.ICETrickle>(5, _omitFieldNames ? '' : 'iceTrickle', subBuilder: $0.ICETrickle.create)
+    ..aOM<ChangePublishQuality>(6, _omitFieldNames ? '' : 'changePublishQuality', subBuilder: ChangePublishQuality.create)
+    ..aOM<ParticipantJoined>(10, _omitFieldNames ? '' : 'participantJoined', subBuilder: ParticipantJoined.create)
+    ..aOM<ParticipantLeft>(11, _omitFieldNames ? '' : 'participantLeft', subBuilder: ParticipantLeft.create)
+    ..aOM<DominantSpeakerChanged>(12, _omitFieldNames ? '' : 'dominantSpeakerChanged', subBuilder: DominantSpeakerChanged.create)
+    ..aOM<JoinResponse>(13, _omitFieldNames ? '' : 'joinResponse', subBuilder: JoinResponse.create)
+    ..aOM<HealthCheckResponse>(14, _omitFieldNames ? '' : 'healthCheckResponse', subBuilder: HealthCheckResponse.create)
+    ..aOM<TrackPublished>(16, _omitFieldNames ? '' : 'trackPublished', subBuilder: TrackPublished.create)
+    ..aOM<TrackUnpublished>(17, _omitFieldNames ? '' : 'trackUnpublished', subBuilder: TrackUnpublished.create)
+    ..aOM<Error>(18, _omitFieldNames ? '' : 'error', subBuilder: Error.create)
+    ..aOM<CallGrantsUpdated>(19, _omitFieldNames ? '' : 'callGrantsUpdated', subBuilder: CallGrantsUpdated.create)
+    ..aOM<GoAway>(20, _omitFieldNames ? '' : 'goAway', subBuilder: GoAway.create)
+    ..aOM<ICERestart>(21, _omitFieldNames ? '' : 'iceRestart', subBuilder: ICERestart.create)
+    ..aOM<PinsChanged>(22, _omitFieldNames ? '' : 'pinsUpdated', subBuilder: PinsChanged.create)
+    ..aOM<CallEnded>(23, _omitFieldNames ? '' : 'callEnded', subBuilder: CallEnded.create)
+    ..aOM<ParticipantUpdated>(24, _omitFieldNames ? '' : 'participantUpdated', subBuilder: ParticipantUpdated.create)
+    ..aOM<ParticipantMigrationComplete>(25, _omitFieldNames ? '' : 'participantMigrationComplete', subBuilder: ParticipantMigrationComplete.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -187,8 +199,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SfuEvent copyWith(void Function(SfuEvent) updates) => super.copyWith((message) => updates(message as SfuEvent)) as SfuEvent; // ignore: deprecated_member_use
+  SfuEvent copyWith(void Function(SfuEvent) updates) => super.copyWith((message) => updates(message as SfuEvent)) as SfuEvent;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SfuEvent create() => SfuEvent._();
   SfuEvent createEmptyInstance() => create();
@@ -200,6 +214,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   SfuEvent_EventPayload whichEventPayload() => _SfuEvent_EventPayloadByTag[$_whichOneof(0)]!;
   void clearEventPayload() => clearField($_whichOneof(0));
 
+  /// SubscriberOffer sends the SDP offer for establishing the
+  /// subscriber PeerConnection.
   @$pb.TagNumber(1)
   SubscriberOffer get subscriberOffer => $_getN(0);
   @$pb.TagNumber(1)
@@ -211,6 +227,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   SubscriberOffer ensureSubscriberOffer() => $_ensure(0);
 
+  /// PublisherAnswer sends the SDP answer to the offer sent by
+  /// the client for establishing the Publisher PeerConnection.
   @$pb.TagNumber(2)
   PublisherAnswer get publisherAnswer => $_getN(1);
   @$pb.TagNumber(2)
@@ -222,6 +240,9 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   PublisherAnswer ensurePublisherAnswer() => $_ensure(1);
 
+  /// ConnectionQualityChanged is sent to inform the connection
+  /// quality of the participants in the call. It does not have
+  /// to contain the full list of call participants in it.
   @$pb.TagNumber(3)
   ConnectionQualityChanged get connectionQualityChanged => $_getN(2);
   @$pb.TagNumber(3)
@@ -233,6 +254,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   ConnectionQualityChanged ensureConnectionQualityChanged() => $_ensure(2);
 
+  /// AudioLevelChanged is sent for change in audio levels of
+  /// the participants.
   @$pb.TagNumber(4)
   AudioLevelChanged get audioLevelChanged => $_getN(3);
   @$pb.TagNumber(4)
@@ -244,6 +267,9 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   AudioLevelChanged ensureAudioLevelChanged() => $_ensure(3);
 
+  /// ICETrickle contains the ICE candidate required to establish
+  /// the ICE transport: part of establishing the PeerConnection
+  /// and also for ICE restarts.
   @$pb.TagNumber(5)
   $0.ICETrickle get iceTrickle => $_getN(4);
   @$pb.TagNumber(5)
@@ -255,6 +281,9 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $0.ICETrickle ensureIceTrickle() => $_ensure(4);
 
+  /// ChangePublishQuality advises the publisher to switch on/off
+  /// various qualities of their video stream based on the subscription.
+  /// This is done to save the bandwidth and the CPU of the publisher.
   @$pb.TagNumber(6)
   ChangePublishQuality get changePublishQuality => $_getN(5);
   @$pb.TagNumber(6)
@@ -266,6 +295,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   ChangePublishQuality ensureChangePublishQuality() => $_ensure(5);
 
+  /// ParticipantJoined notifies the client that a new participant
+  /// has joined the call. This is not sent for anonymous users.
   @$pb.TagNumber(10)
   ParticipantJoined get participantJoined => $_getN(6);
   @$pb.TagNumber(10)
@@ -277,6 +308,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   ParticipantJoined ensureParticipantJoined() => $_ensure(6);
 
+  /// ParticipantLeft notifies the client that a call participant
+  /// has left the call. This is not sent for anonymous users.
   @$pb.TagNumber(11)
   ParticipantLeft get participantLeft => $_getN(7);
   @$pb.TagNumber(11)
@@ -288,6 +321,9 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(11)
   ParticipantLeft ensureParticipantLeft() => $_ensure(7);
 
+  /// DominantSpeakerChanged notifies the client about the current
+  /// dominant speaker. This is required for certain use cases like
+  /// the spotlight view.
   @$pb.TagNumber(12)
   DominantSpeakerChanged get dominantSpeakerChanged => $_getN(8);
   @$pb.TagNumber(12)
@@ -299,6 +335,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(12)
   DominantSpeakerChanged ensureDominantSpeakerChanged() => $_ensure(8);
 
+  /// JoinResponse acknowledges a participant successfully joining
+  /// the call. This is sent in response to the JoinRequest.
   @$pb.TagNumber(13)
   JoinResponse get joinResponse => $_getN(9);
   @$pb.TagNumber(13)
@@ -310,6 +348,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(13)
   JoinResponse ensureJoinResponse() => $_ensure(9);
 
+  /// HealthCheckResponse is sent in response to the HealthCheckRequest.
+  /// It contains the participant count in the call.
   @$pb.TagNumber(14)
   HealthCheckResponse get healthCheckResponse => $_getN(10);
   @$pb.TagNumber(14)
@@ -321,6 +361,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(14)
   HealthCheckResponse ensureHealthCheckResponse() => $_ensure(10);
 
+  /// TrackPublished is sent when a new track (like audio, video, screenshare)
+  /// is published by a participant in the call. It is also sent on mute/unmute.
   @$pb.TagNumber(16)
   TrackPublished get trackPublished => $_getN(11);
   @$pb.TagNumber(16)
@@ -332,6 +374,9 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(16)
   TrackPublished ensureTrackPublished() => $_ensure(11);
 
+  /// TrackUnpublished is sent when a track (like audio, video, screenshare)
+  /// is no longer published. It is sent on muting a track or when the participant
+  /// is leaving the call.
   @$pb.TagNumber(17)
   TrackUnpublished get trackUnpublished => $_getN(12);
   @$pb.TagNumber(17)
@@ -343,6 +388,9 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(17)
   TrackUnpublished ensureTrackUnpublished() => $_ensure(12);
 
+  /// Error is used to communicate any error related to the participant. The
+  /// error code and the message explain what went wrong. Whether the participant
+  /// can retry is also indicated.
   @$pb.TagNumber(18)
   Error get error => $_getN(13);
   @$pb.TagNumber(18)
@@ -354,6 +402,7 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(18)
   Error ensureError() => $_ensure(13);
 
+  /// CallGrantsUpdated tells what tracks a participant is allowed to publish.
   @$pb.TagNumber(19)
   CallGrantsUpdated get callGrantsUpdated => $_getN(14);
   @$pb.TagNumber(19)
@@ -365,6 +414,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(19)
   CallGrantsUpdated ensureCallGrantsUpdated() => $_ensure(14);
 
+  /// GoAway tells the client to migrate away from the SFU it is connected to.
+  /// The reason field indicates why this message was sent.
   @$pb.TagNumber(20)
   GoAway get goAway => $_getN(15);
   @$pb.TagNumber(20)
@@ -376,6 +427,7 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(20)
   GoAway ensureGoAway() => $_ensure(15);
 
+  /// ICERestart tells the client to perform ICE restart.
   @$pb.TagNumber(21)
   ICERestart get iceRestart => $_getN(16);
   @$pb.TagNumber(21)
@@ -387,6 +439,7 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(21)
   ICERestart ensureIceRestart() => $_ensure(16);
 
+  /// PinsChanged is sent the list of pins in the call changes. This event contains the entire list of pins.
   @$pb.TagNumber(22)
   PinsChanged get pinsUpdated => $_getN(17);
   @$pb.TagNumber(22)
@@ -398,6 +451,8 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(22)
   PinsChanged ensurePinsUpdated() => $_ensure(17);
 
+  /// CallEnded is sent by the SFU to the client to signal that the call has ended.
+  /// The reason may specify why the call has ended.
   @$pb.TagNumber(23)
   CallEnded get callEnded => $_getN(18);
   @$pb.TagNumber(23)
@@ -409,6 +464,7 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(23)
   CallEnded ensureCallEnded() => $_ensure(18);
 
+  /// ParticipantUpdated is sent when user data is updated
   @$pb.TagNumber(24)
   ParticipantUpdated get participantUpdated => $_getN(19);
   @$pb.TagNumber(24)
@@ -419,26 +475,71 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearParticipantUpdated() => clearField(24);
   @$pb.TagNumber(24)
   ParticipantUpdated ensureParticipantUpdated() => $_ensure(19);
+
+  /// ParticipantMigrationComplete is sent when the participant migration is complete
+  @$pb.TagNumber(25)
+  ParticipantMigrationComplete get participantMigrationComplete => $_getN(20);
+  @$pb.TagNumber(25)
+  set participantMigrationComplete(ParticipantMigrationComplete v) { setField(25, v); }
+  @$pb.TagNumber(25)
+  $core.bool hasParticipantMigrationComplete() => $_has(20);
+  @$pb.TagNumber(25)
+  void clearParticipantMigrationComplete() => clearField(25);
+  @$pb.TagNumber(25)
+  ParticipantMigrationComplete ensureParticipantMigrationComplete() => $_ensure(20);
 }
 
-class PinsChanged extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PinsChanged', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<$0.Pin>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pins', $pb.PbFieldType.PM, subBuilder: $0.Pin.create)
+class ParticipantMigrationComplete extends $pb.GeneratedMessage {
+  factory ParticipantMigrationComplete() => create();
+  ParticipantMigrationComplete._() : super();
+  factory ParticipantMigrationComplete.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ParticipantMigrationComplete.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantMigrationComplete', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  PinsChanged._() : super();
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ParticipantMigrationComplete clone() => ParticipantMigrationComplete()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ParticipantMigrationComplete copyWith(void Function(ParticipantMigrationComplete) updates) => super.copyWith((message) => updates(message as ParticipantMigrationComplete)) as ParticipantMigrationComplete;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ParticipantMigrationComplete create() => ParticipantMigrationComplete._();
+  ParticipantMigrationComplete createEmptyInstance() => create();
+  static $pb.PbList<ParticipantMigrationComplete> createRepeated() => $pb.PbList<ParticipantMigrationComplete>();
+  @$core.pragma('dart2js:noInline')
+  static ParticipantMigrationComplete getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantMigrationComplete>(create);
+  static ParticipantMigrationComplete? _defaultInstance;
+}
+
+class PinsChanged extends $pb.GeneratedMessage {
   factory PinsChanged({
     $core.Iterable<$0.Pin>? pins,
   }) {
-    final _result = create();
+    final $result = create();
     if (pins != null) {
-      _result.pins.addAll(pins);
+      $result.pins.addAll(pins);
     }
-    return _result;
+    return $result;
   }
+  PinsChanged._() : super();
   factory PinsChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PinsChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PinsChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..pc<$0.Pin>(1, _omitFieldNames ? '' : 'pins', $pb.PbFieldType.PM, subBuilder: $0.Pin.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -448,8 +549,10 @@ class PinsChanged extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PinsChanged copyWith(void Function(PinsChanged) updates) => super.copyWith((message) => updates(message as PinsChanged)) as PinsChanged; // ignore: deprecated_member_use
+  PinsChanged copyWith(void Function(PinsChanged) updates) => super.copyWith((message) => updates(message as PinsChanged)) as PinsChanged;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PinsChanged create() => PinsChanged._();
   PinsChanged createEmptyInstance() => create();
@@ -458,33 +561,36 @@ class PinsChanged extends $pb.GeneratedMessage {
   static PinsChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PinsChanged>(create);
   static PinsChanged? _defaultInstance;
 
+  /// the list of pins in the call.
+  /// Pins are ordered in descending order (most important first).
   @$pb.TagNumber(1)
   $core.List<$0.Pin> get pins => $_getList(0);
 }
 
 class Error extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Error', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.Error>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: $0.Error.create)
-    ..e<$0.WebsocketReconnectStrategy>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reconnectStrategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
-    ..hasRequiredFields = false
-  ;
-
-  Error._() : super();
   factory Error({
     $0.Error? error,
     $0.WebsocketReconnectStrategy? reconnectStrategy,
   }) {
-    final _result = create();
+    final $result = create();
     if (error != null) {
-      _result.error = error;
+      $result.error = error;
     }
     if (reconnectStrategy != null) {
-      _result.reconnectStrategy = reconnectStrategy;
+      $result.reconnectStrategy = reconnectStrategy;
     }
-    return _result;
+    return $result;
   }
+  Error._() : super();
   factory Error.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Error.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Error', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<$0.Error>(4, _omitFieldNames ? '' : 'error', subBuilder: $0.Error.create)
+    ..e<$0.WebsocketReconnectStrategy>(5, _omitFieldNames ? '' : 'reconnectStrategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -494,8 +600,10 @@ class Error extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error)) as Error; // ignore: deprecated_member_use
+  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error)) as Error;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Error create() => Error._();
   Error createEmptyInstance() => create();
@@ -515,6 +623,7 @@ class Error extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.Error ensureError() => $_ensure(0);
 
+  /// returns the reconnect strategy to be used by the client
   @$pb.TagNumber(5)
   $0.WebsocketReconnectStrategy get reconnectStrategy => $_getN(1);
   @$pb.TagNumber(5)
@@ -526,28 +635,29 @@ class Error extends $pb.GeneratedMessage {
 }
 
 class ICETrickle extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICETrickle', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.PeerType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceCandidate')
-    ..hasRequiredFields = false
-  ;
-
-  ICETrickle._() : super();
   factory ICETrickle({
     $0.PeerType? peerType,
     $core.String? iceCandidate,
   }) {
-    final _result = create();
+    final $result = create();
     if (peerType != null) {
-      _result.peerType = peerType;
+      $result.peerType = peerType;
     }
     if (iceCandidate != null) {
-      _result.iceCandidate = iceCandidate;
+      $result.iceCandidate = iceCandidate;
     }
-    return _result;
+    return $result;
   }
+  ICETrickle._() : super();
   factory ICETrickle.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ICETrickle.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ICETrickle', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
+    ..aOS(2, _omitFieldNames ? '' : 'iceCandidate')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -557,8 +667,10 @@ class ICETrickle extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ICETrickle copyWith(void Function(ICETrickle) updates) => super.copyWith((message) => updates(message as ICETrickle)) as ICETrickle; // ignore: deprecated_member_use
+  ICETrickle copyWith(void Function(ICETrickle) updates) => super.copyWith((message) => updates(message as ICETrickle)) as ICETrickle;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ICETrickle create() => ICETrickle._();
   ICETrickle createEmptyInstance() => create();
@@ -587,23 +699,24 @@ class ICETrickle extends $pb.GeneratedMessage {
 }
 
 class ICERestart extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICERestart', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.PeerType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
-    ..hasRequiredFields = false
-  ;
-
-  ICERestart._() : super();
   factory ICERestart({
     $0.PeerType? peerType,
   }) {
-    final _result = create();
+    final $result = create();
     if (peerType != null) {
-      _result.peerType = peerType;
+      $result.peerType = peerType;
     }
-    return _result;
+    return $result;
   }
+  ICERestart._() : super();
   factory ICERestart.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ICERestart.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ICERestart', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -613,8 +726,10 @@ class ICERestart extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ICERestart copyWith(void Function(ICERestart) updates) => super.copyWith((message) => updates(message as ICERestart)) as ICERestart; // ignore: deprecated_member_use
+  ICERestart copyWith(void Function(ICERestart) updates) => super.copyWith((message) => updates(message as ICERestart)) as ICERestart;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ICERestart create() => ICERestart._();
   ICERestart createEmptyInstance() => create();
@@ -636,38 +751,47 @@ class ICERestart extends $pb.GeneratedMessage {
 enum SfuRequest_RequestPayload {
   joinRequest, 
   healthCheckRequest, 
+  leaveCallRequest, 
   notSet
 }
 
+/// SfuRequest is a message that is sent from the client to the SFU.
 class SfuRequest extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, SfuRequest_RequestPayload> _SfuRequest_RequestPayloadByTag = {
-    1 : SfuRequest_RequestPayload.joinRequest,
-    2 : SfuRequest_RequestPayload.healthCheckRequest,
-    0 : SfuRequest_RequestPayload.notSet
-  };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2])
-    ..aOM<JoinRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'joinRequest', subBuilder: JoinRequest.create)
-    ..aOM<HealthCheckRequest>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthCheckRequest', subBuilder: HealthCheckRequest.create)
-    ..hasRequiredFields = false
-  ;
-
-  SfuRequest._() : super();
   factory SfuRequest({
     JoinRequest? joinRequest,
     HealthCheckRequest? healthCheckRequest,
+    LeaveCallRequest? leaveCallRequest,
   }) {
-    final _result = create();
+    final $result = create();
     if (joinRequest != null) {
-      _result.joinRequest = joinRequest;
+      $result.joinRequest = joinRequest;
     }
     if (healthCheckRequest != null) {
-      _result.healthCheckRequest = healthCheckRequest;
+      $result.healthCheckRequest = healthCheckRequest;
     }
-    return _result;
+    if (leaveCallRequest != null) {
+      $result.leaveCallRequest = leaveCallRequest;
+    }
+    return $result;
   }
+  SfuRequest._() : super();
   factory SfuRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SfuRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static const $core.Map<$core.int, SfuRequest_RequestPayload> _SfuRequest_RequestPayloadByTag = {
+    1 : SfuRequest_RequestPayload.joinRequest,
+    2 : SfuRequest_RequestPayload.healthCheckRequest,
+    3 : SfuRequest_RequestPayload.leaveCallRequest,
+    0 : SfuRequest_RequestPayload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SfuRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..oo(0, [1, 2, 3])
+    ..aOM<JoinRequest>(1, _omitFieldNames ? '' : 'joinRequest', subBuilder: JoinRequest.create)
+    ..aOM<HealthCheckRequest>(2, _omitFieldNames ? '' : 'healthCheckRequest', subBuilder: HealthCheckRequest.create)
+    ..aOM<LeaveCallRequest>(3, _omitFieldNames ? '' : 'leaveCallRequest', subBuilder: LeaveCallRequest.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -677,8 +801,10 @@ class SfuRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SfuRequest copyWith(void Function(SfuRequest) updates) => super.copyWith((message) => updates(message as SfuRequest)) as SfuRequest; // ignore: deprecated_member_use
+  SfuRequest copyWith(void Function(SfuRequest) updates) => super.copyWith((message) => updates(message as SfuRequest)) as SfuRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SfuRequest create() => SfuRequest._();
   SfuRequest createEmptyInstance() => create();
@@ -711,17 +837,93 @@ class SfuRequest extends $pb.GeneratedMessage {
   void clearHealthCheckRequest() => clearField(2);
   @$pb.TagNumber(2)
   HealthCheckRequest ensureHealthCheckRequest() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  LeaveCallRequest get leaveCallRequest => $_getN(2);
+  @$pb.TagNumber(3)
+  set leaveCallRequest(LeaveCallRequest v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasLeaveCallRequest() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLeaveCallRequest() => clearField(3);
+  @$pb.TagNumber(3)
+  LeaveCallRequest ensureLeaveCallRequest() => $_ensure(2);
 }
 
-class HealthCheckRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HealthCheckRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+class LeaveCallRequest extends $pb.GeneratedMessage {
+  factory LeaveCallRequest({
+    $core.String? sessionId,
+    $core.String? reason,
+  }) {
+    final $result = create();
+    if (sessionId != null) {
+      $result.sessionId = sessionId;
+    }
+    if (reason != null) {
+      $result.reason = reason;
+    }
+    return $result;
+  }
+  LeaveCallRequest._() : super();
+  factory LeaveCallRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory LeaveCallRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'LeaveCallRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'sessionId')
+    ..aOS(2, _omitFieldNames ? '' : 'reason')
     ..hasRequiredFields = false
   ;
 
-  HealthCheckRequest._() : super();
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  LeaveCallRequest clone() => LeaveCallRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  LeaveCallRequest copyWith(void Function(LeaveCallRequest) updates) => super.copyWith((message) => updates(message as LeaveCallRequest)) as LeaveCallRequest;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LeaveCallRequest create() => LeaveCallRequest._();
+  LeaveCallRequest createEmptyInstance() => create();
+  static $pb.PbList<LeaveCallRequest> createRepeated() => $pb.PbList<LeaveCallRequest>();
+  @$core.pragma('dart2js:noInline')
+  static LeaveCallRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LeaveCallRequest>(create);
+  static LeaveCallRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get sessionId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set sessionId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSessionId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSessionId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get reason => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set reason($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasReason() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReason() => clearField(2);
+}
+
+class HealthCheckRequest extends $pb.GeneratedMessage {
   factory HealthCheckRequest() => create();
+  HealthCheckRequest._() : super();
   factory HealthCheckRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HealthCheckRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HealthCheckRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -731,8 +933,10 @@ class HealthCheckRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  HealthCheckRequest copyWith(void Function(HealthCheckRequest) updates) => super.copyWith((message) => updates(message as HealthCheckRequest)) as HealthCheckRequest; // ignore: deprecated_member_use
+  HealthCheckRequest copyWith(void Function(HealthCheckRequest) updates) => super.copyWith((message) => updates(message as HealthCheckRequest)) as HealthCheckRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static HealthCheckRequest create() => HealthCheckRequest._();
   HealthCheckRequest createEmptyInstance() => create();
@@ -743,23 +947,24 @@ class HealthCheckRequest extends $pb.GeneratedMessage {
 }
 
 class HealthCheckResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HealthCheckResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.ParticipantCount>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantCount', subBuilder: $0.ParticipantCount.create)
-    ..hasRequiredFields = false
-  ;
-
-  HealthCheckResponse._() : super();
   factory HealthCheckResponse({
     $0.ParticipantCount? participantCount,
   }) {
-    final _result = create();
+    final $result = create();
     if (participantCount != null) {
-      _result.participantCount = participantCount;
+      $result.participantCount = participantCount;
     }
-    return _result;
+    return $result;
   }
+  HealthCheckResponse._() : super();
   factory HealthCheckResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HealthCheckResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HealthCheckResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<$0.ParticipantCount>(1, _omitFieldNames ? '' : 'participantCount', subBuilder: $0.ParticipantCount.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -769,8 +974,10 @@ class HealthCheckResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  HealthCheckResponse copyWith(void Function(HealthCheckResponse) updates) => super.copyWith((message) => updates(message as HealthCheckResponse)) as HealthCheckResponse; // ignore: deprecated_member_use
+  HealthCheckResponse copyWith(void Function(HealthCheckResponse) updates) => super.copyWith((message) => updates(message as HealthCheckResponse)) as HealthCheckResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static HealthCheckResponse create() => HealthCheckResponse._();
   HealthCheckResponse createEmptyInstance() => create();
@@ -792,38 +999,39 @@ class HealthCheckResponse extends $pb.GeneratedMessage {
 }
 
 class TrackPublished extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackPublished', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..e<$0.TrackType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
-    ..aOM<$0.Participant>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
-
-  TrackPublished._() : super();
   factory TrackPublished({
     $core.String? userId,
     $core.String? sessionId,
     $0.TrackType? type,
     $0.Participant? participant,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
     if (sessionId != null) {
-      _result.sessionId = sessionId;
+      $result.sessionId = sessionId;
     }
     if (type != null) {
-      _result.type = type;
+      $result.type = type;
     }
     if (participant != null) {
-      _result.participant = participant;
+      $result.participant = participant;
     }
-    return _result;
+    return $result;
   }
+  TrackPublished._() : super();
   factory TrackPublished.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory TrackPublished.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'TrackPublished', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
+    ..aOM<$0.Participant>(4, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -833,8 +1041,10 @@ class TrackPublished extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  TrackPublished copyWith(void Function(TrackPublished) updates) => super.copyWith((message) => updates(message as TrackPublished)) as TrackPublished; // ignore: deprecated_member_use
+  TrackPublished copyWith(void Function(TrackPublished) updates) => super.copyWith((message) => updates(message as TrackPublished)) as TrackPublished;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static TrackPublished create() => TrackPublished._();
   TrackPublished createEmptyInstance() => create();
@@ -870,6 +1080,11 @@ class TrackPublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearType() => clearField(3);
 
+  /// Participant information here is included as an optimisation
+  /// for large calls where broadcasting on every participant join
+  /// is expensive. You should **NOT** assume that this will always
+  /// be available though you can use it to update the participant
+  /// list when it is there.
   @$pb.TagNumber(4)
   $0.Participant get participant => $_getN(3);
   @$pb.TagNumber(4)
@@ -883,16 +1098,6 @@ class TrackPublished extends $pb.GeneratedMessage {
 }
 
 class TrackUnpublished extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackUnpublished', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..e<$0.TrackType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
-    ..e<$0.TrackUnpublishReason>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cause', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackUnpublishReason.TRACK_UNPUBLISH_REASON_UNSPECIFIED, valueOf: $0.TrackUnpublishReason.valueOf, enumValues: $0.TrackUnpublishReason.values)
-    ..aOM<$0.Participant>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
-
-  TrackUnpublished._() : super();
   factory TrackUnpublished({
     $core.String? userId,
     $core.String? sessionId,
@@ -900,26 +1105,37 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     $0.TrackUnpublishReason? cause,
     $0.Participant? participant,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
     if (sessionId != null) {
-      _result.sessionId = sessionId;
+      $result.sessionId = sessionId;
     }
     if (type != null) {
-      _result.type = type;
+      $result.type = type;
     }
     if (cause != null) {
-      _result.cause = cause;
+      $result.cause = cause;
     }
     if (participant != null) {
-      _result.participant = participant;
+      $result.participant = participant;
     }
-    return _result;
+    return $result;
   }
+  TrackUnpublished._() : super();
   factory TrackUnpublished.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory TrackUnpublished.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'TrackUnpublished', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
+    ..e<$0.TrackUnpublishReason>(4, _omitFieldNames ? '' : 'cause', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackUnpublishReason.TRACK_UNPUBLISH_REASON_UNSPECIFIED, valueOf: $0.TrackUnpublishReason.valueOf, enumValues: $0.TrackUnpublishReason.values)
+    ..aOM<$0.Participant>(5, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -929,8 +1145,10 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  TrackUnpublished copyWith(void Function(TrackUnpublished) updates) => super.copyWith((message) => updates(message as TrackUnpublished)) as TrackUnpublished; // ignore: deprecated_member_use
+  TrackUnpublished copyWith(void Function(TrackUnpublished) updates) => super.copyWith((message) => updates(message as TrackUnpublished)) as TrackUnpublished;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static TrackUnpublished create() => TrackUnpublished._();
   TrackUnpublished createEmptyInstance() => create();
@@ -975,6 +1193,11 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearCause() => clearField(4);
 
+  /// Participant information here is included as an optimisation
+  /// for large calls where broadcasting on every participant join
+  /// is expensive. You should **NOT** assume that this will always
+  /// be available though you can use it to update the participant
+  /// list when it is there.
   @$pb.TagNumber(5)
   $0.Participant get participant => $_getN(4);
   @$pb.TagNumber(5)
@@ -988,48 +1211,58 @@ class TrackUnpublished extends $pb.GeneratedMessage {
 }
 
 class JoinRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberSdp')
-    ..aOM<$0.ClientDetails>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clientDetails', subBuilder: $0.ClientDetails.create)
-    ..aOM<Migration>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'migration', subBuilder: Migration.create)
-    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fastReconnect')
-    ..hasRequiredFields = false
-  ;
-
-  JoinRequest._() : super();
   factory JoinRequest({
     $core.String? token,
     $core.String? sessionId,
     $core.String? subscriberSdp,
     $0.ClientDetails? clientDetails,
+  @$core.Deprecated('This field is deprecated.')
     Migration? migration,
+  @$core.Deprecated('This field is deprecated.')
     $core.bool? fastReconnect,
+    ReconnectDetails? reconnectDetails,
   }) {
-    final _result = create();
+    final $result = create();
     if (token != null) {
-      _result.token = token;
+      $result.token = token;
     }
     if (sessionId != null) {
-      _result.sessionId = sessionId;
+      $result.sessionId = sessionId;
     }
     if (subscriberSdp != null) {
-      _result.subscriberSdp = subscriberSdp;
+      $result.subscriberSdp = subscriberSdp;
     }
     if (clientDetails != null) {
-      _result.clientDetails = clientDetails;
+      $result.clientDetails = clientDetails;
     }
     if (migration != null) {
-      _result.migration = migration;
+      // ignore: deprecated_member_use_from_same_package
+      $result.migration = migration;
     }
     if (fastReconnect != null) {
-      _result.fastReconnect = fastReconnect;
+      // ignore: deprecated_member_use_from_same_package
+      $result.fastReconnect = fastReconnect;
     }
-    return _result;
+    if (reconnectDetails != null) {
+      $result.reconnectDetails = reconnectDetails;
+    }
+    return $result;
   }
+  JoinRequest._() : super();
   factory JoinRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory JoinRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'JoinRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'token')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..aOS(3, _omitFieldNames ? '' : 'subscriberSdp')
+    ..aOM<$0.ClientDetails>(4, _omitFieldNames ? '' : 'clientDetails', subBuilder: $0.ClientDetails.create)
+    ..aOM<Migration>(5, _omitFieldNames ? '' : 'migration', subBuilder: Migration.create)
+    ..aOB(6, _omitFieldNames ? '' : 'fastReconnect')
+    ..aOM<ReconnectDetails>(7, _omitFieldNames ? '' : 'reconnectDetails', subBuilder: ReconnectDetails.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1039,8 +1272,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  JoinRequest copyWith(void Function(JoinRequest) updates) => super.copyWith((message) => updates(message as JoinRequest)) as JoinRequest; // ignore: deprecated_member_use
+  JoinRequest copyWith(void Function(JoinRequest) updates) => super.copyWith((message) => updates(message as JoinRequest)) as JoinRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static JoinRequest create() => JoinRequest._();
   JoinRequest createEmptyInstance() => create();
@@ -1067,6 +1302,7 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearSessionId() => clearField(2);
 
+  /// dumb SDP that allow us to extract subscriber's decode codecs
   @$pb.TagNumber(3)
   $core.String get subscriberSdp => $_getSZ(2);
   @$pb.TagNumber(3)
@@ -1087,55 +1323,195 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.ClientDetails ensureClientDetails() => $_ensure(3);
 
+  /// Deprecated: use ReconnectDetails instead
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   Migration get migration => $_getN(4);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   set migration(Migration v) { setField(5, v); }
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   $core.bool hasMigration() => $_has(4);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   void clearMigration() => clearField(5);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   Migration ensureMigration() => $_ensure(4);
 
+  ///  Fast reconnect flag explicitly indicates that if the participant session
+  ///  and the associated state is still present in the SFU, the client is ready
+  ///  to restore the PeerConnection with an ICE restart. If the SFU replies with
+  ///  "reconnected: true" in its JoinResponse, then it is safe to perform an ICE
+  ///  restart or else the existing PeerConnections must be cleaned up.
+  ///
+  ///  For the SFU, fast_reconnect:false indicates that even if it has the state
+  ///  cached, the client state is not in sync and hence it must be cleaned up before
+  ///  proceeding further.
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
   $core.bool get fastReconnect => $_getBF(5);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
   set fastReconnect($core.bool v) { $_setBool(5, v); }
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
   $core.bool hasFastReconnect() => $_has(5);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
   void clearFastReconnect() => clearField(6);
+
+  @$pb.TagNumber(7)
+  ReconnectDetails get reconnectDetails => $_getN(6);
+  @$pb.TagNumber(7)
+  set reconnectDetails(ReconnectDetails v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasReconnectDetails() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearReconnectDetails() => clearField(7);
+  @$pb.TagNumber(7)
+  ReconnectDetails ensureReconnectDetails() => $_ensure(6);
 }
 
-class Migration extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Migration', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fromSfuId')
-    ..pc<$0.TrackInfo>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'announcedTracks', $pb.PbFieldType.PM, subBuilder: $0.TrackInfo.create)
-    ..pc<$1.TrackSubscriptionDetails>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: $1.TrackSubscriptionDetails.create)
+class ReconnectDetails extends $pb.GeneratedMessage {
+  factory ReconnectDetails({
+    $0.WebsocketReconnectStrategy? strategy,
+    $core.Iterable<$0.TrackInfo>? announcedTracks,
+    $core.Iterable<$1.TrackSubscriptionDetails>? subscriptions,
+    $core.int? reconnectAttempt,
+    $core.String? fromSfuId,
+    $core.String? previousSessionId,
+  }) {
+    final $result = create();
+    if (strategy != null) {
+      $result.strategy = strategy;
+    }
+    if (announcedTracks != null) {
+      $result.announcedTracks.addAll(announcedTracks);
+    }
+    if (subscriptions != null) {
+      $result.subscriptions.addAll(subscriptions);
+    }
+    if (reconnectAttempt != null) {
+      $result.reconnectAttempt = reconnectAttempt;
+    }
+    if (fromSfuId != null) {
+      $result.fromSfuId = fromSfuId;
+    }
+    if (previousSessionId != null) {
+      $result.previousSessionId = previousSessionId;
+    }
+    return $result;
+  }
+  ReconnectDetails._() : super();
+  factory ReconnectDetails.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ReconnectDetails.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReconnectDetails', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.WebsocketReconnectStrategy>(1, _omitFieldNames ? '' : 'strategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
+    ..pc<$0.TrackInfo>(3, _omitFieldNames ? '' : 'announcedTracks', $pb.PbFieldType.PM, subBuilder: $0.TrackInfo.create)
+    ..pc<$1.TrackSubscriptionDetails>(4, _omitFieldNames ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: $1.TrackSubscriptionDetails.create)
+    ..a<$core.int>(5, _omitFieldNames ? '' : 'reconnectAttempt', $pb.PbFieldType.OU3)
+    ..aOS(6, _omitFieldNames ? '' : 'fromSfuId')
+    ..aOS(7, _omitFieldNames ? '' : 'previousSessionId')
     ..hasRequiredFields = false
   ;
 
-  Migration._() : super();
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ReconnectDetails clone() => ReconnectDetails()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ReconnectDetails copyWith(void Function(ReconnectDetails) updates) => super.copyWith((message) => updates(message as ReconnectDetails)) as ReconnectDetails;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ReconnectDetails create() => ReconnectDetails._();
+  ReconnectDetails createEmptyInstance() => create();
+  static $pb.PbList<ReconnectDetails> createRepeated() => $pb.PbList<ReconnectDetails>();
+  @$core.pragma('dart2js:noInline')
+  static ReconnectDetails getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ReconnectDetails>(create);
+  static ReconnectDetails? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.WebsocketReconnectStrategy get strategy => $_getN(0);
+  @$pb.TagNumber(1)
+  set strategy($0.WebsocketReconnectStrategy v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStrategy() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStrategy() => clearField(1);
+
+  @$pb.TagNumber(3)
+  $core.List<$0.TrackInfo> get announcedTracks => $_getList(1);
+
+  @$pb.TagNumber(4)
+  $core.List<$1.TrackSubscriptionDetails> get subscriptions => $_getList(2);
+
+  @$pb.TagNumber(5)
+  $core.int get reconnectAttempt => $_getIZ(3);
+  @$pb.TagNumber(5)
+  set reconnectAttempt($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasReconnectAttempt() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearReconnectAttempt() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get fromSfuId => $_getSZ(4);
+  @$pb.TagNumber(6)
+  set fromSfuId($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasFromSfuId() => $_has(4);
+  @$pb.TagNumber(6)
+  void clearFromSfuId() => clearField(6);
+
+  /// only set in case of rejoin
+  @$pb.TagNumber(7)
+  $core.String get previousSessionId => $_getSZ(5);
+  @$pb.TagNumber(7)
+  set previousSessionId($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasPreviousSessionId() => $_has(5);
+  @$pb.TagNumber(7)
+  void clearPreviousSessionId() => clearField(7);
+}
+
+class Migration extends $pb.GeneratedMessage {
   factory Migration({
     $core.String? fromSfuId,
     $core.Iterable<$0.TrackInfo>? announcedTracks,
     $core.Iterable<$1.TrackSubscriptionDetails>? subscriptions,
   }) {
-    final _result = create();
+    final $result = create();
     if (fromSfuId != null) {
-      _result.fromSfuId = fromSfuId;
+      $result.fromSfuId = fromSfuId;
     }
     if (announcedTracks != null) {
-      _result.announcedTracks.addAll(announcedTracks);
+      $result.announcedTracks.addAll(announcedTracks);
     }
     if (subscriptions != null) {
-      _result.subscriptions.addAll(subscriptions);
+      $result.subscriptions.addAll(subscriptions);
     }
-    return _result;
+    return $result;
   }
+  Migration._() : super();
   factory Migration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Migration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Migration', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'fromSfuId')
+    ..pc<$0.TrackInfo>(2, _omitFieldNames ? '' : 'announcedTracks', $pb.PbFieldType.PM, subBuilder: $0.TrackInfo.create)
+    ..pc<$1.TrackSubscriptionDetails>(3, _omitFieldNames ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: $1.TrackSubscriptionDetails.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1145,8 +1521,10 @@ class Migration extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Migration copyWith(void Function(Migration) updates) => super.copyWith((message) => updates(message as Migration)) as Migration; // ignore: deprecated_member_use
+  Migration copyWith(void Function(Migration) updates) => super.copyWith((message) => updates(message as Migration)) as Migration;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Migration create() => Migration._();
   Migration createEmptyInstance() => create();
@@ -1172,28 +1550,34 @@ class Migration extends $pb.GeneratedMessage {
 }
 
 class JoinResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.CallState>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callState', subBuilder: $0.CallState.create)
-    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reconnected')
-    ..hasRequiredFields = false
-  ;
-
-  JoinResponse._() : super();
   factory JoinResponse({
     $0.CallState? callState,
     $core.bool? reconnected,
+    $core.int? fastReconnectDeadlineSeconds,
   }) {
-    final _result = create();
+    final $result = create();
     if (callState != null) {
-      _result.callState = callState;
+      $result.callState = callState;
     }
     if (reconnected != null) {
-      _result.reconnected = reconnected;
+      $result.reconnected = reconnected;
     }
-    return _result;
+    if (fastReconnectDeadlineSeconds != null) {
+      $result.fastReconnectDeadlineSeconds = fastReconnectDeadlineSeconds;
+    }
+    return $result;
   }
+  JoinResponse._() : super();
   factory JoinResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory JoinResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'JoinResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<$0.CallState>(1, _omitFieldNames ? '' : 'callState', subBuilder: $0.CallState.create)
+    ..aOB(2, _omitFieldNames ? '' : 'reconnected')
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'fastReconnectDeadlineSeconds', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1203,8 +1587,10 @@ class JoinResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  JoinResponse copyWith(void Function(JoinResponse) updates) => super.copyWith((message) => updates(message as JoinResponse)) as JoinResponse; // ignore: deprecated_member_use
+  JoinResponse copyWith(void Function(JoinResponse) updates) => super.copyWith((message) => updates(message as JoinResponse)) as JoinResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static JoinResponse create() => JoinResponse._();
   JoinResponse createEmptyInstance() => create();
@@ -1232,31 +1618,42 @@ class JoinResponse extends $pb.GeneratedMessage {
   $core.bool hasReconnected() => $_has(1);
   @$pb.TagNumber(2)
   void clearReconnected() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get fastReconnectDeadlineSeconds => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set fastReconnectDeadlineSeconds($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasFastReconnectDeadlineSeconds() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFastReconnectDeadlineSeconds() => clearField(3);
 }
 
+/// ParticipantJoined is fired when a user joins a call
 class ParticipantJoined extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantJoined', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..aOM<$0.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
-
-  ParticipantJoined._() : super();
   factory ParticipantJoined({
     $core.String? callCid,
     $0.Participant? participant,
   }) {
-    final _result = create();
+    final $result = create();
     if (callCid != null) {
-      _result.callCid = callCid;
+      $result.callCid = callCid;
     }
     if (participant != null) {
-      _result.participant = participant;
+      $result.participant = participant;
     }
-    return _result;
+    return $result;
   }
+  ParticipantJoined._() : super();
   factory ParticipantJoined.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ParticipantJoined.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantJoined', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'callCid')
+    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1266,8 +1663,10 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ParticipantJoined copyWith(void Function(ParticipantJoined) updates) => super.copyWith((message) => updates(message as ParticipantJoined)) as ParticipantJoined; // ignore: deprecated_member_use
+  ParticipantJoined copyWith(void Function(ParticipantJoined) updates) => super.copyWith((message) => updates(message as ParticipantJoined)) as ParticipantJoined;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ParticipantJoined create() => ParticipantJoined._();
   ParticipantJoined createEmptyInstance() => create();
@@ -1297,29 +1696,31 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   $0.Participant ensureParticipant() => $_ensure(1);
 }
 
+/// ParticipantJoined is fired when a user leaves a call
 class ParticipantLeft extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantLeft', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..aOM<$0.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
-
-  ParticipantLeft._() : super();
   factory ParticipantLeft({
     $core.String? callCid,
     $0.Participant? participant,
   }) {
-    final _result = create();
+    final $result = create();
     if (callCid != null) {
-      _result.callCid = callCid;
+      $result.callCid = callCid;
     }
     if (participant != null) {
-      _result.participant = participant;
+      $result.participant = participant;
     }
-    return _result;
+    return $result;
   }
+  ParticipantLeft._() : super();
   factory ParticipantLeft.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ParticipantLeft.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantLeft', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'callCid')
+    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1329,8 +1730,10 @@ class ParticipantLeft extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ParticipantLeft copyWith(void Function(ParticipantLeft) updates) => super.copyWith((message) => updates(message as ParticipantLeft)) as ParticipantLeft; // ignore: deprecated_member_use
+  ParticipantLeft copyWith(void Function(ParticipantLeft) updates) => super.copyWith((message) => updates(message as ParticipantLeft)) as ParticipantLeft;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ParticipantLeft create() => ParticipantLeft._();
   ParticipantLeft createEmptyInstance() => create();
@@ -1360,29 +1763,31 @@ class ParticipantLeft extends $pb.GeneratedMessage {
   $0.Participant ensureParticipant() => $_ensure(1);
 }
 
+/// ParticipantUpdated is fired when user data is updated
 class ParticipantUpdated extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..aOM<$0.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
-
-  ParticipantUpdated._() : super();
   factory ParticipantUpdated({
     $core.String? callCid,
     $0.Participant? participant,
   }) {
-    final _result = create();
+    final $result = create();
     if (callCid != null) {
-      _result.callCid = callCid;
+      $result.callCid = callCid;
     }
     if (participant != null) {
-      _result.participant = participant;
+      $result.participant = participant;
     }
-    return _result;
+    return $result;
   }
+  ParticipantUpdated._() : super();
   factory ParticipantUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ParticipantUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantUpdated', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'callCid')
+    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1392,8 +1797,10 @@ class ParticipantUpdated extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ParticipantUpdated copyWith(void Function(ParticipantUpdated) updates) => super.copyWith((message) => updates(message as ParticipantUpdated)) as ParticipantUpdated; // ignore: deprecated_member_use
+  ParticipantUpdated copyWith(void Function(ParticipantUpdated) updates) => super.copyWith((message) => updates(message as ParticipantUpdated)) as ParticipantUpdated;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ParticipantUpdated create() => ParticipantUpdated._();
   ParticipantUpdated createEmptyInstance() => create();
@@ -1423,29 +1830,31 @@ class ParticipantUpdated extends $pb.GeneratedMessage {
   $0.Participant ensureParticipant() => $_ensure(1);
 }
 
+/// SubscriberOffer is sent when the SFU adds tracks to a subscription
 class SubscriberOffer extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SubscriberOffer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceRestart')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdp')
-    ..hasRequiredFields = false
-  ;
-
-  SubscriberOffer._() : super();
   factory SubscriberOffer({
     $core.bool? iceRestart,
     $core.String? sdp,
   }) {
-    final _result = create();
+    final $result = create();
     if (iceRestart != null) {
-      _result.iceRestart = iceRestart;
+      $result.iceRestart = iceRestart;
     }
     if (sdp != null) {
-      _result.sdp = sdp;
+      $result.sdp = sdp;
     }
-    return _result;
+    return $result;
   }
+  SubscriberOffer._() : super();
   factory SubscriberOffer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SubscriberOffer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SubscriberOffer', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'iceRestart')
+    ..aOS(2, _omitFieldNames ? '' : 'sdp')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1455,8 +1864,10 @@ class SubscriberOffer extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SubscriberOffer copyWith(void Function(SubscriberOffer) updates) => super.copyWith((message) => updates(message as SubscriberOffer)) as SubscriberOffer; // ignore: deprecated_member_use
+  SubscriberOffer copyWith(void Function(SubscriberOffer) updates) => super.copyWith((message) => updates(message as SubscriberOffer)) as SubscriberOffer;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SubscriberOffer create() => SubscriberOffer._();
   SubscriberOffer createEmptyInstance() => create();
@@ -1485,23 +1896,24 @@ class SubscriberOffer extends $pb.GeneratedMessage {
 }
 
 class PublisherAnswer extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PublisherAnswer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdp')
-    ..hasRequiredFields = false
-  ;
-
-  PublisherAnswer._() : super();
   factory PublisherAnswer({
     $core.String? sdp,
   }) {
-    final _result = create();
+    final $result = create();
     if (sdp != null) {
-      _result.sdp = sdp;
+      $result.sdp = sdp;
     }
-    return _result;
+    return $result;
   }
+  PublisherAnswer._() : super();
   factory PublisherAnswer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PublisherAnswer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PublisherAnswer', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'sdp')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1511,8 +1923,10 @@ class PublisherAnswer extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PublisherAnswer copyWith(void Function(PublisherAnswer) updates) => super.copyWith((message) => updates(message as PublisherAnswer)) as PublisherAnswer; // ignore: deprecated_member_use
+  PublisherAnswer copyWith(void Function(PublisherAnswer) updates) => super.copyWith((message) => updates(message as PublisherAnswer)) as PublisherAnswer;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PublisherAnswer create() => PublisherAnswer._();
   PublisherAnswer createEmptyInstance() => create();
@@ -1531,24 +1945,27 @@ class PublisherAnswer extends $pb.GeneratedMessage {
   void clearSdp() => clearField(1);
 }
 
+/// ConnectionQuality is sent to inform about connection quality changes
+/// eg. thierry's connection is not good -> render a red icon Zoom style
 class ConnectionQualityChanged extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionQualityChanged', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<ConnectionQualityInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityUpdates', $pb.PbFieldType.PM, subBuilder: ConnectionQualityInfo.create)
-    ..hasRequiredFields = false
-  ;
-
-  ConnectionQualityChanged._() : super();
   factory ConnectionQualityChanged({
     $core.Iterable<ConnectionQualityInfo>? connectionQualityUpdates,
   }) {
-    final _result = create();
+    final $result = create();
     if (connectionQualityUpdates != null) {
-      _result.connectionQualityUpdates.addAll(connectionQualityUpdates);
+      $result.connectionQualityUpdates.addAll(connectionQualityUpdates);
     }
-    return _result;
+    return $result;
   }
+  ConnectionQualityChanged._() : super();
   factory ConnectionQualityChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ConnectionQualityChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionQualityChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..pc<ConnectionQualityInfo>(1, _omitFieldNames ? '' : 'connectionQualityUpdates', $pb.PbFieldType.PM, subBuilder: ConnectionQualityInfo.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1558,8 +1975,10 @@ class ConnectionQualityChanged extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectionQualityChanged copyWith(void Function(ConnectionQualityChanged) updates) => super.copyWith((message) => updates(message as ConnectionQualityChanged)) as ConnectionQualityChanged; // ignore: deprecated_member_use
+  ConnectionQualityChanged copyWith(void Function(ConnectionQualityChanged) updates) => super.copyWith((message) => updates(message as ConnectionQualityChanged)) as ConnectionQualityChanged;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ConnectionQualityChanged create() => ConnectionQualityChanged._();
   ConnectionQualityChanged createEmptyInstance() => create();
@@ -1573,33 +1992,34 @@ class ConnectionQualityChanged extends $pb.GeneratedMessage {
 }
 
 class ConnectionQualityInfo extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionQualityInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..e<$0.ConnectionQuality>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQuality', $pb.PbFieldType.OE, defaultOrMaker: $0.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED, valueOf: $0.ConnectionQuality.valueOf, enumValues: $0.ConnectionQuality.values)
-    ..hasRequiredFields = false
-  ;
-
-  ConnectionQualityInfo._() : super();
   factory ConnectionQualityInfo({
     $core.String? userId,
     $core.String? sessionId,
     $0.ConnectionQuality? connectionQuality,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
     if (sessionId != null) {
-      _result.sessionId = sessionId;
+      $result.sessionId = sessionId;
     }
     if (connectionQuality != null) {
-      _result.connectionQuality = connectionQuality;
+      $result.connectionQuality = connectionQuality;
     }
-    return _result;
+    return $result;
   }
+  ConnectionQualityInfo._() : super();
   factory ConnectionQualityInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ConnectionQualityInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionQualityInfo', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..e<$0.ConnectionQuality>(3, _omitFieldNames ? '' : 'connectionQuality', $pb.PbFieldType.OE, defaultOrMaker: $0.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED, valueOf: $0.ConnectionQuality.valueOf, enumValues: $0.ConnectionQuality.values)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1609,8 +2029,10 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectionQualityInfo copyWith(void Function(ConnectionQualityInfo) updates) => super.copyWith((message) => updates(message as ConnectionQualityInfo)) as ConnectionQualityInfo; // ignore: deprecated_member_use
+  ConnectionQualityInfo copyWith(void Function(ConnectionQualityInfo) updates) => super.copyWith((message) => updates(message as ConnectionQualityInfo)) as ConnectionQualityInfo;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ConnectionQualityInfo create() => ConnectionQualityInfo._();
   ConnectionQualityInfo createEmptyInstance() => create();
@@ -1647,29 +2069,31 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
   void clearConnectionQuality() => clearField(3);
 }
 
+/// DominantSpeakerChanged is sent by the SFU to notify when there is a new dominant speaker in the call
 class DominantSpeakerChanged extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DominantSpeakerChanged', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..hasRequiredFields = false
-  ;
-
-  DominantSpeakerChanged._() : super();
   factory DominantSpeakerChanged({
     $core.String? userId,
     $core.String? sessionId,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
     if (sessionId != null) {
-      _result.sessionId = sessionId;
+      $result.sessionId = sessionId;
     }
-    return _result;
+    return $result;
   }
+  DominantSpeakerChanged._() : super();
   factory DominantSpeakerChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory DominantSpeakerChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DominantSpeakerChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1679,8 +2103,10 @@ class DominantSpeakerChanged extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DominantSpeakerChanged copyWith(void Function(DominantSpeakerChanged) updates) => super.copyWith((message) => updates(message as DominantSpeakerChanged)) as DominantSpeakerChanged; // ignore: deprecated_member_use
+  DominantSpeakerChanged copyWith(void Function(DominantSpeakerChanged) updates) => super.copyWith((message) => updates(message as DominantSpeakerChanged)) as DominantSpeakerChanged;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DominantSpeakerChanged create() => DominantSpeakerChanged._();
   DominantSpeakerChanged createEmptyInstance() => create();
@@ -1709,38 +2135,39 @@ class DominantSpeakerChanged extends $pb.GeneratedMessage {
 }
 
 class AudioLevel extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioLevel', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'level', $pb.PbFieldType.OF)
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSpeaking')
-    ..hasRequiredFields = false
-  ;
-
-  AudioLevel._() : super();
   factory AudioLevel({
     $core.String? userId,
     $core.String? sessionId,
     $core.double? level,
     $core.bool? isSpeaking,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
     if (sessionId != null) {
-      _result.sessionId = sessionId;
+      $result.sessionId = sessionId;
     }
     if (level != null) {
-      _result.level = level;
+      $result.level = level;
     }
     if (isSpeaking != null) {
-      _result.isSpeaking = isSpeaking;
+      $result.isSpeaking = isSpeaking;
     }
-    return _result;
+    return $result;
   }
+  AudioLevel._() : super();
   factory AudioLevel.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory AudioLevel.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioLevel', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'level', $pb.PbFieldType.OF)
+    ..aOB(4, _omitFieldNames ? '' : 'isSpeaking')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1750,8 +2177,10 @@ class AudioLevel extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AudioLevel copyWith(void Function(AudioLevel) updates) => super.copyWith((message) => updates(message as AudioLevel)) as AudioLevel; // ignore: deprecated_member_use
+  AudioLevel copyWith(void Function(AudioLevel) updates) => super.copyWith((message) => updates(message as AudioLevel)) as AudioLevel;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static AudioLevel create() => AudioLevel._();
   AudioLevel createEmptyInstance() => create();
@@ -1778,6 +2207,7 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearSessionId() => clearField(2);
 
+  /// 0.0 means complete silence, 1.0 loudest
   @$pb.TagNumber(3)
   $core.double get level => $_getN(2);
   @$pb.TagNumber(3)
@@ -1797,24 +2227,26 @@ class AudioLevel extends $pb.GeneratedMessage {
   void clearIsSpeaking() => clearField(4);
 }
 
+/// AudioLevelChanged is sent by the SFU to notify about audio levels by user
 class AudioLevelChanged extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioLevelChanged', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<AudioLevel>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioLevels', $pb.PbFieldType.PM, subBuilder: AudioLevel.create)
-    ..hasRequiredFields = false
-  ;
-
-  AudioLevelChanged._() : super();
   factory AudioLevelChanged({
     $core.Iterable<AudioLevel>? audioLevels,
   }) {
-    final _result = create();
+    final $result = create();
     if (audioLevels != null) {
-      _result.audioLevels.addAll(audioLevels);
+      $result.audioLevels.addAll(audioLevels);
     }
-    return _result;
+    return $result;
   }
+  AudioLevelChanged._() : super();
   factory AudioLevelChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory AudioLevelChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioLevelChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..pc<AudioLevel>(1, _omitFieldNames ? '' : 'audioLevels', $pb.PbFieldType.PM, subBuilder: AudioLevel.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1824,8 +2256,10 @@ class AudioLevelChanged extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AudioLevelChanged copyWith(void Function(AudioLevelChanged) updates) => super.copyWith((message) => updates(message as AudioLevelChanged)) as AudioLevelChanged; // ignore: deprecated_member_use
+  AudioLevelChanged copyWith(void Function(AudioLevelChanged) updates) => super.copyWith((message) => updates(message as AudioLevelChanged)) as AudioLevelChanged;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static AudioLevelChanged create() => AudioLevelChanged._();
   AudioLevelChanged createEmptyInstance() => create();
@@ -1839,23 +2273,24 @@ class AudioLevelChanged extends $pb.GeneratedMessage {
 }
 
 class AudioMediaRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioMediaRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channelCount', $pb.PbFieldType.O3)
-    ..hasRequiredFields = false
-  ;
-
-  AudioMediaRequest._() : super();
   factory AudioMediaRequest({
     $core.int? channelCount,
   }) {
-    final _result = create();
+    final $result = create();
     if (channelCount != null) {
-      _result.channelCount = channelCount;
+      $result.channelCount = channelCount;
     }
-    return _result;
+    return $result;
   }
+  AudioMediaRequest._() : super();
   factory AudioMediaRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory AudioMediaRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioMediaRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'channelCount', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1865,8 +2300,10 @@ class AudioMediaRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AudioMediaRequest copyWith(void Function(AudioMediaRequest) updates) => super.copyWith((message) => updates(message as AudioMediaRequest)) as AudioMediaRequest; // ignore: deprecated_member_use
+  AudioMediaRequest copyWith(void Function(AudioMediaRequest) updates) => super.copyWith((message) => updates(message as AudioMediaRequest)) as AudioMediaRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static AudioMediaRequest create() => AudioMediaRequest._();
   AudioMediaRequest createEmptyInstance() => create();
@@ -1886,28 +2323,29 @@ class AudioMediaRequest extends $pb.GeneratedMessage {
 }
 
 class AudioSender extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioSender', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<AudioMediaRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mediaRequest', subBuilder: AudioMediaRequest.create)
-    ..aOM<$0.Codec>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'codec', subBuilder: $0.Codec.create)
-    ..hasRequiredFields = false
-  ;
-
-  AudioSender._() : super();
   factory AudioSender({
     AudioMediaRequest? mediaRequest,
     $0.Codec? codec,
   }) {
-    final _result = create();
+    final $result = create();
     if (mediaRequest != null) {
-      _result.mediaRequest = mediaRequest;
+      $result.mediaRequest = mediaRequest;
     }
     if (codec != null) {
-      _result.codec = codec;
+      $result.codec = codec;
     }
-    return _result;
+    return $result;
   }
+  AudioSender._() : super();
   factory AudioSender.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory AudioSender.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioSender', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<AudioMediaRequest>(1, _omitFieldNames ? '' : 'mediaRequest', subBuilder: AudioMediaRequest.create)
+    ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1917,8 +2355,10 @@ class AudioSender extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AudioSender copyWith(void Function(AudioSender) updates) => super.copyWith((message) => updates(message as AudioSender)) as AudioSender; // ignore: deprecated_member_use
+  AudioSender copyWith(void Function(AudioSender) updates) => super.copyWith((message) => updates(message as AudioSender)) as AudioSender;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static AudioSender create() => AudioSender._();
   AudioSender createEmptyInstance() => create();
@@ -1951,33 +2391,34 @@ class AudioSender extends $pb.GeneratedMessage {
 }
 
 class VideoMediaRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VideoMediaRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idealHeight', $pb.PbFieldType.O3)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idealWidth', $pb.PbFieldType.O3)
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idealFrameRate', $pb.PbFieldType.O3)
-    ..hasRequiredFields = false
-  ;
-
-  VideoMediaRequest._() : super();
   factory VideoMediaRequest({
     $core.int? idealHeight,
     $core.int? idealWidth,
     $core.int? idealFrameRate,
   }) {
-    final _result = create();
+    final $result = create();
     if (idealHeight != null) {
-      _result.idealHeight = idealHeight;
+      $result.idealHeight = idealHeight;
     }
     if (idealWidth != null) {
-      _result.idealWidth = idealWidth;
+      $result.idealWidth = idealWidth;
     }
     if (idealFrameRate != null) {
-      _result.idealFrameRate = idealFrameRate;
+      $result.idealFrameRate = idealFrameRate;
     }
-    return _result;
+    return $result;
   }
+  VideoMediaRequest._() : super();
   factory VideoMediaRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory VideoMediaRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoMediaRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'idealHeight', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'idealWidth', $pb.PbFieldType.O3)
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'idealFrameRate', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1987,8 +2428,10 @@ class VideoMediaRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  VideoMediaRequest copyWith(void Function(VideoMediaRequest) updates) => super.copyWith((message) => updates(message as VideoMediaRequest)) as VideoMediaRequest; // ignore: deprecated_member_use
+  VideoMediaRequest copyWith(void Function(VideoMediaRequest) updates) => super.copyWith((message) => updates(message as VideoMediaRequest)) as VideoMediaRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static VideoMediaRequest create() => VideoMediaRequest._();
   VideoMediaRequest createEmptyInstance() => create();
@@ -2025,19 +2468,10 @@ class VideoMediaRequest extends $pb.GeneratedMessage {
   void clearIdealFrameRate() => clearField(3);
 }
 
+/// VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
+/// The parameters are specified here - https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpEncodingParameters
+/// SDKs use these parameters sent from the server to dynamically adjust these parameters to save CPU, bandwidth
 class VideoLayerSetting extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VideoLayerSetting', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'active')
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'maxBitrate', $pb.PbFieldType.O3)
-    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'scaleResolutionDownBy', $pb.PbFieldType.OF)
-    ..e<VideoLayerSetting_Priority>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OE, defaultOrMaker: VideoLayerSetting_Priority.PRIORITY_HIGH_UNSPECIFIED, valueOf: VideoLayerSetting_Priority.valueOf, enumValues: VideoLayerSetting_Priority.values)
-    ..aOM<$0.Codec>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'codec', subBuilder: $0.Codec.create)
-    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'maxFramerate', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  VideoLayerSetting._() : super();
   factory VideoLayerSetting({
     $core.String? name,
     $core.bool? active,
@@ -2047,32 +2481,45 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
     $0.Codec? codec,
     $core.int? maxFramerate,
   }) {
-    final _result = create();
+    final $result = create();
     if (name != null) {
-      _result.name = name;
+      $result.name = name;
     }
     if (active != null) {
-      _result.active = active;
+      $result.active = active;
     }
     if (maxBitrate != null) {
-      _result.maxBitrate = maxBitrate;
+      $result.maxBitrate = maxBitrate;
     }
     if (scaleResolutionDownBy != null) {
-      _result.scaleResolutionDownBy = scaleResolutionDownBy;
+      $result.scaleResolutionDownBy = scaleResolutionDownBy;
     }
     if (priority != null) {
-      _result.priority = priority;
+      $result.priority = priority;
     }
     if (codec != null) {
-      _result.codec = codec;
+      $result.codec = codec;
     }
     if (maxFramerate != null) {
-      _result.maxFramerate = maxFramerate;
+      $result.maxFramerate = maxFramerate;
     }
-    return _result;
+    return $result;
   }
+  VideoLayerSetting._() : super();
   factory VideoLayerSetting.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory VideoLayerSetting.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoLayerSetting', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..aOB(2, _omitFieldNames ? '' : 'active')
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'maxBitrate', $pb.PbFieldType.O3)
+    ..a<$core.double>(4, _omitFieldNames ? '' : 'scaleResolutionDownBy', $pb.PbFieldType.OF)
+    ..e<VideoLayerSetting_Priority>(5, _omitFieldNames ? '' : 'priority', $pb.PbFieldType.OE, defaultOrMaker: VideoLayerSetting_Priority.PRIORITY_HIGH_UNSPECIFIED, valueOf: VideoLayerSetting_Priority.valueOf, enumValues: VideoLayerSetting_Priority.values)
+    ..aOM<$0.Codec>(6, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'maxFramerate', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2082,8 +2529,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  VideoLayerSetting copyWith(void Function(VideoLayerSetting) updates) => super.copyWith((message) => updates(message as VideoLayerSetting)) as VideoLayerSetting; // ignore: deprecated_member_use
+  VideoLayerSetting copyWith(void Function(VideoLayerSetting) updates) => super.copyWith((message) => updates(message as VideoLayerSetting)) as VideoLayerSetting;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static VideoLayerSetting create() => VideoLayerSetting._();
   VideoLayerSetting createEmptyInstance() => create();
@@ -2159,33 +2608,34 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
 }
 
 class VideoSender extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VideoSender', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<VideoMediaRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mediaRequest', subBuilder: VideoMediaRequest.create)
-    ..aOM<$0.Codec>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'codec', subBuilder: $0.Codec.create)
-    ..pc<VideoLayerSetting>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'layers', $pb.PbFieldType.PM, subBuilder: VideoLayerSetting.create)
-    ..hasRequiredFields = false
-  ;
-
-  VideoSender._() : super();
   factory VideoSender({
     VideoMediaRequest? mediaRequest,
     $0.Codec? codec,
     $core.Iterable<VideoLayerSetting>? layers,
   }) {
-    final _result = create();
+    final $result = create();
     if (mediaRequest != null) {
-      _result.mediaRequest = mediaRequest;
+      $result.mediaRequest = mediaRequest;
     }
     if (codec != null) {
-      _result.codec = codec;
+      $result.codec = codec;
     }
     if (layers != null) {
-      _result.layers.addAll(layers);
+      $result.layers.addAll(layers);
     }
-    return _result;
+    return $result;
   }
+  VideoSender._() : super();
   factory VideoSender.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory VideoSender.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoSender', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<VideoMediaRequest>(1, _omitFieldNames ? '' : 'mediaRequest', subBuilder: VideoMediaRequest.create)
+    ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
+    ..pc<VideoLayerSetting>(3, _omitFieldNames ? '' : 'layers', $pb.PbFieldType.PM, subBuilder: VideoLayerSetting.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2195,8 +2645,10 @@ class VideoSender extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  VideoSender copyWith(void Function(VideoSender) updates) => super.copyWith((message) => updates(message as VideoSender)) as VideoSender; // ignore: deprecated_member_use
+  VideoSender copyWith(void Function(VideoSender) updates) => super.copyWith((message) => updates(message as VideoSender)) as VideoSender;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static VideoSender create() => VideoSender._();
   VideoSender createEmptyInstance() => create();
@@ -2231,29 +2683,31 @@ class VideoSender extends $pb.GeneratedMessage {
   $core.List<VideoLayerSetting> get layers => $_getList(2);
 }
 
+/// sent to users when they need to change the quality of their video
 class ChangePublishQuality extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChangePublishQuality', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<AudioSender>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioSenders', $pb.PbFieldType.PM, subBuilder: AudioSender.create)
-    ..pc<VideoSender>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoSenders', $pb.PbFieldType.PM, subBuilder: VideoSender.create)
-    ..hasRequiredFields = false
-  ;
-
-  ChangePublishQuality._() : super();
   factory ChangePublishQuality({
     $core.Iterable<AudioSender>? audioSenders,
     $core.Iterable<VideoSender>? videoSenders,
   }) {
-    final _result = create();
+    final $result = create();
     if (audioSenders != null) {
-      _result.audioSenders.addAll(audioSenders);
+      $result.audioSenders.addAll(audioSenders);
     }
     if (videoSenders != null) {
-      _result.videoSenders.addAll(videoSenders);
+      $result.videoSenders.addAll(videoSenders);
     }
-    return _result;
+    return $result;
   }
+  ChangePublishQuality._() : super();
   factory ChangePublishQuality.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ChangePublishQuality.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChangePublishQuality', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..pc<AudioSender>(1, _omitFieldNames ? '' : 'audioSenders', $pb.PbFieldType.PM, subBuilder: AudioSender.create)
+    ..pc<VideoSender>(2, _omitFieldNames ? '' : 'videoSenders', $pb.PbFieldType.PM, subBuilder: VideoSender.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2263,8 +2717,10 @@ class ChangePublishQuality extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ChangePublishQuality copyWith(void Function(ChangePublishQuality) updates) => super.copyWith((message) => updates(message as ChangePublishQuality)) as ChangePublishQuality; // ignore: deprecated_member_use
+  ChangePublishQuality copyWith(void Function(ChangePublishQuality) updates) => super.copyWith((message) => updates(message as ChangePublishQuality)) as ChangePublishQuality;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ChangePublishQuality create() => ChangePublishQuality._();
   ChangePublishQuality createEmptyInstance() => create();
@@ -2280,29 +2736,46 @@ class ChangePublishQuality extends $pb.GeneratedMessage {
   $core.List<VideoSender> get videoSenders => $_getList(1);
 }
 
+///  CallGrants is sent to users when there is a change in the call permissions
+///  to publish audio, video or share the screen for a user or a role. This is
+///  idempotent and can be sent at any time. Only the current_grants in the latest
+///  message should be considered. In other words, this is not dependent on any
+///  other message (including previous call_grants_updated message)
+///
+///  When this message is received, the client (say, React component) should mute
+///  the tracks which are not allowed anymore. For example, if the message has
+///  grants {audio:true, video:false} while the user is publishing video, then the
+///  client component should mute the video track and gray out the video button.
+///  This way, the user will not be able to publish video until the permissions
+///  are granted again. Also, muting the track on the client side will prevent
+///  the SFU from receiving the video track and will save bandwidth.
+///
+///  In simple words, this is exactly the same as muting a track on the client.
+///  Here, instead of the user instructing the client, SFU would be doing it.
 class CallGrantsUpdated extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallGrantsUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.CallGrants>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentGrants', subBuilder: $0.CallGrants.create)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
-
-  CallGrantsUpdated._() : super();
   factory CallGrantsUpdated({
     $0.CallGrants? currentGrants,
     $core.String? message,
   }) {
-    final _result = create();
+    final $result = create();
     if (currentGrants != null) {
-      _result.currentGrants = currentGrants;
+      $result.currentGrants = currentGrants;
     }
     if (message != null) {
-      _result.message = message;
+      $result.message = message;
     }
-    return _result;
+    return $result;
   }
+  CallGrantsUpdated._() : super();
   factory CallGrantsUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory CallGrantsUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CallGrantsUpdated', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<$0.CallGrants>(1, _omitFieldNames ? '' : 'currentGrants', subBuilder: $0.CallGrants.create)
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2312,8 +2785,10 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  CallGrantsUpdated copyWith(void Function(CallGrantsUpdated) updates) => super.copyWith((message) => updates(message as CallGrantsUpdated)) as CallGrantsUpdated; // ignore: deprecated_member_use
+  CallGrantsUpdated copyWith(void Function(CallGrantsUpdated) updates) => super.copyWith((message) => updates(message as CallGrantsUpdated)) as CallGrantsUpdated;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static CallGrantsUpdated create() => CallGrantsUpdated._();
   CallGrantsUpdated createEmptyInstance() => create();
@@ -2343,24 +2818,27 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
   void clearMessage() => clearField(2);
 }
 
+/// Go away is sent by the SFU to the client to signal to migrate away from the SFU.
+/// The evict reason may specify why the user is being evicted.
 class GoAway extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GoAway', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.GoAwayReason>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED, valueOf: $0.GoAwayReason.valueOf, enumValues: $0.GoAwayReason.values)
-    ..hasRequiredFields = false
-  ;
-
-  GoAway._() : super();
   factory GoAway({
     $0.GoAwayReason? reason,
   }) {
-    final _result = create();
+    final $result = create();
     if (reason != null) {
-      _result.reason = reason;
+      $result.reason = reason;
     }
-    return _result;
+    return $result;
   }
+  GoAway._() : super();
   factory GoAway.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory GoAway.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GoAway', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.GoAwayReason>(1, _omitFieldNames ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED, valueOf: $0.GoAwayReason.valueOf, enumValues: $0.GoAwayReason.values)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2370,8 +2848,10 @@ class GoAway extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  GoAway copyWith(void Function(GoAway) updates) => super.copyWith((message) => updates(message as GoAway)) as GoAway; // ignore: deprecated_member_use
+  GoAway copyWith(void Function(GoAway) updates) => super.copyWith((message) => updates(message as GoAway)) as GoAway;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static GoAway create() => GoAway._();
   GoAway createEmptyInstance() => create();
@@ -2390,24 +2870,27 @@ class GoAway extends $pb.GeneratedMessage {
   void clearReason() => clearField(1);
 }
 
+/// CallEnded is sent by the SFU to the client to signal that the call has ended.
+/// The reason may specify why the call has ended.
 class CallEnded extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallEnded', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.CallEndedReason>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.CallEndedReason.CALL_ENDED_REASON_UNSPECIFIED, valueOf: $0.CallEndedReason.valueOf, enumValues: $0.CallEndedReason.values)
-    ..hasRequiredFields = false
-  ;
-
-  CallEnded._() : super();
   factory CallEnded({
     $0.CallEndedReason? reason,
   }) {
-    final _result = create();
+    final $result = create();
     if (reason != null) {
-      _result.reason = reason;
+      $result.reason = reason;
     }
-    return _result;
+    return $result;
   }
+  CallEnded._() : super();
   factory CallEnded.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory CallEnded.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CallEnded', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.CallEndedReason>(1, _omitFieldNames ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.CallEndedReason.CALL_ENDED_REASON_UNSPECIFIED, valueOf: $0.CallEndedReason.valueOf, enumValues: $0.CallEndedReason.values)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2417,8 +2900,10 @@ class CallEnded extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  CallEnded copyWith(void Function(CallEnded) updates) => super.copyWith((message) => updates(message as CallEnded)) as CallEnded; // ignore: deprecated_member_use
+  CallEnded copyWith(void Function(CallEnded) updates) => super.copyWith((message) => updates(message as CallEnded)) as CallEnded;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static CallEnded create() => CallEnded._();
   CallEnded createEmptyInstance() => create();
@@ -2437,3 +2922,6 @@ class CallEnded extends $pb.GeneratedMessage {
   void clearReason() => clearField(1);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

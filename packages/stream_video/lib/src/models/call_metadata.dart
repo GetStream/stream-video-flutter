@@ -49,6 +49,7 @@ class CallDetails with EquatableMixin {
     required this.egress,
     required this.custom,
     required this.rtmpIngress,
+    this.joinAheadTimeSeconds,
     this.startsAt,
     this.createdAt,
     this.endedAt,
@@ -66,6 +67,7 @@ class CallDetails with EquatableMixin {
   final CallEgress egress;
   final Map<String, Object> custom;
   final String rtmpIngress;
+  final int? joinAheadTimeSeconds;
   final DateTime? startsAt;
   final DateTime? createdAt;
   final DateTime? endedAt;

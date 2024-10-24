@@ -48,8 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onButtonClick: (call, type, serviceType) async {
         switch (serviceType) {
           case ServiceType.call:
-            call.reject();
-            call.leave();
+            call.reject(reason: CallRejectReason.cancel());
           case ServiceType.screenSharing:
             StreamVideoFlutterBackground.stopService(ServiceType.screenSharing);
             call.setScreenShareEnabled(enabled: false);
@@ -102,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) {
           return AlertDialog(
             title: Text(
-              'Enter the ID of the user you want to call',
+              'Enter the IDs of users you want to call (separated by commas)',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             content: Column(
@@ -125,7 +124,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        _getOrCreateCall(memberIds: [controller.text]);
+                        _getOrCreateCall(
+                          memberIds: controller.text
+                              .split(',')
+                              .map((e) => e.trim())
+                              .toList(),
+                        );
                       },
                     ),
                   ),

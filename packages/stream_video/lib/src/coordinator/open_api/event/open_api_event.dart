@@ -34,6 +34,7 @@ class OpenApiEvent with EquatableMixin {
     this.callRecordingStopped,
     this.callBroadcastingStarted,
     this.callBroadcastingStopped,
+    this.callBroadcastingFailed,
     this.callLiveStarted,
     this.callMemberAdded,
     this.callMemberRemoved,
@@ -125,6 +126,9 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callBroadcastingStopped:
         final event = open.CallHLSBroadcastingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callBroadcastingStopped: event);
+      case EventType.callBroadcastingFailed:
+        final event = open.CallHLSBroadcastingFailedEvent.fromJson(jsonObj);
+        return result.copyWith(callBroadcastingFailed: event);
       case EventType.callLiveStarted:
         final event = open.CallLiveStartedEvent.fromJson(jsonObj);
         return result.copyWith(callLiveStarted: event);
@@ -207,6 +211,7 @@ class OpenApiEvent with EquatableMixin {
   final open.CallRecordingStoppedEvent? callRecordingStopped;
   final open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted;
   final open.CallHLSBroadcastingStoppedEvent? callBroadcastingStopped;
+  final open.CallHLSBroadcastingFailedEvent? callBroadcastingFailed;
   final open.CallLiveStartedEvent? callLiveStarted;
   final open.CallMemberAddedEvent? callMemberAdded;
   final open.CallMemberRemovedEvent? callMemberRemoved;
@@ -249,6 +254,7 @@ class OpenApiEvent with EquatableMixin {
     open.CallRecordingStoppedEvent? callRecordingStopped,
     open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted,
     open.CallHLSBroadcastingStoppedEvent? callBroadcastingStopped,
+    open.CallHLSBroadcastingFailedEvent? callBroadcastingFailed,
     open.CallLiveStartedEvent? callLiveStarted,
     open.CallMemberAddedEvent? callMemberAdded,
     open.CallMemberRemovedEvent? callMemberRemoved,
@@ -297,6 +303,8 @@ class OpenApiEvent with EquatableMixin {
           callBroadcastingStarted ?? this.callBroadcastingStarted,
       callBroadcastingStopped:
           callBroadcastingStopped ?? this.callBroadcastingStopped,
+      callBroadcastingFailed:
+          callBroadcastingFailed ?? this.callBroadcastingFailed,
       callLiveStarted: callLiveStarted ?? this.callLiveStarted,
       callMemberAdded: callMemberAdded ?? this.callMemberAdded,
       callMemberRemoved: callMemberRemoved ?? this.callMemberRemoved,
