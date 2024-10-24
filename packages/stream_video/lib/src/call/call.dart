@@ -347,7 +347,7 @@ class Call {
     final status = state.status;
 
     if (status is CallStatusReconnectionFailed) {
-      await leave();
+      await leave(reason: DisconnectReason.reconnectionFailed());
     }
 
     if (status is CallStatusDisconnected) {
@@ -434,7 +434,6 @@ class Call {
     if (outgoingCall != null && outgoingCall.callCid != callCid) {
       _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
       await outgoingCall.reject(reason: CallRejectReason.cancel());
-      await outgoingCall.leave();
 
       await _streamVideo.state.setOutgoingCall(null);
     }
@@ -443,7 +442,6 @@ class Call {
     if (activeCall != null && activeCall.callCid != callCid) {
       _logger.i(() => '[accept] canceling another active call: $activeCall');
       await activeCall.reject(reason: CallRejectReason.cancel());
-      await activeCall.leave();
 
       await _streamVideo.state.setActiveCall(null);
     }
@@ -460,21 +458,20 @@ class Call {
     final state = this.state.value;
     _logger.i(() => '[reject] state: $state');
 
-    final status = state.status;
-    if ((status is! CallStatusIncoming || status.acceptedByMe) &&
-        status is! CallStatusOutgoing) {
-      _logger.w(() => '[rejectCall] rejected (invalid status): $status');
-      return Result.error('invalid status: $status');
-    }
-
     final result = await _coordinatorClient.rejectCall(
       cid: state.callCid,
       reason: reason?.value,
     );
 
-    if (result is Success<None>) {
-      _stateManager.lifecycleCallRejected();
-    }
+    // Always leave the call after rejecting it.
+    await leave(
+      reason: result is Success<None>
+          ? DisconnectReason.rejected(
+              byUserId: state.currentUserId,
+              reason: reason,
+            )
+          : null,
+    );
 
     return result;
   }
@@ -1001,6 +998,21 @@ class Call {
   }
 
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
+    if (sfuEvent is SfuParticipantLeftEvent) {
+      final callParticipants = [...state.value.callParticipants]..removeWhere(
+          (participant) =>
+              participant.userId == sfuEvent.participant.userId &&
+              participant.sessionId == sfuEvent.participant.sessionId,
+        );
+
+      if (callParticipants.length == 1 &&
+          callParticipants.first.userId == _streamVideo.currentUser.id &&
+          state.value.isRingingFlow &&
+          _stateManager.callPreferences.dropIfAloneInRingingFlow) {
+        await leave();
+      }
+    }
+
     if (sfuEvent is SfuSocketDisconnected) {
       _logger.w(() => '[onSfuEvent] socket disconnected');
     } else if (sfuEvent is SfuSocketFailed) {
@@ -1194,7 +1206,7 @@ class Call {
     return const Result.success(none);
   }
 
-  Future<Result<None>> leave() async {
+  Future<Result<None>> leave({DisconnectReason? reason}) async {
     final state = this.state.value;
     _logger.i(() => '[leave] state: $state');
 
@@ -1203,10 +1215,13 @@ class Call {
       return const Result.success(none);
     }
 
-    _session?.leave(reason: 'user is leaving the call');
-    await _clear('leave');
+    try {
+      _session?.leave(reason: 'user is leaving the call');
+    } finally {
+      await _clear('leave');
+    }
 
-    _stateManager.lifecycleCallDisconnected();
+    _stateManager.lifecycleCallDisconnected(reason: reason);
     _logger.v(() => '[leave] finished');
 
     return const Result.success(none);
@@ -1254,6 +1269,7 @@ class Call {
     // Apply defaul audio output and input devices
     final mediaDevicesResult =
         await RtcMediaDeviceNotifier.instance.enumerateDevices();
+
     final mediaDevices = mediaDevicesResult.fold(
       success: (success) => success.data,
       failure: (failure) => <RtcMediaDevice>[],

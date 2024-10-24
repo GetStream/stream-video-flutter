@@ -36,24 +36,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallRejected() {
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(
-        () => '[lifecycleCallRejected] rejected (invalid status): $status',
-      );
-      return;
-    }
-    _logger.i(() => '[lifecycleCallRejected] state: $state');
-    state = state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.rejected(
-          byUserId: state.currentUserId,
-        ),
-      ),
-    );
-  }
-
   void lifecycleCallEnded() {
     _logger.i(() => '[lifecycleCallEnded] state: $state');
     state = state.copyWith(
@@ -184,14 +166,15 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallDisconnected() {
+  void lifecycleCallDisconnected({DisconnectReason? reason}) {
     _logger.w(() => '[lifecycleCallDisconnected] state: $state');
 
     state = state.copyWith(
       status: CallStatus.disconnected(
-        DisconnectReason.cancelled(
-          byUserId: state.currentUserId,
-        ),
+        reason ??
+            DisconnectReason.cancelled(
+              byUserId: state.currentUserId,
+            ),
       ),
       sessionId: '',
       callParticipants: const [],

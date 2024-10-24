@@ -17,6 +17,7 @@ const _idCallEnded = 3;
 const _idCallAccepted = 4;
 const _idCallKitAcceptDecline = 5;
 const _idCallRejected = 6;
+const _idCallParticipantCount = 7;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
@@ -72,7 +73,28 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallEnded,
         client.events.on<CoordinatorCallEndedEvent>(
           (event) {
+            _logger.d(
+                () => '[subscribeToEvents] Call ended event: ${event.callCid}');
             endCallByCid(event.callCid.toString());
+          },
+        ),
+      );
+
+      _subscriptions.add(
+        _idCallParticipantCount,
+        client.events.on<CoordinatorCallSessionParticipantCountUpdatedEvent>(
+          (event) async {
+            final totalCount = event.participantsCountByRole.values
+                .map((v) => v)
+                .reduce((a, b) => a + b);
+
+            _logger.d(() =>
+                '[subscribeToEvents] Participant count updated event: ${event.callCid}, count: $totalCount');
+            if (totalCount == 0) {
+              _logger.v(() =>
+                  '[subscribeToEvents] No participants left, ending call: ${event.callCid}');
+              endCallByCid(event.callCid.toString());
+            }
           },
         ),
       );
@@ -81,8 +103,12 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallRejected,
         client.events.on<CoordinatorCallRejectedEvent>(
           (event) async {
+            _logger.d(() =>
+                '[subscribeToEvents] Call rejected event: ${event.callCid}, rejected by: ${event.rejectedByUserId}');
             if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
                 event.rejectedByUserId == streamVideo.currentUser.id) {
+              _logger.v(() =>
+                  '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}');
               endCallByCid(event.callCid.toString());
             }
           },
@@ -93,17 +119,23 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallAccepted,
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
+            _logger.d(() =>
+                '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}');
             if (event.acceptedByUserId != streamVideo.currentUser.id) return;
 
             // end CallKit call on other devices if the call was accepted on one of them
             if (streamVideo.activeCall?.state.value.status
                 is! CallStatusActive) {
+              _logger.v(() =>
+                  '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}');
               await endCallByCid(event.callCid.toString());
             }
 
             // if the call was accepted on the same device, end the CallKit call silently
             // (in case it was accepted from the app and not from the CallKit UI)
             else {
+              _logger.v(() =>
+                  '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}');
               await FlutterCallkitIncoming.silenceEvents();
               await endCallByCid(event.callCid.toString());
               await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -150,6 +182,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
           _subscriptions.cancel(_idCallAccepted);
           _subscriptions.cancel(_idCallEnded);
           _subscriptions.cancel(_idCallRejected);
+          _subscriptions.cancel(_idCallParticipantCount);
         },
       ),
     );
