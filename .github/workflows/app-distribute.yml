@@ -3,7 +3,7 @@ name: App Distribute CI
 on:
   push:
     branches:
-      - main
+      - chore/dogfooding-distribution
     paths:
       - dogfooding/**
 
