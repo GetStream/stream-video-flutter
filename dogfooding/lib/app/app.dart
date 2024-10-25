@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 // 📦 Package imports:
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter_dogfooding/core/repos/token_service.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/di/injector.dart';
@@ -67,8 +68,12 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
       return true;
     };
 
-    // Initialise injector
-    await AppInjector.init();
+    // Initialise injector, use demo env for production
+    if (kDebugMode == true) {
+      await AppInjector.init();
+    } else {
+      await AppInjector.init(forceEnvironment: Environment.demo);
+    }
 
     // Check if there are saved credentials. If there are, login with them.
     await _handleSavedLogin();
