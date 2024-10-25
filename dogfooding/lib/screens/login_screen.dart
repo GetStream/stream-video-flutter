@@ -15,6 +15,7 @@ import 'package:flutter_dogfooding/widgets/stream_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // 🌎 Project imports:
 import '../di/injector.dart';
@@ -193,6 +194,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Join As Guest',
                   ),
                 ),
+                FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox.shrink();
+                      final platformInfo = snapshot.data;
+
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'Version ${platformInfo?.version}+${platformInfo?.buildNumber}',
+                          style: theme.textTheme.labelSmall,
+                        ),
+                      );
+                    }),
               ],
             ),
           ),
