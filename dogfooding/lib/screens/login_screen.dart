@@ -195,19 +195,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 FutureBuilder<PackageInfo>(
-                    future: PackageInfo.fromPlatform(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const SizedBox.shrink();
-                      final platformInfo = snapshot.data;
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const SizedBox.shrink();
+                    final platformInfo = snapshot.data;
 
-                      return Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          'Version ${platformInfo?.version}+${platformInfo?.buildNumber}',
-                          style: theme.textTheme.labelSmall,
-                        ),
-                      );
-                    }),
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'Version ${platformInfo?.version}+${platformInfo?.buildNumber}',
+                        style: theme.textTheme.labelSmall,
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
