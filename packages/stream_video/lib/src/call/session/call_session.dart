@@ -785,7 +785,13 @@ class CallSession extends Disposable {
     _logger.d(
       () => '[updateViewportVisibility] visibilityChange: $visibilityChange',
     );
-    return _vvBuffer.post(visibilityChange);
+
+    if (!_vvBuffer.isClosed) {
+      return _vvBuffer.post(visibilityChange);
+    }
+
+    //Ignore the visibility change if the buffer is closed
+    return const Result.success(none);
   }
 
   Future<Result<None>> updateViewportVisibilities(
@@ -834,7 +840,13 @@ class CallSession extends Disposable {
     _logger.d(
       () => '[updateSubscription] subscriptionChange: $subscriptionChange',
     );
-    return _saBuffer.post(subscriptionChange);
+
+    if (!_saBuffer.isClosed) {
+      return _saBuffer.post(subscriptionChange);
+    }
+
+    //Ignore the subscription change if the buffer is closed
+    return const Result.success(none);
   }
 
   Future<Result<None>> updateSubscriptions(
