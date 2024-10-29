@@ -308,9 +308,7 @@ class Call {
   void _observeReconnectEvents() {
     _subscriptions.add(
       _idReconnect,
-      InternetConnection.createInstance(
-        checkInterval: const Duration(seconds: 1),
-      ).onStatusChange.listen(
+      InternetConnection.createInstance().onStatusChange.listen(
         (status) {
           if (status == InternetStatus.disconnected) {
             _logger.d(() => '[observeReconnectEvents] network disconnected');
@@ -497,8 +495,6 @@ class Call {
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
   }) async {
-    _logger.i(() => '[join] state: $state');
-
     await _init();
 
     if (state.value.status is CallStatusConnected) {
