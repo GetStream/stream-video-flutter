@@ -71,7 +71,6 @@ abstract class CoordinatorClient {
 
   Future<Result<models.CoordinatorJoined>> joinCall({
     required StreamCallCid callCid,
-    String? datacenterId,
     bool? ringing,
     bool? create,
     String? migratingFrom,
@@ -241,6 +240,7 @@ abstract class CoordinatorClient {
     StreamTranscriptionSettings? transcription,
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
+    StreamLimitsSettings? limits,
   });
 
   Future<Result<GuestCreatedData>> loadGuest({

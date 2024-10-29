@@ -23,6 +23,8 @@ class DebounceBuffer<T, R> {
   final OnBuffered<T, R> onBuffered;
   final OnCancel<R> onCancel;
 
+  bool get isClosed => _eventsSubject.isClosed;
+
   final _eventsSubject = BehaviorSubject<T>();
   late final StreamSubscription<R> _subscription;
 

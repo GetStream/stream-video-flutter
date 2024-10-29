@@ -6,7 +6,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
 import 'package:system_info2/system_info2.dart';
-import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
@@ -17,6 +16,8 @@ import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
+import '../../sfu/data/models/sfu_call_state.dart';
+import '../../sfu/data/models/sfu_error.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
@@ -38,9 +39,9 @@ import 'call_session_config.dart';
 const _tag = 'SV:CallSession';
 
 const _debounceDuration = Duration(milliseconds: 200);
-const _pcReconnectTimeout = Duration(seconds: 4);
+const _migrationCompleteEventTimeout = Duration(seconds: 7);
 
-typedef OnFullReconnectNeeded = void Function();
+typedef OnPeerConnectionIssue = void Function(StreamPeerConnection pc);
 
 class CallSession extends Disposable {
   CallSession({
@@ -49,8 +50,9 @@ class CallSession extends Disposable {
     required this.sessionId,
     required this.config,
     required this.stateManager,
-    required this.onFullReconnectNeeded,
+    required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
+    this.joinResponseTimeout = const Duration(seconds: 5),
   })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
@@ -80,7 +82,11 @@ class CallSession extends Disposable {
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
-  final OnFullReconnectNeeded onFullReconnectNeeded;
+  final OnPeerConnectionIssue onPeerConnectionIssue;
+
+  final Duration joinResponseTimeout;
+  final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
+      _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
 
   RtcManager? rtcManager;
 
@@ -132,7 +138,6 @@ class CallSession extends Disposable {
         os = sfu_models.OS(
           name: 'iOS',
           version: deviceInfo.systemVersion,
-          architecture: SysInfo.rawKernelArchitecture,
         );
         device = sfu_models.Device(
           name: deviceInfo.model,
@@ -180,7 +185,29 @@ class CallSession extends Disposable {
     }
   }
 
-  Future<Result<None>> start() async {
+  sfu_events.ReconnectDetails getReconnectDetails(
+    SfuReconnectionStrategy strategy, {
+    String? migratingFromSfuId,
+    int? reconnectAttempts,
+  }) {
+    final announcedTracks = rtcManager?.getPublisherTrackInfos().toDTO();
+    final subscribedTracks =
+        _currentTrackSubscriptionsSubject.value.values.toList().toDTO();
+
+    return sfu_events.ReconnectDetails(
+      strategy: strategy.toDto(),
+      announcedTracks: announcedTracks,
+      subscriptions: subscribedTracks,
+      previousSessionId: sessionId,
+      fromSfuId: migratingFromSfuId ?? '',
+      reconnectAttempt: reconnectAttempts,
+    );
+  }
+
+  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
+      start({
+    sfu_events.ReconnectDetails? reconnectDetails,
+  }) async {
     try {
       _logger.d(() => '[start] no args');
 
@@ -212,24 +239,31 @@ class CallSession extends Disposable {
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
         _logger.e(() => '[start] ws connect failed: $wsResult');
-        return wsResult;
+        return const Result.failure(
+          VideoError(message: 'Failed to connect to WS'),
+        );
       }
+
       _logger.v(() => '[start] sfu connected');
-      final genericSdp = await RtcManager.getGenericSdp();
-      _logger.v(() => '[start] genericSdp.len: ${genericSdp.length}');
+
+      final subscriberSdp = await RtcManager.getGenericSdp();
+      _logger.v(() => '[start] subscriberSdp.len: ${subscriberSdp.length}');
+
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
             clientDetails: _clientDetails,
             token: config.sfuToken,
             sessionId: sessionId,
-            subscriberSdp: genericSdp,
+            subscriberSdp: subscriberSdp,
+            reconnectDetails: reconnectDetails,
           ),
         ),
       );
+
       _logger.v(() => '[start] wait for SfuJoinResponseEvent');
       final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
-        timeLimit: const Duration(seconds: 30),
+        timeLimit: joinResponseTimeout,
       );
 
       _logger.v(() => '[start] sfu joined: $event');
@@ -238,14 +272,15 @@ class CallSession extends Disposable {
         (it) => it.userId == currentUserId,
       );
       final localTrackId = localParticipant.trackLookupPrefix;
+
       _logger.v(() => '[start] localTrackId: $localTrackId');
       rtcManager = await rtcManagerFactory.makeRtcManager(
         publisherId: localTrackId,
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
-        ..onSubscriberDisconnectedOrFailed = _onSubsciberDisconnectedOrFailed
-        ..onPublisherDisconnectedOrFailed = _onPublisherDisconnectedOrFailed
+        ..onPublisherIssue = onPeerConnectionIssue
+        ..onSubscriberIssue = onPeerConnectionIssue
         ..onLocalTrackMuted = _onLocalTrackMuted
         ..onLocalTrackPublished = _onLocalTrackPublished
         ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -271,15 +306,37 @@ class CallSession extends Disposable {
         );
       });
 
-      _logger.v(() => '[start] completed');
-      return const Result.success(none);
+      _logger.d(() => '[start] completed');
+      return Result.success(
+        (
+          callState: event.callState,
+          fastReconnectDeadline: event.fastReconnectDeadline
+        ),
+      );
     } catch (e, stk) {
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
-  Future<Result<None>> fastReconnect() async {
+  Future<Result<None>> waitForMigrationComplete() async {
+    try {
+      _logger.v(() => '[waitForMigrationComplete] no args');
+
+      await sfuWS.events.waitFor<SfuParticipantMigrationCompleteEvent>(
+        timeLimit: _migrationCompleteEventTimeout,
+      );
+
+      _logger.d(() => '[waitForMigrationComplete] completed');
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(() => '[waitForMigrationComplete] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
+      fastReconnect() async {
     try {
       _logger.d(() => '[fastReconnect] no args');
 
@@ -299,7 +356,7 @@ class CallSession extends Disposable {
             token: config.sfuToken,
             sessionId: sessionId,
             subscriberSdp: genericSdp,
-            fastReconnect: true,
+            reconnectDetails: getReconnectDetails(SfuReconnectionStrategy.fast),
           ),
         ),
       );
@@ -314,15 +371,23 @@ class CallSession extends Disposable {
           () =>
               '[fastReconnect] fast-reconnect possible - requesting ICE restarts',
         );
-        final iceResult = await sfuClient.restartIce(
-          sfu.ICERestartRequest(
-            sessionId: sessionId,
-            peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+
+        await rtcManager?.publisher.pc.restartIce();
+
+        final announcedTracks =
+            rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
+
+        for (final track in announcedTracks) {
+          await _onRemoteTrackReceived(rtcManager!.publisher, track);
+        }
+
+        _logger.d(() => '[fastReconnect] completed');
+        return Result.success(
+          (
+            callState: event.callState,
+            fastReconnectDeadline: event.fastReconnectDeadline
           ),
         );
-
-        _logger.v(() => '[fastReconnect] completed');
-        return iceResult.map((data) => none);
       } else {
         _logger.v(() => '[fastReconnect] fast-reconnect not possible');
         return const Result.failure(
@@ -335,21 +400,40 @@ class CallSession extends Disposable {
     }
   }
 
-  @override
-  Future<void> dispose() async {
-    _logger.d(() => '[dispose] no args');
+  void leave({String? reason}) {
+    _logger.d(() => '[leave] no args');
+    sfuWS.leave(sessionId: sessionId, reason: reason);
+  }
+
+  Future<void> close(
+    StreamWebSocketCloseCode code, {
+    String? closeReason,
+  }) async {
+    _logger.d(() => '[close] code: $code, closeReason: $closeReason');
+
     await _stats.close();
     await _saBuffer.cancel();
     await _eventsSubscription?.cancel();
     _eventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
+    await _currentTrackSubscriptionsSubject.close();
+
     await sfuWS.disconnect(
-      StreamWebSocketCloseCode.closeSocketFromClient.value,
+      code.value,
+      'dart-client: $closeReason',
     );
+
     await rtcManager?.dispose();
     rtcManager = null;
     _peerConnectionCheckTimer?.cancel();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
+
+    await close(StreamWebSocketCloseCode.normalClosure);
     return await super.dispose();
   }
 
@@ -376,6 +460,7 @@ class CallSession extends Disposable {
 
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
+
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
@@ -598,56 +683,6 @@ class CallSession extends Disposable {
     _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 
-  Future<void> _onSubsciberDisconnectedOrFailed(
-    StreamPeerConnection pc,
-    rtc.RTCIceConnectionState state,
-  ) async {
-    _logger.d(
-      () => '[_onSubsciberDisconnectedOrFaild] type: ${pc.type}, state: $state',
-    );
-
-    _peerConnectionCheckTimer?.cancel();
-    _peerConnectionCheckTimer = Timer(_pcReconnectTimeout, () {
-      if (pc.pc.connectionState !=
-          RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
-        _peerConnectionCheckTimer = null;
-        onFullReconnectNeeded();
-      }
-    });
-
-    final iceResult = await sfuClient.restartIce(
-      sfu.ICERestartRequest(
-        sessionId: sessionId,
-        peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
-      ),
-    );
-
-    _logger.v(() => '[_onSubsciberDisconnectedOrFailed] result: $iceResult');
-  }
-
-  Future<void> _onPublisherDisconnectedOrFailed(
-    StreamPeerConnection pc,
-    rtc.RTCIceConnectionState state,
-  ) async {
-    _logger.d(
-      () =>
-          '[_onPublisherDisconnectedOrFailed] type: ${pc.type}, state: $state',
-    );
-
-    _peerConnectionCheckTimer?.cancel();
-    _peerConnectionCheckTimer = Timer(_pcReconnectTimeout, () {
-      if (pc.pc.connectionState !=
-          RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
-        _peerConnectionCheckTimer = null;
-        onFullReconnectNeeded();
-      }
-    });
-
-    await pc.pc.restartIce();
-
-    _logger.v(() => '[_onPublisherDisconnectedOrFailed] ice restarted');
-  }
-
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
     _logger.d(() => '[negotiate] type: ${pc.type}');
 
@@ -749,7 +784,13 @@ class CallSession extends Disposable {
     _logger.d(
       () => '[updateViewportVisibility] visibilityChange: $visibilityChange',
     );
-    return _vvBuffer.post(visibilityChange);
+
+    if (!_vvBuffer.isClosed) {
+      return _vvBuffer.post(visibilityChange);
+    }
+
+    //Ignore the visibility change if the buffer is closed
+    return const Result.success(none);
   }
 
   Future<Result<None>> updateViewportVisibilities(
@@ -786,6 +827,8 @@ class CallSession extends Disposable {
       subscriptions: subscriptions.values,
     );
 
+    _currentTrackSubscriptionsSubject.add(subscriptions);
+
     _logger.v(() => '[setSubscriptions] result: $result');
     return result;
   }
@@ -796,7 +839,13 @@ class CallSession extends Disposable {
     _logger.d(
       () => '[updateSubscription] subscriptionChange: $subscriptionChange',
     );
-    return _saBuffer.post(subscriptionChange);
+
+    if (!_saBuffer.isClosed) {
+      return _saBuffer.post(subscriptionChange);
+    }
+
+    //Ignore the subscription change if the buffer is closed
+    return const Result.success(none);
   }
 
   Future<Result<None>> updateSubscriptions(
@@ -820,6 +869,9 @@ class CallSession extends Disposable {
       sessionId: sessionId,
       subscriptions: subscriptions.values,
     );
+
+    _currentTrackSubscriptionsSubject.add(subscriptions);
+
     _logger.v(() => '[updateSubscriptions] result: $result');
     return result;
   }
@@ -944,6 +996,19 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
             fps: layer.parameters.encoding.maxFramerate,
           );
         }),
+      );
+    }).toList();
+  }
+}
+
+extension SfuSubscriptionDetailsEx on List<SfuSubscriptionDetails> {
+  List<sfu.TrackSubscriptionDetails> toDTO() {
+    return map((sub) {
+      return sfu.TrackSubscriptionDetails(
+        userId: sub.userId,
+        sessionId: sub.sessionId,
+        trackType: sub.trackType.toDTO(),
+        dimension: sub.dimension?.toDTO(),
       );
     }).toList();
   }

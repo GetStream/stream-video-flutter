@@ -24,12 +24,14 @@ class CallState extends Equatable {
       isBackstage: false,
       settings: const CallSettings(),
       egress: const CallEgress(),
+      rtmpIngress: '',
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
       createdAt: null,
+      updatedAt: null,
       startsAt: null,
       endedAt: null,
       liveStartedAt: null,
@@ -38,46 +40,8 @@ class CallState extends Equatable {
       subscriberStats: null,
       localStats: null,
       latencyHistory: const [],
-    );
-  }
-
-  factory CallState.fromMetadata({
-    required String currentUserId,
-    required StreamCallCid callCid,
-    required bool ringing,
-    required CallMetadata metadata,
-  }) {
-    return CallState._(
-      currentUserId: currentUserId,
-      callCid: callCid,
-      createdByUserId: metadata.details.createdBy.id,
-      isRingingFlow: ringing,
-      sessionId: '',
-      status: metadata.toCallStatus(currentUserId, ringing: ringing),
-      isRecording: metadata.details.recording,
-      isBroadcasting: metadata.details.broadcasting,
-      isTranscribing: metadata.details.transcribing,
-      isBackstage: metadata.details.backstage,
-      settings: metadata.settings,
-      egress: metadata.details.egress,
-      videoInputDevice: null,
-      audioInputDevice: null,
-      audioOutputDevice: null,
-      ownCapabilities: List.unmodifiable(metadata.details.ownCapabilities),
-      callParticipants: List.unmodifiable(
-        metadata.toCallParticipants(
-          currentUserId,
-        ),
-      ),
-      createdAt: null,
-      startsAt: null,
-      endedAt: null,
-      liveStartedAt: null,
-      liveEndedAt: null,
-      publisherStats: null,
-      subscriberStats: null,
-      localStats: null,
-      latencyHistory: const [],
+      blockedUserIds: const [],
+      custom: const {},
     );
   }
 
@@ -95,12 +59,14 @@ class CallState extends Equatable {
     required this.isBackstage,
     required this.settings,
     required this.egress,
+    required this.rtmpIngress,
     required this.ownCapabilities,
     required this.callParticipants,
     required this.videoInputDevice,
     required this.audioInputDevice,
     required this.audioOutputDevice,
     required this.createdAt,
+    required this.updatedAt,
     required this.startsAt,
     required this.endedAt,
     required this.liveStartedAt,
@@ -109,6 +75,8 @@ class CallState extends Equatable {
     required this.subscriberStats,
     required this.localStats,
     required this.latencyHistory,
+    required this.blockedUserIds,
+    required this.custom,
   });
 
   final String currentUserId;
@@ -119,6 +87,7 @@ class CallState extends Equatable {
   final CallStatus status;
   final CallSettings settings;
   final CallEgress egress;
+  final String rtmpIngress;
   final bool isRecording;
   final bool isBroadcasting;
   final bool isTranscribing;
@@ -131,12 +100,15 @@ class CallState extends Equatable {
   final DateTime? createdAt;
   final DateTime? startsAt;
   final DateTime? endedAt;
+  final DateTime? updatedAt;
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
   final PeerConnectionStats? publisherStats;
   final PeerConnectionStats? subscriberStats;
   final LocalStats? localStats;
   final List<int> latencyHistory;
+  final List<String> blockedUserIds;
+  final Map<String, Object> custom;
 
   String get callId => callCid.id;
 
@@ -165,12 +137,14 @@ class CallState extends Equatable {
     bool? isBackstage,
     CallSettings? settings,
     CallEgress? egress,
+    String? rtmpIngress,
     RtcMediaDevice? videoInputDevice,
     RtcMediaDevice? audioInputDevice,
     RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
     DateTime? createdAt,
+    DateTime? updatedAt,
     DateTime? startsAt,
     DateTime? endedAt,
     DateTime? liveStartedAt,
@@ -179,6 +153,8 @@ class CallState extends Equatable {
     PeerConnectionStats? subscriberStats,
     LocalStats? localStats,
     List<int>? latencyHistory,
+    List<String>? blockedUserIds,
+    Map<String, Object>? custom,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -193,12 +169,14 @@ class CallState extends Equatable {
       isBackstage: isBackstage ?? this.isBackstage,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
+      rtmpIngress: rtmpIngress ?? this.rtmpIngress,
       videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       startsAt: startsAt ?? this.startsAt,
       endedAt: endedAt ?? this.endedAt,
       liveStartedAt: liveStartedAt ?? this.liveStartedAt,
@@ -207,6 +185,32 @@ class CallState extends Equatable {
       subscriberStats: subscriberStats ?? this.subscriberStats,
       localStats: localStats ?? this.localStats,
       latencyHistory: latencyHistory ?? this.latencyHistory,
+      blockedUserIds: blockedUserIds ?? this.blockedUserIds,
+      custom: custom ?? this.custom,
+    );
+  }
+
+  CallState copyFromMetadata(CallMetadata metadata) {
+    final capabilities = metadata.details.ownCapabilities.toList();
+
+    return copyWith(
+      isBackstage: metadata.details.backstage,
+      isRecording: metadata.details.recording,
+      isTranscribing: metadata.details.transcribing,
+      isBroadcasting: metadata.details.broadcasting,
+      blockedUserIds: metadata.details.blockedUserIds.toList(),
+      createdAt: metadata.details.createdAt,
+      updatedAt: metadata.details.updatedAt,
+      startsAt: metadata.details.startsAt,
+      endedAt: metadata.details.endedAt,
+      createdByUserId: metadata.details.createdBy.id,
+      custom: metadata.details.custom,
+      egress: metadata.details.egress,
+      rtmpIngress: metadata.details.rtmpIngress,
+      settings: metadata.settings,
+      ownCapabilities: capabilities.isEmpty ? null : capabilities,
+      liveStartedAt: metadata.session.liveStartedAt,
+      liveEndedAt: metadata.session.liveEndedAt,
     );
   }
 
@@ -223,12 +227,14 @@ class CallState extends Equatable {
         isBackstage,
         settings,
         egress,
+        rtmpIngress,
         videoInputDevice,
         audioInputDevice,
         audioOutputDevice,
         ownCapabilities,
         callParticipants,
         createdAt,
+        updatedAt,
         startsAt,
         endedAt,
         liveStartedAt,
@@ -237,6 +243,8 @@ class CallState extends Equatable {
         subscriberStats,
         localStats,
         latencyHistory,
+        blockedUserIds,
+        custom,
       ];
 
   @override
@@ -250,44 +258,5 @@ class CallState extends Equatable {
         ' audioOutputDevice: $audioOutputDevice,'
         ' ownCapabilities: $ownCapabilities,'
         ' callParticipants: $callParticipants)';
-  }
-}
-
-extension on CallMetadata {
-  CallStatus toCallStatus(
-    String currentUserId, {
-    required bool ringing,
-  }) {
-    final createdByMe = currentUserId == details.createdBy.id;
-    if (createdByMe && ringing) {
-      return CallStatus.outgoing();
-    } else if (!createdByMe && ringing) {
-      return CallStatus.incoming();
-    } else {
-      return CallStatus.idle();
-    }
-  }
-
-  List<CallParticipantState> toCallParticipants(String currentUserId) {
-    final result = <CallParticipantState>[];
-    for (final userId in members.keys) {
-      final member = members[userId];
-      final user = users[userId];
-      final isLocal = currentUserId == userId;
-      result.add(
-        CallParticipantState(
-          userId: userId,
-          roles: member?.roles ?? user?.roles ?? [],
-          name: user?.name ?? '',
-          custom: user?.custom ?? {},
-          image: user?.image ?? '',
-          sessionId: '',
-          trackIdPrefix: '',
-          isLocal: isLocal,
-          isOnline: !isLocal,
-        ),
-      );
-    }
-    return result;
   }
 }

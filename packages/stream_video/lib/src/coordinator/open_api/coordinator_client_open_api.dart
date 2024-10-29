@@ -10,7 +10,6 @@ import '../../errors/video_error_composer.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
 import '../../models/call_received_data.dart';
-import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../state_emitter.dart';
 import '../../token/token_manager.dart';
@@ -434,7 +433,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall({
     required StreamCallCid callCid,
-    String? datacenterId,
     bool? ringing,
     bool? create,
     String? migratingFrom,
@@ -442,7 +440,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () => '[joinCall] cid: $callCid, dataCenterId: $datacenterId'
+        () => '[joinCall] cid: $callCid'
             ', ringing: $ringing, create: $create , migratingFrom: $migratingFrom'
             ', video: $video',
       );
@@ -482,6 +480,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           users: result.members.toCallUsers(),
           duration: result.duration,
           reportingIntervalMs: result.statsOptions.reportingIntervalMs,
+          ownCapabilities: result.ownCapabilities
+              .map(
+                (it) => CallPermission.fromAlias(it.value),
+              )
+              .toList(),
         ),
       );
     } catch (e, stk) {
@@ -1061,6 +1064,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamTranscriptionSettings? transcription,
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
+    StreamLimitsSettings? limits,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1081,6 +1085,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             transcription: transcription?.toOpenDto(),
             backstage: backstage?.toOpenDto(),
             geofencing: geofencing?.toOpenDto(),
+            limits: limits?.toOpenDto(),
           ),
           custom: custom,
         ),

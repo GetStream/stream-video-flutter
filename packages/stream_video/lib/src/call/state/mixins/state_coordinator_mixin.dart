@@ -4,6 +4,7 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../../call_state.dart';
 import '../../../coordinator/models/coordinator_events.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_metadata.dart';
 import '../../../models/call_participant_state.dart';
 import '../../../models/call_reaction.dart';
 import '../../../models/call_status.dart';
@@ -12,6 +13,12 @@ import '../../../models/disconnect_reason.dart';
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
+  void callMetadataChanged(CallMetadata callMetadata) {
+    state = state.copyFromMetadata(
+      callMetadata,
+    );
+  }
+
   void coordinatorCallAccepted(
     CoordinatorCallAcceptedEvent event,
   ) {
@@ -23,6 +30,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       );
       return;
     }
+
     final participant = state.callParticipants.firstWhereOrNull((participant) {
       return participant.userId == event.acceptedByUserId;
     });
@@ -31,11 +39,17 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
         () =>
             '[coordinatorUpdateCallAccepted] rejected (accepted by non-Member)',
       );
+
       return;
     }
-    state = state.copyWith(
-      status: CallStatus.outgoing(acceptedByCallee: true),
-    );
+
+    state = state
+        .copyFromMetadata(
+          event.metadata,
+        )
+        .copyWith(
+          status: CallStatus.outgoing(acceptedByCallee: true),
+        );
   }
 
   void coordinatorCallRejected(
@@ -50,9 +64,11 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       );
       return;
     }
+
     final participantIndex = state.callParticipants.indexWhere((participant) {
       return participant.userId == event.rejectedByUserId;
     });
+
     if (participantIndex == -1) {
       _logger.w(
         () => '[coordinatorCallRejected] rejected '
@@ -60,23 +76,33 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       );
       return;
     }
+
     final callParticipants = [...state.callParticipants];
     final removed = callParticipants.removeAt(participantIndex);
+
     if (removed.userId == state.currentUserId ||
         callParticipants.hasSingle(state.currentUserId)) {
-      state = state.copyWith(
-        status: CallStatus.disconnected(
-          DisconnectReason.rejected(
-            byUserId: removed.userId,
-          ),
-        ),
-        sessionId: '',
-        callParticipants: callParticipants,
-      );
+      state = state
+          .copyFromMetadata(
+            event.metadata,
+          )
+          .copyWith(
+            status: CallStatus.disconnected(
+              DisconnectReason.rejected(
+                byUserId: removed.userId,
+              ),
+            ),
+            sessionId: '',
+            callParticipants: callParticipants,
+          );
     }
-    state = state.copyWith(
-      callParticipants: callParticipants,
-    );
+    state = state
+        .copyFromMetadata(
+          event.metadata,
+        )
+        .copyWith(
+          callParticipants: callParticipants,
+        );
   }
 
   void coordinatorCallEnded(
@@ -84,40 +110,16 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   ) {
     _logger.i(() => '[coordinatorCallEnded] state: $state');
     final status = state.status;
+
     if (status is! CallStatusActive) {
       _logger.w(() => '[coordinatorCallEnded] rejected (status is not Active)');
       return;
     }
+
     if (state.callCid != event.callCid) {
       _logger.w(() => '[coordinatorCallEnded] rejected (invalid cid): $event');
       return;
     }
-    // final participantIndex = state.callParticipants.indexWhere((participant) {
-    //   return participant.userId == event.endedByUserId;
-    // });
-    // if (participantIndex == -1) {
-    //   _logger.w(
-    //     () => '[reduceCallEnded] rejected '
-    //         '(by unknown user): ${event.endedByUserId}',
-    //   );
-    //   return state;
-    // }
-    // final callParticipants = [...state.callParticipants];
-    // final removed = callParticipants.removeAt(participantIndex);
-    // if (removed.userId == state.currentUserId ||
-    //     callParticipants.hasSingle(state.currentUserId)) {
-    //   return state.copyWith(
-    //     status: CallStatus.disconnected(
-    //       DisconnectReason.cancelled(
-    //         byUserId: removed.userId,
-    //       ),
-    //     ),
-    //     callParticipants: callParticipants,
-    //   );
-    // }
-    // return state.copyWith(
-    //   callParticipants: callParticipants,
-    // );
 
     state = state.copyWith(
       status: CallStatus.disconnected(
@@ -180,6 +182,23 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     );
   }
 
+  void coordinatorCallRecordingFailed(
+    CoordinatorCallRecordingFailedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallRecordingFailed] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isRecording: false,
+    );
+  }
+
   void coordinatorCallTranscriptionStarted(
     CoordinatorCallTranscriptionStartedEvent event,
   ) {
@@ -214,6 +233,23 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     );
   }
 
+  void coordinatorCallTranscriptionFailed(
+    CoordinatorCallTranscriptionFailedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallTranscriptionFailed] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isTranscribing: false,
+    );
+  }
+
   void coordinatorCallBroadcastingStarted(
     CoordinatorCallBroadcastingStartedEvent event,
   ) {
@@ -239,6 +275,23 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       _logger.w(
         () =>
             '[coordinatorCallBroadcastingStopped] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isBroadcasting: false,
+    );
+  }
+
+  void coordinatorCallBroadcastingFailed(
+    CoordinatorCallBroadcastingFailedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallBroadcastingFailed] rejected (status is not Active)',
       );
       return;
     }

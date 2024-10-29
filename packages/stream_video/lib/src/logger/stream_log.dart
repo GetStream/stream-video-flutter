@@ -16,13 +16,25 @@ class StreamLog {
   Finder _finder = _defaultFinder;
 
   static StreamLog get instance => _instance;
+  static List<String> excludeTags = <String>[];
+  static List<String> includeOnlyTags = <String>[];
 
   set logger(StreamLogger logger) {
     _logger = logger;
   }
 
   set priority(Priority priority) {
-    _validator = (logPriority, _) => logPriority >= priority;
+    _validator = (logPriority, tag) {
+      if (excludeTags.isNotEmpty && excludeTags.contains(tag)) {
+        return false;
+      }
+
+      if (includeOnlyTags.isNotEmpty && !includeOnlyTags.contains(tag)) {
+        return false;
+      }
+
+      return logPriority.index >= priority.index;
+    };
   }
 
   set validator(IsLoggableValidator validator) {
