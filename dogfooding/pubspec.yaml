@@ -67,13 +67,14 @@ flutter:
     - assets/
   uses-material-design: true
 
-flutter_icons:
+flutter_launcher_icons:
   image_path: "assets/ic_launcher.png"
 
   android: true
   adaptive_icon_background: "assets/ic_launcher_background.png"
   adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
   ios: true
+  remove_alpha_ios: true
   web:
     generate: true
   windows:
