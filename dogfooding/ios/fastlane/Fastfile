@@ -56,7 +56,6 @@ platform :ios do
       app_identifier: "io.getstream.video.flutter.dogfooding",
       username: ENV["FASTLANE_APPLE_ID"],
       team_id: "EHV7XZLAHA",
-      version: flutter_version()["version_name"],
       platform: "ios",
     )
     
