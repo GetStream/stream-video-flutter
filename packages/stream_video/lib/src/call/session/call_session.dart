@@ -138,7 +138,6 @@ class CallSession extends Disposable {
         os = sfu_models.OS(
           name: 'iOS',
           version: deviceInfo.systemVersion,
-          architecture: SysInfo.rawKernelArchitecture,
         );
         device = sfu_models.Device(
           name: deviceInfo.model,

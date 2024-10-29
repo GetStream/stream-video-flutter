@@ -1496,8 +1496,6 @@ class Call {
           ', ringing: $ringing, notify: $notify, video: $video',
     );
 
-    await _init();
-
     final response = await _coordinatorClient.getCall(
       callCid: callCid,
       membersLimit: membersLimit,
@@ -1541,8 +1539,6 @@ class Call {
       () => '[getOrCreate] cid: $callCid, ringing: $ringing, '
           'memberIds: $memberIds',
     );
-
-    await _init();
 
     if (ringing) {
       await _streamVideo.state.setOutgoingCall(this);
