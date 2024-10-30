@@ -14,14 +14,16 @@ export 'open_api/video/coordinator/api.dart'
         Message,
         ModerationCustomActionEvent,
         ModerationFlaggedEvent,
-        ModerationMarkSafeEvent,
+        ModerationMarkReviewedEvent,
         ModerationPayload,
         Poll,
         PollOption,
         PollVote,
         Reaction,
         ReactionGroupResponse,
-        ReviewQueueItem;
+        ReviewQueueItem,
+        TypingIndicators,
+        TypingIndicatorsResponse;
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call/call_events.dart';
@@ -40,6 +42,7 @@ export 'src/logger/stream_logger.dart';
 export 'src/models/models.dart';
 export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';
+export 'src/retry/retry_policy.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
 export 'src/sfu/data/models/sfu_goaway_reason.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';

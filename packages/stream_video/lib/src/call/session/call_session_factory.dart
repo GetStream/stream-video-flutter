@@ -27,12 +27,14 @@ class CallSessionFactory {
     String? sessionId,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
-    required OnFullReconnectNeeded onFullReconnectNeeded,
+    required OnPeerConnectionIssue onPeerConnectionFailure,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
+
     final rtcConfig = _makeRtcConfig(credentials.iceServers) ??
         defaultRtcConfiguration(credentials.sfuServer.url);
+
     final sessionConfig = CallSessionConfig(
       sfuName: credentials.sfuServer.name,
       sfuUrl: credentials.sfuServer.url,
@@ -40,9 +42,11 @@ class CallSessionFactory {
       sfuToken: credentials.sfuToken,
       rtcConfig: rtcConfig,
     );
+
     final sfuName = sessionConfig.sfuName;
     final sfuUrl = sessionConfig.sfuUrl;
     _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
+
     return CallSession(
       sessionSeq: _sessionSeq++,
       callCid: callCid,
@@ -50,7 +54,7 @@ class CallSessionFactory {
       config: sessionConfig,
       stateManager: stateManager,
       sdpEditor: sdpEditor,
-      onFullReconnectNeeded: onFullReconnectNeeded,
+      onPeerConnectionIssue: onPeerConnectionFailure,
     );
   }
 

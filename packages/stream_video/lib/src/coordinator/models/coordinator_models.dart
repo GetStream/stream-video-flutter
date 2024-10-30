@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../models/call_credentials.dart';
-import '../../models/call_metadata.dart';
+import '../../../stream_video.dart';
 
 @immutable
 abstract class CoordinatorModel with EquatableMixin {
@@ -24,6 +23,7 @@ class CoordinatorJoined extends CoordinatorModel {
     required this.users,
     required this.duration,
     required this.reportingIntervalMs,
+    required this.ownCapabilities,
   });
 
   final bool wasCreated;
@@ -33,6 +33,7 @@ class CoordinatorJoined extends CoordinatorModel {
   final Map<String, CallUser> users;
   final String duration;
   final int reportingIntervalMs;
+  final List<CallPermission> ownCapabilities;
 
   @override
   List<Object?> get props => [

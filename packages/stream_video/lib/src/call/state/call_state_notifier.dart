@@ -35,10 +35,9 @@ class CallStateNotifier extends StateNotifier<CallState>
 
   @override
   set state(CallState value) {
-    _logger.v(() => '[setState] ${value.status} <= ${super.state.status}');
-    _logger.v(() => '[setState] ${value.callParticipants.map((it) {
-      return (it.sessionId, it.userId);
-    })}',);
+    if (value.status != super.state.status) {
+      _logger.v(() => '[setState] ${value.status} <= ${super.state.status}');
+    }
 
     super.state = value;
     callStateStream.value = value;

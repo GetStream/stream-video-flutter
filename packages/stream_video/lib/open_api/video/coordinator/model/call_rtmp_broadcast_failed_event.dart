@@ -10,13 +10,13 @@
 
 part of openapi.api;
 
-class CallRtmpBroadcastStartedEvent {
-  /// Returns a new [CallRtmpBroadcastStartedEvent] instance.
-  CallRtmpBroadcastStartedEvent({
+class CallRtmpBroadcastFailedEvent {
+  /// Returns a new [CallRtmpBroadcastFailedEvent] instance.
+  CallRtmpBroadcastFailedEvent({
     required this.callCid,
     required this.createdAt,
     required this.name,
-    this.type = 'call.rtmp_broadcast_started',
+    this.type = 'call.rtmp_broadcast_failed',
   });
 
   /// The unique identifier for a call (<type>:<id>)
@@ -28,11 +28,11 @@ class CallRtmpBroadcastStartedEvent {
   /// Name of the given RTMP broadcast
   String name;
 
-  /// The type of event: \"call.rtmp_broadcast_started\" in this case
+  /// The type of event: \"call.rtmp_broadcast_failed\" in this case
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRtmpBroadcastStartedEvent &&
+  bool operator ==(Object other) => identical(this, other) || other is CallRtmpBroadcastFailedEvent &&
     other.callCid == callCid &&
     other.createdAt == createdAt &&
     other.name == name &&
@@ -47,7 +47,7 @@ class CallRtmpBroadcastStartedEvent {
     (type.hashCode);
 
   @override
-  String toString() => 'CallRtmpBroadcastStartedEvent[callCid=$callCid, createdAt=$createdAt, name=$name, type=$type]';
+  String toString() => 'CallRtmpBroadcastFailedEvent[callCid=$callCid, createdAt=$createdAt, name=$name, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -58,10 +58,10 @@ class CallRtmpBroadcastStartedEvent {
     return json;
   }
 
-  /// Returns a new [CallRtmpBroadcastStartedEvent] instance and imports its values from
+  /// Returns a new [CallRtmpBroadcastFailedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallRtmpBroadcastStartedEvent? fromJson(dynamic value) {
+  static CallRtmpBroadcastFailedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -70,13 +70,13 @@ class CallRtmpBroadcastStartedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRtmpBroadcastStartedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRtmpBroadcastStartedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallRtmpBroadcastFailedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallRtmpBroadcastFailedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallRtmpBroadcastStartedEvent(
+      return CallRtmpBroadcastFailedEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         name: mapValueOfType<String>(json, r'name')!,
@@ -86,11 +86,11 @@ class CallRtmpBroadcastStartedEvent {
     return null;
   }
 
-  static List<CallRtmpBroadcastStartedEvent> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallRtmpBroadcastStartedEvent>[];
+  static List<CallRtmpBroadcastFailedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallRtmpBroadcastFailedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallRtmpBroadcastStartedEvent.fromJson(row);
+        final value = CallRtmpBroadcastFailedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -99,12 +99,12 @@ class CallRtmpBroadcastStartedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallRtmpBroadcastStartedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallRtmpBroadcastStartedEvent>{};
+  static Map<String, CallRtmpBroadcastFailedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallRtmpBroadcastFailedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRtmpBroadcastStartedEvent.fromJson(entry.value);
+        final value = CallRtmpBroadcastFailedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -113,14 +113,14 @@ class CallRtmpBroadcastStartedEvent {
     return map;
   }
 
-  // maps a json object with a list of CallRtmpBroadcastStartedEvent-objects as value to a dart map
-  static Map<String, List<CallRtmpBroadcastStartedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallRtmpBroadcastStartedEvent>>{};
+  // maps a json object with a list of CallRtmpBroadcastFailedEvent-objects as value to a dart map
+  static Map<String, List<CallRtmpBroadcastFailedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallRtmpBroadcastFailedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallRtmpBroadcastStartedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallRtmpBroadcastFailedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

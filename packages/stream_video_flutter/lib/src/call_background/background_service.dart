@@ -189,7 +189,6 @@ class StreamBackgroundService {
           await onButtonClick.call(call, ButtonType.cancel, serviceType);
         } else {
           if (serviceType == ServiceType.call) {
-            await call.leave();
             await call.reject(reason: CallRejectReason.cancel());
           } else if (serviceType == ServiceType.screenSharing) {
             await StreamVideoFlutterBackground.stopService(

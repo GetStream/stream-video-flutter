@@ -123,6 +123,7 @@ extension EnvelopeExt on open.CallResponse {
       transcribing: transcribing,
       custom: Map.unmodifiable(custom),
       rtmpIngress: ingress.rtmp.address,
+      joinAheadTimeSeconds: joinAheadTimeSeconds,
       startsAt: startsAt,
       createdAt: createdAt,
       endedAt: endedAt,
@@ -158,6 +159,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ring: StreamRingSettings(
         autoCancelTimeout: Duration(milliseconds: ring.autoCancelTimeoutMs),
         autoRejectTimeout: Duration(milliseconds: ring.incomingCallTimeoutMs),
+        missedCallTimeout: Duration(milliseconds: ring.missedCallTimeoutMs),
       ),
       audio: StreamAudioSettings(
         accessRequestEnabled: audio.accessRequestEnabled,
@@ -166,16 +168,19 @@ extension CallSettingsExt on open.CallSettingsResponse {
         defaultDevice: audio.defaultDevice.toRequestDomain(),
         micDefaultOn: audio.micDefaultOn,
         speakerDefaultOn: audio.speakerDefaultOn,
+        noiseCancellation: audio.noiseCancellation?.toSettingsDomain(),
       ),
       video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
         enabled: video.enabled,
         cameraDefaultOn: video.cameraDefaultOn,
         cameraFacing: video.cameraFacing.toRequestDomain(),
+        targetResolution: video.targetResolution.toSettingsDomain(),
       ),
       screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
         enabled: screensharing.enabled,
+        targetResolution: video.targetResolution.toSettingsDomain(),
       ),
       recording: StreamRecordingSettings(
         audioOnly: recording.audioOnly,
@@ -185,16 +190,22 @@ extension CallSettingsExt on open.CallSettingsResponse {
       broadcasting: StreamBroadcastingSettings(
         enabled: broadcasting.enabled,
         hls: broadcasting.hls.toSettingsDomain(),
+        rtmp: broadcasting.rtmp.toSettingsDomain(),
       ),
       transcription: StreamTranscriptionSettings(
         closedCaptionMode: transcription.closedCaptionMode,
         mode: transcription.mode.toSettingsDomain(),
+        languages: transcription.languages,
       ),
       backstage: StreamBackstageSettings(
         enabled: backstage.enabled,
       ),
       geofencing: StreamGeofencingSettings(
         names: geofencing.names,
+      ),
+      limits: StreamLimitsSettings(
+        maxParticipants: limits.maxParticipants,
+        maxDurationSeconds: limits.maxDurationSeconds,
       ),
     );
   }
@@ -234,12 +245,51 @@ extension on open.TranscriptionSettingsResponseModeEnum {
   }
 }
 
+extension on open.NoiseCancellationSettings {
+  StreamNoiceCancellingSettings toSettingsDomain() {
+    return StreamNoiceCancellingSettings(
+      mode: mode.toSettingsDomain(),
+    );
+  }
+}
+
+extension on open.NoiseCancellationSettingsModeEnum {
+  NoiceCancellationSettingsMode toSettingsDomain() {
+    if (this == open.NoiseCancellationSettingsModeEnum.autoOn) {
+      return NoiceCancellationSettingsMode.autoOn;
+    } else if (this == open.NoiseCancellationSettingsModeEnum.available) {
+      return NoiceCancellationSettingsMode.available;
+    } else {
+      return NoiceCancellationSettingsMode.disabled;
+    }
+  }
+}
+
 extension on open.HLSSettingsResponse {
   StreamHlsSettings toSettingsDomain() {
     return StreamHlsSettings(
       autoOn: autoOn,
       enabled: enabled,
       qualityTracks: List.unmodifiable(qualityTracks),
+    );
+  }
+}
+
+extension on open.RTMPSettingsResponse {
+  StreamRtmpSettings toSettingsDomain() {
+    return StreamRtmpSettings(
+      quality: quality,
+      enabled: enabled,
+    );
+  }
+}
+
+extension on open.TargetResolution {
+  StreamTargetResolution toSettingsDomain() {
+    return StreamTargetResolution(
+      height: height,
+      width: width,
+      bitrate: bitrate,
     );
   }
 }

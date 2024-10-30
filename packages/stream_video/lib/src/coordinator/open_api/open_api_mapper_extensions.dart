@@ -40,6 +40,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: call.cid),
           sessionId: event.sessionId,
           createdAt: event.createdAt,
+          members: event.members.map((it) => it.toCallMember()).toList(),
+          metadata: call.toCallMetadata(members: event.members),
+          callUser: event.user.toCallUser(),
         );
       case EventType.callRing:
         final event = callRing!;
@@ -60,6 +63,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           acceptedBy: acceptedBy,
           createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          user: event.user.toCallUser(),
         );
       case EventType.callRejected:
         final event = callRejected!;
@@ -67,6 +72,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           rejectedBy: event.user.toCallUser(),
           createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          user: event.user.toCallUser(),
         );
       case EventType.callUpdated:
         final event = callUpdated!;
@@ -122,6 +129,16 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           user: event.participant.user.toCallUser(),
           participant: event.participant.toCallParticipant(),
         );
+      case EventType.callSessionParticipantCountUpdated:
+        final event = callSessionParticipantCountUpdated!;
+
+        return CoordinatorCallSessionParticipantCountUpdatedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          anonymousParticipantCount: event.anonymousParticipantCount,
+          participantsCountByRole: event.participantsCountByRole,
+        );
       case EventType.callPermissionRequest:
         final event = callPermissionRequest!;
         return CoordinatorCallPermissionRequestEvent(
@@ -154,7 +171,13 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
+      case EventType.callRecordingFailed:
+        final event = callRecordingFailed!;
 
+        return CoordinatorCallRecordingFailedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
       case EventType.callBroadcastingStarted:
         final event = callBroadcastingStarted!;
         return CoordinatorCallBroadcastingStartedEvent(
@@ -165,6 +188,12 @@ extension WebsocketEventMapperExt on OpenApiEvent {
       case EventType.callBroadcastingStopped:
         final event = callBroadcastingStopped!;
         return CoordinatorCallBroadcastingStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
+      case EventType.callBroadcastingFailed:
+        final event = callBroadcastingFailed!;
+        return CoordinatorCallBroadcastingFailedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
@@ -233,6 +262,16 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
+      case EventType.callClosedCaption:
+        final event = callClosedCaption!;
+        return CoordinatorCallClosedCaptionEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          startTime: event.closedCaption.startTime,
+          endTime: event.closedCaption.endTime,
+          speakerId: event.closedCaption.speakerId,
+          text: event.closedCaption.text,
+        );
       case EventType.callNotification:
         // TODO: Handle event
         break;
@@ -240,9 +279,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         // TODO: Handle event
         break;
       case EventType.callRecordingReady:
-        // TODO: Handle event
-        break;
-      case EventType.callRecordingFailed:
         // TODO: Handle event
         break;
       case EventType.custom:
