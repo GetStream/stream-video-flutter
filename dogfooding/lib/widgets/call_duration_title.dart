@@ -27,7 +27,7 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
   void initState() {
     super.initState();
 
-    widget.call.get().then((value) {
+    widget.call.get(watch: false).then((value) {
       _startedAt = value.foldOrNull(
               success: (callData) =>
                   callData.data.metadata.session.startedAt ?? DateTime.now()) ??

@@ -289,4 +289,14 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
       }).toList(),
     );
   }
+
+  void setParticipantsCount({
+    required int totalCount,
+    required int anonymousCount,
+  }) {
+    state = state.copyWith(
+      participantCount: totalCount,
+      anonymousParticipantCount: anonymousCount,
+    );
+  }
 }

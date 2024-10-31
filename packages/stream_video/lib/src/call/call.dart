@@ -255,6 +255,9 @@ class Call {
     return _connectOptionsOverride ?? _connectOptions;
   }
 
+  /// It is better to pass the [connectOptions] to [join] method,
+  /// setting it directly has to be done carefully. Depending on the moment in the call lifecycle,
+  /// it might be overwritten by default configuration or it might be too late to apply the changes.
   set connectOptions(CallConnectOptions connectOptions) {
     if (state.value.status is CallStatusConnected) {
       _logger.w(
@@ -296,6 +299,7 @@ class Call {
   }
 
   void _observeEvents() {
+    _subscriptions.cancel(_idCoordEvents);
     _subscriptions.add(
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
@@ -312,7 +316,7 @@ class Call {
         (status) {
           if (status == InternetStatus.disconnected) {
             _logger.d(() => '[observeReconnectEvents] network disconnected');
-            _awaitNetworkAvailableFuture = awaitNetworkAvailable();
+            _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
             _reconnect(SfuReconnectionStrategy.fast);
           }
         },
@@ -412,11 +416,22 @@ class Call {
           }),
         );
         return _stateManager.coordinatorCallReaction(event);
+      case CoordinatorCallSessionParticipantCountUpdatedEvent _:
+        if (state.value.status.isConnected || state.value.status.isJoined) {
+          return;
+        }
+
+        return _stateManager.setParticipantsCount(
+          totalCount:
+              event.participantsCountByRole.values.fold(0, (a, b) => a + b),
+          anonymousCount: event.anonymousParticipantCount,
+        );
       default:
         break;
     }
   }
 
+  /// Accepts the incomming call.
   Future<Result<None>> accept() async {
     final state = this.state.value;
     _logger.i(() => '[accept] state: $state');
@@ -451,6 +466,7 @@ class Call {
     return result;
   }
 
+  /// Rejects the incomming call.
   Future<Result<None>> reject({CallRejectReason? reason}) async {
     final state = this.state.value;
     _logger.i(() => '[reject] state: $state');
@@ -473,6 +489,7 @@ class Call {
     return result;
   }
 
+  /// Ends the call for all participants.
   Future<Result<None>> end() async {
     final state = this.state.value;
     _logger.d(() => '[end] status: ${state.status}');
@@ -492,6 +509,9 @@ class Call {
     return result;
   }
 
+  /// Joins the call.
+  ///
+  /// - [connectOptions]: optional initial call configuration
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
   }) async {
@@ -744,8 +764,6 @@ class Call {
     return Result.success(credentials);
   }
 
-  /// Allows you to create a new call with the given parameters
-  /// and joins the call immediately.
   Future<Result<CallJoinedData>> _performJoinCallRequest({
     bool create = false,
     bool video = false,
@@ -865,7 +883,7 @@ class Call {
       _idSessionStats,
       session.stats.listen((stats) {
         _stats.emit(stats);
-        processStats(stats);
+        _processStats(stats);
       }),
     );
 
@@ -900,7 +918,7 @@ class Call {
     );
   }
 
-  void processStats(CallStats stats) {
+  void _processStats(CallStats stats) {
     var publisherStats =
         state.value.publisherStats ?? PeerConnectionStats.empty();
     var subscriberStats =
@@ -1006,6 +1024,11 @@ class Call {
           _stateManager.callPreferences.dropIfAloneInRingingFlow) {
         await leave();
       }
+    } else if (sfuEvent is SfuHealthCheckResponseEvent) {
+      _stateManager.setParticipantsCount(
+        totalCount: sfuEvent.participantCount.total,
+        anonymousCount: sfuEvent.participantCount.anonymous,
+      );
     }
 
     if (sfuEvent is SfuSocketDisconnected) {
@@ -1144,7 +1167,7 @@ class Call {
     );
   }
 
-  Future<InternetStatus> awaitNetworkAvailable() async {
+  Future<InternetStatus> _awaitNetworkAvailable() async {
     _logger.v(() => '[awaitNetworkAwailable] starting timer');
     final fastReconnectTimer = Timer(_fastReconnectDeadline, () {
       _logger.w(() => '[awaitNetworkAwailable] too late for fast reconnect');
@@ -1201,6 +1224,9 @@ class Call {
     return const Result.success(none);
   }
 
+  /// Leaves the call.
+  ///
+  /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) async {
     final state = this.state.value;
     _logger.i(() => '[leave] state: $state');
@@ -1250,6 +1276,10 @@ class Call {
     return [...?_session?.getTracks(trackIdPrefix)];
   }
 
+  /// Takes a picture of a VideoTrack at highest possible resolution
+  ///
+  /// - [participant]: the participant whose track to take a screenshot of
+  /// - [trackType]: optional type of track to take a screenshot of, defaults to [SfuTrackType.video]
   Future<ByteBuffer?> takeScreenshot(
     CallParticipantState participant, {
     SfuTrackType? trackType,
@@ -1450,6 +1480,7 @@ class Call {
     });
   }
 
+  /// Adds members to the current call.
   Future<Result<None>> addMembers(List<UserInfo> users) {
     return _coordinatorClient.addMembers(
       callCid: callCid,
@@ -1459,6 +1490,7 @@ class Call {
     );
   }
 
+  /// Removes members from the current call.
   Future<Result<None>> removeMembers(List<String> userIds) {
     return _coordinatorClient.removeMembers(
       callCid: callCid,
@@ -1479,18 +1511,28 @@ class Call {
     );
   }
 
-  /// Receives a call information. You can then use
-  /// the [CallReceivedData] in order to create a [Call] object.
+  /// Loads the information about the call.
+  ///
+  /// - [ringing]: If `true`, sends a VoIP notification, triggering the native call screen on iOS and Android.
+  /// - [notify]: If `true`, sends a standard push notification.
+  /// - [video]: Marks the call as a video call if `true`; otherwise, audio-only.
+  /// - [watch]:  If `true`, listens to coordinator events and updates call state accordingly.
+  /// - [membersLimit]: Sets the total number of members to return as part of the response.
   Future<Result<CallReceivedData>> get({
     int? membersLimit,
     bool ringing = false,
     bool notify = false,
     bool video = false,
+    bool watch = true,
   }) async {
     _logger.d(
       () => '[get] cid: $callCid, membersLimit: $membersLimit'
           ', ringing: $ringing, notify: $notify, video: $video',
     );
+
+    if (watch) {
+      _observeEvents();
+    }
 
     final response = await _coordinatorClient.getCall(
       callCid: callCid,
@@ -1518,14 +1560,19 @@ class Call {
     );
   }
 
-  /// Receives a call or creates it with given information. You can then use
-  /// the [CallReceivedOrCreatedData] in order to create a [Call] object.
+  /// Loads the information about the call and creates it if it doesn't exist.
+  ///
+  /// - [ringing]: If `true`, sends a VoIP notification, triggering the native call screen on iOS and Android.
+  /// - [notify]: If `true`, sends a standard push notification.
+  /// - [video]: Marks the call as a video call if `true`; otherwise, audio-only.
+  /// - [watch]:  If `true`, listens to coordinator events and updates call state accordingly.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     bool ringing = false,
     bool video = false,
-    String? team,
+    bool watch = true,
     bool? notify,
+    String? team,
     DateTime? startsAt,
     StreamBackstageSettings? backstage,
     StreamLimitsSettings? limits,
@@ -1535,6 +1582,10 @@ class Call {
       () => '[getOrCreate] cid: $callCid, ringing: $ringing, '
           'memberIds: $memberIds',
     );
+
+    if (watch) {
+      _observeEvents();
+    }
 
     if (ringing) {
       await _streamVideo.state.setOutgoingCall(this);
