@@ -431,7 +431,7 @@ class Call {
     }
   }
 
-  /// Accepts the incomming call.
+  /// Accepts the incoming call.
   Future<Result<None>> accept() async {
     final state = this.state.value;
     _logger.i(() => '[accept] state: $state');
