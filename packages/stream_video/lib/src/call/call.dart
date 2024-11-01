@@ -466,7 +466,7 @@ class Call {
     return result;
   }
 
-  /// Rejects the incomming call.
+  /// Rejects the incoming call.
   Future<Result<None>> reject({CallRejectReason? reason}) async {
     final state = this.state.value;
     _logger.i(() => '[reject] state: $state');
