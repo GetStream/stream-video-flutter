@@ -374,6 +374,7 @@ extension CallSessionResponseExt on open.CallSessionResponse {
       endedAt: endedAt,
       liveStartedAt: liveStartedAt,
       liveEndedAt: liveEndedAt,
+      timerEndsAt: timerEndsAt,
     );
   }
 }

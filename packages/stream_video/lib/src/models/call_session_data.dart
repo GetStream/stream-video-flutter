@@ -16,6 +16,7 @@ class CallSessionData with EquatableMixin {
     this.liveStartedAt,
     this.endedAt,
     this.liveEndedAt,
+    this.timerEndsAt,
   });
 
   final String id;
@@ -27,6 +28,7 @@ class CallSessionData with EquatableMixin {
   final DateTime? endedAt;
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
+  final DateTime? timerEndsAt;
 
   @override
   List<Object?> get props => [
@@ -35,6 +37,7 @@ class CallSessionData with EquatableMixin {
         liveStartedAt,
         liveStartedAt,
         liveEndedAt,
+        timerEndsAt,
       ];
 }
 
