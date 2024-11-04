@@ -11,6 +11,8 @@ class CallConnectOptions with EquatableMixin {
     this.audioInputDevice,
     this.speakerDefaultOn = false,
     this.cameraFacingMode = FacingMode.user,
+    this.targetResolution,
+    this.screenShareTargetResolution,
   });
 
   final TrackOption camera;
@@ -22,6 +24,8 @@ class CallConnectOptions with EquatableMixin {
   final bool speakerDefaultOn;
 
   final FacingMode cameraFacingMode;
+  final StreamTargetResolution? targetResolution;
+  final StreamTargetResolution? screenShareTargetResolution;
 
   CallConnectOptions copyWith({
     TrackOption? camera,
@@ -31,6 +35,8 @@ class CallConnectOptions with EquatableMixin {
     RtcMediaDevice? audioInputDevice,
     FacingMode? cameraFacingMode,
     bool? speakerDefaultOn,
+    StreamTargetResolution? targetResolution,
+    StreamTargetResolution? screenShareTargetResolution,
   }) {
     return CallConnectOptions(
       camera: camera ?? this.camera,
@@ -40,6 +46,9 @@ class CallConnectOptions with EquatableMixin {
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       cameraFacingMode: cameraFacingMode ?? this.cameraFacingMode,
       speakerDefaultOn: speakerDefaultOn ?? this.speakerDefaultOn,
+      targetResolution: targetResolution ?? this.targetResolution,
+      screenShareTargetResolution:
+          screenShareTargetResolution ?? this.screenShareTargetResolution,
     );
   }
 
@@ -52,6 +61,8 @@ class CallConnectOptions with EquatableMixin {
       audioInputDevice: other.audioInputDevice,
       cameraFacingMode: other.cameraFacingMode,
       speakerDefaultOn: other.speakerDefaultOn,
+      targetResolution: other.targetResolution,
+      screenShareTargetResolution: other.screenShareTargetResolution,
     );
   }
 
@@ -64,6 +75,8 @@ class CallConnectOptions with EquatableMixin {
         audioInputDevice,
         cameraFacingMode,
         speakerDefaultOn,
+        targetResolution,
+        screenShareTargetResolution,
       ];
 
   @override
@@ -76,6 +89,8 @@ class CallConnectOptions with EquatableMixin {
         ' audioInput: $audioInputDevice, '
         ' cameraFacingMode: $cameraFacingMode, '
         ' speakerDefaultOn: $speakerDefaultOn'
+        ' targetResolution: $targetResolution'
+        ' screenShareTargetResolution: $screenShareTargetResolution'
         '}';
   }
 }
