@@ -1342,6 +1342,8 @@ class Call {
           ? FacingMode.user
           : FacingMode.environment,
       speakerDefaultOn: settings.audio.speakerDefaultOn,
+      targetResolution: settings.video.targetResolution,
+      screenShareTargetResolution: settings.screenShare.targetResolution,
     );
   }
 
@@ -1350,9 +1352,13 @@ class Call {
     await _applyCameraOption(
       _connectOptions.camera,
       _connectOptions.cameraFacingMode,
+      _connectOptions.targetResolution,
     );
     await _applyMicrophoneOption(_connectOptions.microphone);
-    await _applyScreenShareOption(_connectOptions.screenShare);
+    await _applyScreenShareOption(
+      _connectOptions.screenShare,
+      _connectOptions.screenShareTargetResolution,
+    );
 
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
@@ -1374,6 +1380,7 @@ class Call {
   Future<void> _applyCameraOption(
     TrackOption cameraOption,
     FacingMode facingMode,
+    StreamTargetResolution? targetResolution,
   ) async {
     if (cameraOption is TrackProvided) {
       await _setLocalTrack(cameraOption.track);
@@ -1382,6 +1389,8 @@ class Call {
         enabled: true,
         constraints: CameraConstraints(
           facingMode: facingMode,
+          params: targetResolution?.toVideoParams() ??
+              RtcVideoParametersPresets.h720_16x9,
         ),
       );
     }
@@ -1395,11 +1404,22 @@ class Call {
     }
   }
 
-  Future<void> _applyScreenShareOption(TrackOption screenShareOption) async {
+  Future<void> _applyScreenShareOption(
+    TrackOption screenShareOption,
+    StreamTargetResolution? targetResolution,
+  ) async {
     if (screenShareOption is TrackProvided) {
       await _setLocalTrack(screenShareOption.track);
     } else if (screenShareOption is TrackEnabled) {
-      await setScreenShareEnabled(enabled: true);
+      await setScreenShareEnabled(
+        enabled: true,
+        constraints: ScreenShareConstraints(
+          params: targetResolution?.toVideoParams(
+                defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
+              ) ??
+              RtcVideoParametersPresets.h1080_16x9,
+        ),
+      );
     }
   }
 
@@ -1893,9 +1913,17 @@ class Call {
       return Result.error('Missing permission to share screen for the user');
     }
 
+    final updatedConstraints =
+        (constraints ?? const ScreenShareConstraints()).copyWith(
+      params: constraints?.params ??
+          _connectOptions.screenShareTargetResolution?.toVideoParams(
+            defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
+          ),
+    );
+
     final result = await _session?.setScreenShareEnabled(
           enabled,
-          constraints: constraints,
+          constraints: updatedConstraints,
         ) ??
         Result.error('Call session is null, cannot start screen share');
 

@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 import '../../open_api/video/coordinator/api.dart';
+import '../webrtc/model/rtc_video_dimension.dart';
+import '../webrtc/model/rtc_video_encoding.dart';
+import '../webrtc/model/rtc_video_parameters.dart';
 
 class CallSettings with EquatableMixin {
   const CallSettings({
@@ -123,8 +126,10 @@ class StreamVideoSettings extends MediaSettings {
     this.enabled = false,
     this.cameraDefaultOn = true,
     this.cameraFacing = VideoSettingsRequestCameraFacingEnum.front,
-    this.targetResolution =
-        const StreamTargetResolution(height: 1280, width: 720),
+    this.targetResolution = const StreamTargetResolution(
+      height: 720,
+      width: 1280,
+    ),
   });
 
   final bool enabled;
@@ -357,6 +362,44 @@ class StreamHlsSettings extends AbstractSettings {
   List<Object?> get props => [enabled, autoOn, qualityTracks];
 }
 
+class StreamTargetResolution extends AbstractSettings {
+  const StreamTargetResolution({
+    required this.height,
+    required this.width,
+    this.bitrate,
+  });
+
+  final int height;
+  final int width;
+  final int? bitrate;
+
+  @override
+  List<Object?> get props => [height, width, bitrate];
+
+  TargetResolution toOpenDto() {
+    return TargetResolution(
+      height: height,
+      width: width,
+      bitrate: bitrate,
+    );
+  }
+
+  RtcVideoParameters toVideoParams({
+    int defaultBitrate = RtcVideoParametersPresets.k720pBitrate,
+  }) {
+    return RtcVideoParameters(
+      dimension: RtcVideoDimension(
+        width: width,
+        height: height,
+      ),
+      encoding: RtcVideoEncoding(
+        maxFramerate: 30,
+        maxBitrate: bitrate ?? defaultBitrate,
+      ),
+    );
+  }
+}
+
 class StreamRtmpSettings extends AbstractSettings {
   const StreamRtmpSettings({
     required this.quality,
@@ -483,28 +526,5 @@ enum NoiceCancellationSettingsMode {
       case NoiceCancellationSettingsMode.autoOn:
         return NoiseCancellationSettingsModeEnum.autoOn;
     }
-  }
-}
-
-class StreamTargetResolution extends AbstractSettings {
-  const StreamTargetResolution({
-    required this.height,
-    required this.width,
-    this.bitrate,
-  });
-
-  final int height;
-  final int width;
-  final int? bitrate;
-
-  @override
-  List<Object?> get props => [height, width, bitrate];
-
-  TargetResolution toOpenDto() {
-    return TargetResolution(
-      height: height,
-      width: width,
-      bitrate: bitrate,
-    );
   }
 }
