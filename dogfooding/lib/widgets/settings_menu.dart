@@ -11,6 +11,23 @@ CallReactionData _raisedHandReaction = const CallReactionData(
   icon: '✋',
 );
 
+enum IncomingVideoQuality {
+  auto('Auto'),
+  p2160('2160p'),
+  p1080('1080p'),
+  p720('720p'),
+  p480('480p'),
+  p144('144p'),
+  off('Off');
+
+  final String name;
+
+  const IncomingVideoQuality(this.name);
+
+  @override
+  String toString() => name;
+}
+
 class SettingsMenu extends StatefulWidget {
   const SettingsMenu({
     required this.call,
@@ -40,7 +57,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   bool showAudioOutputs = false;
   bool showAudioInputs = false;
-  bool get showMainSettings => !showAudioOutputs && !showAudioInputs;
+  bool showIncomingQuality = false;
+  bool get showMainSettings =>
+      !showAudioOutputs && !showAudioInputs && !showIncomingQuality;
 
   @override
   void initState() {
@@ -83,11 +102,15 @@ class _SettingsMenuState extends State<SettingsMenu> {
         if (showMainSettings) ..._buildMenuItems(),
         if (showAudioOutputs) ..._buildAudioOutputsMenu(),
         if (showAudioInputs) ..._buildAudioInputsMenu(),
+        if (showIncomingQuality) ..._buildIncomingQualityMenu(),
       ]),
     );
   }
 
   List<Widget> _buildMenuItems() {
+    final incomingVideoQuality = getIncomingVideoQuality(
+        widget.call.dynascaleManager.incomingVideoSettings);
+
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -153,6 +176,24 @@ class _SettingsMenuState extends State<SettingsMenu> {
         onPressed: () {
           setState(() {
             showAudioInputs = true;
+          });
+        },
+      ),
+      const SizedBox(height: 16),
+      StandardActionMenuItem(
+        icon: Icons.high_quality_sharp,
+        label: 'Incoming video quality',
+        trailing: Text(
+          incomingVideoQuality.name,
+          style: TextStyle(
+            color: incomingVideoQuality != IncomingVideoQuality.auto
+                ? AppColorPalette.appGreen
+                : null,
+          ),
+        ),
+        onPressed: () {
+          setState(() {
+            showIncomingQuality = true;
           });
         },
       )
@@ -229,6 +270,87 @@ class _SettingsMenuState extends State<SettingsMenu> {
           .insertBetween(const SizedBox(height: 16)),
     ];
   }
+
+  List<Widget> _buildIncomingQualityMenu() {
+    return [
+      GestureDetector(
+        onTap: () {
+          setState(() {
+            showIncomingQuality = false;
+          });
+        },
+        child: const Align(
+          alignment: Alignment.centerLeft,
+          child: Icon(Icons.arrow_back, size: 24),
+        ),
+      ),
+      const SizedBox(height: 16),
+      ...IncomingVideoQuality.values
+          .map(
+            (quality) {
+              return StandardActionMenuItem(
+                icon: Icons.video_settings,
+                label: quality.name,
+                color: getIncomingVideoQuality(widget
+                            .call.dynascaleManager.incomingVideoSettings) ==
+                        quality
+                    ? AppColorPalette.appGreen
+                    : null,
+                onPressed: () {
+                  if (quality == IncomingVideoQuality.off) {
+                    widget.call.setIncomingVideoEnabled(false);
+                  } else {
+                    widget.call.setPreferredIncomingVideoResolution(
+                        getIncomingVideoResolution(quality));
+                  }
+                },
+              );
+            },
+          )
+          .cast()
+          .insertBetween(const SizedBox(height: 16)),
+    ];
+  }
+
+  VideoResolution? getIncomingVideoResolution(IncomingVideoQuality quality) {
+    switch (quality) {
+      case IncomingVideoQuality.auto:
+      case IncomingVideoQuality.off:
+        return null;
+      case IncomingVideoQuality.p2160:
+        return VideoResolution(width: 3840, height: 2160);
+      case IncomingVideoQuality.p1080:
+        return VideoResolution(width: 1920, height: 1080);
+      case IncomingVideoQuality.p720:
+        return VideoResolution(width: 1280, height: 720);
+      case IncomingVideoQuality.p480:
+        return VideoResolution(width: 640, height: 480);
+      case IncomingVideoQuality.p144:
+        return VideoResolution(width: 256, height: 144);
+    }
+  }
+
+  IncomingVideoQuality getIncomingVideoQuality(IncomingVideoSettings? setting) {
+    final preferredResolution = setting?.preferredResolution;
+    if (setting?.enabled == false) {
+      return IncomingVideoQuality.off;
+    }
+    if (preferredResolution == null) {
+      return IncomingVideoQuality.auto;
+    } else if (preferredResolution.height >= 2160) {
+      return IncomingVideoQuality.p2160;
+    } else if (preferredResolution.height >= 1080) {
+      return IncomingVideoQuality.p1080;
+    } else if (preferredResolution.height >= 720) {
+      return IncomingVideoQuality.p720;
+    } else if (preferredResolution.height >= 480) {
+      return IncomingVideoQuality.p480;
+    } else if (preferredResolution.height >= 144) {
+      return IncomingVideoQuality.p144;
+    } else {
+      return IncomingVideoQuality.auto;
+    }
+  }
 }
 
 class SettingsMenuItem extends StatelessWidget {
@@ -265,10 +387,12 @@ class StandardActionMenuItem extends StatelessWidget {
     required this.label,
     this.color,
     this.onPressed,
+    this.trailing,
   });
 
   final IconData icon;
   final String label;
+  final Widget? trailing;
   final Color? color;
   final void Function()? onPressed;
 
@@ -285,8 +409,16 @@ class StandardActionMenuItem extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: 8),
-          Text(label,
-              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
+          if (trailing != null) trailing!,
+          const SizedBox(width: 8),
         ],
       ),
     );

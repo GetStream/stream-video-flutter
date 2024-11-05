@@ -30,6 +30,7 @@ export 'src/call/call_events.dart';
 export 'src/call/call_reject_reason.dart';
 export 'src/call/call_ringing_state.dart';
 export 'src/call/call_type.dart';
+export 'src/call/session/dynascale_manager.dart';
 export 'src/call_state.dart';
 export 'src/coordinator/coordinator_client.dart';
 export 'src/coordinator/models/coordinator_events.dart';

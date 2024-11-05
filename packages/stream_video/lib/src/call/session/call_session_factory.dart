@@ -9,6 +9,7 @@ import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
+import 'dynascale_manager.dart';
 
 int _sessionSeq = 1;
 
@@ -27,6 +28,7 @@ class CallSessionFactory {
     String? sessionId,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
+    required DynascaleManager dynascaleManager,
     required OnPeerConnectionIssue onPeerConnectionFailure,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
@@ -53,6 +55,7 @@ class CallSessionFactory {
       sessionId: finalSessionId,
       config: sessionConfig,
       stateManager: stateManager,
+      dynascaleManager: dynascaleManager,
       sdpEditor: sdpEditor,
       onPeerConnectionIssue: onPeerConnectionFailure,
     );
