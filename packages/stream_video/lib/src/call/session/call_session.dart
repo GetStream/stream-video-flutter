@@ -408,12 +408,10 @@ class CallSession extends Disposable {
     _logger.d(() => '[close] code: $code, closeReason: $closeReason');
 
     await _stats.close();
-    // await _saBuffer.cancel();
     await _eventsSubscription?.cancel();
     _eventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
-    // await _currentTrackSubscriptionsSubject.close();
 
     await sfuWS.disconnect(
       code.value,
