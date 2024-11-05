@@ -766,7 +766,7 @@ class StreamVideo extends Disposable {
       callType: callType,
       id: id,
     );
-    final callResult = await call.get();
+    final callResult = await call.get(watch: false);
 
     return callResult.fold(
       failure: (failure) {

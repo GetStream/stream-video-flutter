@@ -1,13 +1,28 @@
 ## Unreleased
 
+This release introduces a major rework of the join/reconnect flow in the Call class to support Reconnect V2, enhancing reconnection handling across various scenarios. Most updates are within the internals of the Call class, though some changes are outward-facing, including a few breaking changes.
+
+🔄 Changed
+* `Call.reject()` method will now always call `Call.leave()` method internally.
+
+🚧 Breaking changes
+* Removed the deprecated `Call.joinLobby()` method.
+* The `maxDuration` and `maxParticipants` parameters of `Call.getOrCreate()` are now combined into the `StreamLimitsSettings? limits` parameter.
+
 🔄 Dependency updates
-* Updated firebase dependencies to fix Xcode 16 build issues
+* Updated Firebase dependencies to resolve Xcode 16 build issues.
 
 ✅ Added
-* Added `registerPushDevice` optional parameter (default as true) to `StreamVideo.connect()` method that can prevent automatic push token registration.
+* Added the `registerPushDevice` optional parameter (default is `true`) to the `StreamVideo.connect()` method,allowing the prevention of automatic push token registration.
+* Added `participantCount` and `anonymousParticipantCount` to `CallState` reflecting the current number of participants in the call.
+* Introduced the `watch` parameter to `Call.get()` and `Call.getOrCreate()` methods (default is `true`). When set to `true`, this enables the `Call` to listen for coordinator events and update its state accordingly, even before the call is joined (`Call.join()`).
+* Added support for `targetResolution` setting set on the Dashboard to determine the max resolution the video stream.
 
 🐞 Fixed
-* Automatic push token registration done by `StreamVideo` now stores registered token in `SharedPreferences` and will now only perform API call when token changes.
+* Automatic push token registration by `StreamVideo` now stores registered token in `SharedPreferences`, performing an API call only when the token changes.
+* Fixed premature ringing termination issues.
+* Resolved issues where ringing would not end when the caller terminates the call in an app-terminated state.
+* Fixed issue with call not ending in some cases when only one participant is left and `dropIfAloneInRingingFlow` is set to `true`.
 
 ## 0.5.5
 

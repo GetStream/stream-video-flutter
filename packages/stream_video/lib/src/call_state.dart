@@ -41,6 +41,8 @@ class CallState extends Equatable {
       localStats: null,
       latencyHistory: const [],
       blockedUserIds: const [],
+      participantCount: 0,
+      anonymousParticipantCount: 0,
       custom: const {},
     );
   }
@@ -76,6 +78,8 @@ class CallState extends Equatable {
     required this.localStats,
     required this.latencyHistory,
     required this.blockedUserIds,
+    required this.participantCount,
+    required this.anonymousParticipantCount,
     required this.custom,
   });
 
@@ -108,6 +112,8 @@ class CallState extends Equatable {
   final LocalStats? localStats;
   final List<int> latencyHistory;
   final List<String> blockedUserIds;
+  final int participantCount;
+  final int anonymousParticipantCount;
   final Map<String, Object> custom;
 
   String get callId => callCid.id;
@@ -154,6 +160,8 @@ class CallState extends Equatable {
     LocalStats? localStats,
     List<int>? latencyHistory,
     List<String>? blockedUserIds,
+    int? participantCount,
+    int? anonymousParticipantCount,
     Map<String, Object>? custom,
   }) {
     return CallState._(
@@ -186,6 +194,9 @@ class CallState extends Equatable {
       localStats: localStats ?? this.localStats,
       latencyHistory: latencyHistory ?? this.latencyHistory,
       blockedUserIds: blockedUserIds ?? this.blockedUserIds,
+      participantCount: participantCount ?? this.participantCount,
+      anonymousParticipantCount:
+          anonymousParticipantCount ?? this.anonymousParticipantCount,
       custom: custom ?? this.custom,
     );
   }
@@ -244,6 +255,8 @@ class CallState extends Equatable {
         localStats,
         latencyHistory,
         blockedUserIds,
+        participantCount,
+        anonymousParticipantCount,
         custom,
       ];
 
