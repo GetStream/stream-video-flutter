@@ -50,8 +50,6 @@ class DynascaleManager {
 
   final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
       _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
-  // final BehaviorSubject<Map<String, VideoTrackSubscriptionOverride>>
-  //     _videoTrackSubscriptionsOverrides = BehaviorSubject.seeded({});
 
   final BehaviorSubject<IncomingVideoSettings?>
       _videoTrackSubscriptionsOverrides = BehaviorSubject.seeded(null);
