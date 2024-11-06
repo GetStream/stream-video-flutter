@@ -1,4 +1,4 @@
-## Unreleased
+## 0.6.0
 
 🔄 Dependency updates
 * Updated firebase dependencies to fix Xcode 16 build issues

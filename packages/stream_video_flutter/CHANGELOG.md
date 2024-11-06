@@ -1,4 +1,4 @@
-## Unreleased
+## 0.6.0
 
 This release introduces a major rework of the join/reconnect flow in the Call class to support Reconnect V2, enhancing reconnection handling across various scenarios. Most updates are within the internals of the Call class, though some changes are outward-facing, including a few breaking changes.
 
