@@ -191,7 +191,8 @@ class Call {
         _streamVideo = streamVideo,
         _preferences = preferences,
         _retryPolicy = retryPolicy,
-        _credentials = credentials {
+        _credentials = credentials,
+        dynascaleManager = DynascaleManager(stateManager: stateManager) {
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
 
     if (stateManager.callState.isRingingFlow) {
@@ -213,6 +214,7 @@ class Call {
   final CallSessionFactory _sessionFactory;
   final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
+  final DynascaleManager dynascaleManager;
 
   CallCredentials? _credentials;
   CallSession? _session;
@@ -640,6 +642,7 @@ class Call {
           sessionId: performingRejoin ? null : _previousSession?.sessionId,
           credentials: _credentials!,
           stateManager: _stateManager,
+          dynascaleManager: dynascaleManager,
           onPeerConnectionFailure: (pc) async {
             if (state.value.status is! CallStatusReconnecting) {
               await pc.pc.restartIce().onError((_, __) {
@@ -647,6 +650,11 @@ class Call {
               });
             }
           },
+        );
+
+        dynascaleManager.init(
+          sfuClient: _session!.sfuClient,
+          sessionId: _session!.sessionId,
         );
       } else {
         _logger.v(
@@ -1259,6 +1267,7 @@ class Call {
     _cancelables.cancelAll();
     await _session?.dispose();
     _session = null;
+    await dynascaleManager.dispose();
     await _streamVideo.state.setActiveCall(null);
     await _streamVideo.state.setOutgoingCall(null);
     _logger.v(() => '[clear] completed');
@@ -1789,7 +1798,7 @@ class Call {
   /// can be override by passing a [track] to the function.
   ///
   /// Note: The user calling this function must have permission to perform the
-  ///  action else it will result in an error.
+  /// action else it will result in an error.
   Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) {
     return _permissionsManager.muteOthers(track: track);
   }
@@ -1798,7 +1807,7 @@ class Call {
   /// calling the function.
   ///
   /// Note: The user calling this function must have permission to perform the
-  //  action else it will result in an error.
+  /// action else it will result in an error.
   Future<Result<None>> muteAllUsers() {
     return _permissionsManager.muteAllUsers();
   }
@@ -2050,15 +2059,7 @@ class Call {
   Future<Result<None>> setSubscriptions(
     List<SubscriptionChange> changes,
   ) async {
-    final result = await _session?.setSubscriptions(changes) ??
-        Result.error('Session is null');
-
-    // TODO: Verify this is not needed
-    // if (result.isSuccess) {
-    //   _stateManager
-    //       .participantUpdateSubscriptions();
-    // }
-
+    final result = await dynascaleManager.setSubscriptions(changes);
     return result;
   }
 
@@ -2075,24 +2076,9 @@ class Call {
       trackTypes: trackTypes,
     );
 
-    final result = await _session?.setSubscriptions([
-          change,
-        ]) ??
-        Result.error('Session is null');
-
-    // TODO: Verify this is not needed
-    // if (result.isSuccess) {
-    //   _stateManager.participantUpdateSubscriptions(
-    //     UpdateSubscriptions([
-    //       UpdateSubscription(
-    //         userId: userId,
-    //         sessionId: sessionId,
-    //         trackIdPrefix: trackIdPrefix,
-    //         trackType: trackTypes.keys.first,
-    //       ),
-    //     ]),
-    //   );
-    // }
+    final result = await dynascaleManager.setSubscriptions([
+      change,
+    ]);
 
     return result;
   }
@@ -2104,16 +2090,15 @@ class Call {
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
   }) async {
-    final result = await _session?.updateSubscription(
-          SubscriptionChange.update(
-            userId: userId,
-            sessionId: sessionId,
-            trackIdPrefix: trackIdPrefix,
-            trackType: trackType,
-            videoDimension: videoDimension,
-          ),
-        ) ??
-        Result.error('Session is null');
+    final result = await dynascaleManager.updateSubscription(
+      SubscriptionChange.update(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+        videoDimension: videoDimension,
+      ),
+    );
 
     if (result.isSuccess) {
       _stateManager.participantUpdateSubscription(
@@ -2135,15 +2120,14 @@ class Call {
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
   }) async {
-    final result = await _session?.updateSubscription(
-          SubscriptionChange.update(
-            userId: userId,
-            sessionId: sessionId,
-            trackIdPrefix: trackIdPrefix,
-            trackType: trackType,
-          ),
-        ) ??
-        Result.error('Session is null');
+    final result = await dynascaleManager.updateSubscription(
+      SubscriptionChange.update(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+      ),
+    );
 
     if (result.isSuccess) {
       _stateManager.participantRemoveSubscription(
@@ -2155,6 +2139,43 @@ class Call {
     }
 
     return result;
+  }
+
+  /// Specifies the preference for incoming video resolution. The preference will
+  /// be matched as closely as possible, but the actual resolution will depend
+  /// on the video source quality and client network conditions. This will enable
+  /// incoming video if it was previously disabled.
+  ///
+  /// [resolution] is the preferred resolution, or `null` to clear the preference.
+  /// [sessionIds] optionally specifies the session IDs of the participants this
+  /// preference affects. By default, it affects all participants.
+  Future<Result<None>> setPreferredIncomingVideoResolution(
+    VideoResolution? resolution, {
+    List<String>? sessionIds,
+  }) async {
+    dynascaleManager.setVideoTrackSubscriptionOverrides(
+      override: resolution != null
+          ? VideoTrackSubscriptionOverride(
+              dimension: RtcVideoDimension(
+                width: resolution.width,
+                height: resolution.height,
+              ),
+            )
+          : null,
+      sessionIds: sessionIds,
+    );
+
+    return dynascaleManager.applyTrackSubscriptions();
+  }
+
+  /// Enables or disables incoming video from all remote call participants,
+  /// and removes any preference for preferred resolution.
+  Future<Result<None>> setIncomingVideoEnabled(bool enabled) async {
+    dynascaleManager.setVideoTrackSubscriptionOverrides(
+      override: VideoTrackSubscriptionOverride(enabled: enabled),
+    );
+
+    return dynascaleManager.applyTrackSubscriptions();
   }
 
   Future<Result<QueriedMembers>> queryMembers({

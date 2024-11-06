@@ -50,6 +50,7 @@ class CallSession extends Disposable {
     required this.sessionId,
     required this.config,
     required this.stateManager,
+    required this.dynascaleManager,
     required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
     this.joinResponseTimeout = const Duration(seconds: 5),
@@ -79,17 +80,15 @@ class CallSession extends Disposable {
   final String sessionId;
   final CallSessionConfig config;
   final CallStateNotifier stateManager;
+  final DynascaleManager dynascaleManager;
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   final OnPeerConnectionIssue onPeerConnectionIssue;
 
   final Duration joinResponseTimeout;
-  final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
-      _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
 
   RtcManager? rtcManager;
-
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
   StreamSubscription<Map<String, dynamic>>? _statsSubscription;
@@ -101,12 +100,6 @@ class CallSession extends Disposable {
   late final _stats = MutableSharedEmitterImpl<CallStats>();
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
-
-  late final _saBuffer = DebounceBuffer<SubscriptionChange, Result<None>>(
-    duration: _debounceDuration,
-    onBuffered: updateSubscriptions,
-    onCancel: () => Result.error('SubscriptionChange cancelled'),
-  );
 
   late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
     duration: _debounceDuration,
@@ -191,8 +184,11 @@ class CallSession extends Disposable {
     int? reconnectAttempts,
   }) {
     final announcedTracks = rtcManager?.getPublisherTrackInfos().toDTO();
-    final subscribedTracks =
-        _currentTrackSubscriptionsSubject.value.values.toList().toDTO();
+    final subscribedTracks = dynascaleManager
+        .getTrackSubscriptions(ignoreOverride: true)
+        .values
+        .toList()
+        .toDTO();
 
     return sfu_events.ReconnectDetails(
       strategy: strategy.toDto(),
@@ -412,12 +408,10 @@ class CallSession extends Disposable {
     _logger.d(() => '[close] code: $code, closeReason: $closeReason');
 
     await _stats.close();
-    await _saBuffer.cancel();
     await _eventsSubscription?.cancel();
     _eventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
-    await _currentTrackSubscriptionsSubject.close();
 
     await sfuWS.disconnect(
       code.value,
@@ -803,79 +797,6 @@ class CallSession extends Disposable {
     return const Result.success(none);
   }
 
-  Future<Result<None>> setSubscriptions(
-    List<SubscriptionChange> subscriptionChanges,
-  ) async {
-    _logger.d(
-      () => '[setSubscriptions] subscriptionChanges: $subscriptionChanges',
-    );
-
-    final participants = stateManager.callState.callParticipants;
-    final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
-    final subscriptions = <String, SfuSubscriptionDetails>{
-      ...participants.getSubscriptions(exclude: exclude),
-    };
-    _logger.v(() => '[setSubscriptions] source: $subscriptions');
-    for (final change in subscriptionChanges) {
-      final changeSubscriptions = change.getSubscriptions();
-      subscriptions.addAll(changeSubscriptions);
-    }
-
-    _logger.v(() => '[setSubscriptions] updated: $subscriptions');
-    final result = await sfuClient.update(
-      sessionId: sessionId,
-      subscriptions: subscriptions.values,
-    );
-
-    _currentTrackSubscriptionsSubject.add(subscriptions);
-
-    _logger.v(() => '[setSubscriptions] result: $result');
-    return result;
-  }
-
-  Future<Result<None>> updateSubscription(
-    SubscriptionChange subscriptionChange,
-  ) async {
-    _logger.d(
-      () => '[updateSubscription] subscriptionChange: $subscriptionChange',
-    );
-
-    if (!_saBuffer.isClosed) {
-      return _saBuffer.post(subscriptionChange);
-    }
-
-    //Ignore the subscription change if the buffer is closed
-    return const Result.success(none);
-  }
-
-  Future<Result<None>> updateSubscriptions(
-    List<SubscriptionChange> changes,
-  ) async {
-    _logger.d(() => '[updateSubscriptions] changes: $changes');
-    final participants = stateManager.callState.callParticipants;
-    final subscriptions = <String, SfuSubscriptionDetails>{
-      ...participants.getSubscriptions(),
-    };
-    _logger.v(() => '[updateSubscriptions] source: $subscriptions');
-    for (final change in changes) {
-      if (change.subscribed) {
-        subscriptions[change.trackId!] = change.toSubscription();
-      } else if (!change.subscribed) {
-        subscriptions.remove(change.trackId);
-      }
-    }
-    _logger.v(() => '[updateSubscriptions] updated: $subscriptions');
-    final result = await sfuClient.update(
-      sessionId: sessionId,
-      subscriptions: subscriptions.values,
-    );
-
-    _currentTrackSubscriptionsSubject.add(subscriptions);
-
-    _logger.v(() => '[updateSubscriptions] result: $result');
-    return result;
-  }
-
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
@@ -1011,102 +932,5 @@ extension SfuSubscriptionDetailsEx on List<SfuSubscriptionDetails> {
         dimension: sub.dimension?.toDTO(),
       );
     }).toList();
-  }
-}
-
-extension on SfuClient {
-  Future<Result<None>> update({
-    required String sessionId,
-    required Iterable<SfuSubscriptionDetails> subscriptions,
-  }) async {
-    final result = await updateSubscriptions(
-      sfu.UpdateSubscriptionsRequest(
-        sessionId: sessionId,
-        tracks: subscriptions.map(
-          (it) => sfu.TrackSubscriptionDetails(
-            userId: it.userId,
-            sessionId: it.sessionId,
-            trackType: it.trackType.toDTO(),
-            dimension: it.dimension?.toDTO(),
-          ),
-        ),
-      ),
-    );
-
-    return result.fold(
-      failure: (it) => it,
-      success: (it) {
-        if (it.data.hasError()) {
-          final error = it.data.error;
-          return Result.error('${error.code} - ${error.message}');
-        }
-        return const Result.success(none);
-      },
-    );
-  }
-}
-
-extension on List<CallParticipantState> {
-  Map<String, SfuSubscriptionDetails> getSubscriptions({
-    Set<SfuTrackType> exclude = const {},
-  }) {
-    final subscriptions = <String, SfuSubscriptionDetails>{};
-
-    for (final participant in this) {
-      // We only care about remote participants.
-      if (participant.isLocal) continue;
-
-      streamLog.v(
-        _tag,
-        () => '[getSubscriptions] userId: ${participant.userId}, '
-            'published: ${participant.publishedTracks.keys}',
-      );
-
-      subscriptions.addAll(
-        participant.getSubscriptions(exclude: exclude),
-      );
-    }
-
-    return subscriptions;
-  }
-}
-
-extension on CallParticipantState {
-  Map<String, SfuSubscriptionDetails> getSubscriptions({
-    Set<SfuTrackType> exclude = const {},
-  }) {
-    final subscriptions = <String, SfuSubscriptionDetails>{};
-
-    for (final trackType in publishedTracks.keys) {
-      final trackState = publishedTracks[trackType];
-
-      streamLog.v(
-        _tag,
-        () => '[getSubscriptions] trackType: $trackType, '
-            'trackState: $trackState',
-      );
-
-      // We only care about remote tracks.
-      if (trackState is! RemoteTrackState) continue;
-
-      // Continue if we should exclude this trackType.
-      final shouldExclude = exclude.contains(trackType);
-      if (shouldExclude) continue;
-
-      // We only care about tracks that are subscribed.
-      if (!trackState.subscribed) continue;
-
-      final detail = SfuSubscriptionDetails(
-        userId: userId,
-        sessionId: sessionId,
-        trackIdPrefix: trackIdPrefix,
-        trackType: trackType,
-        dimension: trackState.videoDimension,
-      );
-
-      subscriptions[detail.trackId] = detail;
-    }
-
-    return subscriptions;
   }
 }

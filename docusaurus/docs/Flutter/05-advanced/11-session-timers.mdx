@@ -1,0 +1,47 @@
+---
+title: Session Timers
+slug: /session-timers
+sidebar_position: 11
+description: Learn how to limit the maximum duration of a call in the Stream Video Flutter SDK.
+---
+
+A session timer allows you to limit the maximum duration of a call. The duration [can be configured](https://getstream.io/video/docs/api/calls/#session-timers) for all calls of a certain type, or on a per-call basis. When a session timer reaches zero, the call automatically ends.
+
+## Creating a call with a session timer
+
+Let's see how to create a single call with a limited duration:
+
+```dart
+final call = client.makeCall(callType: StreamCallType.defaultType(), id: 'REPLACE_WITH_CALL_ID');
+await call.getOrCreate(
+  limits: const StreamLimitsSettings(
+    maxDurationSeconds: 3600,
+  ),
+);
+```
+
+This code creates a call with a duration of 3600 seconds (1 hour) from the time the session is starts (a participant joins the call).
+
+After joining the call with the specified `maxDurationSeconds`, you can examine a call state's `timerEndsAt` field, which provides the timestamp when the call will end. When a call ends, all participants are removed from the call.
+
+```dart
+await call.join();
+print(call.state.value.timerEndsAt);
+```
+
+## Extending a call
+
+​You can also extend the duration of a call, both before or during the call. To do that, you should use the `call.update` method:
+
+```dart
+final duration =
+    call.state.value.settings.limits.maxDurationSeconds! + 60;
+    
+call.update(
+  limits: StreamLimitsSettings(
+    maxDurationSeconds: duration,
+  ),
+);
+```
+
+If the call duration is extended, the `timerEndsAt` is updated to reflect this change. Call participants will receive the `call.updated` event to notify them about this change.

@@ -73,3 +73,13 @@ class SubscriptionChange {
         'subscribed: $subscribed, trackId: $trackId}';
   }
 }
+
+class VideoTrackSubscriptionOverride {
+  VideoTrackSubscriptionOverride({
+    this.dimension,
+    this.enabled = true,
+  });
+
+  final RtcVideoDimension? dimension;
+  final bool enabled;
+}

@@ -50,8 +50,18 @@ class StreamVideoRenderer extends StatelessWidget {
       // The video track is local and is already published.
       child = _buildVideoTrackRenderer(context, trackState);
     } else if (trackState.subscribed && trackState.received) {
-      // The video track is remote and has been received.
-      child = _buildVideoTrackRenderer(context, trackState);
+      final incomingVideoSettingsEnabled = call
+              .dynascaleManager.incomingVideoSettings
+              ?.isParticipantVideoEnabled(participant.sessionId) ??
+          true;
+
+      if (!incomingVideoSettingsEnabled) {
+        // The video track is remote and has been received, but has been disabled.
+        child = placeholderBuilder.call(context);
+      } else {
+        // The video track is remote and has been received.
+        child = _buildVideoTrackRenderer(context, trackState);
+      }
     } else {
       // The video track is remote and hasn't been received yet.
       child = placeholderBuilder.call(context);

@@ -19,6 +19,22 @@ class SfuSubscriptionDetails with EquatableMixin {
 
   final String trackId;
 
+  SfuSubscriptionDetails copyWith({
+    String? userId,
+    String? sessionId,
+    String? trackIdPrefix,
+    SfuTrackType? trackType,
+    RtcVideoDimension? dimension,
+  }) {
+    return SfuSubscriptionDetails(
+      userId: userId ?? this.userId,
+      sessionId: sessionId ?? this.sessionId,
+      trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
+      trackType: trackType ?? this.trackType,
+      dimension: dimension ?? this.dimension,
+    );
+  }
+
   @override
   bool? get stringify => true;
 

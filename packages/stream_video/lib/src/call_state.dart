@@ -36,6 +36,7 @@ class CallState extends Equatable {
       endedAt: null,
       liveStartedAt: null,
       liveEndedAt: null,
+      timerEndsAt: null,
       publisherStats: null,
       subscriberStats: null,
       localStats: null,
@@ -73,6 +74,7 @@ class CallState extends Equatable {
     required this.endedAt,
     required this.liveStartedAt,
     required this.liveEndedAt,
+    required this.timerEndsAt,
     required this.publisherStats,
     required this.subscriberStats,
     required this.localStats,
@@ -107,6 +109,7 @@ class CallState extends Equatable {
   final DateTime? updatedAt;
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
+  final DateTime? timerEndsAt;
   final PeerConnectionStats? publisherStats;
   final PeerConnectionStats? subscriberStats;
   final LocalStats? localStats;
@@ -155,6 +158,7 @@ class CallState extends Equatable {
     DateTime? endedAt,
     DateTime? liveStartedAt,
     DateTime? liveEndedAt,
+    DateTime? timerEndsAt,
     PeerConnectionStats? publisherStats,
     PeerConnectionStats? subscriberStats,
     LocalStats? localStats,
@@ -189,6 +193,7 @@ class CallState extends Equatable {
       endedAt: endedAt ?? this.endedAt,
       liveStartedAt: liveStartedAt ?? this.liveStartedAt,
       liveEndedAt: liveEndedAt ?? this.liveEndedAt,
+      timerEndsAt: timerEndsAt ?? this.timerEndsAt,
       publisherStats: publisherStats ?? this.publisherStats,
       subscriberStats: subscriberStats ?? this.subscriberStats,
       localStats: localStats ?? this.localStats,
@@ -222,6 +227,7 @@ class CallState extends Equatable {
       ownCapabilities: capabilities.isEmpty ? null : capabilities,
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
+      timerEndsAt: metadata.session.timerEndsAt,
     );
   }
 
@@ -250,6 +256,7 @@ class CallState extends Equatable {
         endedAt,
         liveStartedAt,
         liveEndedAt,
+        timerEndsAt,
         publisherStats,
         subscriberStats,
         localStats,

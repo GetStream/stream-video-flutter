@@ -17,6 +17,7 @@ This release introduces a major rework of the join/reconnect flow in the Call cl
 * Added `participantCount` and `anonymousParticipantCount` to `CallState` reflecting the current number of participants in the call.
 * Introduced the `watch` parameter to `Call.get()` and `Call.getOrCreate()` methods (default is `true`). When set to `true`, this enables the `Call` to listen for coordinator events and update its state accordingly, even before the call is joined (`Call.join()`).
 * Added support for `targetResolution` setting set on the Dashboard to determine the max resolution the video stream.
+* Introduced new API methods to give greater control over incoming video quality. `Call.setPreferredIncomingVideoResolution()` allows you to manually set a preferred video resolution, while `Call.setIncomingVideoEnabled()` enables or disables incoming video. For more details, refer to the [documentation](https://getstream.io/video/docs/flutter/manual-video-quality-selection/).
 
 🐞 Fixed
 * Automatic push token registration by `StreamVideo` now stores registered token in `SharedPreferences`, performing an API call only when the token changes.
