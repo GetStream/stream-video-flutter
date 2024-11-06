@@ -42,7 +42,7 @@ class DynascaleManager {
     required this.stateManager,
   });
 
-  late final _logger = taggedLogger(tag: 'dynascaleManager');
+  late final _logger = taggedLogger(tag: 'SV:DynascaleManager');
 
   final CallStateNotifier stateManager;
   late SfuClient sfuClient;
