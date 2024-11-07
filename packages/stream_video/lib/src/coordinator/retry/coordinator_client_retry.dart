@@ -332,6 +332,36 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> collectUserFeedback({
+    required String callType,
+    required String callId,
+    required String sessionId,
+    required int rating,
+    required String sdk,
+    required String sdkVersion,
+    required String userSessionId,
+    String? reason,
+    Map<String, Object>? custom,
+  }) async {
+    return _retryManager.execute(
+      () => _delegate.collectUserFeedback(
+        callType: callType,
+        callId: callId,
+        sessionId: sessionId,
+        rating: rating,
+        sdk: sdk,
+        sdkVersion: sdkVersion,
+        userSessionId: userSessionId,
+        reason: reason,
+        custom: custom,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('collectUserFeedback', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
   Future<Result<QueriedCalls>> queryCalls({
     required Map<String, Object> filterConditions,
     String? next,

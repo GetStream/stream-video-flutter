@@ -13,7 +13,7 @@ class StreamButton extends StatelessWidget {
 
   factory StreamButton.active({
     required String label,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     Widget? icon,
   }) {
     return StreamButton(

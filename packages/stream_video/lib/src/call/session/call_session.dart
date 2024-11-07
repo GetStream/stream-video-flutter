@@ -293,6 +293,7 @@ class CallSession extends Disposable {
             publisherStats: jsonEncode(rawStats['publisherStats']),
             subscriberStats: jsonEncode(rawStats['subscriberStats']),
             sdkVersion: streamVideoVersion,
+            sdk: streamSdkName,
             webrtcVersion: switch (CurrentPlatform.type) {
               PlatformType.android => androidWebRTCVersion,
               PlatformType.ios => iosWebRTCVersion,

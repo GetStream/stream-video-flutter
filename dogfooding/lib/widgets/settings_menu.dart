@@ -5,6 +5,8 @@ import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../utils/feedback_dialog.dart';
+
 CallReactionData _raisedHandReaction = const CallReactionData(
   emojiCode: ':raise-hand:',
   type: 'Raise hand',
@@ -196,7 +198,15 @@ class _SettingsMenuState extends State<SettingsMenu> {
             showIncomingQuality = true;
           });
         },
-      )
+      ),
+      const SizedBox(height: 16),
+      StandardActionMenuItem(
+        icon: Icons.feedback,
+        label: 'Provide feedback',
+        onPressed: () {
+          showFeedbackDialog(context, call: widget.call);
+        },
+      ),
     ];
   }
 
