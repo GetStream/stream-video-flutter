@@ -14,6 +14,8 @@
   <img id="android-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/android:stream_video_flutter-3.2%20MB-blue"/>
   <img id="ios-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/ios:stream_video-10.1%20MB-blue"/>
   <img id="ios-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/ios:stream_video_flutter-825%20KB-blue"/>
+  <img id="stream-video-push-notification" alt="StreamVideoPushNotification" src="https://img.shields.io/badge/stream_video_push_notification-<1%20MB-blue"/>
+  <img id="stream-video-screen-sharing" alt="StreamVideoScreenSharing" src="https://img.shields.io/badge/stream_video_screen_sharing-<1%20MB-blue"/>
 </p>
 
 ## Quick Links
