@@ -9,6 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/utils/feedback_dialog.dart';
 import 'package:flutter_dogfooding/widgets/badged_call_option.dart';
 import 'package:flutter_dogfooding/widgets/call_duration_title.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu.dart';
@@ -200,6 +201,10 @@ class _CallScreenState extends State<CallScreen> {
                 return CallAppBar(
                   call: call,
                   leadingWidth: 120,
+                  onLeaveCallTap: () {
+                    call.leave();
+                    showFeedbackDialog(context, call: call);
+                  },
                   leading: Row(
                     children: [
                       ToggleLayoutOption(

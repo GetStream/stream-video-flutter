@@ -1266,7 +1266,6 @@ class Call {
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
     await _session?.dispose();
-    _session = null;
     await dynascaleManager.dispose();
     await _streamVideo.state.setActiveCall(null);
     await _streamVideo.state.setOutgoingCall(null);
@@ -2231,6 +2230,40 @@ class Call {
       callCid: callCid,
       eventType: eventType,
       custom: custom,
+    );
+  }
+
+  /// Collects user feedback asynchronously.
+  ///
+  /// Parameters:
+  /// - `[rating]`: Rating between 1 and 5 denoting the experience of the user in the call
+  /// - `[reason]`: The reason/description for the rating
+  /// - `[custom]`: Custom data
+  Future<Result<None>> collectUserFeedback({
+    required int rating,
+    String? reason,
+    Map<String, Object>? custom,
+  }) {
+    if (rating < 1 || rating > 5) {
+      throw ArgumentError('Rating must be between 1 and 5');
+    }
+
+    if (_session?.sessionId == null) {
+      throw ArgumentError(
+        'Feedback can be submitted only in the context of a call session',
+      );
+    }
+
+    return _coordinatorClient.collectUserFeedback(
+      callId: id,
+      callType: type.value,
+      sessionId: _session!.sessionId,
+      rating: rating,
+      reason: reason,
+      custom: custom,
+      sdk: streamSdkName,
+      sdkVersion: streamVideoVersion,
+      userSessionId: _session!.sessionId,
     );
   }
 }

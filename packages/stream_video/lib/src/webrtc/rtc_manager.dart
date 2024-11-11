@@ -89,7 +89,7 @@ class RtcManager extends Disposable {
           'subscriberStats': subscriber,
           'publisherStats': publisher,
         },
-      );
+      ).asBroadcastStream();
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;

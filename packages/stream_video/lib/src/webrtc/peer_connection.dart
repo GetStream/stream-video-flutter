@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:rxdart/rxdart.dart';
 
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
@@ -98,7 +99,8 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onTrack}
   OnStats? onStats;
 
-  Stream<List<Map<String, dynamic>>> get statsStream => _statsController.stream;
+  Stream<List<Map<String, dynamic>>> get statsStream =>
+      _statsController.stream.startWith([]);
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
 

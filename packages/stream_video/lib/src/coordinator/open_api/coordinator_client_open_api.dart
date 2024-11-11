@@ -228,6 +228,55 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     );
   }
 
+  // Submit user feedback for the call
+  @override
+  Future<Result<None>> collectUserFeedback({
+    required String callType,
+    required String callId,
+    required String sessionId,
+    required int rating,
+    required String sdk,
+    required String sdkVersion,
+    required String userSessionId,
+    String? reason,
+    Map<String, Object>? custom,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[collectUserFeedback] no connection established');
+        return connectionResult;
+      }
+
+      final input = open.CollectUserFeedbackRequest(
+        custom: custom ?? {},
+        rating: rating,
+        reason: reason,
+        sdk: sdk,
+        sdkVersion: sdkVersion,
+        userSessionId: userSessionId,
+      );
+
+      _logger.d(() => '[collectUserFeedback] input: $input');
+      final result = await _defaultApi.collectUserFeedback(
+        callType,
+        callId,
+        sessionId,
+        input,
+      );
+
+      _logger.v(() => '[collectUserFeedback] completed: $result');
+      if (result == null) {
+        return Result.error('collectUserFeedback result is null');
+      }
+
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(() => '[collectUserFeedback] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
   /// Create a new Device used to receive Push Notifications.
   @override
   Future<Result<None>> createDevice({
