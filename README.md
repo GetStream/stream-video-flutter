@@ -5,6 +5,19 @@
 [![CI](https://github.com/GetStream/stream-video-flutter/actions/workflows/stream_video_flutter_workflow.yml/badge.svg?branch=main)](https://github.com/GetStream/stream-video-flutter/actions/workflows/stream_video_flutter_workflow.yml)
 [![Melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
 
+Android: 
+<p align="center">
+  <img id="android-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-19.2%20MB-blue"/>
+  <img id="android-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/StreamVideoFlutter-3.2%20MB-blue"/>
+</p>
+
+iOS: 
+<p align="center">
+  <img id="ios-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-10.1%20MB-blue"/>
+  <img id="ios-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/StreamVideoFlutter-825%20KB-blue"/>
+</p>
+
+
 ## Quick Links
 
 - [Register](https://getstream.io/video/) to get an API key for Stream Video
