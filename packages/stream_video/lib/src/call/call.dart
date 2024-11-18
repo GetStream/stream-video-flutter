@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -16,7 +15,6 @@ import '../../version.g.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../coordinator/open_api/error/open_api_error.dart';
 import '../errors/video_error_composer.dart';
-import '../models/call_closed_caption.dart';
 import '../models/call_received_data.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_error.dart';

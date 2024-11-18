@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../../call_state.dart';
-import '../../../coordinator/models/coordinator_events.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_metadata.dart';
 import '../../../models/call_participant_state.dart';

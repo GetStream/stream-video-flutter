@@ -889,7 +889,8 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
 
 extension StreamCallEventX on StreamCallEvent? {
   StreamCallEvent? emitIfNotNull(
-      MutableSharedEmitter<StreamCallEvent> emitter) {
+    MutableSharedEmitter<StreamCallEvent> emitter,
+  ) {
     if (this != null) {
       emitter.emit(this!);
     }

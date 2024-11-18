@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../stream_video.dart';
 
@@ -242,6 +241,7 @@ class CallState extends Equatable {
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
+      capabilitiesByRole: capabilitiesByRole,
     );
   }
 
