@@ -18,13 +18,7 @@ class TranscriptionSettingsRequest {
     required this.mode,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? closedCaptionMode;
+  TranscriptionSettingsRequestClosedCaptionModeEnum? closedCaptionMode;
 
   List<String> languages;
 
@@ -77,7 +71,7 @@ class TranscriptionSettingsRequest {
       }());
 
       return TranscriptionSettingsRequest(
-        closedCaptionMode: mapValueOfType<String>(json, r'closed_caption_mode'),
+        closedCaptionMode: TranscriptionSettingsRequestClosedCaptionModeEnum.fromJson(json[r'closed_caption_mode']),
         languages: json[r'languages'] is Iterable
             ? (json[r'languages'] as Iterable).cast<String>().toList(growable: false)
             : const [],
@@ -132,6 +126,83 @@ class TranscriptionSettingsRequest {
     'mode',
   };
 }
+
+
+class TranscriptionSettingsRequestClosedCaptionModeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const TranscriptionSettingsRequestClosedCaptionModeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const available = TranscriptionSettingsRequestClosedCaptionModeEnum._(r'available');
+  static const disabled = TranscriptionSettingsRequestClosedCaptionModeEnum._(r'disabled');
+  static const autoOn = TranscriptionSettingsRequestClosedCaptionModeEnum._(r'auto-on');
+
+  /// List of all possible values in this [enum][TranscriptionSettingsRequestClosedCaptionModeEnum].
+  static const values = <TranscriptionSettingsRequestClosedCaptionModeEnum>[
+    available,
+    disabled,
+    autoOn,
+  ];
+
+  static TranscriptionSettingsRequestClosedCaptionModeEnum? fromJson(dynamic value) => TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer().decode(value);
+
+  static List<TranscriptionSettingsRequestClosedCaptionModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <TranscriptionSettingsRequestClosedCaptionModeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = TranscriptionSettingsRequestClosedCaptionModeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [TranscriptionSettingsRequestClosedCaptionModeEnum] to String,
+/// and [decode] dynamic data back to [TranscriptionSettingsRequestClosedCaptionModeEnum].
+class TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer {
+  factory TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer() => _instance ??= const TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer._();
+
+  const TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer._();
+
+  String encode(TranscriptionSettingsRequestClosedCaptionModeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a TranscriptionSettingsRequestClosedCaptionModeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  TranscriptionSettingsRequestClosedCaptionModeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'available': return TranscriptionSettingsRequestClosedCaptionModeEnum.available;
+        case r'disabled': return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
+        case r'auto-on': return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer] instance.
+  static TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer? _instance;
+}
+
 
 
 class TranscriptionSettingsRequestModeEnum {

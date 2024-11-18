@@ -20,7 +20,6 @@ class DeleteCallResponse {
 
   CallResponse call;
 
-  /// Duration of the request in milliseconds
   String duration;
 
   ///

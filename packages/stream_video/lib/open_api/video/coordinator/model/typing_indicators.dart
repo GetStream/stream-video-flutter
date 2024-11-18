@@ -13,16 +13,10 @@ part of openapi.api;
 class TypingIndicators {
   /// Returns a new [TypingIndicators] instance.
   TypingIndicators({
-    this.enabled,
+    required this.enabled,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? enabled;
+  bool enabled;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is TypingIndicators &&
@@ -31,18 +25,14 @@ class TypingIndicators {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (enabled == null ? 0 : enabled!.hashCode);
+    (enabled.hashCode);
 
   @override
   String toString() => 'TypingIndicators[enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.enabled != null) {
       json[r'enabled'] = this.enabled;
-    } else {
-      json[r'enabled'] = null;
-    }
     return json;
   }
 
@@ -65,7 +55,7 @@ class TypingIndicators {
       }());
 
       return TypingIndicators(
-        enabled: mapValueOfType<bool>(json, r'enabled'),
+        enabled: mapValueOfType<bool>(json, r'enabled')!,
       );
     }
     return null;
@@ -113,6 +103,7 @@ class TypingIndicators {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'enabled',
   };
 }
 

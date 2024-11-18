@@ -28,7 +28,7 @@ class UserPresenceChangedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserPresenceChangedEvent &&
@@ -79,7 +79,7 @@ class UserPresenceChangedEvent {
       return UserPresenceChangedEvent(
         createdAt: mapDateTime(json, r'created_at', r'')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

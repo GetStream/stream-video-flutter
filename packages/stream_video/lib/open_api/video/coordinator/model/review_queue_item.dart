@@ -49,7 +49,7 @@ class ReviewQueueItem {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? assignedTo;
+  User? assignedTo;
 
   List<Ban> bans;
 
@@ -65,7 +65,7 @@ class ReviewQueueItem {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? entityCreator;
+  EntityCreator? entityCreator;
 
   String entityId;
 
@@ -260,12 +260,12 @@ class ReviewQueueItem {
 
       return ReviewQueueItem(
         actions: ActionLog.listFromJson(json[r'actions']),
-        assignedTo: UserObject.fromJson(json[r'assigned_to']),
+        assignedTo: User.fromJson(json[r'assigned_to']),
         bans: Ban.listFromJson(json[r'bans']),
         completedAt: NullTime.fromJson(json[r'completed_at'])!,
         contentChanged: mapValueOfType<bool>(json, r'content_changed')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        entityCreator: UserObject.fromJson(json[r'entity_creator']),
+        entityCreator: EntityCreator.fromJson(json[r'entity_creator']),
         entityId: mapValueOfType<String>(json, r'entity_id')!,
         entityType: mapValueOfType<String>(json, r'entity_type')!,
         feedsV2Activity: EnrichedActivity.fromJson(json[r'feeds_v2_activity']),

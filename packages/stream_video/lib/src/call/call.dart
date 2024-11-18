@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -15,6 +16,7 @@ import '../../version.g.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../coordinator/open_api/error/open_api_error.dart';
 import '../errors/video_error_composer.dart';
+import '../models/call_closed_caption.dart';
 import '../models/call_received_data.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_error.dart';
@@ -38,7 +40,7 @@ import 'session/call_session_factory.dart';
 import 'state/call_state_notifier.dart';
 
 typedef OnCallPermissionRequest = void Function(
-  CoordinatorCallPermissionRequestEvent,
+  StreamCallPermissionRequestEvent,
 );
 
 typedef GetCurrentUserId = String? Function();
@@ -206,6 +208,7 @@ class Call {
   late final _callInitLock = Lock();
   late final _callJoinLock = Lock();
   late final _callReconnectLock = Lock();
+  late final _callClosedCaptionsLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
   final StreamVideo _streamVideo;
@@ -228,6 +231,7 @@ class Call {
   bool _initialized = false;
 
   final List<Timer> _reactionTimers = [];
+  final Map<String, Timer> _captionsTimers = {};
 
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
@@ -242,6 +246,11 @@ class Call {
 
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
   final _callEvents = MutableSharedEmitterImpl<StreamCallEvent>();
+
+  Stream<List<StreamClosedCaption>> get closedCaptions =>
+      _closedCaptions.asStream();
+  final _closedCaptions =
+      MutableStateEmitterImpl<List<StreamClosedCaption>>([]);
 
   OnCallPermissionRequest? onPermissionRequest;
 
@@ -305,8 +314,10 @@ class Call {
     _subscriptions.add(
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
-        event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
-        await _onCoordinatorEvent(event);
+        event
+            .mapToCallEvent(state.value)
+            .emitIfNotNull(_callEvents)
+            ?.also(_onCoordinatorEvent);
       }),
     );
   }
@@ -363,62 +374,72 @@ class Call {
         state.settings.audio.redundantCodingEnabled;
   }
 
-  Future<void> _onCoordinatorEvent(CoordinatorCallEvent event) async {
+  Future<void> _onCoordinatorEvent(StreamCallEvent event) async {
     // Return if the event is not for this call.
     if (event.callCid != state.value.callCid) return;
+
     _logger.v(
       () =>
           '[onCoordinatorEvent] event.type: ${event.runtimeType}, calStatus: ${state.value.status}',
     );
 
     switch (event) {
-      case CoordinatorCallPermissionRequestEvent _:
+      case StreamCallPermissionRequestEvent _:
         // Notify the client about the permission request.
         return onPermissionRequest?.call(event);
-      case CoordinatorCallRejectedEvent _:
+      case StreamCallRejectedEvent _:
         return _stateManager.coordinatorCallRejected(event);
-      case CoordinatorCallAcceptedEvent _:
+      case StreamCallAcceptedEvent _:
         return _stateManager.coordinatorCallAccepted(event);
-      case CoordinatorCallEndedEvent _:
+      case StreamCallEndedEvent _:
         return _stateManager.coordinatorCallEnded(event);
-      case CoordinatorCallPermissionsUpdatedEvent _:
+      case StreamCallPermissionsUpdatedEvent _:
         return _stateManager.coordinatorCallPermissionsUpdated(event);
-      case CoordinatorCallRecordingStartedEvent _:
+      case StreamCallRecordingStartedEvent _:
         return _stateManager.coordinatorCallRecordingStarted(event);
-      case CoordinatorCallRecordingStoppedEvent _:
+      case StreamCallRecordingStoppedEvent _:
         return _stateManager.coordinatorCallRecordingStopped(event);
-      case CoordinatorCallRecordingFailedEvent _:
+      case StreamCallRecordingFailedEvent _:
         return _stateManager.coordinatorCallRecordingFailed(event);
-      case CoordinatorCallTranscriptionStartedEvent _:
+      case StreamCallTranscriptionStartedEvent _:
         return _stateManager.coordinatorCallTranscriptionStarted(event);
-      case CoordinatorCallTranscriptionStoppedEvent _:
+      case StreamCallTranscriptionStoppedEvent _:
         return _stateManager.coordinatorCallTranscriptionStopped(event);
-      case CoordinatorCallTranscriptionFailedEvent _:
+      case StreamCallTranscriptionFailedEvent _:
         return _stateManager.coordinatorCallTranscriptionFailed(event);
-      case CoordinatorCallBroadcastingStartedEvent _:
+      case StreamCallClosedCaptionsStartedEvent _:
+        return _stateManager.coordinatorCallClosedCaptionsStarted(event);
+      case StreamCallClosedCaptionsStoppedEvent _:
+        return _stateManager.coordinatorCallClosedCaptionsStopped(event);
+      case StreamCallClosedCaptionsFailedEvent _:
+        return _stateManager.coordinatorCallClosedCaptionsFailed(event);
+
+      case StreamCallBroadcastingStartedEvent _:
         return _stateManager.coordinatorCallBroadcastingStarted(event);
-      case CoordinatorCallBroadcastingStoppedEvent _:
+      case StreamCallBroadcastingStoppedEvent _:
         return _stateManager.coordinatorCallBroadcastingStopped(event);
-      case CoordinatorCallBroadcastingFailedEvent _:
+      case StreamCallBroadcastingFailedEvent _:
         return _stateManager.coordinatorCallBroadcastingFailed(event);
-      case CoordinatorCallRingingEvent _:
+      case StreamCallRingingEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-      case CoordinatorCallMissedEvent _:
+      case StreamCallMissedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-      case CoordinatorCallSessionEndedEvent _:
+      case StreamCallSessionEndedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-      case CoordinatorCallSessionStartedEvent _:
+      case StreamCallSessionStartedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-      case CoordinatorCallUpdatedEvent _:
+      case StreamCallUpdatedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-      case CoordinatorCallReactionEvent _:
+      case StreamCallClosedCaptionsEvent _:
+        return _handleClosedCaptionEvent(event);
+      case StreamCallReactionEvent _:
         _reactionTimers.add(
           Timer(_preferences.reactionAutoDismissTime, () {
             _stateManager.resetCallReaction(event.user.id);
           }),
         );
         return _stateManager.coordinatorCallReaction(event);
-      case CoordinatorCallSessionParticipantCountUpdatedEvent _:
+      case StreamCallSessionParticipantCountUpdatedEvent _:
         if (state.value.status.isConnected || state.value.status.isJoined) {
           return;
         }
@@ -1263,6 +1284,10 @@ class Call {
       timer.cancel();
     }
 
+    for (final timer in _captionsTimers.values) {
+      timer.cancel();
+    }
+
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
     await _session?.dispose();
@@ -1508,6 +1533,70 @@ class Call {
     });
   }
 
+  void _handleClosedCaptionEvent(StreamCallClosedCaptionsEvent event) {
+    _callClosedCaptionsLock.synchronized(() {
+      _logger.v(() => '[handleClosedCaptionEvent] event: $event');
+
+      String keyFor(StreamClosedCaption caption) {
+        return '${caption.speakerId}_${caption.startTime}';
+      }
+
+      final queue = _closedCaptions.value;
+      final currentCaption = StreamClosedCaption.fromEvent(event);
+      final currentKey = keyFor(currentCaption);
+
+      // Ignore duplicates from backend
+      if (queue.any((caption) => keyFor(caption) == currentKey)) {
+        return;
+      }
+
+      final newQueue = [...queue, currentCaption];
+
+      final retentionTimeInMs = _preferences.closedCaptionsRetentionTimeInMs;
+      final queueSize = _preferences.closedCaptionsQueueSize;
+
+      try {
+        // schedule the removal of the closed caption after the retention time
+        if (retentionTimeInMs > 0) {
+          final timer = Timer(Duration(milliseconds: retentionTimeInMs), () {
+            _removeExpiredCaption(keyFor, currentCaption);
+            _captionsTimers.remove(currentKey);
+          });
+
+          _captionsTimers[currentKey] = timer;
+
+          // cancel the cleanup tasks for the closed captions that are no longer in the queue
+          if (newQueue.length > queueSize) {
+            for (var i = 0; i < newQueue.length - queueSize; i++) {
+              final key = keyFor(newQueue[i]);
+              final timer = _captionsTimers[key];
+
+              timer?.cancel();
+              _captionsTimers.remove(key);
+            }
+          }
+
+          _closedCaptions.value = newQueue.length > queueSize
+              ? newQueue.sublist(newQueue.length - queueSize)
+              : newQueue;
+        }
+      } catch (error) {
+        _logger.e(() => '[handleClosedCaptionEvent] failed: $error');
+      }
+    });
+  }
+
+  Future<void> _removeExpiredCaption(
+    String Function(StreamClosedCaption) keyFor,
+    StreamClosedCaption caption,
+  ) async {
+    return _callClosedCaptionsLock.synchronized(() {
+      _closedCaptions.value = _closedCaptions.value.where((c) {
+        return keyFor(c) != keyFor(caption);
+      }).toList();
+    });
+  }
+
   /// Adds members to the current call.
   Future<Result<None>> addMembers(List<UserInfo> users) {
     return _coordinatorClient.addMembers(
@@ -1604,6 +1693,8 @@ class Call {
     DateTime? startsAt,
     StreamBackstageSettings? backstage,
     StreamLimitsSettings? limits,
+    StreamRecordingSettings? recording,
+    StreamTranscriptionSettings? transcription,
     Map<String, Object> custom = const {},
   }) async {
     _logger.d(
@@ -1622,6 +1713,8 @@ class Call {
     final settingsOverride = CallSettingsRequest(
       backstage: backstage?.toOpenDto(),
       limits: limits?.toOpenDto(),
+      transcription: transcription?.toOpenDto(),
+      recording: recording?.toOpenDto(),
     );
 
     final response = await _coordinatorClient.getOrCreateCall(
@@ -1741,6 +1834,28 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.setCallTranscribing(isTranscribing: false);
+    }
+
+    return result;
+  }
+
+  /// Starts close captions for the call.
+  Future<Result<None>> startClosedCaptions() async {
+    final result = await _permissionsManager.startClosedCaptions();
+
+    if (result.isSuccess) {
+      _stateManager.setCallClosedCaptioning(isCaptioning: true);
+    }
+
+    return result;
+  }
+
+  /// Stops close captions for the call.
+  Future<Result<None>> stopClosedCaptions() async {
+    final result = await _permissionsManager.stopClosedCaptions();
+
+    if (result.isSuccess) {
+      _stateManager.setCallClosedCaptioning(isCaptioning: false);
     }
 
     return result;
@@ -2149,7 +2264,7 @@ class Call {
   /// [sessionIds] optionally specifies the session IDs of the participants this
   /// preference affects. By default, it affects all participants.
   Future<Result<None>> setPreferredIncomingVideoResolution(
-    VideoResolution? resolution, {
+    VideoDimension? resolution, {
     List<String>? sessionIds,
   }) async {
     dynascaleManager.setVideoTrackSubscriptionOverrides(

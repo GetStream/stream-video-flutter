@@ -68,7 +68,7 @@ class OwnUserResponse {
   ///
   DateTime? deletedAt;
 
-  List<Device> devices;
+  List<DeviceResponse> devices;
 
   String id;
 
@@ -300,7 +300,7 @@ class OwnUserResponse {
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
-        devices: Device.listFromJson(json[r'devices']),
+        devices: DeviceResponse.listFromJson(json[r'devices']),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
         invisible: mapValueOfType<bool>(json, r'invisible')!,

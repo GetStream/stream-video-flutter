@@ -46,7 +46,7 @@ class ModerationMarkReviewedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ModerationMarkReviewedEvent &&
@@ -113,7 +113,7 @@ class ModerationMarkReviewedEvent {
         item: ReviewQueueItem.fromJson(json[r'item']),
         message: Message.fromJson(json[r'message']),
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

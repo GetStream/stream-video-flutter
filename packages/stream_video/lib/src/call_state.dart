@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../stream_video.dart';
 
@@ -21,6 +22,7 @@ class CallState extends Equatable {
       isRecording: false,
       isBroadcasting: false,
       isTranscribing: false,
+      isCaptioning: false,
       isBackstage: false,
       settings: const CallSettings(),
       egress: const CallEgress(),
@@ -59,6 +61,7 @@ class CallState extends Equatable {
     required this.isRecording,
     required this.isBroadcasting,
     required this.isTranscribing,
+    required this.isCaptioning,
     required this.isBackstage,
     required this.settings,
     required this.egress,
@@ -97,6 +100,7 @@ class CallState extends Equatable {
   final bool isRecording;
   final bool isBroadcasting;
   final bool isTranscribing;
+  final bool isCaptioning;
   final bool isBackstage;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
@@ -143,6 +147,7 @@ class CallState extends Equatable {
     bool? isRecording,
     bool? isBroadcasting,
     bool? isTranscribing,
+    bool? isCaptioning,
     bool? isBackstage,
     CallSettings? settings,
     CallEgress? egress,
@@ -178,6 +183,7 @@ class CallState extends Equatable {
       isRecording: isRecording ?? this.isRecording,
       isBroadcasting: isBroadcasting ?? this.isBroadcasting,
       isTranscribing: isTranscribing ?? this.isTranscribing,
+      isCaptioning: isCaptioning ?? this.isCaptioning,
       isBackstage: isBackstage ?? this.isBackstage,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
@@ -213,6 +219,7 @@ class CallState extends Equatable {
       isBackstage: metadata.details.backstage,
       isRecording: metadata.details.recording,
       isTranscribing: metadata.details.transcribing,
+      isCaptioning: metadata.details.captioning,
       isBroadcasting: metadata.details.broadcasting,
       blockedUserIds: metadata.details.blockedUserIds.toList(),
       createdAt: metadata.details.createdAt,
@@ -240,6 +247,7 @@ class CallState extends Equatable {
         status,
         isRecording,
         isTranscribing,
+        isCaptioning,
         isBroadcasting,
         isBackstage,
         settings,

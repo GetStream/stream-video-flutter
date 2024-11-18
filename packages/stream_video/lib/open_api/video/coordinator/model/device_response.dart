@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class Device {
-  /// Returns a new [Device] instance.
-  Device({
+class DeviceResponse {
+  /// Returns a new [DeviceResponse] instance.
+  DeviceResponse({
     required this.createdAt,
     this.disabled,
     this.disabledReason,
@@ -72,7 +72,7 @@ class Device {
   bool? voip;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Device &&
+  bool operator ==(Object other) => identical(this, other) || other is DeviceResponse &&
     other.createdAt == createdAt &&
     other.disabled == disabled &&
     other.disabledReason == disabledReason &&
@@ -95,7 +95,7 @@ class Device {
     (voip == null ? 0 : voip!.hashCode);
 
   @override
-  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, userId=$userId, voip=$voip]';
+  String toString() => 'DeviceResponse[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, userId=$userId, voip=$voip]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -126,10 +126,10 @@ class Device {
     return json;
   }
 
-  /// Returns a new [Device] instance and imports its values from
+  /// Returns a new [DeviceResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Device? fromJson(dynamic value) {
+  static DeviceResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -138,13 +138,13 @@ class Device {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Device[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Device[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "DeviceResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "DeviceResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Device(
+      return DeviceResponse(
         createdAt: mapDateTime(json, r'created_at', r'')!,
         disabled: mapValueOfType<bool>(json, r'disabled'),
         disabledReason: mapValueOfType<String>(json, r'disabled_reason'),
@@ -158,11 +158,11 @@ class Device {
     return null;
   }
 
-  static List<Device> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <Device>[];
+  static List<DeviceResponse> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <DeviceResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Device.fromJson(row);
+        final value = DeviceResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -171,12 +171,12 @@ class Device {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Device> mapFromJson(dynamic json) {
-    final map = <String, Device>{};
+  static Map<String, DeviceResponse> mapFromJson(dynamic json) {
+    final map = <String, DeviceResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Device.fromJson(entry.value);
+        final value = DeviceResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -185,14 +185,14 @@ class Device {
     return map;
   }
 
-  // maps a json object with a list of Device-objects as value to a dart map
-  static Map<String, List<Device>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<Device>>{};
+  // maps a json object with a list of DeviceResponse-objects as value to a dart map
+  static Map<String, List<DeviceResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<DeviceResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Device.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = DeviceResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

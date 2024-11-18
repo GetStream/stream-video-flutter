@@ -9,6 +9,7 @@ import '../../../models/call_participant_state.dart';
 import '../../../models/call_reaction.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
+import '../../call_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -20,7 +21,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallAccepted(
-    CoordinatorCallAcceptedEvent event,
+    StreamCallAcceptedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusOutgoing) {
@@ -53,7 +54,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallRejected(
-    CoordinatorCallRejectedEvent event,
+    StreamCallRejectedEvent event,
   ) {
     final status = state.status;
     _logger.d(() => '[coordinatorCallRejected] state: $state');
@@ -106,7 +107,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallEnded(
-    CoordinatorCallEndedEvent event,
+    StreamCallEndedEvent event,
   ) {
     _logger.i(() => '[coordinatorCallEnded] state: $state');
     final status = state.status;
@@ -130,7 +131,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallPermissionsUpdated(
-    CoordinatorCallPermissionsUpdatedEvent event,
+    StreamCallPermissionsUpdatedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -149,7 +150,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallRecordingStarted(
-    CoordinatorCallRecordingStartedEvent event,
+    StreamCallRecordingStartedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -166,7 +167,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallRecordingStopped(
-    CoordinatorCallRecordingStoppedEvent event,
+    StreamCallRecordingStoppedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -183,7 +184,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallRecordingFailed(
-    CoordinatorCallRecordingFailedEvent event,
+    StreamCallRecordingFailedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -200,7 +201,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallTranscriptionStarted(
-    CoordinatorCallTranscriptionStartedEvent event,
+    StreamCallTranscriptionStartedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -217,7 +218,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallTranscriptionStopped(
-    CoordinatorCallTranscriptionStoppedEvent event,
+    StreamCallTranscriptionStoppedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -234,7 +235,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallTranscriptionFailed(
-    CoordinatorCallTranscriptionFailedEvent event,
+    StreamCallTranscriptionFailedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -250,8 +251,59 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     );
   }
 
+  void coordinatorCallClosedCaptionsStarted(
+    StreamCallClosedCaptionsStartedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallClosedCaptionsStarted] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isCaptioning: true,
+    );
+  }
+
+  void coordinatorCallClosedCaptionsStopped(
+    StreamCallClosedCaptionsStoppedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallClosedCaptionsStopped] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isCaptioning: false,
+    );
+  }
+
+  void coordinatorCallClosedCaptionsFailed(
+    StreamCallClosedCaptionsFailedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallClosedCaptionsFailed] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isTranscribing: false,
+    );
+  }
+
   void coordinatorCallBroadcastingStarted(
-    CoordinatorCallBroadcastingStartedEvent event,
+    StreamCallBroadcastingStartedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -268,7 +320,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallBroadcastingStopped(
-    CoordinatorCallBroadcastingStoppedEvent event,
+    StreamCallBroadcastingStoppedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -285,7 +337,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallBroadcastingFailed(
-    CoordinatorCallBroadcastingFailedEvent event,
+    StreamCallBroadcastingFailedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
@@ -302,7 +354,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallReaction(
-    CoordinatorCallReactionEvent event,
+    StreamCallReactionEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {

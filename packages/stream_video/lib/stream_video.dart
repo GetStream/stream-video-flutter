@@ -7,8 +7,11 @@ export 'open_api/video/coordinator/api.dart'
         Attachment,
         Channel,
         ChannelConfig,
+        ChannelOwnCapability,
+        ConfigOverrides,
         EnrichedActivity,
         EnrichedReaction,
+        EntityCreator,
         Field,
         Flag2,
         Message,
@@ -23,7 +26,8 @@ export 'open_api/video/coordinator/api.dart'
         ReactionGroupResponse,
         ReviewQueueItem,
         TypingIndicators,
-        TypingIndicatorsResponse;
+        TypingIndicatorsResponse,
+        User;
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call/call_events.dart';

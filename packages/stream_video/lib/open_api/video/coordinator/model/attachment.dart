@@ -26,10 +26,13 @@ class Attachment {
     this.footerIcon,
     this.giphy,
     this.imageUrl,
+    this.latitude,
+    this.longitude,
     this.ogScrapeUrl,
     this.originalHeight,
     this.originalWidth,
     this.pretext,
+    this.stoppedSharing,
     this.text,
     this.thumbUrl,
     this.title,
@@ -129,6 +132,22 @@ class Attachment {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  double? latitude;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  double? longitude;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   String? ogScrapeUrl;
 
   ///
@@ -154,6 +173,14 @@ class Attachment {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? pretext;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? stoppedSharing;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -187,7 +214,6 @@ class Attachment {
   ///
   String? titleLink;
 
-  /// Attachment type (e.g. image, video, url)
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -211,10 +237,13 @@ class Attachment {
     other.footerIcon == footerIcon &&
     other.giphy == giphy &&
     other.imageUrl == imageUrl &&
+    other.latitude == latitude &&
+    other.longitude == longitude &&
     other.ogScrapeUrl == ogScrapeUrl &&
     other.originalHeight == originalHeight &&
     other.originalWidth == originalWidth &&
     other.pretext == pretext &&
+    other.stoppedSharing == stoppedSharing &&
     other.text == text &&
     other.thumbUrl == thumbUrl &&
     other.title == title &&
@@ -237,10 +266,13 @@ class Attachment {
     (footerIcon == null ? 0 : footerIcon!.hashCode) +
     (giphy == null ? 0 : giphy!.hashCode) +
     (imageUrl == null ? 0 : imageUrl!.hashCode) +
+    (latitude == null ? 0 : latitude!.hashCode) +
+    (longitude == null ? 0 : longitude!.hashCode) +
     (ogScrapeUrl == null ? 0 : ogScrapeUrl!.hashCode) +
     (originalHeight == null ? 0 : originalHeight!.hashCode) +
     (originalWidth == null ? 0 : originalWidth!.hashCode) +
     (pretext == null ? 0 : pretext!.hashCode) +
+    (stoppedSharing == null ? 0 : stoppedSharing!.hashCode) +
     (text == null ? 0 : text!.hashCode) +
     (thumbUrl == null ? 0 : thumbUrl!.hashCode) +
     (title == null ? 0 : title!.hashCode) +
@@ -248,7 +280,7 @@ class Attachment {
     (type == null ? 0 : type!.hashCode);
 
   @override
-  String toString() => 'Attachment[actions=$actions, assetUrl=$assetUrl, authorIcon=$authorIcon, authorLink=$authorLink, authorName=$authorName, color=$color, custom=$custom, fallback=$fallback, fields=$fields, footer=$footer, footerIcon=$footerIcon, giphy=$giphy, imageUrl=$imageUrl, ogScrapeUrl=$ogScrapeUrl, originalHeight=$originalHeight, originalWidth=$originalWidth, pretext=$pretext, text=$text, thumbUrl=$thumbUrl, title=$title, titleLink=$titleLink, type=$type]';
+  String toString() => 'Attachment[actions=$actions, assetUrl=$assetUrl, authorIcon=$authorIcon, authorLink=$authorLink, authorName=$authorName, color=$color, custom=$custom, fallback=$fallback, fields=$fields, footer=$footer, footerIcon=$footerIcon, giphy=$giphy, imageUrl=$imageUrl, latitude=$latitude, longitude=$longitude, ogScrapeUrl=$ogScrapeUrl, originalHeight=$originalHeight, originalWidth=$originalWidth, pretext=$pretext, stoppedSharing=$stoppedSharing, text=$text, thumbUrl=$thumbUrl, title=$title, titleLink=$titleLink, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -305,6 +337,16 @@ class Attachment {
     } else {
       json[r'image_url'] = null;
     }
+    if (this.latitude != null) {
+      json[r'latitude'] = this.latitude;
+    } else {
+      json[r'latitude'] = null;
+    }
+    if (this.longitude != null) {
+      json[r'longitude'] = this.longitude;
+    } else {
+      json[r'longitude'] = null;
+    }
     if (this.ogScrapeUrl != null) {
       json[r'og_scrape_url'] = this.ogScrapeUrl;
     } else {
@@ -324,6 +366,11 @@ class Attachment {
       json[r'pretext'] = this.pretext;
     } else {
       json[r'pretext'] = null;
+    }
+    if (this.stoppedSharing != null) {
+      json[r'stopped_sharing'] = this.stoppedSharing;
+    } else {
+      json[r'stopped_sharing'] = null;
     }
     if (this.text != null) {
       json[r'text'] = this.text;
@@ -385,10 +432,13 @@ class Attachment {
         footerIcon: mapValueOfType<String>(json, r'footer_icon'),
         giphy: Images.fromJson(json[r'giphy']),
         imageUrl: mapValueOfType<String>(json, r'image_url'),
+        latitude: mapValueOfType<double>(json, r'latitude'),
+        longitude: mapValueOfType<double>(json, r'longitude'),
         ogScrapeUrl: mapValueOfType<String>(json, r'og_scrape_url'),
         originalHeight: mapValueOfType<int>(json, r'original_height'),
         originalWidth: mapValueOfType<int>(json, r'original_width'),
         pretext: mapValueOfType<String>(json, r'pretext'),
+        stoppedSharing: mapValueOfType<bool>(json, r'stopped_sharing'),
         text: mapValueOfType<String>(json, r'text'),
         thumbUrl: mapValueOfType<String>(json, r'thumb_url'),
         title: mapValueOfType<String>(json, r'title'),

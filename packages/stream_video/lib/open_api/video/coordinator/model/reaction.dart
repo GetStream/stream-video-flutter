@@ -23,21 +23,16 @@ class Reaction {
     this.userId,
   });
 
-  /// Date/time of creation
   DateTime createdAt;
 
   Map<String, Object> custom;
 
-  /// ID of a message user reacted to
   String messageId;
 
-  /// Reaction score. If not specified reaction has score of 1
   int score;
 
-  /// The type of reaction (e.g. 'like', 'laugh', 'wow')
   String type;
 
-  /// Date/time of the last update
   DateTime updatedAt;
 
   ///
@@ -46,9 +41,8 @@ class Reaction {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
-  /// ID of a user who reacted to a message
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -129,7 +123,7 @@ class Reaction {
         score: mapValueOfType<int>(json, r'score')!,
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
         userId: mapValueOfType<String>(json, r'user_id'),
       );
     }

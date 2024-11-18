@@ -65,7 +65,7 @@ class ConnectUserDetailsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PrivacySettings? privacySettings;
+  PrivacySettingsResponse? privacySettings;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -163,7 +163,7 @@ class ConnectUserDetailsRequest {
         invisible: mapValueOfType<bool>(json, r'invisible'),
         language: mapValueOfType<String>(json, r'language'),
         name: mapValueOfType<String>(json, r'name'),
-        privacySettings: PrivacySettings.fromJson(json[r'privacy_settings']),
+        privacySettings: PrivacySettingsResponse.fromJson(json[r'privacy_settings']),
         pushNotifications: PushNotificationSettingsInput.fromJson(json[r'push_notifications']),
       );
     }

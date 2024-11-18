@@ -62,7 +62,7 @@ class Channel {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  ChannelConfig? configOverrides;
+  ConfigOverrides? configOverrides;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -80,7 +80,7 @@ class Channel {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? createdBy;
+  User? createdBy;
 
   Map<String, Object> custom;
 
@@ -132,7 +132,7 @@ class Channel {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? truncatedBy;
+  User? truncatedBy;
 
   String type;
 
@@ -279,10 +279,10 @@ class Channel {
         autoTranslationLanguage: mapValueOfType<String>(json, r'auto_translation_language')!,
         cid: mapValueOfType<String>(json, r'cid')!,
         config: ChannelConfig.fromJson(json[r'config']),
-        configOverrides: ChannelConfig.fromJson(json[r'config_overrides']),
+        configOverrides: ConfigOverrides.fromJson(json[r'config_overrides']),
         cooldown: mapValueOfType<int>(json, r'cooldown'),
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserObject.fromJson(json[r'created_by']),
+        createdBy: User.fromJson(json[r'created_by']),
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         disabled: mapValueOfType<bool>(json, r'disabled')!,
@@ -293,7 +293,7 @@ class Channel {
         memberCount: mapValueOfType<int>(json, r'member_count'),
         members: ChannelMember.listFromJson(json[r'members']),
         team: mapValueOfType<String>(json, r'team'),
-        truncatedBy: UserObject.fromJson(json[r'truncated_by']),
+        truncatedBy: User.fromJson(json[r'truncated_by']),
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );

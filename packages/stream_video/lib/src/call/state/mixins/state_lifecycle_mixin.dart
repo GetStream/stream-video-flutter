@@ -65,6 +65,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: data.metadata.details.backstage,
       isRecording: data.metadata.details.recording,
       isTranscribing: data.metadata.details.transcribing,
+      isCaptioning: data.metadata.details.captioning,
       isBroadcasting: data.metadata.details.broadcasting,
       blockedUserIds: data.metadata.details.blockedUserIds.toList(),
       createdAt: data.metadata.details.createdAt,

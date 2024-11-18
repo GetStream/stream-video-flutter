@@ -121,6 +121,7 @@ extension EnvelopeExt on open.CallResponse {
       recording: recording,
       backstage: backstage,
       transcribing: transcribing,
+      captioning: captioning,
       custom: Map.unmodifiable(custom),
       rtmpIngress: ingress.rtmp.address,
       joinAheadTimeSeconds: joinAheadTimeSeconds,
@@ -193,8 +194,8 @@ extension CallSettingsExt on open.CallSettingsResponse {
         rtmp: broadcasting.rtmp.toSettingsDomain(),
       ),
       transcription: StreamTranscriptionSettings(
-        closedCaptionMode: transcription.closedCaptionMode,
-        mode: transcription.mode.toSettingsDomain(),
+        closedCaptionMode: transcription.closedCaptionMode.toSettingsDomain(),
+        transcriptionMode: transcription.mode.toSettingsDomain(),
         languages: transcription.languages,
       ),
       backstage: StreamBackstageSettings(
@@ -241,6 +242,20 @@ extension on open.TranscriptionSettingsResponseModeEnum {
       return TranscriptionSettingsMode.available;
     } else {
       return TranscriptionSettingsMode.disabled;
+    }
+  }
+}
+
+extension on open.TranscriptionSettingsResponseClosedCaptionModeEnum {
+  ClosedCaptionSettingsMode toSettingsDomain() {
+    if (this ==
+        open.TranscriptionSettingsResponseClosedCaptionModeEnum.autoOn) {
+      return ClosedCaptionSettingsMode.autoOn;
+    } else if (this ==
+        open.TranscriptionSettingsResponseClosedCaptionModeEnum.available) {
+      return ClosedCaptionSettingsMode.available;
+    } else {
+      return ClosedCaptionSettingsMode.disabled;
     }
   }
 }
@@ -426,7 +441,7 @@ extension CreateDeviceRequestPushProviderEnumX
   }
 }
 
-extension DeviceExt on open.Device {
+extension DeviceExt on open.DeviceResponse {
   PushDevice? toPushDevice() {
     final parsedProvider = PushProvider.fromAlias(pushProvider);
     if (parsedProvider == null) {
@@ -448,7 +463,7 @@ extension DeviceExt on open.Device {
   }
 }
 
-extension DeviceListExt on List<open.Device> {
+extension DeviceListExt on List<open.DeviceResponse> {
   List<PushDevice> toPushDevices() {
     return map((it) => it.toPushDevice()).whereNotNull().toList();
   }

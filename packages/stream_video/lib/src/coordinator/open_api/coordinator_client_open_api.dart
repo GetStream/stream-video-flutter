@@ -813,6 +813,50 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> startClosedCaptions(
+    StreamCallCid callCid,
+  ) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[startClosedCaptions] no connection established');
+        return connectionResult;
+      }
+      final result =
+          await _defaultApi.startClosedCaptions(callCid.type.value, callCid.id);
+      if (result == null) {
+        return Result.error('[startClosedCaptions] result is null');
+      }
+
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> stopClosedCaptions(
+    StreamCallCid callCid,
+  ) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[stopClosedCaptions] no connection established');
+        return connectionResult;
+      }
+      final result =
+          await _defaultApi.stopClosedCaptions(callCid.type.value, callCid.id);
+      if (result == null) {
+        return Result.error('[stopClosedCaptions] result is null');
+      }
+
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid) async {
     try {
       final connectionResult = await _waitUntilConnected();

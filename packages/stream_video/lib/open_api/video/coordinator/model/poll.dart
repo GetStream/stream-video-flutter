@@ -52,7 +52,7 @@ class Poll {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? createdBy;
+  User? createdBy;
 
   String createdById;
 
@@ -220,7 +220,7 @@ class Poll {
         allowUserSuggestedOptions: mapValueOfType<bool>(json, r'allow_user_suggested_options')!,
         answersCount: mapValueOfType<int>(json, r'answers_count')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserObject.fromJson(json[r'created_by']),
+        createdBy: User.fromJson(json[r'created_by']),
         createdById: mapValueOfType<String>(json, r'created_by_id')!,
         description: mapValueOfType<String>(json, r'description')!,
         enforceUniqueVote: mapValueOfType<bool>(json, r'enforce_unique_vote')!,

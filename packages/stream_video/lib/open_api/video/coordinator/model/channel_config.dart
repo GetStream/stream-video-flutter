@@ -38,6 +38,7 @@ class ChannelConfig {
     required this.reminders,
     required this.replies,
     required this.search,
+    required this.skipLastMsgUpdateForSystemMsgs,
     required this.typingEvents,
     required this.updatedAt,
     required this.uploads,
@@ -70,7 +71,6 @@ class ChannelConfig {
 
   List<BlockListOptions> blocklists;
 
-  /// List of commands that channel supports
   List<String> commands;
 
   bool connectEvents;
@@ -120,6 +120,8 @@ class ChannelConfig {
 
   bool search;
 
+  bool skipLastMsgUpdateForSystemMsgs;
+
   bool typingEvents;
 
   DateTime updatedAt;
@@ -155,6 +157,7 @@ class ChannelConfig {
     other.reminders == reminders &&
     other.replies == replies &&
     other.search == search &&
+    other.skipLastMsgUpdateForSystemMsgs == skipLastMsgUpdateForSystemMsgs &&
     other.typingEvents == typingEvents &&
     other.updatedAt == updatedAt &&
     other.uploads == uploads &&
@@ -188,13 +191,14 @@ class ChannelConfig {
     (reminders.hashCode) +
     (replies.hashCode) +
     (search.hashCode) +
+    (skipLastMsgUpdateForSystemMsgs.hashCode) +
     (typingEvents.hashCode) +
     (updatedAt.hashCode) +
     (uploads.hashCode) +
     (urlEnrichment.hashCode);
 
   @override
-  String toString() => 'ChannelConfig[allowedFlagReasons=$allowedFlagReasons, automod=$automod, automodBehavior=$automodBehavior, automodThresholds=$automodThresholds, blocklist=$blocklist, blocklistBehavior=$blocklistBehavior, blocklists=$blocklists, commands=$commands, connectEvents=$connectEvents, createdAt=$createdAt, customEvents=$customEvents, markMessagesPending=$markMessagesPending, maxMessageLength=$maxMessageLength, mutes=$mutes, name=$name, partitionSize=$partitionSize, partitionTtl=$partitionTtl, polls=$polls, pushNotifications=$pushNotifications, quotes=$quotes, reactions=$reactions, readEvents=$readEvents, reminders=$reminders, replies=$replies, search=$search, typingEvents=$typingEvents, updatedAt=$updatedAt, uploads=$uploads, urlEnrichment=$urlEnrichment]';
+  String toString() => 'ChannelConfig[allowedFlagReasons=$allowedFlagReasons, automod=$automod, automodBehavior=$automodBehavior, automodThresholds=$automodThresholds, blocklist=$blocklist, blocklistBehavior=$blocklistBehavior, blocklists=$blocklists, commands=$commands, connectEvents=$connectEvents, createdAt=$createdAt, customEvents=$customEvents, markMessagesPending=$markMessagesPending, maxMessageLength=$maxMessageLength, mutes=$mutes, name=$name, partitionSize=$partitionSize, partitionTtl=$partitionTtl, polls=$polls, pushNotifications=$pushNotifications, quotes=$quotes, reactions=$reactions, readEvents=$readEvents, reminders=$reminders, replies=$replies, search=$search, skipLastMsgUpdateForSystemMsgs=$skipLastMsgUpdateForSystemMsgs, typingEvents=$typingEvents, updatedAt=$updatedAt, uploads=$uploads, urlEnrichment=$urlEnrichment]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -243,6 +247,7 @@ class ChannelConfig {
       json[r'reminders'] = this.reminders;
       json[r'replies'] = this.replies;
       json[r'search'] = this.search;
+      json[r'skip_last_msg_update_for_system_msgs'] = this.skipLastMsgUpdateForSystemMsgs;
       json[r'typing_events'] = this.typingEvents;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
       json[r'uploads'] = this.uploads;
@@ -298,6 +303,7 @@ class ChannelConfig {
         reminders: mapValueOfType<bool>(json, r'reminders')!,
         replies: mapValueOfType<bool>(json, r'replies')!,
         search: mapValueOfType<bool>(json, r'search')!,
+        skipLastMsgUpdateForSystemMsgs: mapValueOfType<bool>(json, r'skip_last_msg_update_for_system_msgs')!,
         typingEvents: mapValueOfType<bool>(json, r'typing_events')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
         uploads: mapValueOfType<bool>(json, r'uploads')!,
@@ -367,6 +373,7 @@ class ChannelConfig {
     'reminders',
     'replies',
     'search',
+    'skip_last_msg_update_for_system_msgs',
     'typing_events',
     'updated_at',
     'uploads',

@@ -13,6 +13,7 @@ part of openapi.api;
 class ChannelMember {
   /// Returns a new [ChannelMember] instance.
   ChannelMember({
+    this.archivedAt,
     this.banExpires,
     required this.banned,
     required this.channelRole,
@@ -24,6 +25,7 @@ class ChannelMember {
     this.invited,
     this.isModerator,
     required this.notificationsMuted,
+    this.pinnedAt,
     required this.shadowBanned,
     this.status,
     required this.updatedAt,
@@ -31,7 +33,14 @@ class ChannelMember {
     this.userId,
   });
 
-  /// Expiration date of the ban
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? archivedAt;
+
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -40,13 +49,10 @@ class ChannelMember {
   ///
   DateTime? banExpires;
 
-  /// Whether member is banned this channel or not
   bool banned;
 
-  /// Role of the member in the channel
   String channelRole;
 
-  /// Date/time of creation
   DateTime createdAt;
 
   Map<String, Object> custom;
@@ -59,7 +65,6 @@ class ChannelMember {
   ///
   DateTime? deletedAt;
 
-  /// Date when invite was accepted
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -68,7 +73,6 @@ class ChannelMember {
   ///
   DateTime? inviteAcceptedAt;
 
-  /// Date when invite was rejected
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -77,7 +81,6 @@ class ChannelMember {
   ///
   DateTime? inviteRejectedAt;
 
-  /// Whether member was invited or not
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -86,7 +89,6 @@ class ChannelMember {
   ///
   bool? invited;
 
-  /// Whether member is channel moderator or not
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -97,7 +99,14 @@ class ChannelMember {
 
   bool notificationsMuted;
 
-  /// Whether member is shadow banned in this channel or not
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? pinnedAt;
+
   bool shadowBanned;
 
   ///
@@ -108,7 +117,6 @@ class ChannelMember {
   ///
   String? status;
 
-  /// Date/time of the last update
   DateTime updatedAt;
 
   ///
@@ -117,7 +125,7 @@ class ChannelMember {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -129,6 +137,7 @@ class ChannelMember {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ChannelMember &&
+    other.archivedAt == archivedAt &&
     other.banExpires == banExpires &&
     other.banned == banned &&
     other.channelRole == channelRole &&
@@ -140,6 +149,7 @@ class ChannelMember {
     other.invited == invited &&
     other.isModerator == isModerator &&
     other.notificationsMuted == notificationsMuted &&
+    other.pinnedAt == pinnedAt &&
     other.shadowBanned == shadowBanned &&
     other.status == status &&
     other.updatedAt == updatedAt &&
@@ -149,6 +159,7 @@ class ChannelMember {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (archivedAt == null ? 0 : archivedAt!.hashCode) +
     (banExpires == null ? 0 : banExpires!.hashCode) +
     (banned.hashCode) +
     (channelRole.hashCode) +
@@ -160,6 +171,7 @@ class ChannelMember {
     (invited == null ? 0 : invited!.hashCode) +
     (isModerator == null ? 0 : isModerator!.hashCode) +
     (notificationsMuted.hashCode) +
+    (pinnedAt == null ? 0 : pinnedAt!.hashCode) +
     (shadowBanned.hashCode) +
     (status == null ? 0 : status!.hashCode) +
     (updatedAt.hashCode) +
@@ -167,10 +179,15 @@ class ChannelMember {
     (userId == null ? 0 : userId!.hashCode);
 
   @override
-  String toString() => 'ChannelMember[banExpires=$banExpires, banned=$banned, channelRole=$channelRole, createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, inviteAcceptedAt=$inviteAcceptedAt, inviteRejectedAt=$inviteRejectedAt, invited=$invited, isModerator=$isModerator, notificationsMuted=$notificationsMuted, shadowBanned=$shadowBanned, status=$status, updatedAt=$updatedAt, user=$user, userId=$userId]';
+  String toString() => 'ChannelMember[archivedAt=$archivedAt, banExpires=$banExpires, banned=$banned, channelRole=$channelRole, createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, inviteAcceptedAt=$inviteAcceptedAt, inviteRejectedAt=$inviteRejectedAt, invited=$invited, isModerator=$isModerator, notificationsMuted=$notificationsMuted, pinnedAt=$pinnedAt, shadowBanned=$shadowBanned, status=$status, updatedAt=$updatedAt, user=$user, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.archivedAt != null) {
+      json[r'archived_at'] = this.archivedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'archived_at'] = null;
+    }
     if (this.banExpires != null) {
       json[r'ban_expires'] = this.banExpires!.toUtc().toIso8601String();
     } else {
@@ -206,6 +223,11 @@ class ChannelMember {
       json[r'is_moderator'] = null;
     }
       json[r'notifications_muted'] = this.notificationsMuted;
+    if (this.pinnedAt != null) {
+      json[r'pinned_at'] = this.pinnedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'pinned_at'] = null;
+    }
       json[r'shadow_banned'] = this.shadowBanned;
     if (this.status != null) {
       json[r'status'] = this.status;
@@ -245,6 +267,7 @@ class ChannelMember {
       }());
 
       return ChannelMember(
+        archivedAt: mapDateTime(json, r'archived_at', r''),
         banExpires: mapDateTime(json, r'ban_expires', r''),
         banned: mapValueOfType<bool>(json, r'banned')!,
         channelRole: mapValueOfType<String>(json, r'channel_role')!,
@@ -256,10 +279,11 @@ class ChannelMember {
         invited: mapValueOfType<bool>(json, r'invited'),
         isModerator: mapValueOfType<bool>(json, r'is_moderator'),
         notificationsMuted: mapValueOfType<bool>(json, r'notifications_muted')!,
+        pinnedAt: mapDateTime(json, r'pinned_at', r''),
         shadowBanned: mapValueOfType<bool>(json, r'shadow_banned')!,
         status: mapValueOfType<String>(json, r'status'),
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
         userId: mapValueOfType<String>(json, r'user_id'),
       );
     }

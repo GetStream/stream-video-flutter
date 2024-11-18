@@ -97,8 +97,9 @@ class ChannelResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? createdBy;
+  UserResponse? createdBy;
 
+  /// Custom data for this object
   Map<String, Object> custom;
 
   /// Date/time of deletion
@@ -176,7 +177,7 @@ class ChannelResponse {
   bool? muted;
 
   /// List of channel capabilities of authenticated user
-  List<String> ownCapabilities;
+  List<ChannelOwnCapability> ownCapabilities;
 
   /// Team the channel belongs to (multi-tenant only)
   ///
@@ -202,7 +203,7 @@ class ChannelResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? truncatedBy;
+  UserResponse? truncatedBy;
 
   /// Type of the channel
   String type;
@@ -393,7 +394,7 @@ class ChannelResponse {
         config: ChannelConfigWithInfo.fromJson(json[r'config']),
         cooldown: mapValueOfType<int>(json, r'cooldown'),
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserObject.fromJson(json[r'created_by']),
+        createdBy: UserResponse.fromJson(json[r'created_by']),
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         disabled: mapValueOfType<bool>(json, r'disabled')!,
@@ -406,12 +407,10 @@ class ChannelResponse {
         members: ChannelMember.listFromJson(json[r'members']),
         muteExpiresAt: mapDateTime(json, r'mute_expires_at', r''),
         muted: mapValueOfType<bool>(json, r'muted'),
-        ownCapabilities: json[r'own_capabilities'] is Iterable
-            ? (json[r'own_capabilities'] as Iterable).cast<String>().toList(growable: false)
-            : const [],
+        ownCapabilities: ChannelOwnCapability.listFromJson(json[r'own_capabilities']),
         team: mapValueOfType<String>(json, r'team'),
         truncatedAt: mapDateTime(json, r'truncated_at', r''),
-        truncatedBy: UserObject.fromJson(json[r'truncated_by']),
+        truncatedBy: UserResponse.fromJson(json[r'truncated_by']),
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
