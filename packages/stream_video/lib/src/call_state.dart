@@ -32,6 +32,7 @@ class CallState extends Equatable {
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
+      capabilitiesByRole: const {},
       createdAt: null,
       updatedAt: null,
       startsAt: null,
@@ -50,7 +51,6 @@ class CallState extends Equatable {
     );
   }
 
-  /// TODO
   const CallState._({
     required this.currentUserId,
     required this.callCid,
@@ -68,6 +68,7 @@ class CallState extends Equatable {
     required this.rtmpIngress,
     required this.ownCapabilities,
     required this.callParticipants,
+    required this.capabilitiesByRole,
     required this.videoInputDevice,
     required this.audioInputDevice,
     required this.audioOutputDevice,
@@ -107,6 +108,7 @@ class CallState extends Equatable {
   final RtcMediaDevice? audioOutputDevice;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
+  final Map<String, List<String>> capabilitiesByRole;
   final DateTime? createdAt;
   final DateTime? startsAt;
   final DateTime? endedAt;
@@ -157,6 +159,7 @@ class CallState extends Equatable {
     RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
+    Map<String, List<String>>? capabilitiesByRole,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? startsAt,
@@ -193,6 +196,7 @@ class CallState extends Equatable {
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
+      capabilitiesByRole: capabilitiesByRole ?? this.capabilitiesByRole,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       startsAt: startsAt ?? this.startsAt,
@@ -212,7 +216,10 @@ class CallState extends Equatable {
     );
   }
 
-  CallState copyFromMetadata(CallMetadata metadata) {
+  CallState copyFromMetadata(
+    CallMetadata metadata, {
+    Map<String, List<String>>? capabilitiesByRole,
+  }) {
     final capabilities = metadata.details.ownCapabilities.toList();
 
     return copyWith(
@@ -258,6 +265,7 @@ class CallState extends Equatable {
         audioOutputDevice,
         ownCapabilities,
         callParticipants,
+        capabilitiesByRole,
         createdAt,
         updatedAt,
         startsAt,

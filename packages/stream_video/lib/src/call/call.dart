@@ -429,7 +429,10 @@ class Call {
       case StreamCallSessionStartedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallUpdatedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
+        return _stateManager.callMetadataChanged(
+          event.metadata,
+          capabilitiesByRole: event.capabilitiesByRole,
+        );
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:

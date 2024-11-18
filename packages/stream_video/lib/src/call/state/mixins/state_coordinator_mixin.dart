@@ -14,9 +14,13 @@ import '../../call_events.dart';
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
-  void callMetadataChanged(CallMetadata callMetadata) {
+  void callMetadataChanged(
+    CallMetadata callMetadata, {
+    Map<String, List<String>>? capabilitiesByRole,
+  }) {
     state = state.copyFromMetadata(
       callMetadata,
+      capabilitiesByRole: capabilitiesByRole,
     );
   }
 
