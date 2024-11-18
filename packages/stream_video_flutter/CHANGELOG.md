@@ -5,7 +5,7 @@
 * The `Call.onPermissionRequest` callback changed the event type passed as an argument from `CoordinatorCallPermissionRequestEvent` to `StreamCallPermissionRequestEvent`
 
 ✅ Added
-* Added the 'call.collectUserFeedback()' method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [cookbook](https://getstream.io/video/docs/flutter/user-rating/).
+* Added the `call.collectUserFeedback()` method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [cookbook](https://getstream.io/video/docs/flutter/user-rating/).
 * Added support for Closed Captions:
     * Listen to the `Call.closedCaptions` stream to overlay captions during your call.
     * Use `CallPreferences` to configure: 
