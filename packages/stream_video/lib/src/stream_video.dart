@@ -643,6 +643,7 @@ class StreamVideo extends Disposable {
       return;
     }
 
+    unawaited(callToJoin.join());
     onCallAccepted?.call(callToJoin);
   }
 
