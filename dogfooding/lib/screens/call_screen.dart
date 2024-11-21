@@ -155,12 +155,18 @@ class _CallScreenState extends State<CallScreen> {
               callParticipantsBuilder: (context, call, callState) {
                 return Stack(
                   children: [
-                    StreamCallParticipants(
-                      call: call,
-                      participants: callState.callParticipants,
-                      layoutMode: _currentLayoutMode,
+                    Column(
+                      children: [
+                        Expanded(
+                          child: StreamCallParticipants(
+                            call: call,
+                            participants: callState.callParticipants,
+                            layoutMode: _currentLayoutMode,
+                          ),
+                        ),
+                        ClosedCaptionsWidget(call: call),
+                      ],
                     ),
-                    ClosedCaptionsWidget(call: call),
                     if (_moreMenuVisible) ...[
                       GestureDetector(
                         onTap: () => setState(() => _moreMenuVisible = false),
