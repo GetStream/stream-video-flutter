@@ -16,6 +16,7 @@ Official Flutter Plugin for Stream Video..
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'flutter_webrtc'
+  s.dependency 'ios_platform_images'
   s.static_framework = true
   s.platform = :ios, '11.0'
 

@@ -4,20 +4,65 @@ import flutter_webrtc
 
 public class StreamVideoFlutterPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "stream_video_flutter", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(
+            name: "stream_video_flutter", binaryMessenger: registrar.messenger())
         let instance = StreamVideoFlutterPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
-        
+
         let factory = StreamPictureInPictureNativeViewFactory(messenger: registrar.messenger())
         registrar.register(
             factory,
             withId: "stream-pip-view")
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "getPlatformVersion":
-            result("iOS " + UIDevice.current.systemVersion)
+        case "isBackgroundEffectSupported":
+            if #available(iOS 15.0, *) {
+                result(true)
+            } else {
+                result(false)
+            }
+        case "registerBlurEffectProcessors":
+            if #available(iOS 15.0, *) {
+                ProcessorProvider.addProcessor(
+                    BlurBackgroundVideoFrameProcessor(blurIntensity: BlurIntensity.light),
+                    forName: "BackgroundBlurLight")
+                ProcessorProvider.addProcessor(
+                    BlurBackgroundVideoFrameProcessor(blurIntensity: BlurIntensity.medium),
+                    forName: "BackgroundBlurMedium")
+                ProcessorProvider.addProcessor(
+                    BlurBackgroundVideoFrameProcessor(blurIntensity: BlurIntensity.heavy),
+                    forName: "BackgroundBlurHeavy")
+            } else {
+                print("Background blur effects are not supported on iOS versions earlier than 15.0")
+            }
+
+            result(nil)
+        case "registerImageEffectProcessors":
+            if #available(iOS 15.0, *) {
+                if let arguments = call.arguments as? [String: Any] {
+                    guard let backgroundImageUrl = arguments["backgroundImageUrl"] as? String
+                    else {
+                        result(
+                            FlutterError(
+                                code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil)
+                        )
+                        return
+                    }
+
+                    ProcessorProvider.addProcessor(
+                        ImageBackgroundVideoFrameProcessor(backgroundImageUrl),
+                        forName: "VirtualBackground-\(backgroundImageUrl)")
+
+                    result(nil)
+                }
+
+                result(nil)
+
+            } else {
+                print("Image overlay effects are not supported on iOS versions earlier than 15.0")
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -26,12 +71,12 @@ public class StreamVideoFlutterPlugin: NSObject, FlutterPlugin {
 
 class StreamPictureInPictureNativeViewFactory: NSObject, FlutterPlatformViewFactory {
     private var messenger: FlutterBinaryMessenger
-    
+
     init(messenger: FlutterBinaryMessenger) {
         self.messenger = messenger
         super.init()
     }
-    
+
     func create(
         withFrame frame: CGRect,
         viewIdentifier viewId: Int64,
@@ -43,7 +88,7 @@ class StreamPictureInPictureNativeViewFactory: NSObject, FlutterPlatformViewFact
             arguments: args,
             binaryMessenger: messenger)
     }
-    
+
     public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         return FlutterStandardMessageCodec.sharedInstance()
     }
@@ -53,7 +98,7 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
     private var _view: UIView
     private var methodChannel: FlutterMethodChannel?
     private lazy var pictureInPictureController = StreamPictureInPictureController()
-    
+
     init(
         frame: CGRect,
         viewIdentifier viewId: Int64,
@@ -62,24 +107,26 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
     ) {
         _view = UIView()
         super.init()
-        
-        self.methodChannel = FlutterMethodChannel(name: "stream_video_flutter_pip" ,binaryMessenger: messenger)
+
+        self.methodChannel = FlutterMethodChannel(
+            name: "stream_video_flutter_pip", binaryMessenger: messenger)
         methodChannel?.setMethodCallHandler(onMethodCall)
-        
+
         pictureInPictureController?.sourceView = _view
-        
+
         createNativeView(view: _view)
     }
-    
+
     private func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
-        switch(call.method){
+        switch call.method {
         case "setTrack":
-            let argumentsDictionary = call.arguments as? Dictionary<String, Any>
+            let argumentsDictionary = call.arguments as? [String: Any]
             let trackId = argumentsDictionary?["trackId"] as? String
-          
+
             DispatchQueue.main.async {
                 if let unwrappedTrackId = trackId {
-                    let track = FlutterWebRTCPlugin.sharedSingleton()?.track(forId: unwrappedTrackId, peerConnectionId: nil);
+                    let track = FlutterWebRTCPlugin.sharedSingleton()?.track(
+                        forId: unwrappedTrackId, peerConnectionId: nil)
                     if let videoTrack = track as? RTCVideoTrack {
                         self.pictureInPictureController?.track = videoTrack
                     }
@@ -92,12 +139,12 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
             result(FlutterMethodNotImplemented)
         }
     }
-    
+
     func view() -> UIView {
         return _view
     }
-    
-    func createNativeView(view _view: UIView){
+
+    func createNativeView(view _view: UIView) {
         _view.backgroundColor = UIColor.clear
     }
 }
