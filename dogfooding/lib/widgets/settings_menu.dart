@@ -193,14 +193,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
       StandardActionMenuItem(
         icon: Icons.auto_awesome,
         label: 'Set Background Effect',
-        trailing: Text(
-          _videoEffectsManager.currentEffect != null ? 'On' : 'Off',
-          style: TextStyle(
-            color: _videoEffectsManager.currentEffect != null
-                ? AppColorPalette.appGreen
-                : null,
-          ),
-        ),
         onPressed: () {
           setState(() {
             showBackgroundEffects = true;
