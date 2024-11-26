@@ -368,11 +368,12 @@ class StreamVideo extends Disposable {
     }
     try {
       await _connectOperation?.cancel();
-      await _client.disconnectUser();
-      _subscriptions.cancelAll();
 
       // Unregister device from push notification manager.
-      pushNotificationManager?.unregisterDevice();
+      await pushNotificationManager?.unregisterDevice();
+
+      await _client.disconnectUser();
+      _subscriptions.cancelAll();
 
       // Resetting the state.
       await _state.clear();
