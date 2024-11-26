@@ -69,26 +69,40 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isRinging = memberIds.isNotEmpty;
 
     try {
-      await _call!.getOrCreate(
+      final result = await _call!.getOrCreate(
         memberIds: memberIds,
         ringing: isRinging,
         video: true,
       );
+
+      result.fold(
+        success: (success) {
+          if (mounted) {
+            if (isRinging) {
+              CallRoute($extra: (
+                call: _call!,
+                connectOptions: null,
+              )).push(context);
+            } else {
+              LobbyRoute($extra: _call!).push(context);
+            }
+          }
+        },
+        failure: (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              duration: const Duration(seconds: 20),
+              content: Text('Error: ${failure.error.message}'),
+            ),
+          );
+        },
+      );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
-    }
-
-    if (mounted) {
-      hideLoadingIndicator(context);
-
-      if (isRinging) {
-        CallRoute($extra: (
-          call: _call!,
-          connectOptions: null,
-        )).push(context);
-      } else {
-        LobbyRoute($extra: _call!).push(context);
+    } finally {
+      if (mounted) {
+        hideLoadingIndicator(context);
       }
     }
   }

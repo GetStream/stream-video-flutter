@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final userInfo = UserInfo(
       role: 'admin',
-      id: googleUser.email,
+      id: createValidId(googleUser.email),
       name: googleUser.displayName ?? '',
       image: googleUser.photoUrl,
     );
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final userInfo = UserInfo(
       role: 'admin',
-      id: email.replaceAll('@', '_').replaceAll('.', '_'),
+      id: createValidId(email),
       name: email,
     );
 
@@ -82,9 +82,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Register StreamVideo client with the user.
     final authController = locator.get<UserAuthController>();
-    await authController.login(user, environment);
 
-    if (mounted) hideLoadingIndicator(context);
+    try {
+      await authController.login(user, environment);
+    } catch (e, _) {
+      if (mounted) {
+        hideLoadingIndicator(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 20),
+            content: Text('Error: $e'),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -267,4 +278,13 @@ String randomId({int size = 21}) {
     id += _alphabet[(math.Random().nextDouble() * 64).floor() | 0];
   }
   return id;
+}
+
+String createValidId(String id) {
+  return id
+      .replaceAll('@', '_')
+      .replaceAll('.', '_')
+      .replaceAll('.', '_')
+      .replaceAll('+', '_')
+      .replaceAll('~', '_');
 }
