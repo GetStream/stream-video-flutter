@@ -23,8 +23,6 @@ class StreamVideoEffectsManager {
   final Call call;
   final _logger = taggedLogger(tag: _tag);
 
-  String? currentEffect;
-
   Future<bool> isSupported() async {
     return await StreamVideoFlutterPlatform.instance
             .isBackgroundEffectSupported() ??
@@ -52,8 +50,6 @@ class StreamVideoEffectsManager {
         blurIntensity.name,
       ],
     );
-
-    currentEffect = blurIntensity.name;
   }
 
   Future<void> applyBackgroundImageFilter(String imageUrl) async {
@@ -81,8 +77,6 @@ class StreamVideoEffectsManager {
         effectName,
       ],
     );
-
-    currentEffect = effectName;
   }
 
   Future<void> disableAllFilters() async {
@@ -99,8 +93,6 @@ class StreamVideoEffectsManager {
       trackId,
       names: [],
     );
-
-    currentEffect = null;
   }
 
   Future<String?> _getTrackId() async {
