@@ -18,14 +18,8 @@ class UserAuthRepository {
     final response = await videoClient.connect();
 
     return response.fold(success: (success) {
-      final userToken = response.getDataOrNull();
-
-      if (userToken == null) {
-        throw Exception('Failed to connect user');
-      }
-
       return UserCredentials(
-        token: userToken,
+        token: success.data,
         userInfo: currentUser,
       );
     }, failure: (failure) {

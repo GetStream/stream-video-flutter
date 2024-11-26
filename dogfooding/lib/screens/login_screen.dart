@@ -281,10 +281,5 @@ String randomId({int size = 21}) {
 }
 
 String createValidId(String id) {
-  return id
-      .replaceAll('@', '_')
-      .replaceAll('.', '_')
-      .replaceAll('.', '_')
-      .replaceAll('+', '_')
-      .replaceAll('~', '_');
+  return id.replaceAll(RegExp(r'[^\w]'), '_');
 }
