@@ -1,6 +1,7 @@
 import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../../stream_video.dart';
 import 'video_error.dart';
 
 /// TODO
@@ -21,6 +22,12 @@ mixin VideoErrors {
     } else if (exception is WebSocketChannelException) {
       return VideoErrorWithCause(
         message: exception.message ?? exception.inner?.toString() ?? '',
+        cause: exception,
+        stackTrace: stackTrace,
+      );
+    } else if (exception is ApiException) {
+      return VideoErrorWithCause(
+        message: exception.message ?? exception.toString(),
         cause: exception,
         stackTrace: stackTrace,
       );

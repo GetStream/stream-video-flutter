@@ -16,15 +16,15 @@ class UserAuthRepository {
 
   Future<UserCredentials> login() async {
     final response = await videoClient.connect();
-    final userToken = response.getDataOrNull();
-    if (userToken == null) {
-      throw Exception('Failed to connect user');
-    }
 
-    return UserCredentials(
-      token: userToken,
-      userInfo: currentUser,
-    );
+    return response.fold(success: (success) {
+      return UserCredentials(
+        token: success.data,
+        userInfo: currentUser,
+      );
+    }, failure: (failure) {
+      throw failure.error;
+    });
   }
 
   UserInfo get currentUser => videoClient.currentUser;

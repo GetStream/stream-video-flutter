@@ -260,7 +260,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
-  void unregisterDevice() async {
+  Future<void> unregisterDevice() async {
     final token = await getDevicePushTokenVoIP();
     if (token != null) {
       _client.deleteDevice(id: token);
@@ -272,7 +272,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       _client.deleteDevice(id: apnToken);
     }
 
-    removedStoredTokens();
+    await removedStoredTokens();
   }
 
   @override
