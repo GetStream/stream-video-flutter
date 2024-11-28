@@ -10,13 +10,14 @@
 
 part of openapi.api;
 
+// MANUAL_EDIT Response -> DurationResponse
 class DurationResponse {
   /// Returns a new [DurationResponse] instance.
   DurationResponse({
     required this.duration,
   });
 
-  /// Duration of the request in human-readable format
+  /// Duration of the request in milliseconds
   String duration;
 
   @override

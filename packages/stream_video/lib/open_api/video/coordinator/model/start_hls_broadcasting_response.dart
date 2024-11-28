@@ -17,9 +17,9 @@ class StartHLSBroadcastingResponse {
     required this.playlistUrl,
   });
 
-  /// Duration of the request in milliseconds
   String duration;
 
+  /// the URL of the HLS playlist
   String playlistUrl;
 
   @override

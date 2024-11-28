@@ -26,6 +26,8 @@ enum CallPermission {
   updateCallMember('update-call-member'),
   startTranscriptionCall('start-transcription-call'),
   stopTranscriptionCall('stop-transcription-call'),
+  startClosedCaptionsCall('start-closed-captions-call'),
+  stopClosedCaptionsCall('stop-closed-captions-call'),
   pinForEveryone('pin-for-everyone'),
   unknown('unknown');
 

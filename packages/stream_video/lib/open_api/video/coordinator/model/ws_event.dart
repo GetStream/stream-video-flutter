@@ -73,7 +73,7 @@ class WSEvent {
 
   String type;
 
-  UserObject user;
+  User user;
 
   CallResponse call;
 
@@ -166,7 +166,7 @@ class WSEvent {
 
   String cid;
 
-  UserObject createdBy;
+  User createdBy;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -404,7 +404,7 @@ class WSEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user'])!,
+        user: User.fromJson(json[r'user'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members']),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
@@ -442,7 +442,7 @@ class WSEvent {
         channelId: mapValueOfType<String>(json, r'channel_id')!,
         channelType: mapValueOfType<String>(json, r'channel_type')!,
         cid: mapValueOfType<String>(json, r'cid')!,
-        createdBy: UserObject.fromJson(json[r'created_by'])!,
+        createdBy: User.fromJson(json[r'created_by'])!,
         expiration: mapDateTime(json, r'expiration', r''),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
         team: mapValueOfType<String>(json, r'team'),

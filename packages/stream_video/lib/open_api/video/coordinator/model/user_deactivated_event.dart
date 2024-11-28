@@ -21,7 +21,7 @@ class UserDeactivatedEvent {
 
   DateTime createdAt;
 
-  UserObject createdBy;
+  User createdBy;
 
   String type;
 
@@ -31,7 +31,7 @@ class UserDeactivatedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserDeactivatedEvent &&
@@ -84,9 +84,9 @@ class UserDeactivatedEvent {
 
       return UserDeactivatedEvent(
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserObject.fromJson(json[r'created_by'])!,
+        createdBy: User.fromJson(json[r'created_by'])!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

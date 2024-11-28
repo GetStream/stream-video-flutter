@@ -38,7 +38,7 @@ class Ban {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? createdBy;
+  User? createdBy;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -64,7 +64,7 @@ class Ban {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? target;
+  User? target;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is Ban &&
@@ -143,11 +143,11 @@ class Ban {
       return Ban(
         channel: Channel.fromJson(json[r'channel']),
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserObject.fromJson(json[r'created_by']),
+        createdBy: User.fromJson(json[r'created_by']),
         expires: mapDateTime(json, r'expires', r''),
         reason: mapValueOfType<String>(json, r'reason'),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
-        target: UserObject.fromJson(json[r'target']),
+        target: User.fromJson(json[r'target']),
       );
     }
     return null;

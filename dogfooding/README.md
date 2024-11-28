@@ -18,6 +18,8 @@ For a more basic example of how to use the Stream Video Flutter package, check o
 
 - **Testing Ground**: Used by Stream developers for feature validation and bug testing.
 
+- **Closed Captions**: Test closed captions during video calls.
+
 ## Getting Started
 
 To set up and run the app, follow these steps:

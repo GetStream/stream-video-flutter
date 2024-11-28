@@ -46,6 +46,7 @@ class CallDetails with EquatableMixin {
     required this.recording,
     required this.backstage,
     required this.transcribing,
+    required this.captioning,
     required this.egress,
     required this.custom,
     required this.rtmpIngress,
@@ -64,6 +65,7 @@ class CallDetails with EquatableMixin {
   final bool recording;
   final bool backstage;
   final bool transcribing;
+  final bool captioning;
   final CallEgress egress;
   final Map<String, Object> custom;
   final String rtmpIngress;
@@ -82,6 +84,7 @@ class CallDetails with EquatableMixin {
         recording,
         backstage,
         transcribing,
+        captioning,
         egress,
         custom,
         rtmpIngress,

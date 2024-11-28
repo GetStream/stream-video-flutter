@@ -18,7 +18,7 @@ class ListDevicesResponse {
   });
 
   /// List of devices
-  List<Device> devices;
+  List<DeviceResponse> devices;
 
   String duration;
 
@@ -62,7 +62,7 @@ class ListDevicesResponse {
       }());
 
       return ListDevicesResponse(
-        devices: Device.listFromJson(json[r'devices']),
+        devices: DeviceResponse.listFromJson(json[r'devices']),
         duration: mapValueOfType<String>(json, r'duration')!,
       );
     }

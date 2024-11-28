@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class UserObject {
-  /// Returns a new [UserObject] instance.
-  UserObject({
+class User {
+  /// Returns a new [User] instance.
+  User({
     this.banExpires,
     required this.banned,
     this.createdAt,
@@ -23,6 +23,7 @@ class UserObject {
     this.invisible,
     this.language,
     this.lastActive,
+    this.lastEngagedAt,
     required this.online,
     this.privacySettings,
     this.pushNotifications,
@@ -32,7 +33,6 @@ class UserObject {
     this.updatedAt,
   });
 
-  /// Expiration date of the ban
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -41,10 +41,8 @@ class UserObject {
   ///
   DateTime? banExpires;
 
-  /// Whether a user is banned or not
   bool banned;
 
-  /// Date/time of creation
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -55,7 +53,6 @@ class UserObject {
 
   Map<String, Object> custom;
 
-  /// Date of deactivation
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -64,7 +61,6 @@ class UserObject {
   ///
   DateTime? deactivatedAt;
 
-  /// Date/time of deletion
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -73,7 +69,6 @@ class UserObject {
   ///
   DateTime? deletedAt;
 
-  /// Unique user identifier
   String id;
 
   ///
@@ -84,7 +79,6 @@ class UserObject {
   ///
   bool? invisible;
 
-  /// Preferred language of a user
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -93,7 +87,6 @@ class UserObject {
   ///
   String? language;
 
-  /// Date of last activity
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -102,7 +95,14 @@ class UserObject {
   ///
   DateTime? lastActive;
 
-  /// Whether a user online or not
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? lastEngagedAt;
+
   bool online;
 
   ///
@@ -121,7 +121,6 @@ class UserObject {
   ///
   PushNotificationSettings? pushNotifications;
 
-  /// Revocation date for tokens
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -130,13 +129,10 @@ class UserObject {
   ///
   DateTime? revokeTokensIssuedBefore;
 
-  /// Determines the set of user permissions
   String role;
 
-  /// List of teams user is a part of
   List<String> teams;
 
-  /// Date/time of the last update
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -146,7 +142,7 @@ class UserObject {
   DateTime? updatedAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserObject &&
+  bool operator ==(Object other) => identical(this, other) || other is User &&
     other.banExpires == banExpires &&
     other.banned == banned &&
     other.createdAt == createdAt &&
@@ -157,6 +153,7 @@ class UserObject {
     other.invisible == invisible &&
     other.language == language &&
     other.lastActive == lastActive &&
+    other.lastEngagedAt == lastEngagedAt &&
     other.online == online &&
     other.privacySettings == privacySettings &&
     other.pushNotifications == pushNotifications &&
@@ -178,6 +175,7 @@ class UserObject {
     (invisible == null ? 0 : invisible!.hashCode) +
     (language == null ? 0 : language!.hashCode) +
     (lastActive == null ? 0 : lastActive!.hashCode) +
+    (lastEngagedAt == null ? 0 : lastEngagedAt!.hashCode) +
     (online.hashCode) +
     (privacySettings == null ? 0 : privacySettings!.hashCode) +
     (pushNotifications == null ? 0 : pushNotifications!.hashCode) +
@@ -187,7 +185,7 @@ class UserObject {
     (updatedAt == null ? 0 : updatedAt!.hashCode);
 
   @override
-  String toString() => 'UserObject[banExpires=$banExpires, banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+  String toString() => 'User[banExpires=$banExpires, banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, lastEngagedAt=$lastEngagedAt, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -229,6 +227,11 @@ class UserObject {
     } else {
       json[r'last_active'] = null;
     }
+    if (this.lastEngagedAt != null) {
+      json[r'last_engaged_at'] = this.lastEngagedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'last_engaged_at'] = null;
+    }
       json[r'online'] = this.online;
     if (this.privacySettings != null) {
       json[r'privacy_settings'] = this.privacySettings;
@@ -255,10 +258,10 @@ class UserObject {
     return json;
   }
 
-  /// Returns a new [UserObject] instance and imports its values from
+  /// Returns a new [User] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static UserObject? fromJson(dynamic value) {
+  static User? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -267,13 +270,13 @@ class UserObject {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserObject[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserObject[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "User[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "User[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return UserObject(
+      return User(
         banExpires: mapDateTime(json, r'ban_expires', r''),
         banned: mapValueOfType<bool>(json, r'banned')!,
         createdAt: mapDateTime(json, r'created_at', r''),
@@ -284,6 +287,7 @@ class UserObject {
         invisible: mapValueOfType<bool>(json, r'invisible'),
         language: mapValueOfType<String>(json, r'language'),
         lastActive: mapDateTime(json, r'last_active', r''),
+        lastEngagedAt: mapDateTime(json, r'last_engaged_at', r''),
         online: mapValueOfType<bool>(json, r'online')!,
         privacySettings: PrivacySettings.fromJson(json[r'privacy_settings']),
         pushNotifications: PushNotificationSettings.fromJson(json[r'push_notifications']),
@@ -298,11 +302,11 @@ class UserObject {
     return null;
   }
 
-  static List<UserObject> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <UserObject>[];
+  static List<User> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <User>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = UserObject.fromJson(row);
+        final value = User.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -311,12 +315,12 @@ class UserObject {
     return result.toList(growable: growable);
   }
 
-  static Map<String, UserObject> mapFromJson(dynamic json) {
-    final map = <String, UserObject>{};
+  static Map<String, User> mapFromJson(dynamic json) {
+    final map = <String, User>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UserObject.fromJson(entry.value);
+        final value = User.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -325,14 +329,14 @@ class UserObject {
     return map;
   }
 
-  // maps a json object with a list of UserObject-objects as value to a dart map
-  static Map<String, List<UserObject>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<UserObject>>{};
+  // maps a json object with a list of User-objects as value to a dart map
+  static Map<String, List<User>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<User>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserObject.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = User.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
