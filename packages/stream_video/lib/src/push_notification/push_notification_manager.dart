@@ -26,7 +26,7 @@ abstract class PushNotificationManager {
 
   /// Unregisters the device for push notifications. Internal use only.
   @internal
-  void unregisterDevice();
+  Future<void> unregisterDevice();
 
   /// Displays an incoming call notification.
   ///
