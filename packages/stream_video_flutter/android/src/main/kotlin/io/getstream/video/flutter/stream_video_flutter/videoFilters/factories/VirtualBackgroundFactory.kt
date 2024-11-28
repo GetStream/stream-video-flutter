@@ -16,8 +16,8 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
-import com.cloudwebrtc.webrtc.videoEffects.VideoFrameProcessor
-import com.cloudwebrtc.webrtc.videoEffects.VideoFrameProcessorFactoryInterface
+import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
+import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessorFactoryInterface
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.BitmapVideoFilter
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.Segment
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.VideoFrameProcessorWithBitmapFilter

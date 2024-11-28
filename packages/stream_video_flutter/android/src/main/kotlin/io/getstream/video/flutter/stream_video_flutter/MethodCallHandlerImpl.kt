@@ -25,7 +25,7 @@ import io.getstream.video.flutter.stream_video_flutter.service.StreamCallService
 import io.getstream.video.flutter.stream_video_flutter.service.StreamScreenShareService
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
 import io.getstream.video.flutter.stream_video_flutter.service.utils.putBoolean
-import com.cloudwebrtc.webrtc.videoEffects.ProcessorProvider
+import io.getstream.webrtc.flutter.videoEffects.ProcessorProvider
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.BackgroundBlurFactory
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.BlurIntensity
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.VirtualBackgroundFactory

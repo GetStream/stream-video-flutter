@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -52,6 +53,7 @@ class SettingsMenu extends StatefulWidget {
 
 class _SettingsMenuState extends State<SettingsMenu> {
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  final DogfoodingAppChannel _dogfoodingAppChannel = DogfoodingAppChannel();
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
   late StreamVideoEffectsManager _videoEffectsManager;
 
@@ -365,9 +367,13 @@ class _SettingsMenuState extends State<SettingsMenu> {
         ],
       ),
       const SizedBox(height: 16),
-      const Text('Background Blur',
-          style: TextStyle(fontWeight: FontWeight.bold)),
-      const SizedBox(height: 16),
+      const Text(
+        'Background Blur',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 8),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -428,8 +434,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
         ],
       ),
       const SizedBox(height: 16),
-      const Text('Image Background',
-          style: TextStyle(fontWeight: FontWeight.bold)),
+      const Text(
+        'Image Background',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       const SizedBox(height: 16),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -473,6 +483,41 @@ class _SettingsMenuState extends State<SettingsMenu> {
               ),
             ),
           )
+        ],
+      ),
+      const SizedBox(height: 16),
+      const Text(
+        'Custom Filters',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.filter_b_and_w,
+                      size: 40,
+                    ),
+                    onPressed: () => _videoEffectsManager.applyCustomEffect(
+                      'grayscale',
+                      registerEffectProcessorCallback: () async {
+                        await _dogfoodingAppChannel.registerGreyscaleEffect();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const Text('Grayscale'),
+            ],
+          ),
         ],
       ),
     ];

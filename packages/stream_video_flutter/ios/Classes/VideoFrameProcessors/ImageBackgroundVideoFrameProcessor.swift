@@ -4,8 +4,8 @@
 
 import CoreImage
 import Foundation
-import flutter_webrtc
 import ios_platform_images
+import stream_webrtc_flutter
 
 /// A video filter that applies a custom image as the background.
 ///

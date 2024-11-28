@@ -1,6 +1,6 @@
 import Flutter
 import UIKit
-import flutter_webrtc
+import stream_webrtc_flutter
 
 public class StreamVideoFlutterPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {

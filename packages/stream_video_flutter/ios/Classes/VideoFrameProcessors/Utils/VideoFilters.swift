@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import flutter_webrtc
+import stream_webrtc_flutter
 
 #if canImport(UIKit)
     import Foundation

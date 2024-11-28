@@ -5,7 +5,7 @@ import android.graphics.Matrix
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.util.Log
-import com.cloudwebrtc.webrtc.videoEffects.VideoFrameProcessor
+import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.TextureBufferImpl
 import org.webrtc.VideoFrame
