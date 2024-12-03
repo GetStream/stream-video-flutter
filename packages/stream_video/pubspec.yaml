@@ -12,6 +12,7 @@ environment:
 
 dependencies:
   async: ^2.11.0
+  battery_plus: ^6.2.0
   collection: ^1.18.0
   connectivity_plus: ^6.0.4
   dart_webrtc: ^1.4.9
@@ -33,6 +34,7 @@ dependencies:
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1
+  thermal: ^1.1.6
   uuid: ^4.2.1
   web: ^1.0.0
   web_socket_channel: ^3.0.1

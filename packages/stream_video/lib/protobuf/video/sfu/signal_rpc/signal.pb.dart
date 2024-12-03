@@ -221,6 +221,12 @@ class StopNoiseCancellationResponse extends $pb.GeneratedMessage {
   $0.Error ensureError() => $_ensure(0);
 }
 
+enum SendStatsRequest_DeviceState {
+  android, 
+  apple, 
+  notSet
+}
+
 class SendStatsRequest extends $pb.GeneratedMessage {
   factory SendStatsRequest({
     $core.String? sessionId,
@@ -229,6 +235,10 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     $core.String? webrtcVersion,
     $core.String? sdk,
     $core.String? sdkVersion,
+    $0.InputDevices? audioDevices,
+    $0.InputDevices? videoDevices,
+    $0.AndroidState? android,
+    $0.AppleState? apple,
   }) {
     final $result = create();
     if (sessionId != null) {
@@ -249,19 +259,41 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     if (sdkVersion != null) {
       $result.sdkVersion = sdkVersion;
     }
+    if (audioDevices != null) {
+      $result.audioDevices = audioDevices;
+    }
+    if (videoDevices != null) {
+      $result.videoDevices = videoDevices;
+    }
+    if (android != null) {
+      $result.android = android;
+    }
+    if (apple != null) {
+      $result.apple = apple;
+    }
     return $result;
   }
   SendStatsRequest._() : super();
   factory SendStatsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SendStatsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
+  static const $core.Map<$core.int, SendStatsRequest_DeviceState> _SendStatsRequest_DeviceStateByTag = {
+    9 : SendStatsRequest_DeviceState.android,
+    10 : SendStatsRequest_DeviceState.apple,
+    0 : SendStatsRequest_DeviceState.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendStatsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+    ..oo(0, [9, 10])
     ..aOS(1, _omitFieldNames ? '' : 'sessionId')
     ..aOS(2, _omitFieldNames ? '' : 'subscriberStats')
     ..aOS(3, _omitFieldNames ? '' : 'publisherStats')
     ..aOS(4, _omitFieldNames ? '' : 'webrtcVersion')
     ..aOS(5, _omitFieldNames ? '' : 'sdk')
     ..aOS(6, _omitFieldNames ? '' : 'sdkVersion')
+    ..aOM<$0.InputDevices>(7, _omitFieldNames ? '' : 'audioDevices', subBuilder: $0.InputDevices.create)
+    ..aOM<$0.InputDevices>(8, _omitFieldNames ? '' : 'videoDevices', subBuilder: $0.InputDevices.create)
+    ..aOM<$0.AndroidState>(9, _omitFieldNames ? '' : 'android', subBuilder: $0.AndroidState.create)
+    ..aOM<$0.AppleState>(10, _omitFieldNames ? '' : 'apple', subBuilder: $0.AppleState.create)
     ..hasRequiredFields = false
   ;
 
@@ -285,6 +317,9 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static SendStatsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendStatsRequest>(create);
   static SendStatsRequest? _defaultInstance;
+
+  SendStatsRequest_DeviceState whichDeviceState() => _SendStatsRequest_DeviceStateByTag[$_whichOneof(0)]!;
+  void clearDeviceState() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.String get sessionId => $_getSZ(0);
@@ -339,6 +374,50 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   $core.bool hasSdkVersion() => $_has(5);
   @$pb.TagNumber(6)
   void clearSdkVersion() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $0.InputDevices get audioDevices => $_getN(6);
+  @$pb.TagNumber(7)
+  set audioDevices($0.InputDevices v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasAudioDevices() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearAudioDevices() => clearField(7);
+  @$pb.TagNumber(7)
+  $0.InputDevices ensureAudioDevices() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $0.InputDevices get videoDevices => $_getN(7);
+  @$pb.TagNumber(8)
+  set videoDevices($0.InputDevices v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasVideoDevices() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearVideoDevices() => clearField(8);
+  @$pb.TagNumber(8)
+  $0.InputDevices ensureVideoDevices() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $0.AndroidState get android => $_getN(8);
+  @$pb.TagNumber(9)
+  set android($0.AndroidState v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasAndroid() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearAndroid() => clearField(9);
+  @$pb.TagNumber(9)
+  $0.AndroidState ensureAndroid() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  $0.AppleState get apple => $_getN(9);
+  @$pb.TagNumber(10)
+  set apple($0.AppleState v) { setField(10, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasApple() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearApple() => clearField(10);
+  @$pb.TagNumber(10)
+  $0.AppleState ensureApple() => $_ensure(9);
 }
 
 class SendStatsResponse extends $pb.GeneratedMessage {
