@@ -1402,16 +1402,16 @@ class Call {
     _logger.v(() => '[applyConnectOptions] finished');
   }
 
-  Future<void> _applyCameraOption(
+  Future<Result<None>> _applyCameraOption(
     TrackOption cameraOption,
     FacingMode facingMode,
     StreamTargetResolution? targetResolution,
     String? deviceId,
   ) async {
     if (cameraOption is TrackProvided) {
-      await _setLocalTrack(cameraOption.track);
+      return _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
-      await setCameraEnabled(
+      return setCameraEnabled(
         enabled: true,
         constraints: CameraConstraints(
           facingMode: facingMode,
@@ -1421,6 +1421,8 @@ class Call {
         ),
       );
     }
+
+    return const Result.success(none);
   }
 
   Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {

@@ -922,13 +922,17 @@ class CallSession extends Disposable {
       final audioInputDevices = sfu_models.InputDevices(
         availableDevices: _availableAudioInputs,
         currentDevice: stateManager.callState.audioInputDevice?.label,
-        isPermitted: stateManager.callState.audioInputDevice != null,
+        isPermitted: stateManager.callState.audioInputDevice != null &&
+            stateManager.callState.ownCapabilities
+                .contains(CallPermission.sendAudio),
       );
 
       final videoInputDevices = sfu_models.InputDevices(
         availableDevices: _availableVideoInputs,
         currentDevice: stateManager.callState.videoInputDevice?.label,
-        isPermitted: stateManager.callState.videoInputDevice != null,
+        isPermitted: stateManager.callState.videoInputDevice != null &&
+            stateManager.callState.ownCapabilities
+                .contains(CallPermission.sendVideo),
       );
 
       if (CurrentPlatform.isAndroid) {
