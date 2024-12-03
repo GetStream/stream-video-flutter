@@ -1,8 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video.dart';
 import '../disposable.dart';
@@ -409,7 +408,7 @@ extension PublisherRtcManager on RtcManager {
     final dimension = track.getVideoDimension();
     _logger.v(() => '[publishVideoTrack] dimension: $dimension');
 
-    List<RTCRtpEncoding> encodings;
+    List<rtc.RTCRtpEncoding> encodings;
 
     if (track.trackType == SfuTrackType.screenShare) {
       final physicalSize =

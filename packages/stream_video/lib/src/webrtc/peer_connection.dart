@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
