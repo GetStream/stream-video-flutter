@@ -34,7 +34,7 @@ dependencies:
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1
-  thermal: ^1.1.6
+  thermal: ^1.1.7
   uuid: ^4.2.1
   web: ^1.0.0
   web_socket_channel: ^3.0.1
