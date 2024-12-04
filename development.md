@@ -60,20 +60,25 @@
 - [x] Transcription
 
 ### 0.5.0 milestone
-- [ ] Documentation parity
-- - [ ] UI components
-- - [ ] Cookbook
-- - [ ] Advanced guides
-- [ ] Tap to focus (flutter_webrtc)
-- [ ] Video filters / audio filters
+- [x] Reconnection v2
+- [x] Documentation parity
+- - [x] UI components
+- - [x] Cookbook
+- - [x] Advanced guides
+- [x] Dynascale 2.0
+- [x] SFU switching
+
+### 0.6.0 milestone
+- [x] Video filters
+- [ ] Closed captions
+
+### 0.7.0 milestone
+- [ ] Codec preference
 - [ ] Local audio levels (maybe from webrtc)
+- [ ] Audio filters (noice cancelling)
+- [ ] Tap to focus (flutter_webrtc)
 - [ ] Test coverage 
 - - [ ] stream_video (75%)
 - - [ ] stream_video_flutter (75%)
 - - [ ] stream_video_push_notification
 - - [ ] Coverage check for PRs
-- [ ] Dynascale 2.0
-- [ ] SFU switching
-- [ ] Buttons to simulate ICE restarts / SFU switching
-- [ ] Proximity button support
-- [ ] Reconnection v2
