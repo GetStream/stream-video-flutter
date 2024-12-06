@@ -9,6 +9,7 @@ class CallConnectOptions with EquatableMixin {
     this.screenShare = TrackDisabled._instance,
     this.audioOutputDevice,
     this.audioInputDevice,
+    this.videoInputDevice,
     this.speakerDefaultOn = false,
     this.cameraFacingMode = FacingMode.user,
     this.targetResolution,
@@ -21,6 +22,7 @@ class CallConnectOptions with EquatableMixin {
 
   final RtcMediaDevice? audioOutputDevice;
   final RtcMediaDevice? audioInputDevice;
+  final RtcMediaDevice? videoInputDevice;
   final bool speakerDefaultOn;
 
   final FacingMode cameraFacingMode;
@@ -33,6 +35,7 @@ class CallConnectOptions with EquatableMixin {
     TrackOption? screenShare,
     RtcMediaDevice? audioOutputDevice,
     RtcMediaDevice? audioInputDevice,
+    RtcMediaDevice? videoInputDevice,
     FacingMode? cameraFacingMode,
     bool? speakerDefaultOn,
     StreamTargetResolution? targetResolution,
@@ -44,6 +47,7 @@ class CallConnectOptions with EquatableMixin {
       screenShare: screenShare ?? this.screenShare,
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
+      videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       cameraFacingMode: cameraFacingMode ?? this.cameraFacingMode,
       speakerDefaultOn: speakerDefaultOn ?? this.speakerDefaultOn,
       targetResolution: targetResolution ?? this.targetResolution,
@@ -59,6 +63,7 @@ class CallConnectOptions with EquatableMixin {
       screenShare: other.screenShare,
       audioOutputDevice: other.audioOutputDevice,
       audioInputDevice: other.audioInputDevice,
+      videoInputDevice: other.videoInputDevice,
       cameraFacingMode: other.cameraFacingMode,
       speakerDefaultOn: other.speakerDefaultOn,
       targetResolution: other.targetResolution,
@@ -73,6 +78,7 @@ class CallConnectOptions with EquatableMixin {
         screenShare,
         audioOutputDevice,
         audioInputDevice,
+        videoInputDevice,
         cameraFacingMode,
         speakerDefaultOn,
         targetResolution,
@@ -87,6 +93,7 @@ class CallConnectOptions with EquatableMixin {
         ' screenShare: $screenShare, '
         ' audioOutput: $audioOutputDevice,'
         ' audioInput: $audioInputDevice, '
+        ' videoInput: $videoInputDevice, '
         ' cameraFacingMode: $cameraFacingMode, '
         ' speakerDefaultOn: $speakerDefaultOn'
         ' targetResolution: $targetResolution'

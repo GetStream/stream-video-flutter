@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
 import 'package:system_info2/system_info2.dart';
+import 'package:thermal/thermal.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
@@ -15,6 +17,7 @@ import '../../../version.g.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
+import '../../extensions/thermal_status_ext.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_error.dart';
@@ -71,6 +74,26 @@ class CallSession extends Disposable {
           sdpEditor: sdpEditor,
         ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
+
+    _thermalStatusSubscription =
+        Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
+      _thermalStatus = status;
+    });
+
+    _mediaDeviceSubscription =
+        RtcMediaDeviceNotifier.instance.onDeviceChange.listen(
+      (devices) {
+        _availableAudioInputs = devices
+            .where((device) => device.kind == RtcMediaDeviceKind.audioInput)
+            .map((device) => device.label)
+            .toList();
+
+        _availableVideoInputs = devices
+            .where((device) => device.kind == RtcMediaDeviceKind.videoInput)
+            .map((device) => device.label)
+            .toList();
+      },
+    );
   }
 
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
@@ -92,6 +115,13 @@ class CallSession extends Disposable {
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
   StreamSubscription<Map<String, dynamic>>? _statsSubscription;
+  StreamSubscription<List<RtcMediaDevice>>? _mediaDeviceSubscription;
+  StreamSubscription<ThermalStatus>? _thermalStatusSubscription;
+
+  List<String>? _availableAudioInputs;
+  List<String>? _availableVideoInputs;
+  ThermalStatus? _thermalStatus;
+
   Timer? _peerConnectionCheckTimer;
 
   sfu_models.ClientDetails? _clientDetails;
@@ -285,23 +315,7 @@ class CallSession extends Disposable {
 
       _rtcManagerSubject!.add(rtcManager!);
 
-      await _statsSubscription?.cancel();
-      _statsSubscription = rtcManager?.statsStream.listen((rawStats) {
-        sfuClient.sendStats(
-          sfu.SendStatsRequest(
-            sessionId: sessionId,
-            publisherStats: jsonEncode(rawStats['publisherStats']),
-            subscriberStats: jsonEncode(rawStats['subscriberStats']),
-            sdkVersion: streamVideoVersion,
-            sdk: streamSdkName,
-            webrtcVersion: switch (CurrentPlatform.type) {
-              PlatformType.android => androidWebRTCVersion,
-              PlatformType.ios => iosWebRTCVersion,
-              _ => null,
-            },
-          ),
-        );
-      });
+      await observePeerConnectionStats();
 
       _logger.d(() => '[start] completed');
       return Result.success(
@@ -410,9 +424,9 @@ class CallSession extends Disposable {
 
     await _stats.close();
     await _eventsSubscription?.cancel();
-    _eventsSubscription = null;
     await _statsSubscription?.cancel();
-    _statsSubscription = null;
+    await _mediaDeviceSubscription?.cancel();
+    await _thermalStatusSubscription?.cancel();
 
     await sfuWS.disconnect(
       code.value,
@@ -866,14 +880,14 @@ class CallSession extends Disposable {
     return result.map((_) => none);
   }
 
-  Future<Result<None>> flipCamera() async {
+  Future<Result<RtcLocalTrack<CameraConstraints>>> flipCamera() async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to flip camera, Call not connected');
     }
 
     final result = await rtcManager.flipCamera();
-    return result.map((_) => none);
+    return result;
   }
 
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
@@ -894,6 +908,66 @@ class CallSession extends Disposable {
 
     final result = await rtcManager.setCameraPosition(cameraPosition: position);
     return result.map((_) => none);
+  }
+
+  Future<void> observePeerConnectionStats() async {
+    await _statsSubscription?.cancel();
+
+    _statsSubscription = rtcManager?.statsStream.listen((rawStats) async {
+      final lowPowerMode = await Battery().isInBatterySaveMode;
+
+      sfu_models.AndroidState? androidState;
+      sfu_models.AppleState? appleState;
+
+      final audioInputDevices = sfu_models.InputDevices(
+        availableDevices: _availableAudioInputs,
+        currentDevice: stateManager.callState.audioInputDevice?.label,
+        isPermitted: stateManager.callState.audioInputDevice != null &&
+            stateManager.callState.ownCapabilities
+                .contains(CallPermission.sendAudio),
+      );
+
+      final videoInputDevices = sfu_models.InputDevices(
+        availableDevices: _availableVideoInputs,
+        currentDevice: stateManager.callState.videoInputDevice?.label,
+        isPermitted: stateManager.callState.videoInputDevice != null &&
+            stateManager.callState.ownCapabilities
+                .contains(CallPermission.sendVideo),
+      );
+
+      if (CurrentPlatform.isAndroid) {
+        androidState = sfu_models.AndroidState(
+          thermalState: _thermalStatus?.toAndroidThermalState(),
+          isPowerSaverMode: lowPowerMode,
+        );
+      } else if (CurrentPlatform.isIos) {
+        appleState = sfu_models.AppleState(
+          thermalState: _thermalStatus?.toAppleThermalState(),
+          isLowPowerModeEnabled: lowPowerMode,
+        );
+      }
+
+      final request = sfu.SendStatsRequest(
+        sessionId: sessionId,
+        publisherStats: jsonEncode(rawStats['publisherStats']),
+        subscriberStats: jsonEncode(rawStats['subscriberStats']),
+        sdkVersion: streamVideoVersion,
+        sdk: streamSdkName,
+        android: androidState,
+        apple: appleState,
+        audioDevices: audioInputDevices,
+        videoDevices: videoInputDevices,
+        webrtcVersion: switch (CurrentPlatform.type) {
+          PlatformType.android => androidWebRTCVersion,
+          PlatformType.ios => iosWebRTCVersion,
+          _ => null,
+        },
+      );
+
+      await sfuClient.sendStats(
+        request,
+      );
+    });
   }
 
   @override

@@ -77,6 +77,13 @@ const SendStatsRequest$json = {
     {'1': 'webrtc_version', '3': 4, '4': 1, '5': 9, '10': 'webrtcVersion'},
     {'1': 'sdk', '3': 5, '4': 1, '5': 9, '10': 'sdk'},
     {'1': 'sdk_version', '3': 6, '4': 1, '5': 9, '10': 'sdkVersion'},
+    {'1': 'audio_devices', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.models.InputDevices', '10': 'audioDevices'},
+    {'1': 'video_devices', '3': 8, '4': 1, '5': 11, '6': '.stream.video.sfu.models.InputDevices', '10': 'videoDevices'},
+    {'1': 'android', '3': 9, '4': 1, '5': 11, '6': '.stream.video.sfu.models.AndroidState', '9': 0, '10': 'android'},
+    {'1': 'apple', '3': 10, '4': 1, '5': 11, '6': '.stream.video.sfu.models.AppleState', '9': 0, '10': 'apple'},
+  ],
+  '8': [
+    {'1': 'device_state'},
   ],
 };
 
@@ -86,7 +93,12 @@ final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
     'JzY3JpYmVyX3N0YXRzGAIgASgJUg9zdWJzY3JpYmVyU3RhdHMSJwoPcHVibGlzaGVyX3N0YXRz'
     'GAMgASgJUg5wdWJsaXNoZXJTdGF0cxIlCg53ZWJydGNfdmVyc2lvbhgEIAEoCVINd2VicnRjVm'
     'Vyc2lvbhIQCgNzZGsYBSABKAlSA3NkaxIfCgtzZGtfdmVyc2lvbhgGIAEoCVIKc2RrVmVyc2lv'
-    'bg==');
+    'bhJKCg1hdWRpb19kZXZpY2VzGAcgASgLMiUuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSW5wdX'
+    'REZXZpY2VzUgxhdWRpb0RldmljZXMSSgoNdmlkZW9fZGV2aWNlcxgIIAEoCzIlLnN0cmVhbS52'
+    'aWRlby5zZnUubW9kZWxzLklucHV0RGV2aWNlc1IMdmlkZW9EZXZpY2VzEkEKB2FuZHJvaWQYCS'
+    'ABKAsyJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BbmRyb2lkU3RhdGVIAFIHYW5kcm9pZBI7'
+    'CgVhcHBsZRgKIAEoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkFwcGxlU3RhdGVIAFIFYX'
+    'BwbGVCDgoMZGV2aWNlX3N0YXRl');
 
 @$core.Deprecated('Use sendStatsResponseDescriptor instead')
 const SendStatsResponse$json = {
@@ -337,6 +349,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.models.TrackInfo': $0.TrackInfo$json,
   '.stream.video.sfu.models.VideoLayer': $0.VideoLayer$json,
   '.stream.video.sfu.models.VideoDimension': $0.VideoDimension$json,
+  '.stream.video.sfu.models.Codec': $0.Codec$json,
   '.stream.video.sfu.signal.SetPublisherResponse': SetPublisherResponse$json,
   '.stream.video.sfu.models.Error': $0.Error$json,
   '.stream.video.sfu.signal.SendAnswerRequest': SendAnswerRequest$json,
@@ -352,6 +365,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.signal.ICERestartRequest': ICERestartRequest$json,
   '.stream.video.sfu.signal.ICERestartResponse': ICERestartResponse$json,
   '.stream.video.sfu.signal.SendStatsRequest': SendStatsRequest$json,
+  '.stream.video.sfu.models.InputDevices': $0.InputDevices$json,
+  '.stream.video.sfu.models.AndroidState': $0.AndroidState$json,
+  '.stream.video.sfu.models.AppleState': $0.AppleState$json,
   '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
   '.stream.video.sfu.signal.StartNoiseCancellationRequest': StartNoiseCancellationRequest$json,
   '.stream.video.sfu.signal.StartNoiseCancellationResponse': StartNoiseCancellationResponse$json,

@@ -7,16 +7,18 @@ class SfuVideoLayerSetting with EquatableMixin {
     required this.name,
     required this.active,
     required this.maxBitrate,
+    required this.maxFramerate,
     required this.scaleResolutionDownBy,
-    required this.priority,
+    required this.scalabilityMode,
     required this.codec,
   });
 
   final String name;
   final bool active;
   final int maxBitrate;
+  final int maxFramerate;
   final double scaleResolutionDownBy;
-  final SfuVideoLayerSettingPriority priority;
+  final String scalabilityMode;
   final SfuCodec codec;
 
   @override
@@ -27,18 +29,9 @@ class SfuVideoLayerSetting with EquatableMixin {
         name,
         active,
         maxBitrate,
+        maxFramerate,
         scaleResolutionDownBy,
-        priority,
+        scalabilityMode,
         codec,
       ];
-}
-
-enum SfuVideoLayerSettingPriority {
-  high,
-  medium,
-  low,
-  veryLow;
-
-  @override
-  String toString() => name;
 }

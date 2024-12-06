@@ -251,5 +251,57 @@ class WebsocketReconnectStrategy extends $pb.ProtobufEnum {
   const WebsocketReconnectStrategy._($core.int v, $core.String n) : super(v, n);
 }
 
+/// AndroidThermalState is reported by the Android API. The full list of values is documented here
+/// https://developer.android.com/reference/android/os/PowerManager.html#getCurrentThermalStatus()
+class AndroidThermalState extends $pb.ProtobufEnum {
+  static const AndroidThermalState ANDROID_THERMAL_STATE_UNSPECIFIED = AndroidThermalState._(0, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_UNSPECIFIED');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_NONE = AndroidThermalState._(1, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_NONE');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_LIGHT = AndroidThermalState._(2, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_LIGHT');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_MODERATE = AndroidThermalState._(3, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_MODERATE');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_SEVERE = AndroidThermalState._(4, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_SEVERE');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_CRITICAL = AndroidThermalState._(5, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_CRITICAL');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_EMERGENCY = AndroidThermalState._(6, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_EMERGENCY');
+  static const AndroidThermalState ANDROID_THERMAL_STATE_SHUTDOWN = AndroidThermalState._(7, _omitEnumNames ? '' : 'ANDROID_THERMAL_STATE_SHUTDOWN');
+
+  static const $core.List<AndroidThermalState> values = <AndroidThermalState> [
+    ANDROID_THERMAL_STATE_UNSPECIFIED,
+    ANDROID_THERMAL_STATE_NONE,
+    ANDROID_THERMAL_STATE_LIGHT,
+    ANDROID_THERMAL_STATE_MODERATE,
+    ANDROID_THERMAL_STATE_SEVERE,
+    ANDROID_THERMAL_STATE_CRITICAL,
+    ANDROID_THERMAL_STATE_EMERGENCY,
+    ANDROID_THERMAL_STATE_SHUTDOWN,
+  ];
+
+  static final $core.Map<$core.int, AndroidThermalState> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static AndroidThermalState? valueOf($core.int value) => _byValue[value];
+
+  const AndroidThermalState._($core.int v, $core.String n) : super(v, n);
+}
+
+/// AppleThermalState is the thermal state as reported by Apple devices when available or applicable to the platform.
+/// The full list of states (enum) is available here: https://developer.apple.com/documentation/foundation/processinfo/thermalstate
+class AppleThermalState extends $pb.ProtobufEnum {
+  static const AppleThermalState APPLE_THERMAL_STATE_UNSPECIFIED = AppleThermalState._(0, _omitEnumNames ? '' : 'APPLE_THERMAL_STATE_UNSPECIFIED');
+  static const AppleThermalState APPLE_THERMAL_STATE_NOMINAL = AppleThermalState._(1, _omitEnumNames ? '' : 'APPLE_THERMAL_STATE_NOMINAL');
+  static const AppleThermalState APPLE_THERMAL_STATE_FAIR = AppleThermalState._(2, _omitEnumNames ? '' : 'APPLE_THERMAL_STATE_FAIR');
+  static const AppleThermalState APPLE_THERMAL_STATE_SERIOUS = AppleThermalState._(3, _omitEnumNames ? '' : 'APPLE_THERMAL_STATE_SERIOUS');
+  static const AppleThermalState APPLE_THERMAL_STATE_CRITICAL = AppleThermalState._(4, _omitEnumNames ? '' : 'APPLE_THERMAL_STATE_CRITICAL');
+
+  static const $core.List<AppleThermalState> values = <AppleThermalState> [
+    APPLE_THERMAL_STATE_UNSPECIFIED,
+    APPLE_THERMAL_STATE_NOMINAL,
+    APPLE_THERMAL_STATE_FAIR,
+    APPLE_THERMAL_STATE_SERIOUS,
+    APPLE_THERMAL_STATE_CRITICAL,
+  ];
+
+  static final $core.Map<$core.int, AppleThermalState> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static AppleThermalState? valueOf($core.int value) => _byValue[value];
+
+  const AppleThermalState._($core.int v, $core.String n) : super(v, n);
+}
+
 
 const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');
