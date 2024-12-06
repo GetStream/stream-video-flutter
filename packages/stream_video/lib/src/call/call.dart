@@ -1314,6 +1314,9 @@ class Call {
     final audioInputs = mediaDevices
         .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
         .toList();
+    final videoInputs = mediaDevices
+        .where((d) => d.kind == RtcMediaDeviceKind.videoInput)
+        .toList();
 
     var defaultAudioOutput = audioOutputs.firstWhereOrNull((device) {
       if (settings.audio.defaultDevice ==
@@ -1332,6 +1335,17 @@ class Call {
       defaultAudioOutput = audioOutputs.first;
     }
 
+    var defaultVideoInput = videoInputs.firstWhereOrNull(
+      (device) => device.label
+          .toLowerCase()
+          .contains(settings.video.cameraFacing.value.toLowerCase()),
+    );
+
+    if (defaultVideoInput == null && videoInputs.length > 2) {
+      // If it's not front or back then take one of the external cameras
+      defaultVideoInput = videoInputs.last;
+    }
+
     final defaultAudioInput = audioInputs
             .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
         audioInputs.firstOrNull;
@@ -1345,6 +1359,7 @@ class Call {
       ),
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
+      videoInputDevice: defaultVideoInput ?? videoInputs.firstOrNull,
       cameraFacingMode: settings.video.cameraFacing ==
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
@@ -1361,7 +1376,9 @@ class Call {
       _connectOptions.camera,
       _connectOptions.cameraFacingMode,
       _connectOptions.targetResolution,
+      _connectOptions.videoInputDevice?.id,
     );
+
     await _applyMicrophoneOption(_connectOptions.microphone);
     await _applyScreenShareOption(
       _connectOptions.screenShare,
@@ -1385,23 +1402,27 @@ class Call {
     _logger.v(() => '[applyConnectOptions] finished');
   }
 
-  Future<void> _applyCameraOption(
+  Future<Result<None>> _applyCameraOption(
     TrackOption cameraOption,
     FacingMode facingMode,
     StreamTargetResolution? targetResolution,
+    String? deviceId,
   ) async {
     if (cameraOption is TrackProvided) {
-      await _setLocalTrack(cameraOption.track);
+      return _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
-      await setCameraEnabled(
+      return setCameraEnabled(
         enabled: true,
         constraints: CameraConstraints(
           facingMode: facingMode,
+          deviceId: deviceId,
           params: targetResolution?.toVideoParams() ??
               RtcVideoParametersPresets.h720_16x9,
         ),
       );
     }
+
+    return const Result.success(none);
   }
 
   Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
@@ -1828,15 +1849,31 @@ class Call {
     final result =
         await _session?.flipCamera() ?? Result.error('Session is null');
 
-    if (result.isSuccess) {
-      _connectOptions = connectOptions.copyWith(
-        cameraFacingMode: connectOptions.cameraFacingMode.flip(),
-      );
+    await result.fold(
+      success: (success) async {
+        final mediaDevicesResult =
+            await RtcMediaDeviceNotifier.instance.enumerateDevices();
 
-      _stateManager.participantFlipCamera();
-    }
+        final mediaDevices = mediaDevicesResult.fold(
+          success: (success) => success.data,
+          failure: (failure) => <RtcMediaDevice>[],
+        );
 
-    return result;
+        final currentInput = mediaDevices
+            .where((d) => d.id == success.data.mediaConstraints.deviceId)
+            .firstOrNull;
+
+        _connectOptions = connectOptions.copyWith(
+          cameraFacingMode: connectOptions.cameraFacingMode.flip(),
+          videoInputDevice: currentInput,
+        );
+
+        _stateManager.participantFlipCamera(currentInput);
+      },
+      failure: (failure) {},
+    );
+
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
@@ -1844,6 +1881,7 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      _connectOptions = connectOptions.copyWith(videoInputDevice: device);
       _stateManager.participantSetVideoInputDevice(device: device);
     }
 

@@ -699,31 +699,19 @@ class VideoLayer extends $pb.GeneratedMessage {
 
 class Codec extends $pb.GeneratedMessage {
   factory Codec({
-    $core.int? payloadType,
-    $core.String? name,
-    $core.String? fmtpLine,
-    $core.int? clockRate,
-    $core.String? encodingParameters,
-    $core.Iterable<$core.String>? feedbacks,
+    $core.String? mimeType,
+    $core.String? scalabilityMode,
+    $core.String? fmtp,
   }) {
     final $result = create();
-    if (payloadType != null) {
-      $result.payloadType = payloadType;
+    if (mimeType != null) {
+      $result.mimeType = mimeType;
     }
-    if (name != null) {
-      $result.name = name;
+    if (scalabilityMode != null) {
+      $result.scalabilityMode = scalabilityMode;
     }
-    if (fmtpLine != null) {
-      $result.fmtpLine = fmtpLine;
-    }
-    if (clockRate != null) {
-      $result.clockRate = clockRate;
-    }
-    if (encodingParameters != null) {
-      $result.encodingParameters = encodingParameters;
-    }
-    if (feedbacks != null) {
-      $result.feedbacks.addAll(feedbacks);
+    if (fmtp != null) {
+      $result.fmtp = fmtp;
     }
     return $result;
   }
@@ -732,12 +720,9 @@ class Codec extends $pb.GeneratedMessage {
   factory Codec.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Codec', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'payloadType', $pb.PbFieldType.OU3)
-    ..aOS(2, _omitFieldNames ? '' : 'name')
-    ..aOS(3, _omitFieldNames ? '' : 'fmtpLine')
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'clockRate', $pb.PbFieldType.OU3)
-    ..aOS(5, _omitFieldNames ? '' : 'encodingParameters')
-    ..pPS(6, _omitFieldNames ? '' : 'feedbacks')
+    ..aOS(1, _omitFieldNames ? '' : 'mimeType')
+    ..aOS(2, _omitFieldNames ? '' : 'scalabilityMode')
+    ..aOS(3, _omitFieldNames ? '' : 'fmtp')
     ..hasRequiredFields = false
   ;
 
@@ -763,52 +748,31 @@ class Codec extends $pb.GeneratedMessage {
   static Codec? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get payloadType => $_getIZ(0);
+  $core.String get mimeType => $_getSZ(0);
   @$pb.TagNumber(1)
-  set payloadType($core.int v) { $_setUnsignedInt32(0, v); }
+  set mimeType($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasPayloadType() => $_has(0);
+  $core.bool hasMimeType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearPayloadType() => clearField(1);
+  void clearMimeType() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get name => $_getSZ(1);
+  $core.String get scalabilityMode => $_getSZ(1);
   @$pb.TagNumber(2)
-  set name($core.String v) { $_setString(1, v); }
+  set scalabilityMode($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasName() => $_has(1);
+  $core.bool hasScalabilityMode() => $_has(1);
   @$pb.TagNumber(2)
-  void clearName() => clearField(2);
+  void clearScalabilityMode() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get fmtpLine => $_getSZ(2);
+  $core.String get fmtp => $_getSZ(2);
   @$pb.TagNumber(3)
-  set fmtpLine($core.String v) { $_setString(2, v); }
+  set fmtp($core.String v) { $_setString(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasFmtpLine() => $_has(2);
+  $core.bool hasFmtp() => $_has(2);
   @$pb.TagNumber(3)
-  void clearFmtpLine() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.int get clockRate => $_getIZ(3);
-  @$pb.TagNumber(4)
-  set clockRate($core.int v) { $_setUnsignedInt32(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasClockRate() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearClockRate() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.String get encodingParameters => $_getSZ(4);
-  @$pb.TagNumber(5)
-  set encodingParameters($core.String v) { $_setString(4, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasEncodingParameters() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearEncodingParameters() => clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.List<$core.String> get feedbacks => $_getList(5);
+  void clearFmtp() => clearField(3);
 }
 
 class ICETrickle extends $pb.GeneratedMessage {
@@ -899,6 +863,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     $core.bool? stereo,
     $core.bool? red,
     $core.bool? muted,
+    $core.Iterable<Codec>? preferredCodecs,
   }) {
     final $result = create();
     if (trackId != null) {
@@ -925,6 +890,9 @@ class TrackInfo extends $pb.GeneratedMessage {
     if (muted != null) {
       $result.muted = muted;
     }
+    if (preferredCodecs != null) {
+      $result.preferredCodecs.addAll(preferredCodecs);
+    }
     return $result;
   }
   TrackInfo._() : super();
@@ -940,6 +908,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     ..aOB(8, _omitFieldNames ? '' : 'stereo')
     ..aOB(9, _omitFieldNames ? '' : 'red')
     ..aOB(10, _omitFieldNames ? '' : 'muted')
+    ..pc<Codec>(11, _omitFieldNames ? '' : 'preferredCodecs', $pb.PbFieldType.PM, subBuilder: Codec.create)
     ..hasRequiredFields = false
   ;
 
@@ -1030,6 +999,9 @@ class TrackInfo extends $pb.GeneratedMessage {
   $core.bool hasMuted() => $_has(7);
   @$pb.TagNumber(10)
   void clearMuted() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.List<Codec> get preferredCodecs => $_getList(8);
 }
 
 class Error extends $pb.GeneratedMessage {
@@ -1730,6 +1702,207 @@ class CallGrants extends $pb.GeneratedMessage {
   $core.bool hasCanScreenshare() => $_has(2);
   @$pb.TagNumber(3)
   void clearCanScreenshare() => clearField(3);
+}
+
+class InputDevices extends $pb.GeneratedMessage {
+  factory InputDevices({
+    $core.Iterable<$core.String>? availableDevices,
+    $core.String? currentDevice,
+    $core.bool? isPermitted,
+  }) {
+    final $result = create();
+    if (availableDevices != null) {
+      $result.availableDevices.addAll(availableDevices);
+    }
+    if (currentDevice != null) {
+      $result.currentDevice = currentDevice;
+    }
+    if (isPermitted != null) {
+      $result.isPermitted = isPermitted;
+    }
+    return $result;
+  }
+  InputDevices._() : super();
+  factory InputDevices.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory InputDevices.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InputDevices', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..pPS(1, _omitFieldNames ? '' : 'availableDevices')
+    ..aOS(2, _omitFieldNames ? '' : 'currentDevice')
+    ..aOB(3, _omitFieldNames ? '' : 'isPermitted')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  InputDevices clone() => InputDevices()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  InputDevices copyWith(void Function(InputDevices) updates) => super.copyWith((message) => updates(message as InputDevices)) as InputDevices;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InputDevices create() => InputDevices._();
+  InputDevices createEmptyInstance() => create();
+  static $pb.PbList<InputDevices> createRepeated() => $pb.PbList<InputDevices>();
+  @$core.pragma('dart2js:noInline')
+  static InputDevices getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InputDevices>(create);
+  static InputDevices? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.String> get availableDevices => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.String get currentDevice => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set currentDevice($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCurrentDevice() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCurrentDevice() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get isPermitted => $_getBF(2);
+  @$pb.TagNumber(3)
+  set isPermitted($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasIsPermitted() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearIsPermitted() => clearField(3);
+}
+
+class AndroidState extends $pb.GeneratedMessage {
+  factory AndroidState({
+    AndroidThermalState? thermalState,
+    $core.bool? isPowerSaverMode,
+  }) {
+    final $result = create();
+    if (thermalState != null) {
+      $result.thermalState = thermalState;
+    }
+    if (isPowerSaverMode != null) {
+      $result.isPowerSaverMode = isPowerSaverMode;
+    }
+    return $result;
+  }
+  AndroidState._() : super();
+  factory AndroidState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AndroidState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AndroidState', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..e<AndroidThermalState>(1, _omitFieldNames ? '' : 'thermalState', $pb.PbFieldType.OE, defaultOrMaker: AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED, valueOf: AndroidThermalState.valueOf, enumValues: AndroidThermalState.values)
+    ..aOB(2, _omitFieldNames ? '' : 'isPowerSaverMode')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AndroidState clone() => AndroidState()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AndroidState copyWith(void Function(AndroidState) updates) => super.copyWith((message) => updates(message as AndroidState)) as AndroidState;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AndroidState create() => AndroidState._();
+  AndroidState createEmptyInstance() => create();
+  static $pb.PbList<AndroidState> createRepeated() => $pb.PbList<AndroidState>();
+  @$core.pragma('dart2js:noInline')
+  static AndroidState getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AndroidState>(create);
+  static AndroidState? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  AndroidThermalState get thermalState => $_getN(0);
+  @$pb.TagNumber(1)
+  set thermalState(AndroidThermalState v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasThermalState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearThermalState() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get isPowerSaverMode => $_getBF(1);
+  @$pb.TagNumber(2)
+  set isPowerSaverMode($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasIsPowerSaverMode() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearIsPowerSaverMode() => clearField(2);
+}
+
+class AppleState extends $pb.GeneratedMessage {
+  factory AppleState({
+    AppleThermalState? thermalState,
+    $core.bool? isLowPowerModeEnabled,
+  }) {
+    final $result = create();
+    if (thermalState != null) {
+      $result.thermalState = thermalState;
+    }
+    if (isLowPowerModeEnabled != null) {
+      $result.isLowPowerModeEnabled = isLowPowerModeEnabled;
+    }
+    return $result;
+  }
+  AppleState._() : super();
+  factory AppleState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AppleState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AppleState', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..e<AppleThermalState>(1, _omitFieldNames ? '' : 'thermalState', $pb.PbFieldType.OE, defaultOrMaker: AppleThermalState.APPLE_THERMAL_STATE_UNSPECIFIED, valueOf: AppleThermalState.valueOf, enumValues: AppleThermalState.values)
+    ..aOB(2, _omitFieldNames ? '' : 'isLowPowerModeEnabled')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AppleState clone() => AppleState()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AppleState copyWith(void Function(AppleState) updates) => super.copyWith((message) => updates(message as AppleState)) as AppleState;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AppleState create() => AppleState._();
+  AppleState createEmptyInstance() => create();
+  static $pb.PbList<AppleState> createRepeated() => $pb.PbList<AppleState>();
+  @$core.pragma('dart2js:noInline')
+  static AppleState getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AppleState>(create);
+  static AppleState? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  AppleThermalState get thermalState => $_getN(0);
+  @$pb.TagNumber(1)
+  set thermalState(AppleThermalState v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasThermalState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearThermalState() => clearField(1);
+
+  /// https://developer.apple.com/documentation/foundation/processinfo/1617047-islowpowermodeenabled
+  @$pb.TagNumber(2)
+  $core.bool get isLowPowerModeEnabled => $_getBF(1);
+  @$pb.TagNumber(2)
+  set isLowPowerModeEnabled($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasIsLowPowerModeEnabled() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearIsLowPowerModeEnabled() => clearField(2);
 }
 
 

@@ -3,26 +3,18 @@ import 'package:meta/meta.dart';
 @immutable
 class SfuCodec {
   const SfuCodec({
-    required this.payloadType,
-    required this.name,
-    required this.fmtpLine,
-    required this.clockRate,
-    required this.encodingParameters,
-    required this.feedbacks,
+    required this.mimeType,
+    required this.scalabilityMode,
+    required this.fmtp,
   });
 
-  final int payloadType;
-  final String name;
-  final String fmtpLine;
-  final int clockRate;
-  final String encodingParameters;
-  final List<String> feedbacks;
+  final String mimeType;
+  final String scalabilityMode;
+  final String fmtp;
 
   @override
   String toString() {
-    return 'SfuCodec{payloadType: $payloadType, name: $name, '
-        'fmtpLine: $fmtpLine, clockRate: $clockRate, '
-        'encodingParameters: $encodingParameters, feedbacks: $feedbacks}';
+    return 'SfuCodec{mimeType: $mimeType, scalabilityMode: $scalabilityMode, fmtp: $fmtp}';
   }
 
   @override
@@ -30,19 +22,11 @@ class SfuCodec {
       identical(this, other) ||
       other is SfuCodec &&
           runtimeType == other.runtimeType &&
-          payloadType == other.payloadType &&
-          name == other.name &&
-          fmtpLine == other.fmtpLine &&
-          clockRate == other.clockRate &&
-          encodingParameters == other.encodingParameters &&
-          feedbacks == other.feedbacks;
+          mimeType == other.mimeType &&
+          scalabilityMode == other.scalabilityMode &&
+          fmtp == other.fmtp;
 
   @override
   int get hashCode =>
-      payloadType.hashCode ^
-      name.hashCode ^
-      fmtpLine.hashCode ^
-      clockRate.hashCode ^
-      encodingParameters.hashCode ^
-      feedbacks.hashCode;
+      mimeType.hashCode ^ scalabilityMode.hashCode ^ fmtp.hashCode;
 }

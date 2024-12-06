@@ -485,49 +485,18 @@ final $typed_data.Uint8List audioLevelChangedDescriptor = $convert.base64Decode(
     'ChFBdWRpb0xldmVsQ2hhbmdlZBJFCgxhdWRpb19sZXZlbHMYASADKAsyIi5zdHJlYW0udmlkZW'
     '8uc2Z1LmV2ZW50LkF1ZGlvTGV2ZWxSC2F1ZGlvTGV2ZWxz');
 
-@$core.Deprecated('Use audioMediaRequestDescriptor instead')
-const AudioMediaRequest$json = {
-  '1': 'AudioMediaRequest',
-  '2': [
-    {'1': 'channel_count', '3': 1, '4': 1, '5': 5, '10': 'channelCount'},
-  ],
-};
-
-/// Descriptor for `AudioMediaRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List audioMediaRequestDescriptor = $convert.base64Decode(
-    'ChFBdWRpb01lZGlhUmVxdWVzdBIjCg1jaGFubmVsX2NvdW50GAEgASgFUgxjaGFubmVsQ291bn'
-    'Q=');
-
 @$core.Deprecated('Use audioSenderDescriptor instead')
 const AudioSender$json = {
   '1': 'AudioSender',
   '2': [
-    {'1': 'media_request', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.event.AudioMediaRequest', '10': 'mediaRequest'},
     {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
   ],
 };
 
 /// Descriptor for `AudioSender`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List audioSenderDescriptor = $convert.base64Decode(
-    'CgtBdWRpb1NlbmRlchJOCg1tZWRpYV9yZXF1ZXN0GAEgASgLMikuc3RyZWFtLnZpZGVvLnNmdS'
-    '5ldmVudC5BdWRpb01lZGlhUmVxdWVzdFIMbWVkaWFSZXF1ZXN0EjQKBWNvZGVjGAIgASgLMh4u'
-    'c3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ29kZWNSBWNvZGVj');
-
-@$core.Deprecated('Use videoMediaRequestDescriptor instead')
-const VideoMediaRequest$json = {
-  '1': 'VideoMediaRequest',
-  '2': [
-    {'1': 'ideal_height', '3': 1, '4': 1, '5': 5, '10': 'idealHeight'},
-    {'1': 'ideal_width', '3': 2, '4': 1, '5': 5, '10': 'idealWidth'},
-    {'1': 'ideal_frame_rate', '3': 3, '4': 1, '5': 5, '10': 'idealFrameRate'},
-  ],
-};
-
-/// Descriptor for `VideoMediaRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List videoMediaRequestDescriptor = $convert.base64Decode(
-    'ChFWaWRlb01lZGlhUmVxdWVzdBIhCgxpZGVhbF9oZWlnaHQYASABKAVSC2lkZWFsSGVpZ2h0Eh'
-    '8KC2lkZWFsX3dpZHRoGAIgASgFUgppZGVhbFdpZHRoEigKEGlkZWFsX2ZyYW1lX3JhdGUYAyAB'
-    'KAVSDmlkZWFsRnJhbWVSYXRl');
+    'CgtBdWRpb1NlbmRlchI0CgVjb2RlYxgCIAEoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLk'
+    'NvZGVjUgVjb2RlYw==');
 
 @$core.Deprecated('Use videoLayerSettingDescriptor instead')
 const VideoLayerSetting$json = {
@@ -537,21 +506,9 @@ const VideoLayerSetting$json = {
     {'1': 'active', '3': 2, '4': 1, '5': 8, '10': 'active'},
     {'1': 'max_bitrate', '3': 3, '4': 1, '5': 5, '10': 'maxBitrate'},
     {'1': 'scale_resolution_down_by', '3': 4, '4': 1, '5': 2, '10': 'scaleResolutionDownBy'},
-    {'1': 'priority', '3': 5, '4': 1, '5': 14, '6': '.stream.video.sfu.event.VideoLayerSetting.Priority', '10': 'priority'},
     {'1': 'codec', '3': 6, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
     {'1': 'max_framerate', '3': 7, '4': 1, '5': 13, '10': 'maxFramerate'},
-  ],
-  '4': [VideoLayerSetting_Priority$json],
-};
-
-@$core.Deprecated('Use videoLayerSettingDescriptor instead')
-const VideoLayerSetting_Priority$json = {
-  '1': 'Priority',
-  '2': [
-    {'1': 'PRIORITY_HIGH_UNSPECIFIED', '2': 0},
-    {'1': 'PRIORITY_LOW', '2': 1},
-    {'1': 'PRIORITY_MEDIUM', '2': 2},
-    {'1': 'PRIORITY_VERY_LOW', '2': 3},
+    {'1': 'scalability_mode', '3': 8, '4': 1, '5': 9, '10': 'scalabilityMode'},
   ],
 };
 
@@ -559,18 +516,15 @@ const VideoLayerSetting_Priority$json = {
 final $typed_data.Uint8List videoLayerSettingDescriptor = $convert.base64Decode(
     'ChFWaWRlb0xheWVyU2V0dGluZxISCgRuYW1lGAEgASgJUgRuYW1lEhYKBmFjdGl2ZRgCIAEoCF'
     'IGYWN0aXZlEh8KC21heF9iaXRyYXRlGAMgASgFUgptYXhCaXRyYXRlEjcKGHNjYWxlX3Jlc29s'
-    'dXRpb25fZG93bl9ieRgEIAEoAlIVc2NhbGVSZXNvbHV0aW9uRG93bkJ5Ek4KCHByaW9yaXR5GA'
-    'UgASgOMjIuc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5WaWRlb0xheWVyU2V0dGluZy5Qcmlvcml0'
-    'eVIIcHJpb3JpdHkSNAoFY29kZWMYBiABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2'
-    'RlY1IFY29kZWMSIwoNbWF4X2ZyYW1lcmF0ZRgHIAEoDVIMbWF4RnJhbWVyYXRlImcKCFByaW9y'
-    'aXR5Eh0KGVBSSU9SSVRZX0hJR0hfVU5TUEVDSUZJRUQQABIQCgxQUklPUklUWV9MT1cQARITCg'
-    '9QUklPUklUWV9NRURJVU0QAhIVChFQUklPUklUWV9WRVJZX0xPVxAD');
+    'dXRpb25fZG93bl9ieRgEIAEoAlIVc2NhbGVSZXNvbHV0aW9uRG93bkJ5EjQKBWNvZGVjGAYgAS'
+    'gLMh4uc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ29kZWNSBWNvZGVjEiMKDW1heF9mcmFtZXJh'
+    'dGUYByABKA1SDG1heEZyYW1lcmF0ZRIpChBzY2FsYWJpbGl0eV9tb2RlGAggASgJUg9zY2FsYW'
+    'JpbGl0eU1vZGU=');
 
 @$core.Deprecated('Use videoSenderDescriptor instead')
 const VideoSender$json = {
   '1': 'VideoSender',
   '2': [
-    {'1': 'media_request', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.event.VideoMediaRequest', '10': 'mediaRequest'},
     {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
     {'1': 'layers', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.event.VideoLayerSetting', '10': 'layers'},
   ],
@@ -578,10 +532,9 @@ const VideoSender$json = {
 
 /// Descriptor for `VideoSender`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List videoSenderDescriptor = $convert.base64Decode(
-    'CgtWaWRlb1NlbmRlchJOCg1tZWRpYV9yZXF1ZXN0GAEgASgLMikuc3RyZWFtLnZpZGVvLnNmdS'
-    '5ldmVudC5WaWRlb01lZGlhUmVxdWVzdFIMbWVkaWFSZXF1ZXN0EjQKBWNvZGVjGAIgASgLMh4u'
-    'c3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ29kZWNSBWNvZGVjEkEKBmxheWVycxgDIAMoCzIpLn'
-    'N0cmVhbS52aWRlby5zZnUuZXZlbnQuVmlkZW9MYXllclNldHRpbmdSBmxheWVycw==');
+    'CgtWaWRlb1NlbmRlchI0CgVjb2RlYxgCIAEoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLk'
+    'NvZGVjUgVjb2RlYxJBCgZsYXllcnMYAyADKAsyKS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LlZp'
+    'ZGVvTGF5ZXJTZXR0aW5nUgZsYXllcnM=');
 
 @$core.Deprecated('Use changePublishQualityDescriptor instead')
 const ChangePublishQuality$json = {

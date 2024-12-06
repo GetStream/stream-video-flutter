@@ -164,7 +164,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       onCallEvent.whereType<ActionCallIncoming>().listen(
         (_) {
           if (!client.isConnected) {
-            _wasWsConnected = client.isConnected;
             client.openConnection();
           }
 
@@ -179,12 +178,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         onCallEvent.whereType<ActionCallDecline>().map((_) => null),
         onCallEvent.whereType<ActionCallTimeout>().map((_) => null),
       ]).listen(
-        (_) {
-          if (_wasWsConnected == false) {
-            _wasWsConnected = null;
-            client.closeConnection();
-          }
-
+        (event) {
           _subscriptions.cancel(_idCallAccepted);
           _subscriptions.cancel(_idCallEnded);
           _subscriptions.cancel(_idCallRejected);
@@ -203,7 +197,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   late SharedPreferences _sharedPreferences;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
-  bool? _wasWsConnected;
 
   final Subscriptions _subscriptions = Subscriptions();
 

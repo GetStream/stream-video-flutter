@@ -324,9 +324,6 @@ extension SfuWebsocketReconnectStrategyExtension
 extension SfuAudioSenderExtension on sfu_events.AudioSender {
   SfuAudioSender toDomain() {
     return SfuAudioSender(
-      mediaRequest: SfuAudioMediaRequest(
-        channelCount: mediaRequest.channelCount,
-      ),
       codec: codec.toDomain(),
     );
   }
@@ -336,11 +333,6 @@ extension SfuAudioSenderExtension on sfu_events.AudioSender {
 extension SfuVideoSenderExtension on sfu_events.VideoSender {
   SfuVideoSender toDomain() {
     return SfuVideoSender(
-      mediaRequest: SfuVideoMediaRequest(
-        idealHeight: mediaRequest.idealHeight,
-        idealWidth: mediaRequest.idealWidth,
-        idealFrameRate: mediaRequest.idealFrameRate,
-      ),
       codec: codec.toDomain(),
       layers: layers.map((it) => it.toDomain()).toList(),
     );
@@ -351,12 +343,9 @@ extension SfuVideoSenderExtension on sfu_events.VideoSender {
 extension SfuCodecExtension on sfu_models.Codec {
   SfuCodec toDomain() {
     return SfuCodec(
-      payloadType: payloadType,
-      name: name,
-      fmtpLine: fmtpLine,
-      clockRate: clockRate,
-      encodingParameters: encodingParameters,
-      feedbacks: feedbacks,
+      mimeType: mimeType,
+      scalabilityMode: scalabilityMode,
+      fmtp: fmtp,
     );
   }
 }
@@ -367,26 +356,10 @@ extension on sfu_events.VideoLayerSetting {
       name: name,
       active: active,
       maxBitrate: maxBitrate,
+      maxFramerate: maxFramerate,
       scaleResolutionDownBy: scaleResolutionDownBy,
-      priority: priority.toDomain(),
+      scalabilityMode: scalabilityMode,
       codec: codec.toDomain(),
     );
-  }
-}
-
-extension on sfu_events.VideoLayerSetting_Priority {
-  SfuVideoLayerSettingPriority toDomain() {
-    switch (this) {
-      case sfu_events.VideoLayerSetting_Priority.PRIORITY_HIGH_UNSPECIFIED:
-        return SfuVideoLayerSettingPriority.high;
-      case sfu_events.VideoLayerSetting_Priority.PRIORITY_LOW:
-        return SfuVideoLayerSettingPriority.low;
-      case sfu_events.VideoLayerSetting_Priority.PRIORITY_MEDIUM:
-        return SfuVideoLayerSettingPriority.medium;
-      case sfu_events.VideoLayerSetting_Priority.PRIORITY_VERY_LOW:
-        return SfuVideoLayerSettingPriority.veryLow;
-      default:
-        throw StateError('unexpected VideoLayerSetting_Priority: $this');
-    }
   }
 }

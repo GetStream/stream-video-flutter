@@ -121,7 +121,7 @@ class SfuClient {
     sfu.SendStatsRequest request,
   ) async {
     try {
-      _logger.d(() => '[sendStats] request: $request');
+      _logger.v(() => '[sendStats] request: $request');
       final response = await _client.sendStats(_withAuthHeaders(), request);
       _logger.v(() => '[sendStats] response: $response');
       return Result.success(response);

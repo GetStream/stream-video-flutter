@@ -5,9 +5,11 @@ import '../../exceptions/video_exception.dart';
 import '../../logger/stream_log.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
+import '../../utils/result.dart';
 import '../media/media_constraints.dart';
 import '../model/rtc_video_dimension.dart';
 import '../rtc_media_device/rtc_media_device.dart';
+import '../rtc_media_device/rtc_media_device_notifier.dart';
 import 'rtc_track.dart';
 
 const kLocalTrackIdPrefix = 'local';
@@ -217,9 +219,26 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
 
     // Use the native switchCamera method.
     final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
+
+    final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
+        .enumerateDevices(kind: RtcMediaDeviceKind.videoInput);
+
+    final mediaDevices = mediaDevicesResult.fold(
+      success: (success) => success.data,
+      failure: (failure) => <RtcMediaDevice>[],
+    );
+
+    final currentCamera = mediaDevices
+        .where(
+          (d) =>
+              d.label.toLowerCase().contains(isFrontCamera ? 'front' : 'back'),
+        )
+        .firstOrNull;
+
     return copyWith(
       mediaConstraints: mediaConstraints.copyWith(
         facingMode: isFrontCamera ? FacingMode.user : FacingMode.environment,
+        deviceId: currentCamera?.id,
       ),
     );
   }
