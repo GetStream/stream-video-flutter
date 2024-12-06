@@ -4,13 +4,13 @@
 
 import Combine
 import Foundation
-import flutter_webrtc
+import stream_webrtc_flutter
 
 /// StreamPictureInPictureTrackStateAdapter serves as an adapter for managing the state of a video track
 /// used for picture-in-picture functionality. It can enable or disable observers based on its isEnabled property
 /// and ensures that the active track is always enabled when necessary.
 final class StreamPictureInPictureTrackStateAdapter {
-    
+
     /// This property represents whether the adapter is enabled or not.
     var isEnabled: Bool = false {
         didSet {
@@ -21,7 +21,7 @@ final class StreamPictureInPictureTrackStateAdapter {
             enableObserver(isEnabled)
         }
     }
-    
+
     /// This property represents the active RTCVideoTrack.
     var activeTrack: RTCVideoTrack? {
         didSet {
@@ -33,19 +33,20 @@ final class StreamPictureInPictureTrackStateAdapter {
             }
         }
     }
-    
+
     // MARK: - Private helpers
-    
+
     /// This property holds a reference to the observer cancellable.
     private var observerCancellable: AnyCancellable?
-    
+
     /// This private function enables or disables an observer based on the 'isActive' parameter.
     ///
     /// - Parameter isActive: A Boolean value indicating whether the observer should be active.
     private func enableObserver(_ isActive: Bool) {
         if isActive {
             /// If 'isActive' is true, it sets up an observer that checks tracks state periodically.
-            observerCancellable = Timer
+            observerCancellable =
+                Timer
                 .publish(every: 0.1, on: .main, in: .default)
                 .autoconnect()
                 .receive(on: DispatchQueue.main)
@@ -58,11 +59,11 @@ final class StreamPictureInPictureTrackStateAdapter {
             observerCancellable = nil
         }
     }
-    
+
     /// This private function checks the state of the active track and enables it if it's not already enabled.
     private func checkTracksState() {
         if let activeTrack, !activeTrack.isEnabled {
-//            log.info("⚙️Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.")
+            //            log.info("⚙️Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.")
             self.activeTrack?.isEnabled = true
         }
     }

@@ -21,7 +21,6 @@ dependencies:
   fixnum: ^1.1.0
   flutter:
     sdk: flutter
-  flutter_webrtc: ^0.11.7
   http: ^1.1.0
   internet_connection_checker_plus: ^2.5.2
   intl: ">=0.18.1 <=0.19.0"
@@ -31,6 +30,7 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
+  stream_webrtc_flutter: ^0.12.2+2
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1

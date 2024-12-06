@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../logger/stream_log.dart';
 import '../../../utils/standard.dart';
@@ -34,10 +34,10 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
 
     for (final report in this) {
       rawStats.add({
-          'id': report.id,
-          'type': report.type,
-          'timestamp': report.timestamp,
-          ...report.values,
+        'id': report.id,
+        'type': report.type,
+        'timestamp': report.timestamp,
+        ...report.values,
       });
     }
 
