@@ -15,6 +15,7 @@ class CallResponse {
   CallResponse({
     required this.backstage,
     this.blockedUserIds = const [],
+    required this.captioning,
     required this.cid,
     required this.createdAt,
     required this.createdBy,
@@ -39,6 +40,8 @@ class CallResponse {
   bool backstage;
 
   List<String> blockedUserIds;
+
+  bool captioning;
 
   /// The unique identifier for a call (<type>:<id>)
   String cid;
@@ -126,6 +129,7 @@ class CallResponse {
   bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
     other.backstage == backstage &&
     _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
+    other.captioning == captioning &&
     other.cid == cid &&
     other.createdAt == createdAt &&
     other.createdBy == createdBy &&
@@ -151,6 +155,7 @@ class CallResponse {
     // ignore: unnecessary_parenthesis
     (backstage.hashCode) +
     (blockedUserIds.hashCode) +
+    (captioning.hashCode) +
     (cid.hashCode) +
     (createdAt.hashCode) +
     (createdBy.hashCode) +
@@ -172,12 +177,13 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'backstage'] = this.backstage;
       json[r'blocked_user_ids'] = this.blockedUserIds;
+      json[r'captioning'] = this.captioning;
       json[r'cid'] = this.cid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'created_by'] = this.createdBy;
@@ -247,6 +253,7 @@ class CallResponse {
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
             ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
+        captioning: mapValueOfType<bool>(json, r'captioning')!,
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         createdBy: UserResponse.fromJson(json[r'created_by'])!,
@@ -315,6 +322,7 @@ class CallResponse {
   static const requiredKeys = <String>{
     'backstage',
     'blocked_user_ids',
+    'captioning',
     'cid',
     'created_at',
     'created_by',

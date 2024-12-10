@@ -40,7 +40,7 @@ class UserUnmutedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserUnmutedEvent &&
@@ -105,7 +105,7 @@ class UserUnmutedEvent {
             ? (json[r'target_users'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

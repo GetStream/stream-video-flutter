@@ -34,7 +34,7 @@ class UserBannedEvent {
 
   DateTime createdAt;
 
-  UserObject createdBy;
+  User createdBy;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -70,7 +70,7 @@ class UserBannedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserBannedEvent &&
@@ -159,13 +159,13 @@ class UserBannedEvent {
         channelType: mapValueOfType<String>(json, r'channel_type')!,
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserObject.fromJson(json[r'created_by'])!,
+        createdBy: User.fromJson(json[r'created_by'])!,
         expiration: mapDateTime(json, r'expiration', r''),
         reason: mapValueOfType<String>(json, r'reason'),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
         team: mapValueOfType<String>(json, r'team'),
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

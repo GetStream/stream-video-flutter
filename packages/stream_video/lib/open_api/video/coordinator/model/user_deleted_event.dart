@@ -37,7 +37,7 @@ class UserDeletedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserDeletedEvent &&
@@ -100,7 +100,7 @@ class UserDeletedEvent {
         hardDelete: mapValueOfType<bool>(json, r'hard_delete')!,
         markMessagesDeleted: mapValueOfType<bool>(json, r'mark_messages_deleted')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

@@ -21,6 +21,7 @@ class CallState extends Equatable {
       isRecording: false,
       isBroadcasting: false,
       isTranscribing: false,
+      isCaptioning: false,
       isBackstage: false,
       settings: const CallSettings(),
       egress: const CallEgress(),
@@ -30,6 +31,7 @@ class CallState extends Equatable {
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
+      capabilitiesByRole: const {},
       createdAt: null,
       updatedAt: null,
       startsAt: null,
@@ -48,7 +50,6 @@ class CallState extends Equatable {
     );
   }
 
-  /// TODO
   const CallState._({
     required this.currentUserId,
     required this.callCid,
@@ -59,12 +60,14 @@ class CallState extends Equatable {
     required this.isRecording,
     required this.isBroadcasting,
     required this.isTranscribing,
+    required this.isCaptioning,
     required this.isBackstage,
     required this.settings,
     required this.egress,
     required this.rtmpIngress,
     required this.ownCapabilities,
     required this.callParticipants,
+    required this.capabilitiesByRole,
     required this.videoInputDevice,
     required this.audioInputDevice,
     required this.audioOutputDevice,
@@ -97,12 +100,14 @@ class CallState extends Equatable {
   final bool isRecording;
   final bool isBroadcasting;
   final bool isTranscribing;
+  final bool isCaptioning;
   final bool isBackstage;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
   final RtcMediaDevice? audioOutputDevice;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
+  final Map<String, List<String>> capabilitiesByRole;
   final DateTime? createdAt;
   final DateTime? startsAt;
   final DateTime? endedAt;
@@ -143,6 +148,7 @@ class CallState extends Equatable {
     bool? isRecording,
     bool? isBroadcasting,
     bool? isTranscribing,
+    bool? isCaptioning,
     bool? isBackstage,
     CallSettings? settings,
     CallEgress? egress,
@@ -152,6 +158,7 @@ class CallState extends Equatable {
     RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
+    Map<String, List<String>>? capabilitiesByRole,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? startsAt,
@@ -178,6 +185,7 @@ class CallState extends Equatable {
       isRecording: isRecording ?? this.isRecording,
       isBroadcasting: isBroadcasting ?? this.isBroadcasting,
       isTranscribing: isTranscribing ?? this.isTranscribing,
+      isCaptioning: isCaptioning ?? this.isCaptioning,
       isBackstage: isBackstage ?? this.isBackstage,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
@@ -187,6 +195,7 @@ class CallState extends Equatable {
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
+      capabilitiesByRole: capabilitiesByRole ?? this.capabilitiesByRole,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       startsAt: startsAt ?? this.startsAt,
@@ -206,13 +215,17 @@ class CallState extends Equatable {
     );
   }
 
-  CallState copyFromMetadata(CallMetadata metadata) {
+  CallState copyFromMetadata(
+    CallMetadata metadata, {
+    Map<String, List<String>>? capabilitiesByRole,
+  }) {
     final capabilities = metadata.details.ownCapabilities.toList();
 
     return copyWith(
       isBackstage: metadata.details.backstage,
       isRecording: metadata.details.recording,
       isTranscribing: metadata.details.transcribing,
+      isCaptioning: metadata.details.captioning,
       isBroadcasting: metadata.details.broadcasting,
       blockedUserIds: metadata.details.blockedUserIds.toList(),
       createdAt: metadata.details.createdAt,
@@ -228,6 +241,7 @@ class CallState extends Equatable {
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
+      capabilitiesByRole: capabilitiesByRole,
     );
   }
 
@@ -240,6 +254,7 @@ class CallState extends Equatable {
         status,
         isRecording,
         isTranscribing,
+        isCaptioning,
         isBroadcasting,
         isBackstage,
         settings,
@@ -250,6 +265,7 @@ class CallState extends Equatable {
         audioOutputDevice,
         ownCapabilities,
         callParticipants,
+        capabilitiesByRole,
         createdAt,
         updatedAt,
         startsAt,

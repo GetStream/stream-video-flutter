@@ -21,6 +21,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
+import '../widgets/closed_captions_widget.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({
@@ -154,10 +155,17 @@ class _CallScreenState extends State<CallScreen> {
               callParticipantsBuilder: (context, call, callState) {
                 return Stack(
                   children: [
-                    StreamCallParticipants(
-                      call: call,
-                      participants: callState.callParticipants,
-                      layoutMode: _currentLayoutMode,
+                    Column(
+                      children: [
+                        Expanded(
+                          child: StreamCallParticipants(
+                            call: call,
+                            participants: callState.callParticipants,
+                            layoutMode: _currentLayoutMode,
+                          ),
+                        ),
+                        ClosedCaptionsWidget(call: call),
+                      ],
                     ),
                     if (_moreMenuVisible) ...[
                       GestureDetector(

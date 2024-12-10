@@ -56,7 +56,7 @@ class PollVote {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -150,7 +150,7 @@ class PollVote {
         optionId: mapValueOfType<String>(json, r'option_id')!,
         pollId: mapValueOfType<String>(json, r'poll_id')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
         userId: mapValueOfType<String>(json, r'user_id'),
       );
     }

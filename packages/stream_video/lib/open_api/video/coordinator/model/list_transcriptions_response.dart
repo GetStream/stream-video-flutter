@@ -19,6 +19,7 @@ class ListTranscriptionsResponse {
 
   String duration;
 
+  /// List of transcriptions for the call
   List<CallTranscription> transcriptions;
 
   @override
