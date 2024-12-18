@@ -19,6 +19,7 @@ import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../extensions/thermal_status_ext.dart';
+import '../../models/call_client_publish_options.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_error.dart';
@@ -57,6 +58,7 @@ class CallSession extends Disposable {
     required this.dynascaleManager,
     required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
+    this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
   })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
@@ -109,6 +111,7 @@ class CallSession extends Disposable {
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   final OnPeerConnectionIssue onPeerConnectionIssue;
+  final ClientPublishOptions? clientPublishOptions;
 
   final Duration joinResponseTimeout;
 
@@ -294,6 +297,10 @@ class CallSession extends Disposable {
             subscriberSdp: subscriberSdp,
             publisherSdp: publisherSdp,
             reconnectDetails: reconnectDetails,
+            preferredPublishOptions:
+                clientPublishOptions?.getPreferredPublishOptions(),
+            preferredSubscribeOptions:
+                clientPublishOptions?.getPreferredSubscriberOptions(),
           ),
         ),
       );
@@ -389,6 +396,10 @@ class CallSession extends Disposable {
             publisherSdp: publisherSdp,
             reconnectDetails:
                 await getReconnectDetails(SfuReconnectionStrategy.fast),
+            preferredPublishOptions:
+                clientPublishOptions?.getPreferredPublishOptions(),
+            preferredSubscribeOptions:
+                clientPublishOptions?.getPreferredSubscriberOptions(),
           ),
         ),
       );
@@ -1036,5 +1047,39 @@ extension SfuSubscriptionDetailsEx on List<SfuSubscriptionDetails> {
         dimension: sub.dimension?.toDTO(),
       );
     }).toList();
+  }
+}
+
+extension on ClientPublishOptions {
+  List<sfu_models.PublishOption>? getPreferredPublishOptions() {
+    if (preferredCodec == null) return null;
+
+    return [
+      sfu_models.PublishOption(
+        codec: sfu_models.Codec(
+          name: preferredCodec?.name,
+          fmtp: fmtpLine,
+        ),
+        bitrate: preferredBitrate,
+        maxSpatialLayers: maxSimulcastLayers,
+        trackType: sfu_models.TrackType.TRACK_TYPE_VIDEO,
+      ),
+    ];
+  }
+
+  List<sfu_models.SubscribeOption>? getPreferredSubscriberOptions() {
+    if (subscriberCodec == null) return null;
+
+    return [
+      sfu_models.SubscribeOption(
+        codecs: [
+          sfu_models.Codec(
+            name: subscriberCodec?.name,
+            fmtp: subscriberFmtpLine,
+          ),
+        ],
+        trackType: sfu_models.TrackType.TRACK_TYPE_VIDEO,
+      ),
+    ];
   }
 }

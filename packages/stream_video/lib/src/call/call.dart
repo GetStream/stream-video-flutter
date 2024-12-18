@@ -654,6 +654,7 @@ class Call {
               });
             }
           },
+          clientPublishOptions: _preferences.clientPublishOptions,
         );
 
         dynascaleManager.init(
