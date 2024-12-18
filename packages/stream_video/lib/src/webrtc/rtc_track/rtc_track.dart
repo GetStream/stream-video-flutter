@@ -18,16 +18,12 @@ abstract class RtcTrack {
     required this.mediaStream,
     required this.mediaTrack,
     this.videoDimension,
-    this.receiver,
-    this.transceiver,
   });
 
   final String trackIdPrefix;
   final SfuTrackType trackType;
   final rtc.MediaStream mediaStream;
   final rtc.MediaStreamTrack mediaTrack;
-  final rtc.RTCRtpReceiver? receiver;
-  final rtc.RTCRtpTransceiver? transceiver;
 
   /// The video dimension of the track in case it is a video track.
   final RtcVideoDimension? videoDimension;

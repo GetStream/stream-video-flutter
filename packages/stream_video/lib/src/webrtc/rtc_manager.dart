@@ -1,19 +1,24 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
+import '../sfu/data/models/sfu_publish_options.dart';
+import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/extensions.dart';
 import 'codecs_helper.dart' as codecs;
+import 'codecs_helper.dart';
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
 import 'peer_connection.dart';
 import 'rtc_parser.dart';
+import 'transceiver_cache.dart';
 
 /// {@template OnLocalTrackMuted}
 /// Callback for when a local track is muted.
@@ -42,6 +47,7 @@ class RtcManager extends Disposable {
     required this.publisherId,
     required this.publisher,
     required this.subscriber,
+    required this.publishOptions,
   }) {
     subscriber.onTrack = _onRemoteTrack;
   }
@@ -53,6 +59,9 @@ class RtcManager extends Disposable {
   final String publisherId;
   final StreamPeerConnection publisher;
   final StreamPeerConnection subscriber;
+
+  final transceiversManager = TransceiverManager();
+  List<SfuPublishOptions> publishOptions;
 
   final tracks = < /*trackId*/ String, RtcTrack>{};
 
@@ -95,8 +104,9 @@ class RtcManager extends Disposable {
   OnRemoteTrackReceived? onRemoteTrackReceived;
 
   /// Returns a generic sdp.
-  static Future<String> getGenericSdp() async {
-    const direction = rtc.TransceiverDirection.RecvOnly;
+  static Future<String> getGenericSdp(
+    rtc.TransceiverDirection direction,
+  ) async {
     final tempPC = await rtc.createPeerConnection({});
 
     await tempPC.addTransceiver(
@@ -113,7 +123,6 @@ class RtcManager extends Disposable {
     final sdp = offer.sdp;
 
     await tempPC.dispose();
-
     return sdp!;
   }
 
@@ -158,7 +167,7 @@ class RtcManager extends Disposable {
     };
 
     final track = event.track;
-    final receiver = event.receiver;
+    // final receiver = event.receiver;
     final transceiver = event.transceiver;
 
     final idParts = stream.id.split(':');
@@ -170,7 +179,7 @@ class RtcManager extends Disposable {
       trackType: SfuTrackTypeParser.parseSfuName(trackType),
       mediaTrack: track,
       mediaStream: stream,
-      receiver: receiver,
+      // receiver: receiver,
       transceiver: transceiver,
     );
 
@@ -181,6 +190,7 @@ class RtcManager extends Disposable {
 
   Future<void> unpublishTrack({required String trackId}) async {
     final publishedTrack = tracks.remove(trackId);
+
     if (publishedTrack == null) {
       _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
       return;
@@ -188,38 +198,212 @@ class RtcManager extends Disposable {
 
     await publishedTrack.stop();
 
-    final sender = publishedTrack.transceiver?.sender;
-    if (sender != null) {
-      try {
-        await publisher.pc.removeTrack(sender);
-      } catch (e) {
-        _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
+    if (publishedTrack is RtcRemoteTrack) {
+      final sender = publishedTrack.transceiver?.sender;
+
+      if (sender != null) {
+        try {
+          await publisher.pc.removeTrack(sender);
+        } catch (e) {
+          _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
+        }
+      }
+    } else if (publishedTrack is RtcLocalTrack) {
+      for (final publishOption in publishOptions) {
+        if (publishOption.trackType != publishedTrack.trackType) continue;
+
+        final transceiver = transceiversManager.get(publishOption);
+
+        try {
+          if (transceiver != null) {
+            await publisher.pc.removeTrack(transceiver.sender);
+          }
+        } catch (e) {
+          _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
+        }
       }
     }
   }
 
-  Future<void> onPublishQualityChanged(Set<String> rids) async {
-    final transceivers = await publisher.pc.getTransceivers();
-    for (final transceiver in transceivers) {
-      if (transceiver.sender.track?.kind == 'video') {
-        var changed = false;
-        final params = transceiver.sender.parameters;
-        params.encodings?.forEach((enc) {
-          // flip 'active' flag only when necessary
-          final shouldEnable = rids.contains(enc.rid);
-          if (shouldEnable != enc.active) {
-            enc.active = shouldEnable;
-            changed = true;
-          }
-        });
-        if (changed) {
-          if (params.encodings?.isEmpty ?? true) {
-            _logger.v(() => 'No suitable video encoding quality found');
-          }
-          await transceiver.sender.setParameters(params);
-        }
+  bool isPublishing(SfuTrackType trackType) {
+    for (final item in transceiversManager.items()) {
+      if (item.publishOption.trackType != trackType) continue;
+
+      final track = item.transceiver.sender.track;
+      if (track == null) continue;
+
+      if (track.enabled) return true;
+    }
+
+    return false;
+  }
+
+  Future<void> onPublishOptionsChanged(
+    List<SfuPublishOptions> publishOptions,
+  ) async {
+    _logger.i(
+      () => '[onPublishOptionsChanged] publishOptions: $publishOptions}',
+    );
+
+    _logger.v(
+      () =>
+          '[onPublishOptionsChanged] should publish in CODECS: ${publishOptions.map((e) => e.codec.name).join(', ')}}',
+    );
+
+    this.publishOptions = publishOptions;
+
+    for (final publishOption in publishOptions) {
+      final trackType = publishOption.trackType;
+
+      if (!isPublishing(trackType)) {
+        continue;
+      }
+
+      if (transceiversManager.has(publishOption)) {
+        _logger.v(
+          () =>
+              '[onPublishOptionsChanged] already publishing in ${publishOption.codec.name}',
+        );
+        continue;
+      }
+
+      final item = transceiversManager.find(
+        (t) =>
+            t.publishOption.trackType == trackType &&
+            t.transceiver.sender.track != null,
+      );
+
+      if (item == null) {
+        continue;
+      }
+
+      // take the track from the existing transceiver for the same track type,
+      // and publish it with the new publish options
+      await _addTransceiver(item.track, publishOption);
+    }
+
+    for (final item in transceiversManager.items()) {
+      final publishOption = item.publishOption;
+      final hasPublishOption = publishOptions.any(
+        (option) =>
+            option.id == publishOption.id &&
+            option.trackType == publishOption.trackType,
+      );
+
+      if (hasPublishOption) continue;
+
+      _logger.v(
+        () =>
+            '[onPublishOptionsChanged] stop publishin and remove transceiver for ${publishOption.codec.name}',
+      );
+
+      // it is safe to stop the track here, it is a clone
+      await item.transceiver.sender.track?.stop();
+      await item.transceiver.sender.replaceTrack(null);
+      await publisher.pc.removeTrack(item.transceiver.sender);
+      transceiversManager.remove(item);
+    }
+  }
+
+  Future<void> onPublishQualityChanged(SfuVideoSender videoSender) async {
+    final enabledLayers = videoSender.layers.where((e) => e.active).toList();
+
+    _logger.i(
+      () =>
+          '[onPublishQualityChanged] Update publish quality, requested layers by SFU: $enabledLayers',
+    );
+
+    final sender = transceiversManager
+        .getWith(
+          videoSender.trackType,
+          videoSender.publishOptionId,
+        )
+        ?.sender;
+
+    if (sender == null) {
+      _logger.w(() => '[onPublishQualityChanged] no video sender found.');
+      return;
+    }
+
+    if (sender.parameters.encodings?.isEmpty ?? true) {
+      _logger.w(
+        () =>
+            '[onPublishQualityChanged] No suitable video encoding quality found',
+      );
+      return;
+    }
+
+    final codecInUse = sender.parameters.codecs?.firstOrNull;
+    final usesSvcCodec =
+        codecInUse != null && codecs.isSvcCodec(codecInUse.kind);
+
+    _logger.i(
+      () =>
+          '[onPublishQualityChanged] Codec in use: ${codecInUse?.kind}, uses SVC: $usesSvcCodec',
+    );
+
+    var changed = false;
+    for (final encoder in sender.parameters.encodings!) {
+      final layer = usesSvcCodec
+          ? // for SVC, we only have one layer (q) and often rid is omitted
+          enabledLayers.firstOrNull
+          : // for non-SVC, we need to find the layer by rid (simulcast)
+          enabledLayers.firstWhereOrNull((l) => l.name == encoder.rid) ??
+              (sender.parameters.encodings!.length == 1
+                  ? enabledLayers.firstOrNull
+                  : null);
+
+      // flip 'active' flag only when necessary
+      final shouldActivate = layer?.active ?? false;
+      if (shouldActivate != encoder.active) {
+        encoder.active = shouldActivate;
+        changed = true;
+      }
+
+      // skip the rest of the settings if the layer is disabled or not found
+      if (layer == null) continue;
+
+      final scaleResolutionDownBy = layer.scaleResolutionDownBy;
+      final maxBitrate = layer.maxBitrate;
+      final maxFramerate = layer.maxFramerate;
+      final scalabilityMode = layer.scalabilityMode;
+
+      if (scaleResolutionDownBy >= 1 &&
+          scaleResolutionDownBy != encoder.scaleResolutionDownBy) {
+        encoder.scaleResolutionDownBy = scaleResolutionDownBy;
+        changed = true;
+      }
+      if (maxBitrate >= 0 && maxBitrate != encoder.maxBitrate) {
+        encoder.maxBitrate = maxBitrate;
+        changed = true;
+      }
+      if (maxFramerate >= 0 && maxFramerate != encoder.maxFramerate) {
+        encoder.maxFramerate = maxFramerate;
+        changed = true;
+      }
+      if (scalabilityMode.isNotEmpty &&
+          scalabilityMode != encoder.scalabilityMode) {
+        encoder.scalabilityMode = scalabilityMode;
+        changed = true;
       }
     }
+
+    final activeLayers =
+        sender.parameters.encodings!.where((e) => e.active).toList();
+
+    if (!changed) {
+      _logger.i(
+        () =>
+            '[onPublishQualityChanged] Update publish quality, no change: ${activeLayers.map((e) => e.rid)}',
+      );
+      return;
+    }
+
+    // await sender.setParameters(sender.parameters);
+    _logger.i(
+      () =>
+          '[onPublishQualityChanged] Update publish quality, enabled rids: ${activeLayers.map((e) => e.rid)}',
+    );
   }
 
   @override
@@ -271,65 +455,119 @@ extension PublisherRtcManager on RtcManager {
     });
 
     if (track == null) {
-      _logger.w(() => '[getPublisherTrackInfos] track not found: $trackType');
+      _logger.w(() => '[getPublisherTrackByType] track not found: $trackType');
       return null;
     }
 
     return track;
   }
 
-  List<RtcTrackInfo> getPublisherTrackInfos() {
-    return getPublisherTracks().map((it) {
-      List<RtcVideoLayer>? videoLayers;
+  String extractMid(
+    rtc.RTCRtpTransceiver transceiver,
+    int transceiverInitIndex,
+    String? sdp,
+  ) {
+    if (transceiver.mid.isNotEmpty) return transceiver.mid;
+    if (sdp == null) return '';
 
-      // Calculate video layers for video tracks.
-      if (it.isVideoTrack) {
-        final dimension = it.videoDimension!;
-        final encodings = it.transceiver?.sender.parameters.encodings;
-        _logger.i(() => '[getPublisherTrackInfos] dimension: $dimension');
+    final track = transceiver.sender.track;
+    if (track == null) {
+      return '';
+    }
 
-        // default to a single layer, HQ
-        final defaultLayer = RtcVideoLayer(
-          rid: 'f',
-          parameters: RtcVideoParametersPresets.h720_16x9.copyWith(
-            dimension: dimension,
+    final parsedSdp = parse(sdp);
+    final media = (parsedSdp['media'] as List?)
+        ?.cast<Map<String, dynamic>>()
+        .reversed
+        .firstWhereOrNull(
+          (m) =>
+              m['type'] == track.kind &&
+              ((m['msid'] as String?)?.contains(track.id!) ?? true),
+        );
+
+    if (media != null && media['mid'] != null) return media['mid'].toString();
+    if (transceiverInitIndex == -1) return '';
+    return transceiverInitIndex.toString();
+  }
+
+  Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
+    final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
+    final infos = <RtcTrackInfo>[];
+
+    for (final item in transceiversManager.items()) {
+      final track = item.track;
+
+      final transceiverInitialIndex =
+          transceiversManager.indexOf(item.transceiver);
+
+      if (track is RtcLocalAudioTrack) {
+        infos.add(
+          RtcTrackInfo(
+            trackId: track.mediaTrack.id,
+            trackType: track.trackType,
+            mid: extractMid(
+              item.transceiver,
+              transceiverInitialIndex,
+              finalSdp,
+            ),
+            layers: [],
           ),
         );
-        if (encodings == null) {
-          videoLayers = [defaultLayer];
-        } else {
-          videoLayers = encodings.map((it) {
-            final scale = it.scaleResolutionDownBy ?? 1;
-            return RtcVideoLayer(
-              rid: it.rid ?? defaultLayer.rid,
-              parameters: RtcVideoParameters(
-                encoding: RtcVideoEncoding(
-                  maxBitrate: it.maxBitrate ??
-                      defaultLayer.parameters.encoding.maxBitrate,
-                  maxFramerate: it.maxFramerate ??
-                      defaultLayer.parameters.encoding.maxFramerate,
+      } else if (track is RtcLocalVideoTrack) {
+        final dimension = _getTrackDimension(track);
+
+        final encodings = codecs.findOptimalVideoLayers(
+          dimensions: _getTrackDimension(track),
+          publishOptions: item.publishOption,
+        );
+
+        final sendEncodings = isSvcCodec(item.publishOption.codec.name)
+            ? toSvcEncodings(encodings)
+            : encodings;
+
+        infos.add(
+          RtcTrackInfo(
+            trackId: track.mediaTrack.id,
+            trackType: track.trackType,
+            mid: extractMid(
+              item.transceiver,
+              transceiverInitialIndex,
+              finalSdp,
+            ),
+            layers: sendEncodings.map((it) {
+              final scale = it.scaleResolutionDownBy ?? 1;
+              return RtcVideoLayer(
+                rid: it.rid ?? '',
+                parameters: RtcVideoParameters(
+                  encoding: RtcVideoEncoding(
+                    maxBitrate: it.maxBitrate ?? 0,
+                    maxFramerate: it.maxFramerate ?? 0,
+                    quality: ridToVideoQuality(it.rid ?? ''),
+                  ),
+                  dimension: RtcVideoDimension(
+                    width: (dimension.width / scale).floor(),
+                    height: (dimension.height / scale).floor(),
+                  ),
                 ),
-                dimension: RtcVideoDimension(
-                  width: (dimension.width / scale).floor(),
-                  height: (dimension.height / scale).floor(),
-                ),
-              ),
-            );
-          }).toList();
-        }
+              );
+            }).toList(),
+          ),
+        );
       }
+    }
 
-      videoLayers?.forEach((layer) {
-        _logger.v(() => '[getPublisherTrackInfos] layer: $layer');
-      });
+    return infos;
+  }
 
-      return RtcTrackInfo(
-        trackId: it.mediaTrack.id,
-        trackType: it.trackType,
-        mid: it.transceiver?.mid,
-        layers: videoLayers,
-      );
-    }).toList();
+  RtcVideoQuality ridToVideoQuality(String rid) {
+    switch (rid) {
+      case 'q':
+        return RtcVideoQuality.lowUnspecified;
+      case 'h':
+        return RtcVideoQuality.mid;
+      default:
+        return RtcVideoQuality.high; // default to HIGH
+    }
   }
 
   /// Removes all tracks from the publisher with the given [trackIdPrefix].
@@ -361,25 +599,18 @@ extension PublisherRtcManager on RtcManager {
     _logger.i(() => '[publishAudioTrack] track: $track');
     tracks[track.trackId] = track;
 
-    final transceiverResult = await publisher.addAudioTransceiver(
-      stream: track.mediaStream,
-      track: track.mediaTrack,
-      encodings: [
-        rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
-      ],
-    );
+    final transceivers = <rtc.RTCRtpTransceiver>[];
+    for (final option in publishOptions) {
+      if (option.trackType != track.trackType) continue;
 
-    // Return early if the transceiver could not be added.
-    if (transceiverResult is Failure) return transceiverResult;
+      final transceiver = await _addTransceiver(track, option);
+      if (transceiver is Failure) return transceiver;
+      transceivers.add(transceiver.getDataOrNull()!);
 
-    final transceiver = transceiverResult.getDataOrNull()!;
+      _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
+    }
 
-    _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
-
-    // Update track with the added transceiver.
     final updatedTrack = track.copyWith(
-      receiver: transceiver.receiver,
-      transceiver: transceiver,
       stopTrackOnMute: stopTrackOnMute,
     );
 
@@ -404,11 +635,45 @@ extension PublisherRtcManager on RtcManager {
     _logger.i(() => '[publishVideoTrack] track: $track');
     tracks[track.trackId] = track;
 
-    // use constraints passed to getUserMedia by default
-    final dimension = track.getVideoDimension();
-    _logger.v(() => '[publishVideoTrack] dimension: $dimension');
+    for (final option in publishOptions) {
+      if (option.trackType != track.trackType) continue;
 
-    List<rtc.RTCRtpEncoding> encodings;
+      final cashedTransceiver = transceiversManager.get(option);
+      if (cashedTransceiver == null) {
+        final transceiver = await _addTransceiver(track, option);
+        if (transceiver is Failure) return transceiver;
+
+        _logger.v(() => '[publishVideoTrack] new transceiver: $transceiver');
+      } else {
+        final previousTrack = cashedTransceiver.sender.track;
+
+        // don't stop the track if we are re-publishing the same track
+        if (previousTrack != null && previousTrack != track.mediaTrack) {
+          await previousTrack.stop();
+        }
+
+        await cashedTransceiver.sender.replaceTrack(track.mediaTrack);
+
+        _logger.v(
+          () => '[publishVideoTrack] cached transceiver: $cashedTransceiver',
+        );
+      }
+    }
+
+    final updatedTrack = track.copyWith(
+      videoDimension: _getTrackDimension(track),
+      stopTrackOnMute: stopTrackOnMute,
+    );
+
+    // Notify listeners.
+    onLocalTrackPublished?.call(updatedTrack);
+    tracks[updatedTrack.trackId] = updatedTrack;
+
+    return Result.success(updatedTrack);
+  }
+
+  RtcVideoDimension _getTrackDimension(RtcLocalVideoTrack track) {
+    var dimension = track.getVideoDimension();
 
     if (track.trackType == SfuTrackType.screenShare) {
       final physicalSize =
@@ -421,47 +686,85 @@ extension PublisherRtcManager on RtcManager {
 
       _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
 
-      encodings = codecs.findOptimalScreenSharingLayers(
-        dimensions: screenDimension,
-        targetResolution: track.mediaConstraints.params,
+      dimension = screenDimension;
+    }
+
+    return dimension;
+  }
+
+  /// In SVC, we need to send only one video encoding (layer).
+  /// this layer will have the additional spatial and temporal layers
+  /// defined via the scalabilityMode property.
+  List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
+    // We take the `f` layer, and we rename it to `q`.
+    return layers
+        .where((layer) => layer.rid == 'f')
+        .map(
+          (layer) => rtc.RTCRtpEncoding(
+            rid: 'q',
+            active: layer.active,
+            maxBitrate: layer.maxBitrate,
+            maxFramerate: layer.maxFramerate,
+            minBitrate: layer.minBitrate,
+            numTemporalLayers: layer.numTemporalLayers,
+            scaleResolutionDownBy: layer.scaleResolutionDownBy,
+            ssrc: layer.ssrc,
+            scalabilityMode: layer.scalabilityMode,
+          ),
+        )
+        .toList();
+  }
+
+  Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
+    RtcLocalTrack track,
+    SfuPublishOptions publishOptions,
+  ) async {
+    Result<rtc.RTCRtpTransceiver>? transceiverResult;
+
+    // create a clone of the track as otherwise the same trackId will
+    // appear in the SDP in multiple transceivers
+    final mediaTrack = await track.originalMediaTrack.clone();
+
+    if (track is RtcLocalAudioTrack) {
+      transceiverResult = await publisher.addAudioTransceiver(
+        track: mediaTrack,
+        encodings: [
+          rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
+        ],
+      );
+    } else if (track is RtcLocalVideoTrack) {
+      final videoEncodings = codecs.findOptimalVideoLayers(
+        dimensions: _getTrackDimension(track),
+        publishOptions: publishOptions,
+      );
+
+      final sendEncodings = isSvcCodec(publishOptions.codec.name)
+          ? toSvcEncodings(videoEncodings)
+          : videoEncodings;
+
+      for (final encoding in sendEncodings) {
+        _logger.v(() => '[addTransceiver] encoding: ${encoding.toMap()}');
+      }
+
+      transceiverResult = await publisher.addVideoTransceiver(
+        track: mediaTrack,
+        encodings: sendEncodings,
       );
     } else {
-      encodings = codecs.findOptimalVideoLayers(
-        dimensions: dimension,
-        targetResolution: track.mediaConstraints.params,
-      );
+      return Result.error('Unsupported track type: ${track.runtimeType}');
     }
-
-    for (final encoding in encodings) {
-      _logger.v(() => '[publishVideoTrack] encoding: ${encoding.toMap()}');
-    }
-
-    final transceiverResult = await publisher.addVideoTransceiver(
-      stream: track.mediaStream,
-      track: track.mediaTrack,
-      encodings: encodings,
-    );
 
     // Return early if the transceiver could not be added.
     if (transceiverResult is Failure) return transceiverResult;
 
     final transceiver = transceiverResult.getDataOrNull()!;
-
-    _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
-
-    // Update track with the added transceiver.
-    final updatedTrack = track.copyWith(
-      receiver: transceiver.receiver,
-      transceiver: transceiver,
-      videoDimension: dimension,
-      stopTrackOnMute: stopTrackOnMute,
+    transceiversManager.add(
+      track.copyWith(mediaTrack: mediaTrack),
+      publishOptions,
+      transceiver,
     );
 
-    // Notify listeners.
-    onLocalTrackPublished?.call(updatedTrack);
-    tracks[updatedTrack.trackId] = updatedTrack;
-
-    return Result.success(updatedTrack);
+    return Result.success(transceiver);
   }
 
   Future<Result<RtcLocalTrack>> muteTrack({required String trackId}) async {
@@ -500,7 +803,10 @@ extension PublisherRtcManager on RtcManager {
 
     // If the track was released before, restart it.
     if (track.stopTrackOnMute) {
-      final updatedTrack = await track.recreate();
+      final transceivers =
+          transceiversManager.getTransceiversForTrack(track.trackId).toList();
+
+      final updatedTrack = await track.recreate(transceivers);
       tracks[trackId] = updatedTrack;
       onLocalTrackMuted?.call(updatedTrack, false);
 
@@ -578,7 +884,11 @@ extension PublisherRtcManager on RtcManager {
       return Result.error('Track is not camera');
     }
 
+    final transceivers =
+        transceiversManager.getTransceiversForTrack(track.trackId).toList();
+
     final updatedTrack = await track.recreate(
+      transceivers,
       mediaConstraints: track.mediaConstraints.copyWith(
         facingMode: facingMode,
       ),
@@ -627,7 +937,10 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Track is not camera');
     }
 
-    final updatedTrack = await track.selectVideoInput(device);
+    final transceivers =
+        transceiversManager.getTransceiversForTrack(track.trackId).toList();
+
+    final updatedTrack = await track.selectVideoInput(device, transceivers);
     tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
@@ -647,7 +960,10 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Track is not audio');
     }
 
-    final updatedTrack = await track.selectAudioInput(device);
+    final transceivers =
+        transceiversManager.getTransceiversForTrack(track.trackId).toList();
+
+    final updatedTrack = await track.selectAudioInput(transceivers, device);
     tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);

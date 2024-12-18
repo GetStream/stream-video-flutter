@@ -5,34 +5,58 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../sfu/data/models/sfu_publish_options.dart';
 import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_parameters.dart';
 
 List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
   required RtcVideoDimension dimensions,
-  RtcVideoParameters targetResolution = RtcVideoParametersPresets.h720_16x9,
+  required SfuPublishOptions publishOptions,
 }) {
   final optimalVideoLayers = <rtc.RTCRtpEncoding>[];
+  const defaultVideoPreset = RtcVideoParametersPresets.h720_16x9;
 
   final maxBitrate = getComputedMaxBitrate(
-    targetResolution,
+    publishOptions.videoDimension ?? defaultVideoPreset.dimension,
+    publishOptions.bitrate ?? defaultVideoPreset.encoding.maxBitrate,
     dimensions.width,
     dimensions.height,
   );
 
+  final svcCodec = isSvcCodec(publishOptions.codec.name);
+  final maxSpatialLayers = publishOptions.maxSpatialLayers ?? 3;
+  final maxTemporalLayers = publishOptions.maxTemporalLayers ?? 3;
+
   var downscaleFactor = 1;
-  for (final rid in ['f', 'h', 'q'].reversed) {
-    optimalVideoLayers.insert(
-      0,
-      rtc.RTCRtpEncoding(
-        rid: rid,
-        scaleResolutionDownBy: downscaleFactor.toDouble(),
-        maxFramerate: 30,
-        maxBitrate: (maxBitrate / downscaleFactor).round(),
-      ),
+  var bitrateFactor = 1;
+
+  final rids = ['f', 'h', 'q'].sublist(0, maxSpatialLayers);
+  for (final rid in rids) {
+    final layer = rtc.RTCRtpEncoding(
+      rid: rid,
+      maxBitrate: (maxBitrate / bitrateFactor).round(),
+      maxFramerate: publishOptions.fps,
     );
 
+    if (svcCodec) {
+      // for SVC codecs, we need to set the scalability mode, and the
+      // codec will handle the rest (layers, temporal layers, etc.)
+      layer.scalabilityMode = toScalabilityMode(
+        maxSpatialLayers,
+        maxTemporalLayers,
+      );
+    } else {
+      // for non-SVC codecs, we need to downscale proportionally (simulcast)
+      layer.scaleResolutionDownBy = downscaleFactor.toDouble();
+    }
+
     downscaleFactor *= 2;
+    bitrateFactor *= 2;
+
+    // Reversing the order [f, h, q] to [q, h, f] as Chrome uses encoding index
+    // when deciding which layer to disable when CPU or bandwidth is constrained.
+    // Encodings should be ordered in increasing spatial resolution order.
+    optimalVideoLayers.insert(0, layer);
   }
 
   return withSimulcastConstraints(
@@ -42,24 +66,25 @@ List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
 }
 
 int getComputedMaxBitrate(
-  RtcVideoParameters targetResolution,
+  RtcVideoDimension videoDimension,
+  int maxBitrate,
   int currentWidth,
   int currentHeight,
 ) {
   // if the current resolution is lower than the target resolution,
   // we want to proportionally reduce the target bitrate
-  final targetWidth = targetResolution.dimension.width;
-  final targetHeight = targetResolution.dimension.height;
+  final targetWidth = videoDimension.width;
+  final targetHeight = videoDimension.height;
 
   if (currentWidth < targetWidth || currentHeight < targetHeight) {
     final currentPixels = currentWidth * currentHeight;
     final targetPixels = targetWidth * targetHeight;
     final reductionFactor = currentPixels / targetPixels;
 
-    return (targetResolution.encoding.maxBitrate * reductionFactor).round();
+    return (maxBitrate * reductionFactor).round();
   }
 
-  return targetResolution.encoding.maxBitrate;
+  return maxBitrate;
 }
 
 List<rtc.RTCRtpEncoding> withSimulcastConstraints({
@@ -112,3 +137,15 @@ List<rtc.RTCRtpEncoding> findOptimalScreenSharingLayers({
 
   return optimalVideoLayers;
 }
+
+bool isSvcCodec(String? codecOrMimeType) {
+  if (codecOrMimeType == null) return false;
+  final lowerCaseCodec = codecOrMimeType.toLowerCase();
+  return lowerCaseCodec == 'vp9' ||
+      lowerCaseCodec == 'av1' ||
+      lowerCaseCodec == 'video/vp9' ||
+      lowerCaseCodec == 'video/av1';
+}
+
+String toScalabilityMode(int spatialLayers, int temporalLayers) =>
+    'L${spatialLayers}T$temporalLayers${spatialLayers > 1 ? '_KEY' : ''}';

@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:synchronized/synchronized.dart';
 import 'package:system_info2/system_info2.dart';
 import 'package:thermal/thermal.dart';
 
@@ -111,6 +112,8 @@ class CallSession extends Disposable {
 
   final Duration joinResponseTimeout;
 
+  final Lock _sfuEventsLock = Lock();
+
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
@@ -208,12 +211,12 @@ class CallSession extends Disposable {
     }
   }
 
-  sfu_events.ReconnectDetails getReconnectDetails(
+  Future<sfu_events.ReconnectDetails> getReconnectDetails(
     SfuReconnectionStrategy strategy, {
     String? migratingFromSfuId,
     int? reconnectAttempts,
-  }) {
-    final announcedTracks = rtcManager?.getPublisherTrackInfos().toDTO();
+  }) async {
+    final announcedTracks = await rtcManager?.getAnnouncedTracks();
     final subscribedTracks = dynascaleManager
         .getTrackSubscriptions(ignoreOverride: true)
         .values
@@ -222,7 +225,7 @@ class CallSession extends Disposable {
 
     return sfu_events.ReconnectDetails(
       strategy: strategy.toDto(),
-      announcedTracks: announcedTracks,
+      announcedTracks: announcedTracks?.toDTO(),
       subscriptions: subscribedTracks,
       previousSessionId: sessionId,
       fromSfuId: migratingFromSfuId ?? '',
@@ -272,8 +275,15 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[start] sfu connected');
 
-      final subscriberSdp = await RtcManager.getGenericSdp();
-      _logger.v(() => '[start] subscriberSdp.len: ${subscriberSdp.length}');
+      final subscriberSdp =
+          await RtcManager.getGenericSdp(rtc.TransceiverDirection.RecvOnly);
+      final publisherSdp =
+          await RtcManager.getGenericSdp(rtc.TransceiverDirection.SendOnly);
+
+      _logger.v(
+        () => '[start] subscriberSdp.len: ${subscriberSdp.length}, '
+            'publisherSdp.len: ${publisherSdp.length}',
+      );
 
       sfuWS.send(
         sfu_events.SfuRequest(
@@ -282,6 +292,7 @@ class CallSession extends Disposable {
             token: config.sfuToken,
             sessionId: sessionId,
             subscriberSdp: subscriberSdp,
+            publisherSdp: publisherSdp,
             reconnectDetails: reconnectDetails,
           ),
         ),
@@ -302,6 +313,7 @@ class CallSession extends Disposable {
       _logger.v(() => '[start] localTrackId: $localTrackId');
       rtcManager = await rtcManagerFactory.makeRtcManager(
         publisherId: localTrackId,
+        publishOptions: event.publishOptions,
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
@@ -351,8 +363,15 @@ class CallSession extends Disposable {
     try {
       _logger.d(() => '[fastReconnect] no args');
 
-      final genericSdp = await RtcManager.getGenericSdp();
-      _logger.v(() => '[fastReconnect] genericSdp.len: ${genericSdp.length}');
+      final subscriberSdp =
+          await RtcManager.getGenericSdp(rtc.TransceiverDirection.RecvOnly);
+      final publisherSdp =
+          await RtcManager.getGenericSdp(rtc.TransceiverDirection.SendOnly);
+
+      _logger.v(
+        () => '[fastReconnect] subscriberSdp.len: ${subscriberSdp.length}, '
+            'publisherSdp.len: ${publisherSdp.length},',
+      );
 
       await _ensureClientDetails();
 
@@ -366,8 +385,10 @@ class CallSession extends Disposable {
             clientDetails: _clientDetails,
             token: config.sfuToken,
             sessionId: sessionId,
-            subscriberSdp: genericSdp,
-            reconnectDetails: getReconnectDetails(SfuReconnectionStrategy.fast),
+            subscriberSdp: subscriberSdp,
+            publisherSdp: publisherSdp,
+            reconnectDetails:
+                await getReconnectDetails(SfuReconnectionStrategy.fast),
           ),
         ),
       );
@@ -385,10 +406,10 @@ class CallSession extends Disposable {
 
         await rtcManager?.publisher.pc.restartIce();
 
-        final announcedTracks =
+        final remoteTracks =
             rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
 
-        for (final track in announcedTracks) {
+        for (final track in remoteTracks) {
           await _onRemoteTrackReceived(rtcManager!.publisher, track);
         }
 
@@ -470,39 +491,43 @@ class CallSession extends Disposable {
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
 
-    if (event is SfuSubscriberOfferEvent) {
-      await _onSubscriberOffer(event);
-    } else if (event is SfuIceTrickleEvent) {
-      await _onRemoteIceCandidate(event);
-    } else if (event is SfuParticipantLeftEvent) {
-      await _onParticipantLeft(event);
-    } else if (event is SfuTrackPublishedEvent) {
-      await _onTrackPublished(event);
-    } else if (event is SfuTrackUnpublishedEvent) {
-      await _onTrackUnpublished(event);
-    } else if (event is SfuChangePublishQualityEvent) {
-      await _onPublishQualityChanged(event);
-    }
+    await _sfuEventsLock.synchronized(() async {
+      if (event is SfuSubscriberOfferEvent) {
+        await _onSubscriberOffer(event);
+      } else if (event is SfuIceTrickleEvent) {
+        await _onRemoteIceCandidate(event);
+      } else if (event is SfuParticipantLeftEvent) {
+        await _onParticipantLeft(event);
+      } else if (event is SfuTrackPublishedEvent) {
+        await _onTrackPublished(event);
+      } else if (event is SfuTrackUnpublishedEvent) {
+        await _onTrackUnpublished(event);
+      } else if (event is SfuChangePublishQualityEvent) {
+        await _onPublishQualityChanged(event);
+      } else if (event is SfuChangePublishOptionsEvent) {
+        await _onPublishOptionsChanged(event);
+      }
 
-    if (event is SfuJoinResponseEvent) {
-      stateManager.sfuJoinResponse(event);
-    } else if (event is SfuParticipantJoinedEvent) {
-      stateManager.sfuParticipantJoined(event);
-    } else if (event is SfuParticipantUpdatedEvent) {
-      stateManager.sfuParticipantUpdated(event);
-    } else if (event is SfuParticipantLeftEvent) {
-      stateManager.sfuParticipantLeft(event);
-    } else if (event is SfuConnectionQualityChangedEvent) {
-      stateManager.sfuConnectionQualityChanged(event);
-    } else if (event is SfuAudioLevelChangedEvent) {
-      stateManager.sfuUpdateAudioLevelChanged(event);
-    } else if (event is SfuTrackPublishedEvent) {
-      stateManager.sfuTrackPublished(event);
-    } else if (event is SfuTrackUnpublishedEvent) {
-      stateManager.sfuTrackUnpublished(event);
-    } else if (event is SfuDominantSpeakerChangedEvent) {
-      stateManager.sfuDominantSpeakerChanged(event);
-    }
+      if (event is SfuJoinResponseEvent) {
+        stateManager.sfuJoinResponse(event);
+      } else if (event is SfuParticipantJoinedEvent) {
+        stateManager.sfuParticipantJoined(event);
+      } else if (event is SfuParticipantUpdatedEvent) {
+        stateManager.sfuParticipantUpdated(event);
+      } else if (event is SfuParticipantLeftEvent) {
+        stateManager.sfuParticipantLeft(event);
+      } else if (event is SfuConnectionQualityChangedEvent) {
+        stateManager.sfuConnectionQualityChanged(event);
+      } else if (event is SfuAudioLevelChangedEvent) {
+        stateManager.sfuUpdateAudioLevelChanged(event);
+      } else if (event is SfuTrackPublishedEvent) {
+        stateManager.sfuTrackPublished(event);
+      } else if (event is SfuTrackUnpublishedEvent) {
+        stateManager.sfuTrackUnpublished(event);
+      } else if (event is SfuDominantSpeakerChangedEvent) {
+        stateManager.sfuDominantSpeakerChanged(event);
+      }
+    });
   }
 
   Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {
@@ -585,15 +610,17 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onPublishQualityChanged] event: $event');
 
-    final enabledRids = event.videoSenders.firstOrNull?.layers
-            .where((e) => e.active)
-            .map((e) => e.name)
-            .toSet() ??
-        {};
+    for (final videoSender in event.videoSenders) {
+      await rtcManager?.onPublishQualityChanged(videoSender);
+    }
+  }
 
-    _logger.v(() => '[onPublishQualityChanged] Enabled RIDs: $enabledRids');
+  Future<void> _onPublishOptionsChanged(
+    SfuChangePublishOptionsEvent event,
+  ) async {
+    _logger.d(() => '[_onPublishOptionsChanged] event: $event');
 
-    return await rtcManager?.onPublishQualityChanged(enabledRids);
+    return await rtcManager?.onPublishOptionsChanged(event.publishOptions);
   }
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
@@ -698,7 +725,9 @@ class CallSession extends Disposable {
     final offer = await pc.createOffer();
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final tracksInfo = rtcManager!.getPublisherTrackInfos();
+    final sdp = offer.data.sdp;
+    final tracksInfo = await rtcManager!.getAnnouncedTracks(sdp: sdp);
+
     if (tracksInfo.isEmpty) {
       _logger.w(() => '[negotiate] rejected(tracksInfo is empty): $tracksInfo');
       return;
@@ -716,7 +745,7 @@ class CallSession extends Disposable {
 
     final pubResult = await sfuClient.setPublisher(
       sfu.SetPublisherRequest(
-        sdp: offer.data.sdp,
+        sdp: sdp,
         sessionId: sessionId,
         tracks: tracksInfo.toDTO(),
       ),

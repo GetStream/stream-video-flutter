@@ -215,7 +215,6 @@ class StreamPeerConnection extends Disposable {
 
   /// Adds a local [rtc.MediaStreamTrack] with audio to the current connection.
   Future<Result<rtc.RTCRtpTransceiver>> addAudioTransceiver({
-    required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
@@ -225,7 +224,6 @@ class StreamPeerConnection extends Disposable {
         kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
         init: rtc.RTCRtpTransceiverInit(
           direction: rtc.TransceiverDirection.SendOnly,
-          streams: [stream],
           sendEncodings: encodings,
         ),
       );
@@ -240,7 +238,6 @@ class StreamPeerConnection extends Disposable {
   ///
   /// The video is then sent in three different resolutions using simulcast.
   Future<Result<rtc.RTCRtpTransceiver>> addVideoTransceiver({
-    required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
@@ -249,7 +246,6 @@ class StreamPeerConnection extends Disposable {
         track: track,
         kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
         init: rtc.RTCRtpTransceiverInit(
-          streams: [stream],
           direction: rtc.TransceiverDirection.SendOnly,
           sendEncodings: encodings,
         ),

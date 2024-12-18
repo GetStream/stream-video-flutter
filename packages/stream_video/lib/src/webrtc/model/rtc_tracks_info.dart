@@ -17,7 +17,7 @@ class RtcTrackInfo {
   @override
   String toString() {
     return 'RtcTrackInfo{trackId: $trackId, trackType: $trackType, '
-        'layers: $layers}';
+        'mid: $mid, layers: $layers}';
   }
 }
 

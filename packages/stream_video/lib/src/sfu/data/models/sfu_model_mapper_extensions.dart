@@ -1,5 +1,6 @@
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
 import 'sfu_subscription_details.dart';
 import 'sfu_track_type.dart';
@@ -31,6 +32,18 @@ extension SfuTrackTypeMapper on SfuTrackType {
     } else {
       return sfu_models.TrackType.TRACK_TYPE_UNSPECIFIED;
     }
+  }
+}
+
+extension RtcVideoQualityMapper on RtcVideoQuality {
+  sfu_models.VideoQuality toDTO() {
+    return switch (this) {
+      RtcVideoQuality.lowUnspecified =>
+        sfu_models.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
+      RtcVideoQuality.mid => sfu_models.VideoQuality.VIDEO_QUALITY_MID,
+      RtcVideoQuality.high => sfu_models.VideoQuality.VIDEO_QUALITY_HIGH,
+      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF
+    };
   }
 }
 
