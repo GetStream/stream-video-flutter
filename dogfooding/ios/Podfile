@@ -44,6 +44,16 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
   
+  installer.pods_project.targets.each do |target|
+    if target.name == 'wakelock_plus' # Replace with the actual package name
+      target.resources_build_phase.files.each do |file|
+        if file.file_ref.path.include?('thermal.bundle')
+          file.file_ref.set_path('wakelock_plus_privacy.bundle') # Rename the bundle for PackageA
+        end
+      end
+    end
+  end
+
   # fix xcode 15 DT_TOOLCHAIN_DIR - remove after fix oficially - https://github.com/CocoaPods/CocoaPods/issues/12065
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|
