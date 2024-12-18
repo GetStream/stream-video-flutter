@@ -1,14 +1,15 @@
 name: App Distribute CI
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - dogfooding/**
+  pull_request:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - dogfooding/**
 
 env:
-  FLUTTER_VERSION: '3.24.3'
+  FLUTTER_VERSION: "3.24.3"
   FLUTTER_CHANNEL: stable
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
