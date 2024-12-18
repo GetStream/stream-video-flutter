@@ -45,7 +45,7 @@ post_install do |installer|
   end
   
   installer.pods_project.targets.each do |target|
-    if target.name == 'wakelock_plus' # Replace with the actual package name
+    if target.name == 'wakelock_plus-thermal' # Replace with the actual package name
       target.resources_build_phase.files.each do |file|
         if file.file_ref.path.include?('thermal.bundle')
           file.file_ref.set_path('wakelock_plus_privacy.bundle') # Rename the bundle for PackageA
