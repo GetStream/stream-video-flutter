@@ -45,22 +45,14 @@ post_install do |installer|
   end
 
   installer.pods_project.targets.each do |target|
-    if target.name == 'wakelock_plus' # Adjust the target name if necessary
-      target.resources_build_phase.files.each do |file|
-        if file.file_ref.path == 'thermal.bundle' # Matches the path to thermal.bundle
-          puts "Removing wakelock_plus thermal.bundle reference"
-          file.remove_from_project
+    if target.name == 'wakelock_plus-thermal'
+        source_files = target.source_build_phase.files
+        dummy = source_files.find do |file|
+            #puts "File: #{file.file_ref.name}"
+            file.file_ref.name == 'thermal.bundle'
         end
-      end
-    end
-
-    if target.name == 'wakelock_plus-thermal' # Adjust the target name if necessary
-      target.resources_build_phase.files.each do |file|
-        if file.file_ref.path == 'thermal.bundle' # Matches the path to thermal.bundle
-          puts "Removing wakelock_plus thermal.bundle reference"
-          file.remove_from_project
-        end
-      end
+        source_files.delete dummy
+        puts "Deleting source file #{dummy.inspect} from target #{target.inspect}."
     end
   end
 
