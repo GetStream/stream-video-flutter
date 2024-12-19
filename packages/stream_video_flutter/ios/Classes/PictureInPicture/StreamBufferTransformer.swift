@@ -3,12 +3,12 @@
 //
 
 import Foundation
-import flutter_webrtc
+import stream_webrtc_flutter
 
 /// `StreamBufferTransformer` is a struct that provides methods for transforming RTCI420Buffer to
 /// CVPixelBuffer, while performing downsampling when necessary.
 struct StreamBufferTransformer {
-    
+
     var requiresResize = false
 
     /// Transforms an RTCVideoFrame's buffer  to a CMSampleBuffer with optional resizing.
@@ -30,9 +30,9 @@ struct StreamBufferTransformer {
             }
         }()
 
-        if
-            let pixelBuffer = pixelBuffer,
-            let buffer = transformAndResizeIfRequired(pixelBuffer, targetSize: targetSize) {
+        if let pixelBuffer = pixelBuffer,
+            let buffer = transformAndResizeIfRequired(pixelBuffer, targetSize: targetSize)
+        {
             return .init(
                 buffer: buffer,
                 rotation: frame.rotation,
@@ -44,7 +44,7 @@ struct StreamBufferTransformer {
     }
 
     // MARK: - Private API
-    
+
     /// Transforms an RTCVideoFrameBuffer to a CMSampleBuffer with optional resizing.
     /// - Note: The current implementation always handles an i420 buffer as RTCCVPixelBuffer have been
     /// proven problematic.
@@ -65,10 +65,10 @@ struct StreamBufferTransformer {
                 return .init(source: source)
             }
         }()
-        
+
         return resultBuffer
     }
-    
+
     /// Calculates the new size to fit within a container size while maintaining the aspect ratio.
     ///
     /// - Parameters:
@@ -81,17 +81,17 @@ struct StreamBufferTransformer {
     ) -> CGSize {
         let widthRatio = containerSize.width / size.width
         let heightRatio = containerSize.height / size.height
-        
+
         // Choose the smaller ratio to ensure that the entire original size fits
         // within the container.
         let ratioToUse = min(widthRatio, heightRatio)
-        
+
         // Calculate the new size while maintaining the aspect ratio.
         let newSize = CGSize(
             width: size.width * ratioToUse,
             height: size.height * ratioToUse
         )
-        
+
         return newSize
     }
 }

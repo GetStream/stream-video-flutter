@@ -3,10 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  dart_vlc
   desktop_drop
   file_selector_linux
-  flutter_webrtc
+  gtk
+  media_kit_video
+  stream_webrtc_flutter
   url_launcher_linux
 )
 

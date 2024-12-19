@@ -30,6 +30,7 @@ class RtcVideoSource extends RtcMediaSource {
   final double? framesPerSecond;
   final int? frames;
 
+  @override
   String? get codecId => id;
 
   static RtcVideoSource? fromJson(dynamic value) {

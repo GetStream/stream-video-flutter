@@ -38,6 +38,7 @@ const SfuEvent$json = {
     {'1': 'call_ended', '3': 23, '4': 1, '5': 11, '6': '.stream.video.sfu.event.CallEnded', '9': 0, '10': 'callEnded'},
     {'1': 'participant_updated', '3': 24, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ParticipantUpdated', '9': 0, '10': 'participantUpdated'},
     {'1': 'participant_migration_complete', '3': 25, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ParticipantMigrationComplete', '9': 0, '10': 'participantMigrationComplete'},
+    {'1': 'change_publish_options', '3': 27, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ChangePublishOptions', '9': 0, '10': 'changePublishOptions'},
   ],
   '8': [
     {'1': 'event_payload'},
@@ -79,7 +80,33 @@ final $typed_data.Uint8List sfuEventDescriptor = $convert.base64Decode(
     'LmV2ZW50LlBhcnRpY2lwYW50VXBkYXRlZEgAUhJwYXJ0aWNpcGFudFVwZGF0ZWQSfAoecGFydG'
     'ljaXBhbnRfbWlncmF0aW9uX2NvbXBsZXRlGBkgASgLMjQuc3RyZWFtLnZpZGVvLnNmdS5ldmVu'
     'dC5QYXJ0aWNpcGFudE1pZ3JhdGlvbkNvbXBsZXRlSABSHHBhcnRpY2lwYW50TWlncmF0aW9uQ2'
-    '9tcGxldGVCDwoNZXZlbnRfcGF5bG9hZA==');
+    '9tcGxldGUSZAoWY2hhbmdlX3B1Ymxpc2hfb3B0aW9ucxgbIAEoCzIsLnN0cmVhbS52aWRlby5z'
+    'ZnUuZXZlbnQuQ2hhbmdlUHVibGlzaE9wdGlvbnNIAFIUY2hhbmdlUHVibGlzaE9wdGlvbnNCDw'
+    'oNZXZlbnRfcGF5bG9hZA==');
+
+@$core.Deprecated('Use changePublishOptionsDescriptor instead')
+const ChangePublishOptions$json = {
+  '1': 'ChangePublishOptions',
+  '2': [
+    {'1': 'publish_options', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.PublishOption', '10': 'publishOptions'},
+    {'1': 'reason', '3': 2, '4': 1, '5': 9, '10': 'reason'},
+  ],
+};
+
+/// Descriptor for `ChangePublishOptions`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List changePublishOptionsDescriptor = $convert.base64Decode(
+    'ChRDaGFuZ2VQdWJsaXNoT3B0aW9ucxJPCg9wdWJsaXNoX29wdGlvbnMYASADKAsyJi5zdHJlYW'
+    '0udmlkZW8uc2Z1Lm1vZGVscy5QdWJsaXNoT3B0aW9uUg5wdWJsaXNoT3B0aW9ucxIWCgZyZWFz'
+    'b24YAiABKAlSBnJlYXNvbg==');
+
+@$core.Deprecated('Use changePublishOptionsCompleteDescriptor instead')
+const ChangePublishOptionsComplete$json = {
+  '1': 'ChangePublishOptionsComplete',
+};
+
+/// Descriptor for `ChangePublishOptionsComplete`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List changePublishOptionsCompleteDescriptor = $convert.base64Decode(
+    'ChxDaGFuZ2VQdWJsaXNoT3B0aW9uc0NvbXBsZXRl');
 
 @$core.Deprecated('Use participantMigrationCompleteDescriptor instead')
 const ParticipantMigrationComplete$json = {
@@ -249,6 +276,7 @@ const JoinRequest$json = {
     {'1': 'token', '3': 1, '4': 1, '5': 9, '10': 'token'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     {'1': 'subscriber_sdp', '3': 3, '4': 1, '5': 9, '10': 'subscriberSdp'},
+    {'1': 'publisher_sdp', '3': 8, '4': 1, '5': 9, '10': 'publisherSdp'},
     {'1': 'client_details', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ClientDetails', '10': 'clientDetails'},
     {
       '1': 'migration',
@@ -268,18 +296,25 @@ const JoinRequest$json = {
       '10': 'fastReconnect',
     },
     {'1': 'reconnect_details', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ReconnectDetails', '10': 'reconnectDetails'},
+    {'1': 'preferred_publish_options', '3': 9, '4': 3, '5': 11, '6': '.stream.video.sfu.models.PublishOption', '10': 'preferredPublishOptions'},
+    {'1': 'preferred_subscribe_options', '3': 10, '4': 3, '5': 11, '6': '.stream.video.sfu.models.SubscribeOption', '10': 'preferredSubscribeOptions'},
   ],
 };
 
 /// Descriptor for `JoinRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode(
     'CgtKb2luUmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SHQoKc2Vzc2lvbl9pZBgCIAEoCV'
-    'IJc2Vzc2lvbklkEiUKDnN1YnNjcmliZXJfc2RwGAMgASgJUg1zdWJzY3JpYmVyU2RwEk0KDmNs'
-    'aWVudF9kZXRhaWxzGAQgASgLMiYuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ2xpZW50RGV0YW'
-    'lsc1INY2xpZW50RGV0YWlscxJDCgltaWdyYXRpb24YBSABKAsyIS5zdHJlYW0udmlkZW8uc2Z1'
-    'LmV2ZW50Lk1pZ3JhdGlvbkICGAFSCW1pZ3JhdGlvbhIpCg5mYXN0X3JlY29ubmVjdBgGIAEoCE'
-    'ICGAFSDWZhc3RSZWNvbm5lY3QSVQoRcmVjb25uZWN0X2RldGFpbHMYByABKAsyKC5zdHJlYW0u'
-    'dmlkZW8uc2Z1LmV2ZW50LlJlY29ubmVjdERldGFpbHNSEHJlY29ubmVjdERldGFpbHM=');
+    'IJc2Vzc2lvbklkEiUKDnN1YnNjcmliZXJfc2RwGAMgASgJUg1zdWJzY3JpYmVyU2RwEiMKDXB1'
+    'Ymxpc2hlcl9zZHAYCCABKAlSDHB1Ymxpc2hlclNkcBJNCg5jbGllbnRfZGV0YWlscxgEIAEoCz'
+    'ImLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNsaWVudERldGFpbHNSDWNsaWVudERldGFpbHMS'
+    'QwoJbWlncmF0aW9uGAUgASgLMiEuc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5NaWdyYXRpb25CAh'
+    'gBUgltaWdyYXRpb24SKQoOZmFzdF9yZWNvbm5lY3QYBiABKAhCAhgBUg1mYXN0UmVjb25uZWN0'
+    'ElUKEXJlY29ubmVjdF9kZXRhaWxzGAcgASgLMiguc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5SZW'
+    'Nvbm5lY3REZXRhaWxzUhByZWNvbm5lY3REZXRhaWxzEmIKGXByZWZlcnJlZF9wdWJsaXNoX29w'
+    'dGlvbnMYCSADKAsyJi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5QdWJsaXNoT3B0aW9uUhdwcm'
+    'VmZXJyZWRQdWJsaXNoT3B0aW9ucxJoChtwcmVmZXJyZWRfc3Vic2NyaWJlX29wdGlvbnMYCiAD'
+    'KAsyKC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5TdWJzY3JpYmVPcHRpb25SGXByZWZlcnJlZF'
+    'N1YnNjcmliZU9wdGlvbnM=');
 
 @$core.Deprecated('Use reconnectDetailsDescriptor instead')
 const ReconnectDetails$json = {
@@ -329,6 +364,7 @@ const JoinResponse$json = {
     {'1': 'call_state', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.CallState', '10': 'callState'},
     {'1': 'reconnected', '3': 2, '4': 1, '5': 8, '10': 'reconnected'},
     {'1': 'fast_reconnect_deadline_seconds', '3': 3, '4': 1, '5': 5, '10': 'fastReconnectDeadlineSeconds'},
+    {'1': 'publish_options', '3': 4, '4': 3, '5': 11, '6': '.stream.video.sfu.models.PublishOption', '10': 'publishOptions'},
   ],
 };
 
@@ -337,7 +373,8 @@ final $typed_data.Uint8List joinResponseDescriptor = $convert.base64Decode(
     'CgxKb2luUmVzcG9uc2USQQoKY2FsbF9zdGF0ZRgBIAEoCzIiLnN0cmVhbS52aWRlby5zZnUubW'
     '9kZWxzLkNhbGxTdGF0ZVIJY2FsbFN0YXRlEiAKC3JlY29ubmVjdGVkGAIgASgIUgtyZWNvbm5l'
     'Y3RlZBJFCh9mYXN0X3JlY29ubmVjdF9kZWFkbGluZV9zZWNvbmRzGAMgASgFUhxmYXN0UmVjb2'
-    '5uZWN0RGVhZGxpbmVTZWNvbmRz');
+    '5uZWN0RGVhZGxpbmVTZWNvbmRzEk8KD3B1Ymxpc2hfb3B0aW9ucxgEIAMoCzImLnN0cmVhbS52'
+    'aWRlby5zZnUubW9kZWxzLlB1Ymxpc2hPcHRpb25SDnB1Ymxpc2hPcHRpb25z');
 
 @$core.Deprecated('Use participantJoinedDescriptor instead')
 const ParticipantJoined$json = {
@@ -490,13 +527,17 @@ const AudioSender$json = {
   '1': 'AudioSender',
   '2': [
     {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
+    {'1': 'track_type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {'1': 'publish_option_id', '3': 4, '4': 1, '5': 5, '10': 'publishOptionId'},
   ],
 };
 
 /// Descriptor for `AudioSender`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List audioSenderDescriptor = $convert.base64Decode(
     'CgtBdWRpb1NlbmRlchI0CgVjb2RlYxgCIAEoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLk'
-    'NvZGVjUgVjb2RlYw==');
+    'NvZGVjUgVjb2RlYxJBCgp0cmFja190eXBlGAMgASgOMiIuc3RyZWFtLnZpZGVvLnNmdS5tb2Rl'
+    'bHMuVHJhY2tUeXBlUgl0cmFja1R5cGUSKgoRcHVibGlzaF9vcHRpb25faWQYBCABKAVSD3B1Ym'
+    'xpc2hPcHRpb25JZA==');
 
 @$core.Deprecated('Use videoLayerSettingDescriptor instead')
 const VideoLayerSetting$json = {
@@ -527,6 +568,8 @@ const VideoSender$json = {
   '2': [
     {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
     {'1': 'layers', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.event.VideoLayerSetting', '10': 'layers'},
+    {'1': 'track_type', '3': 4, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {'1': 'publish_option_id', '3': 5, '4': 1, '5': 5, '10': 'publishOptionId'},
   ],
 };
 
@@ -534,7 +577,9 @@ const VideoSender$json = {
 final $typed_data.Uint8List videoSenderDescriptor = $convert.base64Decode(
     'CgtWaWRlb1NlbmRlchI0CgVjb2RlYxgCIAEoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLk'
     'NvZGVjUgVjb2RlYxJBCgZsYXllcnMYAyADKAsyKS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LlZp'
-    'ZGVvTGF5ZXJTZXR0aW5nUgZsYXllcnM=');
+    'ZGVvTGF5ZXJTZXR0aW5nUgZsYXllcnMSQQoKdHJhY2tfdHlwZRgEIAEoDjIiLnN0cmVhbS52aW'
+    'Rlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEioKEXB1Ymxpc2hfb3B0aW9uX2lk'
+    'GAUgASgFUg9wdWJsaXNoT3B0aW9uSWQ=');
 
 @$core.Deprecated('Use changePublishQualityDescriptor instead')
 const ChangePublishQuality$json = {
