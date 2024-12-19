@@ -44,15 +44,23 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
 
-  installer.pods_project.targets.each do |target|
-    if target.name == 'wakelock_plus-thermal'
-        source_files = target.source_build_phase.files
-        dummy = source_files.find do |file|
-            #puts "File: #{file.file_ref.name}"
-            file.file_ref.name == 'thermal.bundle'
-        end
-        source_files.delete dummy
-        puts "Deleting source file #{dummy.inspect} from target #{target.inspect}."
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      if target.name == 'wakelock_plus-thermal'
+          bundle_to_remove = 'thermal.bundle'
+          resources = target.resources_build_phase.files
+  
+          # Find the resource bundle to remove
+          bundle_file = resources.find do |resource|
+            resource.file_ref.path&.include?(bundle_to_remove)
+          end
+  
+          # Remove the resource bundle if found
+          if bundle_file
+            resources.delete(bundle_file)
+            puts "Deleting resource bundle #{bundle_to_remove} from target #{target.name}."
+          end
+      end
     end
   end
 
