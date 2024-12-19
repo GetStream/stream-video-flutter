@@ -160,6 +160,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     T? mediaConstraints,
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
+    rtc.MediaStreamTrack? originalMediaTrack,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -169,7 +170,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaConstraints: mediaConstraints ?? this.mediaConstraints,
       stopTrackOnMute: stopTrackOnMute ?? this.stopTrackOnMute,
       videoDimension: videoDimension ?? this.videoDimension,
-      originalMediaTrack: originalMediaTrack,
+      originalMediaTrack: originalMediaTrack ?? this.originalMediaTrack,
     );
   }
 
@@ -192,13 +193,18 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     // Replace the track on the transceiver if it exists.
     for (final transceiver in transceivers) {
-      final sender = transceiver.sender;
+      if (transceiver.sender.track == null) {
+        continue;
+      }
+
+      final clonedTrack = await newTrack.clone();
       streamLog.i(_tag, () => 'Replacing track on sender');
-      await sender.replaceTrack(newTrack);
+      await transceiver.sender.replaceTrack(clonedTrack);
     }
 
     return copyWith(
       mediaTrack: newTrack,
+      originalMediaTrack: newTrack,
       mediaStream: newStream,
       mediaConstraints: constraints,
     );

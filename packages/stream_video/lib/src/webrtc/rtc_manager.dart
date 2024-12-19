@@ -247,7 +247,7 @@ class RtcManager extends Disposable {
 
     _logger.v(
       () =>
-          '[onPublishOptionsChanged] should publish in CODECS: ${publishOptions.map((e) => e.codec.name).join(', ')}}',
+          '[onPublishOptionsChanged] should publish in CODECS: ${publishOptions.map((e) => e.codec.name).join(', ')}',
     );
 
     this.publishOptions = publishOptions;
@@ -282,7 +282,7 @@ class RtcManager extends Disposable {
       await _addTransceiver(item.track, publishOption);
     }
 
-    for (final item in transceiversManager.items()) {
+    for (final item in transceiversManager.items().toList()) {
       final publishOption = item.publishOption;
       final hasPublishOption = publishOptions.any(
         (option) =>
@@ -294,18 +294,19 @@ class RtcManager extends Disposable {
 
       _logger.v(
         () =>
-            '[onPublishOptionsChanged] stop publishin and remove transceiver for ${publishOption.codec.name}',
+            '[onPublishOptionsChanged] stop publishing and remove transceiver for ${publishOption.codec.name}',
       );
 
       // it is safe to stop the track here, it is a clone
       await item.transceiver.sender.track?.stop();
       await item.transceiver.sender.replaceTrack(null);
-      await publisher.pc.removeTrack(item.transceiver.sender);
-      transceiversManager.remove(item);
     }
   }
 
-  Future<void> onPublishQualityChanged(SfuVideoSender videoSender) async {
+  Future<void> onPublishQualityChanged(
+    SfuVideoSender videoSender,
+    String? codecInUse,
+  ) async {
     final enabledLayers = videoSender.layers.where((e) => e.active).toList();
 
     _logger.i(
@@ -325,7 +326,8 @@ class RtcManager extends Disposable {
       return;
     }
 
-    if (sender.parameters.encodings?.isEmpty ?? true) {
+    final params = sender.parameters;
+    if (params.encodings?.isEmpty ?? true) {
       _logger.w(
         () =>
             '[onPublishQualityChanged] No suitable video encoding quality found',
@@ -333,23 +335,21 @@ class RtcManager extends Disposable {
       return;
     }
 
-    final codecInUse = sender.parameters.codecs?.firstOrNull;
-    final usesSvcCodec =
-        codecInUse != null && codecs.isSvcCodec(codecInUse.kind);
+    final usesSvcCodec = codecInUse != null && codecs.isSvcCodec(codecInUse);
 
     _logger.i(
       () =>
-          '[onPublishQualityChanged] Codec in use: ${codecInUse?.kind}, uses SVC: $usesSvcCodec',
+          '[onPublishQualityChanged] Codec in use: $codecInUse, uses SVC: $usesSvcCodec',
     );
 
     var changed = false;
-    for (final encoder in sender.parameters.encodings!) {
+    for (final encoder in params.encodings!) {
       final layer = usesSvcCodec
           ? // for SVC, we only have one layer (q) and often rid is omitted
           enabledLayers.firstOrNull
           : // for non-SVC, we need to find the layer by rid (simulcast)
           enabledLayers.firstWhereOrNull((l) => l.name == encoder.rid) ??
-              (sender.parameters.encodings!.length == 1
+              (params.encodings!.length == 1
                   ? enabledLayers.firstOrNull
                   : null);
 
@@ -373,11 +373,11 @@ class RtcManager extends Disposable {
         encoder.scaleResolutionDownBy = scaleResolutionDownBy;
         changed = true;
       }
-      if (maxBitrate >= 0 && maxBitrate != encoder.maxBitrate) {
+      if (maxBitrate > 0 && maxBitrate != encoder.maxBitrate) {
         encoder.maxBitrate = maxBitrate;
         changed = true;
       }
-      if (maxFramerate >= 0 && maxFramerate != encoder.maxFramerate) {
+      if (maxFramerate > 0 && maxFramerate != encoder.maxFramerate) {
         encoder.maxFramerate = maxFramerate;
         changed = true;
       }
@@ -388,8 +388,7 @@ class RtcManager extends Disposable {
       }
     }
 
-    final activeLayers =
-        sender.parameters.encodings!.where((e) => e.active).toList();
+    final activeLayers = params.encodings!.where((e) => e.active).toList();
 
     if (!changed) {
       _logger.i(
@@ -399,7 +398,7 @@ class RtcManager extends Disposable {
       return;
     }
 
-    // await sender.setParameters(sender.parameters);
+    await sender.setParameters(params);
     _logger.i(
       () =>
           '[onPublishQualityChanged] Update publish quality, enabled rids: ${activeLayers.map((e) => e.rid)}',
@@ -521,10 +520,6 @@ extension PublisherRtcManager on RtcManager {
           publishOptions: item.publishOption,
         );
 
-        final sendEncodings = isSvcCodec(item.publishOption.codec.name)
-            ? toSvcEncodings(encodings)
-            : encodings;
-
         infos.add(
           RtcTrackInfo(
             trackId: track.mediaTrack.id,
@@ -534,7 +529,7 @@ extension PublisherRtcManager on RtcManager {
               transceiverInitialIndex,
               finalSdp,
             ),
-            layers: sendEncodings.map((it) {
+            layers: encodings.map((it) {
               final scale = it.scaleResolutionDownBy ?? 1;
               return RtcVideoLayer(
                 rid: it.rid ?? '',

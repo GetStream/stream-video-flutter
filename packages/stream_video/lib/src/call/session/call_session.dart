@@ -19,7 +19,6 @@ import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../extensions/thermal_status_ext.dart';
-import '../../models/call_client_publish_options.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_error.dart';
@@ -116,6 +115,7 @@ class CallSession extends Disposable {
   final Duration joinResponseTimeout;
 
   final Lock _sfuEventsLock = Lock();
+  final Lock _negotiationLock = Lock();
 
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
@@ -621,8 +621,11 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onPublishQualityChanged] event: $event');
 
+    final usedCodec =
+        stateManager.callState.publisherStats?.videoCodec?.firstOrNull;
+
     for (final videoSender in event.videoSenders) {
-      await rtcManager?.onPublishQualityChanged(videoSender);
+      await rtcManager?.onPublishQualityChanged(videoSender, usedCodec);
     }
   }
 
@@ -731,46 +734,49 @@ class CallSession extends Disposable {
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
-    _logger.d(() => '[negotiate] type: ${pc.type}');
+    await _negotiationLock.synchronized(() async {
+      _logger.d(() => '[negotiate] type: ${pc.type}');
 
-    final offer = await pc.createOffer();
-    if (offer is! Success<rtc.RTCSessionDescription>) return;
+      final offer = await pc.createOffer();
+      if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final sdp = offer.data.sdp;
-    final tracksInfo = await rtcManager!.getAnnouncedTracks(sdp: sdp);
+      final sdp = offer.data.sdp;
+      final tracksInfo = await rtcManager!.getAnnouncedTracks(sdp: sdp);
 
-    if (tracksInfo.isEmpty) {
-      _logger.w(() => '[negotiate] rejected(tracksInfo is empty): $tracksInfo');
-      return;
-    }
-
-    for (final track in tracksInfo) {
-      _logger.v(
-        () => '[negotiate] track.id: ${track.trackId}, '
-            'track.type: ${track.trackType}',
-      );
-      for (final layer in [...?track.layers]) {
-        _logger.v(() => '[negotiate] layer: $layer');
+      if (tracksInfo.isEmpty) {
+        _logger
+            .w(() => '[negotiate] rejected(tracksInfo is empty): $tracksInfo');
+        return;
       }
-    }
 
-    final pubResult = await sfuClient.setPublisher(
-      sfu.SetPublisherRequest(
-        sdp: sdp,
-        sessionId: sessionId,
-        tracks: tracksInfo.toDTO(),
-      ),
-    );
+      for (final track in tracksInfo) {
+        _logger.v(
+          () => '[negotiate] track.id: ${track.trackId}, '
+              'track.type: ${track.trackType}',
+        );
+        for (final layer in [...?track.layers]) {
+          _logger.v(() => '[negotiate] layer: $layer');
+        }
+      }
 
-    if (pubResult is! Success<sfu.SetPublisherResponse>) {
-      _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
-      return;
-    }
+      final pubResult = await sfuClient.setPublisher(
+        sfu.SetPublisherRequest(
+          sdp: sdp,
+          sessionId: sessionId,
+          tracks: tracksInfo.toDTO(),
+        ),
+      );
 
-    final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
-    if (ansResult is! Success<void>) {
-      _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
-    }
+      if (pubResult is! Success<sfu.SetPublisherResponse>) {
+        _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
+        return;
+      }
+
+      final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
+      if (ansResult is! Success<void>) {
+        _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
+      }
+    });
   }
 
   Future<void> _onRemoteTrackReceived(
