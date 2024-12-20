@@ -749,15 +749,7 @@ class CallSession extends Disposable {
         return;
       }
 
-      for (final track in tracksInfo) {
-        _logger.v(
-          () => '[negotiate] track.id: ${track.trackId}, '
-              'track.type: ${track.trackType}',
-        );
-        for (final layer in [...?track.layers]) {
-          _logger.v(() => '[negotiate] layer: $layer');
-        }
-      }
+      _logger.v(() => '[negotiate] announcing tracks: $tracksInfo');
 
       final pubResult = await sfuClient.setPublisher(
         sfu.SetPublisherRequest(

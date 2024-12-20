@@ -24,10 +24,6 @@ dependencies:
   stream_webrtc_flutter: ^0.12.3+3
   visibility_detector: ^0.4.0+2
 
-dependency_overrides:
-  stream_video:
-    path: ../stream_video
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

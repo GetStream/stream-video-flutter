@@ -18,7 +18,7 @@ class TransceiverCache {
 
   @override
   String toString() {
-    return 'TransceiverCache{track: $track, publishOption $publishOption, sender.track.enabled: ${transceiver.sender.track?.enabled}}';
+    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}}';
   }
 }
 

@@ -277,6 +277,11 @@ class RtcManager extends Disposable {
         continue;
       }
 
+      _logger.v(
+        () =>
+            '[onPublishOptionsChanged] adding transceiver for:  ${publishOption.codec.name}',
+      );
+
       // take the track from the existing transceiver for the same track type,
       // and publish it with the new publish options
       await _addTransceiver(item.track, publishOption);
@@ -715,6 +720,11 @@ extension PublisherRtcManager on RtcManager {
     SfuPublishOptions publishOptions,
   ) async {
     Result<rtc.RTCRtpTransceiver>? transceiverResult;
+
+    _logger.v(
+      () =>
+          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}',
+    );
 
     // create a clone of the track as otherwise the same trackId will
     // appear in the SDP in multiple transceivers

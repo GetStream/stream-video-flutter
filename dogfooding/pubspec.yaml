@@ -39,6 +39,7 @@ dependencies:
   stream_video_screen_sharing: ^0.6.0
 
 dependency_overrides:
+  wakelock_plus: ^1.2.9
   stream_video:
     path: ../packages/stream_video
   stream_video_flutter:
