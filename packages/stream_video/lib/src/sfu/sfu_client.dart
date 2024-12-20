@@ -132,13 +132,13 @@ class SfuClient {
 extension on sfu.SetPublisherRequest {
   String stringify() {
     return 'SetPublisherRequest(sessionId: $sessionId, tracks: $tracks, '
-        'sdp.length: ${sdp.length})';
+        'sdp: $sdp)';
   }
 }
 
 extension on sfu.SetPublisherResponse {
   String stringify() {
     return 'SetPublisherResponse(sessionId: $sessionId, '
-        'iceRestart: $iceRestart, error: $error, sdp.length: ${sdp.length})';
+        'iceRestart: $iceRestart, error: $error, sdp: $sdp)';
   }
 }

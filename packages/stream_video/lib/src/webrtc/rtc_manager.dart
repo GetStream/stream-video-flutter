@@ -256,13 +256,17 @@ class RtcManager extends Disposable {
       final trackType = publishOption.trackType;
 
       if (!isPublishing(trackType)) {
+        _logger.v(
+          () =>
+              '[onPublishOptionsChanged] ignoring codec: ${publishOption.codec.name} for track type: $trackType - track is not publishing',
+        );
         continue;
       }
 
       if (transceiversManager.has(publishOption)) {
         _logger.v(
           () =>
-              '[onPublishOptionsChanged] already publishing in ${publishOption.codec.name}',
+              '[onPublishOptionsChanged] already publishing in ${publishOption.codec.name} for $trackType',
         );
         continue;
       }
@@ -279,7 +283,7 @@ class RtcManager extends Disposable {
 
       _logger.v(
         () =>
-            '[onPublishOptionsChanged] adding transceiver for:  ${publishOption.codec.name}',
+            '[onPublishOptionsChanged] adding transceiver for: $trackType with codec: ${publishOption.codec.name}',
       );
 
       // take the track from the existing transceiver for the same track type,
@@ -299,7 +303,7 @@ class RtcManager extends Disposable {
 
       _logger.v(
         () =>
-            '[onPublishOptionsChanged] stop publishing and remove transceiver for ${publishOption.codec.name}',
+            '[onPublishOptionsChanged] stop publishing and remove transceiver for: ${item.track.trackType} with codec: ${publishOption.codec.name}',
       );
 
       // it is safe to stop the track here, it is a clone
