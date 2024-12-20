@@ -288,6 +288,8 @@ class _JoinForm extends StatelessWidget {
               child: TextField(
                 controller: callIdController,
                 style: const TextStyle(color: Colors.white),
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: InputDecoration(
                   enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(
@@ -301,6 +303,8 @@ class _JoinForm extends StatelessWidget {
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   isDense: true,
+                  hintStyle:
+                      const TextStyle(color: AppColorPalette.secondaryText),
                   hintText: 'Enter call id',
                   // suffix button to generate a random call id
                   suffixIcon: IconButton(
