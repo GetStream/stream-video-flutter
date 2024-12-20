@@ -635,6 +635,13 @@ extension PublisherRtcManager on RtcManager {
     _logger.i(() => '[publishVideoTrack] track: $track');
     tracks[track.trackId] = track;
 
+    if (!publishOptions.any((o) => o.trackType == track.trackType)) {
+      _logger.w(() =>
+          '[publishVideoTrack] No publish options found for track type: ${track.trackType}');
+      return Result.error(
+          'No publish options found for track type: ${track.trackType}');
+    }
+
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 

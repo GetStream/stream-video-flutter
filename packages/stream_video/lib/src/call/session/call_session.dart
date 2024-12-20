@@ -12,6 +12,7 @@ import 'package:thermal/thermal.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../../version.g.dart';
@@ -169,7 +170,7 @@ class CallSession extends Disposable {
           version: deviceInfo.systemVersion,
         );
         device = sfu_models.Device(
-          name: deviceInfo.model,
+          name: deviceInfo.utsname.machine,
         );
       } else if (CurrentPlatform.isWeb) {
         final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
@@ -288,6 +289,19 @@ class CallSession extends Disposable {
             'publisherSdp.len: ${publisherSdp.length}',
       );
 
+      final isReconnecting = reconnectDetails != null &&
+          reconnectDetails.strategy !=
+              WebsocketReconnectStrategy
+                  .WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED;
+
+      final preferredPublishOptions = isReconnecting
+          ? rtcManager?.publishOptions.map((o) => o.toDTO())
+          : clientPublishOptions?.getPreferredPublishOptions();
+
+      final preferredSubscribeOptions = isReconnecting
+          ? null
+          : clientPublishOptions?.getPreferredSubscriberOptions();
+
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
@@ -297,10 +311,8 @@ class CallSession extends Disposable {
             subscriberSdp: subscriberSdp,
             publisherSdp: publisherSdp,
             reconnectDetails: reconnectDetails,
-            preferredPublishOptions:
-                clientPublishOptions?.getPreferredPublishOptions(),
-            preferredSubscribeOptions:
-                clientPublishOptions?.getPreferredSubscriberOptions(),
+            preferredPublishOptions: preferredPublishOptions,
+            preferredSubscribeOptions: preferredSubscribeOptions,
           ),
         ),
       );
@@ -397,9 +409,7 @@ class CallSession extends Disposable {
             reconnectDetails:
                 await getReconnectDetails(SfuReconnectionStrategy.fast),
             preferredPublishOptions:
-                clientPublishOptions?.getPreferredPublishOptions(),
-            preferredSubscribeOptions:
-                clientPublishOptions?.getPreferredSubscriberOptions(),
+                rtcManager?.publishOptions.map((o) => o.toDTO()),
           ),
         ),
       );
