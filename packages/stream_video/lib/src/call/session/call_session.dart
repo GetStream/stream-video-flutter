@@ -220,7 +220,8 @@ class CallSession extends Disposable {
     String? migratingFromSfuId,
     int? reconnectAttempts,
   }) async {
-    final announcedTracks = await rtcManager?.getAnnouncedTracks();
+    final announcedTracks = await rtcManager?.getAnnouncedTracksForReconnect();
+
     final subscribedTracks = dynascaleManager
         .getTrackSubscriptions(ignoreOverride: true)
         .values

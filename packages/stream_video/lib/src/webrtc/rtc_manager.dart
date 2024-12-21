@@ -498,69 +498,97 @@ extension PublisherRtcManager on RtcManager {
     return transceiverInitIndex.toString();
   }
 
-  Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
+  Future<List<RtcTrackInfo>> getAnnouncedTracks({
+    String? sdp,
+  }) async {
     final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
     final infos = <RtcTrackInfo>[];
 
     for (final item in transceiversManager.items()) {
-      final track = item.track;
-
-      final transceiverInitialIndex =
-          transceiversManager.indexOf(item.transceiver);
-
-      if (track is RtcLocalAudioTrack) {
-        infos.add(
-          RtcTrackInfo(
-            trackId: track.mediaTrack.id,
-            trackType: track.trackType,
-            mid: extractMid(
-              item.transceiver,
-              transceiverInitialIndex,
-              finalSdp,
-            ),
-            layers: [],
-          ),
-        );
-      } else if (track is RtcLocalVideoTrack) {
-        final dimension = _getTrackDimension(track);
-
-        final encodings = codecs.findOptimalVideoLayers(
-          dimensions: _getTrackDimension(track),
-          publishOptions: item.publishOption,
-        );
-
-        infos.add(
-          RtcTrackInfo(
-            trackId: track.mediaTrack.id,
-            trackType: track.trackType,
-            mid: extractMid(
-              item.transceiver,
-              transceiverInitialIndex,
-              finalSdp,
-            ),
-            layers: encodings.map((it) {
-              final scale = it.scaleResolutionDownBy ?? 1;
-              return RtcVideoLayer(
-                rid: it.rid ?? '',
-                parameters: RtcVideoParameters(
-                  encoding: RtcVideoEncoding(
-                    maxBitrate: it.maxBitrate ?? 0,
-                    maxFramerate: it.maxFramerate ?? 0,
-                    quality: ridToVideoQuality(it.rid ?? ''),
-                  ),
-                  dimension: RtcVideoDimension(
-                    width: (dimension.width / scale).floor(),
-                    height: (dimension.height / scale).floor(),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      }
+      if (item.transceiver.sender.track == null) continue;
+      infos.add(_transceiverToTrackInfo(item, sdp: finalSdp));
     }
 
     return infos;
+  }
+
+  Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
+    String? sdp,
+  }) async {
+    final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
+    final infos = <RtcTrackInfo>[];
+
+    for (final publishOption in publishOptions) {
+      final item = transceiversManager.find(
+        (c) =>
+            c.publishOption.id == publishOption.id &&
+            c.publishOption.trackType == publishOption.trackType,
+      );
+
+      if (item?.transceiver.sender.track == null) continue;
+      infos.add(_transceiverToTrackInfo(item!, sdp: finalSdp));
+    }
+
+    return infos;
+  }
+
+  RtcTrackInfo _transceiverToTrackInfo(
+    TransceiverCache transceiverCache, {
+    String? sdp,
+  }) {
+    final track = transceiverCache.track;
+
+    final transceiverInitialIndex =
+        transceiversManager.indexOf(transceiverCache.transceiver);
+
+    if (track is RtcLocalAudioTrack) {
+      return RtcTrackInfo(
+        trackId: track.mediaTrack.id,
+        trackType: track.trackType,
+        mid: extractMid(
+          transceiverCache.transceiver,
+          transceiverInitialIndex,
+          sdp,
+        ),
+        layers: [],
+      );
+    } else if (track is RtcLocalVideoTrack) {
+      final dimension = _getTrackDimension(track);
+
+      final encodings = codecs.findOptimalVideoLayers(
+        dimensions: _getTrackDimension(track),
+        publishOptions: transceiverCache.publishOption,
+      );
+
+      return RtcTrackInfo(
+        trackId: track.mediaTrack.id,
+        trackType: track.trackType,
+        mid: extractMid(
+          transceiverCache.transceiver,
+          transceiverInitialIndex,
+          sdp,
+        ),
+        layers: encodings.map((it) {
+          final scale = it.scaleResolutionDownBy ?? 1;
+          return RtcVideoLayer(
+            rid: it.rid ?? '',
+            parameters: RtcVideoParameters(
+              encoding: RtcVideoEncoding(
+                maxBitrate: it.maxBitrate ?? 0,
+                maxFramerate: it.maxFramerate ?? 0,
+                quality: ridToVideoQuality(it.rid ?? ''),
+              ),
+              dimension: RtcVideoDimension(
+                width: (dimension.width / scale).floor(),
+                height: (dimension.height / scale).floor(),
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    }
+
+    throw UnimplementedError('Unsupported track type: ${track.runtimeType}');
   }
 
   RtcVideoQuality ridToVideoQuality(String rid) {
