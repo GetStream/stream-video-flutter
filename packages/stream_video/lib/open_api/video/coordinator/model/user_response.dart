@@ -40,7 +40,8 @@ class UserResponse {
   DateTime createdAt;
 
   /// Custom data for this object
-  Map<String, Object> custom;
+  // MANUAL_EDIT: allow null values
+  Map<String, Object?> custom;
 
   /// Date of deactivation
   ///
@@ -224,7 +225,8 @@ class UserResponse {
             ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        // MANUAL_EDIT: allow null values
+        custom: mapCastOfType<String, Object?>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         id: mapValueOfType<String>(json, r'id')!,

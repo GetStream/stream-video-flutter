@@ -395,6 +395,7 @@ class StreamTargetResolution extends AbstractSettings {
       encoding: RtcVideoEncoding(
         maxFramerate: 30,
         maxBitrate: bitrate ?? defaultBitrate,
+        quality: RtcVideoQuality.high,
       ),
     );
   }

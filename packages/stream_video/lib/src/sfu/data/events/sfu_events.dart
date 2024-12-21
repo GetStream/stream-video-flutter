@@ -12,6 +12,7 @@ import '../models/sfu_connection_info.dart';
 import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_participant.dart';
+import '../models/sfu_publish_options.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_sender.dart';
 
@@ -36,11 +37,13 @@ class SfuJoinResponseEvent extends SfuEvent {
     required this.callState,
     this.isReconnected = false,
     this.fastReconnectDeadline = Duration.zero,
+    this.publishOptions = const [],
   });
 
   final SfuCallState callState;
   final bool isReconnected;
   final Duration fastReconnectDeadline;
+  final List<SfuPublishOptions> publishOptions;
 
   @override
   List<Object> get props => [callState, isReconnected, fastReconnectDeadline];
@@ -114,6 +117,17 @@ class SfuChangePublishQualityEvent extends SfuEvent {
 
   final List<SfuAudioSender> audioSenders;
   final List<SfuVideoSender> videoSenders;
+}
+
+@internal
+class SfuChangePublishOptionsEvent extends SfuEvent {
+  const SfuChangePublishOptionsEvent({
+    required this.publishOptions,
+    this.reason,
+  });
+
+  final List<SfuPublishOptions> publishOptions;
+  final String? reason;
 }
 
 @internal

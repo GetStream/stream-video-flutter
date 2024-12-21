@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_webrtc
+  stream_webrtc_flutter
   url_launcher_linux
 )
 
