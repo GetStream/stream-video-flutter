@@ -553,6 +553,7 @@ extension PublisherRtcManager on RtcManager {
         ),
         layers: [],
         codec: transceiverCache.publishOption.codec,
+        muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
       );
     } else if (track is RtcLocalVideoTrack) {
       final dimension = _getTrackDimension(track);
@@ -571,6 +572,7 @@ extension PublisherRtcManager on RtcManager {
           sdp,
         ),
         codec: transceiverCache.publishOption.codec,
+        muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
         layers: encodings.map((it) {
           final scale = it.scaleResolutionDownBy ?? 1;
           return RtcVideoLayer(
