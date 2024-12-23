@@ -1,3 +1,4 @@
+import '../../sfu/data/models/sfu_codec.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
 import 'rtc_video_parameters.dart';
 
@@ -7,17 +8,19 @@ class RtcTrackInfo {
     required this.trackType,
     required this.mid,
     required this.layers,
+    required this.codec,
   });
 
   final String? trackId;
   final SfuTrackType? trackType;
   final String? mid;
   final List<RtcVideoLayer>? layers;
+  final SfuCodec? codec;
 
   @override
   String toString() {
     return 'RtcTrackInfo{trackId: $trackId, trackType: $trackType, '
-        'mid: $mid, layers: $layers}';
+        'mid: $mid, layers: $layers, codec: $codec}';
   }
 }
 

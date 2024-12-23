@@ -384,6 +384,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.models.TrackInfo': $0.TrackInfo$json,
   '.stream.video.sfu.models.VideoLayer': $0.VideoLayer$json,
   '.stream.video.sfu.models.VideoDimension': $0.VideoDimension$json,
+  '.stream.video.sfu.models.Codec': $0.Codec$json,
   '.stream.video.sfu.signal.SetPublisherResponse': SetPublisherResponse$json,
   '.stream.video.sfu.models.Error': $0.Error$json,
   '.stream.video.sfu.signal.SendAnswerRequest': SendAnswerRequest$json,

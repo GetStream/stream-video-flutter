@@ -480,6 +480,7 @@ const TrackInfo$json = {
     {'1': 'stereo', '3': 8, '4': 1, '5': 8, '10': 'stereo'},
     {'1': 'red', '3': 9, '4': 1, '5': 8, '10': 'red'},
     {'1': 'muted', '3': 10, '4': 1, '5': 8, '10': 'muted'},
+    {'1': 'codec', '3': 11, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
   ],
 };
 
@@ -489,7 +490,8 @@ final $typed_data.Uint8List trackInfoDescriptor = $convert.base64Decode(
     'EoDjIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEjsKBmxh'
     'eWVycxgFIAMoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvTGF5ZXJSBmxheWVycx'
     'IQCgNtaWQYBiABKAlSA21pZBIQCgNkdHgYByABKAhSA2R0eBIWCgZzdGVyZW8YCCABKAhSBnN0'
-    'ZXJlbxIQCgNyZWQYCSABKAhSA3JlZBIUCgVtdXRlZBgKIAEoCFIFbXV0ZWQ=');
+    'ZXJlbxIQCgNyZWQYCSABKAhSA3JlZBIUCgVtdXRlZBgKIAEoCFIFbXV0ZWQSNAoFY29kZWMYCy'
+    'ABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IFY29kZWM=');
 
 @$core.Deprecated('Use errorDescriptor instead')
 const Error$json = {

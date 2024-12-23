@@ -1136,6 +1136,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     $core.bool? stereo,
     $core.bool? red,
     $core.bool? muted,
+    Codec? codec,
   }) {
     final $result = create();
     if (trackId != null) {
@@ -1162,6 +1163,9 @@ class TrackInfo extends $pb.GeneratedMessage {
     if (muted != null) {
       $result.muted = muted;
     }
+    if (codec != null) {
+      $result.codec = codec;
+    }
     return $result;
   }
   TrackInfo._() : super();
@@ -1177,6 +1181,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     ..aOB(8, _omitFieldNames ? '' : 'stereo')
     ..aOB(9, _omitFieldNames ? '' : 'red')
     ..aOB(10, _omitFieldNames ? '' : 'muted')
+    ..aOM<Codec>(11, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
     ..hasRequiredFields = false
   ;
 
@@ -1267,6 +1272,17 @@ class TrackInfo extends $pb.GeneratedMessage {
   $core.bool hasMuted() => $_has(7);
   @$pb.TagNumber(10)
   void clearMuted() => clearField(10);
+
+  @$pb.TagNumber(11)
+  Codec get codec => $_getN(8);
+  @$pb.TagNumber(11)
+  set codec(Codec v) { setField(11, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasCodec() => $_has(8);
+  @$pb.TagNumber(11)
+  void clearCodec() => clearField(11);
+  @$pb.TagNumber(11)
+  Codec ensureCodec() => $_ensure(8);
 }
 
 class Error extends $pb.GeneratedMessage {

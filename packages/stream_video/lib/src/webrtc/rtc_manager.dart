@@ -7,6 +7,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
+import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
@@ -551,6 +552,7 @@ extension PublisherRtcManager on RtcManager {
           sdp,
         ),
         layers: [],
+        codec: transceiverCache.publishOption.codec,
       );
     } else if (track is RtcLocalVideoTrack) {
       final dimension = _getTrackDimension(track);
@@ -568,6 +570,7 @@ extension PublisherRtcManager on RtcManager {
           transceiverInitialIndex,
           sdp,
         ),
+        codec: transceiverCache.publishOption.codec,
         layers: encodings.map((it) {
           final scale = it.scaleResolutionDownBy ?? 1;
           return RtcVideoLayer(
