@@ -69,6 +69,14 @@ open class StreamCallService : Service() {
         notificationPayload = NotificationPayload()
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+
+        // Cleanup when the app is swiped away
+        stopForeground(true)
+        stopSelf()
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun startForeground() {
