@@ -760,14 +760,14 @@ extension PublisherRtcManager on RtcManager {
   ) async {
     Result<rtc.RTCRtpTransceiver>? transceiverResult;
 
-    _logger.v(
-      () =>
-          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}',
-    );
-
     // create a clone of the track as otherwise the same trackId will
     // appear in the SDP in multiple transceivers
     final mediaTrack = await track.originalMediaTrack.clone();
+
+    _logger.v(
+      () =>
+          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}, trackId: ${mediaTrack.id}',
+    );
 
     if (track is RtcLocalAudioTrack) {
       transceiverResult = await publisher.addAudioTransceiver(
