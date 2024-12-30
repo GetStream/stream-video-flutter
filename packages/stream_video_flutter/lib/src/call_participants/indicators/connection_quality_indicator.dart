@@ -27,6 +27,7 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.black.withOpacity(0.85),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(10),

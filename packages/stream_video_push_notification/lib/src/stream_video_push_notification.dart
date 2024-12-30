@@ -417,6 +417,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> dispose() async {
     _subscriptions.cancelAll();
   }
+
+  static Future ensureFullScreenIntentPermission() {
+    return StreamVideoPushNotificationPlatform.instance
+        .ensureFullScreenIntentPermission();
+  }
 }
 
 const _defaultPushParams = StreamVideoPushParams(
