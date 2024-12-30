@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Updated minimum Flutter version to 3.24.5
+
 ✅ Added
 * Added the `StreamVideoPushNotificationManager.ensureFullScreenIntentPermission()` method. This resolves an issue on some Android 14 devices where full-screen notifications would not appear due to missing permissions.
 You can now invoke this method to show a settings screen, allowing users to enable the required permission if it's not already enabled.
