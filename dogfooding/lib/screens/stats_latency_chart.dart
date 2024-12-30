@@ -77,11 +77,13 @@ class StatsLatencyChart extends StatelessWidget {
                 colors: [
                   ColorTween(
                           begin: AppColorPalette.appGreen,
-                          end: AppColorPalette.appGreen.withValues(alpha: 0.5))
+                          // ignore: deprecated_member_use
+                          end: AppColorPalette.appGreen.withOpacity(0.5))
                       .lerp(0.2)!,
                   ColorTween(
                           begin: AppColorPalette.appGreen,
-                          end: AppColorPalette.appGreen.withValues(alpha: 0.5))
+                          // ignore: deprecated_member_use
+                          end: AppColorPalette.appGreen.withOpacity(0.5))
                       .lerp(0.2)!,
                 ],
               ),
@@ -97,15 +99,19 @@ class StatsLatencyChart extends StatelessWidget {
                     ColorTween(
                             begin: AppColorPalette.appGreen,
                             end:
-                                AppColorPalette.appGreen.withValues(alpha: 0.5))
+                                // ignore: deprecated_member_use
+                                AppColorPalette.appGreen.withOpacity(0.5))
                         .lerp(0.2)!
-                        .withValues(alpha: 0.1),
+                        // ignore: deprecated_member_use
+                        .withOpacity(0.1),
                     ColorTween(
                             begin: AppColorPalette.appGreen,
                             end:
-                                AppColorPalette.appGreen.withValues(alpha: 0.5))
+                                // ignore: deprecated_member_use
+                                AppColorPalette.appGreen.withOpacity(0.5))
                         .lerp(0.2)!
-                        .withValues(alpha: 0.1),
+                        // ignore: deprecated_member_use
+                        .withOpacity(0.1),
                   ],
                 ),
               ),
