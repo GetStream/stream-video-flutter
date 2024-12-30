@@ -275,6 +275,7 @@ class StatIndicator extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
+        // ignore: deprecated_member_use
         color: indicatorData.$1.withOpacity(0.16),
       ),
       padding: const EdgeInsets.all(8),

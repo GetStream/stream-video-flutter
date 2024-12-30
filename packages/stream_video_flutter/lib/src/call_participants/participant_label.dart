@@ -56,6 +56,7 @@ class StreamParticipantLabel extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.black.withOpacity(0.85),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(10),
