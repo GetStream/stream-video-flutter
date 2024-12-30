@@ -62,4 +62,24 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
   Future<void> setPictureInPictureEnabled({required bool enable}) {
     throw UnimplementedError('showPictureInPicture has not been implemented.');
   }
+
+  Future<bool?> isBackgroundEffectSupported() {
+    throw UnimplementedError(
+      'isBackgroundEffectSupported has not been implemented.',
+    );
+  }
+
+  Future<void> registerBlurEffectProcessors() {
+    throw UnimplementedError(
+      'registerBlurEffectProcessors has not been implemented.',
+    );
+  }
+
+  Future<void> registerImageEffectProcessors({
+    required String backgroundImageUrl,
+  }) {
+    throw UnimplementedError(
+      'registerImageEffectProcessors has not been implemented.',
+    );
+  }
 }

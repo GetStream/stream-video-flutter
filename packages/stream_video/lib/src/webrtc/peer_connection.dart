@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
@@ -215,7 +215,6 @@ class StreamPeerConnection extends Disposable {
 
   /// Adds a local [rtc.MediaStreamTrack] with audio to the current connection.
   Future<Result<rtc.RTCRtpTransceiver>> addAudioTransceiver({
-    required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
@@ -225,7 +224,6 @@ class StreamPeerConnection extends Disposable {
         kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
         init: rtc.RTCRtpTransceiverInit(
           direction: rtc.TransceiverDirection.SendOnly,
-          streams: [stream],
           sendEncodings: encodings,
         ),
       );
@@ -240,7 +238,6 @@ class StreamPeerConnection extends Disposable {
   ///
   /// The video is then sent in three different resolutions using simulcast.
   Future<Result<rtc.RTCRtpTransceiver>> addVideoTransceiver({
-    required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
@@ -249,7 +246,6 @@ class StreamPeerConnection extends Disposable {
         track: track,
         kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
         init: rtc.RTCRtpTransceiverInit(
-          streams: [stream],
           direction: rtc.TransceiverDirection.SendOnly,
           sendEncodings: encodings,
         ),
@@ -348,6 +344,8 @@ class StreamPeerConnection extends Disposable {
       Duration(milliseconds: _reportingIntervalMs),
       (_) async {
         try {
+          if (_statsController.isClosed) return;
+
           final stats = await pc.getStats();
           final rtcPrintableStats = stats.toPrintableRtcStats();
           final rawStats = stats.toRawStats();
@@ -386,6 +384,7 @@ class StreamPeerConnection extends Disposable {
     onIceCandidate = null;
     onTrack = null;
     _pendingCandidates.clear();
+    await _statsController.close();
     await pc.dispose();
     return await super.dispose();
   }

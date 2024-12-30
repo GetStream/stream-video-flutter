@@ -1,5 +1,6 @@
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../sfu/data/models/sfu_publish_options.dart';
 import '../types/other.dart';
 import 'peer_connection_factory.dart';
 import 'rtc_manager.dart';
@@ -28,6 +29,7 @@ class RtcManagerFactory {
 
   Future<RtcManager> makeRtcManager({
     required String publisherId,
+    List<SfuPublishOptions> publishOptions = const [],
   }) async {
     _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
     final publisher = await pcFactory.makePublisher(
@@ -44,6 +46,7 @@ class RtcManagerFactory {
       publisherId: publisherId,
       publisher: publisher,
       subscriber: subscriber,
+      publishOptions: publishOptions,
     );
   }
 }

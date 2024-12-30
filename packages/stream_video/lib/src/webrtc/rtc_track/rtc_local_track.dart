@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../exceptions/video_exception.dart';
 import '../../logger/stream_log.dart';
@@ -28,10 +28,9 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     required super.mediaStream,
     required super.mediaTrack,
     required this.mediaConstraints,
+    required this.originalMediaTrack,
     this.stopTrackOnMute = true,
     super.videoDimension,
-    super.receiver,
-    super.transceiver,
   });
 
   static Future<RtcLocalAudioTrack> audio({
@@ -53,6 +52,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       trackType: SfuTrackType.audio,
       mediaStream: stream,
       mediaTrack: audioTrack,
+      originalMediaTrack: audioTrack,
       mediaConstraints: constraints,
     );
 
@@ -77,6 +77,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       trackType: SfuTrackType.video,
       mediaStream: stream,
       mediaTrack: videoTrack,
+      originalMediaTrack: videoTrack,
       mediaConstraints: constraints,
     );
 
@@ -102,11 +103,15 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       trackType: SfuTrackType.screenShare,
       mediaStream: stream,
       mediaTrack: videoTrack,
+      originalMediaTrack: videoTrack,
       mediaConstraints: constraints,
     );
 
     return track;
   }
+
+  /// The original media track used to create this track.
+  final rtc.MediaStreamTrack originalMediaTrack;
 
   /// The media constraints used to create this track.
   ///
@@ -155,8 +160,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     T? mediaConstraints,
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
-    rtc.RTCRtpReceiver? receiver,
-    rtc.RTCRtpTransceiver? transceiver,
+    rtc.MediaStreamTrack? originalMediaTrack,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -166,13 +170,15 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaConstraints: mediaConstraints ?? this.mediaConstraints,
       stopTrackOnMute: stopTrackOnMute ?? this.stopTrackOnMute,
       videoDimension: videoDimension ?? this.videoDimension,
-      receiver: receiver ?? this.receiver,
-      transceiver: transceiver ?? this.transceiver,
+      originalMediaTrack: originalMediaTrack ?? this.originalMediaTrack,
     );
   }
 
   /// Recreates the track with new [mediaConstraints].
-  Future<RtcLocalTrack<T>> recreate({T? mediaConstraints}) async {
+  Future<RtcLocalTrack<T>> recreate(
+    List<rtc.RTCRtpTransceiver> transceivers, {
+    T? mediaConstraints,
+  }) async {
     streamLog.i(_tag, () => 'Recreating track: $trackId');
 
     // Stop the current track.
@@ -186,14 +192,19 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     final newTrack = newStream.getTracks().first;
 
     // Replace the track on the transceiver if it exists.
-    final sender = transceiver?.sender;
-    if (sender != null) {
+    for (final transceiver in transceivers) {
+      if (transceiver.sender.track == null) {
+        continue;
+      }
+
+      final clonedTrack = await newTrack.clone();
       streamLog.i(_tag, () => 'Replacing track on sender');
-      await sender.replaceTrack(newTrack);
+      await transceiver.sender.replaceTrack(clonedTrack);
     }
 
     return copyWith(
       mediaTrack: newTrack,
+      originalMediaTrack: newTrack,
       mediaStream: newStream,
       mediaConstraints: constraints,
     );
@@ -243,7 +254,10 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     );
   }
 
-  Future<RtcLocalCameraTrack> selectVideoInput(RtcMediaDevice device) async {
+  Future<RtcLocalCameraTrack> selectVideoInput(
+    RtcMediaDevice device,
+    List<rtc.RTCRtpTransceiver> transceivers,
+  ) async {
     streamLog.i(_cameraTag, () => 'Selecting camera input: $device');
 
     final currentDeviceId = mediaConstraints.deviceId;
@@ -255,6 +269,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
 
     // recreate the track with new deviceId.
     final updatedTrack = await recreate(
+      transceivers,
       mediaConstraints: mediaConstraints.copyWith(
         deviceId: device.id,
       ),
@@ -282,7 +297,10 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
 const _audioTag = 'SV:RtcLocalAudioTrack';
 
 extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
-  Future<RtcLocalAudioTrack> selectAudioInput(RtcMediaDevice device) async {
+  Future<RtcLocalAudioTrack> selectAudioInput(
+    List<rtc.RTCRtpTransceiver> transceivers,
+    RtcMediaDevice device,
+  ) async {
     streamLog.i(_audioTag, () => 'Selecting audio input: $device');
 
     final currentDeviceId = mediaConstraints.deviceId;
@@ -296,7 +314,7 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
 
     if (CurrentPlatform.isWeb) {
       // recreate the track with new deviceId.
-      return recreate(mediaConstraints: updatedConstraints);
+      return recreate(transceivers, mediaConstraints: updatedConstraints);
     }
 
     try {

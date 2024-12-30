@@ -62,6 +62,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: k1080pBitrate,
       maxFramerate: 30,
+      quality: RtcVideoQuality.high,
     ),
   );
 
@@ -70,6 +71,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: k720pBitrate,
       maxFramerate: 30,
+      quality: RtcVideoQuality.high,
     ),
   );
 
@@ -78,6 +80,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: k540pBitrate,
       maxFramerate: 30,
+      quality: RtcVideoQuality.mid,
     ),
   );
 
@@ -86,6 +89,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: k360pBitrate,
       maxFramerate: 30,
+      quality: RtcVideoQuality.lowUnspecified,
     ),
   );
 
@@ -94,6 +98,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: k180pBitrate,
       maxFramerate: 30,
+      quality: RtcVideoQuality.lowUnspecified,
     ),
   );
 
@@ -103,6 +108,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: (k1080pBitrate * 0.75) ~/ 1,
       maxFramerate: 30,
+      quality: RtcVideoQuality.high,
     ),
   );
 
@@ -111,6 +117,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: (k720pBitrate * 0.75) ~/ 1,
       maxFramerate: 30,
+      quality: RtcVideoQuality.high,
     ),
   );
 
@@ -119,6 +126,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: (k540pBitrate * 0.75) ~/ 1,
       maxFramerate: 30,
+      quality: RtcVideoQuality.mid,
     ),
   );
 
@@ -127,6 +135,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: (k360pBitrate * 0.75) ~/ 1,
       maxFramerate: 30,
+      quality: RtcVideoQuality.lowUnspecified,
     ),
   );
 
@@ -135,6 +144,7 @@ extension RtcVideoParametersPresets on RtcVideoParameters {
     encoding: RtcVideoEncoding(
       maxBitrate: (k180pBitrate * 0.75) ~/ 1,
       maxFramerate: 30,
+      quality: RtcVideoQuality.lowUnspecified,
     ),
   );
 }
