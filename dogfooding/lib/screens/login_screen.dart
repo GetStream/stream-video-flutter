@@ -113,10 +113,10 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: AppColorPalette.backgroundColor,
         actions: [
-          // if (kDebugMode)
-          EnvironmentSwitcher(
-            currentEnvironment: _appPreferences.environment,
-          )
+          if (kDebugMode)
+            EnvironmentSwitcher(
+              currentEnvironment: _appPreferences.environment,
+            )
         ],
       ),
       body: SafeArea(

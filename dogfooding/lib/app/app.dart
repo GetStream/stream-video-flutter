@@ -69,11 +69,11 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     };
 
     // Initialise injector, use demo env for production
-    // if (kDebugMode == true) {
-    await AppInjector.init();
-    // } else {
-    //   await AppInjector.init(forceEnvironment: Environment.demo);
-    // }
+    if (kDebugMode == true) {
+      await AppInjector.init();
+    } else {
+      await AppInjector.init(forceEnvironment: Environment.demo);
+    }
 
     // Check if there are saved credentials. If there are, login with them.
     await _handleSavedLogin();

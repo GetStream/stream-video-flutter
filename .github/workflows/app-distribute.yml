@@ -1,12 +1,11 @@
 name: App Distribute CI
 
 on:
-  pull_request:
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - dogfooding/**
+  push:
+    branches:
+      - main
+    paths:
+      - dogfooding/**
 
 env:
   FLUTTER_VERSION: "3.24.3"
@@ -38,11 +37,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Use Xcode 16.0
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_16.app
-          xcodebuild -version  # Confirm Xcode 16.0 is being used
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
