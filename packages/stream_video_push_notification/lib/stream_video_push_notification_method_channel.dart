@@ -54,9 +54,9 @@ class MethodChannelStreamVideoPushNotification
   }
 
   @override
-  Future<void> ensureFullIntentPermission() async {
+  Future<void> ensureFullScreenIntentPermission() async {
     if (!CurrentPlatform.isAndroid) return;
 
-    await methodChannel.invokeMethod<void>('ensureFullIntentPermission');
+    await methodChannel.invokeMethod<void>('ensureFullScreenIntentPermission');
   }
 }

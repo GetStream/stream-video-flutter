@@ -31,7 +31,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
   }
 
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-    if (call.method == "ensureFullIntentPermission") {
+    if (call.method == "ensureFullScreenIntentPermission") {
       val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
       if (Build.VERSION.SDK_INT >= 34) {
         if (!notificationManager.canUseFullScreenIntent()) {
