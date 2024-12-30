@@ -51,6 +51,11 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     CallerCustomizationFunction? callerCustomizationCallback,
     BackgroundVoipCallHandler? backgroundVoipCallHandler,
   ) {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+    throw UnimplementedError('init() has not been implemented.');
+  }
+
+  Future<void> ensureFullScreenIntentPermission() {
+    throw UnimplementedError(
+        'ensureFullScreenIntentPermission() has not been implemented.');
   }
 }

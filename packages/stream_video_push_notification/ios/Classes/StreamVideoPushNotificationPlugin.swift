@@ -6,7 +6,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     let persistentState: UserDefaults = UserDefaults.standard
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let mainChannel = FlutterMethodChannel(name: "stream_video_push_notifications", binaryMessenger: registrar.messenger())
+        let mainChannel = FlutterMethodChannel(name: "stream_video_push_notification", binaryMessenger: registrar.messenger())
         let instance = StreamVideoPushNotificationPlugin()
         
         registrar.addMethodCallDelegate(instance, channel: mainChannel)
