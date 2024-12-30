@@ -110,7 +110,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         optionElevation: 2,
         inactiveOptionElevation: 2,
         optionBackgroundColor: Colors.white,
-        inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
+        inactiveOptionBackgroundColor:
+            colorTheme.overlay.withValues(alpha: 0.4),
         optionShape: const CircleBorder(),
         optionPadding: const EdgeInsets.all(16),
       ),
@@ -227,7 +228,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
         callingLabelTextStyle: TextStyle(
           fontSize: 20,
-          color: colorTheme.barsBg.withOpacity(0.6),
+          color: colorTheme.barsBg.withValues(alpha: 0.6),
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -274,7 +275,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
         callingLabelTextStyle: TextStyle(
           fontSize: 20,
-          color: colorTheme.barsBg.withOpacity(0.6),
+          color: colorTheme.barsBg.withValues(alpha: 0.6),
           fontWeight: FontWeight.bold,
         ),
       ),

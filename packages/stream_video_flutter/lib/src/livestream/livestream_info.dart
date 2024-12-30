@@ -79,7 +79,7 @@ class LivestreamInfo extends StatelessWidget {
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     return ColoredBox(
-      color: Colors.black.withOpacity(0.4),
+      color: Colors.black.withValues(alpha: 0.4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

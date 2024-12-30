@@ -328,7 +328,8 @@ class _StreamDogFoodingAppContentState
             optionElevation: 2,
             inactiveOptionElevation: 2,
             optionBackgroundColor: AppColorPalette.buttonSecondary,
-            inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
+            inactiveOptionBackgroundColor:
+                colorTheme.overlay.withValues(alpha: 0.4),
             optionShape: const CircleBorder(),
             optionPadding: const EdgeInsets.all(14),
           ),

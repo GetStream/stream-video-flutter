@@ -73,7 +73,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: colorTheme.barsBg.withOpacity(0.85),
+                  color: colorTheme.barsBg.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
