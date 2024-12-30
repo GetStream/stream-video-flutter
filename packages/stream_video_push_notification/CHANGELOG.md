@@ -1,4 +1,4 @@
-## Unreleased
+## 0.6.1
 
 ✅ Added
 * Added the `StreamVideoPushNotificationManager.ensureFullScreenIntentPermission()` method. This resolves an issue on some Android 14 devices where full-screen notifications would not appear due to missing permissions.
