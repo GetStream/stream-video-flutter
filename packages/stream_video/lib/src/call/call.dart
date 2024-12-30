@@ -1553,13 +1553,14 @@ class Call {
 
       final newQueue = [...queue, currentCaption];
 
-      final retentionTimeInMs = _preferences.closedCaptionsRetentionTimeInMs;
-      final queueSize = _preferences.closedCaptionsQueueSize;
+      final visibilityDurationMs =
+          _preferences.closedCaptionsVisibilityDurationMs;
+      final visibileCaptions = _preferences.closedCaptionsVisibleCaptions;
 
       try {
         // schedule the removal of the closed caption after the retention time
-        if (retentionTimeInMs > 0) {
-          final timer = Timer(Duration(milliseconds: retentionTimeInMs), () {
+        if (visibilityDurationMs > 0) {
+          final timer = Timer(Duration(milliseconds: visibilityDurationMs), () {
             _removeExpiredCaption(keyFor, currentCaption);
             _captionsTimers.remove(currentKey);
           });
@@ -1567,8 +1568,8 @@ class Call {
           _captionsTimers[currentKey] = timer;
 
           // cancel the cleanup tasks for the closed captions that are no longer in the queue
-          if (newQueue.length > queueSize) {
-            for (var i = 0; i < newQueue.length - queueSize; i++) {
+          if (newQueue.length > visibileCaptions) {
+            for (var i = 0; i < newQueue.length - visibileCaptions; i++) {
               final key = keyFor(newQueue[i]);
               final timer = _captionsTimers[key];
 
@@ -1577,8 +1578,8 @@ class Call {
             }
           }
 
-          _closedCaptions.value = newQueue.length > queueSize
-              ? newQueue.sublist(newQueue.length - queueSize)
+          _closedCaptions.value = newQueue.length > visibileCaptions
+              ? newQueue.sublist(newQueue.length - visibileCaptions)
               : newQueue;
         }
       } catch (error) {

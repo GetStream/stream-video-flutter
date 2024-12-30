@@ -68,8 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
         callType: kCallType,
         id: callId,
         preferences: DefaultCallPreferences(
-          closedCaptionsQueueSize: 3,
-          closedCaptionsRetentionTimeInMs: 5000,
+          closedCaptionsVisibleCaptions: 3,
+          closedCaptionsVisibilityDurationMs: 5000,
         ));
 
     bool isRinging = memberIds.isNotEmpty;

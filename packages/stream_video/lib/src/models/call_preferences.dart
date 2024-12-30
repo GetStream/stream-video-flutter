@@ -4,8 +4,8 @@ abstract class CallPreferences {
 
   bool get dropIfAloneInRingingFlow;
 
-  int get closedCaptionsRetentionTimeInMs;
-  int get closedCaptionsQueueSize;
+  int get closedCaptionsVisibilityDurationMs;
+  int get closedCaptionsVisibleCaptions;
 }
 
 class DefaultCallPreferences implements CallPreferences {
@@ -13,8 +13,8 @@ class DefaultCallPreferences implements CallPreferences {
     this.connectTimeout = const Duration(seconds: 60),
     this.reactionAutoDismissTime = const Duration(seconds: 5),
     this.dropIfAloneInRingingFlow = true,
-    this.closedCaptionsRetentionTimeInMs = 2700,
-    this.closedCaptionsQueueSize = 2,
+    this.closedCaptionsVisibilityDurationMs = 2700,
+    this.closedCaptionsVisibleCaptions = 2,
   });
 
   @override
@@ -27,8 +27,8 @@ class DefaultCallPreferences implements CallPreferences {
   final bool dropIfAloneInRingingFlow;
 
   @override
-  final int closedCaptionsRetentionTimeInMs;
+  final int closedCaptionsVisibilityDurationMs;
 
   @override
-  final int closedCaptionsQueueSize;
+  final int closedCaptionsVisibleCaptions;
 }

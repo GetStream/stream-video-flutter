@@ -9,8 +9,8 @@
 * Added support for Closed Captions:
     * Listen to the `Call.closedCaptions` stream to overlay captions during your call.
     * Use `CallPreferences` to configure: 
-        * `closedCaptionsRetentionTimeInMs` for controlling how long captions are displayed.
-        * `closedCaptionsQueueSize` for managing the number of captions in the display queue.
+        * `closedCaptionsVisibilityDurationMs` for controlling how long captions are displayed.
+        * `closedCaptionsVisibleCaptions` for managing the number of captions in the display queue.
     * Easily enable or disable captions with the `ToggleClosedCaptionsOption` widget.
     * Learn More:
         * Check the [guide](https://getstream.io/video/docs/flutter/closed-captions/) for integration steps.
