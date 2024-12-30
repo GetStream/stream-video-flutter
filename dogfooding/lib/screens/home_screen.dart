@@ -13,6 +13,7 @@ import 'package:flutter_dogfooding/widgets/stream_button.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
@@ -42,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
       Permission.camera,
       Permission.microphone,
     ].request();
+
+    StreamVideoPushNotificationManager.ensureFullScreenIntentPermission();
 
     StreamBackgroundService.init(
       StreamVideo.instance,
