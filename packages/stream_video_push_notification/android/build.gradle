@@ -23,7 +23,7 @@ apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace = "com.example.stream_video_push_notification"
+        namespace = "io.getstream.video.flutter.stream_video_push_notification"
     }
 
     compileSdk = 34
