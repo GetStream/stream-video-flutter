@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Permission.microphone,
     ].request();
 
-    StreamVideoPushNotificationManager.ensureFullIntentPermission();
+    StreamVideoPushNotificationManager.ensureFullScreenIntentPermission();
 
     StreamBackgroundService.init(
       StreamVideo.instance,

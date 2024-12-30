@@ -54,8 +54,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  Future<void> ensureFullIntentPermission() {
+  Future<void> ensureFullScreenIntentPermission() {
     throw UnimplementedError(
-        'ensureFullIntentPermission() has not been implemented.');
+        'ensureFullScreenIntentPermission() has not been implemented.');
   }
 }

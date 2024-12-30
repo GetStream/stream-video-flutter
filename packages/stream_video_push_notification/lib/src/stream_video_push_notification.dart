@@ -418,9 +418,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _subscriptions.cancelAll();
   }
 
-  static Future ensureFullIntentPermission() {
+  static Future ensureFullScreenIntentPermission() {
     return StreamVideoPushNotificationPlatform.instance
-        .ensureFullIntentPermission();
+        .ensureFullScreenIntentPermission();
   }
 }
 
