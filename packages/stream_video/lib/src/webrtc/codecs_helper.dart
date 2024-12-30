@@ -3,7 +3,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_parameters.dart';
