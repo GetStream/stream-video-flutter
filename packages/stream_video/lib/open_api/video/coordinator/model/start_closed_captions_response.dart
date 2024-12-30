@@ -10,42 +10,36 @@
 
 part of openapi.api;
 
-class VideoResolution {
-  /// Returns a new [VideoResolution] instance.
-  VideoResolution({
-    required this.height,
-    required this.width,
+class StartClosedCaptionsResponse {
+  /// Returns a new [StartClosedCaptionsResponse] instance.
+  StartClosedCaptionsResponse({
+    required this.duration,
   });
 
-  int height;
-
-  int width;
+  String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is VideoResolution &&
-    other.height == height &&
-    other.width == width;
+  bool operator ==(Object other) => identical(this, other) || other is StartClosedCaptionsResponse &&
+    other.duration == duration;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (height.hashCode) +
-    (width.hashCode);
+    (duration.hashCode);
 
   @override
-  String toString() => 'VideoResolution[height=$height, width=$width]';
+  String toString() => 'StartClosedCaptionsResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'height'] = this.height;
-      json[r'width'] = this.width;
+      json[r'duration'] = this.duration;
     return json;
   }
 
-  /// Returns a new [VideoResolution] instance and imports its values from
+  /// Returns a new [StartClosedCaptionsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static VideoResolution? fromJson(dynamic value) {
+  static StartClosedCaptionsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -54,25 +48,24 @@ class VideoResolution {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "VideoResolution[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "VideoResolution[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "StartClosedCaptionsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "StartClosedCaptionsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return VideoResolution(
-        height: mapValueOfType<int>(json, r'height')!,
-        width: mapValueOfType<int>(json, r'width')!,
+      return StartClosedCaptionsResponse(
+        duration: mapValueOfType<String>(json, r'duration')!,
       );
     }
     return null;
   }
 
-  static List<VideoResolution> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <VideoResolution>[];
+  static List<StartClosedCaptionsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <StartClosedCaptionsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = VideoResolution.fromJson(row);
+        final value = StartClosedCaptionsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -81,12 +74,12 @@ class VideoResolution {
     return result.toList(growable: growable);
   }
 
-  static Map<String, VideoResolution> mapFromJson(dynamic json) {
-    final map = <String, VideoResolution>{};
+  static Map<String, StartClosedCaptionsResponse> mapFromJson(dynamic json) {
+    final map = <String, StartClosedCaptionsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = VideoResolution.fromJson(entry.value);
+        final value = StartClosedCaptionsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -95,14 +88,14 @@ class VideoResolution {
     return map;
   }
 
-  // maps a json object with a list of VideoResolution-objects as value to a dart map
-  static Map<String, List<VideoResolution>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<VideoResolution>>{};
+  // maps a json object with a list of StartClosedCaptionsResponse-objects as value to a dart map
+  static Map<String, List<StartClosedCaptionsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<StartClosedCaptionsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = VideoResolution.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StartClosedCaptionsResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -110,8 +103,7 @@ class VideoResolution {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'height',
-    'width',
+    'duration',
   };
 }
 

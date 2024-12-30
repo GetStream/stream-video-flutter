@@ -39,6 +39,7 @@ class ChannelConfigWithInfo {
     required this.reminders,
     required this.replies,
     required this.search,
+    required this.skipLastMsgUpdateForSystemMsgs,
     required this.typingEvents,
     required this.updatedAt,
     required this.uploads,
@@ -98,13 +99,7 @@ class ChannelConfigWithInfo {
   ///
   int? partitionSize;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? partitionTtl;
+  String? partitionTtl;
 
   bool polls;
 
@@ -122,6 +117,8 @@ class ChannelConfigWithInfo {
 
   bool search;
 
+  bool skipLastMsgUpdateForSystemMsgs;
+
   bool typingEvents;
 
   DateTime updatedAt;
@@ -131,83 +128,82 @@ class ChannelConfigWithInfo {
   bool urlEnrichment;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChannelConfigWithInfo &&
-          _deepEquality.equals(other.allowedFlagReasons, allowedFlagReasons) &&
-          other.automod == automod &&
-          other.automodBehavior == automodBehavior &&
-          other.automodThresholds == automodThresholds &&
-          other.blocklist == blocklist &&
-          other.blocklistBehavior == blocklistBehavior &&
-          _deepEquality.equals(other.blocklists, blocklists) &&
-          _deepEquality.equals(other.commands, commands) &&
-          other.connectEvents == connectEvents &&
-          other.createdAt == createdAt &&
-          other.customEvents == customEvents &&
-          _deepEquality.equals(other.grants, grants) &&
-          other.markMessagesPending == markMessagesPending &&
-          other.maxMessageLength == maxMessageLength &&
-          other.mutes == mutes &&
-          other.name == name &&
-          other.partitionSize == partitionSize &&
-          other.partitionTtl == partitionTtl &&
-          other.polls == polls &&
-          other.pushNotifications == pushNotifications &&
-          other.quotes == quotes &&
-          other.reactions == reactions &&
-          other.readEvents == readEvents &&
-          other.reminders == reminders &&
-          other.replies == replies &&
-          other.search == search &&
-          other.typingEvents == typingEvents &&
-          other.updatedAt == updatedAt &&
-          other.uploads == uploads &&
-          other.urlEnrichment == urlEnrichment;
+  bool operator ==(Object other) => identical(this, other) || other is ChannelConfigWithInfo &&
+    _deepEquality.equals(other.allowedFlagReasons, allowedFlagReasons) &&
+    other.automod == automod &&
+    other.automodBehavior == automodBehavior &&
+    other.automodThresholds == automodThresholds &&
+    other.blocklist == blocklist &&
+    other.blocklistBehavior == blocklistBehavior &&
+    _deepEquality.equals(other.blocklists, blocklists) &&
+    _deepEquality.equals(other.commands, commands) &&
+    other.connectEvents == connectEvents &&
+    other.createdAt == createdAt &&
+    other.customEvents == customEvents &&
+    _deepEquality.equals(other.grants, grants) &&
+    other.markMessagesPending == markMessagesPending &&
+    other.maxMessageLength == maxMessageLength &&
+    other.mutes == mutes &&
+    other.name == name &&
+    other.partitionSize == partitionSize &&
+    other.partitionTtl == partitionTtl &&
+    other.polls == polls &&
+    other.pushNotifications == pushNotifications &&
+    other.quotes == quotes &&
+    other.reactions == reactions &&
+    other.readEvents == readEvents &&
+    other.reminders == reminders &&
+    other.replies == replies &&
+    other.search == search &&
+    other.skipLastMsgUpdateForSystemMsgs == skipLastMsgUpdateForSystemMsgs &&
+    other.typingEvents == typingEvents &&
+    other.updatedAt == updatedAt &&
+    other.uploads == uploads &&
+    other.urlEnrichment == urlEnrichment;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (allowedFlagReasons.hashCode) +
-      (automod.hashCode) +
-      (automodBehavior.hashCode) +
-      (automodThresholds == null ? 0 : automodThresholds!.hashCode) +
-      (blocklist == null ? 0 : blocklist!.hashCode) +
-      (blocklistBehavior == null ? 0 : blocklistBehavior!.hashCode) +
-      (blocklists.hashCode) +
-      (commands.hashCode) +
-      (connectEvents.hashCode) +
-      (createdAt.hashCode) +
-      (customEvents.hashCode) +
-      (grants.hashCode) +
-      (markMessagesPending.hashCode) +
-      (maxMessageLength.hashCode) +
-      (mutes.hashCode) +
-      (name.hashCode) +
-      (partitionSize == null ? 0 : partitionSize!.hashCode) +
-      (partitionTtl == null ? 0 : partitionTtl!.hashCode) +
-      (polls.hashCode) +
-      (pushNotifications.hashCode) +
-      (quotes.hashCode) +
-      (reactions.hashCode) +
-      (readEvents.hashCode) +
-      (reminders.hashCode) +
-      (replies.hashCode) +
-      (search.hashCode) +
-      (typingEvents.hashCode) +
-      (updatedAt.hashCode) +
-      (uploads.hashCode) +
-      (urlEnrichment.hashCode);
+    // ignore: unnecessary_parenthesis
+    (allowedFlagReasons.hashCode) +
+    (automod.hashCode) +
+    (automodBehavior.hashCode) +
+    (automodThresholds == null ? 0 : automodThresholds!.hashCode) +
+    (blocklist == null ? 0 : blocklist!.hashCode) +
+    (blocklistBehavior == null ? 0 : blocklistBehavior!.hashCode) +
+    (blocklists.hashCode) +
+    (commands.hashCode) +
+    (connectEvents.hashCode) +
+    (createdAt.hashCode) +
+    (customEvents.hashCode) +
+    (grants.hashCode) +
+    (markMessagesPending.hashCode) +
+    (maxMessageLength.hashCode) +
+    (mutes.hashCode) +
+    (name.hashCode) +
+    (partitionSize == null ? 0 : partitionSize!.hashCode) +
+    (partitionTtl == null ? 0 : partitionTtl!.hashCode) +
+    (polls.hashCode) +
+    (pushNotifications.hashCode) +
+    (quotes.hashCode) +
+    (reactions.hashCode) +
+    (readEvents.hashCode) +
+    (reminders.hashCode) +
+    (replies.hashCode) +
+    (search.hashCode) +
+    (skipLastMsgUpdateForSystemMsgs.hashCode) +
+    (typingEvents.hashCode) +
+    (updatedAt.hashCode) +
+    (uploads.hashCode) +
+    (urlEnrichment.hashCode);
 
   @override
-  String toString() =>
-      'ChannelConfigWithInfo[allowedFlagReasons=$allowedFlagReasons, automod=$automod, automodBehavior=$automodBehavior, automodThresholds=$automodThresholds, blocklist=$blocklist, blocklistBehavior=$blocklistBehavior, blocklists=$blocklists, commands=$commands, connectEvents=$connectEvents, createdAt=$createdAt, customEvents=$customEvents, grants=$grants, markMessagesPending=$markMessagesPending, maxMessageLength=$maxMessageLength, mutes=$mutes, name=$name, partitionSize=$partitionSize, partitionTtl=$partitionTtl, polls=$polls, pushNotifications=$pushNotifications, quotes=$quotes, reactions=$reactions, readEvents=$readEvents, reminders=$reminders, replies=$replies, search=$search, typingEvents=$typingEvents, updatedAt=$updatedAt, uploads=$uploads, urlEnrichment=$urlEnrichment]';
+  String toString() => 'ChannelConfigWithInfo[allowedFlagReasons=$allowedFlagReasons, automod=$automod, automodBehavior=$automodBehavior, automodThresholds=$automodThresholds, blocklist=$blocklist, blocklistBehavior=$blocklistBehavior, blocklists=$blocklists, commands=$commands, connectEvents=$connectEvents, createdAt=$createdAt, customEvents=$customEvents, grants=$grants, markMessagesPending=$markMessagesPending, maxMessageLength=$maxMessageLength, mutes=$mutes, name=$name, partitionSize=$partitionSize, partitionTtl=$partitionTtl, polls=$polls, pushNotifications=$pushNotifications, quotes=$quotes, reactions=$reactions, readEvents=$readEvents, reminders=$reminders, replies=$replies, search=$search, skipLastMsgUpdateForSystemMsgs=$skipLastMsgUpdateForSystemMsgs, typingEvents=$typingEvents, updatedAt=$updatedAt, uploads=$uploads, urlEnrichment=$urlEnrichment]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'allowed_flag_reasons'] = this.allowedFlagReasons;
-    json[r'automod'] = this.automod;
-    json[r'automod_behavior'] = this.automodBehavior;
+      json[r'allowed_flag_reasons'] = this.allowedFlagReasons;
+      json[r'automod'] = this.automod;
+      json[r'automod_behavior'] = this.automodBehavior;
     if (this.automodThresholds != null) {
       json[r'automod_thresholds'] = this.automodThresholds;
     } else {
@@ -223,16 +219,16 @@ class ChannelConfigWithInfo {
     } else {
       json[r'blocklist_behavior'] = null;
     }
-    json[r'blocklists'] = this.blocklists;
-    json[r'commands'] = this.commands;
-    json[r'connect_events'] = this.connectEvents;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom_events'] = this.customEvents;
-    json[r'grants'] = this.grants;
-    json[r'mark_messages_pending'] = this.markMessagesPending;
-    json[r'max_message_length'] = this.maxMessageLength;
-    json[r'mutes'] = this.mutes;
-    json[r'name'] = this.name;
+      json[r'blocklists'] = this.blocklists;
+      json[r'commands'] = this.commands;
+      json[r'connect_events'] = this.connectEvents;
+      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'custom_events'] = this.customEvents;
+      json[r'grants'] = this.grants;
+      json[r'mark_messages_pending'] = this.markMessagesPending;
+      json[r'max_message_length'] = this.maxMessageLength;
+      json[r'mutes'] = this.mutes;
+      json[r'name'] = this.name;
     if (this.partitionSize != null) {
       json[r'partition_size'] = this.partitionSize;
     } else {
@@ -243,18 +239,19 @@ class ChannelConfigWithInfo {
     } else {
       json[r'partition_ttl'] = null;
     }
-    json[r'polls'] = this.polls;
-    json[r'push_notifications'] = this.pushNotifications;
-    json[r'quotes'] = this.quotes;
-    json[r'reactions'] = this.reactions;
-    json[r'read_events'] = this.readEvents;
-    json[r'reminders'] = this.reminders;
-    json[r'replies'] = this.replies;
-    json[r'search'] = this.search;
-    json[r'typing_events'] = this.typingEvents;
-    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
-    json[r'uploads'] = this.uploads;
-    json[r'url_enrichment'] = this.urlEnrichment;
+      json[r'polls'] = this.polls;
+      json[r'push_notifications'] = this.pushNotifications;
+      json[r'quotes'] = this.quotes;
+      json[r'reactions'] = this.reactions;
+      json[r'read_events'] = this.readEvents;
+      json[r'reminders'] = this.reminders;
+      json[r'replies'] = this.replies;
+      json[r'search'] = this.search;
+      json[r'skip_last_msg_update_for_system_msgs'] = this.skipLastMsgUpdateForSystemMsgs;
+      json[r'typing_events'] = this.typingEvents;
+      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+      json[r'uploads'] = this.uploads;
+      json[r'url_enrichment'] = this.urlEnrichment;
     return json;
   }
 
@@ -270,27 +267,21 @@ class ChannelConfigWithInfo {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ChannelConfigWithInfo[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ChannelConfigWithInfo[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "ChannelConfigWithInfo[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "ChannelConfigWithInfo[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return ChannelConfigWithInfo(
         allowedFlagReasons: json[r'allowed_flag_reasons'] is Iterable
-            ? (json[r'allowed_flag_reasons'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
+            ? (json[r'allowed_flag_reasons'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         automod: ChannelConfigWithInfoAutomodEnum.fromJson(json[r'automod'])!,
-        automodBehavior: ChannelConfigWithInfoAutomodBehaviorEnum.fromJson(
-            json[r'automod_behavior'])!,
+        automodBehavior: ChannelConfigWithInfoAutomodBehaviorEnum.fromJson(json[r'automod_behavior'])!,
         automodThresholds: Thresholds.fromJson(json[r'automod_thresholds']),
         blocklist: mapValueOfType<String>(json, r'blocklist'),
-        blocklistBehavior: ChannelConfigWithInfoBlocklistBehaviorEnum.fromJson(
-            json[r'blocklist_behavior']),
+        blocklistBehavior: ChannelConfigWithInfoBlocklistBehaviorEnum.fromJson(json[r'blocklist_behavior']),
         blocklists: BlockListOptions.listFromJson(json[r'blocklists']),
         commands: Command.listFromJson(json[r'commands']),
         connectEvents: mapValueOfType<bool>(json, r'connect_events')!,
@@ -303,7 +294,7 @@ class ChannelConfigWithInfo {
         mutes: mapValueOfType<bool>(json, r'mutes')!,
         name: mapValueOfType<String>(json, r'name')!,
         partitionSize: mapValueOfType<int>(json, r'partition_size'),
-        partitionTtl: mapValueOfType<int>(json, r'partition_ttl'),
+        partitionTtl: mapValueOfType<String>(json, r'partition_ttl'),
         polls: mapValueOfType<bool>(json, r'polls')!,
         pushNotifications: mapValueOfType<bool>(json, r'push_notifications')!,
         quotes: mapValueOfType<bool>(json, r'quotes')!,
@@ -312,6 +303,7 @@ class ChannelConfigWithInfo {
         reminders: mapValueOfType<bool>(json, r'reminders')!,
         replies: mapValueOfType<bool>(json, r'replies')!,
         search: mapValueOfType<bool>(json, r'search')!,
+        skipLastMsgUpdateForSystemMsgs: mapValueOfType<bool>(json, r'skip_last_msg_update_for_system_msgs')!,
         typingEvents: mapValueOfType<bool>(json, r'typing_events')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
         uploads: mapValueOfType<bool>(json, r'uploads')!,
@@ -321,10 +313,7 @@ class ChannelConfigWithInfo {
     return null;
   }
 
-  static List<ChannelConfigWithInfo> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<ChannelConfigWithInfo> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChannelConfigWithInfo>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -352,19 +341,13 @@ class ChannelConfigWithInfo {
   }
 
   // maps a json object with a list of ChannelConfigWithInfo-objects as value to a dart map
-  static Map<String, List<ChannelConfigWithInfo>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<ChannelConfigWithInfo>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ChannelConfigWithInfo>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ChannelConfigWithInfo.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        map[entry.key] = ChannelConfigWithInfo.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -390,12 +373,14 @@ class ChannelConfigWithInfo {
     'reminders',
     'replies',
     'search',
+    'skip_last_msg_update_for_system_msgs',
     'typing_events',
     'updated_at',
     'uploads',
     'url_enrichment',
   };
 }
+
 
 class ChannelConfigWithInfoAutomodEnum {
   /// Instantiate a new enum with the provided [value].
@@ -420,13 +405,9 @@ class ChannelConfigWithInfoAutomodEnum {
     AI,
   ];
 
-  static ChannelConfigWithInfoAutomodEnum? fromJson(dynamic value) =>
-      ChannelConfigWithInfoAutomodEnumTypeTransformer().decode(value);
+  static ChannelConfigWithInfoAutomodEnum? fromJson(dynamic value) => ChannelConfigWithInfoAutomodEnumTypeTransformer().decode(value);
 
-  static List<ChannelConfigWithInfoAutomodEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<ChannelConfigWithInfoAutomodEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChannelConfigWithInfoAutomodEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -443,8 +424,7 @@ class ChannelConfigWithInfoAutomodEnum {
 /// Transformation class that can [encode] an instance of [ChannelConfigWithInfoAutomodEnum] to String,
 /// and [decode] dynamic data back to [ChannelConfigWithInfoAutomodEnum].
 class ChannelConfigWithInfoAutomodEnumTypeTransformer {
-  factory ChannelConfigWithInfoAutomodEnumTypeTransformer() =>
-      _instance ??= const ChannelConfigWithInfoAutomodEnumTypeTransformer._();
+  factory ChannelConfigWithInfoAutomodEnumTypeTransformer() => _instance ??= const ChannelConfigWithInfoAutomodEnumTypeTransformer._();
 
   const ChannelConfigWithInfoAutomodEnumTypeTransformer._();
 
@@ -458,16 +438,12 @@ class ChannelConfigWithInfoAutomodEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  ChannelConfigWithInfoAutomodEnum? decode(dynamic data,
-      {bool allowNull = true}) {
+  ChannelConfigWithInfoAutomodEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'disabled':
-          return ChannelConfigWithInfoAutomodEnum.disabled;
-        case r'simple':
-          return ChannelConfigWithInfoAutomodEnum.simple;
-        case r'AI':
-          return ChannelConfigWithInfoAutomodEnum.AI;
+        case r'disabled': return ChannelConfigWithInfoAutomodEnum.disabled;
+        case r'simple': return ChannelConfigWithInfoAutomodEnum.simple;
+        case r'AI': return ChannelConfigWithInfoAutomodEnum.AI;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -480,6 +456,8 @@ class ChannelConfigWithInfoAutomodEnumTypeTransformer {
   /// Singleton [ChannelConfigWithInfoAutomodEnumTypeTransformer] instance.
   static ChannelConfigWithInfoAutomodEnumTypeTransformer? _instance;
 }
+
+
 
 class ChannelConfigWithInfoAutomodBehaviorEnum {
   /// Instantiate a new enum with the provided [value].
@@ -495,8 +473,7 @@ class ChannelConfigWithInfoAutomodBehaviorEnum {
 
   static const flag = ChannelConfigWithInfoAutomodBehaviorEnum._(r'flag');
   static const block = ChannelConfigWithInfoAutomodBehaviorEnum._(r'block');
-  static const shadowBlock =
-      ChannelConfigWithInfoAutomodBehaviorEnum._(r'shadow_block');
+  static const shadowBlock = ChannelConfigWithInfoAutomodBehaviorEnum._(r'shadow_block');
 
   /// List of all possible values in this [enum][ChannelConfigWithInfoAutomodBehaviorEnum].
   static const values = <ChannelConfigWithInfoAutomodBehaviorEnum>[
@@ -505,13 +482,9 @@ class ChannelConfigWithInfoAutomodBehaviorEnum {
     shadowBlock,
   ];
 
-  static ChannelConfigWithInfoAutomodBehaviorEnum? fromJson(dynamic value) =>
-      ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer().decode(value);
+  static ChannelConfigWithInfoAutomodBehaviorEnum? fromJson(dynamic value) => ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer().decode(value);
 
-  static List<ChannelConfigWithInfoAutomodBehaviorEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<ChannelConfigWithInfoAutomodBehaviorEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChannelConfigWithInfoAutomodBehaviorEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -528,9 +501,7 @@ class ChannelConfigWithInfoAutomodBehaviorEnum {
 /// Transformation class that can [encode] an instance of [ChannelConfigWithInfoAutomodBehaviorEnum] to String,
 /// and [decode] dynamic data back to [ChannelConfigWithInfoAutomodBehaviorEnum].
 class ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer {
-  factory ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer() =>
-      _instance ??=
-          const ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer._();
+  factory ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer() => _instance ??= const ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer._();
 
   const ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer._();
 
@@ -544,16 +515,12 @@ class ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  ChannelConfigWithInfoAutomodBehaviorEnum? decode(dynamic data,
-      {bool allowNull = true}) {
+  ChannelConfigWithInfoAutomodBehaviorEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'flag':
-          return ChannelConfigWithInfoAutomodBehaviorEnum.flag;
-        case r'block':
-          return ChannelConfigWithInfoAutomodBehaviorEnum.block;
-        case r'shadow_block':
-          return ChannelConfigWithInfoAutomodBehaviorEnum.shadowBlock;
+        case r'flag': return ChannelConfigWithInfoAutomodBehaviorEnum.flag;
+        case r'block': return ChannelConfigWithInfoAutomodBehaviorEnum.block;
+        case r'shadow_block': return ChannelConfigWithInfoAutomodBehaviorEnum.shadowBlock;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -566,6 +533,8 @@ class ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer {
   /// Singleton [ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer] instance.
   static ChannelConfigWithInfoAutomodBehaviorEnumTypeTransformer? _instance;
 }
+
+
 
 class ChannelConfigWithInfoBlocklistBehaviorEnum {
   /// Instantiate a new enum with the provided [value].
@@ -581,8 +550,7 @@ class ChannelConfigWithInfoBlocklistBehaviorEnum {
 
   static const flag = ChannelConfigWithInfoBlocklistBehaviorEnum._(r'flag');
   static const block = ChannelConfigWithInfoBlocklistBehaviorEnum._(r'block');
-  static const shadowBlock =
-      ChannelConfigWithInfoBlocklistBehaviorEnum._(r'shadow_block');
+  static const shadowBlock = ChannelConfigWithInfoBlocklistBehaviorEnum._(r'shadow_block');
 
   /// List of all possible values in this [enum][ChannelConfigWithInfoBlocklistBehaviorEnum].
   static const values = <ChannelConfigWithInfoBlocklistBehaviorEnum>[
@@ -591,13 +559,9 @@ class ChannelConfigWithInfoBlocklistBehaviorEnum {
     shadowBlock,
   ];
 
-  static ChannelConfigWithInfoBlocklistBehaviorEnum? fromJson(dynamic value) =>
-      ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer().decode(value);
+  static ChannelConfigWithInfoBlocklistBehaviorEnum? fromJson(dynamic value) => ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer().decode(value);
 
-  static List<ChannelConfigWithInfoBlocklistBehaviorEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<ChannelConfigWithInfoBlocklistBehaviorEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChannelConfigWithInfoBlocklistBehaviorEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -614,9 +578,7 @@ class ChannelConfigWithInfoBlocklistBehaviorEnum {
 /// Transformation class that can [encode] an instance of [ChannelConfigWithInfoBlocklistBehaviorEnum] to String,
 /// and [decode] dynamic data back to [ChannelConfigWithInfoBlocklistBehaviorEnum].
 class ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer {
-  factory ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer() =>
-      _instance ??=
-          const ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer._();
+  factory ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer() => _instance ??= const ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer._();
 
   const ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer._();
 
@@ -630,16 +592,12 @@ class ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  ChannelConfigWithInfoBlocklistBehaviorEnum? decode(dynamic data,
-      {bool allowNull = true}) {
+  ChannelConfigWithInfoBlocklistBehaviorEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'flag':
-          return ChannelConfigWithInfoBlocklistBehaviorEnum.flag;
-        case r'block':
-          return ChannelConfigWithInfoBlocklistBehaviorEnum.block;
-        case r'shadow_block':
-          return ChannelConfigWithInfoBlocklistBehaviorEnum.shadowBlock;
+        case r'flag': return ChannelConfigWithInfoBlocklistBehaviorEnum.flag;
+        case r'block': return ChannelConfigWithInfoBlocklistBehaviorEnum.block;
+        case r'shadow_block': return ChannelConfigWithInfoBlocklistBehaviorEnum.shadowBlock;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -652,3 +610,5 @@ class ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer {
   /// Singleton [ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer] instance.
   static ChannelConfigWithInfoBlocklistBehaviorEnumTypeTransformer? _instance;
 }
+
+

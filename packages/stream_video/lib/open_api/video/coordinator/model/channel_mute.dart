@@ -49,7 +49,7 @@ class ChannelMute {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  UserResponse? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ChannelMute &&
@@ -116,7 +116,7 @@ class ChannelMute {
         createdAt: mapDateTime(json, r'created_at', r'')!,
         expires: mapDateTime(json, r'expires', r''),
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: UserResponse.fromJson(json[r'user']),
       );
     }
     return null;

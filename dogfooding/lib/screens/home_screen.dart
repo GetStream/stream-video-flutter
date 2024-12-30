@@ -64,7 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (callId.isEmpty) callId = generateAlphanumericString(12);
 
     unawaited(showLoadingIndicator(context));
-    _call = _streamVideo.makeCall(callType: kCallType, id: callId);
+    _call = _streamVideo.makeCall(
+        callType: kCallType,
+        id: callId,
+        preferences: DefaultCallPreferences(
+          closedCaptionsVisibleCaptions: 3,
+          closedCaptionsVisibilityDurationMs: 5000,
+        ));
 
     bool isRinging = memberIds.isNotEmpty;
 

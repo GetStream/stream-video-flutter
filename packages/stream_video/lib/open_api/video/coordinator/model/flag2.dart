@@ -97,7 +97,7 @@ class Flag2 {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is Flag2 &&
@@ -219,13 +219,14 @@ class Flag2 {
         reviewQueueItemId: mapValueOfType<String>(json, r'review_queue_item_id'),
         type: mapValueOfType<String>(json, r'type'),
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;
   }
 
-    static List<Map<String, Object>> mapListOfMapFromJson(dynamic json) {
+    // MANUAL_EDIT
+  static List<Map<String, Object>> mapListOfMapFromJson(dynamic json) {
     if (json is! List) {
       return [];
     }

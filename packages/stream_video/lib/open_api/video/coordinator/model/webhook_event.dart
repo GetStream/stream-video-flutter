@@ -152,7 +152,7 @@ class WebhookEvent {
 
   String cid;
 
-  UserObject createdBy;
+  User createdBy;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -425,7 +425,7 @@ class WebhookEvent {
         channelId: mapValueOfType<String>(json, r'channel_id')!,
         channelType: mapValueOfType<String>(json, r'channel_type')!,
         cid: mapValueOfType<String>(json, r'cid')!,
-        createdBy: UserObject.fromJson(json[r'created_by'])!,
+        createdBy: User.fromJson(json[r'created_by'])!,
         expiration: mapDateTime(json, r'expiration', r''),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
         team: mapValueOfType<String>(json, r'team'),

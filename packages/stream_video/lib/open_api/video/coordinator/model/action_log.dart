@@ -17,6 +17,7 @@ class ActionLog {
     this.custom = const {},
     required this.id,
     required this.reason,
+    required this.reporterType,
     this.reviewQueueItem,
     required this.reviewQueueItemId,
     this.targetUser,
@@ -32,6 +33,8 @@ class ActionLog {
   String id;
 
   String reason;
+
+  String reporterType;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -49,7 +52,7 @@ class ActionLog {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? targetUser;
+  User? targetUser;
 
   String targetUserId;
 
@@ -61,7 +64,7 @@ class ActionLog {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ActionLog &&
@@ -69,6 +72,7 @@ class ActionLog {
     _deepEquality.equals(other.custom, custom) &&
     other.id == id &&
     other.reason == reason &&
+    other.reporterType == reporterType &&
     other.reviewQueueItem == reviewQueueItem &&
     other.reviewQueueItemId == reviewQueueItemId &&
     other.targetUser == targetUser &&
@@ -83,6 +87,7 @@ class ActionLog {
     (custom.hashCode) +
     (id.hashCode) +
     (reason.hashCode) +
+    (reporterType.hashCode) +
     (reviewQueueItem == null ? 0 : reviewQueueItem!.hashCode) +
     (reviewQueueItemId.hashCode) +
     (targetUser == null ? 0 : targetUser!.hashCode) +
@@ -91,7 +96,7 @@ class ActionLog {
     (user == null ? 0 : user!.hashCode);
 
   @override
-  String toString() => 'ActionLog[createdAt=$createdAt, custom=$custom, id=$id, reason=$reason, reviewQueueItem=$reviewQueueItem, reviewQueueItemId=$reviewQueueItemId, targetUser=$targetUser, targetUserId=$targetUserId, type=$type, user=$user]';
+  String toString() => 'ActionLog[createdAt=$createdAt, custom=$custom, id=$id, reason=$reason, reporterType=$reporterType, reviewQueueItem=$reviewQueueItem, reviewQueueItemId=$reviewQueueItemId, targetUser=$targetUser, targetUserId=$targetUserId, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -99,6 +104,7 @@ class ActionLog {
       json[r'custom'] = this.custom;
       json[r'id'] = this.id;
       json[r'reason'] = this.reason;
+      json[r'reporter_type'] = this.reporterType;
     if (this.reviewQueueItem != null) {
       json[r'review_queue_item'] = this.reviewQueueItem;
     } else {
@@ -143,12 +149,13 @@ class ActionLog {
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         id: mapValueOfType<String>(json, r'id')!,
         reason: mapValueOfType<String>(json, r'reason')!,
+        reporterType: mapValueOfType<String>(json, r'reporter_type')!,
         reviewQueueItem: ReviewQueueItem.fromJson(json[r'review_queue_item']),
         reviewQueueItemId: mapValueOfType<String>(json, r'review_queue_item_id')!,
-        targetUser: UserObject.fromJson(json[r'target_user']),
+        targetUser: User.fromJson(json[r'target_user']),
         targetUserId: mapValueOfType<String>(json, r'target_user_id')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;
@@ -200,6 +207,7 @@ class ActionLog {
     'custom',
     'id',
     'reason',
+    'reporter_type',
     'review_queue_item_id',
     'target_user_id',
     'type',

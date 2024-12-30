@@ -411,6 +411,57 @@ class CoordinatorCallTranscriptionFailedEvent extends CoordinatorCallEvent {
       ];
 }
 
+class CoordinatorCallClosedCaptionStartedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallClosedCaptionStartedEvent({
+    required this.callCid,
+    required this.createdAt,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+      ];
+}
+
+class CoordinatorCallClosedCaptionStoppedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallClosedCaptionStoppedEvent({
+    required this.callCid,
+    required this.createdAt,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+      ];
+}
+
+class CoordinatorCallClosedCaptionFailedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallClosedCaptionFailedEvent({
+    required this.callCid,
+    required this.createdAt,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+      ];
+}
+
 class CoordinatorCallBroadcastingStartedEvent extends CoordinatorCallEvent {
   const CoordinatorCallBroadcastingStartedEvent({
     required this.callCid,
@@ -672,6 +723,7 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
     required this.endTime,
     required this.speakerId,
     required this.text,
+    required this.user,
   });
 
   @override
@@ -681,6 +733,7 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
   final DateTime endTime;
   final String speakerId;
   final String text;
+  final CallUser user;
 
   @override
   List<Object?> get props => [
@@ -690,6 +743,7 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
         endTime,
         speakerId,
         text,
+        user,
       ];
 }
 

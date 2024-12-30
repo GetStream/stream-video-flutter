@@ -23,7 +23,7 @@ class VideoQuality {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  VideoResolution? resolution;
+  VideoDimension? resolution;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -81,7 +81,7 @@ class VideoQuality {
       }());
 
       return VideoQuality(
-        resolution: VideoResolution.fromJson(json[r'resolution']),
+        resolution: VideoDimension.fromJson(json[r'resolution']),
         usageType: mapValueOfType<String>(json, r'usage_type'),
       );
     }

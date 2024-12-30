@@ -309,22 +309,22 @@ class StreamRingSettings extends AbstractSettings {
 
 class StreamTranscriptionSettings extends AbstractSettings {
   const StreamTranscriptionSettings({
-    this.closedCaptionMode = '',
-    this.mode = TranscriptionSettingsMode.disabled,
+    this.closedCaptionMode = ClosedCaptionSettingsMode.disabled,
+    this.transcriptionMode = TranscriptionSettingsMode.disabled,
     this.languages = const [],
   });
 
-  final String closedCaptionMode;
   final List<String> languages;
-  final TranscriptionSettingsMode mode;
+  final ClosedCaptionSettingsMode closedCaptionMode;
+  final TranscriptionSettingsMode transcriptionMode;
 
   @override
-  List<Object?> get props => [closedCaptionMode, mode, languages];
+  List<Object?> get props => [closedCaptionMode, transcriptionMode, languages];
 
   TranscriptionSettingsRequest toOpenDto() {
     return TranscriptionSettingsRequest(
-      closedCaptionMode: closedCaptionMode,
-      mode: mode.toOpenDto(),
+      closedCaptionMode: closedCaptionMode.toOpenDto(),
+      mode: transcriptionMode.toOpenDto(),
       languages: languages,
     );
   }
@@ -411,6 +411,39 @@ class StreamRtmpSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [enabled, quality];
+}
+
+enum StreamTranscriptionMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  TranscriptionSettingsResponseModeEnum toOpenDto() {
+    switch (this) {
+      case StreamTranscriptionMode.available:
+        return TranscriptionSettingsResponseModeEnum.available;
+      case StreamTranscriptionMode.disabled:
+        return TranscriptionSettingsResponseModeEnum.disabled;
+      case StreamTranscriptionMode.autoOn:
+        return TranscriptionSettingsResponseModeEnum.autoOn;
+    }
+  }
+
+  static StreamTranscriptionMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return StreamTranscriptionMode.available;
+      case 'disabled':
+        return StreamTranscriptionMode.disabled;
+      case 'autoOn':
+        return StreamTranscriptionMode.autoOn;
+      default:
+        return StreamTranscriptionMode.disabled;
+    }
+  }
 }
 
 enum RecordSettingsMode {
@@ -505,6 +538,26 @@ enum TranscriptionSettingsMode {
         return TranscriptionSettingsRequestModeEnum.disabled;
       case TranscriptionSettingsMode.autoOn:
         return TranscriptionSettingsRequestModeEnum.autoOn;
+    }
+  }
+}
+
+enum ClosedCaptionSettingsMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  TranscriptionSettingsRequestClosedCaptionModeEnum toOpenDto() {
+    switch (this) {
+      case ClosedCaptionSettingsMode.available:
+        return TranscriptionSettingsRequestClosedCaptionModeEnum.available;
+      case ClosedCaptionSettingsMode.disabled:
+        return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
+      case ClosedCaptionSettingsMode.autoOn:
+        return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
     }
   }
 }

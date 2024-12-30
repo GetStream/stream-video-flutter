@@ -53,10 +53,8 @@ class Message {
     this.user,
   });
 
-  /// Array of message attachments
   List<Attachment> attachments;
 
-  /// Whether `before_message_send webhook` failed or not. Field is only accessible in push webhook
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -65,10 +63,8 @@ class Message {
   ///
   bool? beforeMessageSendFailed;
 
-  /// Channel unique identifier in <type>:<id> format
   String cid;
 
-  /// Contains provided slash command
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -77,12 +73,10 @@ class Message {
   ///
   String? command;
 
-  /// Date/time of creation
   DateTime createdAt;
 
   Map<String, Object> custom;
 
-  /// Date/time of deletion
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -93,23 +87,17 @@ class Message {
 
   int deletedReplyCount;
 
-  /// Contains HTML markup of the message. Can only be set when using server-side API
   String html;
 
-  /// Object with translations. Key `language` contains the original language key. Other keys contain translations
   Map<String, String> i18n;
 
-  /// Message ID is unique string identifier of the message
   String id;
 
-  /// Contains image moderation information
   Map<String, List<String>> imageLabels;
 
-  /// List of 10 latest reactions to this message
   List<Reaction> latestReactions;
 
-  /// List of mentioned users
-  List<UserObject> mentionedUsers;
+  List<User> mentionedUsers;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -119,7 +107,6 @@ class Message {
   ///
   DateTime? messageTextUpdatedAt;
 
-  /// Should be empty if `text` is provided. Can only be set when using server-side API
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -128,10 +115,8 @@ class Message {
   ///
   String? mml;
 
-  /// List of 10 latest reactions of authenticated user to this message
   List<Reaction> ownReactions;
 
-  /// ID of parent message (thread)
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -140,7 +125,6 @@ class Message {
   ///
   String? parentId;
 
-  /// Date when pinned message expires
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -149,10 +133,8 @@ class Message {
   ///
   DateTime? pinExpires;
 
-  /// Whether message is pinned or not
   bool pinned;
 
-  /// Date when message got pinned
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -167,7 +149,7 @@ class Message {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? pinnedBy;
+  User? pinnedBy;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -177,7 +159,6 @@ class Message {
   ///
   Poll? poll;
 
-  /// Identifier of the poll to include in the message
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -202,21 +183,16 @@ class Message {
   ///
   String? quotedMessageId;
 
-  /// An object containing number of reactions of each type. Key: reaction type (string), value: number of reactions (int)
   Map<String, int> reactionCounts;
 
   Map<String, ReactionGroupResponse> reactionGroups;
 
-  /// An object containing scores of reactions of each type. Key: reaction type (string), value: total score of reactions (int)
   Map<String, int> reactionScores;
 
-  /// Number of replies to this message
   int replyCount;
 
-  /// Whether the message was shadowed or not
   bool shadowed;
 
-  /// Whether thread reply should be shown in the channel as well
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -225,19 +201,14 @@ class Message {
   ///
   bool? showInChannel;
 
-  /// Whether message is silent or not
   bool silent;
 
-  /// Text of the message. Should be empty if `mml` is provided
   String text;
 
-  /// List of users who participate in thread
-  List<UserObject> threadParticipants;
+  List<User> threadParticipants;
 
-  /// Contains type of the message
-  MessageTypeEnum type;
+  String type;
 
-  /// Date/time of the last update
   DateTime updatedAt;
 
   ///
@@ -246,7 +217,7 @@ class Message {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  User? user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is Message &&
@@ -472,7 +443,7 @@ class Message {
             ? const {}
             : mapCastOfType<String, List<String>>(json, r'image_labels') ?? const {},
         latestReactions: Reaction.listFromJson(json[r'latest_reactions']),
-        mentionedUsers: UserObject.listFromJson(json[r'mentioned_users']),
+        mentionedUsers: User.listFromJson(json[r'mentioned_users']),
         messageTextUpdatedAt: mapDateTime(json, r'message_text_updated_at', r''),
         mml: mapValueOfType<String>(json, r'mml'),
         ownReactions: Reaction.listFromJson(json[r'own_reactions']),
@@ -480,7 +451,7 @@ class Message {
         pinExpires: mapDateTime(json, r'pin_expires', r''),
         pinned: mapValueOfType<bool>(json, r'pinned')!,
         pinnedAt: mapDateTime(json, r'pinned_at', r''),
-        pinnedBy: UserObject.fromJson(json[r'pinned_by']),
+        pinnedBy: User.fromJson(json[r'pinned_by']),
         poll: Poll.fromJson(json[r'poll']),
         pollId: mapValueOfType<String>(json, r'poll_id'),
         quotedMessage: Message.fromJson(json[r'quoted_message']),
@@ -493,10 +464,10 @@ class Message {
         showInChannel: mapValueOfType<bool>(json, r'show_in_channel'),
         silent: mapValueOfType<bool>(json, r'silent')!,
         text: mapValueOfType<String>(json, r'text')!,
-        threadParticipants: UserObject.listFromJson(json[r'thread_participants']),
-        type: MessageTypeEnum.fromJson(json[r'type'])!,
+        threadParticipants: User.listFromJson(json[r'thread_participants']),
+        type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;
@@ -566,90 +537,4 @@ class Message {
     'updated_at',
   };
 }
-
-/// Contains type of the message
-class MessageTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const MessageTypeEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
-  @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const regular = MessageTypeEnum._(r'regular');
-  static const ephemeral = MessageTypeEnum._(r'ephemeral');
-  static const error = MessageTypeEnum._(r'error');
-  static const reply = MessageTypeEnum._(r'reply');
-  static const system = MessageTypeEnum._(r'system');
-  static const deleted = MessageTypeEnum._(r'deleted');
-
-  /// List of all possible values in this [enum][MessageTypeEnum].
-  static const values = <MessageTypeEnum>[
-    regular,
-    ephemeral,
-    error,
-    reply,
-    system,
-    deleted,
-  ];
-
-  static MessageTypeEnum? fromJson(dynamic value) => MessageTypeEnumTypeTransformer().decode(value);
-
-  static List<MessageTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <MessageTypeEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = MessageTypeEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-}
-
-/// Transformation class that can [encode] an instance of [MessageTypeEnum] to String,
-/// and [decode] dynamic data back to [MessageTypeEnum].
-class MessageTypeEnumTypeTransformer {
-  factory MessageTypeEnumTypeTransformer() => _instance ??= const MessageTypeEnumTypeTransformer._();
-
-  const MessageTypeEnumTypeTransformer._();
-
-  String encode(MessageTypeEnum data) => data.value;
-
-  /// Decodes a [dynamic value][data] to a MessageTypeEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  MessageTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'regular': return MessageTypeEnum.regular;
-        case r'ephemeral': return MessageTypeEnum.ephemeral;
-        case r'error': return MessageTypeEnum.error;
-        case r'reply': return MessageTypeEnum.reply;
-        case r'system': return MessageTypeEnum.system;
-        case r'deleted': return MessageTypeEnum.deleted;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
-
-  /// Singleton [MessageTypeEnumTypeTransformer] instance.
-  static MessageTypeEnumTypeTransformer? _instance;
-}
-
 
