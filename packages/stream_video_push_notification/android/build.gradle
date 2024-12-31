@@ -26,16 +26,16 @@ android {
         namespace = "io.getstream.video.flutter.stream_video_push_notification"
     }
 
-    compileSdk = 34
+    compileSdk = 35
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-    }
+    kotlin {
+         jvmToolchain(17)
+     }
 
     sourceSets {
         main.java.srcDirs += "src/main/kotlin"
