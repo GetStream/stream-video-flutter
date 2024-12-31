@@ -32,17 +32,20 @@ android {
     if (project.android.hasProperty("namespace")) {
         namespace = "io.getstream.video.flutter.dogfooding"
     }
+
     compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        //Required by flutter_local_notifications
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
+    kotlin {
+         jvmToolchain(17)
+     }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -73,6 +76,8 @@ flutter {
 }
 
 dependencies {
+    //Required by flutter_local_notifications
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'io.getstream:stream-log:1.1.3'
 }
