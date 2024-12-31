@@ -16,7 +16,7 @@ class CircleTransform : Transformation {
         if (squaredBitmap != source) {
             source.recycle()
         }
-        val bitmap = Bitmap.createBitmap(size, size, source.config)
+        val bitmap = Bitmap.createBitmap(size, size, source.config ?: Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint()
         val shader = BitmapShader(

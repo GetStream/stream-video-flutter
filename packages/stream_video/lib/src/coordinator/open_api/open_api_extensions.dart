@@ -1,5 +1,3 @@
-import 'package:collection/collection.dart';
-
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
@@ -450,6 +448,6 @@ extension DeviceExt on open.Device {
 
 extension DeviceListExt on List<open.Device> {
   List<PushDevice> toPushDevices() {
-    return map((it) => it.toPushDevice()).whereNotNull().toList();
+    return map((it) => it.toPushDevice()).nonNulls.toList();
   }
 }

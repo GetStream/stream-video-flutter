@@ -29,7 +29,10 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 34
+    if (project.android.hasProperty("namespace")) {
+        namespace = "io.getstream.video.flutter.dogfooding"
+    }
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     compileOptions {
