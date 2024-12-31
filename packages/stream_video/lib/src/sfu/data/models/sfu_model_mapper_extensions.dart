@@ -1,6 +1,5 @@
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
-import '../../../call/session/dynascale_manager.dart';
 import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
 import 'sfu_codec.dart';

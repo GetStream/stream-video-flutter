@@ -1,13 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
-import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
@@ -85,20 +83,6 @@ class RtcManager extends Disposable {
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     publisher.onRenegotiationNeeded = cb;
   }
-
-  set onStatsReceived(OnStats? cb) {
-    subscriber.onStats = cb;
-    publisher.onStats = cb;
-  }
-
-  Stream<Map<String, dynamic>> get statsStream => CombineLatestStream.combine2(
-        subscriber.statsStream,
-        publisher.statsStream,
-        (subscriber, publisher) => {
-          'subscriberStats': subscriber,
-          'publisherStats': publisher,
-        },
-      ).asBroadcastStream();
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
@@ -427,7 +411,6 @@ class RtcManager extends Disposable {
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
-    onStatsReceived = null;
 
     await publisher.dispose();
     await subscriber.dispose();
@@ -673,10 +656,13 @@ extension PublisherRtcManager on RtcManager {
     tracks[track.trackId] = track;
 
     if (!publishOptions.any((o) => o.trackType == track.trackType)) {
-      _logger.w(() =>
-          '[publishVideoTrack] No publish options found for track type: ${track.trackType}');
+      _logger.w(
+        () =>
+            '[publishVideoTrack] No publish options found for track type: ${track.trackType}',
+      );
       return Result.error(
-          'No publish options found for track type: ${track.trackType}');
+        'No publish options found for track type: ${track.trackType}',
+      );
     }
 
     for (final option in publishOptions) {
@@ -1258,11 +1244,6 @@ extension RtcManagerTrackHelper on RtcManager {
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
-  }
-
-  void updateReportingInterval(int reportingIntervalMs) {
-    publisher.reportingIntervalMs = reportingIntervalMs;
-    subscriber.reportingIntervalMs = reportingIntervalMs;
   }
 }
 
