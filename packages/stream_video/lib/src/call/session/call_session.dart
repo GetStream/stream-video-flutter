@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:battery_plus/battery_plus.dart';
 import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
 import 'package:system_info2/system_info2.dart';
-import 'package:thermal/thermal.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
@@ -19,7 +17,6 @@ import '../../../version.g.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
-import '../../extensions/thermal_status_ext.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_error.dart';
@@ -31,8 +28,6 @@ import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
-import '../../webrtc/model/stats/rtc_printable_stats.dart';
-import '../../webrtc/model/stats/rtc_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
@@ -77,26 +72,6 @@ class CallSession extends Disposable {
           sdpEditor: sdpEditor,
         ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
-
-    _thermalStatusSubscription =
-        Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
-      _thermalStatus = status;
-    });
-
-    _mediaDeviceSubscription =
-        RtcMediaDeviceNotifier.instance.onDeviceChange.listen(
-      (devices) {
-        _availableAudioInputs = devices
-            .where((device) => device.kind == RtcMediaDeviceKind.audioInput)
-            .map((device) => device.label)
-            .toList();
-
-        _availableVideoInputs = devices
-            .where((device) => device.kind == RtcMediaDeviceKind.videoInput)
-            .map((device) => device.label)
-            .toList();
-      },
-    );
   }
 
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
@@ -121,20 +96,10 @@ class CallSession extends Disposable {
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
-  StreamSubscription<Map<String, dynamic>>? _statsSubscription;
-  StreamSubscription<List<RtcMediaDevice>>? _mediaDeviceSubscription;
-  StreamSubscription<ThermalStatus>? _thermalStatusSubscription;
-
-  List<String>? _availableAudioInputs;
-  List<String>? _availableVideoInputs;
-  ThermalStatus? _thermalStatus;
 
   Timer? _peerConnectionCheckTimer;
 
   sfu_models.ClientDetails? _clientDetails;
-
-  SharedEmitter<CallStats> get stats => _stats;
-  late final _stats = MutableSharedEmitterImpl<CallStats>();
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
@@ -342,12 +307,9 @@ class CallSession extends Disposable {
         ..onLocalTrackMuted = _onLocalTrackMuted
         ..onLocalTrackPublished = _onLocalTrackPublished
         ..onRenegotiationNeeded = _onRenegotiationNeeded
-        ..onRemoteTrackReceived = _onRemoteTrackReceived
-        ..onStatsReceived = _onStatsReceived;
+        ..onRemoteTrackReceived = _onRemoteTrackReceived;
 
       _rtcManagerSubject!.add(rtcManager!);
-
-      await observePeerConnectionStats();
 
       _logger.d(() => '[start] completed');
       return Result.success(
@@ -465,11 +427,7 @@ class CallSession extends Disposable {
   }) async {
     _logger.d(() => '[close] code: $code, closeReason: $closeReason');
 
-    await _stats.close();
     await _eventsSubscription?.cancel();
-    await _statsSubscription?.cancel();
-    await _mediaDeviceSubscription?.cancel();
-    await _thermalStatusSubscription?.cancel();
 
     await sfuWS.disconnect(
       code.value,
@@ -810,22 +768,6 @@ class CallSession extends Disposable {
     }
   }
 
-  void _onStatsReceived(
-    StreamPeerConnection pc,
-    List<RtcStats> rtcStats,
-    RtcPrintableStats rtcPrintableStats,
-    List<Map<String, dynamic>> rtcRawStats,
-  ) {
-    _stats.emit(
-      CallStats(
-        peerType: pc.type,
-        stats: rtcStats,
-        printable: rtcPrintableStats,
-        raw: rtcRawStats,
-      ),
-    );
-  }
-
   Future<Result<None>> setParticipantPinned({
     required String sessionId,
     required String userId,
@@ -957,66 +899,6 @@ class CallSession extends Disposable {
 
     final result = await rtcManager.setCameraPosition(cameraPosition: position);
     return result.map((_) => none);
-  }
-
-  Future<void> observePeerConnectionStats() async {
-    await _statsSubscription?.cancel();
-
-    _statsSubscription = rtcManager?.statsStream.listen((rawStats) async {
-      final lowPowerMode = await Battery().isInBatterySaveMode;
-
-      sfu_models.AndroidState? androidState;
-      sfu_models.AppleState? appleState;
-
-      final audioInputDevices = sfu_models.InputDevices(
-        availableDevices: _availableAudioInputs,
-        currentDevice: stateManager.callState.audioInputDevice?.label,
-        isPermitted: stateManager.callState.audioInputDevice != null &&
-            stateManager.callState.ownCapabilities
-                .contains(CallPermission.sendAudio),
-      );
-
-      final videoInputDevices = sfu_models.InputDevices(
-        availableDevices: _availableVideoInputs,
-        currentDevice: stateManager.callState.videoInputDevice?.label,
-        isPermitted: stateManager.callState.videoInputDevice != null &&
-            stateManager.callState.ownCapabilities
-                .contains(CallPermission.sendVideo),
-      );
-
-      if (CurrentPlatform.isAndroid) {
-        androidState = sfu_models.AndroidState(
-          thermalState: _thermalStatus?.toAndroidThermalState(),
-          isPowerSaverMode: lowPowerMode,
-        );
-      } else if (CurrentPlatform.isIos) {
-        appleState = sfu_models.AppleState(
-          thermalState: _thermalStatus?.toAppleThermalState(),
-          isLowPowerModeEnabled: lowPowerMode,
-        );
-      }
-
-      final request = sfu.SendStatsRequest(
-        sessionId: sessionId,
-        publisherStats: jsonEncode(rawStats['publisherStats']),
-        subscriberStats: jsonEncode(rawStats['subscriberStats']),
-        sdkVersion: streamVideoVersion,
-        sdk: streamSdkName,
-        android: androidState,
-        apple: appleState,
-        audioDevices: audioInputDevices,
-        videoDevices: videoInputDevices,
-        webrtcVersion: switch (CurrentPlatform.type) {
-          PlatformType.android => androidWebRTCVersion,
-          PlatformType.ios => iosWebRTCVersion,
-          _ => null,
-        },
-      );
-
-      await sfuClient.sendStats(
-        request,
-      );
-    });
   }
 
   @override
