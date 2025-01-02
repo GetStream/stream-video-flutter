@@ -450,6 +450,6 @@ extension DeviceExt on open.Device {
 
 extension DeviceListExt on List<open.Device> {
   List<PushDevice> toPushDevices() {
-    return map((it) => it.toPushDevice()).whereNotNull().toList();
+    return map((it) => it.toPushDevice()).nonNulls.toList();
   }
 }

@@ -205,7 +205,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
     final participants = _participants
         .map((it) => _users[it.userId])
-        .whereNotNull()
+        .nonNulls
         .map((e) => e.toUserInfo())
         .toList();
     return Scaffold(
