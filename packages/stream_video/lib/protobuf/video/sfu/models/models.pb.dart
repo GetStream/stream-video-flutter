@@ -1137,6 +1137,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     $core.bool? red,
     $core.bool? muted,
     Codec? codec,
+    $core.int? publishOptionId,
   }) {
     final $result = create();
     if (trackId != null) {
@@ -1166,6 +1167,9 @@ class TrackInfo extends $pb.GeneratedMessage {
     if (codec != null) {
       $result.codec = codec;
     }
+    if (publishOptionId != null) {
+      $result.publishOptionId = publishOptionId;
+    }
     return $result;
   }
   TrackInfo._() : super();
@@ -1182,6 +1186,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     ..aOB(9, _omitFieldNames ? '' : 'red')
     ..aOB(10, _omitFieldNames ? '' : 'muted')
     ..aOM<Codec>(11, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
+    ..a<$core.int>(12, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -1283,6 +1288,15 @@ class TrackInfo extends $pb.GeneratedMessage {
   void clearCodec() => clearField(11);
   @$pb.TagNumber(11)
   Codec ensureCodec() => $_ensure(8);
+
+  @$pb.TagNumber(12)
+  $core.int get publishOptionId => $_getIZ(9);
+  @$pb.TagNumber(12)
+  set publishOptionId($core.int v) { $_setSignedInt32(9, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasPublishOptionId() => $_has(9);
+  @$pb.TagNumber(12)
+  void clearPublishOptionId() => clearField(12);
 }
 
 class Error extends $pb.GeneratedMessage {

@@ -1030,6 +1030,7 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
         trackId: info.trackId,
         trackType: info.trackType?.toDTO(),
         mid: info.mid,
+        publishOptionId: info.publishOptionId,
         codec: info.codec?.toDTO(),
         layers: info.layers?.map((layer) {
           return sfu_models.VideoLayer(

@@ -10,6 +10,7 @@ class RtcTrackInfo {
     required this.layers,
     required this.codec,
     required this.muted,
+    required this.publishOptionId,
   });
 
   final String? trackId;
@@ -18,11 +19,12 @@ class RtcTrackInfo {
   final List<RtcVideoLayer>? layers;
   final SfuCodec? codec;
   final bool muted;
+  final int publishOptionId;
 
   @override
   String toString() {
     return 'RtcTrackInfo{trackId: $trackId, trackType: $trackType, '
-        'mid: $mid, layers: $layers, codec: $codec, muted: $muted}';
+        'mid: $mid, layers: $layers, codec: $codec, muted: $muted, publishOptionId: $publishOptionId}';
   }
 }
 

@@ -546,6 +546,7 @@ extension PublisherRtcManager on RtcManager {
       return RtcTrackInfo(
         trackId: track.mediaTrack.id,
         trackType: track.trackType,
+        publishOptionId: transceiverCache.publishOption.id,
         mid: extractMid(
           transceiverCache.transceiver,
           transceiverInitialIndex,
@@ -566,6 +567,7 @@ extension PublisherRtcManager on RtcManager {
       return RtcTrackInfo(
         trackId: track.mediaTrack.id,
         trackType: track.trackType,
+        publishOptionId: transceiverCache.publishOption.id,
         mid: extractMid(
           transceiverCache.transceiver,
           transceiverInitialIndex,
