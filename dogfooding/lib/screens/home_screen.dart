@@ -73,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // preferences: DefaultCallPreferences(
       //   clientPublishOptions: ClientPublishOptions(
       //     preferredCodec: PreferredCodec.av1,
+      //     fmtpLine: 'level-idx=5;profile=0;tier=0',
       //   ),
       // ),
     );
