@@ -3,7 +3,7 @@
 * Updated minimum Flutter version to 3.24.5
 
 ✅ Added
-* Added the 'call.collectUserFeedback()' method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-quality-rating/).
+* Added the `call.collectUserFeedback()` method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [documentation](https://getstream.io/video/docs/flutter/user-rating/).
 * Added device thermal status reporting to better optimize call quality.
 * Added the `StreamVideoPushNotificationManager.ensureFullScreenIntentPermission()` method. This resolves an issue on some Android 14 devices where full-screen notifications would not appear due to missing permissions.
 You can now invoke this method to show a settings screen, allowing users to enable the required permission if it's not already enabled.
