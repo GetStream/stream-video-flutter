@@ -3,7 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video_flutter_platform_interface.dart';
 
-const _tag = 'SVF:BackgrounFilters';
+const _tag = 'SVF:BackgroundFilters';
 
 enum BlurIntensity {
   light('BackgroundBlurLight'),
