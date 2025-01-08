@@ -6,12 +6,6 @@ on:
       - main
 
   workflow_dispatch:
-    inputs:
-      branch:
-        description: "Branch to distribute the app from"
-        required: true
-        default: "main"
-        type: string
 
 env:
   FLUTTER_VERSION: "3.24.3"
@@ -38,8 +32,6 @@ jobs:
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -82,8 +74,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch || github.ref_name }}
 
       - name: ⚙️ Set up Java
         uses: actions/setup-java@v3
