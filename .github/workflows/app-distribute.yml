@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: Checkout code
         uses: actions/checkout@v3
