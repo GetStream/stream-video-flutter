@@ -35,8 +35,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch || github.ref_name }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
