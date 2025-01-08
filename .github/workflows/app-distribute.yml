@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.24.3"
+  FLUTTER_VERSION: "3.27.1"
   FLUTTER_CHANNEL: stable
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}

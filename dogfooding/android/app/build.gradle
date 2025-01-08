@@ -1,3 +1,10 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "com.google.gms.google-services"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
@@ -26,13 +33,6 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
-
-apply plugin: 'com.android.application'
-// START: FlutterFire Configuration
-apply plugin: 'com.google.gms.google-services'
-// END: FlutterFire Configuration
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
     if (project.android.hasProperty("namespace")) {
@@ -100,6 +100,5 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:multidex:1.0.3'
 }
