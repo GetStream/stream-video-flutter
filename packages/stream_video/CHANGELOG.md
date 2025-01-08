@@ -1,7 +1,6 @@
 ## Unreleased 
 
 🚧 Breaking changes
-
 * The package is now compatible with Gradle 8. The minimum required Java version is now 17.
 
 ## 0.6.1
