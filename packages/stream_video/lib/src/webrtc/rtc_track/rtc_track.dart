@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../logger/stream_log.dart';
 import '../../sfu/data/models/sfu_track_type.dart';

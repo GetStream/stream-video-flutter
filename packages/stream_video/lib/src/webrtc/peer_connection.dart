@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
@@ -348,6 +348,8 @@ class StreamPeerConnection extends Disposable {
       Duration(milliseconds: _reportingIntervalMs),
       (_) async {
         try {
+          if (_statsController.isClosed) return;
+
           final stats = await pc.getStats();
           final rtcPrintableStats = stats.toPrintableRtcStats();
           final rawStats = stats.toRawStats();
@@ -386,6 +388,7 @@ class StreamPeerConnection extends Disposable {
     onIceCandidate = null;
     onTrack = null;
     _pendingCandidates.clear();
+    await _statsController.close();
     await pc.dispose();
     return await super.dispose();
   }

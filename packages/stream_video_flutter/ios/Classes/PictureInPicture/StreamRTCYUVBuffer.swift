@@ -5,28 +5,28 @@
 import Accelerate
 import CoreVideo
 import Foundation
-import flutter_webrtc
+import stream_webrtc_flutter
 
 /// A class that encapsulates the conversion of RTC video frame buffers from YUV to ARGB format.
 final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
-    
+
     private let pixelBufferRepository = StreamPixelBufferRepository.init()
-    
+
     /// The original source of the video frame, conforming to `RTCVideoFrameBuffer`.
     private let source: RTCVideoFrameBuffer
-    
+
     /// The conversion mechanism from YUV to ARGB.
     private let conversion: StreamYUVToARGBConversion
-    
+
     /// The width of the video frame.
     var width: Int32 { source.width }
-    
+
     /// The height of the video frame.
     var height: Int32 { source.height }
-    
+
     /// Lazily initialized pixel buffer that stores the converted YUV to ARGB data.
     private lazy var i420ToYUVPixelBuffer = buildI420ToYUVPixelBuffer()
-    
+
     /// Initializes a new buffer with the given source and conversion setup.
     ///
     /// - Parameters:
@@ -39,7 +39,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         self.source = source
         self.conversion = conversion
     }
-    
+
     /// Converts the frame to the I420 format.
     ///
     /// - Returns: An object conforming to `RTCI420BufferProtocol`.
@@ -50,7 +50,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             return source.toI420()
         }
     }
-    
+
     /// Resizes the current buffer resized to the target size.
     ///
     /// - Parameter targetSize: The target size for the buffer.
@@ -66,13 +66,14 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
                 scaleHeight: Int32(targetSize.height)
             )
             return .init(source: resizedSource, conversion: conversion)
-        } else if
-            let pixelBuffer = source as? RTCCVPixelBuffer,
+        } else if let pixelBuffer = source as? RTCCVPixelBuffer,
             let dequeuedPixelBuffer = try? pixelBufferRepository.dequeuePixelBuffer(
                 of: targetSize,
                 pixelFormat: CVPixelBufferGetPixelFormatType(pixelBuffer.pixelBuffer)
-            ) {
-            let count = pixelBuffer.bufferSizeForCroppingAndScaling(toWidth: Int32(targetSize.width), height: Int32(targetSize.height))
+            )
+        {
+            let count = pixelBuffer.bufferSizeForCroppingAndScaling(
+                toWidth: Int32(targetSize.width), height: Int32(targetSize.height))
             let tempBuffer: UnsafeMutableRawPointer? = malloc(Int(count))
             pixelBuffer.cropAndScale(to: dequeuedPixelBuffer, withTempBuffer: tempBuffer)
             tempBuffer?.deallocate()
@@ -81,7 +82,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             return nil
         }
     }
-    
+
     /// Retrieves the underlying pixel buffer if available.
     var pixelBuffer: CVPixelBuffer? {
         if source is RTCI420Buffer {
@@ -92,15 +93,15 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             return nil
         }
     }
-    
+
     /// Creates a CMSampleBuffer from the current pixel buffer, if available.
     var sampleBuffer: CMSampleBuffer? {
         guard let pixelBuffer else {
             return nil
         }
-        
+
         var sampleBuffer: CMSampleBuffer?
-        
+
         var timingInfo = CMSampleTimingInfo()
         var formatDescription: CMFormatDescription?
         CMVideoFormatDescriptionCreateForImageBuffer(
@@ -108,12 +109,12 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             imageBuffer: pixelBuffer,
             formatDescriptionOut: &formatDescription
         )
-        
+
         guard let formatDescription = formatDescription else {
-//            log.error("Cannot create sample buffer formatDescription.")
+            //            log.error("Cannot create sample buffer formatDescription.")
             return nil
         }
-        
+
         _ = CMSampleBufferCreateReadyWithImageBuffer(
             allocator: kCFAllocatorDefault,
             imageBuffer: pixelBuffer,
@@ -121,12 +122,12 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             sampleTiming: &timingInfo,
             sampleBufferOut: &sampleBuffer
         )
-        
+
         guard let buffer = sampleBuffer else {
-//            log.error("Cannot create sample buffer")
+            //            log.error("Cannot create sample buffer")
             return nil
         }
-        
+
         let attachments: CFArray! = CMSampleBufferGetSampleAttachmentsArray(
             buffer,
             createIfNecessary: true
@@ -138,12 +139,12 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         let key = Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque()
         let value = Unmanaged.passUnretained(kCFBooleanTrue).toOpaque()
         CFDictionarySetValue(dictionary, key, value)
-        
+
         return buffer
     }
-    
+
     // MARK: - Private Helpers
-    
+
     /// Creates a pixel buffer converted from I420 to YUV format.
     ///
     /// - Returns: A `CVPixelBuffer` containing the converted data or nil if the conversion fails.
@@ -151,16 +152,16 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         guard let source = source as? RTCI420Buffer else {
             return nil
         }
-        
+
         do {
             let pixelBuffer = try pixelBufferRepository.dequeuePixelBuffer(
                 of: .init(width: Int(width), height: Int(height))
             )
-            
+
             var YpImageBuffer = buildYpImageBuffer(source)
             var CbImageBuffer = buildCbImageBuffer(source)
             var CrImageBuffer = buildCrImageBuffer(source)
-            
+
             CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
             var output = buildImageBuffer(from: pixelBuffer)
             /// The `vImageConvert_420Yp8_Cb8_Cr8ToARGB8888` will convert our buffer
@@ -180,21 +181,21 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
                 255,
                 vImage_Flags(kvImageNoFlags)
             )
-            
+
             CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
-            
+
             if error == kvImageNoError {
                 return pixelBuffer
             } else {
-//                log.error(error)
+                //                log.error(error)
                 return nil
             }
         } catch {
-//            log.error(error)
+            //            log.error(error)
             return nil
         }
     }
-    
+
     /// Constructs a `vImage_Buffer` for the Y plane from the source I420 buffer.
     ///
     /// - Parameter source: The source I420 buffer.
@@ -207,7 +208,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             rowBytes: Int(source.strideY)
         )
     }
-    
+
     /// Constructs a `vImage_Buffer` for the Cb plane from the source I420 buffer.
     ///
     /// - Parameter source: The source I420 buffer.
@@ -220,7 +221,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             rowBytes: Int(source.strideU)
         )
     }
-    
+
     /// Constructs a `vImage_Buffer` for the Cr plane from the source I420 buffer.
     ///
     /// - Parameter source: The source I420 buffer.
@@ -233,7 +234,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             rowBytes: Int(source.strideV)
         )
     }
-    
+
     /// Creates a `vImage_Buffer` from a CVPixelBuffer.
     ///
     /// - Parameter pixelBuffer: The pixel buffer to convert.
