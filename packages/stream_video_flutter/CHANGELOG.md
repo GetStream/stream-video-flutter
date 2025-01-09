@@ -1,9 +1,18 @@
-## Unreleased
+## Unreleased 
+
+🚧 Breaking changes
+* The package is now compatible with Gradle 8. The minimum required Java version is now 17.
+* Updated the `flutter_callkit_incoming` package to version 2.5.0, which also requires Java 17.
+
+✅ Added
+* Added out-of-the-box support for blur background filters and image filters. As well as the option to create custom video filters. For complete documentation of those features please check [here.](https://getstream.io/video/docs/flutter/advanced/apply-video-filters/)
+
+## 0.6.1
 
 * Updated minimum Flutter version to 3.24.5
 
 ✅ Added
-* Added the 'call.collectUserFeedback()' method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-quality-rating/).
+* Added the `call.collectUserFeedback()` method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [documentation](https://getstream.io/video/docs/flutter/user-rating/).
 * Added device thermal status reporting to better optimize call quality.
 * Added the `StreamVideoPushNotificationManager.ensureFullScreenIntentPermission()` method. This resolves an issue on some Android 14 devices where full-screen notifications would not appear due to missing permissions.
 You can now invoke this method to show a settings screen, allowing users to enable the required permission if it's not already enabled.
