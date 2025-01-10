@@ -22,6 +22,7 @@ class ClosedCaptionsWidget extends StatelessWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: !call.state.value.isCaptioning ? 0 : 130,
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.5),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             child: ListView.separated(

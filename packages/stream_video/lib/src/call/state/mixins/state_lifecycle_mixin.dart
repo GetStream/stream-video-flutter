@@ -107,6 +107,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
           isRingingFlow: ringing,
           audioOutputDevice: callConnectOptions.audioOutputDevice,
           audioInputDevice: callConnectOptions.audioInputDevice,
+          videoInputDevice: callConnectOptions.videoInputDevice,
         );
   }
 
@@ -156,6 +157,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
           ),
           audioOutputDevice: callConnectOptions?.audioOutputDevice,
           audioInputDevice: callConnectOptions?.audioInputDevice,
+          videoInputDevice: callConnectOptions?.videoInputDevice,
         );
   }
 

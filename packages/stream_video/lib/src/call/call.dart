@@ -4,9 +4,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
@@ -25,6 +25,7 @@ import '../utils/cancelables.dart';
 import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/standard.dart';
+import '../webrtc/model/stats/rtc_codec.dart';
 import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
 import '../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
 import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
@@ -145,7 +146,8 @@ class Call {
   }) {
     final finalCallPreferences = preferences ?? DefaultCallPreferences();
     final finalRetryPolicy = retryPolicy ?? const RetryPolicy();
-    final finalSdpPolicy = sdpPolicy ?? const SdpPolicy();
+    final finalSdpPolicy =
+        sdpPolicy ?? const SdpPolicy(spdEditingEnabled: false);
 
     final stateManager = _makeStateManager(
       callCid,
@@ -183,7 +185,9 @@ class Call {
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.callState.callCid,
-          sdpEditor: SdpEditorImpl(sdpPolicy),
+          sdpEditor: sdpPolicy.spdEditingEnabled
+              ? SdpEditorImpl(sdpPolicy)
+              : NoOpSdpEditor(),
         ),
         _stateManager = stateManager,
         _permissionsManager = permissionManager,
@@ -650,7 +654,7 @@ class Call {
       final reconnectDetails =
           _reconnectStrategy == SfuReconnectionStrategy.unspecified
               ? null
-              : _previousSession?.getReconnectDetails(_reconnectStrategy);
+              : await _previousSession?.getReconnectDetails(_reconnectStrategy);
 
       if (performingRejoin || performingMigration || !isWsHealthy) {
         _logger.v(
@@ -672,6 +676,7 @@ class Call {
               });
             }
           },
+          clientPublishOptions: _preferences.clientPublishOptions,
         );
 
         dynascaleManager.init(
@@ -741,9 +746,6 @@ class Call {
         _previousSession = null;
         _stateManager.lifecycleCallConnected();
       }
-
-      _logger.v(() => '[join] apllying connect options');
-      await _applyConnectOptions();
 
       _logger.v(() => '[join] completed');
       return const Result.success(none);
@@ -933,7 +935,13 @@ class Call {
       localStats: localStats,
     );
 
-    final result = await session.start(reconnectDetails: reconnectDetails);
+    final result = await session.start(
+      reconnectDetails: reconnectDetails,
+      onRtcManagerCreatedCallback: (_) async {
+        _logger.v(() => '[startSession] applying connect options');
+        await _applyConnectOptions();
+      },
+    );
 
     return result.fold(
       success: (success) {
@@ -955,25 +963,12 @@ class Call {
         state.value.subscriberStats ?? PeerConnectionStats.empty();
 
     if (stats.peerType == StreamPeerType.publisher) {
-      final mediaStatsF = stats.stats
+      final allStats = stats.stats
           .whereType<RtcOutboundRtpVideoStream>()
-          .where((s) => s.rid == 'f')
-          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
-          .firstOrNull;
-      final mediaStatsH = stats.stats
-          .whereType<RtcOutboundRtpVideoStream>()
-          .where((s) => s.rid == 'h')
-          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
-          .firstOrNull;
-      final mediaStatsQ = stats.stats
-          .whereType<RtcOutboundRtpVideoStream>()
-          .where((s) => s.rid == 'q')
-          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
-          .firstOrNull;
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream);
 
-      final allStats = [mediaStatsF, mediaStatsH, mediaStatsQ];
       final mediaStats = allStats.firstWhereOrNull(
-        (s) => s?.width != null && s?.height != null && s?.fps != null,
+        (s) => s.width != null && s.height != null && s.fps != null,
       );
 
       final jitterInMs = ((mediaStats?.jitter ?? 0) * 1000).toInt();
@@ -981,10 +976,36 @@ class Call {
           ? '${mediaStats.width} x ${mediaStats.height} @ ${mediaStats.fps}fps'
           : null;
 
+      var activeOutbound = allStats.toList();
+
+      if (publisherStats.outboundMediaStats.isNotEmpty) {
+        activeOutbound = activeOutbound
+            .where(
+              (s) =>
+                  publisherStats.outboundMediaStats.none((i) => s.id == i.id) ||
+                  publisherStats.outboundMediaStats
+                          .firstWhere((i) => i.id == s.id)
+                          .bytesSent !=
+                      s.bytesSent,
+            )
+            .toList();
+      }
+
+      final codec = stats.stats
+          .whereType<RtcCodec>()
+          .where((c) => c.mimeType?.startsWith('video') ?? false)
+          .where((c) => activeOutbound.any((s) => s.videoCodecId == c.id))
+          .map((c) => c.mimeType?.replaceFirst('video/', ''))
+          .where((c) => c != null)
+          .cast<String>()
+          .toList();
+
       publisherStats = publisherStats.copyWith(
         resolution: resolution,
         qualityDropReason: mediaStats?.qualityLimit,
         jitterInMs: jitterInMs,
+        videoCodec: codec,
+        outboundMediaStats: allStats.toList(),
       );
     }
 
@@ -999,9 +1020,17 @@ class Call {
           ? '${inboudRtpVideo.frameWidth} x ${inboudRtpVideo.frameHeight} @ ${inboudRtpVideo.framesPerSecond}fps'
           : null;
 
+      final codecStats = stats.stats
+          .whereType<RtcCodec>()
+          .where((c) => c.mimeType?.startsWith('video') ?? false)
+          .firstOrNull;
+
+      final codec = codecStats?.mimeType?.replaceFirst('video/', '');
+
       subscriberStats = subscriberStats.copyWith(
         resolution: resolution,
         jitterInMs: jitterInMs,
+        videoCodec: codec != null ? [codec] : [],
       );
     }
 
@@ -1340,6 +1369,9 @@ class Call {
     final audioInputs = mediaDevices
         .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
         .toList();
+    final videoInputs = mediaDevices
+        .where((d) => d.kind == RtcMediaDeviceKind.videoInput)
+        .toList();
 
     var defaultAudioOutput = audioOutputs.firstWhereOrNull((device) {
       if (settings.audio.defaultDevice ==
@@ -1358,6 +1390,17 @@ class Call {
       defaultAudioOutput = audioOutputs.first;
     }
 
+    var defaultVideoInput = videoInputs.firstWhereOrNull(
+      (device) => device.label
+          .toLowerCase()
+          .contains(settings.video.cameraFacing.value.toLowerCase()),
+    );
+
+    if (defaultVideoInput == null && videoInputs.length > 2) {
+      // If it's not front or back then take one of the external cameras
+      defaultVideoInput = videoInputs.last;
+    }
+
     final defaultAudioInput = audioInputs
             .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
         audioInputs.firstOrNull;
@@ -1371,6 +1414,7 @@ class Call {
       ),
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
+      videoInputDevice: defaultVideoInput ?? videoInputs.firstOrNull,
       cameraFacingMode: settings.video.cameraFacing ==
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
@@ -1387,7 +1431,9 @@ class Call {
       _connectOptions.camera,
       _connectOptions.cameraFacingMode,
       _connectOptions.targetResolution,
+      _connectOptions.videoInputDevice?.id,
     );
+
     await _applyMicrophoneOption(_connectOptions.microphone);
     await _applyScreenShareOption(
       _connectOptions.screenShare,
@@ -1411,23 +1457,27 @@ class Call {
     _logger.v(() => '[applyConnectOptions] finished');
   }
 
-  Future<void> _applyCameraOption(
+  Future<Result<None>> _applyCameraOption(
     TrackOption cameraOption,
     FacingMode facingMode,
     StreamTargetResolution? targetResolution,
+    String? deviceId,
   ) async {
     if (cameraOption is TrackProvided) {
-      await _setLocalTrack(cameraOption.track);
+      return _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
-      await setCameraEnabled(
+      return setCameraEnabled(
         enabled: true,
         constraints: CameraConstraints(
           facingMode: facingMode,
+          deviceId: deviceId,
           params: targetResolution?.toVideoParams() ??
               RtcVideoParametersPresets.h720_16x9,
         ),
       );
     }
+
+    return const Result.success(none);
   }
 
   Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
@@ -1945,15 +1995,31 @@ class Call {
     final result =
         await _session?.flipCamera() ?? Result.error('Session is null');
 
-    if (result.isSuccess) {
-      _connectOptions = connectOptions.copyWith(
-        cameraFacingMode: connectOptions.cameraFacingMode.flip(),
-      );
+    await result.fold(
+      success: (success) async {
+        final mediaDevicesResult =
+            await RtcMediaDeviceNotifier.instance.enumerateDevices();
 
-      _stateManager.participantFlipCamera();
-    }
+        final mediaDevices = mediaDevicesResult.fold(
+          success: (success) => success.data,
+          failure: (failure) => <RtcMediaDevice>[],
+        );
 
-    return result;
+        final currentInput = mediaDevices
+            .where((d) => d.id == success.data.mediaConstraints.deviceId)
+            .firstOrNull;
+
+        _connectOptions = connectOptions.copyWith(
+          cameraFacingMode: connectOptions.cameraFacingMode.flip(),
+          videoInputDevice: currentInput,
+        );
+
+        _stateManager.participantFlipCamera(currentInput);
+      },
+      failure: (failure) {},
+    );
+
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
@@ -1961,6 +2027,7 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      _connectOptions = connectOptions.copyWith(videoInputDevice: device);
       _stateManager.participantSetVideoInputDevice(device: device);
     }
 

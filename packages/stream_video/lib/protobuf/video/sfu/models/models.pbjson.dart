@@ -221,6 +221,49 @@ final $typed_data.Uint8List websocketReconnectStrategyDescriptor = $convert.base
     '9DS0VUX1JFQ09OTkVDVF9TVFJBVEVHWV9SRUpPSU4QAxIoCiRXRUJTT0NLRVRfUkVDT05ORUNU'
     'X1NUUkFURUdZX01JR1JBVEUQBA==');
 
+@$core.Deprecated('Use androidThermalStateDescriptor instead')
+const AndroidThermalState$json = {
+  '1': 'AndroidThermalState',
+  '2': [
+    {'1': 'ANDROID_THERMAL_STATE_UNSPECIFIED', '2': 0},
+    {'1': 'ANDROID_THERMAL_STATE_NONE', '2': 1},
+    {'1': 'ANDROID_THERMAL_STATE_LIGHT', '2': 2},
+    {'1': 'ANDROID_THERMAL_STATE_MODERATE', '2': 3},
+    {'1': 'ANDROID_THERMAL_STATE_SEVERE', '2': 4},
+    {'1': 'ANDROID_THERMAL_STATE_CRITICAL', '2': 5},
+    {'1': 'ANDROID_THERMAL_STATE_EMERGENCY', '2': 6},
+    {'1': 'ANDROID_THERMAL_STATE_SHUTDOWN', '2': 7},
+  ],
+};
+
+/// Descriptor for `AndroidThermalState`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List androidThermalStateDescriptor = $convert.base64Decode(
+    'ChNBbmRyb2lkVGhlcm1hbFN0YXRlEiUKIUFORFJPSURfVEhFUk1BTF9TVEFURV9VTlNQRUNJRk'
+    'lFRBAAEh4KGkFORFJPSURfVEhFUk1BTF9TVEFURV9OT05FEAESHwobQU5EUk9JRF9USEVSTUFM'
+    'X1NUQVRFX0xJR0hUEAISIgoeQU5EUk9JRF9USEVSTUFMX1NUQVRFX01PREVSQVRFEAMSIAocQU'
+    '5EUk9JRF9USEVSTUFMX1NUQVRFX1NFVkVSRRAEEiIKHkFORFJPSURfVEhFUk1BTF9TVEFURV9D'
+    'UklUSUNBTBAFEiMKH0FORFJPSURfVEhFUk1BTF9TVEFURV9FTUVSR0VOQ1kQBhIiCh5BTkRST0'
+    'lEX1RIRVJNQUxfU1RBVEVfU0hVVERPV04QBw==');
+
+@$core.Deprecated('Use appleThermalStateDescriptor instead')
+const AppleThermalState$json = {
+  '1': 'AppleThermalState',
+  '2': [
+    {'1': 'APPLE_THERMAL_STATE_UNSPECIFIED', '2': 0},
+    {'1': 'APPLE_THERMAL_STATE_NOMINAL', '2': 1},
+    {'1': 'APPLE_THERMAL_STATE_FAIR', '2': 2},
+    {'1': 'APPLE_THERMAL_STATE_SERIOUS', '2': 3},
+    {'1': 'APPLE_THERMAL_STATE_CRITICAL', '2': 4},
+  ],
+};
+
+/// Descriptor for `AppleThermalState`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List appleThermalStateDescriptor = $convert.base64Decode(
+    'ChFBcHBsZVRoZXJtYWxTdGF0ZRIjCh9BUFBMRV9USEVSTUFMX1NUQVRFX1VOU1BFQ0lGSUVEEA'
+    'ASHwobQVBQTEVfVEhFUk1BTF9TVEFURV9OT01JTkFMEAESHAoYQVBQTEVfVEhFUk1BTF9TVEFU'
+    'RV9GQUlSEAISHwobQVBQTEVfVEhFUk1BTF9TVEFURV9TRVJJT1VTEAMSIAocQVBQTEVfVEhFUk'
+    '1BTF9TVEFURV9DUklUSUNBTBAE');
+
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = {
   '1': 'CallState',
@@ -351,25 +394,63 @@ final $typed_data.Uint8List videoLayerDescriptor = $convert.base64Decode(
     'bhIYCgdiaXRyYXRlGAQgASgNUgdiaXRyYXRlEhAKA2ZwcxgFIAEoDVIDZnBzEj8KB3F1YWxpdH'
     'kYBiABKA4yJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5WaWRlb1F1YWxpdHlSB3F1YWxpdHk=');
 
+@$core.Deprecated('Use subscribeOptionDescriptor instead')
+const SubscribeOption$json = {
+  '1': 'SubscribeOption',
+  '2': [
+    {'1': 'track_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {'1': 'codecs', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codecs'},
+  ],
+};
+
+/// Descriptor for `SubscribeOption`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List subscribeOptionDescriptor = $convert.base64Decode(
+    'Cg9TdWJzY3JpYmVPcHRpb24SQQoKdHJhY2tfdHlwZRgBIAEoDjIiLnN0cmVhbS52aWRlby5zZn'
+    'UubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEjYKBmNvZGVjcxgCIAMoCzIeLnN0cmVhbS52'
+    'aWRlby5zZnUubW9kZWxzLkNvZGVjUgZjb2RlY3M=');
+
+@$core.Deprecated('Use publishOptionDescriptor instead')
+const PublishOption$json = {
+  '1': 'PublishOption',
+  '2': [
+    {'1': 'track_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
+    {'1': 'bitrate', '3': 3, '4': 1, '5': 5, '10': 'bitrate'},
+    {'1': 'fps', '3': 4, '4': 1, '5': 5, '10': 'fps'},
+    {'1': 'max_spatial_layers', '3': 5, '4': 1, '5': 5, '10': 'maxSpatialLayers'},
+    {'1': 'max_temporal_layers', '3': 6, '4': 1, '5': 5, '10': 'maxTemporalLayers'},
+    {'1': 'video_dimension', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.models.VideoDimension', '10': 'videoDimension'},
+    {'1': 'id', '3': 8, '4': 1, '5': 5, '10': 'id'},
+  ],
+};
+
+/// Descriptor for `PublishOption`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List publishOptionDescriptor = $convert.base64Decode(
+    'Cg1QdWJsaXNoT3B0aW9uEkEKCnRyYWNrX3R5cGUYASABKA4yIi5zdHJlYW0udmlkZW8uc2Z1Lm'
+    '1vZGVscy5UcmFja1R5cGVSCXRyYWNrVHlwZRI0CgVjb2RlYxgCIAEoCzIeLnN0cmVhbS52aWRl'
+    'by5zZnUubW9kZWxzLkNvZGVjUgVjb2RlYxIYCgdiaXRyYXRlGAMgASgFUgdiaXRyYXRlEhAKA2'
+    'ZwcxgEIAEoBVIDZnBzEiwKEm1heF9zcGF0aWFsX2xheWVycxgFIAEoBVIQbWF4U3BhdGlhbExh'
+    'eWVycxIuChNtYXhfdGVtcG9yYWxfbGF5ZXJzGAYgASgFUhFtYXhUZW1wb3JhbExheWVycxJQCg'
+    '92aWRlb19kaW1lbnNpb24YByABKAsyJy5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5WaWRlb0Rp'
+    'bWVuc2lvblIOdmlkZW9EaW1lbnNpb24SDgoCaWQYCCABKAVSAmlk');
+
 @$core.Deprecated('Use codecDescriptor instead')
 const Codec$json = {
   '1': 'Codec',
   '2': [
-    {'1': 'payload_type', '3': 1, '4': 1, '5': 13, '10': 'payloadType'},
-    {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-    {'1': 'fmtp_line', '3': 3, '4': 1, '5': 9, '10': 'fmtpLine'},
-    {'1': 'clock_rate', '3': 4, '4': 1, '5': 13, '10': 'clockRate'},
-    {'1': 'encoding_parameters', '3': 5, '4': 1, '5': 9, '10': 'encodingParameters'},
-    {'1': 'feedbacks', '3': 6, '4': 3, '5': 9, '10': 'feedbacks'},
+    {'1': 'payload_type', '3': 16, '4': 1, '5': 13, '10': 'payloadType'},
+    {'1': 'name', '3': 10, '4': 1, '5': 9, '10': 'name'},
+    {'1': 'clock_rate', '3': 14, '4': 1, '5': 13, '10': 'clockRate'},
+    {'1': 'encoding_parameters', '3': 15, '4': 1, '5': 9, '10': 'encodingParameters'},
+    {'1': 'fmtp', '3': 12, '4': 1, '5': 9, '10': 'fmtp'},
   ],
 };
 
 /// Descriptor for `Codec`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List codecDescriptor = $convert.base64Decode(
-    'CgVDb2RlYxIhCgxwYXlsb2FkX3R5cGUYASABKA1SC3BheWxvYWRUeXBlEhIKBG5hbWUYAiABKA'
-    'lSBG5hbWUSGwoJZm10cF9saW5lGAMgASgJUghmbXRwTGluZRIdCgpjbG9ja19yYXRlGAQgASgN'
-    'UgljbG9ja1JhdGUSLwoTZW5jb2RpbmdfcGFyYW1ldGVycxgFIAEoCVISZW5jb2RpbmdQYXJhbW'
-    'V0ZXJzEhwKCWZlZWRiYWNrcxgGIAMoCVIJZmVlZGJhY2tz');
+    'CgVDb2RlYxIhCgxwYXlsb2FkX3R5cGUYECABKA1SC3BheWxvYWRUeXBlEhIKBG5hbWUYCiABKA'
+    'lSBG5hbWUSHQoKY2xvY2tfcmF0ZRgOIAEoDVIJY2xvY2tSYXRlEi8KE2VuY29kaW5nX3BhcmFt'
+    'ZXRlcnMYDyABKAlSEmVuY29kaW5nUGFyYW1ldGVycxISCgRmbXRwGAwgASgJUgRmbXRw');
 
 @$core.Deprecated('Use iCETrickleDescriptor instead')
 const ICETrickle$json = {
@@ -399,6 +480,8 @@ const TrackInfo$json = {
     {'1': 'stereo', '3': 8, '4': 1, '5': 8, '10': 'stereo'},
     {'1': 'red', '3': 9, '4': 1, '5': 8, '10': 'red'},
     {'1': 'muted', '3': 10, '4': 1, '5': 8, '10': 'muted'},
+    {'1': 'codec', '3': 11, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
+    {'1': 'publish_option_id', '3': 12, '4': 1, '5': 5, '10': 'publishOptionId'},
   ],
 };
 
@@ -408,7 +491,9 @@ final $typed_data.Uint8List trackInfoDescriptor = $convert.base64Decode(
     'EoDjIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEjsKBmxh'
     'eWVycxgFIAMoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvTGF5ZXJSBmxheWVycx'
     'IQCgNtaWQYBiABKAlSA21pZBIQCgNkdHgYByABKAhSA2R0eBIWCgZzdGVyZW8YCCABKAhSBnN0'
-    'ZXJlbxIQCgNyZWQYCSABKAhSA3JlZBIUCgVtdXRlZBgKIAEoCFIFbXV0ZWQ=');
+    'ZXJlbxIQCgNyZWQYCSABKAhSA3JlZBIUCgVtdXRlZBgKIAEoCFIFbXV0ZWQSNAoFY29kZWMYCy'
+    'ABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IFY29kZWMSKgoRcHVibGlzaF9v'
+    'cHRpb25faWQYDCABKAVSD3B1Ymxpc2hPcHRpb25JZA==');
 
 @$core.Deprecated('Use errorDescriptor instead')
 const Error$json = {
@@ -542,4 +627,50 @@ final $typed_data.Uint8List callGrantsDescriptor = $convert.base64Decode(
     'CgpDYWxsR3JhbnRzEioKEWNhbl9wdWJsaXNoX2F1ZGlvGAEgASgIUg9jYW5QdWJsaXNoQXVkaW'
     '8SKgoRY2FuX3B1Ymxpc2hfdmlkZW8YAiABKAhSD2NhblB1Ymxpc2hWaWRlbxInCg9jYW5fc2Ny'
     'ZWVuc2hhcmUYAyABKAhSDmNhblNjcmVlbnNoYXJl');
+
+@$core.Deprecated('Use inputDevicesDescriptor instead')
+const InputDevices$json = {
+  '1': 'InputDevices',
+  '2': [
+    {'1': 'available_devices', '3': 1, '4': 3, '5': 9, '10': 'availableDevices'},
+    {'1': 'current_device', '3': 2, '4': 1, '5': 9, '10': 'currentDevice'},
+    {'1': 'is_permitted', '3': 3, '4': 1, '5': 8, '10': 'isPermitted'},
+  ],
+};
+
+/// Descriptor for `InputDevices`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List inputDevicesDescriptor = $convert.base64Decode(
+    'CgxJbnB1dERldmljZXMSKwoRYXZhaWxhYmxlX2RldmljZXMYASADKAlSEGF2YWlsYWJsZURldm'
+    'ljZXMSJQoOY3VycmVudF9kZXZpY2UYAiABKAlSDWN1cnJlbnREZXZpY2USIQoMaXNfcGVybWl0'
+    'dGVkGAMgASgIUgtpc1Blcm1pdHRlZA==');
+
+@$core.Deprecated('Use androidStateDescriptor instead')
+const AndroidState$json = {
+  '1': 'AndroidState',
+  '2': [
+    {'1': 'thermal_state', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.AndroidThermalState', '10': 'thermalState'},
+    {'1': 'is_power_saver_mode', '3': 2, '4': 1, '5': 8, '10': 'isPowerSaverMode'},
+  ],
+};
+
+/// Descriptor for `AndroidState`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List androidStateDescriptor = $convert.base64Decode(
+    'CgxBbmRyb2lkU3RhdGUSUQoNdGhlcm1hbF9zdGF0ZRgBIAEoDjIsLnN0cmVhbS52aWRlby5zZn'
+    'UubW9kZWxzLkFuZHJvaWRUaGVybWFsU3RhdGVSDHRoZXJtYWxTdGF0ZRItChNpc19wb3dlcl9z'
+    'YXZlcl9tb2RlGAIgASgIUhBpc1Bvd2VyU2F2ZXJNb2Rl');
+
+@$core.Deprecated('Use appleStateDescriptor instead')
+const AppleState$json = {
+  '1': 'AppleState',
+  '2': [
+    {'1': 'thermal_state', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.AppleThermalState', '10': 'thermalState'},
+    {'1': 'is_low_power_mode_enabled', '3': 2, '4': 1, '5': 8, '10': 'isLowPowerModeEnabled'},
+  ],
+};
+
+/// Descriptor for `AppleState`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List appleStateDescriptor = $convert.base64Decode(
+    'CgpBcHBsZVN0YXRlEk8KDXRoZXJtYWxfc3RhdGUYASABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm'
+    '1vZGVscy5BcHBsZVRoZXJtYWxTdGF0ZVIMdGhlcm1hbFN0YXRlEjgKGWlzX2xvd19wb3dlcl9t'
+    'b2RlX2VuYWJsZWQYAiABKAhSFWlzTG93UG93ZXJNb2RlRW5hYmxlZA==');
 

@@ -166,8 +166,9 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     );
   }
 
-  void participantFlipCamera() {
+  void participantFlipCamera(RtcMediaDevice? videoDevice) {
     state = state.copyWith(
+      videoInputDevice: videoDevice,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];

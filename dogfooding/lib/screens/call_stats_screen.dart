@@ -28,134 +28,180 @@ class CallStatsScreen extends StatelessWidget {
           final subscriberBitrate = state?.subscriberStats?.bitrateKbps;
           final publisherBitrate = state?.publisherStats?.bitrateKbps;
 
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                'Stats',
-                style: textTheme.title3.apply(color: Colors.white),
-              ),
-              centerTitle: true,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+          return SafeArea(
+            top: false,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'Stats',
+                  style: textTheme.title3.apply(color: Colors.white),
                 ),
-              ],
-            ),
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: StreamUserAvatar(user: currentUser!),
-                    title: const Text(
-                      'Call ID',
-                      style: TextStyle(color: Colors.white),
+                centerTitle: true,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                actions: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
                     ),
-                    subtitle: Text(
-                      call.callCid.value,
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
                   ),
-                  if (snapshot.hasData) ...[
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.network_check, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Call latency',
-                            style: textTheme.title3.apply(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    SizedBox(
-                      height: 200,
-                      child: StatsLatencyChart(
-                        latencyHistory: state!.latencyHistory,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.bar_chart, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Call performance',
-                            style: textTheme.title3.apply(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Review the key data points below to assess call performance.',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    LatencyOrJitterItem(
-                      title: 'Latency',
-                      value: state.publisherStats?.latency ?? 0,
-                    ),
-                    LatencyOrJitterItem(
-                      title: 'Receive jitter',
-                      value: state.subscriberStats?.jitterInMs,
-                    ),
-                    LatencyOrJitterItem(
-                      title: 'Publish jitter',
-                      value: state.publisherStats?.jitterInMs,
-                    ),
-                    StatsItem(
-                      title: 'Region',
-                      value: state.localStats?.sfu,
-                    ),
-                    StatsItem(
-                      title: 'SDK Version',
-                      value: state.localStats?.sdkVersion,
-                    ),
-                    StatsItem(
-                      title: 'WebRTC Version',
-                      value: state.localStats?.webRtcVersion,
-                    ),
-                    StatsItem(
-                      title: 'Publish bitrate',
-                      value: publisherBitrate == null
-                          ? '--'
-                          : '${state.publisherStats?.bitrateKbps} Kbps',
-                    ),
-                    StatsItem(
-                      title: 'Receive bitrate',
-                      value: subscriberBitrate == null
-                          ? '--'
-                          : '${state.subscriberStats?.bitrateKbps} Kbps',
-                    ),
-                  ]
                 ],
+              ),
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: StreamUserAvatar(user: currentUser!),
+                      title: const Text(
+                        'Call ID',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      subtitle: Text(
+                        call.callCid.value,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    if (snapshot.hasData) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.network_check,
+                                color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Call latency',
+                              style:
+                                  textTheme.title3.apply(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      SizedBox(
+                        height: 200,
+                        child: StatsLatencyChart(
+                          latencyHistory: state!.latencyHistory,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bar_chart, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Call performance',
+                              style:
+                                  textTheme.title3.apply(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Review the key data points below to assess call performance.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: LatencyOrJitterItem(
+                              title: 'Latency',
+                              value: state.publisherStats?.latency ?? 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: LatencyOrJitterItem(
+                              title: 'Receive jitter',
+                              value: state.subscriberStats?.jitterInMs,
+                            ),
+                          ),
+                          Expanded(
+                            child: LatencyOrJitterItem(
+                              title: 'Publish jitter',
+                              value: state.publisherStats?.jitterInMs,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Publish bitrate',
+                              value: publisherBitrate == null
+                                  ? '--'
+                                  : '${state.publisherStats?.bitrateKbps} Kbps',
+                            ),
+                          ),
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Receive bitrate',
+                              value: subscriberBitrate == null
+                                  ? '--'
+                                  : '${state.subscriberStats?.bitrateKbps} Kbps',
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Publish resolution',
+                              value:
+                                  "${state.publisherStats?.resolution} | ${state.publisherStats?.videoCodec?.join('+')}",
+                            ),
+                          ),
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Reveive resolution',
+                              value:
+                                  "${state.subscriberStats?.resolution} | ${state.subscriberStats?.videoCodec?.join('+')}",
+                            ),
+                          ),
+                        ],
+                      ),
+                      StatsItem(
+                        title: 'Region',
+                        value: state.localStats?.sfu,
+                      ),
+                      StatsItem(
+                        title: 'SDK Version',
+                        value: state.localStats?.sdkVersion,
+                      ),
+                      StatsItem(
+                        title: 'WebRTC Version',
+                        value: state.localStats?.webRtcVersion,
+                      ),
+                    ]
+                  ],
+                ),
               ),
             ),
           );
@@ -205,7 +251,7 @@ class StatsItem extends StatelessWidget {
     final theme = StreamVideoTheme.of(context);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: AppColorPalette.buttonSecondary,
@@ -232,7 +278,6 @@ class StatsItem extends StatelessWidget {
             ),
           ),
           if (trailing != null) ...[
-            const Spacer(),
             trailing!,
           ],
         ],
@@ -275,6 +320,7 @@ class StatIndicator extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
+        // ignore: deprecated_member_use
         color: indicatorData.$1.withOpacity(0.16),
       ),
       padding: const EdgeInsets.all(8),

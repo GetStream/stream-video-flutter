@@ -1,3 +1,21 @@
+## Unreleased 
+
+🚧 Breaking changes
+
+* The package is now compatible with Gradle 8. The minimum required Java version is now 17.
+* Updated the `flutter_callkit_incoming` package to version 2.5.0, which also requires Java 17.
+
+## 0.6.1
+
+* Updated minimum Flutter version to 3.24.5
+
+✅ Added
+* Added the `StreamVideoPushNotificationManager.ensureFullScreenIntentPermission()` method. This resolves an issue on some Android 14 devices where full-screen notifications would not appear due to missing permissions.
+You can now invoke this method to show a settings screen, allowing users to enable the required permission if it's not already enabled.
+
+🐞 Fixed
+* Resolved an issue where CallKit calls would not connect when accepted while the screen was locked.
+
 ## 0.6.0
 
 🔄 Dependency updates

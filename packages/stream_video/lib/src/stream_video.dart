@@ -644,6 +644,7 @@ class StreamVideo extends Disposable {
       return;
     }
 
+    unawaited(callToJoin.join());
     onCallAccepted?.call(callToJoin);
   }
 
@@ -892,7 +893,7 @@ class StreamVideoOptions {
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
-    this.sdpPolicy = const SdpPolicy(),
+    this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
     this.muteVideoWhenInBackground = false,

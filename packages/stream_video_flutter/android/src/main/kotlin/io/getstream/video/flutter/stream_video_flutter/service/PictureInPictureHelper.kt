@@ -13,7 +13,11 @@ class PictureInPictureHelper {
         const val PIP_ENABLED_PREF_KEY = "pip_enabled"
 
         fun disablePictureInPicture(activity: Activity) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (activity.isInPictureInPictureMode) {
+                    activity.moveTaskToBack(true) 
+                }
+
                 val params = PictureInPictureParams.Builder()
                 params.setAutoEnterEnabled(false)
                 activity.setPictureInPictureParams(params.build())

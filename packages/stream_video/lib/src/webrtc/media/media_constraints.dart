@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
 
 import '../../logger/stream_log.dart';
@@ -18,7 +18,7 @@ abstract class MediaConstraints {
   /// The deviceId of the capture device to use.
   /// Available deviceIds can be obtained through `flutter_webrtc`:
   /// <pre>
-  /// import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+  /// import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
   ///
   /// List<MediaDeviceInfo> devices = await rtc.navigator.mediaDevices.enumerateDevices();
   /// </pre>

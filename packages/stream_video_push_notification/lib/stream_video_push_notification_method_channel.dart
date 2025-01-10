@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stream_video/stream_video.dart';
 
 import 'stream_video_push_notification_platform_interface.dart';
 
@@ -11,7 +12,7 @@ class MethodChannelStreamVideoPushNotification
     extends StreamVideoPushNotificationPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('stream_video_push_notifications');
+  final methodChannel = const MethodChannel('stream_video_push_notification');
 
   CallerCustomizationFunction? callerCustomizationCallback;
 
@@ -50,5 +51,12 @@ class MethodChannelStreamVideoPushNotification
       pushParams['callbackHandler'] = backgroundCallback?.toRawHandle();
     }
     await methodChannel.invokeMethod<String>('initData', pushParams);
+  }
+
+  @override
+  Future<void> ensureFullScreenIntentPermission() async {
+    if (!CurrentPlatform.isAndroid) return;
+
+    await methodChannel.invokeMethod<void>('ensureFullScreenIntentPermission');
   }
 }

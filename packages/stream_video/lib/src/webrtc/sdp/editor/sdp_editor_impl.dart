@@ -15,6 +15,20 @@ import 'rule/sdp_munging_rule.dart';
 import 'sdp_editor.dart';
 
 @internal
+class NoOpSdpEditor implements SdpEditor {
+  @override
+  set opusDtxEnabled(bool value) {}
+
+  @override
+  set opusRedEnabled(bool value) {}
+
+  @override
+  String? edit(Sdp? sdp) {
+    return sdp?.value;
+  }
+}
+
+@internal
 class SdpEditorImpl implements SdpEditor {
   SdpEditorImpl(this.policy);
 
@@ -54,6 +68,7 @@ class SdpEditorImpl implements SdpEditor {
       _logger.w(() => '[edit] rejected (sdp is null)');
       return null;
     }
+
     if (!policy.mungingEnabled && internalRules.isEmpty) {
       _logger.w(() => '[edit] rejected (disabled & no-internal-rules)');
       return sdp.value;

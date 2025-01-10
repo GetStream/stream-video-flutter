@@ -8,7 +8,6 @@ class SfuCodec {
     required this.fmtpLine,
     required this.clockRate,
     required this.encodingParameters,
-    required this.feedbacks,
   });
 
   final int payloadType;
@@ -16,13 +15,12 @@ class SfuCodec {
   final String fmtpLine;
   final int clockRate;
   final String encodingParameters;
-  final List<String> feedbacks;
 
   @override
   String toString() {
     return 'SfuCodec{payloadType: $payloadType, name: $name, '
         'fmtpLine: $fmtpLine, clockRate: $clockRate, '
-        'encodingParameters: $encodingParameters, feedbacks: $feedbacks}';
+        'encodingParameters: $encodingParameters}';
   }
 
   @override
@@ -34,8 +32,7 @@ class SfuCodec {
           name == other.name &&
           fmtpLine == other.fmtpLine &&
           clockRate == other.clockRate &&
-          encodingParameters == other.encodingParameters &&
-          feedbacks == other.feedbacks;
+          encodingParameters == other.encodingParameters;
 
   @override
   int get hashCode =>
@@ -43,6 +40,5 @@ class SfuCodec {
       name.hashCode ^
       fmtpLine.hashCode ^
       clockRate.hashCode ^
-      encodingParameters.hashCode ^
-      feedbacks.hashCode;
+      encodingParameters.hashCode;
 }

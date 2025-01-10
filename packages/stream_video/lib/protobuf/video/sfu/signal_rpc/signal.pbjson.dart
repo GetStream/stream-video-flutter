@@ -67,6 +67,39 @@ final $typed_data.Uint8List stopNoiseCancellationResponseDescriptor = $convert.b
     'Ch1TdG9wTm9pc2VDYW5jZWxsYXRpb25SZXNwb25zZRI0CgVlcnJvchgBIAEoCzIeLnN0cmVhbS'
     '52aWRlby5zZnUubW9kZWxzLkVycm9yUgVlcnJvcg==');
 
+@$core.Deprecated('Use reconnectionDescriptor instead')
+const Reconnection$json = {
+  '1': 'Reconnection',
+  '2': [
+    {'1': 'time_seconds', '3': 1, '4': 1, '5': 2, '10': 'timeSeconds'},
+    {'1': 'strategy', '3': 2, '4': 1, '5': 14, '6': '.stream.video.sfu.models.WebsocketReconnectStrategy', '10': 'strategy'},
+  ],
+};
+
+/// Descriptor for `Reconnection`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reconnectionDescriptor = $convert.base64Decode(
+    'CgxSZWNvbm5lY3Rpb24SIQoMdGltZV9zZWNvbmRzGAEgASgCUgt0aW1lU2Vjb25kcxJPCghzdH'
+    'JhdGVneRgCIAEoDjIzLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLldlYnNvY2tldFJlY29ubmVj'
+    'dFN0cmF0ZWd5UghzdHJhdGVneQ==');
+
+@$core.Deprecated('Use telemetryDescriptor instead')
+const Telemetry$json = {
+  '1': 'Telemetry',
+  '2': [
+    {'1': 'connection_time_seconds', '3': 1, '4': 1, '5': 2, '9': 0, '10': 'connectionTimeSeconds'},
+    {'1': 'reconnection', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.signal.Reconnection', '9': 0, '10': 'reconnection'},
+  ],
+  '8': [
+    {'1': 'data'},
+  ],
+};
+
+/// Descriptor for `Telemetry`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List telemetryDescriptor = $convert.base64Decode(
+    'CglUZWxlbWV0cnkSOAoXY29ubmVjdGlvbl90aW1lX3NlY29uZHMYASABKAJIAFIVY29ubmVjdG'
+    'lvblRpbWVTZWNvbmRzEksKDHJlY29ubmVjdGlvbhgCIAEoCzIlLnN0cmVhbS52aWRlby5zZnUu'
+    'c2lnbmFsLlJlY29ubmVjdGlvbkgAUgxyZWNvbm5lY3Rpb25CBgoEZGF0YQ==');
+
 @$core.Deprecated('Use sendStatsRequestDescriptor instead')
 const SendStatsRequest$json = {
   '1': 'SendStatsRequest',
@@ -77,6 +110,14 @@ const SendStatsRequest$json = {
     {'1': 'webrtc_version', '3': 4, '4': 1, '5': 9, '10': 'webrtcVersion'},
     {'1': 'sdk', '3': 5, '4': 1, '5': 9, '10': 'sdk'},
     {'1': 'sdk_version', '3': 6, '4': 1, '5': 9, '10': 'sdkVersion'},
+    {'1': 'audio_devices', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.models.InputDevices', '10': 'audioDevices'},
+    {'1': 'video_devices', '3': 8, '4': 1, '5': 11, '6': '.stream.video.sfu.models.InputDevices', '10': 'videoDevices'},
+    {'1': 'android', '3': 9, '4': 1, '5': 11, '6': '.stream.video.sfu.models.AndroidState', '9': 0, '10': 'android'},
+    {'1': 'apple', '3': 10, '4': 1, '5': 11, '6': '.stream.video.sfu.models.AppleState', '9': 0, '10': 'apple'},
+    {'1': 'telemetry', '3': 11, '4': 1, '5': 11, '6': '.stream.video.sfu.signal.Telemetry', '10': 'telemetry'},
+  ],
+  '8': [
+    {'1': 'device_state'},
   ],
 };
 
@@ -86,7 +127,13 @@ final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
     'JzY3JpYmVyX3N0YXRzGAIgASgJUg9zdWJzY3JpYmVyU3RhdHMSJwoPcHVibGlzaGVyX3N0YXRz'
     'GAMgASgJUg5wdWJsaXNoZXJTdGF0cxIlCg53ZWJydGNfdmVyc2lvbhgEIAEoCVINd2VicnRjVm'
     'Vyc2lvbhIQCgNzZGsYBSABKAlSA3NkaxIfCgtzZGtfdmVyc2lvbhgGIAEoCVIKc2RrVmVyc2lv'
-    'bg==');
+    'bhJKCg1hdWRpb19kZXZpY2VzGAcgASgLMiUuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSW5wdX'
+    'REZXZpY2VzUgxhdWRpb0RldmljZXMSSgoNdmlkZW9fZGV2aWNlcxgIIAEoCzIlLnN0cmVhbS52'
+    'aWRlby5zZnUubW9kZWxzLklucHV0RGV2aWNlc1IMdmlkZW9EZXZpY2VzEkEKB2FuZHJvaWQYCS'
+    'ABKAsyJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BbmRyb2lkU3RhdGVIAFIHYW5kcm9pZBI7'
+    'CgVhcHBsZRgKIAEoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkFwcGxlU3RhdGVIAFIFYX'
+    'BwbGUSQAoJdGVsZW1ldHJ5GAsgASgLMiIuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVGVsZW1l'
+    'dHJ5Ugl0ZWxlbWV0cnlCDgoMZGV2aWNlX3N0YXRl');
 
 @$core.Deprecated('Use sendStatsResponseDescriptor instead')
 const SendStatsResponse$json = {
@@ -337,6 +384,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.models.TrackInfo': $0.TrackInfo$json,
   '.stream.video.sfu.models.VideoLayer': $0.VideoLayer$json,
   '.stream.video.sfu.models.VideoDimension': $0.VideoDimension$json,
+  '.stream.video.sfu.models.Codec': $0.Codec$json,
   '.stream.video.sfu.signal.SetPublisherResponse': SetPublisherResponse$json,
   '.stream.video.sfu.models.Error': $0.Error$json,
   '.stream.video.sfu.signal.SendAnswerRequest': SendAnswerRequest$json,
@@ -352,6 +400,11 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.signal.ICERestartRequest': ICERestartRequest$json,
   '.stream.video.sfu.signal.ICERestartResponse': ICERestartResponse$json,
   '.stream.video.sfu.signal.SendStatsRequest': SendStatsRequest$json,
+  '.stream.video.sfu.models.InputDevices': $0.InputDevices$json,
+  '.stream.video.sfu.models.AndroidState': $0.AndroidState$json,
+  '.stream.video.sfu.models.AppleState': $0.AppleState$json,
+  '.stream.video.sfu.signal.Telemetry': Telemetry$json,
+  '.stream.video.sfu.signal.Reconnection': Reconnection$json,
   '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
   '.stream.video.sfu.signal.StartNoiseCancellationRequest': StartNoiseCancellationRequest$json,
   '.stream.video.sfu.signal.StartNoiseCancellationResponse': StartNoiseCancellationResponse$json,

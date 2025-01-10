@@ -221,6 +221,157 @@ class StopNoiseCancellationResponse extends $pb.GeneratedMessage {
   $0.Error ensureError() => $_ensure(0);
 }
 
+class Reconnection extends $pb.GeneratedMessage {
+  factory Reconnection({
+    $core.double? timeSeconds,
+    $0.WebsocketReconnectStrategy? strategy,
+  }) {
+    final $result = create();
+    if (timeSeconds != null) {
+      $result.timeSeconds = timeSeconds;
+    }
+    if (strategy != null) {
+      $result.strategy = strategy;
+    }
+    return $result;
+  }
+  Reconnection._() : super();
+  factory Reconnection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Reconnection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Reconnection', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+    ..a<$core.double>(1, _omitFieldNames ? '' : 'timeSeconds', $pb.PbFieldType.OF)
+    ..e<$0.WebsocketReconnectStrategy>(2, _omitFieldNames ? '' : 'strategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Reconnection clone() => Reconnection()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Reconnection copyWith(void Function(Reconnection) updates) => super.copyWith((message) => updates(message as Reconnection)) as Reconnection;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Reconnection create() => Reconnection._();
+  Reconnection createEmptyInstance() => create();
+  static $pb.PbList<Reconnection> createRepeated() => $pb.PbList<Reconnection>();
+  @$core.pragma('dart2js:noInline')
+  static Reconnection getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Reconnection>(create);
+  static Reconnection? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.double get timeSeconds => $_getN(0);
+  @$pb.TagNumber(1)
+  set timeSeconds($core.double v) { $_setFloat(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTimeSeconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTimeSeconds() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $0.WebsocketReconnectStrategy get strategy => $_getN(1);
+  @$pb.TagNumber(2)
+  set strategy($0.WebsocketReconnectStrategy v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasStrategy() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStrategy() => clearField(2);
+}
+
+enum Telemetry_Data {
+  connectionTimeSeconds, 
+  reconnection, 
+  notSet
+}
+
+class Telemetry extends $pb.GeneratedMessage {
+  factory Telemetry({
+    $core.double? connectionTimeSeconds,
+    Reconnection? reconnection,
+  }) {
+    final $result = create();
+    if (connectionTimeSeconds != null) {
+      $result.connectionTimeSeconds = connectionTimeSeconds;
+    }
+    if (reconnection != null) {
+      $result.reconnection = reconnection;
+    }
+    return $result;
+  }
+  Telemetry._() : super();
+  factory Telemetry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Telemetry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static const $core.Map<$core.int, Telemetry_Data> _Telemetry_DataByTag = {
+    1 : Telemetry_Data.connectionTimeSeconds,
+    2 : Telemetry_Data.reconnection,
+    0 : Telemetry_Data.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Telemetry', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+    ..oo(0, [1, 2])
+    ..a<$core.double>(1, _omitFieldNames ? '' : 'connectionTimeSeconds', $pb.PbFieldType.OF)
+    ..aOM<Reconnection>(2, _omitFieldNames ? '' : 'reconnection', subBuilder: Reconnection.create)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Telemetry clone() => Telemetry()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Telemetry copyWith(void Function(Telemetry) updates) => super.copyWith((message) => updates(message as Telemetry)) as Telemetry;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Telemetry create() => Telemetry._();
+  Telemetry createEmptyInstance() => create();
+  static $pb.PbList<Telemetry> createRepeated() => $pb.PbList<Telemetry>();
+  @$core.pragma('dart2js:noInline')
+  static Telemetry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Telemetry>(create);
+  static Telemetry? _defaultInstance;
+
+  Telemetry_Data whichData() => _Telemetry_DataByTag[$_whichOneof(0)]!;
+  void clearData() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $core.double get connectionTimeSeconds => $_getN(0);
+  @$pb.TagNumber(1)
+  set connectionTimeSeconds($core.double v) { $_setFloat(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasConnectionTimeSeconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearConnectionTimeSeconds() => clearField(1);
+
+  @$pb.TagNumber(2)
+  Reconnection get reconnection => $_getN(1);
+  @$pb.TagNumber(2)
+  set reconnection(Reconnection v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasReconnection() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReconnection() => clearField(2);
+  @$pb.TagNumber(2)
+  Reconnection ensureReconnection() => $_ensure(1);
+}
+
+enum SendStatsRequest_DeviceState {
+  android, 
+  apple, 
+  notSet
+}
+
 class SendStatsRequest extends $pb.GeneratedMessage {
   factory SendStatsRequest({
     $core.String? sessionId,
@@ -229,6 +380,11 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     $core.String? webrtcVersion,
     $core.String? sdk,
     $core.String? sdkVersion,
+    $0.InputDevices? audioDevices,
+    $0.InputDevices? videoDevices,
+    $0.AndroidState? android,
+    $0.AppleState? apple,
+    Telemetry? telemetry,
   }) {
     final $result = create();
     if (sessionId != null) {
@@ -249,19 +405,45 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     if (sdkVersion != null) {
       $result.sdkVersion = sdkVersion;
     }
+    if (audioDevices != null) {
+      $result.audioDevices = audioDevices;
+    }
+    if (videoDevices != null) {
+      $result.videoDevices = videoDevices;
+    }
+    if (android != null) {
+      $result.android = android;
+    }
+    if (apple != null) {
+      $result.apple = apple;
+    }
+    if (telemetry != null) {
+      $result.telemetry = telemetry;
+    }
     return $result;
   }
   SendStatsRequest._() : super();
   factory SendStatsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SendStatsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
+  static const $core.Map<$core.int, SendStatsRequest_DeviceState> _SendStatsRequest_DeviceStateByTag = {
+    9 : SendStatsRequest_DeviceState.android,
+    10 : SendStatsRequest_DeviceState.apple,
+    0 : SendStatsRequest_DeviceState.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendStatsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+    ..oo(0, [9, 10])
     ..aOS(1, _omitFieldNames ? '' : 'sessionId')
     ..aOS(2, _omitFieldNames ? '' : 'subscriberStats')
     ..aOS(3, _omitFieldNames ? '' : 'publisherStats')
     ..aOS(4, _omitFieldNames ? '' : 'webrtcVersion')
     ..aOS(5, _omitFieldNames ? '' : 'sdk')
     ..aOS(6, _omitFieldNames ? '' : 'sdkVersion')
+    ..aOM<$0.InputDevices>(7, _omitFieldNames ? '' : 'audioDevices', subBuilder: $0.InputDevices.create)
+    ..aOM<$0.InputDevices>(8, _omitFieldNames ? '' : 'videoDevices', subBuilder: $0.InputDevices.create)
+    ..aOM<$0.AndroidState>(9, _omitFieldNames ? '' : 'android', subBuilder: $0.AndroidState.create)
+    ..aOM<$0.AppleState>(10, _omitFieldNames ? '' : 'apple', subBuilder: $0.AppleState.create)
+    ..aOM<Telemetry>(11, _omitFieldNames ? '' : 'telemetry', subBuilder: Telemetry.create)
     ..hasRequiredFields = false
   ;
 
@@ -285,6 +467,9 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static SendStatsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendStatsRequest>(create);
   static SendStatsRequest? _defaultInstance;
+
+  SendStatsRequest_DeviceState whichDeviceState() => _SendStatsRequest_DeviceStateByTag[$_whichOneof(0)]!;
+  void clearDeviceState() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   $core.String get sessionId => $_getSZ(0);
@@ -339,6 +524,61 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   $core.bool hasSdkVersion() => $_has(5);
   @$pb.TagNumber(6)
   void clearSdkVersion() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $0.InputDevices get audioDevices => $_getN(6);
+  @$pb.TagNumber(7)
+  set audioDevices($0.InputDevices v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasAudioDevices() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearAudioDevices() => clearField(7);
+  @$pb.TagNumber(7)
+  $0.InputDevices ensureAudioDevices() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $0.InputDevices get videoDevices => $_getN(7);
+  @$pb.TagNumber(8)
+  set videoDevices($0.InputDevices v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasVideoDevices() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearVideoDevices() => clearField(8);
+  @$pb.TagNumber(8)
+  $0.InputDevices ensureVideoDevices() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $0.AndroidState get android => $_getN(8);
+  @$pb.TagNumber(9)
+  set android($0.AndroidState v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasAndroid() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearAndroid() => clearField(9);
+  @$pb.TagNumber(9)
+  $0.AndroidState ensureAndroid() => $_ensure(8);
+
+  @$pb.TagNumber(10)
+  $0.AppleState get apple => $_getN(9);
+  @$pb.TagNumber(10)
+  set apple($0.AppleState v) { setField(10, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasApple() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearApple() => clearField(10);
+  @$pb.TagNumber(10)
+  $0.AppleState ensureApple() => $_ensure(9);
+
+  @$pb.TagNumber(11)
+  Telemetry get telemetry => $_getN(10);
+  @$pb.TagNumber(11)
+  set telemetry(Telemetry v) { setField(11, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasTelemetry() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearTelemetry() => clearField(11);
+  @$pb.TagNumber(11)
+  Telemetry ensureTelemetry() => $_ensure(10);
 }
 
 class SendStatsResponse extends $pb.GeneratedMessage {
