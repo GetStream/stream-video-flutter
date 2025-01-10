@@ -168,7 +168,6 @@ class RtcManager extends Disposable {
     };
 
     final track = event.track;
-    // final receiver = event.receiver;
     final transceiver = event.transceiver;
 
     final idParts = stream.id.split(':');
@@ -180,7 +179,6 @@ class RtcManager extends Disposable {
       trackType: SfuTrackTypeParser.parseSfuName(trackType),
       mediaTrack: track,
       mediaStream: stream,
-      // receiver: receiver,
       transceiver: transceiver,
     );
 
