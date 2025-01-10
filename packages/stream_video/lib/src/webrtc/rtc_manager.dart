@@ -7,7 +7,6 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
-import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
@@ -673,10 +672,13 @@ extension PublisherRtcManager on RtcManager {
     tracks[track.trackId] = track;
 
     if (!publishOptions.any((o) => o.trackType == track.trackType)) {
-      _logger.w(() =>
-          '[publishVideoTrack] No publish options found for track type: ${track.trackType}');
+      _logger.w(
+        () =>
+            '[publishVideoTrack] No publish options found for track type: ${track.trackType}',
+      );
       return Result.error(
-          'No publish options found for track type: ${track.trackType}');
+        'No publish options found for track type: ${track.trackType}',
+      );
     }
 
     for (final option in publishOptions) {
