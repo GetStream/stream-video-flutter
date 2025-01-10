@@ -725,9 +725,6 @@ class Call {
         _stateManager.lifecycleCallConnected();
       }
 
-      _logger.v(() => '[join] apllying connect options');
-      await _applyConnectOptions();
-
       _logger.v(() => '[join] completed');
       return const Result.success(none);
     });
@@ -916,7 +913,13 @@ class Call {
       localStats: localStats,
     );
 
-    final result = await session.start(reconnectDetails: reconnectDetails);
+    final result = await session.start(
+      reconnectDetails: reconnectDetails,
+      onRtcManagerCreatedCallback: (_) async {
+        _logger.v(() => '[startSession] applying connect options');
+        await _applyConnectOptions();
+      },
+    );
 
     return result.fold(
       success: (success) {

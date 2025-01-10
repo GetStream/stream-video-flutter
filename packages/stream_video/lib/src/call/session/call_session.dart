@@ -238,9 +238,14 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
-      start({
+  Future<
+      Result<
+          ({
+            SfuCallState callState,
+            Duration fastReconnectDeadline,
+          })>> start({
     sfu_events.ReconnectDetails? reconnectDetails,
+    FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
   }) async {
     try {
       _logger.d(() => '[start] no args');
@@ -345,6 +350,7 @@ class CallSession extends Disposable {
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
+      await onRtcManagerCreatedCallback?.call(rtcManager!);
       _rtcManagerSubject!.add(rtcManager!);
 
       await observePeerConnectionStats();
