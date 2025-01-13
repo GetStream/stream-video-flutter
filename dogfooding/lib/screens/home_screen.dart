@@ -112,11 +112,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _directCall(BuildContext context) async {
     TextEditingController controller = TextEditingController();
+    final theme = Theme.of(context);
 
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
+            backgroundColor: theme.scaffoldBackgroundColor,
             title: Text(
               'Enter the IDs of users you want to call (separated by commas)',
               style: Theme.of(context).textTheme.bodyLarge,
@@ -126,7 +128,11 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 TextField(
                   controller: controller,
-                  decoration: const InputDecoration(hintText: "User ID"),
+                  decoration: const InputDecoration(
+                      hintText: "User ID",
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      )),
                 ),
                 const SizedBox(
                   height: 16,

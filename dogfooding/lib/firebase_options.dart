@@ -30,10 +30,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -52,15 +49,16 @@ class DefaultFirebaseOptions {
     messagingSenderId: '347024607410',
     projectId: 'stream-video-9b586',
     authDomain: 'stream-video-9b586.firebaseapp.com',
-    storageBucket: 'stream-video-9b586.appspot.com',
+    storageBucket: 'stream-video-9b586.firebasestorage.app',
+    measurementId: 'G-WYV1EVMSDN',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyD4FMyTdDv97hJia6YiV1NMgTdJhbnEwQE',
-    appId: '1:347024607410:android:09387231c1b256b68c21ab',
-    messagingSenderId: '248009810755',
+    appId: '1:347024607410:android:d51590d07b9f9f3c8c21ab',
+    messagingSenderId: '347024607410',
     projectId: 'stream-video-9b586',
-    storageBucket: 'stream-video-9b586.appspot.com',
+    storageBucket: 'stream-video-9b586.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -68,9 +66,9 @@ class DefaultFirebaseOptions {
     appId: '1:347024607410:ios:ffe113a4b22025cd8c21ab',
     messagingSenderId: '347024607410',
     projectId: 'stream-video-9b586',
-    storageBucket: 'stream-video-9b586.appspot.com',
-    iosClientId:
-        '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
+    storageBucket: 'stream-video-9b586.firebasestorage.app',
+    androidClientId: '347024607410-05007a8vo1lm47lojrido3dcl5mdgqgq.apps.googleusercontent.com',
+    iosClientId: '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 
@@ -79,9 +77,20 @@ class DefaultFirebaseOptions {
     appId: '1:347024607410:ios:ffe113a4b22025cd8c21ab',
     messagingSenderId: '347024607410',
     projectId: 'stream-video-9b586',
-    storageBucket: 'stream-video-9b586.appspot.com',
-    iosClientId:
-        '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
+    storageBucket: 'stream-video-9b586.firebasestorage.app',
+    androidClientId: '347024607410-05007a8vo1lm47lojrido3dcl5mdgqgq.apps.googleusercontent.com',
+    iosClientId: '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCYRXF50rhH7OH0dz69Q_be1TkMAuIaj4k',
+    appId: '1:347024607410:web:a6bb53a4d4ce4a198c21ab',
+    messagingSenderId: '347024607410',
+    projectId: 'stream-video-9b586',
+    authDomain: 'stream-video-9b586.firebaseapp.com',
+    storageBucket: 'stream-video-9b586.firebasestorage.app',
+    measurementId: 'G-2HH6XQCBKK',
+  );
+
 }
