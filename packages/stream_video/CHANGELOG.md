@@ -11,6 +11,9 @@
 * Added the 'call.collectUserFeedback()' method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-quality-rating/).
 * Added device thermal status reporting to better optimize call quality.
 
+🐞 Fixed
+* Fixes rejecting ringing call when ActionCallEnd, instead of ActionCallDecline, event is triggered during ringing.
+
 ## 0.6.0
 
 This release introduces a major rework of the join/reconnect flow in the Call class to support Reconnect V2, enhancing reconnection handling across various scenarios. Most updates are within the internals of the Call class, though some changes are outward-facing, including a few breaking changes.
