@@ -13,6 +13,7 @@ part of openapi.api;
 class UserSessionStats {
   /// Returns a new [UserSessionStats] instance.
   UserSessionStats({
+    this.averageConnectionTime,
     this.browser,
     this.browserVersion,
     this.currentIp,
@@ -65,6 +66,14 @@ class UserSessionStats {
     this.truncated,
     this.webrtcVersion,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  double? averageConnectionTime;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -380,6 +389,7 @@ class UserSessionStats {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserSessionStats &&
+    other.averageConnectionTime == averageConnectionTime &&
     other.browser == browser &&
     other.browserVersion == browserVersion &&
     other.currentIp == currentIp &&
@@ -435,6 +445,7 @@ class UserSessionStats {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
     (browser == null ? 0 : browser!.hashCode) +
     (browserVersion == null ? 0 : browserVersion!.hashCode) +
     (currentIp == null ? 0 : currentIp!.hashCode) +
@@ -488,10 +499,15 @@ class UserSessionStats {
     (webrtcVersion == null ? 0 : webrtcVersion!.hashCode);
 
   @override
-  String toString() => 'UserSessionStats[browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
+  String toString() => 'UserSessionStats[averageConnectionTime=$averageConnectionTime, browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.averageConnectionTime != null) {
+      json[r'average_connection_time'] = this.averageConnectionTime;
+    } else {
+      json[r'average_connection_time'] = null;
+    }
     if (this.browser != null) {
       json[r'browser'] = this.browser;
     } else {
@@ -705,6 +721,7 @@ class UserSessionStats {
       }());
 
       return UserSessionStats(
+        averageConnectionTime: mapValueOfType<double>(json, r'average_connection_time'),
         browser: mapValueOfType<String>(json, r'browser'),
         browserVersion: mapValueOfType<String>(json, r'browser_version'),
         currentIp: mapValueOfType<String>(json, r'current_ip'),

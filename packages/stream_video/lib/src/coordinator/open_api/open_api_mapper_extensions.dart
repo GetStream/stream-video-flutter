@@ -128,6 +128,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           sessionId: event.sessionId,
           user: event.participant.user.toCallUser(),
           participant: event.participant.toCallParticipant(),
+          duration: Duration(seconds: event.durationSeconds),
         );
       case EventType.callSessionParticipantCountUpdated:
         final event = callSessionParticipantCountUpdated!;

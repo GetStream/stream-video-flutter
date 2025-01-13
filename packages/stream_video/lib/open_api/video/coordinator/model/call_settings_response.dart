@@ -21,6 +21,7 @@ class CallSettingsResponse {
     required this.recording,
     required this.ring,
     required this.screensharing,
+    required this.session,
     required this.thumbnails,
     required this.transcription,
     required this.video,
@@ -42,6 +43,8 @@ class CallSettingsResponse {
 
   ScreensharingSettingsResponse screensharing;
 
+  SessionSettingsResponse session;
+
   ThumbnailsSettingsResponse thumbnails;
 
   TranscriptionSettingsResponse transcription;
@@ -58,6 +61,7 @@ class CallSettingsResponse {
     other.recording == recording &&
     other.ring == ring &&
     other.screensharing == screensharing &&
+    other.session == session &&
     other.thumbnails == thumbnails &&
     other.transcription == transcription &&
     other.video == video;
@@ -73,12 +77,13 @@ class CallSettingsResponse {
     (recording.hashCode) +
     (ring.hashCode) +
     (screensharing.hashCode) +
+    (session.hashCode) +
     (thumbnails.hashCode) +
     (transcription.hashCode) +
     (video.hashCode);
 
   @override
-  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -90,6 +95,7 @@ class CallSettingsResponse {
       json[r'recording'] = this.recording;
       json[r'ring'] = this.ring;
       json[r'screensharing'] = this.screensharing;
+      json[r'session'] = this.session;
       json[r'thumbnails'] = this.thumbnails;
       json[r'transcription'] = this.transcription;
       json[r'video'] = this.video;
@@ -123,6 +129,7 @@ class CallSettingsResponse {
         recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
         ring: RingSettingsResponse.fromJson(json[r'ring'])!,
         screensharing: ScreensharingSettingsResponse.fromJson(json[r'screensharing'])!,
+        session: SessionSettingsResponse.fromJson(json[r'session'])!,
         thumbnails: ThumbnailsSettingsResponse.fromJson(json[r'thumbnails'])!,
         transcription: TranscriptionSettingsResponse.fromJson(json[r'transcription'])!,
         video: VideoSettingsResponse.fromJson(json[r'video'])!,
@@ -181,6 +188,7 @@ class CallSettingsResponse {
     'recording',
     'ring',
     'screensharing',
+    'session',
     'thumbnails',
     'transcription',
     'video',

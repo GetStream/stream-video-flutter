@@ -4,7 +4,7 @@ import 'package:async/async.dart' as async;
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
-import '../open_api/video/coordinator/api.dart' hide User;
+import '../open_api/video/coordinator/api.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';
 import 'call/call_ringing_state.dart';

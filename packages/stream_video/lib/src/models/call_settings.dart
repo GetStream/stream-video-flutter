@@ -311,21 +311,21 @@ class StreamTranscriptionSettings extends AbstractSettings {
   const StreamTranscriptionSettings({
     this.closedCaptionMode = ClosedCaptionSettingsMode.disabled,
     this.transcriptionMode = TranscriptionSettingsMode.disabled,
-    this.languages = const [],
+    this.language = TranscriptionSettingsLanguage.auto,
   });
 
-  final List<String> languages;
+  final TranscriptionSettingsLanguage language;
   final ClosedCaptionSettingsMode closedCaptionMode;
   final TranscriptionSettingsMode transcriptionMode;
 
   @override
-  List<Object?> get props => [closedCaptionMode, transcriptionMode, languages];
+  List<Object?> get props => [closedCaptionMode, transcriptionMode, language];
 
   TranscriptionSettingsRequest toOpenDto() {
     return TranscriptionSettingsRequest(
       closedCaptionMode: closedCaptionMode.toOpenDto(),
       mode: transcriptionMode.toOpenDto(),
-      languages: languages,
+      language: language.toOpenDto(),
     );
   }
 }
@@ -540,6 +540,54 @@ enum TranscriptionSettingsMode {
       case TranscriptionSettingsMode.autoOn:
         return TranscriptionSettingsRequestModeEnum.autoOn;
     }
+  }
+}
+
+enum TranscriptionSettingsLanguage {
+  auto('auto'),
+  en('en'),
+  fr('fr'),
+  es('es'),
+  de('de'),
+  it('it'),
+  nl('nl'),
+  pt('pt'),
+  pl('pl'),
+  ca('ca'),
+  cs('cs'),
+  da('da'),
+  el('el'),
+  fi('fi'),
+  id('id'),
+  ja('ja'),
+  ru('ru'),
+  sv('sv'),
+  ta('ta'),
+  th('th'),
+  tr('tr'),
+  hu('hu'),
+  ro('ro'),
+  zh('zh'),
+  ar('ar'),
+  tl('tl'),
+  he('he'),
+  hi('hi'),
+  hr('hr'),
+  ko('ko'),
+  ms('ms'),
+  no('no'),
+  uk('uk');
+
+  const TranscriptionSettingsLanguage(this.value);
+  final String value;
+
+  @override
+  String toString() => value;
+
+  TranscriptionSettingsRequestLanguageEnum toOpenDto() {
+    return TranscriptionSettingsRequestLanguageEnumTypeTransformer()
+            .decode(value) ??
+        TranscriptionSettingsRequestLanguageEnum.auto;
   }
 }
 

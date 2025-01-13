@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
@@ -194,7 +196,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
       transcription: StreamTranscriptionSettings(
         closedCaptionMode: transcription.closedCaptionMode.toSettingsDomain(),
         transcriptionMode: transcription.mode.toSettingsDomain(),
-        languages: transcription.languages,
+        language: transcription.language.toSettingsDomain(),
       ),
       backstage: StreamBackstageSettings(
         enabled: backstage.enabled,
@@ -241,6 +243,15 @@ extension on open.TranscriptionSettingsResponseModeEnum {
     } else {
       return TranscriptionSettingsMode.disabled;
     }
+  }
+}
+
+extension on open.TranscriptionSettingsResponseLanguageEnum {
+  TranscriptionSettingsLanguage toSettingsDomain() {
+    return TranscriptionSettingsLanguage.values.firstWhereOrNull(
+          (it) => it.value == value,
+        ) ??
+        TranscriptionSettingsLanguage.auto;
   }
 }
 

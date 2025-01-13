@@ -669,6 +669,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
     required this.sessionId,
     required this.user,
     required this.participant,
+    required this.duration,
   });
 
   @override
@@ -677,6 +678,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
   final String sessionId;
   final CallUser user;
   final CallParticipant participant;
+  final Duration duration;
 
   @override
   List<Object?> get props => [
@@ -685,6 +687,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
         sessionId,
         participant,
         user,
+        duration,
       ];
 }
 

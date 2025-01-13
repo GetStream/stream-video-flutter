@@ -10,22 +10,31 @@
 
 part of openapi.api;
 
-class StartTranscriptionRequest {
-  /// Returns a new [StartTranscriptionRequest] instance.
-  StartTranscriptionRequest({
-    this.enableClosedCaptions,
+class StartClosedCaptionsRequest {
+  /// Returns a new [StartClosedCaptionsRequest] instance.
+  StartClosedCaptionsRequest({
+    this.enableTranscription,
+    this.externalStorage,
     this.language,
-    this.transcriptionExternalStorage,
   });
 
-  /// Enable closed captions along with transcriptions
+  /// Enable transcriptions along with closed captions
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  bool? enableClosedCaptions;
+  bool? enableTranscription;
+
+  /// Which external storage to use for transcriptions (only applicable if enable_transcription is true)
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? externalStorage;
 
   /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
   ///
@@ -36,55 +45,46 @@ class StartTranscriptionRequest {
   ///
   String? language;
 
-  /// Store transcriptions in this external storage
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? transcriptionExternalStorage;
-
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StartTranscriptionRequest &&
-    other.enableClosedCaptions == enableClosedCaptions &&
-    other.language == language &&
-    other.transcriptionExternalStorage == transcriptionExternalStorage;
+  bool operator ==(Object other) => identical(this, other) || other is StartClosedCaptionsRequest &&
+    other.enableTranscription == enableTranscription &&
+    other.externalStorage == externalStorage &&
+    other.language == language;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (enableClosedCaptions == null ? 0 : enableClosedCaptions!.hashCode) +
-    (language == null ? 0 : language!.hashCode) +
-    (transcriptionExternalStorage == null ? 0 : transcriptionExternalStorage!.hashCode);
+    (enableTranscription == null ? 0 : enableTranscription!.hashCode) +
+    (externalStorage == null ? 0 : externalStorage!.hashCode) +
+    (language == null ? 0 : language!.hashCode);
 
   @override
-  String toString() => 'StartTranscriptionRequest[enableClosedCaptions=$enableClosedCaptions, language=$language, transcriptionExternalStorage=$transcriptionExternalStorage]';
+  String toString() => 'StartClosedCaptionsRequest[enableTranscription=$enableTranscription, externalStorage=$externalStorage, language=$language]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.enableClosedCaptions != null) {
-      json[r'enable_closed_captions'] = this.enableClosedCaptions;
+    if (this.enableTranscription != null) {
+      json[r'enable_transcription'] = this.enableTranscription;
     } else {
-      json[r'enable_closed_captions'] = null;
+      json[r'enable_transcription'] = null;
+    }
+    if (this.externalStorage != null) {
+      json[r'external_storage'] = this.externalStorage;
+    } else {
+      json[r'external_storage'] = null;
     }
     if (this.language != null) {
       json[r'language'] = this.language;
     } else {
       json[r'language'] = null;
     }
-    if (this.transcriptionExternalStorage != null) {
-      json[r'transcription_external_storage'] = this.transcriptionExternalStorage;
-    } else {
-      json[r'transcription_external_storage'] = null;
-    }
     return json;
   }
 
-  /// Returns a new [StartTranscriptionRequest] instance and imports its values from
+  /// Returns a new [StartClosedCaptionsRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static StartTranscriptionRequest? fromJson(dynamic value) {
+  static StartClosedCaptionsRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -93,26 +93,26 @@ class StartTranscriptionRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StartTranscriptionRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StartTranscriptionRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "StartClosedCaptionsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "StartClosedCaptionsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return StartTranscriptionRequest(
-        enableClosedCaptions: mapValueOfType<bool>(json, r'enable_closed_captions'),
+      return StartClosedCaptionsRequest(
+        enableTranscription: mapValueOfType<bool>(json, r'enable_transcription'),
+        externalStorage: mapValueOfType<String>(json, r'external_storage'),
         language: mapValueOfType<String>(json, r'language'),
-        transcriptionExternalStorage: mapValueOfType<String>(json, r'transcription_external_storage'),
       );
     }
     return null;
   }
 
-  static List<StartTranscriptionRequest> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <StartTranscriptionRequest>[];
+  static List<StartClosedCaptionsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <StartClosedCaptionsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = StartTranscriptionRequest.fromJson(row);
+        final value = StartClosedCaptionsRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -121,12 +121,12 @@ class StartTranscriptionRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, StartTranscriptionRequest> mapFromJson(dynamic json) {
-    final map = <String, StartTranscriptionRequest>{};
+  static Map<String, StartClosedCaptionsRequest> mapFromJson(dynamic json) {
+    final map = <String, StartClosedCaptionsRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = StartTranscriptionRequest.fromJson(entry.value);
+        final value = StartClosedCaptionsRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -135,14 +135,14 @@ class StartTranscriptionRequest {
     return map;
   }
 
-  // maps a json object with a list of StartTranscriptionRequest-objects as value to a dart map
-  static Map<String, List<StartTranscriptionRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<StartTranscriptionRequest>>{};
+  // maps a json object with a list of StartClosedCaptionsRequest-objects as value to a dart map
+  static Map<String, List<StartClosedCaptionsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<StartClosedCaptionsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StartTranscriptionRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StartClosedCaptionsRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

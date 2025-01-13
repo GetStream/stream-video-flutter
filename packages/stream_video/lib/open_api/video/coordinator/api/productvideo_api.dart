@@ -18,7 +18,7 @@ class ProductvideoApi {
 
   /// Accept Call
   ///
-  ///   Sends events: - call.accepted  Required permissions: - JoinCall 
+  ///   Sends events: - call.accepted 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -56,7 +56,7 @@ class ProductvideoApi {
 
   /// Accept Call
   ///
-  ///   Sends events: - call.accepted  Required permissions: - JoinCall 
+  ///   Sends events: - call.accepted 
   ///
   /// Parameters:
   ///
@@ -80,7 +80,7 @@ class ProductvideoApi {
 
   /// Block user on a call
   ///
-  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
+  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -121,7 +121,7 @@ class ProductvideoApi {
 
   /// Block user on a call
   ///
-  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
+  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user 
   ///
   /// Parameters:
   ///
@@ -148,7 +148,7 @@ class ProductvideoApi {
 
   /// Collect user feedback
   ///
-  ///   Required permissions: - JoinCall 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -191,7 +191,7 @@ class ProductvideoApi {
 
   /// Collect user feedback
   ///
-  ///   Required permissions: - JoinCall 
+  ///  
   ///
   /// Parameters:
   ///
@@ -334,7 +334,7 @@ class ProductvideoApi {
 
   /// Delete Call
   ///
-  ///   Sends events: - call.deleted  Required permissions: - DeleteCall 
+  ///   Sends events: - call.deleted 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -375,7 +375,7 @@ class ProductvideoApi {
 
   /// Delete Call
   ///
-  ///   Sends events: - call.deleted  Required permissions: - DeleteCall 
+  ///   Sends events: - call.deleted 
   ///
   /// Parameters:
   ///
@@ -461,7 +461,7 @@ class ProductvideoApi {
 
   /// Delete recording
   ///
-  /// Deletes recording  Required permissions: - DeleteRecording 
+  /// Deletes recording 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -505,7 +505,7 @@ class ProductvideoApi {
 
   /// Delete recording
   ///
-  /// Deletes recording  Required permissions: - DeleteRecording 
+  /// Deletes recording 
   ///
   /// Parameters:
   ///
@@ -533,7 +533,7 @@ class ProductvideoApi {
 
   /// Delete transcription
   ///
-  /// Deletes transcription  Required permissions: - DeleteTranscription 
+  /// Deletes transcription 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -577,7 +577,7 @@ class ProductvideoApi {
 
   /// Delete transcription
   ///
-  /// Deletes transcription  Required permissions: - DeleteTranscription 
+  /// Deletes transcription 
   ///
   /// Parameters:
   ///
@@ -605,7 +605,7 @@ class ProductvideoApi {
 
   /// End call
   ///
-  ///   Sends events: - call.ended  Required permissions: - EndCall 
+  ///   Sends events: - call.ended 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -643,7 +643,7 @@ class ProductvideoApi {
 
   /// End call
   ///
-  ///   Sends events: - call.ended  Required permissions: - EndCall 
+  ///   Sends events: - call.ended 
   ///
   /// Parameters:
   ///
@@ -667,7 +667,7 @@ class ProductvideoApi {
 
   /// Get Call
   ///
-  ///   Required permissions: - ReadCall 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -731,7 +731,7 @@ class ProductvideoApi {
 
   /// Get Call
   ///
-  ///   Required permissions: - ReadCall 
+  ///  
   ///
   /// Parameters:
   ///
@@ -765,7 +765,7 @@ class ProductvideoApi {
 
   /// Get Call Stats
   ///
-  ///   Required permissions: - ReadCallStats 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -806,7 +806,7 @@ class ProductvideoApi {
 
   /// Get Call Stats
   ///
-  ///   Required permissions: - ReadCallStats 
+  ///  
   ///
   /// Parameters:
   ///
@@ -880,7 +880,7 @@ class ProductvideoApi {
 
   /// Get or create a call
   ///
-  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
+  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -927,7 +927,7 @@ class ProductvideoApi {
 
   /// Get or create a call
   ///
-  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
+  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring 
   ///
   /// Parameters:
   ///
@@ -956,7 +956,7 @@ class ProductvideoApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.live_started  Required permissions: - UpdateCall 
+  ///   Sends events: - call.live_started 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -997,7 +997,7 @@ class ProductvideoApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.live_started  Required permissions: - UpdateCall 
+  ///   Sends events: - call.live_started 
   ///
   /// Parameters:
   ///
@@ -1024,7 +1024,7 @@ class ProductvideoApi {
 
   /// Join call
   ///
-  /// Request to join a call  Required permissions: - CreateCall - JoinCall 
+  /// Request to join a call 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1071,7 +1071,7 @@ class ProductvideoApi {
 
   /// Join call
   ///
-  /// Request to join a call  Required permissions: - CreateCall - JoinCall 
+  /// Request to join a call 
   ///
   /// Parameters:
   ///
@@ -1148,7 +1148,7 @@ class ProductvideoApi {
 
   /// List recordings
   ///
-  /// Lists recordings  Required permissions: - ListRecordings 
+  /// Lists recordings 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1186,7 +1186,7 @@ class ProductvideoApi {
 
   /// List recordings
   ///
-  /// Lists recordings  Required permissions: - ListRecordings 
+  /// Lists recordings 
   ///
   /// Parameters:
   ///
@@ -1210,7 +1210,7 @@ class ProductvideoApi {
 
   /// List transcriptions
   ///
-  /// Lists transcriptions  Required permissions: - ListTranscriptions 
+  /// Lists transcriptions 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1248,7 +1248,7 @@ class ProductvideoApi {
 
   /// List transcriptions
   ///
-  /// Lists transcriptions  Required permissions: - ListTranscriptions 
+  /// Lists transcriptions 
   ///
   /// Parameters:
   ///
@@ -1272,7 +1272,7 @@ class ProductvideoApi {
 
   /// Mute users
   ///
-  /// Mutes users in a call  Required permissions: - MuteUsers 
+  /// Mutes users in a call 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1313,7 +1313,7 @@ class ProductvideoApi {
 
   /// Mute users
   ///
-  /// Mutes users in a call  Required permissions: - MuteUsers 
+  /// Mutes users in a call 
   ///
   /// Parameters:
   ///
@@ -1338,9 +1338,65 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Query Aggregate call Stats
+  ///
+  ///  
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [QueryAggregateCallStatsRequest] queryAggregateCallStatsRequest (required):
+  Future<Response> queryAggregateCallStatsWithHttpInfo(QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/stats';
+
+    // ignore: prefer_final_locals
+    Object? postBody = queryAggregateCallStatsRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Query Aggregate call Stats
+  ///
+  ///  
+  ///
+  /// Parameters:
+  ///
+  /// * [QueryAggregateCallStatsRequest] queryAggregateCallStatsRequest (required):
+  Future<QueryAggregateCallStatsResponse?> queryAggregateCallStats(QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,) async {
+    final response = await queryAggregateCallStatsWithHttpInfo(queryAggregateCallStatsRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryAggregateCallStatsResponse',) as QueryAggregateCallStatsResponse;
+    
+    }
+    return null;
+  }
+
   /// Query call members
   ///
-  /// Query call members with filter query  Required permissions: - ReadCall 
+  /// Query call members with filter query 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1374,7 +1430,7 @@ class ProductvideoApi {
 
   /// Query call members
   ///
-  /// Query call members with filter query  Required permissions: - ReadCall 
+  /// Query call members with filter query 
   ///
   /// Parameters:
   ///
@@ -1396,7 +1452,7 @@ class ProductvideoApi {
 
   /// Query Call Stats
   ///
-  ///   Required permissions: - ReadCallStats 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1430,7 +1486,7 @@ class ProductvideoApi {
 
   /// Query Call Stats
   ///
-  ///   Required permissions: - ReadCallStats 
+  ///  
   ///
   /// Parameters:
   ///
@@ -1452,7 +1508,7 @@ class ProductvideoApi {
 
   /// Query call
   ///
-  /// Query calls with filter query  Required permissions: - ReadCall 
+  /// Query calls with filter query 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1493,7 +1549,7 @@ class ProductvideoApi {
 
   /// Query call
   ///
-  /// Query calls with filter query  Required permissions: - ReadCall 
+  /// Query calls with filter query 
   ///
   /// Parameters:
   ///
@@ -1518,7 +1574,7 @@ class ProductvideoApi {
 
   /// Reject Call
   ///
-  ///   Sends events: - call.rejected  Required permissions: - JoinCall 
+  ///   Sends events: - call.rejected 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1559,7 +1615,7 @@ class ProductvideoApi {
 
   /// Reject Call
   ///
-  ///   Sends events: - call.rejected  Required permissions: - JoinCall 
+  ///   Sends events: - call.rejected 
   ///
   /// Parameters:
   ///
@@ -1654,7 +1710,7 @@ class ProductvideoApi {
 
   /// Send custom event
   ///
-  /// Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent 
+  /// Sends custom event to the call  Sends events: - custom 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1695,7 +1751,7 @@ class ProductvideoApi {
 
   /// Send custom event
   ///
-  /// Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent 
+  /// Sends custom event to the call  Sends events: - custom 
   ///
   /// Parameters:
   ///
@@ -1722,7 +1778,7 @@ class ProductvideoApi {
 
   /// Send reaction to the call
   ///
-  /// Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction 
+  /// Sends reaction to the call  Sends events: - call.reaction_new 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1762,7 +1818,7 @@ class ProductvideoApi {
 
   /// Send reaction to the call
   ///
-  /// Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction 
+  /// Sends reaction to the call  Sends events: - call.reaction_new 
   ///
   /// Parameters:
   ///
@@ -1788,7 +1844,7 @@ class ProductvideoApi {
 
   /// Start closed captions
   ///
-  /// Starts closed captions  Required permissions: - StartClosedCaptions 
+  /// Starts closed captions 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1797,20 +1853,22 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> startClosedCaptionsWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [StartClosedCaptionsRequest] startClosedCaptionsRequest (required):
+  Future<Response> startClosedCaptionsWithHttpInfo(String type, String id, StartClosedCaptionsRequest startClosedCaptionsRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/start_closed_captions'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = startClosedCaptionsRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -1826,15 +1884,17 @@ class ProductvideoApi {
 
   /// Start closed captions
   ///
-  /// Starts closed captions  Required permissions: - StartClosedCaptions 
+  /// Starts closed captions 
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StartClosedCaptionsResponse?> startClosedCaptions(String type, String id,) async {
-    final response = await startClosedCaptionsWithHttpInfo(type, id,);
+  ///
+  /// * [StartClosedCaptionsRequest] startClosedCaptionsRequest (required):
+  Future<StartClosedCaptionsResponse?> startClosedCaptions(String type, String id, StartClosedCaptionsRequest startClosedCaptionsRequest,) async {
+    final response = await startClosedCaptionsWithHttpInfo(type, id, startClosedCaptionsRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -1850,7 +1910,7 @@ class ProductvideoApi {
 
   /// Start HLS broadcasting
   ///
-  /// Starts HLS broadcasting  Required permissions: - StartBroadcasting 
+  /// Starts HLS broadcasting 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1888,7 +1948,7 @@ class ProductvideoApi {
 
   /// Start HLS broadcasting
   ///
-  /// Starts HLS broadcasting  Required permissions: - StartBroadcasting 
+  /// Starts HLS broadcasting 
   ///
   /// Parameters:
   ///
@@ -1912,7 +1972,7 @@ class ProductvideoApi {
 
   /// Start RTMP broadcasts
   ///
-  /// Starts RTMP broadcasts for the provided RTMP destinations  Required permissions: - StartBroadcasting 
+  /// Starts RTMP broadcasts for the provided RTMP destinations 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1953,7 +2013,7 @@ class ProductvideoApi {
 
   /// Start RTMP broadcasts
   ///
-  /// Starts RTMP broadcasts for the provided RTMP destinations  Required permissions: - StartBroadcasting 
+  /// Starts RTMP broadcasts for the provided RTMP destinations 
   ///
   /// Parameters:
   ///
@@ -1980,7 +2040,7 @@ class ProductvideoApi {
 
   /// Start recording
   ///
-  /// Starts recording  Sends events: - call.recording_started  Required permissions: - StartRecording 
+  /// Starts recording  Sends events: - call.recording_started 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2021,7 +2081,7 @@ class ProductvideoApi {
 
   /// Start recording
   ///
-  /// Starts recording  Sends events: - call.recording_started  Required permissions: - StartRecording 
+  /// Starts recording  Sends events: - call.recording_started 
   ///
   /// Parameters:
   ///
@@ -2048,7 +2108,7 @@ class ProductvideoApi {
 
   /// Start transcription
   ///
-  /// Starts transcription  Required permissions: - StartTranscription 
+  /// Starts transcription 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2059,7 +2119,6 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StartTranscriptionRequest] startTranscriptionRequest (required):
-  ///   StartTranscriptionRequest
   Future<Response> startTranscriptionWithHttpInfo(String type, String id, StartTranscriptionRequest startTranscriptionRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/start_transcription'
@@ -2089,7 +2148,7 @@ class ProductvideoApi {
 
   /// Start transcription
   ///
-  /// Starts transcription  Required permissions: - StartTranscription 
+  /// Starts transcription 
   ///
   /// Parameters:
   ///
@@ -2098,7 +2157,6 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StartTranscriptionRequest] startTranscriptionRequest (required):
-  ///   StartTranscriptionRequest
   Future<StartTranscriptionResponse?> startTranscription(String type, String id, StartTranscriptionRequest startTranscriptionRequest,) async {
     final response = await startTranscriptionWithHttpInfo(type, id, startTranscriptionRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
@@ -2116,7 +2174,7 @@ class ProductvideoApi {
 
   /// Stop all RTMP broadcasts for a call
   ///
-  /// Stop all RTMP broadcasts for the provided call  Required permissions: - StopBroadcasting 
+  /// Stop all RTMP broadcasts for the provided call 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2154,7 +2212,7 @@ class ProductvideoApi {
 
   /// Stop all RTMP broadcasts for a call
   ///
-  /// Stop all RTMP broadcasts for the provided call  Required permissions: - StopBroadcasting 
+  /// Stop all RTMP broadcasts for the provided call 
   ///
   /// Parameters:
   ///
@@ -2178,7 +2236,7 @@ class ProductvideoApi {
 
   /// Stop closed captions
   ///
-  /// Stops closed captions  Sends events: - call.transcription_stopped  Required permissions: - StopClosedCaptions 
+  /// Stops closed captions  Sends events: - call.transcription_stopped 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2187,20 +2245,22 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stopClosedCaptionsWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [StopClosedCaptionsRequest] stopClosedCaptionsRequest (required):
+  Future<Response> stopClosedCaptionsWithHttpInfo(String type, String id, StopClosedCaptionsRequest stopClosedCaptionsRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_closed_captions'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = stopClosedCaptionsRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -2216,15 +2276,17 @@ class ProductvideoApi {
 
   /// Stop closed captions
   ///
-  /// Stops closed captions  Sends events: - call.transcription_stopped  Required permissions: - StopClosedCaptions 
+  /// Stops closed captions  Sends events: - call.transcription_stopped 
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StopClosedCaptionsResponse?> stopClosedCaptions(String type, String id,) async {
-    final response = await stopClosedCaptionsWithHttpInfo(type, id,);
+  ///
+  /// * [StopClosedCaptionsRequest] stopClosedCaptionsRequest (required):
+  Future<StopClosedCaptionsResponse?> stopClosedCaptions(String type, String id, StopClosedCaptionsRequest stopClosedCaptionsRequest,) async {
+    final response = await stopClosedCaptionsWithHttpInfo(type, id, stopClosedCaptionsRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -2240,7 +2302,7 @@ class ProductvideoApi {
 
   /// Stop HLS broadcasting
   ///
-  /// Stops HLS broadcasting  Required permissions: - StopBroadcasting 
+  /// Stops HLS broadcasting 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2278,7 +2340,7 @@ class ProductvideoApi {
 
   /// Stop HLS broadcasting
   ///
-  /// Stops HLS broadcasting  Required permissions: - StopBroadcasting 
+  /// Stops HLS broadcasting 
   ///
   /// Parameters:
   ///
@@ -2302,7 +2364,7 @@ class ProductvideoApi {
 
   /// Set call as not live
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.updated 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2311,20 +2373,23 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stopLiveWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [StopLiveRequest] stopLiveRequest (required):
+  ///   StopLiveRequest
+  Future<Response> stopLiveWithHttpInfo(String type, String id, StopLiveRequest stopLiveRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_live'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = stopLiveRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -2340,15 +2405,18 @@ class ProductvideoApi {
 
   /// Set call as not live
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.updated 
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StopLiveResponse?> stopLive(String type, String id,) async {
-    final response = await stopLiveWithHttpInfo(type, id,);
+  ///
+  /// * [StopLiveRequest] stopLiveRequest (required):
+  ///   StopLiveRequest
+  Future<StopLiveResponse?> stopLive(String type, String id, StopLiveRequest stopLiveRequest,) async {
+    final response = await stopLiveWithHttpInfo(type, id, stopLiveRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -2364,7 +2432,7 @@ class ProductvideoApi {
 
   /// Stop RTMP broadcasts
   ///
-  /// Stop RTMP broadcasts for the provided RTMP destinations  Required permissions: - StopBroadcasting 
+  /// Stop RTMP broadcasts for the provided RTMP destinations 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2408,7 +2476,7 @@ class ProductvideoApi {
 
   /// Stop RTMP broadcasts
   ///
-  /// Stop RTMP broadcasts for the provided RTMP destinations  Required permissions: - StopBroadcasting 
+  /// Stop RTMP broadcasts for the provided RTMP destinations 
   ///
   /// Parameters:
   ///
@@ -2437,7 +2505,7 @@ class ProductvideoApi {
 
   /// Stop recording
   ///
-  /// Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
+  /// Stops recording  Sends events: - call.recording_stopped 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2475,7 +2543,7 @@ class ProductvideoApi {
 
   /// Stop recording
   ///
-  /// Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
+  /// Stops recording  Sends events: - call.recording_stopped 
   ///
   /// Parameters:
   ///
@@ -2499,7 +2567,7 @@ class ProductvideoApi {
 
   /// Stop transcription
   ///
-  /// Stops transcription  Sends events: - call.transcription_stopped  Required permissions: - StopTranscription 
+  /// Stops transcription  Sends events: - call.transcription_stopped 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2508,20 +2576,22 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stopTranscriptionWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [StopTranscriptionRequest] stopTranscriptionRequest (required):
+  Future<Response> stopTranscriptionWithHttpInfo(String type, String id, StopTranscriptionRequest stopTranscriptionRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_transcription'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = stopTranscriptionRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -2537,15 +2607,17 @@ class ProductvideoApi {
 
   /// Stop transcription
   ///
-  /// Stops transcription  Sends events: - call.transcription_stopped  Required permissions: - StopTranscription 
+  /// Stops transcription  Sends events: - call.transcription_stopped 
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StopTranscriptionResponse?> stopTranscription(String type, String id,) async {
-    final response = await stopTranscriptionWithHttpInfo(type, id,);
+  ///
+  /// * [StopTranscriptionRequest] stopTranscriptionRequest (required):
+  Future<StopTranscriptionResponse?> stopTranscription(String type, String id, StopTranscriptionRequest stopTranscriptionRequest,) async {
+    final response = await stopTranscriptionWithHttpInfo(type, id, stopTranscriptionRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -2561,7 +2633,7 @@ class ProductvideoApi {
 
   /// Unblocks user on a call
   ///
-  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
+  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2602,7 +2674,7 @@ class ProductvideoApi {
 
   /// Unblocks user on a call
   ///
-  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
+  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user 
   ///
   /// Parameters:
   ///
@@ -2629,7 +2701,7 @@ class ProductvideoApi {
 
   /// Update Call
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.updated 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2670,7 +2742,7 @@ class ProductvideoApi {
 
   /// Update Call
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.updated 
   ///
   /// Parameters:
   ///
@@ -2697,7 +2769,7 @@ class ProductvideoApi {
 
   /// Update Call Member
   ///
-  ///   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2738,7 +2810,7 @@ class ProductvideoApi {
 
   /// Update Call Member
   ///
-  ///   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated 
   ///
   /// Parameters:
   ///
@@ -2765,7 +2837,7 @@ class ProductvideoApi {
 
   /// Update user permissions
   ///
-  /// Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
+  /// Updates user permissions  Sends events: - call.permissions_updated 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2805,7 +2877,7 @@ class ProductvideoApi {
 
   /// Update user permissions
   ///
-  /// Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
+  /// Updates user permissions  Sends events: - call.permissions_updated 
   ///
   /// Parameters:
   ///
@@ -2871,7 +2943,7 @@ class ProductvideoApi {
 
   /// Pin
   ///
-  /// Pins a track for all users in the call.  Required permissions: - PinCallTrack 
+  /// Pins a track for all users in the call. 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2912,7 +2984,7 @@ class ProductvideoApi {
 
   /// Pin
   ///
-  /// Pins a track for all users in the call.  Required permissions: - PinCallTrack 
+  /// Pins a track for all users in the call. 
   ///
   /// Parameters:
   ///
@@ -2939,7 +3011,7 @@ class ProductvideoApi {
 
   /// Unpin
   ///
-  /// Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
+  /// Unpins a track for all users in the call. 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2980,7 +3052,7 @@ class ProductvideoApi {
 
   /// Unpin
   ///
-  /// Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
+  /// Unpins a track for all users in the call. 
   ///
   /// Parameters:
   ///

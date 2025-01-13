@@ -870,12 +870,14 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
     required this.sessionId,
     required this.user,
     required this.participant,
+    required this.duration,
   });
 
   final DateTime createdAt;
   final String sessionId;
   final CallUser user;
   final CallParticipant participant;
+  final Duration duration;
 
   @override
   List<Object?> get props => [
@@ -884,6 +886,7 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
         sessionId,
         participant,
         user,
+        duration,
       ];
 }
 
@@ -1167,6 +1170,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           sessionId: event.sessionId,
           user: event.user,
           participant: event.participant,
+          duration: event.duration,
         ),
       // Ignore other events as they are internal to Coordinator logic
       _ => null,

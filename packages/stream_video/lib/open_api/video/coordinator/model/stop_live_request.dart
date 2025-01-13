@@ -10,22 +10,23 @@
 
 part of openapi.api;
 
-class UserRequest {
-  /// Returns a new [UserRequest] instance.
-  UserRequest({
-    this.custom = const {},
-    required this.id,
-    this.image,
-    this.invisible,
-    this.language,
-    this.name,
-    this.privacySettings,
+class StopLiveRequest {
+  /// Returns a new [StopLiveRequest] instance.
+  StopLiveRequest({
+    this.continueClosedCaption,
+    this.continueHls,
+    this.continueRecording,
+    this.continueRtmpBroadcasts,
+    this.continueTranscription,
   });
 
-  Map<String, Object> custom;
-
-  /// User ID
-  String id;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? continueClosedCaption;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -33,7 +34,7 @@ class UserRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? image;
+  bool? continueHls;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -41,7 +42,7 @@ class UserRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  bool? invisible;
+  bool? continueRecording;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -49,16 +50,7 @@ class UserRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? language;
-
-  /// Optional name of user
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? name;
+  bool? continueRtmpBroadcasts;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -66,68 +58,62 @@ class UserRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Object? privacySettings;
+  bool? continueTranscription;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.id == id &&
-    other.image == image &&
-    other.invisible == invisible &&
-    other.language == language &&
-    other.name == name &&
-    other.privacySettings == privacySettings;
+  bool operator ==(Object other) => identical(this, other) || other is StopLiveRequest &&
+    other.continueClosedCaption == continueClosedCaption &&
+    other.continueHls == continueHls &&
+    other.continueRecording == continueRecording &&
+    other.continueRtmpBroadcasts == continueRtmpBroadcasts &&
+    other.continueTranscription == continueTranscription;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (id.hashCode) +
-    (image == null ? 0 : image!.hashCode) +
-    (invisible == null ? 0 : invisible!.hashCode) +
-    (language == null ? 0 : language!.hashCode) +
-    (name == null ? 0 : name!.hashCode) +
-    (privacySettings == null ? 0 : privacySettings!.hashCode);
+    (continueClosedCaption == null ? 0 : continueClosedCaption!.hashCode) +
+    (continueHls == null ? 0 : continueHls!.hashCode) +
+    (continueRecording == null ? 0 : continueRecording!.hashCode) +
+    (continueRtmpBroadcasts == null ? 0 : continueRtmpBroadcasts!.hashCode) +
+    (continueTranscription == null ? 0 : continueTranscription!.hashCode);
 
   @override
-  String toString() => 'UserRequest[custom=$custom, id=$id, image=$image, invisible=$invisible, language=$language, name=$name, privacySettings=$privacySettings]';
+  String toString() => 'StopLiveRequest[continueClosedCaption=$continueClosedCaption, continueHls=$continueHls, continueRecording=$continueRecording, continueRtmpBroadcasts=$continueRtmpBroadcasts, continueTranscription=$continueTranscription]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
-      json[r'id'] = this.id;
-    if (this.image != null) {
-      json[r'image'] = this.image;
+    if (this.continueClosedCaption != null) {
+      json[r'continue_closed_caption'] = this.continueClosedCaption;
     } else {
-      json[r'image'] = null;
+      json[r'continue_closed_caption'] = null;
     }
-    if (this.invisible != null) {
-      json[r'invisible'] = this.invisible;
+    if (this.continueHls != null) {
+      json[r'continue_hls'] = this.continueHls;
     } else {
-      json[r'invisible'] = null;
+      json[r'continue_hls'] = null;
     }
-    if (this.language != null) {
-      json[r'language'] = this.language;
+    if (this.continueRecording != null) {
+      json[r'continue_recording'] = this.continueRecording;
     } else {
-      json[r'language'] = null;
+      json[r'continue_recording'] = null;
     }
-    if (this.name != null) {
-      json[r'name'] = this.name;
+    if (this.continueRtmpBroadcasts != null) {
+      json[r'continue_rtmp_broadcasts'] = this.continueRtmpBroadcasts;
     } else {
-      json[r'name'] = null;
+      json[r'continue_rtmp_broadcasts'] = null;
     }
-    if (this.privacySettings != null) {
-      json[r'privacy_settings'] = this.privacySettings;
+    if (this.continueTranscription != null) {
+      json[r'continue_transcription'] = this.continueTranscription;
     } else {
-      json[r'privacy_settings'] = null;
+      json[r'continue_transcription'] = null;
     }
     return json;
   }
 
-  /// Returns a new [UserRequest] instance and imports its values from
+  /// Returns a new [StopLiveRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static UserRequest? fromJson(dynamic value) {
+  static StopLiveRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -136,30 +122,28 @@ class UserRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "StopLiveRequest[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "StopLiveRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return UserRequest(
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        id: mapValueOfType<String>(json, r'id')!,
-        image: mapValueOfType<String>(json, r'image'),
-        invisible: mapValueOfType<bool>(json, r'invisible'),
-        language: mapValueOfType<String>(json, r'language'),
-        name: mapValueOfType<String>(json, r'name'),
-        privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
+      return StopLiveRequest(
+        continueClosedCaption: mapValueOfType<bool>(json, r'continue_closed_caption'),
+        continueHls: mapValueOfType<bool>(json, r'continue_hls'),
+        continueRecording: mapValueOfType<bool>(json, r'continue_recording'),
+        continueRtmpBroadcasts: mapValueOfType<bool>(json, r'continue_rtmp_broadcasts'),
+        continueTranscription: mapValueOfType<bool>(json, r'continue_transcription'),
       );
     }
     return null;
   }
 
-  static List<UserRequest> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <UserRequest>[];
+  static List<StopLiveRequest> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <StopLiveRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = UserRequest.fromJson(row);
+        final value = StopLiveRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -168,12 +152,12 @@ class UserRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, UserRequest> mapFromJson(dynamic json) {
-    final map = <String, UserRequest>{};
+  static Map<String, StopLiveRequest> mapFromJson(dynamic json) {
+    final map = <String, StopLiveRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UserRequest.fromJson(entry.value);
+        final value = StopLiveRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -182,14 +166,14 @@ class UserRequest {
     return map;
   }
 
-  // maps a json object with a list of UserRequest-objects as value to a dart map
-  static Map<String, List<UserRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<UserRequest>>{};
+  // maps a json object with a list of StopLiveRequest-objects as value to a dart map
+  static Map<String, List<StopLiveRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<StopLiveRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StopLiveRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -197,7 +181,6 @@ class UserRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'id',
   };
 }
 
