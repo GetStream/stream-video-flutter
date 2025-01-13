@@ -203,9 +203,14 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
-      start({
+  Future<
+      Result<
+          ({
+            SfuCallState callState,
+            Duration fastReconnectDeadline,
+          })>> start({
     sfu_events.ReconnectDetails? reconnectDetails,
+    FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
   }) async {
     try {
       _logger.d(() => '[start] no args');
@@ -309,6 +314,7 @@ class CallSession extends Disposable {
         ..onRenegotiationNeeded = _onRenegotiationNeeded
         ..onRemoteTrackReceived = _onRemoteTrackReceived;
 
+      await onRtcManagerCreatedCallback?.call(rtcManager!);
       _rtcManagerSubject!.add(rtcManager!);
 
       _logger.d(() => '[start] completed');
@@ -912,6 +918,7 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
         trackId: info.trackId,
         trackType: info.trackType?.toDTO(),
         mid: info.mid,
+        publishOptionId: info.publishOptionId,
         codec: info.codec?.toDTO(),
         layers: info.layers?.map((layer) {
           return sfu_models.VideoLayer(

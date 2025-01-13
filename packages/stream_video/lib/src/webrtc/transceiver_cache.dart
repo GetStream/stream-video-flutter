@@ -34,8 +34,6 @@ class TransceiverManager {
   final List<TrackLayersCache> _layers = [];
 
   /// An array maintaining the order how transceivers were added to the peer connection.
-  /// This is needed because some browsers (Firefox) don't reliably report§
-  /// trackId and `mid` parameters.
   final List<RTCRtpTransceiver> _transceiverOrder = [];
 
   /// Adds a transceiver to the cache.
@@ -53,12 +51,6 @@ class TransceiverManager {
     );
 
     _transceiverOrder.add(transceiver);
-  }
-
-  /// Removes a transceiver from the cache.
-  void remove(TransceiverCache item) {
-    _transceivers.remove(item);
-    // _transceiverOrder.remove(item.transceiver);
   }
 
   /// Gets the transceiver for the given publish option.

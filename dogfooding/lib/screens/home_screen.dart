@@ -70,9 +70,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _call = _streamVideo.makeCall(
       callType: kCallType,
       id: callId,
+      // Uncomment to force a specific codec when publishing video track
       // preferences: DefaultCallPreferences(
       //   clientPublishOptions: ClientPublishOptions(
       //     preferredCodec: PreferredCodec.av1,
+      //     fmtpLine: 'level-idx=5;profile=0;tier=0',
       //   ),
       // ),
     );

@@ -112,6 +112,12 @@ class _StreamCallContentState extends State<StreamCallContent>
         WidgetsBinding.instance.removeObserver(this);
       }
     }
+
+    if (widget.callState.status != oldWidget.callState.status) {
+      if (widget.callState.status.isDisconnected) {
+        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
+      }
+    }
   }
 
   @override
