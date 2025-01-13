@@ -12,7 +12,7 @@
 * Added device thermal status reporting to better optimize call quality.
 
 🐞 Fixed
-* Fixes rejecting ringing call when ActionCallEnd, instead of ActionCallDecline, event is triggered during ringing.
+* Fixes rejecting ringing call when CallEnd, instead of CallDecline, event is triggered by CallKit during ringing.
 
 ## 0.6.0
 

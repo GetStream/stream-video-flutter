@@ -9,7 +9,7 @@
 
 🐞 Fixed
 * https://github.com/GetStream/stream-video-flutter/pull/822: Fixed issues when ending the call while in Picture in Picture mode on Android. 
-* https://github.com/GetStream/stream-video-flutter/pull/824: Fixes rejecting ringing call when ActionCallEnd, instead of ActionCallDecline, event is triggered during ringing.
+* https://github.com/GetStream/stream-video-flutter/pull/824: Fixes rejecting ringing call when CallEnd, instead of CallDecline, event is triggered by CallKit during ringing.
 
 ## 0.6.1
 
