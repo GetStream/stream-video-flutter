@@ -6,6 +6,7 @@
 
 ✅ Added
 * https://github.com/GetStream/stream-video-flutter/pull/799: Added out-of-the-box support for blur background filters and image filters. As well as the option to create custom video filters. For complete documentation of those features please check [here.](https://getstream.io/video/docs/flutter/advanced/apply-video-filters/)
+* https://github.com/GetStream/stream-video-flutter/pull/811: Dynamic codec negotiation during calls
 
 🐞 Fixed
 * https://github.com/GetStream/stream-video-flutter/pull/822: Fixed issues when ending the call while in Picture in Picture mode on Android. 
