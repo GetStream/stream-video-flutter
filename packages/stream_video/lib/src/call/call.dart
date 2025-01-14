@@ -581,7 +581,7 @@ class Call {
 
     return _callJoinLock.synchronized(() async {
       _logger.d(() => '[join] options: $_connectOptions');
-      final connectionStartTime = DateTime.now();
+      final connectionTimeStopwatch = Stopwatch()..start();
 
       final validation =
           await _stateManager.validateUserId(_streamVideo.currentUser.id);
@@ -708,11 +708,11 @@ class Call {
       }
 
       // make sure we only track connection timing if we are not calling this method as part of a migration flow
+      connectionTimeStopwatch.stop();
       if (!performingMigration) {
         await _sfuStatsReporter?.sendSfuStats(
           reconnectionStrategy: _reconnectStrategy,
-          connectionTimeMs:
-              DateTime.now().difference(connectionStartTime).inMilliseconds,
+          connectionTimeMs: connectionTimeStopwatch.elapsedMilliseconds,
         );
       }
 
@@ -1099,7 +1099,7 @@ class Call {
   }
 
   Future<void> _reconnectMigrate() async {
-    final migrateStartTime = DateTime.now();
+    final migrateTimeStopwatch = Stopwatch()..start();
 
     _reconnectStrategy = SfuReconnectionStrategy.migrate;
     await _join();
@@ -1116,9 +1116,9 @@ class Call {
       },
     );
 
+    migrateTimeStopwatch.stop();
     await _sfuStatsReporter?.sendSfuStats(
-      connectionTimeMs:
-          DateTime.now().difference(migrateStartTime).inMilliseconds,
+      connectionTimeMs: migrateTimeStopwatch.elapsedMilliseconds,
       reconnectionStrategy: _reconnectStrategy,
     );
   }
