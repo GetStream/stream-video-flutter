@@ -134,7 +134,8 @@ class SfuStatsReporter {
     if (connectionTimeMs == null) return null;
 
     final timeSeconds = connectionTimeMs / 1000;
-    if (reconnectionStrategy != null) {
+    if (reconnectionStrategy != null &&
+        reconnectionStrategy != SfuReconnectionStrategy.unspecified) {
       return sfu.Telemetry(
         reconnection: sfu.Reconnection(
           timeSeconds: timeSeconds,
