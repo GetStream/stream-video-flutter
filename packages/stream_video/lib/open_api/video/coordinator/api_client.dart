@@ -533,10 +533,6 @@ class ApiClient {
           return SendReactionRequest.fromJson(value);
         case 'SendReactionResponse':
           return SendReactionResponse.fromJson(value);
-        case 'SessionSettingsRequest':
-          return SessionSettingsRequest.fromJson(value);
-        case 'SessionSettingsResponse':
-          return SessionSettingsResponse.fromJson(value);
         case 'SortParamRequest':
           return SortParamRequest.fromJson(value);
         case 'StartClosedCaptionsRequest':

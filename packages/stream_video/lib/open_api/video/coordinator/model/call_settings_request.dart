@@ -21,7 +21,6 @@ class CallSettingsRequest {
     this.recording,
     this.ring,
     this.screensharing,
-    this.session,
     this.thumbnails,
     this.transcription,
     this.video,
@@ -97,14 +96,6 @@ class CallSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  SessionSettingsRequest? session;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
   ThumbnailsSettingsRequest? thumbnails;
 
   ///
@@ -133,7 +124,6 @@ class CallSettingsRequest {
     other.recording == recording &&
     other.ring == ring &&
     other.screensharing == screensharing &&
-    other.session == session &&
     other.thumbnails == thumbnails &&
     other.transcription == transcription &&
     other.video == video;
@@ -149,13 +139,12 @@ class CallSettingsRequest {
     (recording == null ? 0 : recording!.hashCode) +
     (ring == null ? 0 : ring!.hashCode) +
     (screensharing == null ? 0 : screensharing!.hashCode) +
-    (session == null ? 0 : session!.hashCode) +
     (thumbnails == null ? 0 : thumbnails!.hashCode) +
     (transcription == null ? 0 : transcription!.hashCode) +
     (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -198,11 +187,6 @@ class CallSettingsRequest {
       json[r'screensharing'] = this.screensharing;
     } else {
       json[r'screensharing'] = null;
-    }
-    if (this.session != null) {
-      json[r'session'] = this.session;
-    } else {
-      json[r'session'] = null;
     }
     if (this.thumbnails != null) {
       json[r'thumbnails'] = this.thumbnails;
@@ -249,7 +233,6 @@ class CallSettingsRequest {
         recording: RecordSettingsRequest.fromJson(json[r'recording']),
         ring: RingSettingsRequest.fromJson(json[r'ring']),
         screensharing: ScreensharingSettingsRequest.fromJson(json[r'screensharing']),
-        session: SessionSettingsRequest.fromJson(json[r'session']),
         thumbnails: ThumbnailsSettingsRequest.fromJson(json[r'thumbnails']),
         transcription: TranscriptionSettingsRequest.fromJson(json[r'transcription']),
         video: VideoSettingsRequest.fromJson(json[r'video']),

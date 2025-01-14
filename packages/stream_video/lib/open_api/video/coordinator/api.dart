@@ -205,8 +205,6 @@ part 'model/send_call_event_request.dart';
 part 'model/send_call_event_response.dart';
 part 'model/send_reaction_request.dart';
 part 'model/send_reaction_response.dart';
-part 'model/session_settings_request.dart';
-part 'model/session_settings_response.dart';
 part 'model/sort_param_request.dart';
 part 'model/start_closed_captions_request.dart';
 part 'model/start_closed_captions_response.dart';
