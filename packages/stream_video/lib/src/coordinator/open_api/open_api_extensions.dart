@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../../stream_video.dart';
+import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
+import '../../logger/stream_log.dart';
+import '../../models/models.dart';
 import '../../utils/standard.dart';
 
 extension MemberExt on open.MemberResponse {

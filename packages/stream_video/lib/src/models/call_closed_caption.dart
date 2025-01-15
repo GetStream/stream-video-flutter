@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../stream_video.dart';
+import '../call/call_events.dart';
+import 'models.dart';
 
 @immutable
 class StreamClosedCaption with EquatableMixin {

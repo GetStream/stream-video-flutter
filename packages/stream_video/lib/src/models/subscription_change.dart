@@ -1,5 +1,6 @@
-import '../../stream_video.dart';
 import '../sfu/data/models/sfu_subscription_details.dart';
+import '../sfu/data/models/sfu_track_type.dart';
+import '../webrtc/model/rtc_video_dimension.dart';
 
 class SubscriptionChange {
   SubscriptionChange.set({

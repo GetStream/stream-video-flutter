@@ -1,10 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-import '../../stream_video.dart';
+import '../call_state.dart';
+import '../coordinator/models/coordinator_events.dart';
+import '../models/models.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_level.dart';
 import '../sfu/data/models/sfu_call_grants.dart';
 import '../sfu/data/models/sfu_connection_info.dart';
+import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/sfu_extensions.dart';
 import '../shared_emitter.dart';
 

@@ -2,7 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../stream_video.dart';
+import 'call/call_type.dart';
+import 'models/models.dart';
+import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
 /// Represents the call's state.
 @immutable

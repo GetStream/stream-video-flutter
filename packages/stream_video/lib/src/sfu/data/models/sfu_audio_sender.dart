@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import '../../../../stream_video.dart';
 import 'sfu_codec.dart';
+import 'sfu_track_type.dart';
 
 @immutable
 class SfuAudioSender {
