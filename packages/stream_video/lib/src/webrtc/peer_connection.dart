@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../disposable.dart';
@@ -50,16 +49,6 @@ typedef OnTrack = void Function(
   rtc.RTCTrackEvent,
 );
 
-/// {@template onTrack}
-/// Handler whenever we receive [RtcPrintableStats].
-/// {@endtemplate}
-typedef OnStats = void Function(
-  StreamPeerConnection,
-  List<RtcStats>,
-  RtcPrintableStats,
-  List<Map<String, dynamic>>,
-);
-
 /// Wrapper around the WebRTC connection that contains tracks.
 class StreamPeerConnection extends Disposable {
   /// Creates [StreamPeerConnection] instance.
@@ -80,7 +69,6 @@ class StreamPeerConnection extends Disposable {
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
   final SdpEditor sdpEditor;
-  int _reportingIntervalMs = 2000;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -96,21 +84,7 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onTrack}
   OnTrack? onTrack;
 
-  /// {@macro onTrack}
-  OnStats? onStats;
-
-  Stream<List<Map<String, dynamic>>> get statsStream =>
-      _statsController.stream.startWith([]);
-
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
-
-  set reportingIntervalMs(int interval) {
-    _reportingIntervalMs = interval;
-    if (_statsTimer != null) {
-      _stopObservingStats();
-    }
-    _startObservingStats();
-  }
 
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer([
@@ -319,10 +293,6 @@ class StreamPeerConnection extends Disposable {
     _logger.v(() => '[onIceConnectionState] state: $state');
 
     switch (state) {
-      case rtc.RTCIceConnectionState.RTCIceConnectionStateConnected:
-        return _startObservingStats();
-      case rtc.RTCIceConnectionState.RTCIceConnectionStateClosed:
-        return _stopObservingStats();
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
       case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
         onIssue?.call(this);
@@ -331,69 +301,45 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
-  Timer? _statsTimer;
-  final StreamController<List<Map<String, dynamic>>> _statsController =
-      StreamController.broadcast();
-
-  void _startObservingStats() {
-    // Stop previous timer if any.
-    _stopObservingStats();
-
-    // Start new timer.
-    _statsTimer = Timer.periodic(
-      Duration(milliseconds: _reportingIntervalMs),
-      (_) async {
-        try {
-          if (_statsController.isClosed) return;
-
-          final stats = await pc.getStats();
-          final rtcPrintableStats = stats.toPrintableRtcStats();
-          final rawStats = stats.toRawStats();
-          final rtcStats = stats
-              .map((report) => report.toRtcStats())
-              .where((element) => element != null)
-              .cast<RtcStats>()
-              .toList();
-
-          onStats?.call(this, rtcStats, rtcPrintableStats, rawStats);
-          _statsController.add(rawStats);
-        } catch (e, stk) {
-          _logger.e(() => '[getStats] failed: $e; $stk');
-        }
-      },
-    );
-  }
-
-  void _stopObservingStats() {
-    _statsTimer?.cancel();
-    _statsTimer = null;
-  }
-
   void _onRenegotiationNeeded() {
     _logger.i(() => '[onRenegotiationNeeded] no args');
     onRenegotiationNeeded?.call(this);
+  }
+
+  Future<
+      ({
+        List<RtcStats> rtcStats,
+        RtcPrintableStats printable,
+        List<Map<String, dynamic>> rawStats,
+      })> getStats() async {
+    final stats = await pc.getStats();
+
+    final rtcPrintableStats = stats.toPrintableRtcStats();
+    final rawStats = stats.toRawStats();
+    final rtcStats = stats
+        .map((report) => report.toRtcStats())
+        .where((element) => element != null)
+        .cast<RtcStats>()
+        .toList();
+
+    return (
+      rtcStats: rtcStats,
+      printable: rtcPrintableStats,
+      rawStats: rawStats,
+    );
   }
 
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     _dropRtcCallbacks();
-    _stopObservingStats();
     onStreamAdded = null;
     onRenegotiationNeeded = null;
     onIceCandidate = null;
     onTrack = null;
     _pendingCandidates.clear();
-    await _statsController.close();
     await pc.dispose();
     return await super.dispose();
-  }
-}
-
-extension on rtc.StatsReport {
-  // ignore: unused_element
-  String stringify() {
-    return 'ts: $timestamp, id: $id, type: $type, values: $values';
   }
 }
 
