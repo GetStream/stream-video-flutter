@@ -265,10 +265,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     PeerConnectionStats? publisherStats,
     PeerConnectionStats? subscriberStats,
   }) {
-    _logger.d(
-      () =>
-          '[lifecycleCallStats] publisherStats: $publisherStats, subscriberStats: $subscriberStats, state: $state',
-    );
     state = state.copyWith(
       publisherStats: publisherStats,
       subscriberStats: subscriberStats,

@@ -69,7 +69,7 @@ class SfuClient {
     try {
       _logger.d(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
-      _logger.v(() => '[setPublisher] response: ${response.stringify()}');
+      _logger.d(() => '[setPublisher] response: ${response.stringify()}');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));

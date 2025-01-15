@@ -443,5 +443,3 @@ class TranscriptionSettingsResponseModeEnumTypeTransformer {
   /// Singleton [TranscriptionSettingsResponseModeEnumTypeTransformer] instance.
   static TranscriptionSettingsResponseModeEnumTypeTransformer? _instance;
 }
-
-

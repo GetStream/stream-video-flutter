@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -97,20 +96,6 @@ class RtcManager extends Disposable {
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     publisher.onRenegotiationNeeded = cb;
   }
-
-  set onStatsReceived(OnStats? cb) {
-    subscriber.onStats = cb;
-    publisher.onStats = cb;
-  }
-
-  Stream<Map<String, dynamic>> get statsStream => CombineLatestStream.combine2(
-        subscriber.statsStream,
-        publisher.statsStream,
-        (subscriber, publisher) => {
-          'subscriberStats': subscriber,
-          'publisherStats': publisher,
-        },
-      ).asBroadcastStream();
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
@@ -437,7 +422,6 @@ class RtcManager extends Disposable {
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
-    onStatsReceived = null;
 
     await publisher.dispose();
     await subscriber.dispose();
@@ -1273,11 +1257,6 @@ extension RtcManagerTrackHelper on RtcManager {
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
-  }
-
-  void updateReportingInterval(int reportingIntervalMs) {
-    publisher.reportingIntervalMs = reportingIntervalMs;
-    subscriber.reportingIntervalMs = reportingIntervalMs;
   }
 }
 
