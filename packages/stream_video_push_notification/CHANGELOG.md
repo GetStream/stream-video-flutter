@@ -1,9 +1,12 @@
-## Unreleased 
+## 0.7.0
 
 🚧 Breaking changes
 
 * The package is now compatible with Gradle 8. The minimum required Java version is now 17.
 * Updated the `flutter_callkit_incoming` package to version 2.5.0, which also requires Java 17.
+
+🐞 Fixed
+* Fixes rejecting ringing call when CallEnd, instead of CallDecline, event is triggered by CallKit during ringing.
 
 ## 0.6.1
 
