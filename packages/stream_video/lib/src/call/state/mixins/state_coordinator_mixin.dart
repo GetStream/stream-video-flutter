@@ -301,7 +301,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     }
 
     state = state.copyWith(
-      isTranscribing: false,
+      isCaptioning: false,
     );
   }
 

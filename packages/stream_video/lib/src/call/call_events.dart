@@ -288,6 +288,8 @@ class StreamCallMissedEvent extends StreamCallEvent {
         sessionId,
         createdAt,
         metadata,
+        callUser,
+        members,
       ];
 }
 
