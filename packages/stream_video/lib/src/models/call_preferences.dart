@@ -5,7 +5,11 @@ abstract class CallPreferences {
   Duration get reactionAutoDismissTime;
   Duration get callStatsReportingInterval;
   bool get dropIfAloneInRingingFlow;
+
   ClientPublishOptions? get clientPublishOptions;
+
+  int get closedCaptionsVisibilityDurationMs;
+  int get closedCaptionsVisibleCaptions;
 }
 
 class DefaultCallPreferences implements CallPreferences {
@@ -15,6 +19,8 @@ class DefaultCallPreferences implements CallPreferences {
     this.callStatsReportingInterval = const Duration(seconds: 2),
     this.dropIfAloneInRingingFlow = true,
     this.clientPublishOptions,
+    this.closedCaptionsVisibilityDurationMs = 2700,
+    this.closedCaptionsVisibleCaptions = 2,
   });
 
   @override
@@ -31,4 +37,10 @@ class DefaultCallPreferences implements CallPreferences {
 
   @override
   final ClientPublishOptions? clientPublishOptions;
+
+  @override
+  final int closedCaptionsVisibilityDurationMs;
+
+  @override
+  final int closedCaptionsVisibleCaptions;
 }

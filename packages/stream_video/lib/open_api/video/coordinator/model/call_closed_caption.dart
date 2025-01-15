@@ -17,6 +17,7 @@ class CallClosedCaption {
     required this.speakerId,
     required this.startTime,
     required this.text,
+    required this.user,
   });
 
   DateTime endTime;
@@ -27,12 +28,15 @@ class CallClosedCaption {
 
   String text;
 
+  UserResponse user;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallClosedCaption &&
     other.endTime == endTime &&
     other.speakerId == speakerId &&
     other.startTime == startTime &&
-    other.text == text;
+    other.text == text &&
+    other.user == user;
 
   @override
   int get hashCode =>
@@ -40,10 +44,11 @@ class CallClosedCaption {
     (endTime.hashCode) +
     (speakerId.hashCode) +
     (startTime.hashCode) +
-    (text.hashCode);
+    (text.hashCode) +
+    (user.hashCode);
 
   @override
-  String toString() => 'CallClosedCaption[endTime=$endTime, speakerId=$speakerId, startTime=$startTime, text=$text]';
+  String toString() => 'CallClosedCaption[endTime=$endTime, speakerId=$speakerId, startTime=$startTime, text=$text, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -51,6 +56,7 @@ class CallClosedCaption {
       json[r'speaker_id'] = this.speakerId;
       json[r'start_time'] = this.startTime.toUtc().toIso8601String();
       json[r'text'] = this.text;
+      json[r'user'] = this.user;
     return json;
   }
 
@@ -77,6 +83,7 @@ class CallClosedCaption {
         speakerId: mapValueOfType<String>(json, r'speaker_id')!,
         startTime: mapDateTime(json, r'start_time', r'')!,
         text: mapValueOfType<String>(json, r'text')!,
+        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -128,6 +135,7 @@ class CallClosedCaption {
     'speaker_id',
     'start_time',
     'text',
+    'user',
   };
 }
 

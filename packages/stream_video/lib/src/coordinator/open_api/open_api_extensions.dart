@@ -1,6 +1,10 @@
+import 'package:collection/collection.dart';
+
 import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../../stream_video.dart';
+import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
+import '../../logger/stream_log.dart';
+import '../../models/models.dart';
 import '../../utils/standard.dart';
 
 extension MemberExt on open.MemberResponse {
@@ -119,6 +123,7 @@ extension EnvelopeExt on open.CallResponse {
       recording: recording,
       backstage: backstage,
       transcribing: transcribing,
+      captioning: captioning,
       custom: Map.unmodifiable(custom),
       rtmpIngress: ingress.rtmp.address,
       joinAheadTimeSeconds: joinAheadTimeSeconds,
@@ -191,9 +196,9 @@ extension CallSettingsExt on open.CallSettingsResponse {
         rtmp: broadcasting.rtmp.toSettingsDomain(),
       ),
       transcription: StreamTranscriptionSettings(
-        closedCaptionMode: transcription.closedCaptionMode,
-        mode: transcription.mode.toSettingsDomain(),
-        languages: transcription.languages,
+        closedCaptionMode: transcription.closedCaptionMode.toSettingsDomain(),
+        transcriptionMode: transcription.mode.toSettingsDomain(),
+        language: transcription.language.toSettingsDomain(),
       ),
       backstage: StreamBackstageSettings(
         enabled: backstage.enabled,
@@ -239,6 +244,29 @@ extension on open.TranscriptionSettingsResponseModeEnum {
       return TranscriptionSettingsMode.available;
     } else {
       return TranscriptionSettingsMode.disabled;
+    }
+  }
+}
+
+extension on open.TranscriptionSettingsResponseLanguageEnum {
+  TranscriptionSettingsLanguage toSettingsDomain() {
+    return TranscriptionSettingsLanguage.values.firstWhereOrNull(
+          (it) => it.value == value,
+        ) ??
+        TranscriptionSettingsLanguage.auto;
+  }
+}
+
+extension on open.TranscriptionSettingsResponseClosedCaptionModeEnum {
+  ClosedCaptionSettingsMode toSettingsDomain() {
+    if (this ==
+        open.TranscriptionSettingsResponseClosedCaptionModeEnum.autoOn) {
+      return ClosedCaptionSettingsMode.autoOn;
+    } else if (this ==
+        open.TranscriptionSettingsResponseClosedCaptionModeEnum.available) {
+      return ClosedCaptionSettingsMode.available;
+    } else {
+      return ClosedCaptionSettingsMode.disabled;
     }
   }
 }
@@ -424,7 +452,7 @@ extension CreateDeviceRequestPushProviderEnumX
   }
 }
 
-extension DeviceExt on open.Device {
+extension DeviceExt on open.DeviceResponse {
   PushDevice? toPushDevice() {
     final parsedProvider = PushProvider.fromAlias(pushProvider);
     if (parsedProvider == null) {
@@ -446,7 +474,7 @@ extension DeviceExt on open.Device {
   }
 }
 
-extension DeviceListExt on List<open.Device> {
+extension DeviceListExt on List<open.DeviceResponse> {
   List<PushDevice> toPushDevices() {
     return map((it) => it.toPushDevice()).nonNulls.toList();
   }

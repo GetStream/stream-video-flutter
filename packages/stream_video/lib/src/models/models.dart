@@ -1,5 +1,6 @@
 export 'call_cid.dart';
 export 'call_client_publish_options.dart';
+export 'call_closed_caption.dart';
 export 'call_created_data.dart';
 export 'call_credentials.dart';
 export 'call_egress.dart';

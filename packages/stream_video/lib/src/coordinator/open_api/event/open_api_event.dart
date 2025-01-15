@@ -47,6 +47,9 @@ class OpenApiEvent with EquatableMixin {
     this.callTranscriptionStarted,
     this.callTranscriptionStopped,
     this.callTranscriptionFailed,
+    this.callClosedCaptionsStarted,
+    this.callClosedCaptionsStopped,
+    this.callClosedCaptionsFailed,
     this.callClosedCaption,
     this.custom,
     this.unknown,
@@ -177,6 +180,15 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callTranscriptionFailed:
         final event = open.CallTranscriptionFailedEvent.fromJson(jsonObj);
         return result.copyWith(callTranscriptionFailed: event);
+      case EventType.callClosedCaptionStarted:
+        final event = open.CallClosedCaptionsStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callClosedCaptionsStarted: event);
+      case EventType.callClosedCaptionStopped:
+        final event = open.CallClosedCaptionsStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(callClosedCaptionsStopped: event);
+      case EventType.callClosedCaptionFailed:
+        final event = open.CallClosedCaptionsFailedEvent.fromJson(jsonObj);
+        return result.copyWith(callClosedCaptionsFailed: event);
       case EventType.callClosedCaption:
         final event = open.ClosedCaptionEvent.fromJson(jsonObj);
         return result.copyWith(callClosedCaption: event);
@@ -224,6 +236,9 @@ class OpenApiEvent with EquatableMixin {
   final open.CallTranscriptionStartedEvent? callTranscriptionStarted;
   final open.CallTranscriptionStoppedEvent? callTranscriptionStopped;
   final open.CallTranscriptionFailedEvent? callTranscriptionFailed;
+  final open.CallClosedCaptionsStartedEvent? callClosedCaptionsStarted;
+  final open.CallClosedCaptionsStoppedEvent? callClosedCaptionsStopped;
+  final open.CallClosedCaptionsFailedEvent? callClosedCaptionsFailed;
   final open.ClosedCaptionEvent? callClosedCaption;
   final open.CustomVideoEvent? custom;
   final Object? unknown;
@@ -267,6 +282,9 @@ class OpenApiEvent with EquatableMixin {
     open.CallTranscriptionStartedEvent? callTranscriptionStarted,
     open.CallTranscriptionStoppedEvent? callTranscriptionStopped,
     open.CallTranscriptionFailedEvent? callTranscriptionFailed,
+    open.CallClosedCaptionsStartedEvent? callClosedCaptionsStarted,
+    open.CallClosedCaptionsStoppedEvent? callClosedCaptionsStopped,
+    open.CallClosedCaptionsFailedEvent? callClosedCaptionsFailed,
     open.ClosedCaptionEvent? callClosedCaption,
     open.CustomVideoEvent? custom,
     Object? unknown,
@@ -321,6 +339,12 @@ class OpenApiEvent with EquatableMixin {
           callTranscriptionStopped ?? this.callTranscriptionStopped,
       callTranscriptionFailed:
           callTranscriptionFailed ?? this.callTranscriptionFailed,
+      callClosedCaptionsStarted:
+          callClosedCaptionsStarted ?? this.callClosedCaptionsStarted,
+      callClosedCaptionsStopped:
+          callClosedCaptionsStopped ?? this.callClosedCaptionsStopped,
+      callClosedCaptionsFailed:
+          callClosedCaptionsFailed ?? this.callClosedCaptionsFailed,
       callClosedCaption: callClosedCaption ?? this.callClosedCaption,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
@@ -368,6 +392,9 @@ class OpenApiEvent with EquatableMixin {
         callTranscriptionStarted,
         callTranscriptionStopped,
         callTranscriptionFailed,
+        callClosedCaptionsStarted,
+        callClosedCaptionsStopped,
+        callClosedCaptionsFailed,
         callClosedCaption,
         custom,
         unknown,

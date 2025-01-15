@@ -19,6 +19,7 @@ class CallStatsReportSummaryResponse {
     required this.callStatus,
     this.createdAt,
     required this.firstStatsTime,
+    this.minUserRating,
     this.qualityScore,
   });
 
@@ -46,6 +47,14 @@ class CallStatsReportSummaryResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  int? minUserRating;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   int? qualityScore;
 
   @override
@@ -56,6 +65,7 @@ class CallStatsReportSummaryResponse {
     other.callStatus == callStatus &&
     other.createdAt == createdAt &&
     other.firstStatsTime == firstStatsTime &&
+    other.minUserRating == minUserRating &&
     other.qualityScore == qualityScore;
 
   @override
@@ -67,10 +77,11 @@ class CallStatsReportSummaryResponse {
     (callStatus.hashCode) +
     (createdAt == null ? 0 : createdAt!.hashCode) +
     (firstStatsTime.hashCode) +
+    (minUserRating == null ? 0 : minUserRating!.hashCode) +
     (qualityScore == null ? 0 : qualityScore!.hashCode);
 
   @override
-  String toString() => 'CallStatsReportSummaryResponse[callCid=$callCid, callDurationSeconds=$callDurationSeconds, callSessionId=$callSessionId, callStatus=$callStatus, createdAt=$createdAt, firstStatsTime=$firstStatsTime, qualityScore=$qualityScore]';
+  String toString() => 'CallStatsReportSummaryResponse[callCid=$callCid, callDurationSeconds=$callDurationSeconds, callSessionId=$callSessionId, callStatus=$callStatus, createdAt=$createdAt, firstStatsTime=$firstStatsTime, minUserRating=$minUserRating, qualityScore=$qualityScore]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -84,6 +95,11 @@ class CallStatsReportSummaryResponse {
       json[r'created_at'] = null;
     }
       json[r'first_stats_time'] = this.firstStatsTime.toUtc().toIso8601String();
+    if (this.minUserRating != null) {
+      json[r'min_user_rating'] = this.minUserRating;
+    } else {
+      json[r'min_user_rating'] = null;
+    }
     if (this.qualityScore != null) {
       json[r'quality_score'] = this.qualityScore;
     } else {
@@ -117,6 +133,7 @@ class CallStatsReportSummaryResponse {
         callStatus: mapValueOfType<String>(json, r'call_status')!,
         createdAt: mapDateTime(json, r'created_at', r''),
         firstStatsTime: mapDateTime(json, r'first_stats_time', r'')!,
+        minUserRating: mapValueOfType<int>(json, r'min_user_rating'),
         qualityScore: mapValueOfType<int>(json, r'quality_score'),
       );
     }

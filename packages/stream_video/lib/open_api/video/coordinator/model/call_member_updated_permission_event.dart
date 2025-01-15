@@ -90,6 +90,7 @@ class CallMemberUpdatedPermissionEvent {
       return CallMemberUpdatedPermissionEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
+        //MANUAL_EDIT mapCast
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},

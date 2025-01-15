@@ -16,7 +16,6 @@ class HealthCheckEvent {
     this.cid,
     required this.connectionId,
     required this.createdAt,
-    this.me,
     this.receivedAt,
     this.type = 'health.check',
   });
@@ -39,14 +38,6 @@ class HealthCheckEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  OwnUserResponse? me;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
   DateTime? receivedAt;
 
   String type;
@@ -56,7 +47,6 @@ class HealthCheckEvent {
     other.cid == cid &&
     other.connectionId == connectionId &&
     other.createdAt == createdAt &&
-    other.me == me &&
     other.receivedAt == receivedAt &&
     other.type == type;
 
@@ -66,12 +56,11 @@ class HealthCheckEvent {
     (cid == null ? 0 : cid!.hashCode) +
     (connectionId.hashCode) +
     (createdAt.hashCode) +
-    (me == null ? 0 : me!.hashCode) +
     (receivedAt == null ? 0 : receivedAt!.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, me=$me, receivedAt=$receivedAt, type=$type]';
+  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, receivedAt=$receivedAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -82,11 +71,6 @@ class HealthCheckEvent {
     }
       json[r'connection_id'] = this.connectionId;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.me != null) {
-      json[r'me'] = this.me;
-    } else {
-      json[r'me'] = null;
-    }
     if (this.receivedAt != null) {
       json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
     } else {
@@ -118,7 +102,6 @@ class HealthCheckEvent {
         cid: mapValueOfType<String>(json, r'cid'),
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        me: OwnUserResponse.fromJson(json[r'me']),
         receivedAt: mapDateTime(json, r'received_at', r''),
         type: mapValueOfType<String>(json, r'type')!,
       );

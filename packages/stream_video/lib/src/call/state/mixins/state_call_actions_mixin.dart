@@ -26,6 +26,13 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     );
   }
 
+  void setCallClosedCaptioning({required bool isCaptioning}) {
+    _logger.e(() => '[setCallClosedCaptioning] isCaptioning:$isCaptioning');
+    state = state.copyWith(
+      isCaptioning: isCaptioning,
+    );
+  }
+
   void setCallBroadcasting({
     required bool isBroadcasting,
     String? hlsPlaylistUrl,

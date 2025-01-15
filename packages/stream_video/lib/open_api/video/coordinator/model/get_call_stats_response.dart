@@ -14,6 +14,7 @@ class GetCallStatsResponse {
   /// Returns a new [GetCallStatsResponse] instance.
   GetCallStatsResponse({
     this.aggregated,
+    this.averageConnectionTime,
     required this.callDurationSeconds,
     required this.callStatus,
     this.callTimeline,
@@ -37,6 +38,14 @@ class GetCallStatsResponse {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   AggregatedStats? aggregated;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  double? averageConnectionTime;
 
   int callDurationSeconds;
 
@@ -88,6 +97,7 @@ class GetCallStatsResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetCallStatsResponse &&
     other.aggregated == aggregated &&
+    other.averageConnectionTime == averageConnectionTime &&
     other.callDurationSeconds == callDurationSeconds &&
     other.callStatus == callStatus &&
     other.callTimeline == callTimeline &&
@@ -107,6 +117,7 @@ class GetCallStatsResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (aggregated == null ? 0 : aggregated!.hashCode) +
+    (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
     (callDurationSeconds.hashCode) +
     (callStatus.hashCode) +
     (callTimeline == null ? 0 : callTimeline!.hashCode) +
@@ -123,7 +134,7 @@ class GetCallStatsResponse {
     (sfus.hashCode);
 
   @override
-  String toString() => 'GetCallStatsResponse[aggregated=$aggregated, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
+  String toString() => 'GetCallStatsResponse[aggregated=$aggregated, averageConnectionTime=$averageConnectionTime, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -131,6 +142,11 @@ class GetCallStatsResponse {
       json[r'aggregated'] = this.aggregated;
     } else {
       json[r'aggregated'] = null;
+    }
+    if (this.averageConnectionTime != null) {
+      json[r'average_connection_time'] = this.averageConnectionTime;
+    } else {
+      json[r'average_connection_time'] = null;
     }
       json[r'call_duration_seconds'] = this.callDurationSeconds;
       json[r'call_status'] = this.callStatus;
@@ -181,6 +197,7 @@ class GetCallStatsResponse {
 
       return GetCallStatsResponse(
         aggregated: AggregatedStats.fromJson(json[r'aggregated']),
+        averageConnectionTime: mapValueOfType<double>(json, r'average_connection_time'),
         callDurationSeconds: mapValueOfType<int>(json, r'call_duration_seconds')!,
         callStatus: mapValueOfType<String>(json, r'call_status')!,
         callTimeline: CallTimeline.fromJson(json[r'call_timeline']),

@@ -1,10 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../../stream_video.dart';
+import '../../../call_state.dart';
 import '../../../errors/video_error.dart';
+import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_received_data.dart';
+import '../../../models/models.dart';
 import '../../../sfu/data/models/sfu_error.dart';
+import '../../../utils/none.dart';
+import '../../../utils/result.dart';
+import '../../call_connect_options.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -65,6 +70,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: data.metadata.details.backstage,
       isRecording: data.metadata.details.recording,
       isTranscribing: data.metadata.details.transcribing,
+      isCaptioning: data.metadata.details.captioning,
       isBroadcasting: data.metadata.details.broadcasting,
       blockedUserIds: data.metadata.details.blockedUserIds.toList(),
       createdAt: data.metadata.details.createdAt,

@@ -3,9 +3,20 @@
 🚧 Breaking changes
 * https://github.com/GetStream/stream-video-flutter/pull/820: The package is now compatible with Gradle 8. The minimum required Java version is now 17.
 * https://github.com/GetStream/stream-video-flutter/pull/820: Updated the `flutter_callkit_incoming` package to version 2.5.0, which also requires Java 17.
+* The `resolution` parameter of `Call.setPreferredIncomingVideoResolution()` method changed type from `VideoResolution` to `VideoDimension`.
+* The `Call.onPermissionRequest` callback changed the event type passed as an argument from `CoordinatorCallPermissionRequestEvent` to `StreamCallPermissionRequestEvent`
 
 ✅ Added
 * https://github.com/GetStream/stream-video-flutter/pull/799: Added out-of-the-box support for blur background filters and image filters. As well as the option to create custom video filters. For complete documentation of those features please check [here.](https://getstream.io/video/docs/flutter/advanced/apply-video-filters/)
+* https://github.com/GetStream/stream-video-flutter/pull/796: Added support for Closed Captions:
+     * Listen to the `Call.closedCaptions` stream to overlay captions during your call.
+     * Use `CallPreferences` to configure: 
+         * `closedCaptionsVisibilityDurationMs` for controlling how long captions are displayed.
+         * `closedCaptionsVisibleCaptions` for managing the number of captions in the display queue.
+     * Easily enable or disable captions with the `ToggleClosedCaptionsOption` widget.
+     * Learn More:
+         * Check the [guide](https://getstream.io/video/docs/flutter/closed-captions/) for integration steps.
+         * Explore the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/closed-captions/) for UI tips.
 * https://github.com/GetStream/stream-video-flutter/pull/811: Dynamic codec negotiation during calls
 
 🐞 Fixed

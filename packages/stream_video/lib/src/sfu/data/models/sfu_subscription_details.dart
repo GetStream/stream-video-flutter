@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../stream_video.dart';
+import '../../../webrtc/model/rtc_video_dimension.dart';
+import 'sfu_track_type.dart';
 
 class SfuSubscriptionDetails with EquatableMixin {
   const SfuSubscriptionDetails({
