@@ -39,6 +39,7 @@ enum SfuEvent_EventPayload {
   callEnded, 
   participantUpdated, 
   participantMigrationComplete, 
+  changePublishOptions, 
   notSet
 }
 
@@ -66,6 +67,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     CallEnded? callEnded,
     ParticipantUpdated? participantUpdated,
     ParticipantMigrationComplete? participantMigrationComplete,
+    ChangePublishOptions? changePublishOptions,
   }) {
     final $result = create();
     if (subscriberOffer != null) {
@@ -131,6 +133,9 @@ class SfuEvent extends $pb.GeneratedMessage {
     if (participantMigrationComplete != null) {
       $result.participantMigrationComplete = participantMigrationComplete;
     }
+    if (changePublishOptions != null) {
+      $result.changePublishOptions = changePublishOptions;
+    }
     return $result;
   }
   SfuEvent._() : super();
@@ -159,10 +164,11 @@ class SfuEvent extends $pb.GeneratedMessage {
     23 : SfuEvent_EventPayload.callEnded,
     24 : SfuEvent_EventPayload.participantUpdated,
     25 : SfuEvent_EventPayload.participantMigrationComplete,
+    27 : SfuEvent_EventPayload.changePublishOptions,
     0 : SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SfuEvent', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27])
     ..aOM<SubscriberOffer>(1, _omitFieldNames ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
     ..aOM<PublisherAnswer>(2, _omitFieldNames ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
     ..aOM<ConnectionQualityChanged>(3, _omitFieldNames ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
@@ -184,6 +190,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<CallEnded>(23, _omitFieldNames ? '' : 'callEnded', subBuilder: CallEnded.create)
     ..aOM<ParticipantUpdated>(24, _omitFieldNames ? '' : 'participantUpdated', subBuilder: ParticipantUpdated.create)
     ..aOM<ParticipantMigrationComplete>(25, _omitFieldNames ? '' : 'participantMigrationComplete', subBuilder: ParticipantMigrationComplete.create)
+    ..aOM<ChangePublishOptions>(27, _omitFieldNames ? '' : 'changePublishOptions', subBuilder: ChangePublishOptions.create)
     ..hasRequiredFields = false
   ;
 
@@ -484,6 +491,108 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearParticipantMigrationComplete() => clearField(25);
   @$pb.TagNumber(25)
   ParticipantMigrationComplete ensureParticipantMigrationComplete() => $_ensure(20);
+
+  /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
+  @$pb.TagNumber(27)
+  ChangePublishOptions get changePublishOptions => $_getN(21);
+  @$pb.TagNumber(27)
+  set changePublishOptions(ChangePublishOptions v) { setField(27, v); }
+  @$pb.TagNumber(27)
+  $core.bool hasChangePublishOptions() => $_has(21);
+  @$pb.TagNumber(27)
+  void clearChangePublishOptions() => clearField(27);
+  @$pb.TagNumber(27)
+  ChangePublishOptions ensureChangePublishOptions() => $_ensure(21);
+}
+
+class ChangePublishOptions extends $pb.GeneratedMessage {
+  factory ChangePublishOptions({
+    $core.Iterable<$0.PublishOption>? publishOptions,
+    $core.String? reason,
+  }) {
+    final $result = create();
+    if (publishOptions != null) {
+      $result.publishOptions.addAll(publishOptions);
+    }
+    if (reason != null) {
+      $result.reason = reason;
+    }
+    return $result;
+  }
+  ChangePublishOptions._() : super();
+  factory ChangePublishOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChangePublishOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChangePublishOptions', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..pc<$0.PublishOption>(1, _omitFieldNames ? '' : 'publishOptions', $pb.PbFieldType.PM, subBuilder: $0.PublishOption.create)
+    ..aOS(2, _omitFieldNames ? '' : 'reason')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ChangePublishOptions clone() => ChangePublishOptions()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ChangePublishOptions copyWith(void Function(ChangePublishOptions) updates) => super.copyWith((message) => updates(message as ChangePublishOptions)) as ChangePublishOptions;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ChangePublishOptions create() => ChangePublishOptions._();
+  ChangePublishOptions createEmptyInstance() => create();
+  static $pb.PbList<ChangePublishOptions> createRepeated() => $pb.PbList<ChangePublishOptions>();
+  @$core.pragma('dart2js:noInline')
+  static ChangePublishOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChangePublishOptions>(create);
+  static ChangePublishOptions? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$0.PublishOption> get publishOptions => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.String get reason => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set reason($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasReason() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReason() => clearField(2);
+}
+
+class ChangePublishOptionsComplete extends $pb.GeneratedMessage {
+  factory ChangePublishOptionsComplete() => create();
+  ChangePublishOptionsComplete._() : super();
+  factory ChangePublishOptionsComplete.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChangePublishOptionsComplete.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChangePublishOptionsComplete', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ChangePublishOptionsComplete clone() => ChangePublishOptionsComplete()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ChangePublishOptionsComplete copyWith(void Function(ChangePublishOptionsComplete) updates) => super.copyWith((message) => updates(message as ChangePublishOptionsComplete)) as ChangePublishOptionsComplete;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ChangePublishOptionsComplete create() => ChangePublishOptionsComplete._();
+  ChangePublishOptionsComplete createEmptyInstance() => create();
+  static $pb.PbList<ChangePublishOptionsComplete> createRepeated() => $pb.PbList<ChangePublishOptionsComplete>();
+  @$core.pragma('dart2js:noInline')
+  static ChangePublishOptionsComplete getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChangePublishOptionsComplete>(create);
+  static ChangePublishOptionsComplete? _defaultInstance;
 }
 
 class ParticipantMigrationComplete extends $pb.GeneratedMessage {
@@ -1218,6 +1327,9 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$core.Deprecated('This field is deprecated.')
     $core.bool? fastReconnect,
     ReconnectDetails? reconnectDetails,
+    $core.String? publisherSdp,
+    $core.Iterable<$0.PublishOption>? preferredPublishOptions,
+    $core.Iterable<$0.SubscribeOption>? preferredSubscribeOptions,
   }) {
     final $result = create();
     if (token != null) {
@@ -1243,6 +1355,15 @@ class JoinRequest extends $pb.GeneratedMessage {
     if (reconnectDetails != null) {
       $result.reconnectDetails = reconnectDetails;
     }
+    if (publisherSdp != null) {
+      $result.publisherSdp = publisherSdp;
+    }
+    if (preferredPublishOptions != null) {
+      $result.preferredPublishOptions.addAll(preferredPublishOptions);
+    }
+    if (preferredSubscribeOptions != null) {
+      $result.preferredSubscribeOptions.addAll(preferredSubscribeOptions);
+    }
     return $result;
   }
   JoinRequest._() : super();
@@ -1257,6 +1378,9 @@ class JoinRequest extends $pb.GeneratedMessage {
     ..aOM<Migration>(5, _omitFieldNames ? '' : 'migration', subBuilder: Migration.create)
     ..aOB(6, _omitFieldNames ? '' : 'fastReconnect')
     ..aOM<ReconnectDetails>(7, _omitFieldNames ? '' : 'reconnectDetails', subBuilder: ReconnectDetails.create)
+    ..aOS(8, _omitFieldNames ? '' : 'publisherSdp')
+    ..pc<$0.PublishOption>(9, _omitFieldNames ? '' : 'preferredPublishOptions', $pb.PbFieldType.PM, subBuilder: $0.PublishOption.create)
+    ..pc<$0.SubscribeOption>(10, _omitFieldNames ? '' : 'preferredSubscribeOptions', $pb.PbFieldType.PM, subBuilder: $0.SubscribeOption.create)
     ..hasRequiredFields = false
   ;
 
@@ -1369,6 +1493,21 @@ class JoinRequest extends $pb.GeneratedMessage {
   void clearReconnectDetails() => clearField(7);
   @$pb.TagNumber(7)
   ReconnectDetails ensureReconnectDetails() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $core.String get publisherSdp => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set publisherSdp($core.String v) { $_setString(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasPublisherSdp() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearPublisherSdp() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.List<$0.PublishOption> get preferredPublishOptions => $_getList(8);
+
+  @$pb.TagNumber(10)
+  $core.List<$0.SubscribeOption> get preferredSubscribeOptions => $_getList(9);
 }
 
 class ReconnectDetails extends $pb.GeneratedMessage {
@@ -1551,6 +1690,7 @@ class JoinResponse extends $pb.GeneratedMessage {
     $0.CallState? callState,
     $core.bool? reconnected,
     $core.int? fastReconnectDeadlineSeconds,
+    $core.Iterable<$0.PublishOption>? publishOptions,
   }) {
     final $result = create();
     if (callState != null) {
@@ -1562,6 +1702,9 @@ class JoinResponse extends $pb.GeneratedMessage {
     if (fastReconnectDeadlineSeconds != null) {
       $result.fastReconnectDeadlineSeconds = fastReconnectDeadlineSeconds;
     }
+    if (publishOptions != null) {
+      $result.publishOptions.addAll(publishOptions);
+    }
     return $result;
   }
   JoinResponse._() : super();
@@ -1572,6 +1715,7 @@ class JoinResponse extends $pb.GeneratedMessage {
     ..aOM<$0.CallState>(1, _omitFieldNames ? '' : 'callState', subBuilder: $0.CallState.create)
     ..aOB(2, _omitFieldNames ? '' : 'reconnected')
     ..a<$core.int>(3, _omitFieldNames ? '' : 'fastReconnectDeadlineSeconds', $pb.PbFieldType.O3)
+    ..pc<$0.PublishOption>(4, _omitFieldNames ? '' : 'publishOptions', $pb.PbFieldType.PM, subBuilder: $0.PublishOption.create)
     ..hasRequiredFields = false
   ;
 
@@ -1624,6 +1768,9 @@ class JoinResponse extends $pb.GeneratedMessage {
   $core.bool hasFastReconnectDeadlineSeconds() => $_has(2);
   @$pb.TagNumber(3)
   void clearFastReconnectDeadlineSeconds() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.List<$0.PublishOption> get publishOptions => $_getList(3);
 }
 
 /// ParticipantJoined is fired when a user joins a call
@@ -2272,10 +2419,18 @@ class AudioLevelChanged extends $pb.GeneratedMessage {
 class AudioSender extends $pb.GeneratedMessage {
   factory AudioSender({
     $0.Codec? codec,
+    $0.TrackType? trackType,
+    $core.int? publishOptionId,
   }) {
     final $result = create();
     if (codec != null) {
       $result.codec = codec;
+    }
+    if (trackType != null) {
+      $result.trackType = trackType;
+    }
+    if (publishOptionId != null) {
+      $result.publishOptionId = publishOptionId;
     }
     return $result;
   }
@@ -2285,6 +2440,8 @@ class AudioSender extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioSender', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
     ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -2319,6 +2476,24 @@ class AudioSender extends $pb.GeneratedMessage {
   void clearCodec() => clearField(2);
   @$pb.TagNumber(2)
   $0.Codec ensureCodec() => $_ensure(0);
+
+  @$pb.TagNumber(3)
+  $0.TrackType get trackType => $_getN(1);
+  @$pb.TagNumber(3)
+  set trackType($0.TrackType v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasTrackType() => $_has(1);
+  @$pb.TagNumber(3)
+  void clearTrackType() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get publishOptionId => $_getIZ(2);
+  @$pb.TagNumber(4)
+  set publishOptionId($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasPublishOptionId() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearPublishOptionId() => clearField(4);
 }
 
 /// VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
@@ -2464,6 +2639,8 @@ class VideoSender extends $pb.GeneratedMessage {
   factory VideoSender({
     $0.Codec? codec,
     $core.Iterable<VideoLayerSetting>? layers,
+    $0.TrackType? trackType,
+    $core.int? publishOptionId,
   }) {
     final $result = create();
     if (codec != null) {
@@ -2471,6 +2648,12 @@ class VideoSender extends $pb.GeneratedMessage {
     }
     if (layers != null) {
       $result.layers.addAll(layers);
+    }
+    if (trackType != null) {
+      $result.trackType = trackType;
+    }
+    if (publishOptionId != null) {
+      $result.publishOptionId = publishOptionId;
     }
     return $result;
   }
@@ -2481,6 +2664,8 @@ class VideoSender extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoSender', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
     ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
     ..pc<VideoLayerSetting>(3, _omitFieldNames ? '' : 'layers', $pb.PbFieldType.PM, subBuilder: VideoLayerSetting.create)
+    ..e<$0.TrackType>(4, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
+    ..a<$core.int>(5, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -2518,6 +2703,24 @@ class VideoSender extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   $core.List<VideoLayerSetting> get layers => $_getList(1);
+
+  @$pb.TagNumber(4)
+  $0.TrackType get trackType => $_getN(2);
+  @$pb.TagNumber(4)
+  set trackType($0.TrackType v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTrackType() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearTrackType() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get publishOptionId => $_getIZ(3);
+  @$pb.TagNumber(5)
+  set publishOptionId($core.int v) { $_setSignedInt32(3, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasPublishOptionId() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearPublishOptionId() => clearField(5);
 }
 
 /// sent to users when they need to change the quality of their video
