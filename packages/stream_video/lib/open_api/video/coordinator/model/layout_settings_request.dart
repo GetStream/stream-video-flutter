@@ -13,11 +13,20 @@ part of openapi.api;
 class LayoutSettingsRequest {
   /// Returns a new [LayoutSettingsRequest] instance.
   LayoutSettingsRequest({
+    this.detectOrientation,
     this.externalAppUrl,
     this.externalCssUrl,
     required this.name,
     this.options = const {},
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? detectOrientation;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -41,6 +50,7 @@ class LayoutSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is LayoutSettingsRequest &&
+    other.detectOrientation == detectOrientation &&
     other.externalAppUrl == externalAppUrl &&
     other.externalCssUrl == externalCssUrl &&
     other.name == name &&
@@ -49,16 +59,22 @@ class LayoutSettingsRequest {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (detectOrientation == null ? 0 : detectOrientation!.hashCode) +
     (externalAppUrl == null ? 0 : externalAppUrl!.hashCode) +
     (externalCssUrl == null ? 0 : externalCssUrl!.hashCode) +
     (name.hashCode) +
     (options.hashCode);
 
   @override
-  String toString() => 'LayoutSettingsRequest[externalAppUrl=$externalAppUrl, externalCssUrl=$externalCssUrl, name=$name, options=$options]';
+  String toString() => 'LayoutSettingsRequest[detectOrientation=$detectOrientation, externalAppUrl=$externalAppUrl, externalCssUrl=$externalCssUrl, name=$name, options=$options]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.detectOrientation != null) {
+      json[r'detect_orientation'] = this.detectOrientation;
+    } else {
+      json[r'detect_orientation'] = null;
+    }
     if (this.externalAppUrl != null) {
       json[r'external_app_url'] = this.externalAppUrl;
     } else {
@@ -93,6 +109,7 @@ class LayoutSettingsRequest {
       }());
 
       return LayoutSettingsRequest(
+        detectOrientation: mapValueOfType<bool>(json, r'detect_orientation'),
         externalAppUrl: mapValueOfType<String>(json, r'external_app_url'),
         externalCssUrl: mapValueOfType<String>(json, r'external_css_url'),
         name: LayoutSettingsRequestNameEnum.fromJson(json[r'name'])!,

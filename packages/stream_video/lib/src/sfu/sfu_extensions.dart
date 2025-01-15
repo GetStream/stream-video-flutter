@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 
-import '../../stream_video.dart';
+import '../call_state.dart';
+import '../models/models.dart';
+import '../utils/string.dart';
 import 'data/models/sfu_participant.dart';
 
 extension SfuParticipantX on SfuParticipant {

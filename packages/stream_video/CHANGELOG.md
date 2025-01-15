@@ -2,6 +2,18 @@
 
 🚧 Breaking changes
 * The package is now compatible with Gradle 8. The minimum required Java version is now 17.
+* The `resolution` parameter of `Call.setPreferredIncomingVideoResolution()` method changed type from `VideoResolution` to `VideoDimension`.
+* The `Call.onPermissionRequest` callback changed the event type passed as an argument from `CoordinatorCallPermissionRequestEvent` to `StreamCallPermissionRequestEvent`
+
+✅ Added
+* Added support for Closed Captions:
+     * Listen to the `Call.closedCaptions` stream to overlay captions during your call.
+     * Use `CallPreferences` to configure: 
+         * `closedCaptionsVisibilityDurationMs` for controlling how long captions are displayed.
+         * `closedCaptionsVisibleCaptions` for managing the number of captions in the display queue.
+     * Learn More:
+         * Check the [guide](https://getstream.io/video/docs/flutter/closed-captions/) for integration steps.
+         * Explore the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/closed-captions/) for UI tips.
 
 ## 0.6.1
 
@@ -10,6 +22,9 @@
 ✅ Added
 * Added the 'call.collectUserFeedback()' method which allows users to send call quality rating. These ratings are visible on the Dashboard and are aggregated in call stats for easy tracking. For a sample implementation, please refer to the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-quality-rating/).
 * Added device thermal status reporting to better optimize call quality.
+
+🐞 Fixed
+* Fixes rejecting ringing call when CallEnd, instead of CallDecline, event is triggered by CallKit during ringing.
 
 ## 0.6.0
 

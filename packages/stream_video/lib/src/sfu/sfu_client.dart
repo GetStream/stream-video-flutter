@@ -69,7 +69,7 @@ class SfuClient {
     try {
       _logger.d(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
-      _logger.v(() => '[setPublisher] response: ${response.stringify()}');
+      _logger.d(() => '[setPublisher] response: ${response.stringify()}');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -121,9 +121,7 @@ class SfuClient {
     sfu.SendStatsRequest request,
   ) async {
     try {
-      _logger.v(() => '[sendStats] request: $request');
       final response = await _client.sendStats(_withAuthHeaders(), request);
-      _logger.v(() => '[sendStats] response: $response');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -134,13 +132,13 @@ class SfuClient {
 extension on sfu.SetPublisherRequest {
   String stringify() {
     return 'SetPublisherRequest(sessionId: $sessionId, tracks: $tracks, '
-        'sdp.length: ${sdp.length})';
+        'sdp: $sdp)';
   }
 }
 
 extension on sfu.SetPublisherResponse {
   String stringify() {
     return 'SetPublisherResponse(sessionId: $sessionId, '
-        'iceRestart: $iceRestart, error: $error, sdp.length: ${sdp.length})';
+        'iceRestart: $iceRestart, error: $error, sdp: $sdp)';
   }
 }

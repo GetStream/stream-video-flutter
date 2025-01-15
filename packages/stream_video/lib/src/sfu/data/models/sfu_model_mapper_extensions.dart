@@ -1,6 +1,9 @@
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
+import 'sfu_codec.dart';
+import 'sfu_publish_options.dart';
 import 'sfu_subscription_details.dart';
 import 'sfu_track_type.dart';
 
@@ -34,6 +37,18 @@ extension SfuTrackTypeMapper on SfuTrackType {
   }
 }
 
+extension RtcVideoQualityMapper on RtcVideoQuality {
+  sfu_models.VideoQuality toDTO() {
+    return switch (this) {
+      RtcVideoQuality.lowUnspecified =>
+        sfu_models.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
+      RtcVideoQuality.mid => sfu_models.VideoQuality.VIDEO_QUALITY_MID,
+      RtcVideoQuality.high => sfu_models.VideoQuality.VIDEO_QUALITY_HIGH,
+      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF
+    };
+  }
+}
+
 extension SfuSubscriptionDetailsMapper on SfuSubscriptionDetails {
   sfu.TrackSubscriptionDetails toDTO() {
     return sfu.TrackSubscriptionDetails(
@@ -43,6 +58,36 @@ extension SfuSubscriptionDetailsMapper on SfuSubscriptionDetails {
       dimension: sfu_models.VideoDimension(
         width: dimension?.width,
         height: dimension?.height,
+      ),
+    );
+  }
+}
+
+extension SfuCodecMapper on SfuCodec {
+  sfu_models.Codec toDTO() {
+    return sfu_models.Codec(
+      payloadType: payloadType,
+      name: name,
+      fmtp: fmtpLine,
+      clockRate: clockRate,
+      encodingParameters: encodingParameters,
+    );
+  }
+}
+
+extension SfuPublishOptionsMapper on SfuPublishOptions {
+  sfu_models.PublishOption toDTO() {
+    return sfu_models.PublishOption(
+      trackType: trackType.toDTO(),
+      codec: codec.toDTO(),
+      maxSpatialLayers: maxSpatialLayers,
+      maxTemporalLayers: maxTemporalLayers,
+      bitrate: bitrate,
+      fps: fps,
+      id: id,
+      videoDimension: sfu_models.VideoDimension(
+        width: videoDimension?.width,
+        height: videoDimension?.height,
       ),
     );
   }

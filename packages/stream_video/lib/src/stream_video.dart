@@ -673,13 +673,27 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    final call = activeCall;
-    if (call == null || call.callCid.value != cid) return;
+    final activeCall = this.activeCall;
 
-    final result = await call.leave();
+    // If there is no active call, reject the incoming call.
+    if (activeCall == null) {
+      final callResult = await consumeIncomingCall(uuid: uuid, cid: cid);
+      final callToReject = callResult.getDataOrNull();
+      if (callToReject == null) return;
 
-    if (result is Failure) {
-      _logger.d(() => '[onCallDecline] error leaving call: ${result.error}');
+      final result = await callToReject.reject(
+        reason: CallRejectReason.decline(),
+      );
+
+      if (result is Failure) {
+        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
+      }
+    } else if (activeCall.callCid.value == cid) {
+      final result = await activeCall.leave();
+
+      if (result is Failure) {
+        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
+      }
     }
   }
 
@@ -893,7 +907,7 @@ class StreamVideoOptions {
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
-    this.sdpPolicy = const SdpPolicy(),
+    this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
     this.muteVideoWhenInBackground = false,

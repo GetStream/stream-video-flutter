@@ -20,7 +20,6 @@ class UserRequest {
     this.language,
     this.name,
     this.privacySettings,
-    this.pushNotifications,
   });
 
   Map<String, Object> custom;
@@ -67,15 +66,7 @@ class UserRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PrivacySettings? privacySettings;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  PushNotificationSettingsInput? pushNotifications;
+  Object? privacySettings;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserRequest &&
@@ -85,8 +76,7 @@ class UserRequest {
     other.invisible == invisible &&
     other.language == language &&
     other.name == name &&
-    other.privacySettings == privacySettings &&
-    other.pushNotifications == pushNotifications;
+    other.privacySettings == privacySettings;
 
   @override
   int get hashCode =>
@@ -97,11 +87,10 @@ class UserRequest {
     (invisible == null ? 0 : invisible!.hashCode) +
     (language == null ? 0 : language!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
-    (privacySettings == null ? 0 : privacySettings!.hashCode) +
-    (pushNotifications == null ? 0 : pushNotifications!.hashCode);
+    (privacySettings == null ? 0 : privacySettings!.hashCode);
 
   @override
-  String toString() => 'UserRequest[custom=$custom, id=$id, image=$image, invisible=$invisible, language=$language, name=$name, privacySettings=$privacySettings, pushNotifications=$pushNotifications]';
+  String toString() => 'UserRequest[custom=$custom, id=$id, image=$image, invisible=$invisible, language=$language, name=$name, privacySettings=$privacySettings]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -132,11 +121,6 @@ class UserRequest {
     } else {
       json[r'privacy_settings'] = null;
     }
-    if (this.pushNotifications != null) {
-      json[r'push_notifications'] = this.pushNotifications;
-    } else {
-      json[r'push_notifications'] = null;
-    }
     return json;
   }
 
@@ -165,8 +149,7 @@ class UserRequest {
         invisible: mapValueOfType<bool>(json, r'invisible'),
         language: mapValueOfType<String>(json, r'language'),
         name: mapValueOfType<String>(json, r'name'),
-        privacySettings: PrivacySettings.fromJson(json[r'privacy_settings']),
-        pushNotifications: PushNotificationSettingsInput.fromJson(json[r'push_notifications']),
+        privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
       );
     }
     return null;

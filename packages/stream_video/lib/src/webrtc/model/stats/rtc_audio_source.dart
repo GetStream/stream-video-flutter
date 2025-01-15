@@ -33,6 +33,7 @@ class RtcAudioSource extends RtcMediaSource {
   final double? echoReturnLoss;
   final double? echoReturnLossEnhancement;
 
+  @override
   String? get codecId => id;
 
   static RtcAudioSource? fromJson(dynamic value) {

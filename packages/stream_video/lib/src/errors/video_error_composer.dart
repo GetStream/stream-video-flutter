@@ -1,7 +1,7 @@
 import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../../stream_video.dart';
+import '../../open_api/video/coordinator/api.dart';
 import 'video_error.dart';
 
 /// TODO

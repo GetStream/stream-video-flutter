@@ -13,9 +13,30 @@ part of openapi.api;
 class StartTranscriptionRequest {
   /// Returns a new [StartTranscriptionRequest] instance.
   StartTranscriptionRequest({
+    this.enableClosedCaptions,
+    this.language,
     this.transcriptionExternalStorage,
   });
 
+  /// Enable closed captions along with transcriptions
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? enableClosedCaptions;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? language;
+
+  /// Store transcriptions in this external storage
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -26,18 +47,32 @@ class StartTranscriptionRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is StartTranscriptionRequest &&
+    other.enableClosedCaptions == enableClosedCaptions &&
+    other.language == language &&
     other.transcriptionExternalStorage == transcriptionExternalStorage;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (enableClosedCaptions == null ? 0 : enableClosedCaptions!.hashCode) +
+    (language == null ? 0 : language!.hashCode) +
     (transcriptionExternalStorage == null ? 0 : transcriptionExternalStorage!.hashCode);
 
   @override
-  String toString() => 'StartTranscriptionRequest[transcriptionExternalStorage=$transcriptionExternalStorage]';
+  String toString() => 'StartTranscriptionRequest[enableClosedCaptions=$enableClosedCaptions, language=$language, transcriptionExternalStorage=$transcriptionExternalStorage]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.enableClosedCaptions != null) {
+      json[r'enable_closed_captions'] = this.enableClosedCaptions;
+    } else {
+      json[r'enable_closed_captions'] = null;
+    }
+    if (this.language != null) {
+      json[r'language'] = this.language;
+    } else {
+      json[r'language'] = null;
+    }
     if (this.transcriptionExternalStorage != null) {
       json[r'transcription_external_storage'] = this.transcriptionExternalStorage;
     } else {
@@ -65,6 +100,8 @@ class StartTranscriptionRequest {
       }());
 
       return StartTranscriptionRequest(
+        enableClosedCaptions: mapValueOfType<bool>(json, r'enable_closed_captions'),
+        language: mapValueOfType<String>(json, r'language'),
         transcriptionExternalStorage: mapValueOfType<String>(json, r'transcription_external_storage'),
       );
     }

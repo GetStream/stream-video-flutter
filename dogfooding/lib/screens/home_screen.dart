@@ -67,7 +67,21 @@ class _HomeScreenState extends State<HomeScreen> {
     if (callId.isEmpty) callId = generateAlphanumericString(12);
 
     unawaited(showLoadingIndicator(context));
-    _call = _streamVideo.makeCall(callType: kCallType, id: callId);
+    _call = _streamVideo.makeCall(
+      callType: kCallType,
+      id: callId,
+      preferences: DefaultCallPreferences(
+        closedCaptionsVisibleCaptions: 3,
+        closedCaptionsVisibilityDurationMs: 5000,
+      ),
+      // Uncomment to force a specific codec when publishing video track
+      // preferences: DefaultCallPreferences(
+      //   clientPublishOptions: ClientPublishOptions(
+      //     preferredCodec: PreferredCodec.av1,
+      //     fmtpLine: 'level-idx=5;profile=0;tier=0',
+      //   ),
+      // ),
+    );
 
     bool isRinging = memberIds.isNotEmpty;
 
@@ -289,6 +303,8 @@ class _JoinForm extends StatelessWidget {
               child: TextField(
                 controller: callIdController,
                 style: const TextStyle(color: Colors.white),
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: InputDecoration(
                   enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(
@@ -302,6 +318,8 @@ class _JoinForm extends StatelessWidget {
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   isDense: true,
+                  hintStyle:
+                      const TextStyle(color: AppColorPalette.secondaryText),
                   hintText: 'Enter call id',
                   // suffix button to generate a random call id
                   suffixIcon: IconButton(

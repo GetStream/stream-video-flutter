@@ -15,10 +15,11 @@ class RtcRemoteTrack extends RtcTrack {
     required super.mediaStream,
     required super.mediaTrack,
     super.videoDimension,
-    super.receiver,
-    super.transceiver,
+    this.transceiver,
     this.audioSinkId,
   });
+
+  final rtc.RTCRtpTransceiver? transceiver;
 
   /// The audio sink device id of the track in case it is an audio track.
   final String? audioSinkId;
@@ -57,8 +58,6 @@ class RtcRemoteTrack extends RtcTrack {
     rtc.MediaStream? mediaStream,
     rtc.MediaStreamTrack? mediaTrack,
     RtcVideoDimension? videoDimension,
-    rtc.RTCRtpReceiver? receiver,
-    rtc.RTCRtpTransceiver? transceiver,
     String? audioSinkId,
   }) {
     return RtcRemoteTrack(
@@ -67,8 +66,6 @@ class RtcRemoteTrack extends RtcTrack {
       mediaStream: mediaStream ?? this.mediaStream,
       mediaTrack: mediaTrack ?? this.mediaTrack,
       videoDimension: videoDimension ?? this.videoDimension,
-      receiver: receiver ?? this.receiver,
-      transceiver: transceiver ?? this.transceiver,
       audioSinkId: audioSinkId ?? this.audioSinkId,
     );
   }
