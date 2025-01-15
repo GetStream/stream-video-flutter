@@ -17,6 +17,7 @@
      * Learn More:
          * Check the [guide](https://getstream.io/video/docs/flutter/closed-captions/) for integration steps.
          * Explore the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/closed-captions/) for UI tips.
+* https://github.com/GetStream/stream-video-flutter/pull/811: Dynamic codec negotiation during calls
 
 🐞 Fixed
 * https://github.com/GetStream/stream-video-flutter/pull/822: Fixed issues when ending the call while in Picture in Picture mode on Android. 
