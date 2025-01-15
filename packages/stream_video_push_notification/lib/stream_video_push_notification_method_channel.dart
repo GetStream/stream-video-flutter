@@ -44,6 +44,8 @@ class MethodChannelStreamVideoPushNotification
     CallerCustomizationFunction? callerCustomizationCallback,
     BackgroundVoipCallHandler? backgroundVoipCallHandler,
   ) async {
+    if (!CurrentPlatform.isIos) return;
+
     this.callerCustomizationCallback = callerCustomizationCallback;
     if (backgroundVoipCallHandler != null) {
       final backgroundCallback =

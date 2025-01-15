@@ -16,11 +16,11 @@ class PictureInPictureHelper {
              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (activity.isInPictureInPictureMode) {
                     activity.moveTaskToBack(true) 
-                }
 
-                val params = PictureInPictureParams.Builder()
-                params.setAutoEnterEnabled(false)
-                activity.setPictureInPictureParams(params.build())
+                    val params = PictureInPictureParams.Builder()
+                    params.setAutoEnterEnabled(false)
+                    activity.setPictureInPictureParams(params.build())
+                }
             }
         }
 
