@@ -775,8 +775,6 @@ class Call {
         success: (success) {
           _credentials = success.data.credentials;
           _statsReportingIntervalMs = success.data.reportingIntervalMs;
-          // _session?.rtcManager
-          //     ?.updateReportingInterval(success.data.reportingIntervalMs);
 
           return Result.success(success.data.credentials);
         },
