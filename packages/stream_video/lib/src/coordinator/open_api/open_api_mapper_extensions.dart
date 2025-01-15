@@ -128,6 +128,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           sessionId: event.sessionId,
           user: event.participant.user.toCallUser(),
           participant: event.participant.toCallParticipant(),
+          duration: Duration(seconds: event.durationSeconds),
         );
       case EventType.callSessionParticipantCountUpdated:
         final event = callSessionParticipantCountUpdated!;
@@ -262,6 +263,24 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
+      case EventType.callClosedCaptionStarted:
+        final event = callClosedCaptionsStarted!;
+        return CoordinatorCallClosedCaptionStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
+      case EventType.callClosedCaptionStopped:
+        final event = callClosedCaptionsStopped!;
+        return CoordinatorCallClosedCaptionStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
+      case EventType.callClosedCaptionFailed:
+        final event = callClosedCaptionsFailed!;
+        return CoordinatorCallClosedCaptionFailedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
       case EventType.callClosedCaption:
         final event = callClosedCaption!;
         return CoordinatorCallClosedCaptionEvent(
@@ -271,6 +290,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           endTime: event.closedCaption.endTime,
           speakerId: event.closedCaption.speakerId,
           text: event.closedCaption.text,
+          user: event.closedCaption.user.toCallUser(),
         );
       case EventType.callNotification:
         // TODO: Handle event

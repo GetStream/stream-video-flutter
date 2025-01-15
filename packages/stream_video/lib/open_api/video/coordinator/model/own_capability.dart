@@ -40,9 +40,11 @@ class OwnCapability {
   static const sendAudio = OwnCapability._(r'send-audio');
   static const sendVideo = OwnCapability._(r'send-video');
   static const startBroadcastCall = OwnCapability._(r'start-broadcast-call');
+  static const startClosedCaptionsCall = OwnCapability._(r'start-closed-captions-call');
   static const startRecordCall = OwnCapability._(r'start-record-call');
   static const startTranscriptionCall = OwnCapability._(r'start-transcription-call');
   static const stopBroadcastCall = OwnCapability._(r'stop-broadcast-call');
+  static const stopClosedCaptionsCall = OwnCapability._(r'stop-closed-captions-call');
   static const stopRecordCall = OwnCapability._(r'stop-record-call');
   static const stopTranscriptionCall = OwnCapability._(r'stop-transcription-call');
   static const updateCall = OwnCapability._(r'update-call');
@@ -69,9 +71,11 @@ class OwnCapability {
     sendAudio,
     sendVideo,
     startBroadcastCall,
+    startClosedCaptionsCall,
     startRecordCall,
     startTranscriptionCall,
     stopBroadcastCall,
+    stopClosedCaptionsCall,
     stopRecordCall,
     stopTranscriptionCall,
     updateCall,
@@ -133,9 +137,11 @@ class OwnCapabilityTypeTransformer {
         case r'send-audio': return OwnCapability.sendAudio;
         case r'send-video': return OwnCapability.sendVideo;
         case r'start-broadcast-call': return OwnCapability.startBroadcastCall;
+        case r'start-closed-captions-call': return OwnCapability.startClosedCaptionsCall;
         case r'start-record-call': return OwnCapability.startRecordCall;
         case r'start-transcription-call': return OwnCapability.startTranscriptionCall;
         case r'stop-broadcast-call': return OwnCapability.stopBroadcastCall;
+        case r'stop-closed-captions-call': return OwnCapability.stopClosedCaptionsCall;
         case r'stop-record-call': return OwnCapability.stopRecordCall;
         case r'stop-transcription-call': return OwnCapability.stopTranscriptionCall;
         case r'update-call': return OwnCapability.updateCall;

@@ -309,23 +309,23 @@ class StreamRingSettings extends AbstractSettings {
 
 class StreamTranscriptionSettings extends AbstractSettings {
   const StreamTranscriptionSettings({
-    this.closedCaptionMode = '',
-    this.mode = TranscriptionSettingsMode.disabled,
-    this.languages = const [],
+    this.closedCaptionMode = ClosedCaptionSettingsMode.disabled,
+    this.transcriptionMode = TranscriptionSettingsMode.disabled,
+    this.language = TranscriptionSettingsLanguage.auto,
   });
 
-  final String closedCaptionMode;
-  final List<String> languages;
-  final TranscriptionSettingsMode mode;
+  final TranscriptionSettingsLanguage language;
+  final ClosedCaptionSettingsMode closedCaptionMode;
+  final TranscriptionSettingsMode transcriptionMode;
 
   @override
-  List<Object?> get props => [closedCaptionMode, mode, languages];
+  List<Object?> get props => [closedCaptionMode, transcriptionMode, language];
 
   TranscriptionSettingsRequest toOpenDto() {
     return TranscriptionSettingsRequest(
-      closedCaptionMode: closedCaptionMode,
-      mode: mode.toOpenDto(),
-      languages: languages,
+      closedCaptionMode: closedCaptionMode.toOpenDto(),
+      mode: transcriptionMode.toOpenDto(),
+      language: language.toOpenDto(),
     );
   }
 }
@@ -395,6 +395,7 @@ class StreamTargetResolution extends AbstractSettings {
       encoding: RtcVideoEncoding(
         maxFramerate: 30,
         maxBitrate: bitrate ?? defaultBitrate,
+        quality: RtcVideoQuality.high,
       ),
     );
   }
@@ -411,6 +412,39 @@ class StreamRtmpSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [enabled, quality];
+}
+
+enum StreamTranscriptionMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  TranscriptionSettingsResponseModeEnum toOpenDto() {
+    switch (this) {
+      case StreamTranscriptionMode.available:
+        return TranscriptionSettingsResponseModeEnum.available;
+      case StreamTranscriptionMode.disabled:
+        return TranscriptionSettingsResponseModeEnum.disabled;
+      case StreamTranscriptionMode.autoOn:
+        return TranscriptionSettingsResponseModeEnum.autoOn;
+    }
+  }
+
+  static StreamTranscriptionMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return StreamTranscriptionMode.available;
+      case 'disabled':
+        return StreamTranscriptionMode.disabled;
+      case 'autoOn':
+        return StreamTranscriptionMode.autoOn;
+      default:
+        return StreamTranscriptionMode.disabled;
+    }
+  }
 }
 
 enum RecordSettingsMode {
@@ -505,6 +539,74 @@ enum TranscriptionSettingsMode {
         return TranscriptionSettingsRequestModeEnum.disabled;
       case TranscriptionSettingsMode.autoOn:
         return TranscriptionSettingsRequestModeEnum.autoOn;
+    }
+  }
+}
+
+enum TranscriptionSettingsLanguage {
+  auto('auto'),
+  en('en'),
+  fr('fr'),
+  es('es'),
+  de('de'),
+  it('it'),
+  nl('nl'),
+  pt('pt'),
+  pl('pl'),
+  ca('ca'),
+  cs('cs'),
+  da('da'),
+  el('el'),
+  fi('fi'),
+  id('id'),
+  ja('ja'),
+  ru('ru'),
+  sv('sv'),
+  ta('ta'),
+  th('th'),
+  tr('tr'),
+  hu('hu'),
+  ro('ro'),
+  zh('zh'),
+  ar('ar'),
+  tl('tl'),
+  he('he'),
+  hi('hi'),
+  hr('hr'),
+  ko('ko'),
+  ms('ms'),
+  no('no'),
+  uk('uk');
+
+  const TranscriptionSettingsLanguage(this.value);
+  final String value;
+
+  @override
+  String toString() => value;
+
+  TranscriptionSettingsRequestLanguageEnum toOpenDto() {
+    return TranscriptionSettingsRequestLanguageEnumTypeTransformer()
+            .decode(value) ??
+        TranscriptionSettingsRequestLanguageEnum.auto;
+  }
+}
+
+enum ClosedCaptionSettingsMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  TranscriptionSettingsRequestClosedCaptionModeEnum toOpenDto() {
+    switch (this) {
+      case ClosedCaptionSettingsMode.available:
+        return TranscriptionSettingsRequestClosedCaptionModeEnum.available;
+      case ClosedCaptionSettingsMode.disabled:
+        return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
+      case ClosedCaptionSettingsMode.autoOn:
+        return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
     }
   }
 }

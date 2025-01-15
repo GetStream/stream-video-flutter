@@ -14,6 +14,7 @@ class GoLiveRequest {
   /// Returns a new [GoLiveRequest] instance.
   GoLiveRequest({
     this.recordingStorageName,
+    this.startClosedCaption,
     this.startHls,
     this.startRecording,
     this.startRtmpBroadcasts,
@@ -28,6 +29,14 @@ class GoLiveRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? recordingStorageName;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? startClosedCaption;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -72,6 +81,7 @@ class GoLiveRequest {
   @override
   bool operator ==(Object other) => identical(this, other) || other is GoLiveRequest &&
     other.recordingStorageName == recordingStorageName &&
+    other.startClosedCaption == startClosedCaption &&
     other.startHls == startHls &&
     other.startRecording == startRecording &&
     other.startRtmpBroadcasts == startRtmpBroadcasts &&
@@ -82,6 +92,7 @@ class GoLiveRequest {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (recordingStorageName == null ? 0 : recordingStorageName!.hashCode) +
+    (startClosedCaption == null ? 0 : startClosedCaption!.hashCode) +
     (startHls == null ? 0 : startHls!.hashCode) +
     (startRecording == null ? 0 : startRecording!.hashCode) +
     (startRtmpBroadcasts == null ? 0 : startRtmpBroadcasts!.hashCode) +
@@ -89,7 +100,7 @@ class GoLiveRequest {
     (transcriptionStorageName == null ? 0 : transcriptionStorageName!.hashCode);
 
   @override
-  String toString() => 'GoLiveRequest[recordingStorageName=$recordingStorageName, startHls=$startHls, startRecording=$startRecording, startRtmpBroadcasts=$startRtmpBroadcasts, startTranscription=$startTranscription, transcriptionStorageName=$transcriptionStorageName]';
+  String toString() => 'GoLiveRequest[recordingStorageName=$recordingStorageName, startClosedCaption=$startClosedCaption, startHls=$startHls, startRecording=$startRecording, startRtmpBroadcasts=$startRtmpBroadcasts, startTranscription=$startTranscription, transcriptionStorageName=$transcriptionStorageName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -97,6 +108,11 @@ class GoLiveRequest {
       json[r'recording_storage_name'] = this.recordingStorageName;
     } else {
       json[r'recording_storage_name'] = null;
+    }
+    if (this.startClosedCaption != null) {
+      json[r'start_closed_caption'] = this.startClosedCaption;
+    } else {
+      json[r'start_closed_caption'] = null;
     }
     if (this.startHls != null) {
       json[r'start_hls'] = this.startHls;
@@ -146,6 +162,7 @@ class GoLiveRequest {
 
       return GoLiveRequest(
         recordingStorageName: mapValueOfType<String>(json, r'recording_storage_name'),
+        startClosedCaption: mapValueOfType<bool>(json, r'start_closed_caption'),
         startHls: mapValueOfType<bool>(json, r'start_hls'),
         startRecording: mapValueOfType<bool>(json, r'start_recording'),
         startRtmpBroadcasts: mapValueOfType<bool>(json, r'start_rtmp_broadcasts'),

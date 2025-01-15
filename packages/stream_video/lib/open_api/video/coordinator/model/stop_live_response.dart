@@ -19,7 +19,6 @@ class StopLiveResponse {
 
   CallResponse call;
 
-  /// Duration of the request in milliseconds
   String duration;
 
   @override

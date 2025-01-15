@@ -201,6 +201,47 @@ class _SettingsMenuState extends State<SettingsMenu> {
           });
         },
       ),
+      StreamBuilder(
+          stream: widget.call.state.asStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final callState = snapshot.data as CallState;
+
+              if (callState.settings.transcription.closedCaptionMode ==
+                  ClosedCaptionSettingsMode.disabled) {
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                children: [
+                  const SizedBox(height: 16),
+                  StandardActionMenuItem(
+                    icon: callState.isCaptioning
+                        ? Icons.closed_caption_sharp
+                        : Icons.closed_caption_disabled_sharp,
+                    label: 'Toggle Closed Caption',
+                    trailing: Text(
+                      callState.isCaptioning ? 'On' : 'Off',
+                      style: TextStyle(
+                        color: callState.isCaptioning
+                            ? AppColorPalette.appGreen
+                            : null,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (!callState.isCaptioning) {
+                        widget.call.startClosedCaptions();
+                      } else {
+                        widget.call.stopClosedCaptions();
+                      }
+                    },
+                  ),
+                ],
+              );
+            }
+
+            return const SizedBox.shrink();
+          }),
       const SizedBox(height: 16),
       StandardActionMenuItem(
         icon: Icons.high_quality_sharp,
@@ -523,21 +564,21 @@ class _SettingsMenuState extends State<SettingsMenu> {
     ];
   }
 
-  VideoResolution? getIncomingVideoResolution(IncomingVideoQuality quality) {
+  VideoDimension? getIncomingVideoResolution(IncomingVideoQuality quality) {
     switch (quality) {
       case IncomingVideoQuality.auto:
       case IncomingVideoQuality.off:
         return null;
       case IncomingVideoQuality.p2160:
-        return VideoResolution(width: 3840, height: 2160);
+        return VideoDimension(width: 3840, height: 2160);
       case IncomingVideoQuality.p1080:
-        return VideoResolution(width: 1920, height: 1080);
+        return VideoDimension(width: 1920, height: 1080);
       case IncomingVideoQuality.p720:
-        return VideoResolution(width: 1280, height: 720);
+        return VideoDimension(width: 1280, height: 720);
       case IncomingVideoQuality.p480:
-        return VideoResolution(width: 640, height: 480);
+        return VideoDimension(width: 640, height: 480);
       case IncomingVideoQuality.p144:
-        return VideoResolution(width: 256, height: 144);
+        return VideoDimension(width: 256, height: 144);
     }
   }
 

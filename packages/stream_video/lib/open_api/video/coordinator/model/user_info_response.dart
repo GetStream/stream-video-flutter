@@ -14,12 +14,15 @@ class UserInfoResponse {
   /// Returns a new [UserInfoResponse] instance.
   UserInfoResponse({
     this.custom = const {},
+    required this.id,
     required this.image,
     required this.name,
     this.roles = const [],
   });
 
   Map<String, Object> custom;
+
+  String id;
 
   String image;
 
@@ -30,6 +33,7 @@ class UserInfoResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserInfoResponse &&
     _deepEquality.equals(other.custom, custom) &&
+    other.id == id &&
     other.image == image &&
     other.name == name &&
     _deepEquality.equals(other.roles, roles);
@@ -38,16 +42,18 @@ class UserInfoResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (custom.hashCode) +
+    (id.hashCode) +
     (image.hashCode) +
     (name.hashCode) +
     (roles.hashCode);
 
   @override
-  String toString() => 'UserInfoResponse[custom=$custom, image=$image, name=$name, roles=$roles]';
+  String toString() => 'UserInfoResponse[custom=$custom, id=$id, image=$image, name=$name, roles=$roles]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'custom'] = this.custom;
+      json[r'id'] = this.id;
       json[r'image'] = this.image;
       json[r'name'] = this.name;
       json[r'roles'] = this.roles;
@@ -74,6 +80,7 @@ class UserInfoResponse {
 
       return UserInfoResponse(
         custom: mapCastOfType<String, Object>(json, r'custom')!,
+        id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image')!,
         name: mapValueOfType<String>(json, r'name')!,
         roles: json[r'roles'] is Iterable
@@ -127,6 +134,7 @@ class UserInfoResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'custom',
+    'id',
     'image',
     'name',
     'roles',

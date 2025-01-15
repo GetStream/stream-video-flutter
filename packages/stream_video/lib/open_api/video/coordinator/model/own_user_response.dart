@@ -13,9 +13,7 @@ part of openapi.api;
 class OwnUserResponse {
   /// Returns a new [OwnUserResponse] instance.
   OwnUserResponse({
-    required this.banned,
     this.blockedUserIds = const [],
-    this.channelMutes = const [],
     required this.createdAt,
     this.custom = const {},
     this.deactivatedAt,
@@ -23,30 +21,18 @@ class OwnUserResponse {
     this.devices = const [],
     required this.id,
     this.image,
-    required this.invisible,
     required this.language,
     this.lastActive,
-    this.latestHiddenChannels = const [],
-    this.mutes = const [],
     this.name,
-    required this.online,
     this.privacySettings,
     this.pushNotifications,
     this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
-    required this.totalUnreadCount,
-    required this.unreadChannels,
-    required this.unreadCount,
-    required this.unreadThreads,
     required this.updatedAt,
   });
 
-  bool banned;
-
   List<String> blockedUserIds;
-
-  List<ChannelMute> channelMutes;
 
   DateTime createdAt;
 
@@ -68,7 +54,7 @@ class OwnUserResponse {
   ///
   DateTime? deletedAt;
 
-  List<Device> devices;
+  List<DeviceResponse> devices;
 
   String id;
 
@@ -80,8 +66,6 @@ class OwnUserResponse {
   ///
   String? image;
 
-  bool invisible;
-
   String language;
 
   ///
@@ -92,10 +76,6 @@ class OwnUserResponse {
   ///
   DateTime? lastActive;
 
-  List<String> latestHiddenChannels;
-
-  List<UserMuteResponse> mutes;
-
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -104,15 +84,13 @@ class OwnUserResponse {
   ///
   String? name;
 
-  bool online;
-
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PrivacySettingsResponse? privacySettings;
+  Object? privacySettings;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -134,21 +112,11 @@ class OwnUserResponse {
 
   List<String> teams;
 
-  int totalUnreadCount;
-
-  int unreadChannels;
-
-  int unreadCount;
-
-  int unreadThreads;
-
   DateTime updatedAt;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is OwnUserResponse &&
-    other.banned == banned &&
     _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
-    _deepEquality.equals(other.channelMutes, channelMutes) &&
     other.createdAt == createdAt &&
     _deepEquality.equals(other.custom, custom) &&
     other.deactivatedAt == deactivatedAt &&
@@ -156,30 +124,20 @@ class OwnUserResponse {
     _deepEquality.equals(other.devices, devices) &&
     other.id == id &&
     other.image == image &&
-    other.invisible == invisible &&
     other.language == language &&
     other.lastActive == lastActive &&
-    _deepEquality.equals(other.latestHiddenChannels, latestHiddenChannels) &&
-    _deepEquality.equals(other.mutes, mutes) &&
     other.name == name &&
-    other.online == online &&
     other.privacySettings == privacySettings &&
     other.pushNotifications == pushNotifications &&
     other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
     other.role == role &&
     _deepEquality.equals(other.teams, teams) &&
-    other.totalUnreadCount == totalUnreadCount &&
-    other.unreadChannels == unreadChannels &&
-    other.unreadCount == unreadCount &&
-    other.unreadThreads == unreadThreads &&
     other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (banned.hashCode) +
     (blockedUserIds.hashCode) +
-    (channelMutes.hashCode) +
     (createdAt.hashCode) +
     (custom.hashCode) +
     (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
@@ -187,32 +145,22 @@ class OwnUserResponse {
     (devices.hashCode) +
     (id.hashCode) +
     (image == null ? 0 : image!.hashCode) +
-    (invisible.hashCode) +
     (language.hashCode) +
     (lastActive == null ? 0 : lastActive!.hashCode) +
-    (latestHiddenChannels.hashCode) +
-    (mutes.hashCode) +
     (name == null ? 0 : name!.hashCode) +
-    (online.hashCode) +
     (privacySettings == null ? 0 : privacySettings!.hashCode) +
     (pushNotifications == null ? 0 : pushNotifications!.hashCode) +
     (revokeTokensIssuedBefore == null ? 0 : revokeTokensIssuedBefore!.hashCode) +
     (role.hashCode) +
     (teams.hashCode) +
-    (totalUnreadCount.hashCode) +
-    (unreadChannels.hashCode) +
-    (unreadCount.hashCode) +
-    (unreadThreads.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'OwnUserResponse[banned=$banned, blockedUserIds=$blockedUserIds, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, name=$name, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadCount=$unreadCount, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
+  String toString() => 'OwnUserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'banned'] = this.banned;
       json[r'blocked_user_ids'] = this.blockedUserIds;
-      json[r'channel_mutes'] = this.channelMutes;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
     if (this.deactivatedAt != null) {
@@ -232,21 +180,17 @@ class OwnUserResponse {
     } else {
       json[r'image'] = null;
     }
-      json[r'invisible'] = this.invisible;
       json[r'language'] = this.language;
     if (this.lastActive != null) {
       json[r'last_active'] = this.lastActive!.toUtc().toIso8601String();
     } else {
       json[r'last_active'] = null;
     }
-      json[r'latest_hidden_channels'] = this.latestHiddenChannels;
-      json[r'mutes'] = this.mutes;
     if (this.name != null) {
       json[r'name'] = this.name;
     } else {
       json[r'name'] = null;
     }
-      json[r'online'] = this.online;
     if (this.privacySettings != null) {
       json[r'privacy_settings'] = this.privacySettings;
     } else {
@@ -264,10 +208,6 @@ class OwnUserResponse {
     }
       json[r'role'] = this.role;
       json[r'teams'] = this.teams;
-      json[r'total_unread_count'] = this.totalUnreadCount;
-      json[r'unread_channels'] = this.unreadChannels;
-      json[r'unread_count'] = this.unreadCount;
-      json[r'unread_threads'] = this.unreadThreads;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
@@ -291,38 +231,26 @@ class OwnUserResponse {
       }());
 
       return OwnUserResponse(
-        banned: mapValueOfType<bool>(json, r'banned')!,
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
             ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        channelMutes: ChannelMute.listFromJson(json[r'channel_mutes']),
         createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
-        devices: Device.listFromJson(json[r'devices']),
+        devices: DeviceResponse.listFromJson(json[r'devices']),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
-        invisible: mapValueOfType<bool>(json, r'invisible')!,
         language: mapValueOfType<String>(json, r'language')!,
         lastActive: mapDateTime(json, r'last_active', r''),
-        latestHiddenChannels: json[r'latest_hidden_channels'] is Iterable
-            ? (json[r'latest_hidden_channels'] as Iterable).cast<String>().toList(growable: false)
-            : const [],
-        mutes: UserMuteResponse.listFromJson(json[r'mutes']),
         name: mapValueOfType<String>(json, r'name'),
-        online: mapValueOfType<bool>(json, r'online')!,
-        privacySettings: PrivacySettingsResponse.fromJson(json[r'privacy_settings']),
+        privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
         pushNotifications: PushNotificationSettingsResponse.fromJson(json[r'push_notifications']),
         revokeTokensIssuedBefore: mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable
             ? (json[r'teams'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        totalUnreadCount: mapValueOfType<int>(json, r'total_unread_count')!,
-        unreadChannels: mapValueOfType<int>(json, r'unread_channels')!,
-        unreadCount: mapValueOfType<int>(json, r'unread_count')!,
-        unreadThreads: mapValueOfType<int>(json, r'unread_threads')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }
@@ -371,22 +299,13 @@ class OwnUserResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'banned',
-    'channel_mutes',
     'created_at',
     'custom',
     'devices',
     'id',
-    'invisible',
     'language',
-    'mutes',
-    'online',
     'role',
     'teams',
-    'total_unread_count',
-    'unread_channels',
-    'unread_count',
-    'unread_threads',
     'updated_at',
   };
 }

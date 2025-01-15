@@ -1,6 +1,13 @@
 import 'package:meta/meta.dart';
 
-import '../../../stream_video.dart';
+import '../../../open_api/video/coordinator/api.dart';
+import '../../call_state.dart';
+import '../../coordinator/coordinator_client.dart';
+import '../../logger/impl/tagged_logger.dart';
+import '../../models/models.dart';
+import '../../utils/none.dart';
+import '../../utils/result.dart';
+import '../call.dart';
 import '../state/call_state_notifier.dart';
 
 typedef GetStateOrNull = CallState? Function();
@@ -182,6 +189,28 @@ class PermissionsManager {
     _logger.d(() => '[stopTranscription] no args');
     final result = await coordinatorClient.stopTranscription(callCid);
     _logger.v(() => '[stopTranscription] result: $result');
+    return result;
+  }
+
+  Future<Result<None>> startClosedCaptions() async {
+    if (!hasPermission(CallPermission.startClosedCaptionsCall)) {
+      _logger.w(() => '[startClosedCaptions] rejected (no permission)');
+      return Result.error('Cannot start closed captions (no permission)');
+    }
+    _logger.d(() => '[startClosedCaptions] no args');
+    final result = await coordinatorClient.startClosedCaptions(callCid);
+    _logger.v(() => '[startClosedCaptions] result: $result');
+    return result;
+  }
+
+  Future<Result<None>> stopClosedCaptions() async {
+    if (!hasPermission(CallPermission.stopClosedCaptionsCall)) {
+      _logger.w(() => '[stopClosedCaptions] rejected (no permission)');
+      return Result.error('Cannot stop closed captions (no permission)');
+    }
+    _logger.d(() => '[stopClosedCaptions] no args');
+    final result = await coordinatorClient.stopClosedCaptions(callCid);
+    _logger.v(() => '[stopClosedCaptions] result: $result');
     return result;
   }
 

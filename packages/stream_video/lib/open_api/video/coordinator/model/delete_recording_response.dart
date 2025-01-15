@@ -16,6 +16,7 @@ class DeleteRecordingResponse {
     required this.duration,
   });
 
+  /// Duration of the request in milliseconds
   String duration;
 
   @override

@@ -39,6 +39,9 @@ enum EventType {
   callTranscriptionStarted('call.transcription_started'),
   callTranscriptionStopped('call.transcription_stopped'),
   callTranscriptionFailed('call.transcription_failed'),
+  callClosedCaptionStarted('call.closed_captions_started'),
+  callClosedCaptionStopped('call.closed_captions_stopped'),
+  callClosedCaptionFailed('call.closed_captions_failed'),
   callClosedCaption('call.closed_caption'),
   custom('custom'),
   unknown('unknown');

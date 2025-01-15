@@ -20,8 +20,8 @@ dependencies:
   permission_handler: ^11.3.1
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
-  stream_video: ^0.6.1
-  stream_webrtc_flutter: ^0.12.2+2
+  stream_video: ^0.6.0
+  stream_webrtc_flutter: ^0.12.5+1
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
