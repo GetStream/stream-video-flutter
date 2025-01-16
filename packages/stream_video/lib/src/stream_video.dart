@@ -137,6 +137,7 @@ class StreamVideo extends Disposable {
   })  : _options = options,
         _state = MutableClientState(user) {
     _client = buildCoordinatorClient(
+      user: user,
       apiKey: apiKey,
       tokenManager: _tokenManager,
       latencySettings: _options.latencySettings,
@@ -270,10 +271,12 @@ class StreamVideo extends Disposable {
         'Cannot connect anonymous user to the WS due to Missing Permissions',
       );
     }
+
     _connectOperation ??= _connect(
       includeUserDetails: includeUserDetails,
       registerPushDevice: registerPushDevice,
     ).asCancelable();
+
     return _connectOperation!
         .valueOrDefault(Result.error('connect was cancelled'))
         .whenComplete(() {
@@ -298,6 +301,7 @@ class StreamVideo extends Disposable {
     bool registerPushDevice = true,
   }) async {
     _logger.i(() => '[connect] currentUser.id: ${_state.currentUser.id}');
+
     if (_connectionState.isConnected) {
       _logger.w(() => '[connect] rejected (already connected)');
       final token = _tokenManager.getCachedToken();
@@ -306,9 +310,11 @@ class StreamVideo extends Disposable {
       }
       return Result.success(token);
     }
+
     _connectionState = ConnectionState.connecting(
       _state.currentUser.id,
     );
+
     // guest user will be updated when token gets fetched
     final tokenResult = await _tokenManager.getToken();
     if (tokenResult is! Success<UserToken>) {
@@ -319,6 +325,7 @@ class StreamVideo extends Disposable {
       );
       return tokenResult;
     }
+
     final user = _state.user.value;
     _logger.v(() => '[connect] currentUser.id : ${user.id}');
     try {
@@ -857,6 +864,7 @@ class StreamVideo extends Disposable {
 }
 
 CoordinatorClient buildCoordinatorClient({
+  required User user,
   required String rpcUrl,
   required String wsUrl,
   required String apiKey,
@@ -876,6 +884,7 @@ CoordinatorClient buildCoordinatorClient({
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,
+      isAnonymous: user.type == UserType.anonymous,
     ),
   );
 }

@@ -7,6 +7,7 @@ import '../webrtc/model/stats/rtc_codec.dart';
 import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
 import '../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
 import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
+import '../webrtc/model/stats/rtc_printable_stats.dart';
 import '../webrtc/peer_type.dart';
 import '../webrtc/rtc_manager.dart';
 import 'state/call_state_notifier.dart';
@@ -33,14 +34,15 @@ class StatsReporter {
 
   Future<({CallStats publisherStats, CallStats subscriberStats})>
       collectStats() async {
-    final publisherStatsBundle = await rtcManager.publisher.getStats();
+    final publisherStatsBundle = await rtcManager.publisher?.getStats();
     final subscriberStatsBundle = await rtcManager.subscriber.getStats();
 
     final publisherStats = CallStats(
       peerType: StreamPeerType.publisher,
-      stats: publisherStatsBundle.rtcStats,
-      printable: publisherStatsBundle.printable,
-      raw: publisherStatsBundle.rawStats,
+      stats: publisherStatsBundle?.rtcStats ?? [],
+      printable: publisherStatsBundle?.printable ??
+          const RtcPrintableStats(local: '', remote: ''),
+      raw: publisherStatsBundle?.rawStats ?? [],
     );
 
     final subscriberStats = CallStats(

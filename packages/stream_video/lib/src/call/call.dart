@@ -970,6 +970,8 @@ class Call {
         _logger.v(() => '[startSession] applying connect options');
         await _applyConnectOptions();
       },
+      isAnonymousUser:
+          _streamVideo.state.currentUser.type == UserType.anonymous,
     );
 
     _subscriptions.add(
