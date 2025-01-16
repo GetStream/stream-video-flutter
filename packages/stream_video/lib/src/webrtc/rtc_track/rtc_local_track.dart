@@ -28,8 +28,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     required super.mediaStream,
     required super.mediaTrack,
     required this.mediaConstraints,
-    required this.originalMediaTrack,
     this.stopTrackOnMute = true,
+    this.clonedTracks = const [],
     super.videoDimension,
   });
 
@@ -52,7 +52,6 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       trackType: SfuTrackType.audio,
       mediaStream: stream,
       mediaTrack: audioTrack,
-      originalMediaTrack: audioTrack,
       mediaConstraints: constraints,
     );
 
@@ -77,7 +76,6 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       trackType: SfuTrackType.video,
       mediaStream: stream,
       mediaTrack: videoTrack,
-      originalMediaTrack: videoTrack,
       mediaConstraints: constraints,
     );
 
@@ -103,15 +101,13 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       trackType: SfuTrackType.screenShare,
       mediaStream: stream,
       mediaTrack: videoTrack,
-      originalMediaTrack: videoTrack,
       mediaConstraints: constraints,
     );
 
     return track;
   }
 
-  /// The original media track used to create this track.
-  final rtc.MediaStreamTrack originalMediaTrack;
+  final List<rtc.MediaStreamTrack> clonedTracks;
 
   /// The media constraints used to create this track.
   ///
@@ -140,6 +136,9 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     streamLog.i(_tag, () => 'Stopping track: $trackId');
     try {
       await mediaTrack.stop();
+      for (final track in clonedTracks) {
+        await track.stop();
+      }
     } catch (e) {
       streamLog.w(_tag, () => 'Error stopping mediaTrack: $e');
     }
@@ -152,6 +151,38 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   }
 
   @override
+  void enable() {
+    // Return if the track is already enabled.
+    if (mediaTrack.enabled) return;
+
+    streamLog.i(_tag, () => 'Enabling track $trackId');
+    try {
+      mediaTrack.enabled = true;
+      for (final track in clonedTracks) {
+        track.enabled = true;
+      }
+    } catch (_) {
+      streamLog.w(_tag, () => 'Failed to enable track $trackId');
+    }
+  }
+
+  @override
+  void disable() {
+    // Return if the track is already disabled.
+    if (!mediaTrack.enabled) return;
+
+    streamLog.i(_tag, () => 'Disabling track $trackId');
+    try {
+      mediaTrack.enabled = false;
+      for (final track in clonedTracks) {
+        track.enabled = false;
+      }
+    } catch (_) {
+      streamLog.w(_tag, () => 'Failed to disable track $trackId');
+    }
+  }
+
+  @override
   RtcLocalTrack<T> copyWith({
     String? trackIdPrefix,
     SfuTrackType? trackType,
@@ -160,7 +191,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     T? mediaConstraints,
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
-    rtc.MediaStreamTrack? originalMediaTrack,
+    List<rtc.MediaStreamTrack>? clonedTracks,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -170,7 +201,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaConstraints: mediaConstraints ?? this.mediaConstraints,
       stopTrackOnMute: stopTrackOnMute ?? this.stopTrackOnMute,
       videoDimension: videoDimension ?? this.videoDimension,
-      originalMediaTrack: originalMediaTrack ?? this.originalMediaTrack,
+      clonedTracks: clonedTracks ?? this.clonedTracks,
     );
   }
 
@@ -190,6 +221,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     // Create a new track with the new constraints.
     final newStream = await rtc.navigator.mediaDevices.getMedia(constraints);
     final newTrack = newStream.getTracks().first;
+    final clonedTracks = <rtc.MediaStreamTrack>[];
 
     // Replace the track on the transceiver if it exists.
     for (final transceiver in transceivers) {
@@ -198,15 +230,17 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       }
 
       final clonedTrack = await newTrack.clone();
+      clonedTracks.add(clonedTrack);
+
       streamLog.i(_tag, () => 'Replacing track on sender');
       await transceiver.sender.replaceTrack(clonedTrack);
     }
 
     return copyWith(
       mediaTrack: newTrack,
-      originalMediaTrack: newTrack,
       mediaStream: newStream,
       mediaConstraints: constraints,
+      clonedTracks: clonedTracks,
     );
   }
 

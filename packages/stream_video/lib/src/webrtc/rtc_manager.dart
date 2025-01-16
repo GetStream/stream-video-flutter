@@ -285,7 +285,19 @@ class RtcManager extends Disposable {
 
       // take the track from the existing transceiver for the same track type,
       // and publish it with the new publish options
-      await _addTransceiver(item.track, publishOption);
+      final result = await _addTransceiver(item.track, publishOption);
+
+      if (result is Success) {
+        final localTrack = tracks[item.track.trackId] as RtcLocalTrack?;
+        if (localTrack != null) {
+          tracks[item.track.trackId] = localTrack.copyWith(
+            clonedTracks: [
+              ...localTrack.clonedTracks,
+              result.getDataOrNull()!.mediaTrack,
+            ],
+          );
+        }
+      }
     }
 
     for (final item in transceiversManager.items().toList()) {
@@ -632,21 +644,25 @@ extension PublisherRtcManager on RtcManager {
     // callback.
     _logger.i(() => '[publishAudioTrack] track: $track');
     tracks[track.trackId] = track;
+    var updatedTrack = track.copyWith(stopTrackOnMute: stopTrackOnMute);
 
     final transceivers = <rtc.RTCRtpTransceiver>[];
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 
-      final transceiver = await _addTransceiver(track, option);
-      if (transceiver is Failure) return transceiver;
-      transceivers.add(transceiver.getDataOrNull()!);
+      final transceiverResult = await _addTransceiver(track, option);
+      if (transceiverResult is Failure) return transceiverResult;
+      transceivers.add(transceiverResult.getDataOrNull()!.transceiver);
 
-      _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
+      _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
+
+      updatedTrack = updatedTrack.copyWith(
+        clonedTracks: [
+          ...updatedTrack.clonedTracks,
+          transceiverResult.getDataOrNull()!.mediaTrack,
+        ],
+      );
     }
-
-    final updatedTrack = track.copyWith(
-      stopTrackOnMute: stopTrackOnMute,
-    );
 
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
@@ -668,6 +684,10 @@ extension PublisherRtcManager on RtcManager {
     // callback.
     _logger.i(() => '[publishVideoTrack] track: $track');
     tracks[track.trackId] = track;
+    var updatedTrack = track.copyWith(
+      videoDimension: _getTrackDimension(track),
+      stopTrackOnMute: stopTrackOnMute,
+    );
 
     if (!publishOptions.any((o) => o.trackType == track.trackType)) {
       _logger.w(
@@ -684,10 +704,18 @@ extension PublisherRtcManager on RtcManager {
 
       final cashedTransceiver = transceiversManager.get(option);
       if (cashedTransceiver == null) {
-        final transceiver = await _addTransceiver(track, option);
-        if (transceiver is Failure) return transceiver;
+        final transceiverResult = await _addTransceiver(track, option);
+        if (transceiverResult is Failure) return transceiverResult;
 
-        _logger.v(() => '[publishVideoTrack] new transceiver: $transceiver');
+        updatedTrack = updatedTrack.copyWith(
+          clonedTracks: [
+            ...updatedTrack.clonedTracks,
+            transceiverResult.getDataOrNull()!.mediaTrack,
+          ],
+        );
+
+        _logger
+            .v(() => '[publishVideoTrack] new transceiver: $transceiverResult');
       } else {
         final previousTrack = cashedTransceiver.sender.track;
 
@@ -703,11 +731,6 @@ extension PublisherRtcManager on RtcManager {
         );
       }
     }
-
-    final updatedTrack = track.copyWith(
-      videoDimension: _getTrackDimension(track),
-      stopTrackOnMute: stopTrackOnMute,
-    );
 
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
@@ -759,7 +782,12 @@ extension PublisherRtcManager on RtcManager {
         .toList();
   }
 
-  Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
+  Future<
+      Result<
+          ({
+            rtc.RTCRtpTransceiver transceiver,
+            rtc.MediaStreamTrack mediaTrack,
+          })>> _addTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
   ) async {
@@ -771,16 +799,16 @@ extension PublisherRtcManager on RtcManager {
 
     // create a clone of the track as otherwise the same trackId will
     // appear in the SDP in multiple transceivers
-    final mediaTrack = await track.originalMediaTrack.clone();
+    final mediaTrackClone = await track.mediaTrack.clone();
 
     _logger.v(
       () =>
-          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}, trackId: ${mediaTrack.id}',
+          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}, trackId: ${mediaTrackClone.id}',
     );
 
     if (track is RtcLocalAudioTrack) {
       transceiverResult = await publisher!.addAudioTransceiver(
-        track: mediaTrack,
+        track: mediaTrackClone,
         encodings: [
           rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
         ],
@@ -800,7 +828,7 @@ extension PublisherRtcManager on RtcManager {
       }
 
       transceiverResult = await publisher!.addVideoTransceiver(
-        track: mediaTrack,
+        track: mediaTrackClone,
         encodings: sendEncodings,
       );
     } else {
@@ -812,12 +840,17 @@ extension PublisherRtcManager on RtcManager {
 
     final transceiver = transceiverResult.getDataOrNull()!;
     transceiversManager.add(
-      track.copyWith(mediaTrack: mediaTrack),
+      track.copyWith(mediaTrack: mediaTrackClone),
       publishOptions,
       transceiver,
     );
 
-    return Result.success(transceiver);
+    return Result.success(
+      (
+        transceiver: transceiver,
+        mediaTrack: mediaTrackClone,
+      ),
+    );
   }
 
   Future<Result<RtcLocalTrack>> muteTrack({required String trackId}) async {
