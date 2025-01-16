@@ -763,6 +763,10 @@ extension PublisherRtcManager on RtcManager {
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
   ) async {
+    if (publisher == null) {
+      return Result.error('Publisher is not created, cannot add transceiver');
+    }
+
     Result<rtc.RTCRtpTransceiver>? transceiverResult;
 
     // create a clone of the track as otherwise the same trackId will
@@ -775,7 +779,7 @@ extension PublisherRtcManager on RtcManager {
     );
 
     if (track is RtcLocalAudioTrack) {
-      transceiverResult = await publisher.addAudioTransceiver(
+      transceiverResult = await publisher!.addAudioTransceiver(
         track: mediaTrack,
         encodings: [
           rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
@@ -795,7 +799,7 @@ extension PublisherRtcManager on RtcManager {
         _logger.v(() => '[addTransceiver] encoding: ${encoding.toMap()}');
       }
 
-      transceiverResult = await publisher.addVideoTransceiver(
+      transceiverResult = await publisher!.addVideoTransceiver(
         track: mediaTrack,
         encodings: sendEncodings,
       );
