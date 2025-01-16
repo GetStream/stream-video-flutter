@@ -656,9 +656,9 @@ extension PublisherRtcManager on RtcManager {
 
       _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
 
-      updatedTrack = track.copyWith(
+      updatedTrack = updatedTrack.copyWith(
         clonedTracks: [
-          ...track.clonedTracks,
+          ...updatedTrack.clonedTracks,
           transceiverResult.getDataOrNull()!.mediaTrack,
         ],
       );
@@ -707,9 +707,9 @@ extension PublisherRtcManager on RtcManager {
         final transceiverResult = await _addTransceiver(track, option);
         if (transceiverResult is Failure) return transceiverResult;
 
-        updatedTrack = track.copyWith(
+        updatedTrack = updatedTrack.copyWith(
           clonedTracks: [
-            ...track.clonedTracks,
+            ...updatedTrack.clonedTracks,
             transceiverResult.getDataOrNull()!.mediaTrack,
           ],
         );
