@@ -33,27 +33,17 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
   CallStats? _subscriberStats;
 
   /// Controls the subscription to the stats updates.
-  StreamSubscription<CallStats>? _subscription;
+  StreamSubscription<({CallStats publisherStats, CallStats subscriberStats})>?
+      _subscription;
 
   @override
   void initState() {
     super.initState();
     _subscription = widget.call.stats.listen((stats) {
-      // final local = stats.printable.local.substring(0, 28);
-      // final remote = stats.printable.remote.substring(0, 28);
-      // _logger.v(
-      //   () => '[listenStats] #${stats.peerType}; '
-      //       'local: $local, remote: $remote <<<<<<<<<<<<<<<<<<<<<<<<<<',
-      // );
-      switch (stats.peerType) {
-        case StreamPeerType.publisher:
-          _publisherStats = stats;
-          break;
-        case StreamPeerType.subscriber:
-          _subscriberStats = stats;
-          break;
-      }
-      setState(() {});
+      setState(() {
+        _publisherStats = stats.publisherStats;
+        _subscriberStats = stats.subscriberStats;
+      });
     });
   }
 

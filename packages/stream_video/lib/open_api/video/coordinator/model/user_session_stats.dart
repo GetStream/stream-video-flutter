@@ -13,6 +13,7 @@ part of openapi.api;
 class UserSessionStats {
   /// Returns a new [UserSessionStats] instance.
   UserSessionStats({
+    this.averageConnectionTime,
     this.browser,
     this.browserVersion,
     this.currentIp,
@@ -22,6 +23,7 @@ class UserSessionStats {
     this.distanceToSfuKilometers,
     required this.freezeDurationSeconds,
     this.geolocation,
+    required this.group,
     this.jitter,
     this.latency,
     this.maxFirPerSecond,
@@ -38,7 +40,6 @@ class UserSessionStats {
     required this.packetLossFraction,
     this.pubSubHints,
     this.publishedTracks = const [],
-    this.publisherAudioMos,
     this.publisherJitter,
     this.publisherLatency,
     this.publisherNoiseCancellationSeconds,
@@ -55,7 +56,6 @@ class UserSessionStats {
     this.sdk,
     this.sdkVersion,
     required this.sessionId,
-    this.subscriberAudioMos,
     this.subscriberJitter,
     this.subscriberLatency,
     this.subscriberVideoQualityThrottledDurationSeconds,
@@ -66,6 +66,14 @@ class UserSessionStats {
     this.truncated,
     this.webrtcVersion,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  double? averageConnectionTime;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -132,6 +140,8 @@ class UserSessionStats {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   GeolocationResult? geolocation;
+
+  String group;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -237,14 +247,6 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  MOSStats? publisherAudioMos;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
   TimeStats? publisherJitter;
 
   ///
@@ -337,14 +339,6 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  MOSStats? subscriberAudioMos;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
   TimeStats? subscriberJitter;
 
   ///
@@ -395,6 +389,7 @@ class UserSessionStats {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserSessionStats &&
+    other.averageConnectionTime == averageConnectionTime &&
     other.browser == browser &&
     other.browserVersion == browserVersion &&
     other.currentIp == currentIp &&
@@ -404,6 +399,7 @@ class UserSessionStats {
     other.distanceToSfuKilometers == distanceToSfuKilometers &&
     other.freezeDurationSeconds == freezeDurationSeconds &&
     other.geolocation == geolocation &&
+    other.group == group &&
     other.jitter == jitter &&
     other.latency == latency &&
     other.maxFirPerSecond == maxFirPerSecond &&
@@ -420,7 +416,6 @@ class UserSessionStats {
     other.packetLossFraction == packetLossFraction &&
     other.pubSubHints == pubSubHints &&
     _deepEquality.equals(other.publishedTracks, publishedTracks) &&
-    other.publisherAudioMos == publisherAudioMos &&
     other.publisherJitter == publisherJitter &&
     other.publisherLatency == publisherLatency &&
     other.publisherNoiseCancellationSeconds == publisherNoiseCancellationSeconds &&
@@ -437,7 +432,6 @@ class UserSessionStats {
     other.sdk == sdk &&
     other.sdkVersion == sdkVersion &&
     other.sessionId == sessionId &&
-    other.subscriberAudioMos == subscriberAudioMos &&
     other.subscriberJitter == subscriberJitter &&
     other.subscriberLatency == subscriberLatency &&
     other.subscriberVideoQualityThrottledDurationSeconds == subscriberVideoQualityThrottledDurationSeconds &&
@@ -451,6 +445,7 @@ class UserSessionStats {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
     (browser == null ? 0 : browser!.hashCode) +
     (browserVersion == null ? 0 : browserVersion!.hashCode) +
     (currentIp == null ? 0 : currentIp!.hashCode) +
@@ -460,6 +455,7 @@ class UserSessionStats {
     (distanceToSfuKilometers == null ? 0 : distanceToSfuKilometers!.hashCode) +
     (freezeDurationSeconds.hashCode) +
     (geolocation == null ? 0 : geolocation!.hashCode) +
+    (group.hashCode) +
     (jitter == null ? 0 : jitter!.hashCode) +
     (latency == null ? 0 : latency!.hashCode) +
     (maxFirPerSecond == null ? 0 : maxFirPerSecond!.hashCode) +
@@ -476,7 +472,6 @@ class UserSessionStats {
     (packetLossFraction.hashCode) +
     (pubSubHints == null ? 0 : pubSubHints!.hashCode) +
     (publishedTracks.hashCode) +
-    (publisherAudioMos == null ? 0 : publisherAudioMos!.hashCode) +
     (publisherJitter == null ? 0 : publisherJitter!.hashCode) +
     (publisherLatency == null ? 0 : publisherLatency!.hashCode) +
     (publisherNoiseCancellationSeconds == null ? 0 : publisherNoiseCancellationSeconds!.hashCode) +
@@ -493,7 +488,6 @@ class UserSessionStats {
     (sdk == null ? 0 : sdk!.hashCode) +
     (sdkVersion == null ? 0 : sdkVersion!.hashCode) +
     (sessionId.hashCode) +
-    (subscriberAudioMos == null ? 0 : subscriberAudioMos!.hashCode) +
     (subscriberJitter == null ? 0 : subscriberJitter!.hashCode) +
     (subscriberLatency == null ? 0 : subscriberLatency!.hashCode) +
     (subscriberVideoQualityThrottledDurationSeconds == null ? 0 : subscriberVideoQualityThrottledDurationSeconds!.hashCode) +
@@ -505,10 +499,15 @@ class UserSessionStats {
     (webrtcVersion == null ? 0 : webrtcVersion!.hashCode);
 
   @override
-  String toString() => 'UserSessionStats[browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherAudioMos=$publisherAudioMos, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberAudioMos=$subscriberAudioMos, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
+  String toString() => 'UserSessionStats[averageConnectionTime=$averageConnectionTime, browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.averageConnectionTime != null) {
+      json[r'average_connection_time'] = this.averageConnectionTime;
+    } else {
+      json[r'average_connection_time'] = null;
+    }
     if (this.browser != null) {
       json[r'browser'] = this.browser;
     } else {
@@ -550,6 +549,7 @@ class UserSessionStats {
     } else {
       json[r'geolocation'] = null;
     }
+      json[r'group'] = this.group;
     if (this.jitter != null) {
       json[r'jitter'] = this.jitter;
     } else {
@@ -610,11 +610,6 @@ class UserSessionStats {
       json[r'pub_sub_hints'] = null;
     }
       json[r'published_tracks'] = this.publishedTracks;
-    if (this.publisherAudioMos != null) {
-      json[r'publisher_audio_mos'] = this.publisherAudioMos;
-    } else {
-      json[r'publisher_audio_mos'] = null;
-    }
     if (this.publisherJitter != null) {
       json[r'publisher_jitter'] = this.publisherJitter;
     } else {
@@ -671,11 +666,6 @@ class UserSessionStats {
       json[r'sdk_version'] = null;
     }
       json[r'session_id'] = this.sessionId;
-    if (this.subscriberAudioMos != null) {
-      json[r'subscriber_audio_mos'] = this.subscriberAudioMos;
-    } else {
-      json[r'subscriber_audio_mos'] = null;
-    }
     if (this.subscriberJitter != null) {
       json[r'subscriber_jitter'] = this.subscriberJitter;
     } else {
@@ -731,6 +721,7 @@ class UserSessionStats {
       }());
 
       return UserSessionStats(
+        averageConnectionTime: mapValueOfType<double>(json, r'average_connection_time'),
         browser: mapValueOfType<String>(json, r'browser'),
         browserVersion: mapValueOfType<String>(json, r'browser_version'),
         currentIp: mapValueOfType<String>(json, r'current_ip'),
@@ -740,6 +731,7 @@ class UserSessionStats {
         distanceToSfuKilometers: mapValueOfType<double>(json, r'distance_to_sfu_kilometers'),
         freezeDurationSeconds: mapValueOfType<int>(json, r'freeze_duration_seconds')!,
         geolocation: GeolocationResult.fromJson(json[r'geolocation']),
+        group: mapValueOfType<String>(json, r'group')!,
         jitter: TimeStats.fromJson(json[r'jitter']),
         latency: TimeStats.fromJson(json[r'latency']),
         maxFirPerSecond: mapValueOfType<double>(json, r'max_fir_per_second'),
@@ -756,7 +748,6 @@ class UserSessionStats {
         packetLossFraction: mapValueOfType<double>(json, r'packet_loss_fraction')!,
         pubSubHints: MediaPubSubHint.fromJson(json[r'pub_sub_hints']),
         publishedTracks: PublishedTrackInfo.listFromJson(json[r'published_tracks']),
-        publisherAudioMos: MOSStats.fromJson(json[r'publisher_audio_mos']),
         publisherJitter: TimeStats.fromJson(json[r'publisher_jitter']),
         publisherLatency: TimeStats.fromJson(json[r'publisher_latency']),
         publisherNoiseCancellationSeconds: mapValueOfType<double>(json, r'publisher_noise_cancellation_seconds'),
@@ -773,7 +764,6 @@ class UserSessionStats {
         sdk: mapValueOfType<String>(json, r'sdk'),
         sdkVersion: mapValueOfType<String>(json, r'sdk_version'),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
-        subscriberAudioMos: MOSStats.fromJson(json[r'subscriber_audio_mos']),
         subscriberJitter: TimeStats.fromJson(json[r'subscriber_jitter']),
         subscriberLatency: TimeStats.fromJson(json[r'subscriber_latency']),
         subscriberVideoQualityThrottledDurationSeconds: mapValueOfType<double>(json, r'subscriber_video_quality_throttled_duration_seconds'),
@@ -831,6 +821,7 @@ class UserSessionStats {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'freeze_duration_seconds',
+    'group',
     'max_freeze_fraction',
     'max_freezes_duration_seconds',
     'min_event_ts',

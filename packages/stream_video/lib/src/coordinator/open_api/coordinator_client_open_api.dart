@@ -4,17 +4,25 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../composed_version.dart';
-import '../../../stream_video.dart';
+import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_received_data.dart';
+import '../../models/models.dart';
+import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../state_emitter.dart';
+import '../../token/token.dart';
 import '../../token/token_manager.dart';
+import '../../utils/none.dart';
+import '../../utils/result.dart';
 import '../../utils/standard.dart';
+import '../coordinator_client.dart';
 import '../models/coordinator_connection_state.dart';
+import '../models/coordinator_events.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws.dart';
 import 'open_api_extensions.dart';
@@ -756,6 +764,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startTranscription(
     StreamCallCid callCid, {
+    bool? enableClosedCaptions,
+    String? language,
     String? transcriptionExternalStorage,
   }) async {
     try {
@@ -769,6 +779,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         callCid.id,
         open.StartTranscriptionRequest(
           transcriptionExternalStorage: transcriptionExternalStorage,
+          enableClosedCaptions: enableClosedCaptions,
+          language: language,
         ),
       );
       return const Result.success(none);
@@ -798,14 +810,83 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> stopTranscription(StreamCallCid callCid) async {
+  Future<Result<None>> stopTranscription(
+    StreamCallCid callCid, {
+    bool? stopClosedCaptions,
+  }) async {
     try {
       final connectionResult = await _waitUntilConnected();
       if (connectionResult is Failure) {
         _logger.e(() => '[stopTranscription] no connection established');
         return connectionResult;
       }
-      await _defaultApi.stopTranscription(callCid.type.value, callCid.id);
+      await _defaultApi.stopTranscription(
+        callCid.type.value,
+        callCid.id,
+        open.StopTranscriptionRequest(
+          stopClosedCaptions: stopClosedCaptions,
+        ),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> startClosedCaptions(
+    StreamCallCid callCid, {
+    bool? enableTranscription,
+    String? language,
+    String? transcriptionExternalStorage,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[startClosedCaptions] no connection established');
+        return connectionResult;
+      }
+      final result = await _defaultApi.startClosedCaptions(
+        callCid.type.value,
+        callCid.id,
+        open.StartClosedCaptionsRequest(
+          enableTranscription: enableTranscription,
+          externalStorage: transcriptionExternalStorage,
+          language: language,
+        ),
+      );
+      if (result == null) {
+        return Result.error('[startClosedCaptions] result is null');
+      }
+
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> stopClosedCaptions(
+    StreamCallCid callCid, {
+    bool? stopTranscription,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[stopClosedCaptions] no connection established');
+        return connectionResult;
+      }
+      final result = await _defaultApi.stopClosedCaptions(
+        callCid.type.value,
+        callCid.id,
+        open.StopClosedCaptionsRequest(
+          stopTranscription: stopTranscription,
+        ),
+      );
+      if (result == null) {
+        return Result.error('[stopClosedCaptions] result is null');
+      }
+
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -1047,14 +1128,31 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
-  Future<Result<CallMetadata>> stopLive(StreamCallCid callCid) async {
+  Future<Result<CallMetadata>> stopLive(
+    StreamCallCid callCid, {
+    bool? continueClosedCaption,
+    bool? continueHls,
+    bool? continueRecording,
+    bool? continueRtmpBroadcasts,
+    bool? continueTranscription,
+  }) async {
     try {
       final connectionResult = await _waitUntilConnected();
       if (connectionResult is Failure) {
         _logger.e(() => '[stopLive] no connection established');
         return connectionResult;
       }
-      final result = await _defaultApi.stopLive(callCid.type.value, callCid.id);
+      final result = await _defaultApi.stopLive(
+        callCid.type.value,
+        callCid.id,
+        open.StopLiveRequest(
+          continueClosedCaption: continueClosedCaption,
+          continueHls: continueHls,
+          continueRecording: continueRecording,
+          continueRtmpBroadcasts: continueRtmpBroadcasts,
+          continueTranscription: continueTranscription,
+        ),
+      );
       if (result == null) {
         return Result.error('stopLive result is null');
       }

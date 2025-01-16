@@ -1,3 +1,9 @@
+## 0.7.0
+* Sync version with `stream_video_flutter` 0.7.0
+
+## 0.6.1
+* Updated minimum Flutter version to 3.24.5
+
 ## 0.6.0
 * Sync version with `stream_video_flutter` 0.6.0
 

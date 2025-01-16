@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/utils.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
+import '../../models/call_client_publish_options.dart';
 import '../../models/call_credentials.dart';
 import '../../types/other.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
@@ -30,6 +31,7 @@ class CallSessionFactory {
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
     required OnPeerConnectionIssue onPeerConnectionFailure,
+    ClientPublishOptions? clientPublishOptions,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
@@ -58,6 +60,7 @@ class CallSessionFactory {
       dynascaleManager: dynascaleManager,
       sdpEditor: sdpEditor,
       onPeerConnectionIssue: onPeerConnectionFailure,
+      clientPublishOptions: clientPublishOptions,
     );
   }
 

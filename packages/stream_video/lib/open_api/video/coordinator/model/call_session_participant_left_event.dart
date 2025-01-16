@@ -15,6 +15,7 @@ class CallSessionParticipantLeftEvent {
   CallSessionParticipantLeftEvent({
     required this.callCid,
     required this.createdAt,
+    required this.durationSeconds,
     required this.participant,
     required this.sessionId,
     this.type = 'call.session_participant_left',
@@ -23,6 +24,9 @@ class CallSessionParticipantLeftEvent {
   String callCid;
 
   DateTime createdAt;
+
+  /// The duration participant was in the session in seconds
+  int durationSeconds;
 
   CallParticipantResponse participant;
 
@@ -36,6 +40,7 @@ class CallSessionParticipantLeftEvent {
   bool operator ==(Object other) => identical(this, other) || other is CallSessionParticipantLeftEvent &&
     other.callCid == callCid &&
     other.createdAt == createdAt &&
+    other.durationSeconds == durationSeconds &&
     other.participant == participant &&
     other.sessionId == sessionId &&
     other.type == type;
@@ -45,17 +50,19 @@ class CallSessionParticipantLeftEvent {
     // ignore: unnecessary_parenthesis
     (callCid.hashCode) +
     (createdAt.hashCode) +
+    (durationSeconds.hashCode) +
     (participant.hashCode) +
     (sessionId.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, participant=$participant, sessionId=$sessionId, type=$type]';
+  String toString() => 'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, durationSeconds=$durationSeconds, participant=$participant, sessionId=$sessionId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'duration_seconds'] = this.durationSeconds;
       json[r'participant'] = this.participant;
       json[r'session_id'] = this.sessionId;
       json[r'type'] = this.type;
@@ -83,6 +90,7 @@ class CallSessionParticipantLeftEvent {
       return CallSessionParticipantLeftEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
@@ -135,6 +143,7 @@ class CallSessionParticipantLeftEvent {
   static const requiredKeys = <String>{
     'call_cid',
     'created_at',
+    'duration_seconds',
     'participant',
     'session_id',
     'type',

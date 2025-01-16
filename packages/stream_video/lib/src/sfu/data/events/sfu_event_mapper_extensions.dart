@@ -1,5 +1,6 @@
 import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../../webrtc/model/rtc_video_dimension.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
 import '../models/sfu_call_grants.dart';
@@ -11,6 +12,7 @@ import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_model_mapper_extensions.dart';
 import '../models/sfu_participant.dart';
+import '../models/sfu_publish_options.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_layer_setting.dart';
 import '../models/sfu_video_sender.dart';
@@ -83,6 +85,17 @@ extension SfuEventMapper on sfu_events.SfuEvent {
               .toList(),
         );
 
+      case sfu_events.SfuEvent_EventPayload.changePublishOptions:
+        final payload = changePublishOptions;
+        return SfuChangePublishOptionsEvent(
+          publishOptions: payload.publishOptions
+              .map(
+                (it) => it.toDomain(),
+              )
+              .toList(),
+          reason: payload.reason,
+        );
+
       case sfu_events.SfuEvent_EventPayload.joinResponse:
         return SfuJoinResponseEvent(
           callState: joinResponse.callState.toDomain(),
@@ -90,6 +103,11 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           fastReconnectDeadline: Duration(
             seconds: joinResponse.fastReconnectDeadlineSeconds,
           ),
+          publishOptions: joinResponse.publishOptions
+              .map(
+                (it) => it.toDomain(),
+              )
+              .toList(),
         );
       case sfu_events.SfuEvent_EventPayload.participantJoined:
         return SfuParticipantJoinedEvent(
@@ -320,32 +338,35 @@ extension SfuWebsocketReconnectStrategyExtension
   }
 }
 
-/// TODO
 extension SfuAudioSenderExtension on sfu_events.AudioSender {
   SfuAudioSender toDomain() {
     return SfuAudioSender(
       codec: codec.toDomain(),
+      trackType: trackType.toDomain(),
+      publishOptionId: publishOptionId,
     );
   }
 }
 
-/// TODO
 extension SfuVideoSenderExtension on sfu_events.VideoSender {
   SfuVideoSender toDomain() {
     return SfuVideoSender(
       codec: codec.toDomain(),
       layers: layers.map((it) => it.toDomain()).toList(),
+      trackType: trackType.toDomain(),
+      publishOptionId: publishOptionId,
     );
   }
 }
 
-/// TODO
 extension SfuCodecExtension on sfu_models.Codec {
   SfuCodec toDomain() {
     return SfuCodec(
-      mimeType: mimeType,
-      scalabilityMode: scalabilityMode,
-      fmtp: fmtp,
+      payloadType: payloadType,
+      name: name,
+      fmtpLine: fmtp,
+      clockRate: clockRate,
+      encodingParameters: encodingParameters,
     );
   }
 }
@@ -360,6 +381,24 @@ extension on sfu_events.VideoLayerSetting {
       scaleResolutionDownBy: scaleResolutionDownBy,
       scalabilityMode: scalabilityMode,
       codec: codec.toDomain(),
+    );
+  }
+}
+
+extension on sfu_models.PublishOption {
+  SfuPublishOptions toDomain() {
+    return SfuPublishOptions(
+      id: id,
+      codec: codec.toDomain(),
+      videoDimension: RtcVideoDimension(
+        width: videoDimension.width,
+        height: videoDimension.height,
+      ),
+      trackType: trackType.toDomain(),
+      maxSpatialLayers: maxSpatialLayers,
+      maxTemporalLayers: maxTemporalLayers,
+      bitrate: bitrate,
+      fps: fps,
     );
   }
 }

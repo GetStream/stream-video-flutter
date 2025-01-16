@@ -25,6 +25,10 @@ import io.getstream.video.flutter.stream_video_flutter.service.StreamCallService
 import io.getstream.video.flutter.stream_video_flutter.service.StreamScreenShareService
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
 import io.getstream.video.flutter.stream_video_flutter.service.utils.putBoolean
+import io.getstream.webrtc.flutter.videoEffects.ProcessorProvider
+import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.BackgroundBlurFactory
+import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.BlurIntensity
+import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.VirtualBackgroundFactory
 
 class MethodCallHandlerImpl(
     appContext: Context,
@@ -34,6 +38,7 @@ class MethodCallHandlerImpl(
     private val logger by taggedLogger(tag = "StreamMethodHandler")
 
     private val serviceManager: ServiceManager = ServiceManagerImpl(appContext.applicationContext)
+    private val applicationContext = appContext.applicationContext
 
     private var permissionCallback: ((Result<Unit>) -> Unit)? = null
 
@@ -68,6 +73,38 @@ class MethodCallHandlerImpl(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         logger.d { "[onMethodCall] method: ${call.method}" }
         when (call.method) {
+            "isBackgroundEffectSupported" -> {
+                result.success(true)
+            }
+            "registerBlurEffectProcessors" -> {
+                ProcessorProvider.addProcessor(
+                    "BackgroundBlurLight",
+                    BackgroundBlurFactory(BlurIntensity.LIGHT)
+                )
+
+                ProcessorProvider.addProcessor(
+                    "BackgroundBlurMedium",
+                    BackgroundBlurFactory(BlurIntensity.MEDIUM)
+                )
+
+                ProcessorProvider.addProcessor(
+                    "BackgroundBlurHeavy",
+                    BackgroundBlurFactory(BlurIntensity.HEAVY)
+                )
+
+                result.success(null)
+            }
+            "registerImageEffectProcessors" -> {
+                val backgroundImageUrl = call.argument<String>("backgroundImageUrl")
+                backgroundImageUrl?.let {
+                    ProcessorProvider.addProcessor(
+                        "VirtualBackground-$backgroundImageUrl",
+                        VirtualBackgroundFactory(applicationContext, backgroundImageUrl)
+                    )
+                }
+
+                result.success(null)
+            }
             "enablePictureInPictureMode" -> {
                 val activity = getActivity()
                 putBoolean(activity, PictureInPictureHelper.PIP_ENABLED_PREF_KEY, true)

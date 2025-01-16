@@ -83,6 +83,7 @@ class CallUpdatedEvent {
       return CallUpdatedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
+        // MANUAL_EDIT: capabilitiesFromJson
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
             : capabilitiesFromJson(json['capabilities_by_role']) ??
@@ -94,6 +95,7 @@ class CallUpdatedEvent {
     return null;
   }
 
+  // MANUAL_EDIT: capabilitiesFromJson
   static Map<String, List<String>> capabilitiesFromJson(
       dynamic json, {
         bool growable = false,

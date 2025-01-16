@@ -13,7 +13,6 @@ part of openapi.api;
 class UserEventPayload {
   /// Returns a new [UserEventPayload] instance.
   UserEventPayload({
-    required this.banned,
     this.blockedUserIds = const [],
     required this.createdAt,
     this.custom = const {},
@@ -25,15 +24,12 @@ class UserEventPayload {
     required this.language,
     this.lastActive,
     this.name,
-    required this.online,
     this.privacySettings,
     this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
     required this.updatedAt,
   });
-
-  bool banned;
 
   List<String> blockedUserIds;
 
@@ -93,15 +89,13 @@ class UserEventPayload {
   ///
   String? name;
 
-  bool online;
-
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PrivacySettingsResponse? privacySettings;
+  Object? privacySettings;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -119,7 +113,6 @@ class UserEventPayload {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserEventPayload &&
-    other.banned == banned &&
     _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
     other.createdAt == createdAt &&
     _deepEquality.equals(other.custom, custom) &&
@@ -131,7 +124,6 @@ class UserEventPayload {
     other.language == language &&
     other.lastActive == lastActive &&
     other.name == name &&
-    other.online == online &&
     other.privacySettings == privacySettings &&
     other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
     other.role == role &&
@@ -141,7 +133,6 @@ class UserEventPayload {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (banned.hashCode) +
     (blockedUserIds.hashCode) +
     (createdAt.hashCode) +
     (custom.hashCode) +
@@ -153,7 +144,6 @@ class UserEventPayload {
     (language.hashCode) +
     (lastActive == null ? 0 : lastActive!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
-    (online.hashCode) +
     (privacySettings == null ? 0 : privacySettings!.hashCode) +
     (revokeTokensIssuedBefore == null ? 0 : revokeTokensIssuedBefore!.hashCode) +
     (role.hashCode) +
@@ -161,11 +151,10 @@ class UserEventPayload {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'UserEventPayload[banned=$banned, blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, name=$name, online=$online, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+  String toString() => 'UserEventPayload[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'banned'] = this.banned;
       json[r'blocked_user_ids'] = this.blockedUserIds;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
@@ -201,7 +190,6 @@ class UserEventPayload {
     } else {
       json[r'name'] = null;
     }
-      json[r'online'] = this.online;
     if (this.privacySettings != null) {
       json[r'privacy_settings'] = this.privacySettings;
     } else {
@@ -237,7 +225,6 @@ class UserEventPayload {
       }());
 
       return UserEventPayload(
-        banned: mapValueOfType<bool>(json, r'banned')!,
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
             ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
@@ -251,8 +238,7 @@ class UserEventPayload {
         language: mapValueOfType<String>(json, r'language')!,
         lastActive: mapDateTime(json, r'last_active', r''),
         name: mapValueOfType<String>(json, r'name'),
-        online: mapValueOfType<bool>(json, r'online')!,
-        privacySettings: PrivacySettingsResponse.fromJson(json[r'privacy_settings']),
+        privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
         revokeTokensIssuedBefore: mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable
@@ -306,13 +292,11 @@ class UserEventPayload {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'banned',
     'blocked_user_ids',
     'created_at',
     'custom',
     'id',
     'language',
-    'online',
     'role',
     'teams',
     'updated_at',

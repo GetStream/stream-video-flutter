@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../logger/stream_log.dart';
 import '../../../utils/standard.dart';
@@ -28,16 +28,18 @@ const _tag = 'SV:StatsMapper';
 const _space = ' ';
 const _lineFeed = '\n';
 
+Map<String, RtcCodec> codecs = <String, RtcCodec>{};
+
 extension RtcStatsMapper on List<rtc.StatsReport> {
   List<Map<String, dynamic>> toRawStats() {
     final rawStats = <Map<String, dynamic>>[];
 
     for (final report in this) {
       rawStats.add({
-          'id': report.id,
-          'type': report.type,
-          'timestamp': report.timestamp,
-          ...report.values,
+        'id': report.id,
+        'type': report.type,
+        'timestamp': report.timestamp,
+        ...report.values,
       });
     }
 
@@ -47,7 +49,6 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
   RtcPrintableStats toPrintableRtcStats() {
     final remoteStat = StringBuffer();
     final localStat = StringBuffer();
-    final codecs = <String, RtcCodec>{};
 
     RtcIceCandidatePair? candidatePair;
 
@@ -73,7 +74,7 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
             }
             break;
           case RtcReportType.remoteInboundRtp:
-            report.extractRemoteInboundRtp(localStat);
+            report.extractRemoteInboundRtp(localStat, codecs);
             break;
           case RtcReportType.inboundRtp:
             report.extractInboundRtp(remoteStat, codecs);
@@ -85,7 +86,7 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
             report.extractTrack(remoteStat: remoteStat, localStat: localStat);
             break;
           case RtcReportType.mediaSource:
-            report.extractMediaSource(localStat);
+            report.extractMediaSource(localStat, codecs);
             break;
           default:
             break;
@@ -405,6 +406,7 @@ extension StatsReportX on rtc.StatsReport {
 
   void extractMediaSource(
     StringBuffer localStat,
+    Map<String, RtcCodec> codecs,
   ) {
     final json = toJson();
     final String? propValue = values[RtcKind.propertyName];
@@ -426,11 +428,13 @@ extension StatsReportX on rtc.StatsReport {
         ..write(kind.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(localStat);
+      codecs[rtcBase.codecId]?.writeTo(localStat);
     }
   }
 
   void extractRemoteInboundRtp(
     StringBuffer localStat,
+    Map<String, RtcCodec> codecs,
   ) {
     final json = toJson();
     final String? propValue = values[RtcKind.propertyName];
@@ -452,6 +456,7 @@ extension StatsReportX on rtc.StatsReport {
         ..write(kind.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(localStat);
+      codecs[rtcBase.codecId]?.writeTo(localStat);
     }
   }
 }

@@ -1,3 +1,11 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "com.google.gms.google-services"
+    id 'com.google.firebase.crashlytics'
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
@@ -27,20 +35,27 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-apply plugin: 'com.android.application'
-// START: FlutterFire Configuration
-apply plugin: 'com.google.gms.google-services'
-// END: FlutterFire Configuration
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace = "io.getstream.video.flutter.dogfooding"
+    }
+
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    afterEvaluate { project ->
+         if (project.hasProperty("kotlin")) {
+             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+                 kotlinOptions {
+                     jvmTarget = "1.8"
+                 }
+             }
+         }
     }
 
     kotlinOptions {
@@ -96,6 +111,5 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:multidex:1.0.3'
 }

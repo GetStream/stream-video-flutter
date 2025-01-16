@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../logger/stream_log.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
@@ -18,16 +18,12 @@ abstract class RtcTrack {
     required this.mediaStream,
     required this.mediaTrack,
     this.videoDimension,
-    this.receiver,
-    this.transceiver,
   });
 
   final String trackIdPrefix;
   final SfuTrackType trackType;
   final rtc.MediaStream mediaStream;
   final rtc.MediaStreamTrack mediaTrack;
-  final rtc.RTCRtpReceiver? receiver;
-  final rtc.RTCRtpTransceiver? transceiver;
 
   /// The video dimension of the track in case it is a video track.
   final RtcVideoDimension? videoDimension;

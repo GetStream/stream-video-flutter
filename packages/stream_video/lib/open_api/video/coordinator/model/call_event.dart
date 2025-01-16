@@ -13,16 +13,25 @@ part of openapi.api;
 class CallEvent {
   /// Returns a new [CallEvent] instance.
   CallEvent({
-    this.additional = const {},
+    this.category,
     this.component,
     required this.description,
     required this.endTimestamp,
+    required this.internal,
+    this.issueTags = const [],
+    required this.kind,
     required this.severity,
     required this.timestamp,
     required this.type,
   });
 
-  Map<String, Object> additional;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? category;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -36,6 +45,12 @@ class CallEvent {
 
   int endTimestamp;
 
+  bool internal;
+
+  List<String> issueTags;
+
+  String kind;
+
   int severity;
 
   int timestamp;
@@ -44,10 +59,13 @@ class CallEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallEvent &&
-    _deepEquality.equals(other.additional, additional) &&
+    other.category == category &&
     other.component == component &&
     other.description == description &&
     other.endTimestamp == endTimestamp &&
+    other.internal == internal &&
+    _deepEquality.equals(other.issueTags, issueTags) &&
+    other.kind == kind &&
     other.severity == severity &&
     other.timestamp == timestamp &&
     other.type == type;
@@ -55,20 +73,27 @@ class CallEvent {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (additional.hashCode) +
+    (category == null ? 0 : category!.hashCode) +
     (component == null ? 0 : component!.hashCode) +
     (description.hashCode) +
     (endTimestamp.hashCode) +
+    (internal.hashCode) +
+    (issueTags.hashCode) +
+    (kind.hashCode) +
     (severity.hashCode) +
     (timestamp.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallEvent[additional=$additional, component=$component, description=$description, endTimestamp=$endTimestamp, severity=$severity, timestamp=$timestamp, type=$type]';
+  String toString() => 'CallEvent[category=$category, component=$component, description=$description, endTimestamp=$endTimestamp, internal=$internal, issueTags=$issueTags, kind=$kind, severity=$severity, timestamp=$timestamp, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'additional'] = this.additional;
+    if (this.category != null) {
+      json[r'category'] = this.category;
+    } else {
+      json[r'category'] = null;
+    }
     if (this.component != null) {
       json[r'component'] = this.component;
     } else {
@@ -76,6 +101,9 @@ class CallEvent {
     }
       json[r'description'] = this.description;
       json[r'end_timestamp'] = this.endTimestamp;
+      json[r'internal'] = this.internal;
+      json[r'issue_tags'] = this.issueTags;
+      json[r'kind'] = this.kind;
       json[r'severity'] = this.severity;
       json[r'timestamp'] = this.timestamp;
       json[r'type'] = this.type;
@@ -101,10 +129,15 @@ class CallEvent {
       }());
 
       return CallEvent(
-        additional: mapCastOfType<String, Object>(json, r'additional') ?? const {},
+        category: mapValueOfType<String>(json, r'category'),
         component: mapValueOfType<String>(json, r'component'),
         description: mapValueOfType<String>(json, r'description')!,
         endTimestamp: mapValueOfType<int>(json, r'end_timestamp')!,
+        internal: mapValueOfType<bool>(json, r'internal')!,
+        issueTags: json[r'issue_tags'] is Iterable
+            ? (json[r'issue_tags'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
+        kind: mapValueOfType<String>(json, r'kind')!,
         severity: mapValueOfType<int>(json, r'severity')!,
         timestamp: mapValueOfType<int>(json, r'timestamp')!,
         type: mapValueOfType<String>(json, r'type')!,
@@ -157,6 +190,8 @@ class CallEvent {
   static const requiredKeys = <String>{
     'description',
     'end_timestamp',
+    'internal',
+    'kind',
     'severity',
     'timestamp',
     'type',

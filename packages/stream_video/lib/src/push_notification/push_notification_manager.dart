@@ -4,7 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../stream_video.dart';
+import '../coordinator/coordinator_client.dart';
+import '../stream_video.dart';
 
 part 'call_kit_events.dart';
 

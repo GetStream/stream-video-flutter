@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -52,7 +53,9 @@ class SettingsMenu extends StatefulWidget {
 
 class _SettingsMenuState extends State<SettingsMenu> {
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  final DogfoodingAppChannel _dogfoodingAppChannel = DogfoodingAppChannel();
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
+  late StreamVideoEffectsManager _videoEffectsManager;
 
   var _audioOutputs = <RtcMediaDevice>[];
   var _audioInputs = <RtcMediaDevice>[];
@@ -60,12 +63,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
   bool showAudioOutputs = false;
   bool showAudioInputs = false;
   bool showIncomingQuality = false;
+  bool showBackgroundEffects = false;
+
   bool get showMainSettings =>
-      !showAudioOutputs && !showAudioInputs && !showIncomingQuality;
+      !showAudioOutputs &&
+      !showAudioInputs &&
+      !showIncomingQuality &&
+      !showBackgroundEffects;
 
   @override
   void initState() {
     super.initState();
+    _videoEffectsManager = StreamVideoEffectsManager(widget.call);
     _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen(
       (devices) {
         _audioOutputs = devices
@@ -105,6 +114,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         if (showAudioOutputs) ..._buildAudioOutputsMenu(),
         if (showAudioInputs) ..._buildAudioInputsMenu(),
         if (showIncomingQuality) ..._buildIncomingQualityMenu(),
+        if (showBackgroundEffects) ..._buildBackgroundFiltersMenu(),
       ]),
     );
   }
@@ -181,6 +191,57 @@ class _SettingsMenuState extends State<SettingsMenu> {
           });
         },
       ),
+      const SizedBox(height: 16),
+      StandardActionMenuItem(
+        icon: Icons.auto_awesome,
+        label: 'Set Background Effect',
+        onPressed: () {
+          setState(() {
+            showBackgroundEffects = true;
+          });
+        },
+      ),
+      StreamBuilder(
+          stream: widget.call.state.asStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final callState = snapshot.data as CallState;
+
+              if (callState.settings.transcription.closedCaptionMode ==
+                  ClosedCaptionSettingsMode.disabled) {
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                children: [
+                  const SizedBox(height: 16),
+                  StandardActionMenuItem(
+                    icon: callState.isCaptioning
+                        ? Icons.closed_caption_sharp
+                        : Icons.closed_caption_disabled_sharp,
+                    label: 'Toggle Closed Caption',
+                    trailing: Text(
+                      callState.isCaptioning ? 'On' : 'Off',
+                      style: TextStyle(
+                        color: callState.isCaptioning
+                            ? AppColorPalette.appGreen
+                            : null,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (!callState.isCaptioning) {
+                        widget.call.startClosedCaptions();
+                      } else {
+                        widget.call.stopClosedCaptions();
+                      }
+                    },
+                  ),
+                ],
+              );
+            }
+
+            return const SizedBox.shrink();
+          }),
       const SizedBox(height: 16),
       StandardActionMenuItem(
         icon: Icons.high_quality_sharp,
@@ -322,21 +383,202 @@ class _SettingsMenuState extends State<SettingsMenu> {
     ];
   }
 
-  VideoResolution? getIncomingVideoResolution(IncomingVideoQuality quality) {
+  List<Widget> _buildBackgroundFiltersMenu() {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                showBackgroundEffects = false;
+              });
+            },
+            child: const Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.arrow_back, size: 24),
+            ),
+          ),
+          TextButton(
+            child: const Text('Clear'),
+            onPressed: () {
+              _videoEffectsManager.disableAllFilters();
+            },
+          )
+        ],
+      ),
+      const SizedBox(height: 16),
+      const Text(
+        'Background Blur',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.blur_on,
+                      size: 30,
+                    ),
+                    onPressed: () => _videoEffectsManager
+                        .applyBackgroundBlurFilter(BlurIntensity.light),
+                  ),
+                ),
+              ),
+              const Text('Light'),
+            ],
+          ),
+          Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.blur_on,
+                      size: 40,
+                    ),
+                    onPressed: () => _videoEffectsManager
+                        .applyBackgroundBlurFilter(BlurIntensity.medium),
+                  ),
+                ),
+              ),
+              const Text('Medium'),
+            ],
+          ),
+          Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.blur_on,
+                      size: 50,
+                    ),
+                    onPressed: () => _videoEffectsManager
+                        .applyBackgroundBlurFilter(BlurIntensity.heavy),
+                  ),
+                ),
+              ),
+              const Text('Heavy'),
+            ],
+          )
+        ],
+      ),
+      const SizedBox(height: 16),
+      const Text(
+        'Image Background',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 16),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          InkWell(
+            onTap: () => _videoEffectsManager
+                .applyBackgroundImageFilter('assets/bg1.jpg'),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.asset(
+                'assets/bg1.jpg',
+                fit: BoxFit.cover,
+                width: 72,
+                height: 102,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () => _videoEffectsManager
+                .applyBackgroundImageFilter('assets/bg2.jpg'),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.asset(
+                'assets/bg2.jpg',
+                fit: BoxFit.cover,
+                width: 72,
+                height: 102,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () => _videoEffectsManager
+                .applyBackgroundImageFilter('assets/bg3.jpg'),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.asset(
+                'assets/bg3.jpg',
+                fit: BoxFit.cover,
+                width: 72,
+                height: 102,
+              ),
+            ),
+          )
+        ],
+      ),
+      const SizedBox(height: 16),
+      const Text(
+        'Custom Filters',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.filter_b_and_w,
+                      size: 40,
+                    ),
+                    onPressed: () => _videoEffectsManager.applyCustomEffect(
+                      'grayscale',
+                      registerEffectProcessorCallback: () async {
+                        await _dogfoodingAppChannel.registerGreyscaleEffect();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const Text('Grayscale'),
+            ],
+          ),
+        ],
+      ),
+    ];
+  }
+
+  VideoDimension? getIncomingVideoResolution(IncomingVideoQuality quality) {
     switch (quality) {
       case IncomingVideoQuality.auto:
       case IncomingVideoQuality.off:
         return null;
       case IncomingVideoQuality.p2160:
-        return VideoResolution(width: 3840, height: 2160);
+        return VideoDimension(width: 3840, height: 2160);
       case IncomingVideoQuality.p1080:
-        return VideoResolution(width: 1920, height: 1080);
+        return VideoDimension(width: 1920, height: 1080);
       case IncomingVideoQuality.p720:
-        return VideoResolution(width: 1280, height: 720);
+        return VideoDimension(width: 1280, height: 720);
       case IncomingVideoQuality.p480:
-        return VideoResolution(width: 640, height: 480);
+        return VideoDimension(width: 640, height: 480);
       case IncomingVideoQuality.p144:
-        return VideoResolution(width: 256, height: 144);
+        return VideoDimension(width: 256, height: 144);
     }
   }
 

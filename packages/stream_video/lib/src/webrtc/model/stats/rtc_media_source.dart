@@ -12,4 +12,5 @@ abstract class RtcMediaSource extends RtcStats implements RtcWritable {
 
   final String? kind;
   final String? trackIdentifier;
+  String? get codecId;
 }

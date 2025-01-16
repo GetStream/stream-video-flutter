@@ -41,13 +41,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return (CoordinatorClient client, StreamVideo streamVideo) {
       final params = _defaultPushParams.merge(pushParams);
 
-      if (CurrentPlatform.isIos) {
-        StreamVideoPushNotificationPlatform.instance.init(
-          params.toJson(),
-          callerCustomizationCallback,
-          backgroundVoipCallHandler,
-        );
-      }
+      StreamVideoPushNotificationPlatform.instance.init(
+        params.toJson(),
+        callerCustomizationCallback,
+        backgroundVoipCallHandler,
+      );
 
       return StreamVideoPushNotificationManager._(
         client: client,
@@ -416,6 +414,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> dispose() async {
     _subscriptions.cancelAll();
+  }
+
+  static Future ensureFullScreenIntentPermission() {
+    return StreamVideoPushNotificationPlatform.instance
+        .ensureFullScreenIntentPermission();
   }
 }
 

@@ -570,6 +570,26 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> startClosedCaptions(StreamCallCid callCid) {
+    return _retryManager.execute(
+      () => _delegate.startClosedCaptions(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('startClosedCaptions', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> stopClosedCaptions(StreamCallCid callCid) {
+    return _retryManager.execute(
+      () => _delegate.stopClosedCaptions(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('stopClosedCaptions', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
   Future<Result<None>> unblockUser({
     required StreamCallCid callCid,
     required String userId,

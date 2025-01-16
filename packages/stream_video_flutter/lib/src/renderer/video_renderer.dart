@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../stream_video_flutter.dart';

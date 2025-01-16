@@ -3,14 +3,18 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
+  battery_plus
   connectivity_plus
-  dart_vlc
   desktop_drop
   file_selector_windows
   firebase_auth
   firebase_core
-  flutter_webrtc
+  media_kit_video
+  permission_handler_windows
+  screen_brightness_windows
   share_plus
+  stream_webrtc_flutter
   thumblr_windows
   url_launcher_windows
 )
