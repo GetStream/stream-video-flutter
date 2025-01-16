@@ -1,3 +1,6 @@
+## 0.7.1
+* Sync version with `stream_video_flutter` 0.7.1
+
 ## 0.7.0
 
 🚧 Breaking changes
