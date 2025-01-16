@@ -68,8 +68,8 @@ class RtcManager extends Disposable {
 
   final String sessionId;
   final StreamCallCid callCid;
-  final String publisherId;
-  final StreamPeerConnection publisher;
+  final String? publisherId;
+  final StreamPeerConnection? publisher;
   final StreamPeerConnection subscriber;
 
   final transceiversManager = TransceiverManager();
@@ -78,7 +78,7 @@ class RtcManager extends Disposable {
   final tracks = < /*trackId*/ String, RtcTrack>{};
 
   set onPublisherIceCandidate(OnIceCandidate? cb) {
-    publisher.onIceCandidate = cb;
+    publisher?.onIceCandidate = cb;
   }
 
   set onSubscriberIceCandidate(OnIceCandidate? cb) {
@@ -90,11 +90,11 @@ class RtcManager extends Disposable {
   }
 
   set onPublisherIssue(OnIssue? cb) {
-    publisher.onIssue = cb;
+    publisher?.onIssue = cb;
   }
 
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
-    publisher.onRenegotiationNeeded = cb;
+    publisher?.onRenegotiationNeeded = cb;
   }
 
   OnLocalTrackMuted? onLocalTrackMuted;
@@ -138,7 +138,8 @@ class RtcManager extends Disposable {
   }) async {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
-      return publisher.addIceCandidate(candidate);
+      return publisher?.addIceCandidate(candidate) ??
+          Result.error('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
       return subscriber.addIceCandidate(candidate);
     }
@@ -199,7 +200,7 @@ class RtcManager extends Disposable {
 
       if (sender != null) {
         try {
-          await publisher.pc.removeTrack(sender);
+          await publisher?.pc.removeTrack(sender);
         } catch (e) {
           _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
         }
@@ -212,7 +213,7 @@ class RtcManager extends Disposable {
 
         try {
           if (transceiver != null) {
-            await publisher.pc.removeTrack(transceiver.sender);
+            await publisher?.pc.removeTrack(transceiver.sender);
           }
         } catch (e) {
           _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
@@ -284,7 +285,19 @@ class RtcManager extends Disposable {
 
       // take the track from the existing transceiver for the same track type,
       // and publish it with the new publish options
-      await _addTransceiver(item.track, publishOption);
+      final result = await _addTransceiver(item.track, publishOption);
+
+      if (result is Success) {
+        final localTrack = tracks[item.track.trackId] as RtcLocalTrack?;
+        if (localTrack != null) {
+          tracks[item.track.trackId] = localTrack.copyWith(
+            clonedTracks: [
+              ...localTrack.clonedTracks,
+              result.getDataOrNull()!.mediaTrack,
+            ],
+          );
+        }
+      }
     }
 
     for (final item in transceiversManager.items().toList()) {
@@ -423,7 +436,7 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
-    await publisher.dispose();
+    await publisher?.dispose();
     await subscriber.dispose();
 
     return super.dispose();
@@ -496,7 +509,7 @@ extension PublisherRtcManager on RtcManager {
   Future<List<RtcTrackInfo>> getAnnouncedTracks({
     String? sdp,
   }) async {
-    final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
+    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
     final infos = <RtcTrackInfo>[];
 
     for (final item in transceiversManager.items()) {
@@ -510,7 +523,7 @@ extension PublisherRtcManager on RtcManager {
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
-    final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
+    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
     final infos = <RtcTrackInfo>[];
 
     for (final publishOption in publishOptions) {
@@ -631,21 +644,25 @@ extension PublisherRtcManager on RtcManager {
     // callback.
     _logger.i(() => '[publishAudioTrack] track: $track');
     tracks[track.trackId] = track;
+    var updatedTrack = track.copyWith(stopTrackOnMute: stopTrackOnMute);
 
     final transceivers = <rtc.RTCRtpTransceiver>[];
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 
-      final transceiver = await _addTransceiver(track, option);
-      if (transceiver is Failure) return transceiver;
-      transceivers.add(transceiver.getDataOrNull()!);
+      final transceiverResult = await _addTransceiver(track, option);
+      if (transceiverResult is Failure) return transceiverResult;
+      transceivers.add(transceiverResult.getDataOrNull()!.transceiver);
 
-      _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
+      _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
+
+      updatedTrack = updatedTrack.copyWith(
+        clonedTracks: [
+          ...updatedTrack.clonedTracks,
+          transceiverResult.getDataOrNull()!.mediaTrack,
+        ],
+      );
     }
-
-    final updatedTrack = track.copyWith(
-      stopTrackOnMute: stopTrackOnMute,
-    );
 
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
@@ -667,6 +684,10 @@ extension PublisherRtcManager on RtcManager {
     // callback.
     _logger.i(() => '[publishVideoTrack] track: $track');
     tracks[track.trackId] = track;
+    var updatedTrack = track.copyWith(
+      videoDimension: _getTrackDimension(track),
+      stopTrackOnMute: stopTrackOnMute,
+    );
 
     if (!publishOptions.any((o) => o.trackType == track.trackType)) {
       _logger.w(
@@ -683,10 +704,18 @@ extension PublisherRtcManager on RtcManager {
 
       final cashedTransceiver = transceiversManager.get(option);
       if (cashedTransceiver == null) {
-        final transceiver = await _addTransceiver(track, option);
-        if (transceiver is Failure) return transceiver;
+        final transceiverResult = await _addTransceiver(track, option);
+        if (transceiverResult is Failure) return transceiverResult;
 
-        _logger.v(() => '[publishVideoTrack] new transceiver: $transceiver');
+        updatedTrack = updatedTrack.copyWith(
+          clonedTracks: [
+            ...updatedTrack.clonedTracks,
+            transceiverResult.getDataOrNull()!.mediaTrack,
+          ],
+        );
+
+        _logger
+            .v(() => '[publishVideoTrack] new transceiver: $transceiverResult');
       } else {
         final previousTrack = cashedTransceiver.sender.track;
 
@@ -702,11 +731,6 @@ extension PublisherRtcManager on RtcManager {
         );
       }
     }
-
-    final updatedTrack = track.copyWith(
-      videoDimension: _getTrackDimension(track),
-      stopTrackOnMute: stopTrackOnMute,
-    );
 
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
@@ -758,24 +782,33 @@ extension PublisherRtcManager on RtcManager {
         .toList();
   }
 
-  Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
+  Future<
+      Result<
+          ({
+            rtc.RTCRtpTransceiver transceiver,
+            rtc.MediaStreamTrack mediaTrack,
+          })>> _addTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
   ) async {
+    if (publisher == null) {
+      return Result.error('Publisher is not created, cannot add transceiver');
+    }
+
     Result<rtc.RTCRtpTransceiver>? transceiverResult;
 
     // create a clone of the track as otherwise the same trackId will
     // appear in the SDP in multiple transceivers
-    final mediaTrack = await track.originalMediaTrack.clone();
+    final mediaTrackClone = await track.mediaTrack.clone();
 
     _logger.v(
       () =>
-          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}, trackId: ${mediaTrack.id}',
+          '[addTransceiver] adding transceiver for: ${publishOptions.codec.name}, trackId: ${mediaTrackClone.id}',
     );
 
     if (track is RtcLocalAudioTrack) {
-      transceiverResult = await publisher.addAudioTransceiver(
-        track: mediaTrack,
+      transceiverResult = await publisher!.addAudioTransceiver(
+        track: mediaTrackClone,
         encodings: [
           rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
         ],
@@ -794,8 +827,8 @@ extension PublisherRtcManager on RtcManager {
         _logger.v(() => '[addTransceiver] encoding: ${encoding.toMap()}');
       }
 
-      transceiverResult = await publisher.addVideoTransceiver(
-        track: mediaTrack,
+      transceiverResult = await publisher!.addVideoTransceiver(
+        track: mediaTrackClone,
         encodings: sendEncodings,
       );
     } else {
@@ -807,12 +840,17 @@ extension PublisherRtcManager on RtcManager {
 
     final transceiver = transceiverResult.getDataOrNull()!;
     transceiversManager.add(
-      track.copyWith(mediaTrack: mediaTrack),
+      track.copyWith(mediaTrack: mediaTrackClone),
       publishOptions,
       transceiver,
     );
 
-    return Result.success(transceiver);
+    return Result.success(
+      (
+        transceiver: transceiver,
+        mediaTrack: mediaTrackClone,
+      ),
+    );
   }
 
   Future<Result<RtcLocalTrack>> muteTrack({required String trackId}) async {
@@ -872,9 +910,16 @@ extension PublisherRtcManager on RtcManager {
     AudioConstraints constraints = const AudioConstraints(),
   }) async {
     _logger.d(() => '[createAudioTrack] constraints: ${constraints.toMap()}');
+
+    if (publisher == null || publisherId == null) {
+      return Result.error(
+        'Publisher is not created, cannot create audio track',
+      );
+    }
+
     try {
       final audioTrack = await RtcLocalTrack.audio(
-        trackIdPrefix: publisherId,
+        trackIdPrefix: publisherId!,
         constraints: constraints,
       );
 
@@ -889,9 +934,16 @@ extension PublisherRtcManager on RtcManager {
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
     _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
+
+    if (publisher == null || publisherId == null) {
+      return Result.error(
+        'Publisher is not created, cannot create camera track',
+      );
+    }
+
     try {
       final videoTrack = await RtcLocalTrack.camera(
-        trackIdPrefix: publisherId,
+        trackIdPrefix: publisherId!,
         constraints: constraints,
       );
 
@@ -908,9 +960,16 @@ extension PublisherRtcManager on RtcManager {
     _logger.d(
       () => '[createScreenShareTrack] constraints: ${constraints.toMap()}',
     );
+
+    if (publisher == null || publisherId == null) {
+      return Result.error(
+        'Publisher is not created, cannot create screen share track',
+      );
+    }
+
     try {
       final screenShareTrack = await RtcLocalTrack.screenShare(
-        trackIdPrefix: publisherId,
+        trackIdPrefix: publisherId!,
         constraints: constraints,
       );
 

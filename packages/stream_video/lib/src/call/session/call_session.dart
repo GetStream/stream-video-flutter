@@ -221,9 +221,13 @@ class CallSession extends Disposable {
           })>> start({
     sfu_events.ReconnectDetails? reconnectDetails,
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
+    bool isAnonymousUser = false,
   }) async {
     try {
-      _logger.d(() => '[start] no args');
+      _logger.d(
+        () => '[start] reconnectDetails: $reconnectDetails, '
+            'isAnonymousUser: $isAnonymousUser',
+      );
 
       await _ensureClientDetails();
 
@@ -304,25 +308,35 @@ class CallSession extends Disposable {
       );
 
       _logger.v(() => '[start] sfu joined: $event');
-      final currentUserId = stateManager.callState.currentUserId;
-      final localParticipant = event.callState.participants.firstWhere(
-        (it) => it.userId == currentUserId,
-      );
-      final localTrackId = localParticipant.trackLookupPrefix;
 
-      _logger.v(() => '[start] localTrackId: $localTrackId');
-      rtcManager = await rtcManagerFactory.makeRtcManager(
-        publisherId: localTrackId,
-        publishOptions: event.publishOptions,
-      )
-        ..onPublisherIceCandidate = _onLocalIceCandidate
-        ..onSubscriberIceCandidate = _onLocalIceCandidate
-        ..onPublisherIssue = onPeerConnectionIssue
-        ..onSubscriberIssue = onPeerConnectionIssue
-        ..onLocalTrackMuted = _onLocalTrackMuted
-        ..onLocalTrackPublished = _onLocalTrackPublished
-        ..onRenegotiationNeeded = _onRenegotiationNeeded
-        ..onRemoteTrackReceived = _onRemoteTrackReceived;
+      if (isAnonymousUser) {
+        rtcManager = await rtcManagerFactory.makeRtcManager()
+          ..onSubscriberIceCandidate = _onLocalIceCandidate
+          ..onSubscriberIssue = onPeerConnectionIssue
+          ..onRenegotiationNeeded = _onRenegotiationNeeded
+          ..onRemoteTrackReceived = _onRemoteTrackReceived;
+      } else {
+        final currentUserId = stateManager.callState.currentUserId;
+        final localParticipant = event.callState.participants.firstWhere(
+          (it) => it.userId == currentUserId,
+        );
+        final localTrackId = localParticipant.trackLookupPrefix;
+
+        _logger.v(() => '[start] localTrackId: $localTrackId');
+
+        rtcManager = await rtcManagerFactory.makeRtcManager(
+          publisherId: localTrackId,
+          publishOptions: event.publishOptions,
+        )
+          ..onPublisherIceCandidate = _onLocalIceCandidate
+          ..onSubscriberIceCandidate = _onLocalIceCandidate
+          ..onPublisherIssue = onPeerConnectionIssue
+          ..onSubscriberIssue = onPeerConnectionIssue
+          ..onLocalTrackMuted = _onLocalTrackMuted
+          ..onLocalTrackPublished = _onLocalTrackPublished
+          ..onRenegotiationNeeded = _onRenegotiationNeeded
+          ..onRemoteTrackReceived = _onRemoteTrackReceived;
+      }
 
       await onRtcManagerCreatedCallback?.call(rtcManager!);
       _rtcManagerSubject!.add(rtcManager!);
@@ -404,13 +418,13 @@ class CallSession extends Disposable {
               '[fastReconnect] fast-reconnect possible - requesting ICE restarts',
         );
 
-        await rtcManager?.publisher.pc.restartIce();
+        await rtcManager?.publisher?.pc.restartIce();
 
         final remoteTracks =
             rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
 
         for (final track in remoteTracks) {
-          await _onRemoteTrackReceived(rtcManager!.publisher, track);
+          await _onRemoteTrackReceived(rtcManager!.subscriber, track);
         }
 
         _logger.d(() => '[fastReconnect] completed');

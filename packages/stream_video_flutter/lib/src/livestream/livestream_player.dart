@@ -125,6 +125,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     _callStateSubscription = null;
     _durationTimer.cancel();
     _duration.dispose();
+    _animationController.dispose();
+
     super.dispose();
   }
 

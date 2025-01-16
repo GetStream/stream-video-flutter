@@ -38,6 +38,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required TokenManager tokenManager,
     required LatencyService latencyService,
     required RetryPolicy retryPolicy,
+    this.isAnonymous = false,
   })  : _rpcUrl = rpcUrl,
         _wsUrl = wsUrl,
         _apiKey = apiKey,
@@ -53,6 +54,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   // ignore: unused_field
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
+
+  final bool isAnonymous;
 
   late final open.ApiClient _apiClient = open.ApiClient(
     basePath: _rpcUrl,
@@ -142,7 +145,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   Future<Result<None>> _waitUntilConnected() async {
-    _logger.w(() => '[waitUntilConnected] user.id: ${_user?.id}');
+    if (isAnonymous) {
+      _logger.d(
+        () => '[waitUntilConnected] anonymous user does not require connection',
+      );
+      return const Result.success(none);
+    }
+
+    _logger.d(() => '[waitUntilConnected] user.id: ${_user?.id}');
     return _connectionState
         .firstWhere(
       (it) => it.isConnected,
