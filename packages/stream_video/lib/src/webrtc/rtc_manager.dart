@@ -68,8 +68,8 @@ class RtcManager extends Disposable {
 
   final String sessionId;
   final StreamCallCid callCid;
-  final String publisherId;
-  final StreamPeerConnection publisher;
+  final String? publisherId;
+  final StreamPeerConnection? publisher;
   final StreamPeerConnection subscriber;
 
   final transceiversManager = TransceiverManager();
@@ -78,7 +78,7 @@ class RtcManager extends Disposable {
   final tracks = < /*trackId*/ String, RtcTrack>{};
 
   set onPublisherIceCandidate(OnIceCandidate? cb) {
-    publisher.onIceCandidate = cb;
+    publisher?.onIceCandidate = cb;
   }
 
   set onSubscriberIceCandidate(OnIceCandidate? cb) {
@@ -90,11 +90,11 @@ class RtcManager extends Disposable {
   }
 
   set onPublisherIssue(OnIssue? cb) {
-    publisher.onIssue = cb;
+    publisher?.onIssue = cb;
   }
 
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
-    publisher.onRenegotiationNeeded = cb;
+    publisher?.onRenegotiationNeeded = cb;
   }
 
   OnLocalTrackMuted? onLocalTrackMuted;
@@ -138,7 +138,8 @@ class RtcManager extends Disposable {
   }) async {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
-      return publisher.addIceCandidate(candidate);
+      return publisher?.addIceCandidate(candidate) ??
+          Result.error('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
       return subscriber.addIceCandidate(candidate);
     }
@@ -199,7 +200,7 @@ class RtcManager extends Disposable {
 
       if (sender != null) {
         try {
-          await publisher.pc.removeTrack(sender);
+          await publisher?.pc.removeTrack(sender);
         } catch (e) {
           _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
         }
@@ -212,7 +213,7 @@ class RtcManager extends Disposable {
 
         try {
           if (transceiver != null) {
-            await publisher.pc.removeTrack(transceiver.sender);
+            await publisher?.pc.removeTrack(transceiver.sender);
           }
         } catch (e) {
           _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
@@ -423,7 +424,7 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
-    await publisher.dispose();
+    await publisher?.dispose();
     await subscriber.dispose();
 
     return super.dispose();
@@ -496,7 +497,7 @@ extension PublisherRtcManager on RtcManager {
   Future<List<RtcTrackInfo>> getAnnouncedTracks({
     String? sdp,
   }) async {
-    final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
+    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
     final infos = <RtcTrackInfo>[];
 
     for (final item in transceiversManager.items()) {
@@ -510,7 +511,7 @@ extension PublisherRtcManager on RtcManager {
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
-    final finalSdp = sdp ?? (await publisher.pc.getLocalDescription())?.sdp;
+    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
     final infos = <RtcTrackInfo>[];
 
     for (final publishOption in publishOptions) {
@@ -872,9 +873,16 @@ extension PublisherRtcManager on RtcManager {
     AudioConstraints constraints = const AudioConstraints(),
   }) async {
     _logger.d(() => '[createAudioTrack] constraints: ${constraints.toMap()}');
+
+    if (publisher == null || publisherId == null) {
+      return Result.error(
+        'Publisher is not created, cannot create audio track',
+      );
+    }
+
     try {
       final audioTrack = await RtcLocalTrack.audio(
-        trackIdPrefix: publisherId,
+        trackIdPrefix: publisherId!,
         constraints: constraints,
       );
 
@@ -889,9 +897,16 @@ extension PublisherRtcManager on RtcManager {
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
     _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
+
+    if (publisher == null || publisherId == null) {
+      return Result.error(
+        'Publisher is not created, cannot create camera track',
+      );
+    }
+
     try {
       final videoTrack = await RtcLocalTrack.camera(
-        trackIdPrefix: publisherId,
+        trackIdPrefix: publisherId!,
         constraints: constraints,
       );
 
@@ -908,9 +923,16 @@ extension PublisherRtcManager on RtcManager {
     _logger.d(
       () => '[createScreenShareTrack] constraints: ${constraints.toMap()}',
     );
+
+    if (publisher == null || publisherId == null) {
+      return Result.error(
+        'Publisher is not created, cannot create screen share track',
+      );
+    }
+
     try {
       final screenShareTrack = await RtcLocalTrack.screenShare(
-        trackIdPrefix: publisherId,
+        trackIdPrefix: publisherId!,
         constraints: constraints,
       );
 

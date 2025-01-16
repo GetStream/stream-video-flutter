@@ -28,18 +28,23 @@ class RtcManagerFactory {
   final Map<String, dynamic> mediaConstraints;
 
   Future<RtcManager> makeRtcManager({
-    required String publisherId,
+    String? publisherId,
     List<SfuPublishOptions> publishOptions = const [],
   }) async {
     _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
-    final publisher = await pcFactory.makePublisher(
-      configuration,
-      mediaConstraints,
-    );
+
+    final publisher = publisherId != null
+        ? await pcFactory.makePublisher(
+            configuration,
+            mediaConstraints,
+          )
+        : null;
+
     final subscriber = await pcFactory.makeSubscriber(
       configuration,
       mediaConstraints,
     );
+
     return RtcManager(
       sessionId: sessionId,
       callCid: callCid,

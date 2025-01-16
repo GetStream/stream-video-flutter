@@ -66,7 +66,7 @@ class SfuStatsReporter {
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
     final publisherStatsBundle =
-        await callSession.rtcManager?.publisher.getStats();
+        await callSession.rtcManager?.publisher?.getStats();
     final subscriberStatsBundle =
         await callSession.rtcManager?.subscriber.getStats();
 
