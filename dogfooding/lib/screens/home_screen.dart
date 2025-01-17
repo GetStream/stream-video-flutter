@@ -20,6 +20,7 @@ import '../di/injector.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
+import '../widgets/user_actions_avatar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -196,9 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: theme.scaffoldBackgroundColor,
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: StreamUserAvatar(user: currentUser),
+        leading: UserActionsAvatar(
+          currentUser: currentUser,
         ),
         titleSpacing: 4,
         centerTitle: false,
