@@ -39,6 +39,7 @@ dependencies:
   stream_video_screen_sharing: ^0.7.0
 
 dependency_overrides:
+  just_audio_web: ^0.4.13
   wakelock_plus: ^1.2.9
   stream_video:
     path: ../packages/stream_video
