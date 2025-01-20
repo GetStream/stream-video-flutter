@@ -33,7 +33,7 @@ extension ListAt<T extends Object> on List<T> {
 
 /// Extensions on [Iterable].
 extension IterableExtension<T> on Iterable<T> {
-  /// Insert any item<T> inBetween the list items
+  /// Insert any [item] inBetween the list items
   List<T> insertBetween(T item) => expand((e) sync* {
         yield item;
         yield e;
