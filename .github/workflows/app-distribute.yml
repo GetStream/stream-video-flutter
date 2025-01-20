@@ -45,6 +45,9 @@ jobs:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
+      - name: Setup FlutterFire CLI
+        run: flutter pub global activate flutterfire_cli
+
       - name: Setup Melos
         run: flutter pub global activate melos
 
