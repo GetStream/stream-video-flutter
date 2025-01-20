@@ -1,3 +1,9 @@
+## 0.7.1
+
+🐞 Fixed
+* Resolved an issue where media tracks were not being disabled or enabled correctly.
+* Fixed a problem causing anonymous users to fail when connecting and joining calls.
+
 ## 0.7.0
 
 🚧 Breaking changes
