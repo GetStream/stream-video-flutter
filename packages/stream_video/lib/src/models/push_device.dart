@@ -9,6 +9,7 @@ class PushDevice with EquatableMixin {
     required this.pushToken,
     required this.pushProvider,
     this.pushProviderName,
+    this.userId,
     this.voip,
     required this.createdAt,
     this.disabled,
@@ -23,6 +24,9 @@ class PushDevice with EquatableMixin {
 
   /// The notification push provider name
   final String? pushProviderName;
+
+  /// The user id associated with the device
+  final String? userId;
 
   /// When true the token is for Apple VoIP push notifications
   final bool? voip;

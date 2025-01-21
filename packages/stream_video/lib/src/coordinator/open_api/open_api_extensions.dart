@@ -466,6 +466,7 @@ extension DeviceExt on open.DeviceResponse {
       pushToken: id,
       pushProvider: parsedProvider,
       pushProviderName: pushProviderName,
+      userId: userId,
       voip: voip,
       createdAt: createdAt,
       disabled: disabled,
