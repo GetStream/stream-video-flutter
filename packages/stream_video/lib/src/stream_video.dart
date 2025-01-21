@@ -481,7 +481,7 @@ class StreamVideo extends Disposable {
 
   Future<void> _onActiveCall(Call? activeCall) async {
     if (activeCall == null) {
-      await pushNotificationManager?.endAllCalls();
+      await pushNotificationManager?.endCallByCid(activeCall!.callCid.value);
     }
   }
 
@@ -676,6 +676,8 @@ class StreamVideo extends Disposable {
   }
 
   Future<void> _onCallEnded(ActionCallEnded event) async {
+    _logger.d(() => '[onCallEnded] event: $event');
+
     final uuid = event.data.uuid;
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;

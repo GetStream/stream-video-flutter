@@ -501,15 +501,13 @@ class Call {
     if (outgoingCall != null && outgoingCall.callCid != callCid) {
       _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
       await outgoingCall.reject(reason: CallRejectReason.cancel());
-
       await _streamVideo.state.setOutgoingCall(null);
     }
 
     final activeCall = _streamVideo.state.activeCall.valueOrNull;
     if (activeCall != null && activeCall.callCid != callCid) {
       _logger.i(() => '[accept] canceling another active call: $activeCall');
-      await activeCall.reject(reason: CallRejectReason.cancel());
-
+      await activeCall.leave(reason: DisconnectReason.ended());
       await _streamVideo.state.setActiveCall(null);
     }
 
@@ -1006,6 +1004,8 @@ class Call {
 
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
     if (sfuEvent is SfuParticipantLeftEvent) {
+      if (sfuEvent.callCid != callCid.value) return;
+
       final callParticipants = [...state.value.callParticipants]..removeWhere(
           (participant) =>
               participant.userId == sfuEvent.participant.userId &&

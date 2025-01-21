@@ -97,6 +97,11 @@ abstract class PushNotificationManager {
   /// [uuid] is the unique identifier for the call.
   Future<void> endCall(String uuid);
 
+  /// Ends the call.
+  ///
+  /// [cid] is the call id for the call.
+  Future<void> endCallByCid(String cid);
+
   /// Ends all ongoing calls.
   Future<void> endAllCalls();
 

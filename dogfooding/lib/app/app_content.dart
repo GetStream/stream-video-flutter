@@ -80,7 +80,20 @@ class _StreamDogFoodingAppContentState
   @override
   void initState() {
     super.initState();
-    initPushNotificationManagerIfAvailable();
+
+    if (_userAuthController.currentUser != null) {
+      initPushNotificationManagerIfAvailable();
+    }
+
+    _userAuthController.addListener(() {
+      if (_userAuthController.currentUser != null) {
+        _compositeSubscription.clear();
+        initPushNotificationManagerIfAvailable();
+      } else {
+        _compositeSubscription.clear();
+      }
+    });
+
     _tryConsumingIncomingCallFromTerminatedState();
   }
 
