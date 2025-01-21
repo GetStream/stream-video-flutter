@@ -152,7 +152,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return const Result.success(none);
     }
 
-    _logger.d(() => '[waitUntilConnected] user.id: ${_user?.id}');
+    _logger.d(() =>
+        '[waitUntilConnected] user.id: ${_user?.id}, current state: ${_connectionState.value},');
     return _connectionState
         .firstWhere(
       (it) => it.isConnected,
