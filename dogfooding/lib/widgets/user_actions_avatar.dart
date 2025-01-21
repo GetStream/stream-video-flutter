@@ -59,19 +59,20 @@ class UserActionsAvatar extends StatelessWidget {
                       children: [
                         const Text('Devices'),
                         IconButton(
-                            onPressed: () async {
-                              for (final device in devices.getDataOrNull()!) {
-                                await StreamVideo.instance
-                                    .removeDevice(pushToken: device.pushToken);
-                              }
+                          onPressed: () async {
+                            for (final device in devices.getDataOrNull()!) {
+                              await StreamVideo.instance
+                                  .removeDevice(pushToken: device.pushToken);
+                            }
 
-                              // ignore: use_build_context_synchronously
-                              Navigator.of(context).pop();
-                            },
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ))
+                            // ignore: use_build_context_synchronously
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                        )
                       ],
                     ),
                     content: DeviceList(
