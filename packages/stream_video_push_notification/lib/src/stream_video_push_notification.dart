@@ -168,6 +168,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             subscribeToEvents();
           } else if (event is ActionCallAccept ||
               event is ActionCallDecline ||
+              event is ActionCallTimeout ||
               event is ActionCallEnded) {
             _subscriptions.cancel(_idCallAccepted);
             _subscriptions.cancel(_idCallEnded);
