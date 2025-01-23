@@ -21,10 +21,14 @@ class SfuStatsReporter {
     required this.callSession,
     required this.stateManager,
   }) {
-    _thermalStatusSubscription =
-        Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
-      _thermalStatus = status;
-    });
+    final thermalStatusAvailable =
+        CurrentPlatform.isAndroid || CurrentPlatform.isIos;
+    if (thermalStatusAvailable) {
+      _thermalStatusSubscription =
+          Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
+        _thermalStatus = status;
+      });
+    }
 
     _mediaDeviceSubscription =
         RtcMediaDeviceNotifier.instance.onDeviceChange.listen(
@@ -74,7 +78,12 @@ class SfuStatsReporter {
       return;
     }
 
-    final lowPowerMode = await Battery().isInBatterySaveMode;
+    final batterySaveModeAvailable = CurrentPlatform.isAndroid ||
+        CurrentPlatform.isIos ||
+        CurrentPlatform.isMacOS ||
+        CurrentPlatform.isWindows;
+    final lowPowerMode =
+        batterySaveModeAvailable && await Battery().isInBatterySaveMode;
 
     sfu_models.AndroidState? androidState;
     sfu_models.AppleState? appleState;
