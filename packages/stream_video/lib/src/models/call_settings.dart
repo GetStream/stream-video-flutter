@@ -226,17 +226,25 @@ class StreamLimitsSettings extends AbstractSettings {
 
 class StreamBroadcastingSettings extends AbstractSettings {
   const StreamBroadcastingSettings({
-    this.enabled = false,
-    this.hls = const StreamHlsSettings(),
-    this.rtmp = const StreamRtmpSettings(quality: ''),
+    this.enabled,
+    this.hls,
+    this.rtmp,
   });
 
-  final bool enabled;
-  final StreamHlsSettings hls;
-  final StreamRtmpSettings rtmp;
+  final bool? enabled;
+  final StreamHlsSettings? hls;
+  final StreamRtmpSettings? rtmp;
 
   @override
   List<Object?> get props => [enabled, hls, rtmp];
+
+  BroadcastSettingsRequest toOpenDto() {
+    return BroadcastSettingsRequest(
+      enabled: enabled,
+      hls: hls?.toOpenDto(),
+      rtmp: rtmp?.toOpenDto(),
+    );
+  }
 }
 
 class StreamGeofencingSettings extends AbstractSettings {
@@ -349,17 +357,25 @@ class StreamNoiceCancellingSettings extends AbstractSettings {
 
 class StreamHlsSettings extends AbstractSettings {
   const StreamHlsSettings({
-    this.autoOn = false,
-    this.enabled = false,
+    this.autoOn,
+    this.enabled,
     this.qualityTracks = const [],
   });
 
-  final bool enabled;
-  final bool autoOn;
+  final bool? enabled;
+  final bool? autoOn;
   final List<String> qualityTracks;
 
   @override
   List<Object?> get props => [enabled, autoOn, qualityTracks];
+
+  HLSSettingsRequest toOpenDto() {
+    return HLSSettingsRequest(
+      enabled: enabled,
+      autoOn: autoOn,
+      qualityTracks: qualityTracks,
+    );
+  }
 }
 
 class StreamTargetResolution extends AbstractSettings {
@@ -403,15 +419,22 @@ class StreamTargetResolution extends AbstractSettings {
 
 class StreamRtmpSettings extends AbstractSettings {
   const StreamRtmpSettings({
-    required this.quality,
-    this.enabled = false,
+    this.quality,
+    this.enabled,
   });
 
-  final bool enabled;
-  final String quality;
+  final bool? enabled;
+  final RTMPSettingsQuality? quality;
 
   @override
   List<Object?> get props => [enabled, quality];
+
+  RTMPSettingsRequest toOpenDto() {
+    return RTMPSettingsRequest(
+      enabled: enabled,
+      quality: quality?.toOpenDto(),
+    );
+  }
 }
 
 enum StreamTranscriptionMode {
@@ -476,6 +499,74 @@ enum RecordSettingsMode {
         return RecordSettingsMode.autoOn;
       default:
         return RecordSettingsMode.disabled;
+    }
+  }
+}
+
+enum RTMPSettingsQuality {
+  n360p,
+  n480p,
+  n720p,
+  n1080p,
+  n1440p,
+  portrait360x640,
+  portrait480x854,
+  portrait720x1280,
+  portrait1080x1920,
+  portrait1440x2560;
+
+  @override
+  String toString() => name;
+
+  RTMPSettingsRequestQualityEnum toOpenDto() {
+    switch (this) {
+      case RTMPSettingsQuality.n360p:
+        return RTMPSettingsRequestQualityEnum.n360p;
+      case RTMPSettingsQuality.n480p:
+        return RTMPSettingsRequestQualityEnum.n480p;
+      case RTMPSettingsQuality.n720p:
+        return RTMPSettingsRequestQualityEnum.n720p;
+      case RTMPSettingsQuality.n1080p:
+        return RTMPSettingsRequestQualityEnum.n1080p;
+      case RTMPSettingsQuality.n1440p:
+        return RTMPSettingsRequestQualityEnum.n1440p;
+      case RTMPSettingsQuality.portrait360x640:
+        return RTMPSettingsRequestQualityEnum.portrait360x640;
+      case RTMPSettingsQuality.portrait480x854:
+        return RTMPSettingsRequestQualityEnum.portrait480x854;
+      case RTMPSettingsQuality.portrait720x1280:
+        return RTMPSettingsRequestQualityEnum.portrait720x1280;
+      case RTMPSettingsQuality.portrait1080x1920:
+        return RTMPSettingsRequestQualityEnum.portrait1080x1920;
+      case RTMPSettingsQuality.portrait1440x2560:
+        return RTMPSettingsRequestQualityEnum.portrait1440x2560;
+    }
+  }
+
+  static RTMPSettingsQuality fromString(String quality) {
+    switch (quality) {
+      case '360p':
+        return RTMPSettingsQuality.n360p;
+      case '480p':
+        return RTMPSettingsQuality.n480p;
+      case '720p':
+        return RTMPSettingsQuality.n720p;
+      case '1080p':
+        return RTMPSettingsQuality.n1080p;
+      case '1440p':
+        return RTMPSettingsQuality.n1440p;
+      case 'portrait-360x640':
+        return RTMPSettingsQuality.portrait360x640;
+      case 'portrait-480x854':
+        return RTMPSettingsQuality.portrait480x854;
+      case 'portrait-720x1280':
+        return RTMPSettingsQuality.portrait720x1280;
+      case 'portrait-1080x1920':
+        return RTMPSettingsQuality.portrait1080x1920;
+      case 'portrait-1440x2560':
+        return RTMPSettingsQuality.portrait1440x2560;
+      default:
+        return RTMPSettingsQuality.n360p;
     }
   }
 }

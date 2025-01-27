@@ -18,6 +18,7 @@ const _idCallEnded = 3;
 const _idCallAccepted = 4;
 const _idCallRejected = 6;
 const _idCallParticipantCount = 7;
+const _idActiveCall = 8;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
@@ -70,6 +71,20 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     if (CurrentPlatform.isWeb) return;
 
     SharedPreferences.getInstance().then((prefs) => _sharedPreferences = prefs);
+
+    _subscriptions.add(
+      _idActiveCall,
+      streamVideo.state.activeCall.listen((call) async {
+        _logger.d(() => '[activeCall] Active call changed to ${call?.callCid}');
+        if (activeCall != null && activeCall!.callCid != call?.callCid) {
+          _logger.d(() =>
+              '[activeCall] Stopping previous call: ${activeCall!.callCid}');
+          await endCallByCid(activeCall!.callCid.value);
+        }
+
+        activeCall = call;
+      }),
+    );
 
     subscribeToEvents() {
       _subscriptions.add(
@@ -191,6 +206,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final _logger = taggedLogger(tag: 'SV:PNManager');
 
   final Subscriptions _subscriptions = Subscriptions();
+
+  Call? activeCall;
 
   @override
   void registerDevice() {
@@ -372,11 +389,19 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> endCallByCid(String cid) async {
     final activeCalls = await this.activeCalls();
-    final calls =
-        activeCalls.where((call) => call.callCid == cid && call.uuid != null);
+    final calls = activeCalls
+        .where((call) => call.callCid == cid && call.uuid != null)
+        .toList();
 
-    for (final call in calls) {
-      await endCall(call.uuid!);
+    // This is a workaround for the issue in flutter_callkit_incoming
+    // where second CallKit call overrids data in showCallkitIncoming native method
+    // and it's not possible to end the call by callCid
+    if (activeCalls.length == calls.length) {
+      await endAllCalls();
+    } else {
+      for (final call in calls) {
+        await endCall(call.uuid!);
+      }
     }
   }
 

@@ -55,7 +55,6 @@ const _tag = 'SV:Client';
 
 const _idEvents = 1;
 const _idAppState = 2;
-const _idActiveCall = 4;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
@@ -353,13 +352,6 @@ class StreamVideo extends Disposable {
         pushNotificationManager?.registerDevice();
       }
 
-      if (pushNotificationManager != null) {
-        _subscriptions.add(
-          _idActiveCall,
-          _state.activeCall.listen(_onActiveCall),
-        );
-      }
-
       return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
@@ -476,12 +468,6 @@ class StreamVideo extends Disposable {
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
-    }
-  }
-
-  Future<void> _onActiveCall(Call? activeCall) async {
-    if (activeCall == null) {
-      await pushNotificationManager?.endCallByCid(activeCall!.callCid.value);
     }
   }
 
@@ -685,7 +671,7 @@ class StreamVideo extends Disposable {
     final activeCall = this.activeCall;
 
     // If there is no active call, reject the incoming call.
-    if (activeCall == null) {
+    if (activeCall == null || activeCall.callCid.value != cid) {
       final callResult = await consumeIncomingCall(uuid: uuid, cid: cid);
       final callToReject = callResult.getDataOrNull();
       if (callToReject == null) return;
@@ -706,10 +692,23 @@ class StreamVideo extends Disposable {
     }
   }
 
-  /// Handle incoming VoIP push notifications.
+  @Deprecated('Use handlePushNotificationForRingingFlow instead.')
+  Future<bool> handleVoipPushNotification(
+    Map<String, dynamic> payload, {
+    bool handleMissedCall = true,
+  }) {
+    return handlePushNotificationForRingingFlow(
+      payload,
+      handleMissedCall: handleMissedCall,
+    );
+  }
+
+  /// This method is used to handle incoming call notifications.
+  /// It will show an incoming call notification if the call is ringing.
+  /// It will show a missed call notification if the call is missed.
   ///
   /// Returns `true` if the notification was handled, `false` otherwise.
-  Future<bool> handleVoipPushNotification(
+  Future<bool> handlePushNotificationForRingingFlow(
     Map<String, dynamic> payload, {
     bool handleMissedCall = true,
   }) async {
