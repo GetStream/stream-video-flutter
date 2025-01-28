@@ -53,6 +53,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             ringing: true,
             metadata: call.toCallMetadata(members: event.members),
           ),
+          video: event.video,
           sessionId: event.sessionId,
           createdAt: event.createdAt,
         );

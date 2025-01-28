@@ -152,8 +152,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return const Result.success(none);
     }
 
-    _logger.d(() =>
-        '[waitUntilConnected] user.id: ${_user?.id}, current state: ${_connectionState.value},');
+    _logger.d(
+      () =>
+          '[waitUntilConnected] user.id: ${_user?.id}, current state: ${_connectionState.value},',
+    );
     return _connectionState
         .firstWhere(
       (it) => it.isConnected,
@@ -1110,8 +1112,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<CallMetadata>> goLive({
     required StreamCallCid callCid,
     bool? startHls,
+    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
+    bool? startClosedCaption,
+    String? transcriptionStorageName,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1126,6 +1131,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           startHls: startHls,
           startRecording: startRecording,
           startTranscription: startTranscription,
+          startClosedCaption: startClosedCaption,
+          startRtmpBroadcasts: startRtmpBroadcasts,
+          transcriptionStorageName: transcriptionStorageName,
         ),
       );
       if (result == null) {

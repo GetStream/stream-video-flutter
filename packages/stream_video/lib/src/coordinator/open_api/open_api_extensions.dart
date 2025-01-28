@@ -304,7 +304,7 @@ extension on open.HLSSettingsResponse {
 extension on open.RTMPSettingsResponse {
   StreamRtmpSettings toSettingsDomain() {
     return StreamRtmpSettings(
-      quality: quality,
+      quality: RTMPSettingsQuality.fromString(quality),
       enabled: enabled,
     );
   }

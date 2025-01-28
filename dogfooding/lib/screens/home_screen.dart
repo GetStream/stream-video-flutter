@@ -75,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
         closedCaptionsVisibleCaptions: 3,
         closedCaptionsVisibilityDurationMs: 5000,
       ),
+
       // Uncomment to force a specific codec when publishing video track
       // preferences: DefaultCallPreferences(
       //   clientPublishOptions: ClientPublishOptions(

@@ -55,7 +55,6 @@ const _tag = 'SV:Client';
 
 const _idEvents = 1;
 const _idAppState = 2;
-const _idActiveCall = 4;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
@@ -353,13 +352,6 @@ class StreamVideo extends Disposable {
         pushNotificationManager?.registerDevice();
       }
 
-      if (pushNotificationManager != null) {
-        _subscriptions.add(
-          _idActiveCall,
-          _state.activeCall.listen(_onActiveCall),
-        );
-      }
-
       return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
@@ -476,12 +468,6 @@ class StreamVideo extends Disposable {
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
-    }
-  }
-
-  Future<void> _onActiveCall(Call? activeCall) async {
-    if (activeCall == null) {
-      await pushNotificationManager?.endCallByCid(activeCall!.callCid.value);
     }
   }
 
@@ -683,9 +669,15 @@ class StreamVideo extends Disposable {
     if (uuid == null || cid == null) return;
 
     final activeCall = this.activeCall;
+    final incomingCall = _state.incomingCall.valueOrNull;
 
-    // If there is no active call, reject the incoming call.
-    if (activeCall == null) {
+    if (activeCall?.callCid.value == cid) {
+      final result = await activeCall?.leave();
+
+      if (result is Failure) {
+        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
+      }
+    } else if (incomingCall?.callCid.value == cid) {
       final callResult = await consumeIncomingCall(uuid: uuid, cid: cid);
       final callToReject = callResult.getDataOrNull();
       if (callToReject == null) return;
@@ -695,28 +687,37 @@ class StreamVideo extends Disposable {
       );
 
       if (result is Failure) {
-        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
-      }
-    } else if (activeCall.callCid.value == cid) {
-      final result = await activeCall.leave();
-
-      if (result is Failure) {
-        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
+        _logger.d(
+          () => '[onCallEnded] error rejecting incoming call: ${result.error}',
+        );
       }
     }
   }
 
-  /// Handle incoming VoIP push notifications.
-  ///
-  /// Returns `true` if the notification was handled, `false` otherwise.
+  @Deprecated('Use handleRingingFlowNotifications instead.')
   Future<bool> handleVoipPushNotification(
     Map<String, dynamic> payload, {
     bool handleMissedCall = true,
+  }) {
+    return handleRingingFlowNotifications(
+      payload,
+      handleMissedCall: handleMissedCall,
+    );
+  }
+
+  /// This method is used to handle incoming call notifications.
+  /// It will show an incoming call notification if the call is ringing.
+  /// It will show a missed call notification if the call is missed.
+  ///
+  /// Returns `true` if the notification was handled, `false` otherwise.
+  Future<bool> handleRingingFlowNotifications(
+    Map<String, dynamic> payload, {
+    bool handleMissedCall = true,
   }) async {
-    _logger.d(() => '[handleVoipPushNotification] payload: $payload');
+    _logger.d(() => '[handleRingingFlowNotifications] payload: $payload');
     final manager = pushNotificationManager;
     if (manager == null) {
-      _logger.e(() => '[handleVoipPushNotification] rejected (no manager)');
+      _logger.e(() => '[handleRingingFlowNotifications] rejected (no manager)');
       return false;
     }
 

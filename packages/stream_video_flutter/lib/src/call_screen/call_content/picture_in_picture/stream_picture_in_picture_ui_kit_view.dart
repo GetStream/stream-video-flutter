@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,13 +40,16 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
 
 class _StreamPictureInPictureUiKitViewState
     extends State<StreamPictureInPictureUiKitView> {
+  static const _idCallEvents = 1;
+  static const _idCallState = 2;
+
   final platformMethodChannel = const MethodChannel('stream_video_flutter_pip');
 
-  late StreamSubscription<StreamCallEvent> _subscription;
+  final Subscriptions _subscriptions = Subscriptions();
 
   @override
   void initState() {
-    _subscription = widget.call.callEvents.listen((event) {
+    final callEventsSubscription = widget.call.callEvents.listen((event) {
       final participants = widget.ignoreLocalParticipantVideo
           ? widget.call.state.value.otherParticipants
           : widget.call.state.value.callParticipants;
@@ -87,12 +88,27 @@ class _StreamPictureInPictureUiKitViewState
       }
     });
 
+    _subscriptions.add(_idCallEvents, callEventsSubscription);
+
+    _subscriptions.add(
+      _idCallState,
+      widget.call.state.listen(
+        (callState) {
+          if (callState.status is CallStatusDisconnected) {
+            platformMethodChannel.invokeMethod(
+              'callEnded',
+            );
+          }
+        },
+      ),
+    );
+
     super.initState();
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscriptions.cancelAll();
     super.dispose();
   }
 
