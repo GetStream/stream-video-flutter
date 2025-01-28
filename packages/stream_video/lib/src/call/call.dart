@@ -973,15 +973,19 @@ class Call {
           _streamVideo.state.currentUser.type == UserType.anonymous,
     );
 
-    _subscriptions.add(
-      _idSessionStats,
-      StatsReporter(
-        rtcManager: session.rtcManager!,
-        stateManager: _stateManager,
-      ).run(interval: _preferences.callStatsReportingInterval).listen((stats) {
-        _stats.emit(stats);
-      }),
-    );
+    if (session.rtcManager != null) {
+      _subscriptions.add(
+        _idSessionStats,
+        StatsReporter(
+          rtcManager: session.rtcManager!,
+          stateManager: _stateManager,
+        )
+            .run(interval: _preferences.callStatsReportingInterval)
+            .listen((stats) {
+          _stats.emit(stats);
+        }),
+      );
+    }
 
     if (_statsReportingIntervalMs != null) {
       _sfuStatsReporter = SfuStatsReporter(

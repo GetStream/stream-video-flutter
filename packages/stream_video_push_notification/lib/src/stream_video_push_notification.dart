@@ -102,9 +102,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallParticipantCount,
         client.events.on<CoordinatorCallSessionParticipantCountUpdatedEvent>(
           (event) async {
-            final totalCount = event.participantsCountByRole.values
-                .map((v) => v)
-                .reduce((a, b) => a + b);
+            final roleCounts =
+                event.participantsCountByRole.values.map((v) => v);
+
+            final totalCount =
+                roleCounts.isEmpty ? 0 : roleCounts.reduce((a, b) => a + b);
 
             _logger.d(() =>
                 '[subscribeToEvents] Participant count updated event: ${event.callCid}, count: $totalCount');

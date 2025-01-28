@@ -669,9 +669,15 @@ class StreamVideo extends Disposable {
     if (uuid == null || cid == null) return;
 
     final activeCall = this.activeCall;
+    final incomingCall = _state.incomingCall.valueOrNull;
 
-    // If there is no active call, reject the incoming call.
-    if (activeCall == null || activeCall.callCid.value != cid) {
+    if (activeCall?.callCid.value == cid) {
+      final result = await activeCall?.leave();
+
+      if (result is Failure) {
+        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
+      }
+    } else if (incomingCall?.callCid.value == cid) {
       final callResult = await consumeIncomingCall(uuid: uuid, cid: cid);
       final callToReject = callResult.getDataOrNull();
       if (callToReject == null) return;
@@ -681,13 +687,8 @@ class StreamVideo extends Disposable {
       );
 
       if (result is Failure) {
-        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
-      }
-    } else if (activeCall.callCid.value == cid) {
-      final result = await activeCall.leave();
-
-      if (result is Failure) {
-        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
+        _logger.d(() =>
+            '[onCallEnded] error rejecting incoming call: ${result.error}');
       }
     }
   }
