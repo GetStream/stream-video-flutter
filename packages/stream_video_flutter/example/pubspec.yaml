@@ -27,9 +27,9 @@ dependencies:
   path_provider: ^2.1.0
   share_plus: ^10.0.2
   shared_preferences: ^2.2.0
-  stream_video: ^0.7.1
-  stream_video_flutter: ^0.7.1
-  stream_video_push_notification: ^0.7.1
+  stream_video: ^0.7.2
+  stream_video_flutter: ^0.7.2
+  stream_video_push_notification: ^0.7.2
   stream_webrtc_flutter: ^0.12.5+2
 
 dependency_overrides:

@@ -1,3 +1,16 @@
+## 0.7.2
+
+🐞 Fixed
+* Resolved an issue where accepting a second call while already on a call would not open the call screen correctly.
+* **(Web)** Fixed web compilation issues.
+* **(Web)** Addressed an issue where `battery_plus` and `thermal` packages were erroneously called on web.
+* **(iOS)** Fixed an issue where Picture-in-Picture mode was not ended when the call ended.
+* **(iOS)** Resolved an issue where CallKit calls sometimes were not terminated when the Stream call ended.
+* **(iOS)** Fixed a missing app icon on the CallKit screen when the app was in a terminated state.
+
+🔄 Changed
+* Deprecated the `handleVoipPushNotification()` method in the `StreamVideo` class. Use `handleRingingFlowNotifications()` instead.
+
 ## 0.7.1
 
 🐞 Fixed
