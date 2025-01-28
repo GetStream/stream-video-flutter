@@ -100,11 +100,13 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
 class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
   const CoordinatorCallRingingEvent({
     required this.data,
+    required this.video,
     required this.sessionId,
     required this.createdAt,
   });
 
   final CallRingingData data;
+  final bool video;
   final String sessionId;
   final DateTime createdAt;
 

@@ -170,15 +170,21 @@ class CoordinatorClientRetry extends CoordinatorClient {
   Future<Result<CallMetadata>> goLive({
     required StreamCallCid callCid,
     bool? startHls,
+    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
+    bool? startClosedCaption,
+    String? transcriptionStorageName,
   }) {
     return _retryManager.execute(
       () => _delegate.goLive(
         callCid: callCid,
         startHls: startHls,
+        startRtmpBroadcasts: startRtmpBroadcasts,
         startRecording: startRecording,
         startTranscription: startTranscription,
+        startClosedCaption: startClosedCaption,
+        transcriptionStorageName: transcriptionStorageName,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('goLive', error, nextAttemptDelay);

@@ -94,7 +94,9 @@ class DynascaleManager {
                 incomingVideoSettings?.preferredResolution;
 
         if (enabled == null) {
-          subscribtions[key] = value;
+          if (value.dimension != null) {
+            subscribtions[key] = value;
+          }
         } else if (enabled) {
           subscribtions[key] = value.copyWith(dimension: preferredResolution);
         }
