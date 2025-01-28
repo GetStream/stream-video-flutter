@@ -58,7 +58,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<bool> _handleRemoteMessage(RemoteMessage message) async {
   final streamVideo = locator.get<StreamVideo>();
-  return streamVideo.handleVoipPushNotification(message.data);
+  return streamVideo.handleRingingFlowNotifications(message.data);
 }
 
 class StreamDogFoodingAppContent extends StatefulWidget {

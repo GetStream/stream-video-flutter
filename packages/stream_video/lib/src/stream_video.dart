@@ -687,8 +687,9 @@ class StreamVideo extends Disposable {
       );
 
       if (result is Failure) {
-        _logger.d(() =>
-            '[onCallEnded] error rejecting incoming call: ${result.error}');
+        _logger.d(
+          () => '[onCallEnded] error rejecting incoming call: ${result.error}',
+        );
       }
     }
   }
@@ -713,10 +714,10 @@ class StreamVideo extends Disposable {
     Map<String, dynamic> payload, {
     bool handleMissedCall = true,
   }) async {
-    _logger.d(() => '[handleVoipPushNotification] payload: $payload');
+    _logger.d(() => '[handleRingingFlowNotifications] payload: $payload');
     final manager = pushNotificationManager;
     if (manager == null) {
-      _logger.e(() => '[handleVoipPushNotification] rejected (no manager)');
+      _logger.e(() => '[handleRingingFlowNotifications] rejected (no manager)');
       return false;
     }
 
