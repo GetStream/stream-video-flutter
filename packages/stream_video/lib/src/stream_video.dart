@@ -693,12 +693,12 @@ class StreamVideo extends Disposable {
     }
   }
 
-  @Deprecated('Use handlePushNotificationForRingingFlow instead.')
+  @Deprecated('Use handleRingingFlowNotifications instead.')
   Future<bool> handleVoipPushNotification(
     Map<String, dynamic> payload, {
     bool handleMissedCall = true,
   }) {
-    return handlePushNotificationForRingingFlow(
+    return handleRingingFlowNotifications(
       payload,
       handleMissedCall: handleMissedCall,
     );
@@ -709,7 +709,7 @@ class StreamVideo extends Disposable {
   /// It will show a missed call notification if the call is missed.
   ///
   /// Returns `true` if the notification was handled, `false` otherwise.
-  Future<bool> handlePushNotificationForRingingFlow(
+  Future<bool> handleRingingFlowNotifications(
     Map<String, dynamic> payload, {
     bool handleMissedCall = true,
   }) async {
