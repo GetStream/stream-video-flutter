@@ -1,3 +1,10 @@
+## 0.7.2
+
+🐞 Fixed
+* Resolved an issue where accepting a second call while already on a call would not open the call screen correctly.
+* **(iOS)** Resolved an issue where CallKit calls sometimes were not terminated when the Stream call ended.
+* **(iOS)** Fixed a missing app icon on the CallKit screen when the app was in a terminated state.
+
 ## 0.7.1
 * Sync version with `stream_video_flutter` 0.7.1
 

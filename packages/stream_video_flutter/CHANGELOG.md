@@ -1,3 +1,16 @@
+## 0.7.2
+
+🐞 Fixed
+* Resolved an issue where accepting a second call while already on a call would not open the call screen correctly. [#840](https://github.com/GetStream/stream-video-flutter/pull/840) and [#834](https://github.com/GetStream/stream-video-flutter/pull/834)
+* **(Web)** Fixed web compilation issues. [#832](https://github.com/GetStream/stream-video-flutter/pull/832)
+* **(Web)** Addressed an issue where `battery_plus` and `thermal` packages were erroneously called on web. [#837](https://github.com/GetStream/stream-video-flutter/pull/837)
+* **(iOS)** Fixed an issue where Picture-in-Picture mode was not ended when the call ended. [#840](https://github.com/GetStream/stream-video-flutter/pull/840)
+* **(iOS)** Resolved an issue where CallKit calls sometimes were not terminated when the Stream call ended. [#840](https://github.com/GetStream/stream-video-flutter/pull/840)
+* **(iOS)** Fixed a missing app icon on the CallKit screen when the app was in a terminated state. [#841](https://github.com/GetStream/stream-video-flutter/pull/841)
+
+🔄 Changed
+* Deprecated the `handleVoipPushNotification()` method in the `StreamVideo` class. Use `handleRingingFlowNotifications()` instead.
+
 ## 0.7.1
 
 🐞 Fixed
