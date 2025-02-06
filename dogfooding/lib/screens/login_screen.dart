@@ -20,6 +20,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 // 🌎 Project imports:
 import '../di/injector.dart';
 import '../utils/assets.dart';
+import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
 
@@ -107,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+    final width = math.min(size.width, kMaxWidthRegularScreen);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -121,106 +123,109 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: SafeArea(
         child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Hero(
-                  tag: 'stream_logo',
-                  child: Image.asset(
-                    streamVideoIconAsset,
-                    width: size.width * 0.8,
-                  ),
-                ),
-                const SizedBox(height: 36),
-                Text('Stream', style: theme.textTheme.headlineMedium),
-                Text(
-                  '[Video Calling]',
-                  style: theme.textTheme.headlineMedium?.apply(
-                    color: AppColorPalette.appGreen,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    controller: _emailController,
-                    style:
-                        theme.textTheme.bodyMedium?.apply(color: Colors.white),
-                    decoration: const InputDecoration(
-                      labelText: 'Enter Email',
-                      isDense: true,
-                      border: OutlineInputBorder(),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: kMaxWidthRegularScreen),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: 'stream_logo',
+                    child: Image.asset(
+                      streamVideoIconAsset,
+                      width: width * 0.8,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: StreamButton.active(
-                    label: 'Sign up with email',
-                    icon: const Icon(
-                      Icons.email_outlined,
-                      color: Colors.white,
+                  const SizedBox(height: 36),
+                  Text('Stream', style: theme.textTheme.headlineMedium),
+                  Text(
+                    '[Video Calling]',
+                    style: theme.textTheme.headlineMedium?.apply(
+                      color: AppColorPalette.appGreen,
                     ),
-                    onPressed: _loginWithEmail,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: Colors.grey,
+                  const SizedBox(height: 48),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: _emailController,
+                      style:
+                          theme.textTheme.bodyMedium?.apply(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Enter Email',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: StreamButton.active(
+                      label: 'Sign up with email',
+                      icon: const Icon(
+                        Icons.email_outlined,
+                        color: Colors.white,
+                      ),
+                      onPressed: _loginWithEmail,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: Colors.grey,
+                          ),
                         ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('OR'),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: Colors.grey,
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text('OR'),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: GoogleLoginButton(
-                    onPressed: _loginWithGoogle,
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: GoogleLoginButton(
+                      onPressed: _loginWithGoogle,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: StreamButton.tertiary(
-                    onPressed: _loginAsGuest,
-                    label: 'Join As Guest',
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: StreamButton.tertiary(
+                      onPressed: _loginAsGuest,
+                      label: 'Join As Guest',
+                    ),
                   ),
-                ),
-                FutureBuilder<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return const SizedBox.shrink();
-                    final platformInfo = snapshot.data;
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox.shrink();
+                      final platformInfo = snapshot.data;
 
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        'Version ${platformInfo?.version}+${platformInfo?.buildNumber}',
-                        style: theme.textTheme.labelSmall,
-                      ),
-                    );
-                  },
-                ),
-              ],
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'Version ${platformInfo?.version}+${platformInfo?.buildNumber}',
+                          style: theme.textTheme.labelSmall,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
