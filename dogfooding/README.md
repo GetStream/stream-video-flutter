@@ -52,7 +52,13 @@ open Runner.xcworkspace
     - Create a new app group based on your updated bundle identifier.
     - Example: `group.com.yourname.StreamDogfooding`
 
-4. Run the app
+4. (macOS setup) Install FlutterFire
+To run the macOS app the FlutterFire CLI tool needs to be installed. Install using:
+```bash
+dart pub global activate flutterfire_cli
+```
+
+5. Run the app
 Once the setup is complete, you can run the app using Flutter:
 
 ```bash
