@@ -234,6 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(14),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Hero(
                   tag: 'stream_logo',

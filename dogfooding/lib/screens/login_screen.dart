@@ -128,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Hero(
                     tag: 'stream_logo',
@@ -149,8 +150,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextField(
                       controller: _emailController,
-                      style:
-                          theme.textTheme.bodyMedium?.apply(color: Colors.white),
+                      style: theme.textTheme.bodyMedium
+                          ?.apply(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Enter Email',
                         isDense: true,

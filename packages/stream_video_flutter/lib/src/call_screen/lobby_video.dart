@@ -168,6 +168,7 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
           ),
           const SizedBox(height: 16),
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               CallControlOption(
                 icon: microphoneEnabled
