@@ -30,7 +30,7 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^0.12.5+2
+  stream_webrtc_flutter: ^0.12.8
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1
