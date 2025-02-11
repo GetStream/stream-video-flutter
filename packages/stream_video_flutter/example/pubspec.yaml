@@ -30,7 +30,7 @@ dependencies:
   stream_video: ^0.7.2
   stream_video_flutter: ^0.7.2
   stream_video_push_notification: ^0.7.2
-  stream_webrtc_flutter: ^0.12.5+2
+  stream_webrtc_flutter: ^0.12.8
 
 dependency_overrides:
   stream_video:
