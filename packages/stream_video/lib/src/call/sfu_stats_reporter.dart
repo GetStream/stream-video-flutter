@@ -24,10 +24,14 @@ class SfuStatsReporter {
     final thermalStatusAvailable =
         CurrentPlatform.isAndroid || CurrentPlatform.isIos;
     if (thermalStatusAvailable) {
-      _thermalStatusSubscription =
-          Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
-        _thermalStatus = status;
-      });
+      try {
+        _thermalStatusSubscription =
+            Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
+          _thermalStatus = status;
+        });
+      } catch (e) {
+        // ignore: thermal status not available
+      }
     }
 
     _mediaDeviceSubscription =

@@ -34,6 +34,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
     CallerCustomizationFunction? callerCustomizationCallback,
+    @Deprecated(
+        'Background handler is no longer needed for terminated state ringing on iOS.')
     BackgroundVoipCallHandler? backgroundVoipCallHandler,
     StreamVideoPushParams? pushParams,
     bool registerApnDeviceToken = false,
@@ -44,7 +46,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       StreamVideoPushNotificationPlatform.instance.init(
         params.toJson(),
         callerCustomizationCallback,
-        backgroundVoipCallHandler,
       );
 
       return StreamVideoPushNotificationManager._(

@@ -49,7 +49,6 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   Future<void> init(
     Map<String, dynamic> pushParams,
     CallerCustomizationFunction? callerCustomizationCallback,
-    BackgroundVoipCallHandler? backgroundVoipCallHandler,
   ) {
     throw UnimplementedError('init() has not been implemented.');
   }

@@ -43,7 +43,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       prefs.environment,
     );
 
-    streamVideo.observeCallDeclinedCallKitEvent();
+    final subscription = streamVideo.observeCallDeclinedCallKitEvent();
+
+    streamVideo.disposeAfterResolvingRinging(
+      disposingCallback: () {
+        subscription?.cancel();
+        AppInjector.reset();
+      },
+    );
 
     // Handle the message.
     await _handleRemoteMessage(message);
