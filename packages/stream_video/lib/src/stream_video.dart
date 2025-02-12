@@ -599,6 +599,35 @@ class StreamVideo extends Disposable {
     );
   }
 
+  Future<bool> consumeAndAcceptActiveCall({
+    void Function(Call)? onCallAccepted,
+  }) async {
+    final calls = await pushNotificationManager?.activeCalls();
+    if (calls == null || calls.isEmpty) return false;
+
+    final callResult = await consumeIncomingCall(
+      uuid: calls.first.uuid!,
+      cid: calls.first.callCid!,
+    );
+
+    callResult.fold(success: (result) async {
+      final call = result.data;
+      await call.accept();
+
+      onCallAccepted?.call(call);
+
+      return true;
+    }, failure: (error) {
+      _logger.d(
+        () =>
+            '[consumeAndAcceptActiveCall] error consuming incoming call: $error',
+      );
+      return false;
+    });
+
+    return false;
+  }
+
   CompositeSubscription observeCoreCallKitEvents({
     void Function(Call)? onCallAccepted,
   }) {
