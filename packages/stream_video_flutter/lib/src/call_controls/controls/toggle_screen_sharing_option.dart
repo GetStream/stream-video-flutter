@@ -17,6 +17,7 @@ class ToggleScreenShareOption extends StatelessWidget {
     this.disabledScreenShareIconColor,
     this.enabledScreenShareBackgroundColor,
     this.disabledScreenShareBackgroundColor,
+    this.desktopScreenSelectorBuilder,
   });
 
   /// Represents a call.
@@ -48,9 +49,12 @@ class ToggleScreenShareOption extends StatelessWidget {
 
   final NotificationOptionsBuilder? screenSharingNotificationOptionsBuilder;
 
+  final DesktopScreenSelectorBuilder? desktopScreenSelectorBuilder;
+
   @override
   Widget build(BuildContext context) {
     final enabled = localParticipant.isScreenShareEnabled;
+    var screenShareConstraints = this.screenShareConstraints;
 
     return CallControlOption(
       icon: enabled
@@ -63,6 +67,19 @@ class ToggleScreenShareOption extends StatelessWidget {
           : disabledScreenShareBackgroundColor,
       onPressed: () async {
         final toggledEnabled = !enabled;
+
+        if (CurrentPlatform.isDesktop && toggledEnabled) {
+          final source = await (desktopScreenSelectorBuilder?.call(context) ??
+              showDefaultScreenSelectionDialog(context));
+
+          if (source != null) {
+            screenShareConstraints =
+                (screenShareConstraints ?? const ScreenShareConstraints())
+                    .copyWith(deviceId: source.id);
+          } else {
+            return;
+          }
+        }
 
         if (CurrentPlatform.isAndroid) {
           if (toggledEnabled) {
