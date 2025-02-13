@@ -8,6 +8,18 @@ packages:
   - dogfooding
   - packages/**
 
+command:
+  bootstrap:
+    # Dart and Flutter environment used in the project.
+    environment:
+      sdk: ^3.6.2
+      # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
+      flutter: ">=3.27.4"
+
+    # Dependencies used in the project.
+    dependencies:
+      stream_webrtc_flutter: ^0.12.9
+
 scripts:
   postclean:
     run: melos run clean:flutter --no-select

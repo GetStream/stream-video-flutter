@@ -7,8 +7,8 @@ repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
-  flutter: ">=3.24.5"
+  sdk: ^3.6.2
+  flutter: ">=3.27.4"
 
 dependencies:
   async: ^2.11.0
@@ -30,7 +30,7 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^0.12.8
+  stream_webrtc_flutter: ^0.12.9
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1
