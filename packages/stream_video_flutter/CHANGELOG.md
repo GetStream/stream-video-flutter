@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+* Center alignment of buttons in `StreamLobbyVideo` to support more screen sizes.
+
 ## 0.7.2
 
 🐞 Fixed

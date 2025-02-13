@@ -1,5 +1,6 @@
 // 🎯 Dart imports:
 import 'dart:async';
+import 'dart:math' as math;
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
@@ -192,6 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
+    final width = math.min(size.width, kMaxWidthRegularScreen);
     final name = currentUser!.name;
 
     return Scaffold(
@@ -227,54 +229,58 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            children: [
-              Hero(
-                tag: 'stream_logo',
-                child: Image.asset(
-                  streamVideoIconAsset,
-                  width: size.width * 0.6,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: kMaxWidthRegularScreen),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Hero(
+                  tag: 'stream_logo',
+                  child: Image.asset(
+                    streamVideoIconAsset,
+                    width: width * 0.6,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text('Stream', style: theme.textTheme.headlineMedium),
-              Text(
-                '[Video Calling]',
-                style: theme.textTheme.headlineMedium?.apply(
-                  color: AppColorPalette.appGreen,
+                const SizedBox(height: 24),
+                Text('Stream', style: theme.textTheme.headlineMedium),
+                Text(
+                  '[Video Calling]',
+                  style: theme.textTheme.headlineMedium?.apply(
+                    color: AppColorPalette.appGreen,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 48),
-              Text(
-                'Start a new call, join a meeting by\n'
-                'entering the call ID or by scanning\n'
-                'a QR code.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.apply(
-                  color: AppColorPalette.secondaryText,
+                const SizedBox(height: 48),
+                Text(
+                  'Start a new call, join a meeting by\n'
+                  'entering the call ID or by scanning\n'
+                  'a QR code.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.apply(
+                    color: AppColorPalette.secondaryText,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 36),
-              const SizedBox(height: 8),
-              _JoinForm(
-                callIdController: _callIdController,
-                onJoinPressed: _getOrCreateCall,
-              ),
-              const SizedBox(height: 24),
-              StreamButton.primary(
-                label: 'Start New Call',
-                icon: const Icon(Icons.video_call, color: Colors.white),
-                onPressed: _getOrCreateCall,
-              ),
-              const SizedBox(height: 8),
-              StreamButton.tertiary(
-                label: 'Direct Call',
-                icon: const Icon(Icons.person, color: Colors.white),
-                onPressed: () => _directCall(context),
-              ),
-            ],
+                const SizedBox(height: 36),
+                const SizedBox(height: 8),
+                _JoinForm(
+                  callIdController: _callIdController,
+                  onJoinPressed: _getOrCreateCall,
+                ),
+                const SizedBox(height: 24),
+                StreamButton.primary(
+                  label: 'Start New Call',
+                  icon: const Icon(Icons.video_call, color: Colors.white),
+                  onPressed: _getOrCreateCall,
+                ),
+                const SizedBox(height: 8),
+                StreamButton.tertiary(
+                  label: 'Direct Call',
+                  icon: const Icon(Icons.person, color: Colors.white),
+                  onPressed: () => _directCall(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),
