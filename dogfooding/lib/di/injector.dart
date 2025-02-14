@@ -20,45 +20,6 @@ import '../utils/consts.dart';
 
 GetIt locator = GetIt.instance;
 
-@pragma('vm:entry-point')
-Future<void> _backgroundVoipCallHandler() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  final appPrefs = AppPreferences(prefs: prefs);
-
-  final apiKey = appPrefs.apiKey;
-  final userCredentials = appPrefs.userCredentials;
-
-  if (apiKey == null || userCredentials == null) {
-    return;
-  }
-
-  StreamVideo(
-    apiKey,
-    user: User(info: userCredentials.userInfo),
-    userToken: userCredentials.token.rawValue,
-    options: const StreamVideoOptions(
-      logPriority: Priority.verbose,
-      muteAudioWhenInBackground: true,
-      muteVideoWhenInBackground: true,
-      keepConnectionsAliveWhenInBackground: true,
-    ),
-    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
-      iosPushProvider: const StreamVideoPushProvider.apn(
-        name: 'flutter-apn',
-      ),
-      androidPushProvider: const StreamVideoPushProvider.firebase(
-        name: 'flutter-firebase',
-      ),
-      pushParams: const StreamVideoPushParams(
-        appName: kAppName,
-        ios: IOSParams(iconName: 'IconMask'),
-      ),
-      registerApnDeviceToken: true,
-    ),
-  );
-}
-
 /// This class is responsible for registering dependencies
 /// and injecting them into the app.
 class AppInjector {
@@ -209,7 +170,6 @@ StreamVideo _initStreamVideo(
         appName: kAppName,
         ios: IOSParams(iconName: 'IconMask'),
       ),
-      backgroundVoipCallHandler: _backgroundVoipCallHandler,
       registerApnDeviceToken: true,
     ),
   );

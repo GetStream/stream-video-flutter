@@ -43,7 +43,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       prefs.environment,
     );
 
-    streamVideo.observeCallDeclinedCallKitEvent();
+    final subscription = streamVideo.observeCallDeclinedCallKitEvent();
+
+    streamVideo.disposeAfterResolvingRinging(
+      disposingCallback: () {
+        subscription?.cancel();
+        AppInjector.reset();
+      },
+    );
 
     // Handle the message.
     await _handleRemoteMessage(message);
@@ -116,39 +123,21 @@ class _StreamDogFoodingAppContentState
     if (_router.routerDelegate.navigatorKey.currentContext == null) {
       // App is not running yet. Postpone consuming after app is in the foreground
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _consumeIncomingCall();
+        final streamVideo = locator.get<StreamVideo>();
+        streamVideo.consumeAndAcceptActiveCall(
+          onCallAccepted: (call) {
+            final extra = (
+              call: call,
+              connectOptions: null,
+            );
+
+            _router.push(CallRoute($extra: extra).location, extra: extra);
+          },
+        );
       });
     } else {
       // no-op. If the app is already running we'll handle it via events
     }
-  }
-
-  Future<void> _consumeIncomingCall() async {
-    if (!locator.isRegistered<StreamVideo>()) return;
-
-    final streamVideo = locator.get<StreamVideo>();
-    final calls = await streamVideo.pushNotificationManager?.activeCalls();
-
-    if (calls == null || calls.isEmpty) return;
-
-    final callResult = await streamVideo.consumeIncomingCall(
-      uuid: calls.first.uuid!,
-      cid: calls.first.callCid!,
-    );
-
-    callResult.fold(success: (result) async {
-      final call = result.data;
-      await call.accept();
-
-      final extra = (
-        call: result.data,
-        connectOptions: null,
-      );
-
-      _router.push(CallRoute($extra: extra).location, extra: extra);
-    }, failure: (error) {
-      debugPrint('Error consuming incoming call: $error');
-    });
   }
 
   void _observeCallKitEvents() {
