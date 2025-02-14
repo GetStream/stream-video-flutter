@@ -112,83 +112,86 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
     final cameraEnabled = _cameraTrack != null;
     final microphoneEnabled = _microphoneTrack != null;
 
-    return Column(
-      children: [
-        Container(
-          constraints: const BoxConstraints(maxWidth: 420),
-          height: 280,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: DecoratedBox(
-              decoration: BoxDecoration(color: cardBackgroundColor),
-              child: Builder(
-                builder: (context) {
-                  Widget placeHolderBuilder(BuildContext context) {
-                    return Center(
-                      child: StreamUserAvatarTheme(
-                        data: userAvatarTheme,
-                        child: StreamUserAvatar(
-                          user: currentUser,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 280,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: cardBackgroundColor),
+                child: Builder(
+                  builder: (context) {
+                    Widget placeHolderBuilder(BuildContext context) {
+                      return Center(
+                        child: StreamUserAvatarTheme(
+                          data: userAvatarTheme,
+                          child: StreamUserAvatar(
+                            user: currentUser,
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  return Stack(
-                    children: [
-                      if (cameraEnabled)
-                        VideoTrackRenderer(
-                          mirror: true,
-                          videoTrack: _cameraTrack!,
-                          placeholderBuilder: placeHolderBuilder,
-                        )
-                      else
-                        placeHolderBuilder(context),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            StreamParticipantLabel(
-                              isAudioEnabled: microphoneEnabled,
-                              isSpeaking: false,
-                              participantName: currentUser.name,
-                            ),
-                          ],
+                    return Stack(
+                      children: [
+                        if (cameraEnabled)
+                          VideoTrackRenderer(
+                            mirror: true,
+                            videoTrack: _cameraTrack!,
+                            placeholderBuilder: placeHolderBuilder,
+                          )
+                        else
+                          placeHolderBuilder(context),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              StreamParticipantLabel(
+                                isAudioEnabled: microphoneEnabled,
+                                isSpeaking: false,
+                                participantName: currentUser.name,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            CallControlOption(
-              icon: microphoneEnabled
-                  ? const Icon(Icons.mic_rounded)
-                  : const Icon(Icons.mic_off_rounded),
-              iconColor: microphoneEnabled ? null : theme.optionOffIconColor,
-              backgroundColor:
-                  microphoneEnabled ? null : theme.optionOffBackgroundColor,
-              onPressed: toggleMicrophone,
-            ),
-            CallControlOption(
-              icon: cameraEnabled
-                  ? const Icon(Icons.videocam_rounded)
-                  : const Icon(Icons.videocam_off_rounded),
-              iconColor: cameraEnabled ? null : theme.optionOffIconColor,
-              backgroundColor:
-                  cameraEnabled ? null : theme.optionOffBackgroundColor,
-              onPressed: toggleCamera,
-            ),
-          ],
-        ),
-      ],
+          const SizedBox(height: 16),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CallControlOption(
+                icon: microphoneEnabled
+                    ? const Icon(Icons.mic_rounded)
+                    : const Icon(Icons.mic_off_rounded),
+                iconColor: microphoneEnabled ? null : theme.optionOffIconColor,
+                backgroundColor:
+                    microphoneEnabled ? null : theme.optionOffBackgroundColor,
+                onPressed: toggleMicrophone,
+              ),
+              CallControlOption(
+                icon: cameraEnabled
+                    ? const Icon(Icons.videocam_rounded)
+                    : const Icon(Icons.videocam_off_rounded),
+                iconColor: cameraEnabled ? null : theme.optionOffIconColor,
+                backgroundColor:
+                    cameraEnabled ? null : theme.optionOffBackgroundColor,
+                onPressed: toggleCamera,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

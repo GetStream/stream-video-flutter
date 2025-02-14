@@ -1,4 +1,4 @@
-## Unreleased
+## Upcoming
 
 ✅ Added
 - Introduced `disposeAfterResolvingRinging()` and `consumeAndAcceptActiveCall()` methods in `StreamVideo` to simplify the ringing flow implementation.
@@ -6,6 +6,9 @@
 
 🔄 Changed
 - Deprecated the `backgroundVoipCallHandler` parameter in `StreamVideoPushNotificationManager`, as it is no longer required for iOS ringing to function in a terminated state.
+
+🐞 Fixed
+* Center alignment of buttons in `StreamLobbyVideo` to support more screen sizes.
 
 ## 0.7.2
 

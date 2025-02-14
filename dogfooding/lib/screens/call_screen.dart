@@ -242,6 +242,7 @@ class _CallScreenState extends State<CallScreen> {
                   padding: const EdgeInsets.only(
                     top: 16,
                     left: 8,
+                    bottom: 8,
                   ),
                   color: Colors.black,
                   child: SafeArea(
