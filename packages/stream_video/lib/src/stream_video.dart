@@ -39,6 +39,7 @@ import 'models/push_provider.dart';
 import 'models/queried_calls.dart';
 import 'models/user.dart';
 import 'models/user_info.dart';
+import 'platform_detector/platform_detector.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
 import 'token/token.dart';
@@ -582,6 +583,51 @@ class StreamVideo extends Disposable {
     return manager.on<T>(onEvent);
   }
 
+  StreamSubscription<CallKitEvent>? disposeAfterResolvingRinging({
+    void Function()? disposingCallback,
+  }) {
+    return onCallKitEvent(
+      (event) {
+        if (event is ActionCallAccept ||
+            event is ActionCallDecline ||
+            event is ActionCallTimeout ||
+            event is ActionCallEnded) {
+          disposingCallback?.call();
+          dispose();
+        }
+      },
+    );
+  }
+
+  Future<bool> consumeAndAcceptActiveCall({
+    void Function(Call)? onCallAccepted,
+  }) async {
+    final calls = await pushNotificationManager?.activeCalls();
+    if (calls == null || calls.isEmpty) return false;
+
+    final callResult = await consumeIncomingCall(
+      uuid: calls.first.uuid!,
+      cid: calls.first.callCid!,
+    );
+
+    callResult.fold(success: (result) async {
+      final call = result.data;
+      await call.accept();
+
+      onCallAccepted?.call(call);
+
+      return true;
+    }, failure: (error) {
+      _logger.d(
+        () =>
+            '[consumeAndAcceptActiveCall] error consuming incoming call: $error',
+      );
+      return false;
+    });
+
+    return false;
+  }
+
   CompositeSubscription observeCoreCallKitEvents({
     void Function(Call)? onCallAccepted,
   }) {
@@ -661,7 +707,13 @@ class StreamVideo extends Disposable {
     }
   }
 
+  /// ActionCallEnded event is sent by `flutter_callkit_incoming` when the call is ended.
+  /// On iOS this is connected to CallKit and should end active call or reject incoming call.
+  /// On Android this is connected to push notification being dismissed.
+  /// When app is terminated it can be send even when accepting the call. That's why we only handle it on iOS.
   Future<void> _onCallEnded(ActionCallEnded event) async {
+    if (CurrentPlatform.isAndroid) return;
+
     _logger.d(() => '[onCallEnded] event: $event');
 
     final uuid = event.data.uuid;

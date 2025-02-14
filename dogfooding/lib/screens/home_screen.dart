@@ -64,9 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
+  Future<void> _getOrCreateCall({
+    List<String> memberIds = const [],
+  }) async {
     var callId = _callIdController.text;
-    if (callId.isEmpty) callId = generateAlphanumericString(12);
+
+    // Always generate a new call id for ringing
+    if (callId.isEmpty || memberIds.isNotEmpty) {
+      callId = generateAlphanumericString(12);
+    }
 
     unawaited(showLoadingIndicator(context));
     _call = _streamVideo.makeCall(

@@ -54,26 +54,10 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
             return completion()
         }
 
-        let defaults = UserDefaults.standard
-        let callbackHandle = defaults.object(forKey: "callback_handle") as? Int64
-
         var streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
 
         let state = UIApplication.shared.applicationState
         if state == .background || state == .inactive {
-            if state == .inactive, callbackHandle != nil {
-                DispatchQueue.main.async {
-                    let engine = FlutterEngine(
-                        name: "StreamVideoIsolate", project: nil, allowHeadlessExecution: true)
-                    let callbackInfo = FlutterCallbackCache.lookupCallbackInformation(
-                        callbackHandle!)
-                    let entrypoint = callbackInfo?.callbackName
-                    let uri = callbackInfo?.callbackLibraryPath
-
-                    let isRunning = engine.run(withEntrypoint: entrypoint, libraryURI: uri)
-                }
-            }
-
             handleIncomingCall(streamDict: streamDict, state: state, completion: completion)
         } else if state == .active {
             mainChannel?.invokeMethod("customizeCaller", arguments: streamDict) { (response) in

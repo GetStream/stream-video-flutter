@@ -18,9 +18,6 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "initData":
             if let arguments = call.arguments as? [String: Any] {
-                let handle = arguments["callbackHandler"] as? Int64
-                persistentState.set(handle, forKey: "callback_handle")
-
                 if let iosData = arguments["ios"] as? [String: Any],
                     let iconName = iosData["iconName"] as? String
                 {
