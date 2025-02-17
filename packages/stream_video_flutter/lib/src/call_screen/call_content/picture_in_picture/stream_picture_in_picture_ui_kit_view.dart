@@ -23,15 +23,24 @@ import 'package:stream_video/stream_video.dart';
 ///     },
 ///   );
 /// ```
+///
+/// On iOS, **multitasking camera access** must be enabled to allow the user's
+/// camera to remain active while the app is in the background.
+///
+/// If multitasking camera access is enabled, setting `includeLocalParticipantVideo`
+/// to `true` allows the local camera feed to be used in PiP mode (`true` by default).
+///
+/// For more details, visit:
+/// https://getstream.io/video/docs/flutter/advanced/picture_in_picture/
 class StreamPictureInPictureUiKitView extends StatefulWidget {
   const StreamPictureInPictureUiKitView({
     super.key,
     required this.call,
-    this.ignoreLocalParticipantVideo = true,
+    this.includeLocalParticipantVideo = true,
   });
 
   final Call call;
-  final bool ignoreLocalParticipantVideo;
+  final bool includeLocalParticipantVideo;
 
   @override
   State<StreamPictureInPictureUiKitView> createState() =>
@@ -39,7 +48,7 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
 }
 
 class _StreamPictureInPictureUiKitViewState
-    extends State<StreamPictureInPictureUiKitView> {
+    extends State<StreamPictureInPictureUiKitView> with WidgetsBindingObserver {
   static const _idCallEvents = 1;
   static const _idCallState = 2;
 
@@ -47,48 +56,50 @@ class _StreamPictureInPictureUiKitViewState
 
   final Subscriptions _subscriptions = Subscriptions();
 
-  @override
-  void initState() {
-    final callEventsSubscription = widget.call.callEvents.listen((event) {
-      final participants = widget.ignoreLocalParticipantVideo
-          ? widget.call.state.value.otherParticipants
-          : widget.call.state.value.callParticipants;
-      mergeSort(participants, compare: CallParticipantSortingPresets.speaker);
+  void _handleCallEvent(
+    StreamCallEvent event,
+    bool includeLocalParticipantVideo,
+  ) {
+    final participants = includeLocalParticipantVideo
+        ? widget.call.state.value.callParticipants
+        : widget.call.state.value.otherParticipants;
 
-      final screenShareParticipant = participants.firstWhereOrNull(
-        (it) {
-          final screenShareTrack = it.screenShareTrack;
-          final isScreenShareEnabled = it.isScreenShareEnabled;
+    mergeSort(participants, compare: CallParticipantSortingPresets.speaker);
 
-          return screenShareTrack != null && isScreenShareEnabled;
-        },
+    if (participants.isNotEmpty) {
+      final videoTrack = widget.call.getTrack(
+        participants.first.trackIdPrefix,
+        participants.first.isScreenShareEnabled
+            ? SfuTrackType.screenShare
+            : SfuTrackType.video,
       );
 
-      if (participants.isNotEmpty) {
-        final videoTrack = widget.call.getTrack(
-          screenShareParticipant?.trackIdPrefix ??
-              participants.first.trackIdPrefix,
-          screenShareParticipant != null
-              ? SfuTrackType.screenShare
-              : SfuTrackType.video,
-        );
+      platformMethodChannel.invokeMethod(
+        'setTrack',
+        {
+          'trackId': videoTrack?.mediaTrack.id,
+        },
+      );
+    }
 
-        platformMethodChannel.invokeMethod(
-          'setTrack',
-          {
-            'trackId': videoTrack?.mediaTrack.id,
-          },
-        );
-      }
+    if (event is StreamCallEndedEvent) {
+      platformMethodChannel.invokeMethod(
+        'callEnded',
+      );
+    }
+  }
 
-      if (event is StreamCallEndedEvent) {
-        platformMethodChannel.invokeMethod(
-          'callEnded',
+  void _subscribeToCallEvents() {
+    _subscriptions.add(
+      _idCallEvents,
+      widget.call.callEvents.listen((event) {
+        _handleCallEvent(
+          event,
+          widget.includeLocalParticipantVideo &&
+              widget.call.state.value.iOSMultitaskingCameraAccessEnabled,
         );
-      }
-    });
-
-    _subscriptions.add(_idCallEvents, callEventsSubscription);
+      }),
+    );
 
     _subscriptions.add(
       _idCallState,
@@ -102,12 +113,34 @@ class _StreamPictureInPictureUiKitViewState
         },
       ),
     );
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
 
     super.initState();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _subscriptions.cancelAll();
+        break;
+      case AppLifecycleState.paused:
+        _subscribeToCallEvents();
+        break;
+      default:
+        break;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _subscriptions.cancelAll();
     super.dispose();
   }

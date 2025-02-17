@@ -1,6 +1,5 @@
 // 📦 Package imports:
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
@@ -155,8 +154,8 @@ StreamVideo _initStreamVideo(
     tokenLoader: tokenLoader,
     options: const StreamVideoOptions(
       logPriority: Priority.verbose,
-      muteAudioWhenInBackground: true,
-      muteVideoWhenInBackground: true,
+      muteAudioWhenInBackground: false,
+      muteVideoWhenInBackground: false,
       keepConnectionsAliveWhenInBackground: true,
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(

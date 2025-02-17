@@ -245,8 +245,13 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
 
   void participantSetCameraEnabled({
     required bool enabled,
+    bool? iOSMultitaskingCameraAccessEnabled,
   }) {
-    return _toggleTrackType(SfuTrackType.video, enabled);
+    return _toggleTrackType(
+      SfuTrackType.video,
+      enabled,
+      iOSMultitaskingCameraAccessEnabled: iOSMultitaskingCameraAccessEnabled,
+    );
   }
 
   void participantSetMicrophoneEnabled({
@@ -263,9 +268,11 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
 
   void _toggleTrackType(
     SfuTrackType trackType,
-    bool enabled,
-  ) {
+    bool enabled, {
+    bool? iOSMultitaskingCameraAccessEnabled,
+  }) {
     state = state.copyWith(
+      iOSMultitaskingCameraAccessEnabled: iOSMultitaskingCameraAccessEnabled,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final publishedTracks = participant.publishedTracks;

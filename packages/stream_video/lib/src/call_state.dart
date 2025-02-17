@@ -48,6 +48,7 @@ class CallState extends Equatable {
       blockedUserIds: const [],
       participantCount: 0,
       anonymousParticipantCount: 0,
+      iOSMultitaskingCameraAccessEnabled: false,
       custom: const {},
     );
   }
@@ -87,6 +88,7 @@ class CallState extends Equatable {
     required this.blockedUserIds,
     required this.participantCount,
     required this.anonymousParticipantCount,
+    required this.iOSMultitaskingCameraAccessEnabled,
     required this.custom,
   });
 
@@ -124,6 +126,7 @@ class CallState extends Equatable {
   final List<String> blockedUserIds;
   final int participantCount;
   final int anonymousParticipantCount;
+  final bool iOSMultitaskingCameraAccessEnabled;
   final Map<String, Object> custom;
 
   String get callId => callCid.id;
@@ -175,6 +178,7 @@ class CallState extends Equatable {
     List<String>? blockedUserIds,
     int? participantCount,
     int? anonymousParticipantCount,
+    bool? iOSMultitaskingCameraAccessEnabled,
     Map<String, Object>? custom,
   }) {
     return CallState._(
@@ -213,6 +217,8 @@ class CallState extends Equatable {
       participantCount: participantCount ?? this.participantCount,
       anonymousParticipantCount:
           anonymousParticipantCount ?? this.anonymousParticipantCount,
+      iOSMultitaskingCameraAccessEnabled: iOSMultitaskingCameraAccessEnabled ??
+          this.iOSMultitaskingCameraAccessEnabled,
       custom: custom ?? this.custom,
     );
   }
@@ -282,6 +288,7 @@ class CallState extends Equatable {
         blockedUserIds,
         participantCount,
         anonymousParticipantCount,
+        iOSMultitaskingCameraAccessEnabled,
         custom,
       ];
 

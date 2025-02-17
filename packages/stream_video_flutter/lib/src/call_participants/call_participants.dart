@@ -150,6 +150,16 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
   Widget build(BuildContext context) {
     if (_participants.isNotEmpty &&
         widget.layoutMode == ParticipantLayoutMode.pictureInPicture) {
+      if (_screenShareParticipant != null) {
+        return ScreenShareContent(
+          key: ValueKey(
+            '${_screenShareParticipant!.userId} - screenShareContent',
+          ),
+          call: widget.call,
+          participant: _screenShareParticipant!,
+        );
+      }
+
       return widget.callParticipantBuilder(
         context,
         widget.call,
