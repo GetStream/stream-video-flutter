@@ -58,6 +58,11 @@ scripts:
        Flags all compiler `errors` in the project.
 
   format:
+    run: dart format .
+    description: |
+      Run `dart format .` in all packages.
+
+  format:verify:
     run: dart format --set-exit-if-changed .
     description: |
       Run `dart format --set-exit-if-changed .` in all packages.

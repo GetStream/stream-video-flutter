@@ -60,6 +60,10 @@ jobs:
         run: |
           melos run analyze:error
 
+      - name: Check formatting
+        run: |
+          melos run format:verify
+
   build:
     timeout-minutes: 15
     runs-on: ubuntu-latest
