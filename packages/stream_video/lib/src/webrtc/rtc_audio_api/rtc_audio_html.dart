@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, implementation_imports
 
-import 'dart:js_util' as jsutil;
+import 'dart:js_interop' as jsutil;
+import 'dart:js_interop_unsafe';
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -40,9 +41,9 @@ void stopAudio(String id) {
 
 void setSinkId(String id, String deviceId) {
   final audioElement = web.document.getElementById(audioPrefix + id);
-  if (audioElement is web.HTMLAudioElement &&
-      jsutil.hasProperty(audioElement, 'setSinkId')) {
-    jsutil.setProperty(audioElement, 'setSinkId', deviceId);
+
+  if (audioElement is web.HTMLAudioElement && audioElement.has('setSinkId')) {
+    audioElement.setProperty('setSinkId'.toJS, deviceId.toJS);
   }
 }
 
