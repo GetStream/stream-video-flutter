@@ -10,7 +10,7 @@
 - Deprecated the `backgroundVoipCallHandler` parameter in `StreamVideoPushNotificationManager`, as it is no longer required for iOS ringing to function in a terminated state.
 
 🐞 Fixed
-- **(Windows/Linus)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
+- **(Windows/Linux)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
 
 ## 0.7.2
 

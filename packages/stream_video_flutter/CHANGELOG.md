@@ -11,7 +11,7 @@
 
 🐞 Fixed
 * Center alignment of buttons in `StreamLobbyVideo` to support more screen sizes.
-* **(Windows/Linus)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
+* **(Windows/Linux)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
 
 🚧 (Breaking) Picture-in-Picture (PiP) Improvements & Fixes
 * **Fixed:** PiP not working on Android 15.
