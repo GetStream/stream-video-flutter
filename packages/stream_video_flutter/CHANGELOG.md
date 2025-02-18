@@ -1,4 +1,7 @@
-## Upcoming
+## 0.8.0
+
+* Updated minimum Flutter version to 3.27.4
+    * Note: If you updated Flutter version and are using `flutterfire_cli` for push notifications you might need to reactivate it by running: `dart pub global activate flutterfire_cli`.
 
 ✅ Added
 * Introduced `disposeAfterResolvingRinging()` and `consumeAndAcceptActiveCall()` methods in `StreamVideo` to simplify the ringing flow implementation.
@@ -9,6 +12,7 @@
 
 🐞 Fixed
 * Center alignment of buttons in `StreamLobbyVideo` to support more screen sizes.
+* **(Windows/Linux)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
 
 🚧 (Breaking) Picture-in-Picture (PiP) Improvements & Fixes
 * **Fixed:** PiP not working on Android 15.

@@ -1,4 +1,6 @@
-## Unreleased
+## 0.8.0
+
+* Updated minimum Flutter version to 3.27.4
 
 ✅ Added
 - Introduced `disposeAfterResolvingRinging()` and `consumeAndAcceptActiveCall()` methods in `StreamVideo` to simplify the ringing flow implementation.
@@ -6,6 +8,9 @@
 
 🔄 Changed
 - Deprecated the `backgroundVoipCallHandler` parameter in `StreamVideoPushNotificationManager`, as it is no longer required for iOS ringing to function in a terminated state.
+
+🐞 Fixed
+- **(Windows/Linux)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
 
 ## 0.7.2
 
