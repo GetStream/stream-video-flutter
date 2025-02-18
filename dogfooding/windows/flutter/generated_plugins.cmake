@@ -10,8 +10,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   firebase_auth
   firebase_core
+  gal
   media_kit_video
   permission_handler_windows
+  record_windows
   screen_brightness_windows
   share_plus
   stream_webrtc_flutter
