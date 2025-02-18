@@ -1982,9 +1982,17 @@ class Call {
 
   Future<Result<bool>> setMultitaskingCameraAccessEnabled(bool enabled) async {
     if (CurrentPlatform.isIos) {
-      final result =
-          await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
-      return Result.success(result);
+      try {
+        final result =
+            await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
+        return Result.success(result);
+      } catch (error, stackTrace) {
+        _logger.e(() => 'Failed to set multitasking camera access: $error');
+        return Result.error(
+          'Failed to set multitasking camera access',
+          stackTrace,
+        );
+      }
     }
 
     return const Result.success(false);

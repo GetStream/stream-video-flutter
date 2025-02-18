@@ -43,7 +43,6 @@ class PictureInPictureHelper {
                     val params = PictureInPictureParams.Builder()
                     params.setAspectRatio(aspect).apply {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            setTitle("Video Call")
                             setSeamlessResizeEnabled(true)
                         }
                     }
