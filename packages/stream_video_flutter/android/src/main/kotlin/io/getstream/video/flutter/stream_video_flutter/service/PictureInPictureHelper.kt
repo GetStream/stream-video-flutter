@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Rational
 import io.getstream.video.flutter.stream_video_flutter.service.utils.getBoolean
+import android.app.PictureInPictureUiState
 
 class PictureInPictureHelper {
     companion object {
@@ -41,11 +42,7 @@ class PictureInPictureHelper {
 
                     val params = PictureInPictureParams.Builder()
                     params.setAspectRatio(aspect).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            setAutoEnterEnabled(true)
-                        }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            setTitle("Video Player")
                             setSeamlessResizeEnabled(true)
                         }
                     }

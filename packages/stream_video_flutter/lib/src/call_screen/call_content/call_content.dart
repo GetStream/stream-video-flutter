@@ -113,6 +113,20 @@ class _StreamCallContentState extends State<StreamCallContent>
       }
     }
 
+    // Disable PiP when screen sharing is enabled
+    if (widget.callState.localParticipant?.isScreenShareEnabled !=
+        oldWidget.callState.localParticipant?.isScreenShareEnabled) {
+      if (widget.pictureInPictureConfiguration
+          .disablePictureInPictureWhenScreenSharing) {
+        StreamVideoFlutterBackground.setPictureInPictureEnabled(
+          enable: widget.pictureInPictureConfiguration.enablePictureInPicture &&
+              !(widget.callState.localParticipant?.isScreenShareEnabled ??
+                  false),
+        );
+      }
+    }
+
+    // Disable PiP when call is disconnected
     if (widget.callState.status != oldWidget.callState.status) {
       if (widget.callState.status.isDisconnected) {
         StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
@@ -146,8 +160,13 @@ class _StreamCallContentState extends State<StreamCallContent>
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final pipEnabled =
+        widget.pictureInPictureConfiguration.enablePictureInPicture &&
+            (!widget.pictureInPictureConfiguration
+                    .disablePictureInPictureWhenScreenSharing ||
+                !(callState.localParticipant?.isScreenShareEnabled ?? false));
 
-    if (_isPictureInPictureModeOn && CurrentPlatform.isAndroid) {
+    if (pipEnabled && _isPictureInPictureModeOn && CurrentPlatform.isAndroid) {
       return widget.pictureInPictureConfiguration.androidPiPConfiguration
               .callPictureInPictureBuilder
               ?.call(context, call, callState) ??
@@ -164,17 +183,16 @@ class _StreamCallContentState extends State<StreamCallContent>
         callState.status.isMigrating) {
       bodyWidget = Stack(
         children: [
-          if (CurrentPlatform.isIos &&
-              widget.pictureInPictureConfiguration.enablePictureInPicture)
+          if (CurrentPlatform.isIos && pipEnabled)
             SizedBox(
               height: 600,
               width: 300,
               child: StreamPictureInPictureUiKitView(
                 call: call,
-                ignoreLocalParticipantVideo: widget
+                includeLocalParticipantVideo: widget
                     .pictureInPictureConfiguration
                     .iOSPiPConfiguration
-                    .ignoreLocalParticipantVideo,
+                    .includeLocalParticipantVideo,
               ),
             ),
           widget.callParticipantsBuilder?.call(

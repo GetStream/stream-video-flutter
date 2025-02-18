@@ -158,6 +158,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     streamLog.i(_tag, () => 'Enabling track $trackId');
     try {
       mediaTrack.enabled = true;
+
       for (final track in clonedTracks) {
         track.enabled = true;
       }

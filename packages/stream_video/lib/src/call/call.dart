@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -1979,6 +1980,24 @@ class Call {
     return result.map((_) => none);
   }
 
+  Future<Result<bool>> setMultitaskingCameraAccessEnabled(bool enabled) async {
+    if (CurrentPlatform.isIos) {
+      try {
+        final result =
+            await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
+        return Result.success(result);
+      } catch (error, stackTrace) {
+        _logger.e(() => 'Failed to set multitasking camera access: $error');
+        return Result.error(
+          'Failed to set multitasking camera access',
+          stackTrace,
+        );
+      }
+    }
+
+    return const Result.success(false);
+  }
+
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
     final result = await _session?.setVideoInputDevice(device) ??
         Result.error('Session is null');
@@ -1998,14 +2017,19 @@ class Call {
     if (enabled && !hasPermission(CallPermission.sendVideo)) {
       return Result.error('Missing permission to send video');
     }
-
     final result =
         await _session?.setCameraEnabled(enabled, constraints: constraints) ??
             Result.error('Session is null');
 
     if (result.isSuccess) {
+      // Set multitasking camera access for iOS
+      final multitaskingResult = await setMultitaskingCameraAccessEnabled(
+        enabled && !_streamVideo.muteVideoWhenInBackground,
+      );
+
       _stateManager.participantSetCameraEnabled(
         enabled: enabled,
+        iOSMultitaskingCameraAccessEnabled: multitaskingResult.getDataOrNull(),
       );
 
       _connectOptions = _connectOptions.copyWith(
