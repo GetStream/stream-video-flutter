@@ -1,3 +1,10 @@
+## 0.8.0
+
+* Updated minimum Flutter version to 3.27.4
+
+🐞 Fixed
+- **(Windows/Linus)** Fixes compilation issues caused by `stream_webrtc_flutter` package.
+
 ## 0.7.2
 
 🐞 Fixed
