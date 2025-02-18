@@ -18,7 +18,7 @@ command:
 
     # Dependencies used in the project.
     dependencies:
-      stream_webrtc_flutter: ^0.12.9
+      stream_webrtc_flutter: ^0.12.9+1
 
 scripts:
   postclean:
