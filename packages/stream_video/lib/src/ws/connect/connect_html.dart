@@ -1,14 +1,14 @@
 // ignore_for_file: avoid_web_libraries_in_flutter
 
 import 'dart:async';
-import 'dart:html';
 
+import 'package:web/web.dart' as web;
 import 'package:web_socket_channel/html.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 Future<WebSocketChannel> connect(Uri uri, {Iterable<String>? protocols}) async {
   final completer = Completer<HtmlWebSocketChannel>();
-  final webSocket = WebSocket(uri.toString())
+  final webSocket = web.WebSocket(uri.toString())
     ..binaryType = BinaryType.list.value;
 
   unawaited(
