@@ -115,36 +115,39 @@ class CallSettingsRequest {
   VideoSettingsRequest? video;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallSettingsRequest &&
-    other.audio == audio &&
-    other.backstage == backstage &&
-    other.broadcasting == broadcasting &&
-    other.geofencing == geofencing &&
-    other.limits == limits &&
-    other.recording == recording &&
-    other.ring == ring &&
-    other.screensharing == screensharing &&
-    other.thumbnails == thumbnails &&
-    other.transcription == transcription &&
-    other.video == video;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallSettingsRequest &&
+          other.audio == audio &&
+          other.backstage == backstage &&
+          other.broadcasting == broadcasting &&
+          other.geofencing == geofencing &&
+          other.limits == limits &&
+          other.recording == recording &&
+          other.ring == ring &&
+          other.screensharing == screensharing &&
+          other.thumbnails == thumbnails &&
+          other.transcription == transcription &&
+          other.video == video;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (audio == null ? 0 : audio!.hashCode) +
-    (backstage == null ? 0 : backstage!.hashCode) +
-    (broadcasting == null ? 0 : broadcasting!.hashCode) +
-    (geofencing == null ? 0 : geofencing!.hashCode) +
-    (limits == null ? 0 : limits!.hashCode) +
-    (recording == null ? 0 : recording!.hashCode) +
-    (ring == null ? 0 : ring!.hashCode) +
-    (screensharing == null ? 0 : screensharing!.hashCode) +
-    (thumbnails == null ? 0 : thumbnails!.hashCode) +
-    (transcription == null ? 0 : transcription!.hashCode) +
-    (video == null ? 0 : video!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (audio == null ? 0 : audio!.hashCode) +
+      (backstage == null ? 0 : backstage!.hashCode) +
+      (broadcasting == null ? 0 : broadcasting!.hashCode) +
+      (geofencing == null ? 0 : geofencing!.hashCode) +
+      (limits == null ? 0 : limits!.hashCode) +
+      (recording == null ? 0 : recording!.hashCode) +
+      (ring == null ? 0 : ring!.hashCode) +
+      (screensharing == null ? 0 : screensharing!.hashCode) +
+      (thumbnails == null ? 0 : thumbnails!.hashCode) +
+      (transcription == null ? 0 : transcription!.hashCode) +
+      (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+  String toString() =>
+      'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -218,8 +221,10 @@ class CallSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -232,16 +237,21 @@ class CallSettingsRequest {
         limits: LimitsSettingsRequest.fromJson(json[r'limits']),
         recording: RecordSettingsRequest.fromJson(json[r'recording']),
         ring: RingSettingsRequest.fromJson(json[r'ring']),
-        screensharing: ScreensharingSettingsRequest.fromJson(json[r'screensharing']),
+        screensharing:
+            ScreensharingSettingsRequest.fromJson(json[r'screensharing']),
         thumbnails: ThumbnailsSettingsRequest.fromJson(json[r'thumbnails']),
-        transcription: TranscriptionSettingsRequest.fromJson(json[r'transcription']),
+        transcription:
+            TranscriptionSettingsRequest.fromJson(json[r'transcription']),
         video: VideoSettingsRequest.fromJson(json[r'video']),
       );
     }
     return null;
   }
 
-  static List<CallSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -269,20 +279,24 @@ class CallSettingsRequest {
   }
 
   // maps a json object with a list of CallSettingsRequest-objects as value to a dart map
-  static Map<String, List<CallSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

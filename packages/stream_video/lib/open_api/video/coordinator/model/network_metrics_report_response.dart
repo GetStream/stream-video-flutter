@@ -52,22 +52,25 @@ class NetworkMetricsReportResponse {
   double? averageTimeToReconnect;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is NetworkMetricsReportResponse &&
-    other.averageConnectionTime == averageConnectionTime &&
-    other.averageJitter == averageJitter &&
-    other.averageLatency == averageLatency &&
-    other.averageTimeToReconnect == averageTimeToReconnect;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NetworkMetricsReportResponse &&
+          other.averageConnectionTime == averageConnectionTime &&
+          other.averageJitter == averageJitter &&
+          other.averageLatency == averageLatency &&
+          other.averageTimeToReconnect == averageTimeToReconnect;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
-    (averageJitter == null ? 0 : averageJitter!.hashCode) +
-    (averageLatency == null ? 0 : averageLatency!.hashCode) +
-    (averageTimeToReconnect == null ? 0 : averageTimeToReconnect!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
+      (averageJitter == null ? 0 : averageJitter!.hashCode) +
+      (averageLatency == null ? 0 : averageLatency!.hashCode) +
+      (averageTimeToReconnect == null ? 0 : averageTimeToReconnect!.hashCode);
 
   @override
-  String toString() => 'NetworkMetricsReportResponse[averageConnectionTime=$averageConnectionTime, averageJitter=$averageJitter, averageLatency=$averageLatency, averageTimeToReconnect=$averageTimeToReconnect]';
+  String toString() =>
+      'NetworkMetricsReportResponse[averageConnectionTime=$averageConnectionTime, averageJitter=$averageJitter, averageLatency=$averageLatency, averageTimeToReconnect=$averageTimeToReconnect]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -106,23 +109,30 @@ class NetworkMetricsReportResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "NetworkMetricsReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "NetworkMetricsReportResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "NetworkMetricsReportResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "NetworkMetricsReportResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return NetworkMetricsReportResponse(
-        averageConnectionTime: mapValueOfType<double>(json, r'average_connection_time'),
+        averageConnectionTime:
+            mapValueOfType<double>(json, r'average_connection_time'),
         averageJitter: mapValueOfType<double>(json, r'average_jitter'),
         averageLatency: mapValueOfType<double>(json, r'average_latency'),
-        averageTimeToReconnect: mapValueOfType<double>(json, r'average_time_to_reconnect'),
+        averageTimeToReconnect:
+            mapValueOfType<double>(json, r'average_time_to_reconnect'),
       );
     }
     return null;
   }
 
-  static List<NetworkMetricsReportResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<NetworkMetricsReportResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <NetworkMetricsReportResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -150,20 +160,24 @@ class NetworkMetricsReportResponse {
   }
 
   // maps a json object with a list of NetworkMetricsReportResponse-objects as value to a dart map
-  static Map<String, List<NetworkMetricsReportResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<NetworkMetricsReportResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<NetworkMetricsReportResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = NetworkMetricsReportResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = NetworkMetricsReportResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

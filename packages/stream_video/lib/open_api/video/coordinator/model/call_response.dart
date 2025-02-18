@@ -126,89 +126,92 @@ class CallResponse {
   DateTime updatedAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
-    other.backstage == backstage &&
-    _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
-    other.captioning == captioning &&
-    other.cid == cid &&
-    other.createdAt == createdAt &&
-    other.createdBy == createdBy &&
-    other.currentSessionId == currentSessionId &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.egress == egress &&
-    other.endedAt == endedAt &&
-    other.id == id &&
-    other.ingress == ingress &&
-    other.joinAheadTimeSeconds == joinAheadTimeSeconds &&
-    other.recording == recording &&
-    other.session == session &&
-    other.settings == settings &&
-    other.startsAt == startsAt &&
-    other.team == team &&
-    other.thumbnails == thumbnails &&
-    other.transcribing == transcribing &&
-    other.type == type &&
-    other.updatedAt == updatedAt;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallResponse &&
+          other.backstage == backstage &&
+          _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
+          other.captioning == captioning &&
+          other.cid == cid &&
+          other.createdAt == createdAt &&
+          other.createdBy == createdBy &&
+          other.currentSessionId == currentSessionId &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.egress == egress &&
+          other.endedAt == endedAt &&
+          other.id == id &&
+          other.ingress == ingress &&
+          other.joinAheadTimeSeconds == joinAheadTimeSeconds &&
+          other.recording == recording &&
+          other.session == session &&
+          other.settings == settings &&
+          other.startsAt == startsAt &&
+          other.team == team &&
+          other.thumbnails == thumbnails &&
+          other.transcribing == transcribing &&
+          other.type == type &&
+          other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (backstage.hashCode) +
-    (blockedUserIds.hashCode) +
-    (captioning.hashCode) +
-    (cid.hashCode) +
-    (createdAt.hashCode) +
-    (createdBy.hashCode) +
-    (currentSessionId.hashCode) +
-    (custom.hashCode) +
-    (egress.hashCode) +
-    (endedAt == null ? 0 : endedAt!.hashCode) +
-    (id.hashCode) +
-    (ingress.hashCode) +
-    (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode) +
-    (recording.hashCode) +
-    (session == null ? 0 : session!.hashCode) +
-    (settings.hashCode) +
-    (startsAt == null ? 0 : startsAt!.hashCode) +
-    (team == null ? 0 : team!.hashCode) +
-    (thumbnails == null ? 0 : thumbnails!.hashCode) +
-    (transcribing.hashCode) +
-    (type.hashCode) +
-    (updatedAt.hashCode);
+      // ignore: unnecessary_parenthesis
+      (backstage.hashCode) +
+      (blockedUserIds.hashCode) +
+      (captioning.hashCode) +
+      (cid.hashCode) +
+      (createdAt.hashCode) +
+      (createdBy.hashCode) +
+      (currentSessionId.hashCode) +
+      (custom.hashCode) +
+      (egress.hashCode) +
+      (endedAt == null ? 0 : endedAt!.hashCode) +
+      (id.hashCode) +
+      (ingress.hashCode) +
+      (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode) +
+      (recording.hashCode) +
+      (session == null ? 0 : session!.hashCode) +
+      (settings.hashCode) +
+      (startsAt == null ? 0 : startsAt!.hashCode) +
+      (team == null ? 0 : team!.hashCode) +
+      (thumbnails == null ? 0 : thumbnails!.hashCode) +
+      (transcribing.hashCode) +
+      (type.hashCode) +
+      (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() =>
+      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'backstage'] = this.backstage;
-      json[r'blocked_user_ids'] = this.blockedUserIds;
-      json[r'captioning'] = this.captioning;
-      json[r'cid'] = this.cid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'created_by'] = this.createdBy;
-      json[r'current_session_id'] = this.currentSessionId;
-      json[r'custom'] = this.custom;
-      json[r'egress'] = this.egress;
+    json[r'backstage'] = this.backstage;
+    json[r'blocked_user_ids'] = this.blockedUserIds;
+    json[r'captioning'] = this.captioning;
+    json[r'cid'] = this.cid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'created_by'] = this.createdBy;
+    json[r'current_session_id'] = this.currentSessionId;
+    json[r'custom'] = this.custom;
+    json[r'egress'] = this.egress;
     if (this.endedAt != null) {
       json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
     } else {
       json[r'ended_at'] = null;
     }
-      json[r'id'] = this.id;
-      json[r'ingress'] = this.ingress;
+    json[r'id'] = this.id;
+    json[r'ingress'] = this.ingress;
     if (this.joinAheadTimeSeconds != null) {
       json[r'join_ahead_time_seconds'] = this.joinAheadTimeSeconds;
     } else {
       json[r'join_ahead_time_seconds'] = null;
     }
-      json[r'recording'] = this.recording;
+    json[r'recording'] = this.recording;
     if (this.session != null) {
       json[r'session'] = this.session;
     } else {
       json[r'session'] = null;
     }
-      json[r'settings'] = this.settings;
+    json[r'settings'] = this.settings;
     if (this.startsAt != null) {
       json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
     } else {
@@ -224,9 +227,9 @@ class CallResponse {
     } else {
       json[r'thumbnails'] = null;
     }
-      json[r'transcribing'] = this.transcribing;
-      json[r'type'] = this.type;
-      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+    json[r'transcribing'] = this.transcribing;
+    json[r'type'] = this.type;
+    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
 
@@ -242,8 +245,10 @@ class CallResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -251,7 +256,9 @@ class CallResponse {
       return CallResponse(
         backstage: mapValueOfType<bool>(json, r'backstage')!,
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
-            ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'blocked_user_ids'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         captioning: mapValueOfType<bool>(json, r'captioning')!,
         cid: mapValueOfType<String>(json, r'cid')!,
@@ -263,7 +270,8 @@ class CallResponse {
         endedAt: mapDateTime(json, r'ended_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
-        joinAheadTimeSeconds: mapValueOfType<int>(json, r'join_ahead_time_seconds'),
+        joinAheadTimeSeconds:
+            mapValueOfType<int>(json, r'join_ahead_time_seconds'),
         recording: mapValueOfType<bool>(json, r'recording')!,
         session: CallSessionResponse.fromJson(json[r'session']),
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
@@ -278,7 +286,10 @@ class CallResponse {
     return null;
   }
 
-  static List<CallResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -306,13 +317,19 @@ class CallResponse {
   }
 
   // maps a json object with a list of CallResponse-objects as value to a dart map
-  static Map<String, List<CallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -338,4 +355,3 @@ class CallResponse {
     'updated_at',
   };
 }
-

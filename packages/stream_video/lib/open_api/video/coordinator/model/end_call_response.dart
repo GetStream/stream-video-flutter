@@ -20,20 +20,21 @@ class EndCallResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is EndCallResponse &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EndCallResponse && other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode);
 
   @override
   String toString() => 'EndCallResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -49,8 +50,10 @@ class EndCallResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EndCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EndCallResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "EndCallResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "EndCallResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -62,7 +65,10 @@ class EndCallResponse {
     return null;
   }
 
-  static List<EndCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EndCallResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <EndCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,13 +96,19 @@ class EndCallResponse {
   }
 
   // maps a json object with a list of EndCallResponse-objects as value to a dart map
-  static Map<String, List<EndCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<EndCallResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<EndCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = EndCallResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = EndCallResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -107,4 +119,3 @@ class EndCallResponse {
     'duration',
   };
 }
-

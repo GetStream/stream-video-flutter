@@ -19,20 +19,21 @@ class RTMPIngress {
   String address;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RTMPIngress &&
-    other.address == address;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RTMPIngress && other.address == address;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (address.hashCode);
+      // ignore: unnecessary_parenthesis
+      (address.hashCode);
 
   @override
   String toString() => 'RTMPIngress[address=$address]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'address'] = this.address;
+    json[r'address'] = this.address;
     return json;
   }
 
@@ -48,8 +49,10 @@ class RTMPIngress {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RTMPIngress[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RTMPIngress[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RTMPIngress[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RTMPIngress[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +64,10 @@ class RTMPIngress {
     return null;
   }
 
-  static List<RTMPIngress> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPIngress> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RTMPIngress>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +95,19 @@ class RTMPIngress {
   }
 
   // maps a json object with a list of RTMPIngress-objects as value to a dart map
-  static Map<String, List<RTMPIngress>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RTMPIngress>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RTMPIngress>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RTMPIngress.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RTMPIngress.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +118,3 @@ class RTMPIngress {
     'address',
   };
 }
-

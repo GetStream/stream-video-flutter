@@ -268,10 +268,38 @@ final $typed_data.Uint8List appleThermalStateDescriptor = $convert.base64Decode(
 const CallState$json = {
   '1': 'CallState',
   '2': [
-    {'1': 'participants', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participants'},
-    {'1': 'started_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'startedAt'},
-    {'1': 'participant_count', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ParticipantCount', '10': 'participantCount'},
-    {'1': 'pins', '3': 4, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Pin', '10': 'pins'},
+    {
+      '1': 'participants',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Participant',
+      '10': 'participants'
+    },
+    {
+      '1': 'started_at',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'startedAt'
+    },
+    {
+      '1': 'participant_count',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.ParticipantCount',
+      '10': 'participantCount'
+    },
+    {
+      '1': 'pins',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Pin',
+      '10': 'pins'
+    },
   ],
 };
 
@@ -318,16 +346,56 @@ const Participant$json = {
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'published_tracks', '3': 3, '4': 3, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'publishedTracks'},
-    {'1': 'joined_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'joinedAt'},
-    {'1': 'track_lookup_prefix', '3': 5, '4': 1, '5': 9, '10': 'trackLookupPrefix'},
-    {'1': 'connection_quality', '3': 6, '4': 1, '5': 14, '6': '.stream.video.sfu.models.ConnectionQuality', '10': 'connectionQuality'},
+    {
+      '1': 'published_tracks',
+      '3': 3,
+      '4': 3,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'publishedTracks'
+    },
+    {
+      '1': 'joined_at',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'joinedAt'
+    },
+    {
+      '1': 'track_lookup_prefix',
+      '3': 5,
+      '4': 1,
+      '5': 9,
+      '10': 'trackLookupPrefix'
+    },
+    {
+      '1': 'connection_quality',
+      '3': 6,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ConnectionQuality',
+      '10': 'connectionQuality'
+    },
     {'1': 'is_speaking', '3': 7, '4': 1, '5': 8, '10': 'isSpeaking'},
-    {'1': 'is_dominant_speaker', '3': 8, '4': 1, '5': 8, '10': 'isDominantSpeaker'},
+    {
+      '1': 'is_dominant_speaker',
+      '3': 8,
+      '4': 1,
+      '5': 8,
+      '10': 'isDominantSpeaker'
+    },
     {'1': 'audio_level', '3': 9, '4': 1, '5': 2, '10': 'audioLevel'},
     {'1': 'name', '3': 10, '4': 1, '5': 9, '10': 'name'},
     {'1': 'image', '3': 11, '4': 1, '5': 9, '10': 'image'},
-    {'1': 'custom', '3': 12, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    {
+      '1': 'custom',
+      '3': 12,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Struct',
+      '10': 'custom'
+    },
     {'1': 'roles', '3': 13, '4': 3, '5': 9, '10': 'roles'},
   ],
 };
@@ -350,7 +418,14 @@ final $typed_data.Uint8List participantDescriptor = $convert.base64Decode(
 const StreamQuality$json = {
   '1': 'StreamQuality',
   '2': [
-    {'1': 'video_quality', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.VideoQuality', '10': 'videoQuality'},
+    {
+      '1': 'video_quality',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.VideoQuality',
+      '10': 'videoQuality'
+    },
     {'1': 'user_id', '3': 2, '4': 1, '5': 9, '10': 'userId'},
   ],
 };
@@ -380,10 +455,24 @@ const VideoLayer$json = {
   '1': 'VideoLayer',
   '2': [
     {'1': 'rid', '3': 1, '4': 1, '5': 9, '10': 'rid'},
-    {'1': 'video_dimension', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.VideoDimension', '10': 'videoDimension'},
+    {
+      '1': 'video_dimension',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.VideoDimension',
+      '10': 'videoDimension'
+    },
     {'1': 'bitrate', '3': 4, '4': 1, '5': 13, '10': 'bitrate'},
     {'1': 'fps', '3': 5, '4': 1, '5': 13, '10': 'fps'},
-    {'1': 'quality', '3': 6, '4': 1, '5': 14, '6': '.stream.video.sfu.models.VideoQuality', '10': 'quality'},
+    {
+      '1': 'quality',
+      '3': 6,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.VideoQuality',
+      '10': 'quality'
+    },
   ],
 };
 
@@ -398,8 +487,22 @@ final $typed_data.Uint8List videoLayerDescriptor = $convert.base64Decode(
 const SubscribeOption$json = {
   '1': 'SubscribeOption',
   '2': [
-    {'1': 'track_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
-    {'1': 'codecs', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codecs'},
+    {
+      '1': 'track_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {
+      '1': 'codecs',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codecs'
+    },
   ],
 };
 
@@ -413,13 +516,46 @@ final $typed_data.Uint8List subscribeOptionDescriptor = $convert.base64Decode(
 const PublishOption$json = {
   '1': 'PublishOption',
   '2': [
-    {'1': 'track_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
-    {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
+    {
+      '1': 'track_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {
+      '1': 'codec',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codec'
+    },
     {'1': 'bitrate', '3': 3, '4': 1, '5': 5, '10': 'bitrate'},
     {'1': 'fps', '3': 4, '4': 1, '5': 5, '10': 'fps'},
-    {'1': 'max_spatial_layers', '3': 5, '4': 1, '5': 5, '10': 'maxSpatialLayers'},
-    {'1': 'max_temporal_layers', '3': 6, '4': 1, '5': 5, '10': 'maxTemporalLayers'},
-    {'1': 'video_dimension', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.models.VideoDimension', '10': 'videoDimension'},
+    {
+      '1': 'max_spatial_layers',
+      '3': 5,
+      '4': 1,
+      '5': 5,
+      '10': 'maxSpatialLayers'
+    },
+    {
+      '1': 'max_temporal_layers',
+      '3': 6,
+      '4': 1,
+      '5': 5,
+      '10': 'maxTemporalLayers'
+    },
+    {
+      '1': 'video_dimension',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.VideoDimension',
+      '10': 'videoDimension'
+    },
     {'1': 'id', '3': 8, '4': 1, '5': 5, '10': 'id'},
   ],
 };
@@ -441,7 +577,13 @@ const Codec$json = {
     {'1': 'payload_type', '3': 16, '4': 1, '5': 13, '10': 'payloadType'},
     {'1': 'name', '3': 10, '4': 1, '5': 9, '10': 'name'},
     {'1': 'clock_rate', '3': 14, '4': 1, '5': 13, '10': 'clockRate'},
-    {'1': 'encoding_parameters', '3': 15, '4': 1, '5': 9, '10': 'encodingParameters'},
+    {
+      '1': 'encoding_parameters',
+      '3': 15,
+      '4': 1,
+      '5': 9,
+      '10': 'encodingParameters'
+    },
     {'1': 'fmtp', '3': 12, '4': 1, '5': 9, '10': 'fmtp'},
   ],
 };
@@ -456,7 +598,14 @@ final $typed_data.Uint8List codecDescriptor = $convert.base64Decode(
 const ICETrickle$json = {
   '1': 'ICETrickle',
   '2': [
-    {'1': 'peer_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+    {
+      '1': 'peer_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.PeerType',
+      '10': 'peerType'
+    },
     {'1': 'ice_candidate', '3': 2, '4': 1, '5': 9, '10': 'iceCandidate'},
     {'1': 'session_id', '3': 3, '4': 1, '5': 9, '10': 'sessionId'},
   ],
@@ -473,15 +622,42 @@ const TrackInfo$json = {
   '1': 'TrackInfo',
   '2': [
     {'1': 'track_id', '3': 1, '4': 1, '5': 9, '10': 'trackId'},
-    {'1': 'track_type', '3': 2, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
-    {'1': 'layers', '3': 5, '4': 3, '5': 11, '6': '.stream.video.sfu.models.VideoLayer', '10': 'layers'},
+    {
+      '1': 'track_type',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {
+      '1': 'layers',
+      '3': 5,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.VideoLayer',
+      '10': 'layers'
+    },
     {'1': 'mid', '3': 6, '4': 1, '5': 9, '10': 'mid'},
     {'1': 'dtx', '3': 7, '4': 1, '5': 8, '10': 'dtx'},
     {'1': 'stereo', '3': 8, '4': 1, '5': 8, '10': 'stereo'},
     {'1': 'red', '3': 9, '4': 1, '5': 8, '10': 'red'},
     {'1': 'muted', '3': 10, '4': 1, '5': 8, '10': 'muted'},
-    {'1': 'codec', '3': 11, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
-    {'1': 'publish_option_id', '3': 12, '4': 1, '5': 5, '10': 'publishOptionId'},
+    {
+      '1': 'codec',
+      '3': 11,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codec'
+    },
+    {
+      '1': 'publish_option_id',
+      '3': 12,
+      '4': 1,
+      '5': 5,
+      '10': 'publishOptionId'
+    },
   ],
 };
 
@@ -499,7 +675,14 @@ final $typed_data.Uint8List trackInfoDescriptor = $convert.base64Decode(
 const Error$json = {
   '1': 'Error',
   '2': [
-    {'1': 'code', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.ErrorCode', '10': 'code'},
+    {
+      '1': 'code',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ErrorCode',
+      '10': 'code'
+    },
     {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
     {'1': 'should_retry', '3': 3, '4': 1, '5': 8, '10': 'shouldRetry'},
   ],
@@ -515,10 +698,38 @@ final $typed_data.Uint8List errorDescriptor = $convert.base64Decode(
 const ClientDetails$json = {
   '1': 'ClientDetails',
   '2': [
-    {'1': 'sdk', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Sdk', '10': 'sdk'},
-    {'1': 'os', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.OS', '10': 'os'},
-    {'1': 'browser', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Browser', '10': 'browser'},
-    {'1': 'device', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Device', '10': 'device'},
+    {
+      '1': 'sdk',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Sdk',
+      '10': 'sdk'
+    },
+    {
+      '1': 'os',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.OS',
+      '10': 'os'
+    },
+    {
+      '1': 'browser',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Browser',
+      '10': 'browser'
+    },
+    {
+      '1': 'device',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Device',
+      '10': 'device'
+    },
   ],
 };
 
@@ -534,7 +745,14 @@ final $typed_data.Uint8List clientDetailsDescriptor = $convert.base64Decode(
 const Sdk$json = {
   '1': 'Sdk',
   '2': [
-    {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.SdkType', '10': 'type'},
+    {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.SdkType',
+      '10': 'type'
+    },
     {'1': 'major', '3': 2, '4': 1, '5': 9, '10': 'major'},
     {'1': 'minor', '3': 3, '4': 1, '5': 9, '10': 'minor'},
     {'1': 'patch', '3': 4, '4': 1, '5': 9, '10': 'patch'},
@@ -595,11 +813,38 @@ const Call$json = {
   '2': [
     {'1': 'type', '3': 1, '4': 1, '5': 9, '10': 'type'},
     {'1': 'id', '3': 2, '4': 1, '5': 9, '10': 'id'},
-    {'1': 'created_by_user_id', '3': 3, '4': 1, '5': 9, '10': 'createdByUserId'},
+    {
+      '1': 'created_by_user_id',
+      '3': 3,
+      '4': 1,
+      '5': 9,
+      '10': 'createdByUserId'
+    },
     {'1': 'host_user_id', '3': 4, '4': 1, '5': 9, '10': 'hostUserId'},
-    {'1': 'custom', '3': 5, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
-    {'1': 'created_at', '3': 6, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
-    {'1': 'updated_at', '3': 7, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    {
+      '1': 'custom',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Struct',
+      '10': 'custom'
+    },
+    {
+      '1': 'created_at',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'createdAt'
+    },
+    {
+      '1': 'updated_at',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'updatedAt'
+    },
   ],
 };
 
@@ -632,7 +877,13 @@ final $typed_data.Uint8List callGrantsDescriptor = $convert.base64Decode(
 const InputDevices$json = {
   '1': 'InputDevices',
   '2': [
-    {'1': 'available_devices', '3': 1, '4': 3, '5': 9, '10': 'availableDevices'},
+    {
+      '1': 'available_devices',
+      '3': 1,
+      '4': 3,
+      '5': 9,
+      '10': 'availableDevices'
+    },
     {'1': 'current_device', '3': 2, '4': 1, '5': 9, '10': 'currentDevice'},
     {'1': 'is_permitted', '3': 3, '4': 1, '5': 8, '10': 'isPermitted'},
   ],
@@ -648,8 +899,21 @@ final $typed_data.Uint8List inputDevicesDescriptor = $convert.base64Decode(
 const AndroidState$json = {
   '1': 'AndroidState',
   '2': [
-    {'1': 'thermal_state', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.AndroidThermalState', '10': 'thermalState'},
-    {'1': 'is_power_saver_mode', '3': 2, '4': 1, '5': 8, '10': 'isPowerSaverMode'},
+    {
+      '1': 'thermal_state',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.AndroidThermalState',
+      '10': 'thermalState'
+    },
+    {
+      '1': 'is_power_saver_mode',
+      '3': 2,
+      '4': 1,
+      '5': 8,
+      '10': 'isPowerSaverMode'
+    },
   ],
 };
 
@@ -663,8 +927,21 @@ final $typed_data.Uint8List androidStateDescriptor = $convert.base64Decode(
 const AppleState$json = {
   '1': 'AppleState',
   '2': [
-    {'1': 'thermal_state', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.AppleThermalState', '10': 'thermalState'},
-    {'1': 'is_low_power_mode_enabled', '3': 2, '4': 1, '5': 8, '10': 'isLowPowerModeEnabled'},
+    {
+      '1': 'thermal_state',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.AppleThermalState',
+      '10': 'thermalState'
+    },
+    {
+      '1': 'is_low_power_mode_enabled',
+      '3': 2,
+      '4': 1,
+      '5': 8,
+      '10': 'isLowPowerModeEnabled'
+    },
   ],
 };
 
@@ -673,4 +950,3 @@ final $typed_data.Uint8List appleStateDescriptor = $convert.base64Decode(
     'CgpBcHBsZVN0YXRlEk8KDXRoZXJtYWxfc3RhdGUYASABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm'
     '1vZGVscy5BcHBsZVRoZXJtYWxTdGF0ZVIMdGhlcm1hbFN0YXRlEjgKGWlzX2xvd19wb3dlcl9t'
     'b2RlX2VuYWJsZWQYAiABKAhSFWlzTG93UG93ZXJNb2RlRW5hYmxlZA==');
-

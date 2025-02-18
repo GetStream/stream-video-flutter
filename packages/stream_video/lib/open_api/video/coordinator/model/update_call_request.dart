@@ -39,24 +39,27 @@ class UpdateCallRequest {
   DateTime? startsAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UpdateCallRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.settingsOverride == settingsOverride &&
-    other.startsAt == startsAt;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UpdateCallRequest &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.settingsOverride == settingsOverride &&
+          other.startsAt == startsAt;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
-    (startsAt == null ? 0 : startsAt!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
+      (startsAt == null ? 0 : startsAt!.hashCode);
 
   @override
-  String toString() => 'UpdateCallRequest[custom=$custom, settingsOverride=$settingsOverride, startsAt=$startsAt]';
+  String toString() =>
+      'UpdateCallRequest[custom=$custom, settingsOverride=$settingsOverride, startsAt=$startsAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
+    json[r'custom'] = this.custom;
     if (this.settingsOverride != null) {
       json[r'settings_override'] = this.settingsOverride;
     } else {
@@ -82,22 +85,28 @@ class UpdateCallRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UpdateCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UpdateCallRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UpdateCallRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UpdateCallRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return UpdateCallRequest(
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
+        settingsOverride:
+            CallSettingsRequest.fromJson(json[r'settings_override']),
         startsAt: mapDateTime(json, r'starts_at', r''),
       );
     }
     return null;
   }
 
-  static List<UpdateCallRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UpdateCallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -125,20 +134,24 @@ class UpdateCallRequest {
   }
 
   // maps a json object with a list of UpdateCallRequest-objects as value to a dart map
-  static Map<String, List<UpdateCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UpdateCallRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UpdateCallRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UpdateCallRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UpdateCallRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

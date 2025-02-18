@@ -19,20 +19,22 @@ class CallParticipantCountReportResponse {
   List<DailyAggregateCallParticipantCountReportResponse> daily;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallParticipantCountReportResponse &&
-    _deepEquality.equals(other.daily, daily);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallParticipantCountReportResponse &&
+          _deepEquality.equals(other.daily, daily);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (daily.hashCode);
+      // ignore: unnecessary_parenthesis
+      (daily.hashCode);
 
   @override
   String toString() => 'CallParticipantCountReportResponse[daily=$daily]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'daily'] = this.daily;
+    json[r'daily'] = this.daily;
     return json;
   }
 
@@ -48,20 +50,26 @@ class CallParticipantCountReportResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallParticipantCountReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallParticipantCountReportResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallParticipantCountReportResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallParticipantCountReportResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return CallParticipantCountReportResponse(
-        daily: DailyAggregateCallParticipantCountReportResponse.listFromJson(json[r'daily']),
+        daily: DailyAggregateCallParticipantCountReportResponse.listFromJson(
+            json[r'daily']),
       );
     }
     return null;
   }
 
-  static List<CallParticipantCountReportResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallParticipantCountReportResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallParticipantCountReportResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -74,7 +82,8 @@ class CallParticipantCountReportResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallParticipantCountReportResponse> mapFromJson(dynamic json) {
+  static Map<String, CallParticipantCountReportResponse> mapFromJson(
+      dynamic json) {
     final map = <String, CallParticipantCountReportResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
@@ -89,13 +98,19 @@ class CallParticipantCountReportResponse {
   }
 
   // maps a json object with a list of CallParticipantCountReportResponse-objects as value to a dart map
-  static Map<String, List<CallParticipantCountReportResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallParticipantCountReportResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallParticipantCountReportResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallParticipantCountReportResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallParticipantCountReportResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +121,3 @@ class CallParticipantCountReportResponse {
     'daily',
   };
 }
-

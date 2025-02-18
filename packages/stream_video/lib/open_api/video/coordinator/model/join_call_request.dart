@@ -86,30 +86,33 @@ class JoinCallRequest {
   bool? video;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is JoinCallRequest &&
-    other.create == create &&
-    other.data == data &&
-    other.location == location &&
-    other.membersLimit == membersLimit &&
-    other.migratingFrom == migratingFrom &&
-    other.notify == notify &&
-    other.ring == ring &&
-    other.video == video;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JoinCallRequest &&
+          other.create == create &&
+          other.data == data &&
+          other.location == location &&
+          other.membersLimit == membersLimit &&
+          other.migratingFrom == migratingFrom &&
+          other.notify == notify &&
+          other.ring == ring &&
+          other.video == video;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (create == null ? 0 : create!.hashCode) +
-    (data == null ? 0 : data!.hashCode) +
-    (location.hashCode) +
-    (membersLimit == null ? 0 : membersLimit!.hashCode) +
-    (migratingFrom == null ? 0 : migratingFrom!.hashCode) +
-    (notify == null ? 0 : notify!.hashCode) +
-    (ring == null ? 0 : ring!.hashCode) +
-    (video == null ? 0 : video!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (create == null ? 0 : create!.hashCode) +
+      (data == null ? 0 : data!.hashCode) +
+      (location.hashCode) +
+      (membersLimit == null ? 0 : membersLimit!.hashCode) +
+      (migratingFrom == null ? 0 : migratingFrom!.hashCode) +
+      (notify == null ? 0 : notify!.hashCode) +
+      (ring == null ? 0 : ring!.hashCode) +
+      (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, notify=$notify, ring=$ring, video=$video]';
+  String toString() =>
+      'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -123,7 +126,7 @@ class JoinCallRequest {
     } else {
       json[r'data'] = null;
     }
-      json[r'location'] = this.location;
+    json[r'location'] = this.location;
     if (this.membersLimit != null) {
       json[r'members_limit'] = this.membersLimit;
     } else {
@@ -164,8 +167,10 @@ class JoinCallRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "JoinCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "JoinCallRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "JoinCallRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "JoinCallRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -184,7 +189,10 @@ class JoinCallRequest {
     return null;
   }
 
-  static List<JoinCallRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<JoinCallRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <JoinCallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -212,13 +220,19 @@ class JoinCallRequest {
   }
 
   // maps a json object with a list of JoinCallRequest-objects as value to a dart map
-  static Map<String, List<JoinCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<JoinCallRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<JoinCallRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = JoinCallRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = JoinCallRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -229,4 +243,3 @@ class JoinCallRequest {
     'location',
   };
 }
-

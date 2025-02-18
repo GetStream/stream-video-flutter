@@ -19,20 +19,22 @@ class SDKUsageReport {
   Map<String, PerSDKUsageReport> perSdkUsage;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SDKUsageReport &&
-    _deepEquality.equals(other.perSdkUsage, perSdkUsage);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SDKUsageReport &&
+          _deepEquality.equals(other.perSdkUsage, perSdkUsage);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (perSdkUsage.hashCode);
+      // ignore: unnecessary_parenthesis
+      (perSdkUsage.hashCode);
 
   @override
   String toString() => 'SDKUsageReport[perSdkUsage=$perSdkUsage]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'per_sdk_usage'] = this.perSdkUsage;
+    json[r'per_sdk_usage'] = this.perSdkUsage;
     return json;
   }
 
@@ -48,8 +50,10 @@ class SDKUsageReport {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "SDKUsageReport[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "SDKUsageReport[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "SDKUsageReport[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "SDKUsageReport[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +65,10 @@ class SDKUsageReport {
     return null;
   }
 
-  static List<SDKUsageReport> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SDKUsageReport> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <SDKUsageReport>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +96,19 @@ class SDKUsageReport {
   }
 
   // maps a json object with a list of SDKUsageReport-objects as value to a dart map
-  static Map<String, List<SDKUsageReport>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<SDKUsageReport>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<SDKUsageReport>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SDKUsageReport.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = SDKUsageReport.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +119,3 @@ class SDKUsageReport {
     'per_sdk_usage',
   };
 }
-

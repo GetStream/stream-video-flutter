@@ -22,23 +22,24 @@ class Coordinates {
   double longitude;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Coordinates &&
-    other.latitude == latitude &&
-    other.longitude == longitude;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Coordinates &&
+          other.latitude == latitude &&
+          other.longitude == longitude;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (latitude.hashCode) +
-    (longitude.hashCode);
+      // ignore: unnecessary_parenthesis
+      (latitude.hashCode) + (longitude.hashCode);
 
   @override
   String toString() => 'Coordinates[latitude=$latitude, longitude=$longitude]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'latitude'] = this.latitude;
-      json[r'longitude'] = this.longitude;
+    json[r'latitude'] = this.latitude;
+    json[r'longitude'] = this.longitude;
     return json;
   }
 
@@ -54,8 +55,10 @@ class Coordinates {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Coordinates[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Coordinates[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "Coordinates[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "Coordinates[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +71,10 @@ class Coordinates {
     return null;
   }
 
-  static List<Coordinates> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Coordinates> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Coordinates>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +102,19 @@ class Coordinates {
   }
 
   // maps a json object with a list of Coordinates-objects as value to a dart map
-  static Map<String, List<Coordinates>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Coordinates>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Coordinates>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Coordinates.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Coordinates.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +126,3 @@ class Coordinates {
     'longitude',
   };
 }
-

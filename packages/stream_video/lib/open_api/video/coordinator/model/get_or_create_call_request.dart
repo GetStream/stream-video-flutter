@@ -64,24 +64,27 @@ class GetOrCreateCallRequest {
   bool? video;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GetOrCreateCallRequest &&
-    other.data == data &&
-    other.membersLimit == membersLimit &&
-    other.notify == notify &&
-    other.ring == ring &&
-    other.video == video;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GetOrCreateCallRequest &&
+          other.data == data &&
+          other.membersLimit == membersLimit &&
+          other.notify == notify &&
+          other.ring == ring &&
+          other.video == video;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (data == null ? 0 : data!.hashCode) +
-    (membersLimit == null ? 0 : membersLimit!.hashCode) +
-    (notify == null ? 0 : notify!.hashCode) +
-    (ring == null ? 0 : ring!.hashCode) +
-    (video == null ? 0 : video!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (data == null ? 0 : data!.hashCode) +
+      (membersLimit == null ? 0 : membersLimit!.hashCode) +
+      (notify == null ? 0 : notify!.hashCode) +
+      (ring == null ? 0 : ring!.hashCode) +
+      (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, notify=$notify, ring=$ring, video=$video]';
+  String toString() =>
+      'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -125,8 +128,10 @@ class GetOrCreateCallRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GetOrCreateCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GetOrCreateCallRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GetOrCreateCallRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GetOrCreateCallRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -142,7 +147,10 @@ class GetOrCreateCallRequest {
     return null;
   }
 
-  static List<GetOrCreateCallRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GetOrCreateCallRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GetOrCreateCallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -170,20 +178,24 @@ class GetOrCreateCallRequest {
   }
 
   // maps a json object with a list of GetOrCreateCallRequest-objects as value to a dart map
-  static Map<String, List<GetOrCreateCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GetOrCreateCallRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GetOrCreateCallRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GetOrCreateCallRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GetOrCreateCallRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

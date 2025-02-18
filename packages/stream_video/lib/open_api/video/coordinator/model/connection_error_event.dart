@@ -29,29 +29,32 @@ class ConnectionErrorEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ConnectionErrorEvent &&
-    other.connectionId == connectionId &&
-    other.createdAt == createdAt &&
-    other.error == error &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConnectionErrorEvent &&
+          other.connectionId == connectionId &&
+          other.createdAt == createdAt &&
+          other.error == error &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (connectionId.hashCode) +
-    (createdAt.hashCode) +
-    (error.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (connectionId.hashCode) +
+      (createdAt.hashCode) +
+      (error.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'ConnectionErrorEvent[connectionId=$connectionId, createdAt=$createdAt, error=$error, type=$type]';
+  String toString() =>
+      'ConnectionErrorEvent[connectionId=$connectionId, createdAt=$createdAt, error=$error, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'connection_id'] = this.connectionId;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'error'] = this.error;
-      json[r'type'] = this.type;
+    json[r'connection_id'] = this.connectionId;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'error'] = this.error;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -67,8 +70,10 @@ class ConnectionErrorEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ConnectionErrorEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ConnectionErrorEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ConnectionErrorEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ConnectionErrorEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -83,7 +88,10 @@ class ConnectionErrorEvent {
     return null;
   }
 
-  static List<ConnectionErrorEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ConnectionErrorEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ConnectionErrorEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,13 +119,19 @@ class ConnectionErrorEvent {
   }
 
   // maps a json object with a list of ConnectionErrorEvent-objects as value to a dart map
-  static Map<String, List<ConnectionErrorEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ConnectionErrorEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ConnectionErrorEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ConnectionErrorEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ConnectionErrorEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +145,3 @@ class ConnectionErrorEvent {
     'type',
   };
 }
-

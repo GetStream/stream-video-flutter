@@ -115,54 +115,59 @@ class OwnUserResponse {
   DateTime updatedAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is OwnUserResponse &&
-    _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
-    other.createdAt == createdAt &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.deactivatedAt == deactivatedAt &&
-    other.deletedAt == deletedAt &&
-    _deepEquality.equals(other.devices, devices) &&
-    other.id == id &&
-    other.image == image &&
-    other.language == language &&
-    other.lastActive == lastActive &&
-    other.name == name &&
-    other.privacySettings == privacySettings &&
-    other.pushNotifications == pushNotifications &&
-    other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
-    other.role == role &&
-    _deepEquality.equals(other.teams, teams) &&
-    other.updatedAt == updatedAt;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OwnUserResponse &&
+          _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
+          other.createdAt == createdAt &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.deactivatedAt == deactivatedAt &&
+          other.deletedAt == deletedAt &&
+          _deepEquality.equals(other.devices, devices) &&
+          other.id == id &&
+          other.image == image &&
+          other.language == language &&
+          other.lastActive == lastActive &&
+          other.name == name &&
+          other.privacySettings == privacySettings &&
+          other.pushNotifications == pushNotifications &&
+          other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
+          other.role == role &&
+          _deepEquality.equals(other.teams, teams) &&
+          other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (blockedUserIds.hashCode) +
-    (createdAt.hashCode) +
-    (custom.hashCode) +
-    (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
-    (deletedAt == null ? 0 : deletedAt!.hashCode) +
-    (devices.hashCode) +
-    (id.hashCode) +
-    (image == null ? 0 : image!.hashCode) +
-    (language.hashCode) +
-    (lastActive == null ? 0 : lastActive!.hashCode) +
-    (name == null ? 0 : name!.hashCode) +
-    (privacySettings == null ? 0 : privacySettings!.hashCode) +
-    (pushNotifications == null ? 0 : pushNotifications!.hashCode) +
-    (revokeTokensIssuedBefore == null ? 0 : revokeTokensIssuedBefore!.hashCode) +
-    (role.hashCode) +
-    (teams.hashCode) +
-    (updatedAt.hashCode);
+      // ignore: unnecessary_parenthesis
+      (blockedUserIds.hashCode) +
+      (createdAt.hashCode) +
+      (custom.hashCode) +
+      (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
+      (deletedAt == null ? 0 : deletedAt!.hashCode) +
+      (devices.hashCode) +
+      (id.hashCode) +
+      (image == null ? 0 : image!.hashCode) +
+      (language.hashCode) +
+      (lastActive == null ? 0 : lastActive!.hashCode) +
+      (name == null ? 0 : name!.hashCode) +
+      (privacySettings == null ? 0 : privacySettings!.hashCode) +
+      (pushNotifications == null ? 0 : pushNotifications!.hashCode) +
+      (revokeTokensIssuedBefore == null
+          ? 0
+          : revokeTokensIssuedBefore!.hashCode) +
+      (role.hashCode) +
+      (teams.hashCode) +
+      (updatedAt.hashCode);
 
   @override
-  String toString() => 'OwnUserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+  String toString() =>
+      'OwnUserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'blocked_user_ids'] = this.blockedUserIds;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'custom'] = this.custom;
+    json[r'blocked_user_ids'] = this.blockedUserIds;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'custom'] = this.custom;
     if (this.deactivatedAt != null) {
       json[r'deactivated_at'] = this.deactivatedAt!.toUtc().toIso8601String();
     } else {
@@ -173,14 +178,14 @@ class OwnUserResponse {
     } else {
       json[r'deleted_at'] = null;
     }
-      json[r'devices'] = this.devices;
-      json[r'id'] = this.id;
+    json[r'devices'] = this.devices;
+    json[r'id'] = this.id;
     if (this.image != null) {
       json[r'image'] = this.image;
     } else {
       json[r'image'] = null;
     }
-      json[r'language'] = this.language;
+    json[r'language'] = this.language;
     if (this.lastActive != null) {
       json[r'last_active'] = this.lastActive!.toUtc().toIso8601String();
     } else {
@@ -202,13 +207,14 @@ class OwnUserResponse {
       json[r'push_notifications'] = null;
     }
     if (this.revokeTokensIssuedBefore != null) {
-      json[r'revoke_tokens_issued_before'] = this.revokeTokensIssuedBefore!.toUtc().toIso8601String();
+      json[r'revoke_tokens_issued_before'] =
+          this.revokeTokensIssuedBefore!.toUtc().toIso8601String();
     } else {
       json[r'revoke_tokens_issued_before'] = null;
     }
-      json[r'role'] = this.role;
-      json[r'teams'] = this.teams;
-      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+    json[r'role'] = this.role;
+    json[r'teams'] = this.teams;
+    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
 
@@ -224,15 +230,19 @@ class OwnUserResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "OwnUserResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "OwnUserResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "OwnUserResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "OwnUserResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return OwnUserResponse(
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
-            ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'blocked_user_ids'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
@@ -245,11 +255,15 @@ class OwnUserResponse {
         lastActive: mapDateTime(json, r'last_active', r''),
         name: mapValueOfType<String>(json, r'name'),
         privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
-        pushNotifications: PushNotificationSettingsResponse.fromJson(json[r'push_notifications']),
-        revokeTokensIssuedBefore: mapDateTime(json, r'revoke_tokens_issued_before', r''),
+        pushNotifications: PushNotificationSettingsResponse.fromJson(
+            json[r'push_notifications']),
+        revokeTokensIssuedBefore:
+            mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable
-            ? (json[r'teams'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'teams'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
@@ -257,7 +271,10 @@ class OwnUserResponse {
     return null;
   }
 
-  static List<OwnUserResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<OwnUserResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <OwnUserResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -285,13 +302,19 @@ class OwnUserResponse {
   }
 
   // maps a json object with a list of OwnUserResponse-objects as value to a dart map
-  static Map<String, List<OwnUserResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<OwnUserResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<OwnUserResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = OwnUserResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = OwnUserResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -309,4 +332,3 @@ class OwnUserResponse {
     'updated_at',
   };
 }
-

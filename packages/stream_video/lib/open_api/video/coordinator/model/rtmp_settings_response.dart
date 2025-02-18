@@ -22,23 +22,25 @@ class RTMPSettingsResponse {
   String quality;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RTMPSettingsResponse &&
-    other.enabled == enabled &&
-    other.quality == quality;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RTMPSettingsResponse &&
+          other.enabled == enabled &&
+          other.quality == quality;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (enabled.hashCode) +
-    (quality.hashCode);
+      // ignore: unnecessary_parenthesis
+      (enabled.hashCode) + (quality.hashCode);
 
   @override
-  String toString() => 'RTMPSettingsResponse[enabled=$enabled, quality=$quality]';
+  String toString() =>
+      'RTMPSettingsResponse[enabled=$enabled, quality=$quality]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'enabled'] = this.enabled;
-      json[r'quality'] = this.quality;
+    json[r'enabled'] = this.enabled;
+    json[r'quality'] = this.quality;
     return json;
   }
 
@@ -54,8 +56,10 @@ class RTMPSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RTMPSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RTMPSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RTMPSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RTMPSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +72,10 @@ class RTMPSettingsResponse {
     return null;
   }
 
-  static List<RTMPSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RTMPSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +103,19 @@ class RTMPSettingsResponse {
   }
 
   // maps a json object with a list of RTMPSettingsResponse-objects as value to a dart map
-  static Map<String, List<RTMPSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RTMPSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RTMPSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RTMPSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RTMPSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +127,3 @@ class RTMPSettingsResponse {
     'quality',
   };
 }
-

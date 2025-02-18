@@ -49,24 +49,27 @@ class LayoutSettingsRequest {
   Map<String, Object> options;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is LayoutSettingsRequest &&
-    other.detectOrientation == detectOrientation &&
-    other.externalAppUrl == externalAppUrl &&
-    other.externalCssUrl == externalCssUrl &&
-    other.name == name &&
-    _deepEquality.equals(other.options, options);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LayoutSettingsRequest &&
+          other.detectOrientation == detectOrientation &&
+          other.externalAppUrl == externalAppUrl &&
+          other.externalCssUrl == externalCssUrl &&
+          other.name == name &&
+          _deepEquality.equals(other.options, options);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (detectOrientation == null ? 0 : detectOrientation!.hashCode) +
-    (externalAppUrl == null ? 0 : externalAppUrl!.hashCode) +
-    (externalCssUrl == null ? 0 : externalCssUrl!.hashCode) +
-    (name.hashCode) +
-    (options.hashCode);
+      // ignore: unnecessary_parenthesis
+      (detectOrientation == null ? 0 : detectOrientation!.hashCode) +
+      (externalAppUrl == null ? 0 : externalAppUrl!.hashCode) +
+      (externalCssUrl == null ? 0 : externalCssUrl!.hashCode) +
+      (name.hashCode) +
+      (options.hashCode);
 
   @override
-  String toString() => 'LayoutSettingsRequest[detectOrientation=$detectOrientation, externalAppUrl=$externalAppUrl, externalCssUrl=$externalCssUrl, name=$name, options=$options]';
+  String toString() =>
+      'LayoutSettingsRequest[detectOrientation=$detectOrientation, externalAppUrl=$externalAppUrl, externalCssUrl=$externalCssUrl, name=$name, options=$options]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -85,8 +88,8 @@ class LayoutSettingsRequest {
     } else {
       json[r'external_css_url'] = null;
     }
-      json[r'name'] = this.name;
-      json[r'options'] = this.options;
+    json[r'name'] = this.name;
+    json[r'options'] = this.options;
     return json;
   }
 
@@ -102,8 +105,10 @@ class LayoutSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "LayoutSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "LayoutSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "LayoutSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "LayoutSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -119,7 +124,10 @@ class LayoutSettingsRequest {
     return null;
   }
 
-  static List<LayoutSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<LayoutSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <LayoutSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -147,13 +155,19 @@ class LayoutSettingsRequest {
   }
 
   // maps a json object with a list of LayoutSettingsRequest-objects as value to a dart map
-  static Map<String, List<LayoutSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<LayoutSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<LayoutSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = LayoutSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = LayoutSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -164,7 +178,6 @@ class LayoutSettingsRequest {
     'name',
   };
 }
-
 
 class LayoutSettingsRequestNameEnum {
   /// Instantiate a new enum with the provided [value].
@@ -180,7 +193,8 @@ class LayoutSettingsRequestNameEnum {
 
   static const spotlight = LayoutSettingsRequestNameEnum._(r'spotlight');
   static const grid = LayoutSettingsRequestNameEnum._(r'grid');
-  static const singleParticipant = LayoutSettingsRequestNameEnum._(r'single-participant');
+  static const singleParticipant =
+      LayoutSettingsRequestNameEnum._(r'single-participant');
   static const mobile = LayoutSettingsRequestNameEnum._(r'mobile');
   static const custom = LayoutSettingsRequestNameEnum._(r'custom');
 
@@ -193,9 +207,13 @@ class LayoutSettingsRequestNameEnum {
     custom,
   ];
 
-  static LayoutSettingsRequestNameEnum? fromJson(dynamic value) => LayoutSettingsRequestNameEnumTypeTransformer().decode(value);
+  static LayoutSettingsRequestNameEnum? fromJson(dynamic value) =>
+      LayoutSettingsRequestNameEnumTypeTransformer().decode(value);
 
-  static List<LayoutSettingsRequestNameEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<LayoutSettingsRequestNameEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <LayoutSettingsRequestNameEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -212,7 +230,8 @@ class LayoutSettingsRequestNameEnum {
 /// Transformation class that can [encode] an instance of [LayoutSettingsRequestNameEnum] to String,
 /// and [decode] dynamic data back to [LayoutSettingsRequestNameEnum].
 class LayoutSettingsRequestNameEnumTypeTransformer {
-  factory LayoutSettingsRequestNameEnumTypeTransformer() => _instance ??= const LayoutSettingsRequestNameEnumTypeTransformer._();
+  factory LayoutSettingsRequestNameEnumTypeTransformer() =>
+      _instance ??= const LayoutSettingsRequestNameEnumTypeTransformer._();
 
   const LayoutSettingsRequestNameEnumTypeTransformer._();
 
@@ -229,11 +248,16 @@ class LayoutSettingsRequestNameEnumTypeTransformer {
   LayoutSettingsRequestNameEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'spotlight': return LayoutSettingsRequestNameEnum.spotlight;
-        case r'grid': return LayoutSettingsRequestNameEnum.grid;
-        case r'single-participant': return LayoutSettingsRequestNameEnum.singleParticipant;
-        case r'mobile': return LayoutSettingsRequestNameEnum.mobile;
-        case r'custom': return LayoutSettingsRequestNameEnum.custom;
+        case r'spotlight':
+          return LayoutSettingsRequestNameEnum.spotlight;
+        case r'grid':
+          return LayoutSettingsRequestNameEnum.grid;
+        case r'single-participant':
+          return LayoutSettingsRequestNameEnum.singleParticipant;
+        case r'mobile':
+          return LayoutSettingsRequestNameEnum.mobile;
+        case r'custom':
+          return LayoutSettingsRequestNameEnum.custom;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -246,5 +270,3 @@ class LayoutSettingsRequestNameEnumTypeTransformer {
   /// Singleton [LayoutSettingsRequestNameEnumTypeTransformer] instance.
   static LayoutSettingsRequestNameEnumTypeTransformer? _instance;
 }
-
-

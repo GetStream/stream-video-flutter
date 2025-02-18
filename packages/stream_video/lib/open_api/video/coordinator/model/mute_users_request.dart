@@ -64,26 +64,29 @@ class MuteUsersRequest {
   bool? video;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MuteUsersRequest &&
-    other.audio == audio &&
-    other.muteAllUsers == muteAllUsers &&
-    other.screenshare == screenshare &&
-    other.screenshareAudio == screenshareAudio &&
-    _deepEquality.equals(other.userIds, userIds) &&
-    other.video == video;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MuteUsersRequest &&
+          other.audio == audio &&
+          other.muteAllUsers == muteAllUsers &&
+          other.screenshare == screenshare &&
+          other.screenshareAudio == screenshareAudio &&
+          _deepEquality.equals(other.userIds, userIds) &&
+          other.video == video;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (audio == null ? 0 : audio!.hashCode) +
-    (muteAllUsers == null ? 0 : muteAllUsers!.hashCode) +
-    (screenshare == null ? 0 : screenshare!.hashCode) +
-    (screenshareAudio == null ? 0 : screenshareAudio!.hashCode) +
-    (userIds.hashCode) +
-    (video == null ? 0 : video!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (audio == null ? 0 : audio!.hashCode) +
+      (muteAllUsers == null ? 0 : muteAllUsers!.hashCode) +
+      (screenshare == null ? 0 : screenshare!.hashCode) +
+      (screenshareAudio == null ? 0 : screenshareAudio!.hashCode) +
+      (userIds.hashCode) +
+      (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'MuteUsersRequest[audio=$audio, muteAllUsers=$muteAllUsers, screenshare=$screenshare, screenshareAudio=$screenshareAudio, userIds=$userIds, video=$video]';
+  String toString() =>
+      'MuteUsersRequest[audio=$audio, muteAllUsers=$muteAllUsers, screenshare=$screenshare, screenshareAudio=$screenshareAudio, userIds=$userIds, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -107,7 +110,7 @@ class MuteUsersRequest {
     } else {
       json[r'screenshare_audio'] = null;
     }
-      json[r'user_ids'] = this.userIds;
+    json[r'user_ids'] = this.userIds;
     if (this.video != null) {
       json[r'video'] = this.video;
     } else {
@@ -128,8 +131,10 @@ class MuteUsersRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MuteUsersRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MuteUsersRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "MuteUsersRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "MuteUsersRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -140,7 +145,9 @@ class MuteUsersRequest {
         screenshare: mapValueOfType<bool>(json, r'screenshare'),
         screenshareAudio: mapValueOfType<bool>(json, r'screenshare_audio'),
         userIds: json[r'user_ids'] is Iterable
-            ? (json[r'user_ids'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'user_ids'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         video: mapValueOfType<bool>(json, r'video'),
       );
@@ -148,7 +155,10 @@ class MuteUsersRequest {
     return null;
   }
 
-  static List<MuteUsersRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MuteUsersRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MuteUsersRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -176,20 +186,24 @@ class MuteUsersRequest {
   }
 
   // maps a json object with a list of MuteUsersRequest-objects as value to a dart map
-  static Map<String, List<MuteUsersRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MuteUsersRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MuteUsersRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MuteUsersRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MuteUsersRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

@@ -388,118 +388,138 @@ class UserSessionStats {
   String? webrtcVersion;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserSessionStats &&
-    other.averageConnectionTime == averageConnectionTime &&
-    other.browser == browser &&
-    other.browserVersion == browserVersion &&
-    other.currentIp == currentIp &&
-    other.currentSfu == currentSfu &&
-    other.deviceModel == deviceModel &&
-    other.deviceVersion == deviceVersion &&
-    other.distanceToSfuKilometers == distanceToSfuKilometers &&
-    other.freezeDurationSeconds == freezeDurationSeconds &&
-    other.geolocation == geolocation &&
-    other.group == group &&
-    other.jitter == jitter &&
-    other.latency == latency &&
-    other.maxFirPerSecond == maxFirPerSecond &&
-    other.maxFreezeFraction == maxFreezeFraction &&
-    other.maxFreezesDurationSeconds == maxFreezesDurationSeconds &&
-    other.maxFreezesPerSecond == maxFreezesPerSecond &&
-    other.maxNackPerSecond == maxNackPerSecond &&
-    other.maxPliPerSecond == maxPliPerSecond &&
-    other.maxPublishingVideoQuality == maxPublishingVideoQuality &&
-    other.maxReceivingVideoQuality == maxReceivingVideoQuality &&
-    other.minEventTs == minEventTs &&
-    other.os == os &&
-    other.osVersion == osVersion &&
-    other.packetLossFraction == packetLossFraction &&
-    other.pubSubHints == pubSubHints &&
-    _deepEquality.equals(other.publishedTracks, publishedTracks) &&
-    other.publisherJitter == publisherJitter &&
-    other.publisherLatency == publisherLatency &&
-    other.publisherNoiseCancellationSeconds == publisherNoiseCancellationSeconds &&
-    other.publisherPacketLossFraction == publisherPacketLossFraction &&
-    other.publisherQualityLimitationFraction == publisherQualityLimitationFraction &&
-    _deepEquality.equals(other.publisherVideoQualityLimitationDurationSeconds, publisherVideoQualityLimitationDurationSeconds) &&
-    other.publishingAudioCodec == publishingAudioCodec &&
-    other.publishingDurationSeconds == publishingDurationSeconds &&
-    other.publishingVideoCodec == publishingVideoCodec &&
-    other.qualityScore == qualityScore &&
-    other.receivingAudioCodec == receivingAudioCodec &&
-    other.receivingDurationSeconds == receivingDurationSeconds &&
-    other.receivingVideoCodec == receivingVideoCodec &&
-    other.sdk == sdk &&
-    other.sdkVersion == sdkVersion &&
-    other.sessionId == sessionId &&
-    other.subscriberJitter == subscriberJitter &&
-    other.subscriberLatency == subscriberLatency &&
-    other.subscriberVideoQualityThrottledDurationSeconds == subscriberVideoQualityThrottledDurationSeconds &&
-    _deepEquality.equals(other.subsessions, subsessions) &&
-    other.timeline == timeline &&
-    other.totalPixelsIn == totalPixelsIn &&
-    other.totalPixelsOut == totalPixelsOut &&
-    other.truncated == truncated &&
-    other.webrtcVersion == webrtcVersion;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserSessionStats &&
+          other.averageConnectionTime == averageConnectionTime &&
+          other.browser == browser &&
+          other.browserVersion == browserVersion &&
+          other.currentIp == currentIp &&
+          other.currentSfu == currentSfu &&
+          other.deviceModel == deviceModel &&
+          other.deviceVersion == deviceVersion &&
+          other.distanceToSfuKilometers == distanceToSfuKilometers &&
+          other.freezeDurationSeconds == freezeDurationSeconds &&
+          other.geolocation == geolocation &&
+          other.group == group &&
+          other.jitter == jitter &&
+          other.latency == latency &&
+          other.maxFirPerSecond == maxFirPerSecond &&
+          other.maxFreezeFraction == maxFreezeFraction &&
+          other.maxFreezesDurationSeconds == maxFreezesDurationSeconds &&
+          other.maxFreezesPerSecond == maxFreezesPerSecond &&
+          other.maxNackPerSecond == maxNackPerSecond &&
+          other.maxPliPerSecond == maxPliPerSecond &&
+          other.maxPublishingVideoQuality == maxPublishingVideoQuality &&
+          other.maxReceivingVideoQuality == maxReceivingVideoQuality &&
+          other.minEventTs == minEventTs &&
+          other.os == os &&
+          other.osVersion == osVersion &&
+          other.packetLossFraction == packetLossFraction &&
+          other.pubSubHints == pubSubHints &&
+          _deepEquality.equals(other.publishedTracks, publishedTracks) &&
+          other.publisherJitter == publisherJitter &&
+          other.publisherLatency == publisherLatency &&
+          other.publisherNoiseCancellationSeconds ==
+              publisherNoiseCancellationSeconds &&
+          other.publisherPacketLossFraction == publisherPacketLossFraction &&
+          other.publisherQualityLimitationFraction ==
+              publisherQualityLimitationFraction &&
+          _deepEquality.equals(
+              other.publisherVideoQualityLimitationDurationSeconds,
+              publisherVideoQualityLimitationDurationSeconds) &&
+          other.publishingAudioCodec == publishingAudioCodec &&
+          other.publishingDurationSeconds == publishingDurationSeconds &&
+          other.publishingVideoCodec == publishingVideoCodec &&
+          other.qualityScore == qualityScore &&
+          other.receivingAudioCodec == receivingAudioCodec &&
+          other.receivingDurationSeconds == receivingDurationSeconds &&
+          other.receivingVideoCodec == receivingVideoCodec &&
+          other.sdk == sdk &&
+          other.sdkVersion == sdkVersion &&
+          other.sessionId == sessionId &&
+          other.subscriberJitter == subscriberJitter &&
+          other.subscriberLatency == subscriberLatency &&
+          other.subscriberVideoQualityThrottledDurationSeconds ==
+              subscriberVideoQualityThrottledDurationSeconds &&
+          _deepEquality.equals(other.subsessions, subsessions) &&
+          other.timeline == timeline &&
+          other.totalPixelsIn == totalPixelsIn &&
+          other.totalPixelsOut == totalPixelsOut &&
+          other.truncated == truncated &&
+          other.webrtcVersion == webrtcVersion;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
-    (browser == null ? 0 : browser!.hashCode) +
-    (browserVersion == null ? 0 : browserVersion!.hashCode) +
-    (currentIp == null ? 0 : currentIp!.hashCode) +
-    (currentSfu == null ? 0 : currentSfu!.hashCode) +
-    (deviceModel == null ? 0 : deviceModel!.hashCode) +
-    (deviceVersion == null ? 0 : deviceVersion!.hashCode) +
-    (distanceToSfuKilometers == null ? 0 : distanceToSfuKilometers!.hashCode) +
-    (freezeDurationSeconds.hashCode) +
-    (geolocation == null ? 0 : geolocation!.hashCode) +
-    (group.hashCode) +
-    (jitter == null ? 0 : jitter!.hashCode) +
-    (latency == null ? 0 : latency!.hashCode) +
-    (maxFirPerSecond == null ? 0 : maxFirPerSecond!.hashCode) +
-    (maxFreezeFraction.hashCode) +
-    (maxFreezesDurationSeconds.hashCode) +
-    (maxFreezesPerSecond == null ? 0 : maxFreezesPerSecond!.hashCode) +
-    (maxNackPerSecond == null ? 0 : maxNackPerSecond!.hashCode) +
-    (maxPliPerSecond == null ? 0 : maxPliPerSecond!.hashCode) +
-    (maxPublishingVideoQuality == null ? 0 : maxPublishingVideoQuality!.hashCode) +
-    (maxReceivingVideoQuality == null ? 0 : maxReceivingVideoQuality!.hashCode) +
-    (minEventTs.hashCode) +
-    (os == null ? 0 : os!.hashCode) +
-    (osVersion == null ? 0 : osVersion!.hashCode) +
-    (packetLossFraction.hashCode) +
-    (pubSubHints == null ? 0 : pubSubHints!.hashCode) +
-    (publishedTracks.hashCode) +
-    (publisherJitter == null ? 0 : publisherJitter!.hashCode) +
-    (publisherLatency == null ? 0 : publisherLatency!.hashCode) +
-    (publisherNoiseCancellationSeconds == null ? 0 : publisherNoiseCancellationSeconds!.hashCode) +
-    (publisherPacketLossFraction.hashCode) +
-    (publisherQualityLimitationFraction == null ? 0 : publisherQualityLimitationFraction!.hashCode) +
-    (publisherVideoQualityLimitationDurationSeconds.hashCode) +
-    (publishingAudioCodec == null ? 0 : publishingAudioCodec!.hashCode) +
-    (publishingDurationSeconds.hashCode) +
-    (publishingVideoCodec == null ? 0 : publishingVideoCodec!.hashCode) +
-    (qualityScore.hashCode) +
-    (receivingAudioCodec == null ? 0 : receivingAudioCodec!.hashCode) +
-    (receivingDurationSeconds.hashCode) +
-    (receivingVideoCodec == null ? 0 : receivingVideoCodec!.hashCode) +
-    (sdk == null ? 0 : sdk!.hashCode) +
-    (sdkVersion == null ? 0 : sdkVersion!.hashCode) +
-    (sessionId.hashCode) +
-    (subscriberJitter == null ? 0 : subscriberJitter!.hashCode) +
-    (subscriberLatency == null ? 0 : subscriberLatency!.hashCode) +
-    (subscriberVideoQualityThrottledDurationSeconds == null ? 0 : subscriberVideoQualityThrottledDurationSeconds!.hashCode) +
-    (subsessions.hashCode) +
-    (timeline == null ? 0 : timeline!.hashCode) +
-    (totalPixelsIn.hashCode) +
-    (totalPixelsOut.hashCode) +
-    (truncated == null ? 0 : truncated!.hashCode) +
-    (webrtcVersion == null ? 0 : webrtcVersion!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
+      (browser == null ? 0 : browser!.hashCode) +
+      (browserVersion == null ? 0 : browserVersion!.hashCode) +
+      (currentIp == null ? 0 : currentIp!.hashCode) +
+      (currentSfu == null ? 0 : currentSfu!.hashCode) +
+      (deviceModel == null ? 0 : deviceModel!.hashCode) +
+      (deviceVersion == null ? 0 : deviceVersion!.hashCode) +
+      (distanceToSfuKilometers == null
+          ? 0
+          : distanceToSfuKilometers!.hashCode) +
+      (freezeDurationSeconds.hashCode) +
+      (geolocation == null ? 0 : geolocation!.hashCode) +
+      (group.hashCode) +
+      (jitter == null ? 0 : jitter!.hashCode) +
+      (latency == null ? 0 : latency!.hashCode) +
+      (maxFirPerSecond == null ? 0 : maxFirPerSecond!.hashCode) +
+      (maxFreezeFraction.hashCode) +
+      (maxFreezesDurationSeconds.hashCode) +
+      (maxFreezesPerSecond == null ? 0 : maxFreezesPerSecond!.hashCode) +
+      (maxNackPerSecond == null ? 0 : maxNackPerSecond!.hashCode) +
+      (maxPliPerSecond == null ? 0 : maxPliPerSecond!.hashCode) +
+      (maxPublishingVideoQuality == null
+          ? 0
+          : maxPublishingVideoQuality!.hashCode) +
+      (maxReceivingVideoQuality == null
+          ? 0
+          : maxReceivingVideoQuality!.hashCode) +
+      (minEventTs.hashCode) +
+      (os == null ? 0 : os!.hashCode) +
+      (osVersion == null ? 0 : osVersion!.hashCode) +
+      (packetLossFraction.hashCode) +
+      (pubSubHints == null ? 0 : pubSubHints!.hashCode) +
+      (publishedTracks.hashCode) +
+      (publisherJitter == null ? 0 : publisherJitter!.hashCode) +
+      (publisherLatency == null ? 0 : publisherLatency!.hashCode) +
+      (publisherNoiseCancellationSeconds == null
+          ? 0
+          : publisherNoiseCancellationSeconds!.hashCode) +
+      (publisherPacketLossFraction.hashCode) +
+      (publisherQualityLimitationFraction == null
+          ? 0
+          : publisherQualityLimitationFraction!.hashCode) +
+      (publisherVideoQualityLimitationDurationSeconds.hashCode) +
+      (publishingAudioCodec == null ? 0 : publishingAudioCodec!.hashCode) +
+      (publishingDurationSeconds.hashCode) +
+      (publishingVideoCodec == null ? 0 : publishingVideoCodec!.hashCode) +
+      (qualityScore.hashCode) +
+      (receivingAudioCodec == null ? 0 : receivingAudioCodec!.hashCode) +
+      (receivingDurationSeconds.hashCode) +
+      (receivingVideoCodec == null ? 0 : receivingVideoCodec!.hashCode) +
+      (sdk == null ? 0 : sdk!.hashCode) +
+      (sdkVersion == null ? 0 : sdkVersion!.hashCode) +
+      (sessionId.hashCode) +
+      (subscriberJitter == null ? 0 : subscriberJitter!.hashCode) +
+      (subscriberLatency == null ? 0 : subscriberLatency!.hashCode) +
+      (subscriberVideoQualityThrottledDurationSeconds == null
+          ? 0
+          : subscriberVideoQualityThrottledDurationSeconds!.hashCode) +
+      (subsessions.hashCode) +
+      (timeline == null ? 0 : timeline!.hashCode) +
+      (totalPixelsIn.hashCode) +
+      (totalPixelsOut.hashCode) +
+      (truncated == null ? 0 : truncated!.hashCode) +
+      (webrtcVersion == null ? 0 : webrtcVersion!.hashCode);
 
   @override
-  String toString() => 'UserSessionStats[averageConnectionTime=$averageConnectionTime, browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
+  String toString() =>
+      'UserSessionStats[averageConnectionTime=$averageConnectionTime, browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -543,13 +563,13 @@ class UserSessionStats {
     } else {
       json[r'distance_to_sfu_kilometers'] = null;
     }
-      json[r'freeze_duration_seconds'] = this.freezeDurationSeconds;
+    json[r'freeze_duration_seconds'] = this.freezeDurationSeconds;
     if (this.geolocation != null) {
       json[r'geolocation'] = this.geolocation;
     } else {
       json[r'geolocation'] = null;
     }
-      json[r'group'] = this.group;
+    json[r'group'] = this.group;
     if (this.jitter != null) {
       json[r'jitter'] = this.jitter;
     } else {
@@ -565,8 +585,8 @@ class UserSessionStats {
     } else {
       json[r'max_fir_per_second'] = null;
     }
-      json[r'max_freeze_fraction'] = this.maxFreezeFraction;
-      json[r'max_freezes_duration_seconds'] = this.maxFreezesDurationSeconds;
+    json[r'max_freeze_fraction'] = this.maxFreezeFraction;
+    json[r'max_freezes_duration_seconds'] = this.maxFreezesDurationSeconds;
     if (this.maxFreezesPerSecond != null) {
       json[r'max_freezes_per_second'] = this.maxFreezesPerSecond;
     } else {
@@ -592,7 +612,7 @@ class UserSessionStats {
     } else {
       json[r'max_receiving_video_quality'] = null;
     }
-      json[r'min_event_ts'] = this.minEventTs;
+    json[r'min_event_ts'] = this.minEventTs;
     if (this.os != null) {
       json[r'os'] = this.os;
     } else {
@@ -603,13 +623,13 @@ class UserSessionStats {
     } else {
       json[r'os_version'] = null;
     }
-      json[r'packet_loss_fraction'] = this.packetLossFraction;
+    json[r'packet_loss_fraction'] = this.packetLossFraction;
     if (this.pubSubHints != null) {
       json[r'pub_sub_hints'] = this.pubSubHints;
     } else {
       json[r'pub_sub_hints'] = null;
     }
-      json[r'published_tracks'] = this.publishedTracks;
+    json[r'published_tracks'] = this.publishedTracks;
     if (this.publisherJitter != null) {
       json[r'publisher_jitter'] = this.publisherJitter;
     } else {
@@ -621,35 +641,38 @@ class UserSessionStats {
       json[r'publisher_latency'] = null;
     }
     if (this.publisherNoiseCancellationSeconds != null) {
-      json[r'publisher_noise_cancellation_seconds'] = this.publisherNoiseCancellationSeconds;
+      json[r'publisher_noise_cancellation_seconds'] =
+          this.publisherNoiseCancellationSeconds;
     } else {
       json[r'publisher_noise_cancellation_seconds'] = null;
     }
-      json[r'publisher_packet_loss_fraction'] = this.publisherPacketLossFraction;
+    json[r'publisher_packet_loss_fraction'] = this.publisherPacketLossFraction;
     if (this.publisherQualityLimitationFraction != null) {
-      json[r'publisher_quality_limitation_fraction'] = this.publisherQualityLimitationFraction;
+      json[r'publisher_quality_limitation_fraction'] =
+          this.publisherQualityLimitationFraction;
     } else {
       json[r'publisher_quality_limitation_fraction'] = null;
     }
-      json[r'publisher_video_quality_limitation_duration_seconds'] = this.publisherVideoQualityLimitationDurationSeconds;
+    json[r'publisher_video_quality_limitation_duration_seconds'] =
+        this.publisherVideoQualityLimitationDurationSeconds;
     if (this.publishingAudioCodec != null) {
       json[r'publishing_audio_codec'] = this.publishingAudioCodec;
     } else {
       json[r'publishing_audio_codec'] = null;
     }
-      json[r'publishing_duration_seconds'] = this.publishingDurationSeconds;
+    json[r'publishing_duration_seconds'] = this.publishingDurationSeconds;
     if (this.publishingVideoCodec != null) {
       json[r'publishing_video_codec'] = this.publishingVideoCodec;
     } else {
       json[r'publishing_video_codec'] = null;
     }
-      json[r'quality_score'] = this.qualityScore;
+    json[r'quality_score'] = this.qualityScore;
     if (this.receivingAudioCodec != null) {
       json[r'receiving_audio_codec'] = this.receivingAudioCodec;
     } else {
       json[r'receiving_audio_codec'] = null;
     }
-      json[r'receiving_duration_seconds'] = this.receivingDurationSeconds;
+    json[r'receiving_duration_seconds'] = this.receivingDurationSeconds;
     if (this.receivingVideoCodec != null) {
       json[r'receiving_video_codec'] = this.receivingVideoCodec;
     } else {
@@ -665,7 +688,7 @@ class UserSessionStats {
     } else {
       json[r'sdk_version'] = null;
     }
-      json[r'session_id'] = this.sessionId;
+    json[r'session_id'] = this.sessionId;
     if (this.subscriberJitter != null) {
       json[r'subscriber_jitter'] = this.subscriberJitter;
     } else {
@@ -677,18 +700,19 @@ class UserSessionStats {
       json[r'subscriber_latency'] = null;
     }
     if (this.subscriberVideoQualityThrottledDurationSeconds != null) {
-      json[r'subscriber_video_quality_throttled_duration_seconds'] = this.subscriberVideoQualityThrottledDurationSeconds;
+      json[r'subscriber_video_quality_throttled_duration_seconds'] =
+          this.subscriberVideoQualityThrottledDurationSeconds;
     } else {
       json[r'subscriber_video_quality_throttled_duration_seconds'] = null;
     }
-      json[r'subsessions'] = this.subsessions;
+    json[r'subsessions'] = this.subsessions;
     if (this.timeline != null) {
       json[r'timeline'] = this.timeline;
     } else {
       json[r'timeline'] = null;
     }
-      json[r'total_pixels_in'] = this.totalPixelsIn;
-      json[r'total_pixels_out'] = this.totalPixelsOut;
+    json[r'total_pixels_in'] = this.totalPixelsIn;
+    json[r'total_pixels_out'] = this.totalPixelsOut;
     if (this.truncated != null) {
       json[r'truncated'] = this.truncated;
     } else {
@@ -714,59 +738,84 @@ class UserSessionStats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserSessionStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserSessionStats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UserSessionStats[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UserSessionStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return UserSessionStats(
-        averageConnectionTime: mapValueOfType<double>(json, r'average_connection_time'),
+        averageConnectionTime:
+            mapValueOfType<double>(json, r'average_connection_time'),
         browser: mapValueOfType<String>(json, r'browser'),
         browserVersion: mapValueOfType<String>(json, r'browser_version'),
         currentIp: mapValueOfType<String>(json, r'current_ip'),
         currentSfu: mapValueOfType<String>(json, r'current_sfu'),
         deviceModel: mapValueOfType<String>(json, r'device_model'),
         deviceVersion: mapValueOfType<String>(json, r'device_version'),
-        distanceToSfuKilometers: mapValueOfType<double>(json, r'distance_to_sfu_kilometers'),
-        freezeDurationSeconds: mapValueOfType<int>(json, r'freeze_duration_seconds')!,
+        distanceToSfuKilometers:
+            mapValueOfType<double>(json, r'distance_to_sfu_kilometers'),
+        freezeDurationSeconds:
+            mapValueOfType<int>(json, r'freeze_duration_seconds')!,
         geolocation: GeolocationResult.fromJson(json[r'geolocation']),
         group: mapValueOfType<String>(json, r'group')!,
         jitter: TimeStats.fromJson(json[r'jitter']),
         latency: TimeStats.fromJson(json[r'latency']),
         maxFirPerSecond: mapValueOfType<double>(json, r'max_fir_per_second'),
-        maxFreezeFraction: mapValueOfType<double>(json, r'max_freeze_fraction')!,
-        maxFreezesDurationSeconds: mapValueOfType<int>(json, r'max_freezes_duration_seconds')!,
-        maxFreezesPerSecond: mapValueOfType<double>(json, r'max_freezes_per_second'),
+        maxFreezeFraction:
+            mapValueOfType<double>(json, r'max_freeze_fraction')!,
+        maxFreezesDurationSeconds:
+            mapValueOfType<int>(json, r'max_freezes_duration_seconds')!,
+        maxFreezesPerSecond:
+            mapValueOfType<double>(json, r'max_freezes_per_second'),
         maxNackPerSecond: mapValueOfType<double>(json, r'max_nack_per_second'),
         maxPliPerSecond: mapValueOfType<double>(json, r'max_pli_per_second'),
-        maxPublishingVideoQuality: VideoQuality.fromJson(json[r'max_publishing_video_quality']),
-        maxReceivingVideoQuality: VideoQuality.fromJson(json[r'max_receiving_video_quality']),
+        maxPublishingVideoQuality:
+            VideoQuality.fromJson(json[r'max_publishing_video_quality']),
+        maxReceivingVideoQuality:
+            VideoQuality.fromJson(json[r'max_receiving_video_quality']),
         minEventTs: mapValueOfType<int>(json, r'min_event_ts')!,
         os: mapValueOfType<String>(json, r'os'),
         osVersion: mapValueOfType<String>(json, r'os_version'),
-        packetLossFraction: mapValueOfType<double>(json, r'packet_loss_fraction')!,
+        packetLossFraction:
+            mapValueOfType<double>(json, r'packet_loss_fraction')!,
         pubSubHints: MediaPubSubHint.fromJson(json[r'pub_sub_hints']),
-        publishedTracks: PublishedTrackInfo.listFromJson(json[r'published_tracks']),
+        publishedTracks:
+            PublishedTrackInfo.listFromJson(json[r'published_tracks']),
         publisherJitter: TimeStats.fromJson(json[r'publisher_jitter']),
         publisherLatency: TimeStats.fromJson(json[r'publisher_latency']),
-        publisherNoiseCancellationSeconds: mapValueOfType<double>(json, r'publisher_noise_cancellation_seconds'),
-        publisherPacketLossFraction: mapValueOfType<double>(json, r'publisher_packet_loss_fraction')!,
-        publisherQualityLimitationFraction: mapValueOfType<double>(json, r'publisher_quality_limitation_fraction'),
-        publisherVideoQualityLimitationDurationSeconds: mapCastOfType<String, double>(json, r'publisher_video_quality_limitation_duration_seconds') ?? const {},
-        publishingAudioCodec: mapValueOfType<String>(json, r'publishing_audio_codec'),
-        publishingDurationSeconds: mapValueOfType<int>(json, r'publishing_duration_seconds')!,
-        publishingVideoCodec: mapValueOfType<String>(json, r'publishing_video_codec'),
+        publisherNoiseCancellationSeconds: mapValueOfType<double>(
+            json, r'publisher_noise_cancellation_seconds'),
+        publisherPacketLossFraction:
+            mapValueOfType<double>(json, r'publisher_packet_loss_fraction')!,
+        publisherQualityLimitationFraction: mapValueOfType<double>(
+            json, r'publisher_quality_limitation_fraction'),
+        publisherVideoQualityLimitationDurationSeconds:
+            mapCastOfType<String, double>(json,
+                    r'publisher_video_quality_limitation_duration_seconds') ??
+                const {},
+        publishingAudioCodec:
+            mapValueOfType<String>(json, r'publishing_audio_codec'),
+        publishingDurationSeconds:
+            mapValueOfType<int>(json, r'publishing_duration_seconds')!,
+        publishingVideoCodec:
+            mapValueOfType<String>(json, r'publishing_video_codec'),
         qualityScore: mapValueOfType<double>(json, r'quality_score')!,
-        receivingAudioCodec: mapValueOfType<String>(json, r'receiving_audio_codec'),
-        receivingDurationSeconds: mapValueOfType<int>(json, r'receiving_duration_seconds')!,
-        receivingVideoCodec: mapValueOfType<String>(json, r'receiving_video_codec'),
+        receivingAudioCodec:
+            mapValueOfType<String>(json, r'receiving_audio_codec'),
+        receivingDurationSeconds:
+            mapValueOfType<int>(json, r'receiving_duration_seconds')!,
+        receivingVideoCodec:
+            mapValueOfType<String>(json, r'receiving_video_codec'),
         sdk: mapValueOfType<String>(json, r'sdk'),
         sdkVersion: mapValueOfType<String>(json, r'sdk_version'),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         subscriberJitter: TimeStats.fromJson(json[r'subscriber_jitter']),
         subscriberLatency: TimeStats.fromJson(json[r'subscriber_latency']),
-        subscriberVideoQualityThrottledDurationSeconds: mapValueOfType<double>(json, r'subscriber_video_quality_throttled_duration_seconds'),
+        subscriberVideoQualityThrottledDurationSeconds: mapValueOfType<double>(
+            json, r'subscriber_video_quality_throttled_duration_seconds'),
         subsessions: Subsession.listFromJson(json[r'subsessions']),
         timeline: CallTimeline.fromJson(json[r'timeline']),
         totalPixelsIn: mapValueOfType<int>(json, r'total_pixels_in')!,
@@ -778,7 +827,10 @@ class UserSessionStats {
     return null;
   }
 
-  static List<UserSessionStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserSessionStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserSessionStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -806,13 +858,19 @@ class UserSessionStats {
   }
 
   // maps a json object with a list of UserSessionStats-objects as value to a dart map
-  static Map<String, List<UserSessionStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserSessionStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserSessionStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserSessionStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserSessionStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -835,4 +893,3 @@ class UserSessionStats {
     'total_pixels_out',
   };
 }
-

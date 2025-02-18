@@ -22,23 +22,25 @@ class TimeStats {
   double maxSeconds;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TimeStats &&
-    other.averageSeconds == averageSeconds &&
-    other.maxSeconds == maxSeconds;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TimeStats &&
+          other.averageSeconds == averageSeconds &&
+          other.maxSeconds == maxSeconds;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (averageSeconds.hashCode) +
-    (maxSeconds.hashCode);
+      // ignore: unnecessary_parenthesis
+      (averageSeconds.hashCode) + (maxSeconds.hashCode);
 
   @override
-  String toString() => 'TimeStats[averageSeconds=$averageSeconds, maxSeconds=$maxSeconds]';
+  String toString() =>
+      'TimeStats[averageSeconds=$averageSeconds, maxSeconds=$maxSeconds]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'average_seconds'] = this.averageSeconds;
-      json[r'max_seconds'] = this.maxSeconds;
+    json[r'average_seconds'] = this.averageSeconds;
+    json[r'max_seconds'] = this.maxSeconds;
     return json;
   }
 
@@ -54,8 +56,10 @@ class TimeStats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "TimeStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "TimeStats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "TimeStats[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "TimeStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +72,10 @@ class TimeStats {
     return null;
   }
 
-  static List<TimeStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TimeStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TimeStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +103,19 @@ class TimeStats {
   }
 
   // maps a json object with a list of TimeStats-objects as value to a dart map
-  static Map<String, List<TimeStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TimeStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TimeStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TimeStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TimeStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +127,3 @@ class TimeStats {
     'max_seconds',
   };
 }
-

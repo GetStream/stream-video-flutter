@@ -58,43 +58,46 @@ class CallStatsReportSummaryResponse {
   int? qualityScore;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallStatsReportSummaryResponse &&
-    other.callCid == callCid &&
-    other.callDurationSeconds == callDurationSeconds &&
-    other.callSessionId == callSessionId &&
-    other.callStatus == callStatus &&
-    other.createdAt == createdAt &&
-    other.firstStatsTime == firstStatsTime &&
-    other.minUserRating == minUserRating &&
-    other.qualityScore == qualityScore;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallStatsReportSummaryResponse &&
+          other.callCid == callCid &&
+          other.callDurationSeconds == callDurationSeconds &&
+          other.callSessionId == callSessionId &&
+          other.callStatus == callStatus &&
+          other.createdAt == createdAt &&
+          other.firstStatsTime == firstStatsTime &&
+          other.minUserRating == minUserRating &&
+          other.qualityScore == qualityScore;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (callCid.hashCode) +
-    (callDurationSeconds.hashCode) +
-    (callSessionId.hashCode) +
-    (callStatus.hashCode) +
-    (createdAt == null ? 0 : createdAt!.hashCode) +
-    (firstStatsTime.hashCode) +
-    (minUserRating == null ? 0 : minUserRating!.hashCode) +
-    (qualityScore == null ? 0 : qualityScore!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (callCid.hashCode) +
+      (callDurationSeconds.hashCode) +
+      (callSessionId.hashCode) +
+      (callStatus.hashCode) +
+      (createdAt == null ? 0 : createdAt!.hashCode) +
+      (firstStatsTime.hashCode) +
+      (minUserRating == null ? 0 : minUserRating!.hashCode) +
+      (qualityScore == null ? 0 : qualityScore!.hashCode);
 
   @override
-  String toString() => 'CallStatsReportSummaryResponse[callCid=$callCid, callDurationSeconds=$callDurationSeconds, callSessionId=$callSessionId, callStatus=$callStatus, createdAt=$createdAt, firstStatsTime=$firstStatsTime, minUserRating=$minUserRating, qualityScore=$qualityScore]';
+  String toString() =>
+      'CallStatsReportSummaryResponse[callCid=$callCid, callDurationSeconds=$callDurationSeconds, callSessionId=$callSessionId, callStatus=$callStatus, createdAt=$createdAt, firstStatsTime=$firstStatsTime, minUserRating=$minUserRating, qualityScore=$qualityScore]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_cid'] = this.callCid;
-      json[r'call_duration_seconds'] = this.callDurationSeconds;
-      json[r'call_session_id'] = this.callSessionId;
-      json[r'call_status'] = this.callStatus;
+    json[r'call_cid'] = this.callCid;
+    json[r'call_duration_seconds'] = this.callDurationSeconds;
+    json[r'call_session_id'] = this.callSessionId;
+    json[r'call_status'] = this.callStatus;
     if (this.createdAt != null) {
       json[r'created_at'] = this.createdAt!.toUtc().toIso8601String();
     } else {
       json[r'created_at'] = null;
     }
-      json[r'first_stats_time'] = this.firstStatsTime.toUtc().toIso8601String();
+    json[r'first_stats_time'] = this.firstStatsTime.toUtc().toIso8601String();
     if (this.minUserRating != null) {
       json[r'min_user_rating'] = this.minUserRating;
     } else {
@@ -120,15 +123,18 @@ class CallStatsReportSummaryResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallStatsReportSummaryResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallStatsReportSummaryResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallStatsReportSummaryResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallStatsReportSummaryResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return CallStatsReportSummaryResponse(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        callDurationSeconds: mapValueOfType<int>(json, r'call_duration_seconds')!,
+        callDurationSeconds:
+            mapValueOfType<int>(json, r'call_duration_seconds')!,
         callSessionId: mapValueOfType<String>(json, r'call_session_id')!,
         callStatus: mapValueOfType<String>(json, r'call_status')!,
         createdAt: mapDateTime(json, r'created_at', r''),
@@ -140,7 +146,10 @@ class CallStatsReportSummaryResponse {
     return null;
   }
 
-  static List<CallStatsReportSummaryResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallStatsReportSummaryResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallStatsReportSummaryResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -168,13 +177,19 @@ class CallStatsReportSummaryResponse {
   }
 
   // maps a json object with a list of CallStatsReportSummaryResponse-objects as value to a dart map
-  static Map<String, List<CallStatsReportSummaryResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallStatsReportSummaryResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallStatsReportSummaryResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallStatsReportSummaryResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallStatsReportSummaryResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -189,4 +204,3 @@ class CallStatsReportSummaryResponse {
     'first_stats_time',
   };
 }
-

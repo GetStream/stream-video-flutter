@@ -46,20 +46,25 @@ class StartTranscriptionRequest {
   String? transcriptionExternalStorage;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StartTranscriptionRequest &&
-    other.enableClosedCaptions == enableClosedCaptions &&
-    other.language == language &&
-    other.transcriptionExternalStorage == transcriptionExternalStorage;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StartTranscriptionRequest &&
+          other.enableClosedCaptions == enableClosedCaptions &&
+          other.language == language &&
+          other.transcriptionExternalStorage == transcriptionExternalStorage;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (enableClosedCaptions == null ? 0 : enableClosedCaptions!.hashCode) +
-    (language == null ? 0 : language!.hashCode) +
-    (transcriptionExternalStorage == null ? 0 : transcriptionExternalStorage!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (enableClosedCaptions == null ? 0 : enableClosedCaptions!.hashCode) +
+      (language == null ? 0 : language!.hashCode) +
+      (transcriptionExternalStorage == null
+          ? 0
+          : transcriptionExternalStorage!.hashCode);
 
   @override
-  String toString() => 'StartTranscriptionRequest[enableClosedCaptions=$enableClosedCaptions, language=$language, transcriptionExternalStorage=$transcriptionExternalStorage]';
+  String toString() =>
+      'StartTranscriptionRequest[enableClosedCaptions=$enableClosedCaptions, language=$language, transcriptionExternalStorage=$transcriptionExternalStorage]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -74,7 +79,8 @@ class StartTranscriptionRequest {
       json[r'language'] = null;
     }
     if (this.transcriptionExternalStorage != null) {
-      json[r'transcription_external_storage'] = this.transcriptionExternalStorage;
+      json[r'transcription_external_storage'] =
+          this.transcriptionExternalStorage;
     } else {
       json[r'transcription_external_storage'] = null;
     }
@@ -93,22 +99,29 @@ class StartTranscriptionRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StartTranscriptionRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StartTranscriptionRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "StartTranscriptionRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "StartTranscriptionRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return StartTranscriptionRequest(
-        enableClosedCaptions: mapValueOfType<bool>(json, r'enable_closed_captions'),
+        enableClosedCaptions:
+            mapValueOfType<bool>(json, r'enable_closed_captions'),
         language: mapValueOfType<String>(json, r'language'),
-        transcriptionExternalStorage: mapValueOfType<String>(json, r'transcription_external_storage'),
+        transcriptionExternalStorage:
+            mapValueOfType<String>(json, r'transcription_external_storage'),
       );
     }
     return null;
   }
 
-  static List<StartTranscriptionRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StartTranscriptionRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <StartTranscriptionRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -136,20 +149,24 @@ class StartTranscriptionRequest {
   }
 
   // maps a json object with a list of StartTranscriptionRequest-objects as value to a dart map
-  static Map<String, List<StartTranscriptionRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<StartTranscriptionRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<StartTranscriptionRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StartTranscriptionRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StartTranscriptionRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

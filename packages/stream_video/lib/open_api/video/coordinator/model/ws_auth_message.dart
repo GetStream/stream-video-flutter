@@ -25,26 +25,27 @@ class WSAuthMessage {
   ConnectUserDetailsRequest userDetails;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is WSAuthMessage &&
-    _deepEquality.equals(other.products, products) &&
-    other.token == token &&
-    other.userDetails == userDetails;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WSAuthMessage &&
+          _deepEquality.equals(other.products, products) &&
+          other.token == token &&
+          other.userDetails == userDetails;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (products.hashCode) +
-    (token.hashCode) +
-    (userDetails.hashCode);
+      // ignore: unnecessary_parenthesis
+      (products.hashCode) + (token.hashCode) + (userDetails.hashCode);
 
   @override
-  String toString() => 'WSAuthMessage[products=$products, token=$token, userDetails=$userDetails]';
+  String toString() =>
+      'WSAuthMessage[products=$products, token=$token, userDetails=$userDetails]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'products'] = this.products;
-      json[r'token'] = this.token;
-      json[r'user_details'] = this.userDetails;
+    json[r'products'] = this.products;
+    json[r'token'] = this.token;
+    json[r'user_details'] = this.userDetails;
     return json;
   }
 
@@ -60,15 +61,19 @@ class WSAuthMessage {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "WSAuthMessage[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "WSAuthMessage[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "WSAuthMessage[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "WSAuthMessage[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return WSAuthMessage(
         products: json[r'products'] is Iterable
-            ? (json[r'products'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'products'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         token: mapValueOfType<String>(json, r'token')!,
         userDetails: ConnectUserDetailsRequest.fromJson(json[r'user_details'])!,
@@ -77,7 +82,10 @@ class WSAuthMessage {
     return null;
   }
 
-  static List<WSAuthMessage> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<WSAuthMessage> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <WSAuthMessage>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -105,13 +113,19 @@ class WSAuthMessage {
   }
 
   // maps a json object with a list of WSAuthMessage-objects as value to a dart map
-  static Map<String, List<WSAuthMessage>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<WSAuthMessage>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<WSAuthMessage>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = WSAuthMessage.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = WSAuthMessage.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -123,4 +137,3 @@ class WSAuthMessage {
     'user_details',
   };
 }
-

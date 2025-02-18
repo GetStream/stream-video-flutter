@@ -29,29 +29,32 @@ class CallTranscriptionReadyEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallTranscriptionReadyEvent &&
-    other.callCid == callCid &&
-    other.callTranscription == callTranscription &&
-    other.createdAt == createdAt &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallTranscriptionReadyEvent &&
+          other.callCid == callCid &&
+          other.callTranscription == callTranscription &&
+          other.createdAt == createdAt &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (callCid.hashCode) +
-    (callTranscription.hashCode) +
-    (createdAt.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (callCid.hashCode) +
+      (callTranscription.hashCode) +
+      (createdAt.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'CallTranscriptionReadyEvent[callCid=$callCid, callTranscription=$callTranscription, createdAt=$createdAt, type=$type]';
+  String toString() =>
+      'CallTranscriptionReadyEvent[callCid=$callCid, callTranscription=$callTranscription, createdAt=$createdAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_cid'] = this.callCid;
-      json[r'call_transcription'] = this.callTranscription;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'type'] = this.type;
+    json[r'call_cid'] = this.callCid;
+    json[r'call_transcription'] = this.callTranscription;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -67,15 +70,18 @@ class CallTranscriptionReadyEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallTranscriptionReadyEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallTranscriptionReadyEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallTranscriptionReadyEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallTranscriptionReadyEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return CallTranscriptionReadyEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        callTranscription: CallTranscription.fromJson(json[r'call_transcription'])!,
+        callTranscription:
+            CallTranscription.fromJson(json[r'call_transcription'])!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
@@ -83,7 +89,10 @@ class CallTranscriptionReadyEvent {
     return null;
   }
 
-  static List<CallTranscriptionReadyEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallTranscriptionReadyEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallTranscriptionReadyEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,13 +120,19 @@ class CallTranscriptionReadyEvent {
   }
 
   // maps a json object with a list of CallTranscriptionReadyEvent-objects as value to a dart map
-  static Map<String, List<CallTranscriptionReadyEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallTranscriptionReadyEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallTranscriptionReadyEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallTranscriptionReadyEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallTranscriptionReadyEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +146,3 @@ class CallTranscriptionReadyEvent {
     'type',
   };
 }
-

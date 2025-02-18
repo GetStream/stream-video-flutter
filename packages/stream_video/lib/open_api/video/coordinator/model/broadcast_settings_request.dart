@@ -43,20 +43,23 @@ class BroadcastSettingsRequest {
   RTMPSettingsRequest? rtmp;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is BroadcastSettingsRequest &&
-    other.enabled == enabled &&
-    other.hls == hls &&
-    other.rtmp == rtmp;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BroadcastSettingsRequest &&
+          other.enabled == enabled &&
+          other.hls == hls &&
+          other.rtmp == rtmp;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (enabled == null ? 0 : enabled!.hashCode) +
-    (hls == null ? 0 : hls!.hashCode) +
-    (rtmp == null ? 0 : rtmp!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (enabled == null ? 0 : enabled!.hashCode) +
+      (hls == null ? 0 : hls!.hashCode) +
+      (rtmp == null ? 0 : rtmp!.hashCode);
 
   @override
-  String toString() => 'BroadcastSettingsRequest[enabled=$enabled, hls=$hls, rtmp=$rtmp]';
+  String toString() =>
+      'BroadcastSettingsRequest[enabled=$enabled, hls=$hls, rtmp=$rtmp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -90,8 +93,10 @@ class BroadcastSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "BroadcastSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "BroadcastSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "BroadcastSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "BroadcastSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -105,7 +110,10 @@ class BroadcastSettingsRequest {
     return null;
   }
 
-  static List<BroadcastSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BroadcastSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <BroadcastSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -133,20 +141,24 @@ class BroadcastSettingsRequest {
   }
 
   // maps a json object with a list of BroadcastSettingsRequest-objects as value to a dart map
-  static Map<String, List<BroadcastSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<BroadcastSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<BroadcastSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = BroadcastSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = BroadcastSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

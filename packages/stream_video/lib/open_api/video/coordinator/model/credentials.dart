@@ -25,26 +25,27 @@ class Credentials {
   String token;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Credentials &&
-    _deepEquality.equals(other.iceServers, iceServers) &&
-    other.server == server &&
-    other.token == token;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Credentials &&
+          _deepEquality.equals(other.iceServers, iceServers) &&
+          other.server == server &&
+          other.token == token;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (iceServers.hashCode) +
-    (server.hashCode) +
-    (token.hashCode);
+      // ignore: unnecessary_parenthesis
+      (iceServers.hashCode) + (server.hashCode) + (token.hashCode);
 
   @override
-  String toString() => 'Credentials[iceServers=$iceServers, server=$server, token=$token]';
+  String toString() =>
+      'Credentials[iceServers=$iceServers, server=$server, token=$token]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'ice_servers'] = this.iceServers;
-      json[r'server'] = this.server;
-      json[r'token'] = this.token;
+    json[r'ice_servers'] = this.iceServers;
+    json[r'server'] = this.server;
+    json[r'token'] = this.token;
     return json;
   }
 
@@ -60,8 +61,10 @@ class Credentials {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Credentials[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Credentials[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "Credentials[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "Credentials[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -75,7 +78,10 @@ class Credentials {
     return null;
   }
 
-  static List<Credentials> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Credentials> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Credentials>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -103,13 +109,19 @@ class Credentials {
   }
 
   // maps a json object with a list of Credentials-objects as value to a dart map
-  static Map<String, List<Credentials>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Credentials>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Credentials>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Credentials.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Credentials.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -122,4 +134,3 @@ class Credentials {
     'token',
   };
 }
-

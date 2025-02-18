@@ -37,25 +37,28 @@ class RingSettingsRequest {
   int? missedCallTimeoutMs;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RingSettingsRequest &&
-    other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
-    other.incomingCallTimeoutMs == incomingCallTimeoutMs &&
-    other.missedCallTimeoutMs == missedCallTimeoutMs;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RingSettingsRequest &&
+          other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
+          other.incomingCallTimeoutMs == incomingCallTimeoutMs &&
+          other.missedCallTimeoutMs == missedCallTimeoutMs;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (autoCancelTimeoutMs.hashCode) +
-    (incomingCallTimeoutMs.hashCode) +
-    (missedCallTimeoutMs == null ? 0 : missedCallTimeoutMs!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (autoCancelTimeoutMs.hashCode) +
+      (incomingCallTimeoutMs.hashCode) +
+      (missedCallTimeoutMs == null ? 0 : missedCallTimeoutMs!.hashCode);
 
   @override
-  String toString() => 'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs, missedCallTimeoutMs=$missedCallTimeoutMs]';
+  String toString() =>
+      'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs, missedCallTimeoutMs=$missedCallTimeoutMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'auto_cancel_timeout_ms'] = this.autoCancelTimeoutMs;
-      json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
+    json[r'auto_cancel_timeout_ms'] = this.autoCancelTimeoutMs;
+    json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
     if (this.missedCallTimeoutMs != null) {
       json[r'missed_call_timeout_ms'] = this.missedCallTimeoutMs;
     } else {
@@ -76,22 +79,30 @@ class RingSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RingSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RingSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RingSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RingSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return RingSettingsRequest(
-        autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms')!,
-        incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
-        missedCallTimeoutMs: mapValueOfType<int>(json, r'missed_call_timeout_ms'),
+        autoCancelTimeoutMs:
+            mapValueOfType<int>(json, r'auto_cancel_timeout_ms')!,
+        incomingCallTimeoutMs:
+            mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
+        missedCallTimeoutMs:
+            mapValueOfType<int>(json, r'missed_call_timeout_ms'),
       );
     }
     return null;
   }
 
-  static List<RingSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RingSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RingSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -119,13 +130,19 @@ class RingSettingsRequest {
   }
 
   // maps a json object with a list of RingSettingsRequest-objects as value to a dart map
-  static Map<String, List<RingSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RingSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RingSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RingSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RingSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -137,4 +154,3 @@ class RingSettingsRequest {
     'incoming_call_timeout_ms',
   };
 }
-

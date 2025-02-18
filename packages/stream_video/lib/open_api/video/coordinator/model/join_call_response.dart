@@ -46,45 +46,48 @@ class JoinCallResponse {
   StatsOptions statsOptions;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is JoinCallResponse &&
-    other.call == call &&
-    other.created == created &&
-    other.credentials == credentials &&
-    other.duration == duration &&
-    _deepEquality.equals(other.members, members) &&
-    other.membership == membership &&
-    _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
-    other.statsOptions == statsOptions;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JoinCallResponse &&
+          other.call == call &&
+          other.created == created &&
+          other.credentials == credentials &&
+          other.duration == duration &&
+          _deepEquality.equals(other.members, members) &&
+          other.membership == membership &&
+          _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
+          other.statsOptions == statsOptions;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (created.hashCode) +
-    (credentials.hashCode) +
-    (duration.hashCode) +
-    (members.hashCode) +
-    (membership == null ? 0 : membership!.hashCode) +
-    (ownCapabilities.hashCode) +
-    (statsOptions.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (created.hashCode) +
+      (credentials.hashCode) +
+      (duration.hashCode) +
+      (members.hashCode) +
+      (membership == null ? 0 : membership!.hashCode) +
+      (ownCapabilities.hashCode) +
+      (statsOptions.hashCode);
 
   @override
-  String toString() => 'JoinCallResponse[call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities, statsOptions=$statsOptions]';
+  String toString() =>
+      'JoinCallResponse[call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities, statsOptions=$statsOptions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'created'] = this.created;
-      json[r'credentials'] = this.credentials;
-      json[r'duration'] = this.duration;
-      json[r'members'] = this.members;
+    json[r'call'] = this.call;
+    json[r'created'] = this.created;
+    json[r'credentials'] = this.credentials;
+    json[r'duration'] = this.duration;
+    json[r'members'] = this.members;
     if (this.membership != null) {
       json[r'membership'] = this.membership;
     } else {
       json[r'membership'] = null;
     }
-      json[r'own_capabilities'] = this.ownCapabilities;
-      json[r'stats_options'] = this.statsOptions;
+    json[r'own_capabilities'] = this.ownCapabilities;
+    json[r'stats_options'] = this.statsOptions;
     return json;
   }
 
@@ -100,8 +103,10 @@ class JoinCallResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "JoinCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "JoinCallResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "JoinCallResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "JoinCallResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -120,7 +125,10 @@ class JoinCallResponse {
     return null;
   }
 
-  static List<JoinCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<JoinCallResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <JoinCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -148,13 +156,19 @@ class JoinCallResponse {
   }
 
   // maps a json object with a list of JoinCallResponse-objects as value to a dart map
-  static Map<String, List<JoinCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<JoinCallResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<JoinCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = JoinCallResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = JoinCallResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -171,4 +185,3 @@ class JoinCallResponse {
     'stats_options',
   };
 }
-

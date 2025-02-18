@@ -67,8 +67,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '347024607410',
     projectId: 'stream-video-9b586',
     storageBucket: 'stream-video-9b586.firebasestorage.app',
-    androidClientId: '347024607410-05007a8vo1lm47lojrido3dcl5mdgqgq.apps.googleusercontent.com',
-    iosClientId: '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
+    androidClientId:
+        '347024607410-05007a8vo1lm47lojrido3dcl5mdgqgq.apps.googleusercontent.com',
+    iosClientId:
+        '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 
@@ -78,8 +80,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '347024607410',
     projectId: 'stream-video-9b586',
     storageBucket: 'stream-video-9b586.firebasestorage.app',
-    androidClientId: '347024607410-05007a8vo1lm47lojrido3dcl5mdgqgq.apps.googleusercontent.com',
-    iosClientId: '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
+    androidClientId:
+        '347024607410-05007a8vo1lm47lojrido3dcl5mdgqgq.apps.googleusercontent.com',
+    iosClientId:
+        '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 
@@ -92,5 +96,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'stream-video-9b586.firebasestorage.app',
     measurementId: 'G-2HH6XQCBKK',
   );
-
 }

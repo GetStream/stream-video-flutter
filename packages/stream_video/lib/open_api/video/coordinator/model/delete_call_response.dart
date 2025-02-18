@@ -31,25 +31,28 @@ class DeleteCallResponse {
   String? taskId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is DeleteCallResponse &&
-    other.call == call &&
-    other.duration == duration &&
-    other.taskId == taskId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeleteCallResponse &&
+          other.call == call &&
+          other.duration == duration &&
+          other.taskId == taskId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (duration.hashCode) +
-    (taskId == null ? 0 : taskId!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (duration.hashCode) +
+      (taskId == null ? 0 : taskId!.hashCode);
 
   @override
-  String toString() => 'DeleteCallResponse[call=$call, duration=$duration, taskId=$taskId]';
+  String toString() =>
+      'DeleteCallResponse[call=$call, duration=$duration, taskId=$taskId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'duration'] = this.duration;
+    json[r'call'] = this.call;
+    json[r'duration'] = this.duration;
     if (this.taskId != null) {
       json[r'task_id'] = this.taskId;
     } else {
@@ -70,8 +73,10 @@ class DeleteCallResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "DeleteCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "DeleteCallResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "DeleteCallResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "DeleteCallResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -85,7 +90,10 @@ class DeleteCallResponse {
     return null;
   }
 
-  static List<DeleteCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DeleteCallResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <DeleteCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -113,13 +121,19 @@ class DeleteCallResponse {
   }
 
   // maps a json object with a list of DeleteCallResponse-objects as value to a dart map
-  static Map<String, List<DeleteCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DeleteCallResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DeleteCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = DeleteCallResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = DeleteCallResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +145,3 @@ class DeleteCallResponse {
     'duration',
   };
 }
-

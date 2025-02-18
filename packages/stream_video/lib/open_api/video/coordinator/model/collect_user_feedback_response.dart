@@ -20,20 +20,21 @@ class CollectUserFeedbackResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CollectUserFeedbackResponse &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CollectUserFeedbackResponse && other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode);
 
   @override
   String toString() => 'CollectUserFeedbackResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -49,8 +50,10 @@ class CollectUserFeedbackResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CollectUserFeedbackResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CollectUserFeedbackResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CollectUserFeedbackResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CollectUserFeedbackResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -62,7 +65,10 @@ class CollectUserFeedbackResponse {
     return null;
   }
 
-  static List<CollectUserFeedbackResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CollectUserFeedbackResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CollectUserFeedbackResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,13 +96,19 @@ class CollectUserFeedbackResponse {
   }
 
   // maps a json object with a list of CollectUserFeedbackResponse-objects as value to a dart map
-  static Map<String, List<CollectUserFeedbackResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CollectUserFeedbackResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CollectUserFeedbackResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CollectUserFeedbackResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CollectUserFeedbackResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -107,4 +119,3 @@ class CollectUserFeedbackResponse {
     'duration',
   };
 }
-

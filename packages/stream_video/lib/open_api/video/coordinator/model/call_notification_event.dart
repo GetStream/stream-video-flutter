@@ -40,38 +40,41 @@ class CallNotificationEvent {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallNotificationEvent &&
-    other.call == call &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    _deepEquality.equals(other.members, members) &&
-    other.sessionId == sessionId &&
-    other.type == type &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallNotificationEvent &&
+          other.call == call &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          _deepEquality.equals(other.members, members) &&
+          other.sessionId == sessionId &&
+          other.type == type &&
+          other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (members.hashCode) +
-    (sessionId.hashCode) +
-    (type.hashCode) +
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (members.hashCode) +
+      (sessionId.hashCode) +
+      (type.hashCode) +
+      (user.hashCode);
 
   @override
-  String toString() => 'CallNotificationEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, sessionId=$sessionId, type=$type, user=$user]';
+  String toString() =>
+      'CallNotificationEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, sessionId=$sessionId, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'members'] = this.members;
-      json[r'session_id'] = this.sessionId;
-      json[r'type'] = this.type;
-      json[r'user'] = this.user;
+    json[r'call'] = this.call;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'members'] = this.members;
+    json[r'session_id'] = this.sessionId;
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -87,8 +90,10 @@ class CallNotificationEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallNotificationEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallNotificationEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallNotificationEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallNotificationEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -106,7 +111,10 @@ class CallNotificationEvent {
     return null;
   }
 
-  static List<CallNotificationEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallNotificationEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallNotificationEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -134,13 +142,19 @@ class CallNotificationEvent {
   }
 
   // maps a json object with a list of CallNotificationEvent-objects as value to a dart map
-  static Map<String, List<CallNotificationEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallNotificationEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallNotificationEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallNotificationEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallNotificationEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -157,4 +171,3 @@ class CallNotificationEvent {
     'user',
   };
 }
-

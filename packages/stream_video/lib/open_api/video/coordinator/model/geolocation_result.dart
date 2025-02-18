@@ -46,47 +46,50 @@ class GeolocationResult {
   String subdivisionIsoCode;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GeolocationResult &&
-    other.accuracyRadius == accuracyRadius &&
-    other.city == city &&
-    other.continent == continent &&
-    other.continentCode == continentCode &&
-    other.country == country &&
-    other.countryIsoCode == countryIsoCode &&
-    other.latitude == latitude &&
-    other.longitude == longitude &&
-    other.subdivision == subdivision &&
-    other.subdivisionIsoCode == subdivisionIsoCode;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GeolocationResult &&
+          other.accuracyRadius == accuracyRadius &&
+          other.city == city &&
+          other.continent == continent &&
+          other.continentCode == continentCode &&
+          other.country == country &&
+          other.countryIsoCode == countryIsoCode &&
+          other.latitude == latitude &&
+          other.longitude == longitude &&
+          other.subdivision == subdivision &&
+          other.subdivisionIsoCode == subdivisionIsoCode;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (accuracyRadius.hashCode) +
-    (city.hashCode) +
-    (continent.hashCode) +
-    (continentCode.hashCode) +
-    (country.hashCode) +
-    (countryIsoCode.hashCode) +
-    (latitude.hashCode) +
-    (longitude.hashCode) +
-    (subdivision.hashCode) +
-    (subdivisionIsoCode.hashCode);
+      // ignore: unnecessary_parenthesis
+      (accuracyRadius.hashCode) +
+      (city.hashCode) +
+      (continent.hashCode) +
+      (continentCode.hashCode) +
+      (country.hashCode) +
+      (countryIsoCode.hashCode) +
+      (latitude.hashCode) +
+      (longitude.hashCode) +
+      (subdivision.hashCode) +
+      (subdivisionIsoCode.hashCode);
 
   @override
-  String toString() => 'GeolocationResult[accuracyRadius=$accuracyRadius, city=$city, continent=$continent, continentCode=$continentCode, country=$country, countryIsoCode=$countryIsoCode, latitude=$latitude, longitude=$longitude, subdivision=$subdivision, subdivisionIsoCode=$subdivisionIsoCode]';
+  String toString() =>
+      'GeolocationResult[accuracyRadius=$accuracyRadius, city=$city, continent=$continent, continentCode=$continentCode, country=$country, countryIsoCode=$countryIsoCode, latitude=$latitude, longitude=$longitude, subdivision=$subdivision, subdivisionIsoCode=$subdivisionIsoCode]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'accuracy_radius'] = this.accuracyRadius;
-      json[r'city'] = this.city;
-      json[r'continent'] = this.continent;
-      json[r'continent_code'] = this.continentCode;
-      json[r'country'] = this.country;
-      json[r'country_iso_code'] = this.countryIsoCode;
-      json[r'latitude'] = this.latitude;
-      json[r'longitude'] = this.longitude;
-      json[r'subdivision'] = this.subdivision;
-      json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
+    json[r'accuracy_radius'] = this.accuracyRadius;
+    json[r'city'] = this.city;
+    json[r'continent'] = this.continent;
+    json[r'continent_code'] = this.continentCode;
+    json[r'country'] = this.country;
+    json[r'country_iso_code'] = this.countryIsoCode;
+    json[r'latitude'] = this.latitude;
+    json[r'longitude'] = this.longitude;
+    json[r'subdivision'] = this.subdivision;
+    json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
     return json;
   }
 
@@ -102,8 +105,10 @@ class GeolocationResult {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GeolocationResult[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GeolocationResult[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GeolocationResult[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GeolocationResult[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -118,13 +123,17 @@ class GeolocationResult {
         latitude: mapValueOfType<double>(json, r'latitude')!,
         longitude: mapValueOfType<double>(json, r'longitude')!,
         subdivision: mapValueOfType<String>(json, r'subdivision')!,
-        subdivisionIsoCode: mapValueOfType<String>(json, r'subdivision_iso_code')!,
+        subdivisionIsoCode:
+            mapValueOfType<String>(json, r'subdivision_iso_code')!,
       );
     }
     return null;
   }
 
-  static List<GeolocationResult> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GeolocationResult> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GeolocationResult>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -152,13 +161,19 @@ class GeolocationResult {
   }
 
   // maps a json object with a list of GeolocationResult-objects as value to a dart map
-  static Map<String, List<GeolocationResult>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GeolocationResult>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GeolocationResult>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GeolocationResult.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GeolocationResult.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -178,4 +193,3 @@ class GeolocationResult {
     'subdivision_iso_code',
   };
 }
-

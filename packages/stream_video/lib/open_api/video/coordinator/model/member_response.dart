@@ -53,33 +53,36 @@ class MemberResponse {
   String userId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MemberResponse &&
-    other.createdAt == createdAt &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.deletedAt == deletedAt &&
-    other.role == role &&
-    other.updatedAt == updatedAt &&
-    other.user == user &&
-    other.userId == userId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemberResponse &&
+          other.createdAt == createdAt &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.deletedAt == deletedAt &&
+          other.role == role &&
+          other.updatedAt == updatedAt &&
+          other.user == user &&
+          other.userId == userId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (createdAt.hashCode) +
-    (custom.hashCode) +
-    (deletedAt == null ? 0 : deletedAt!.hashCode) +
-    (role == null ? 0 : role!.hashCode) +
-    (updatedAt.hashCode) +
-    (user.hashCode) +
-    (userId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (createdAt.hashCode) +
+      (custom.hashCode) +
+      (deletedAt == null ? 0 : deletedAt!.hashCode) +
+      (role == null ? 0 : role!.hashCode) +
+      (updatedAt.hashCode) +
+      (user.hashCode) +
+      (userId.hashCode);
 
   @override
-  String toString() => 'MemberResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, role=$role, updatedAt=$updatedAt, user=$user, userId=$userId]';
+  String toString() =>
+      'MemberResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, role=$role, updatedAt=$updatedAt, user=$user, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'custom'] = this.custom;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'custom'] = this.custom;
     if (this.deletedAt != null) {
       json[r'deleted_at'] = this.deletedAt!.toUtc().toIso8601String();
     } else {
@@ -90,9 +93,9 @@ class MemberResponse {
     } else {
       json[r'role'] = null;
     }
-      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
-      json[r'user'] = this.user;
-      json[r'user_id'] = this.userId;
+    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+    json[r'user'] = this.user;
+    json[r'user_id'] = this.userId;
     return json;
   }
 
@@ -108,8 +111,10 @@ class MemberResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MemberResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MemberResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "MemberResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "MemberResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -127,7 +132,10 @@ class MemberResponse {
     return null;
   }
 
-  static List<MemberResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MemberResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MemberResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -155,13 +163,19 @@ class MemberResponse {
   }
 
   // maps a json object with a list of MemberResponse-objects as value to a dart map
-  static Map<String, List<MemberResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MemberResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MemberResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MemberResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MemberResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -176,4 +190,3 @@ class MemberResponse {
     'user_id',
   };
 }
-

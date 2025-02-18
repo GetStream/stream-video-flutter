@@ -20,20 +20,21 @@ class UnblockUserResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UnblockUserResponse &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnblockUserResponse && other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode);
 
   @override
   String toString() => 'UnblockUserResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -49,8 +50,10 @@ class UnblockUserResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UnblockUserResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UnblockUserResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UnblockUserResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UnblockUserResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -62,7 +65,10 @@ class UnblockUserResponse {
     return null;
   }
 
-  static List<UnblockUserResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UnblockUserResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UnblockUserResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,13 +96,19 @@ class UnblockUserResponse {
   }
 
   // maps a json object with a list of UnblockUserResponse-objects as value to a dart map
-  static Map<String, List<UnblockUserResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UnblockUserResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UnblockUserResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UnblockUserResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UnblockUserResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -107,4 +119,3 @@ class UnblockUserResponse {
     'duration',
   };
 }
-

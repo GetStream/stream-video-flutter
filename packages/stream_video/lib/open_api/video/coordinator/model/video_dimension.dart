@@ -22,23 +22,22 @@ class VideoDimension {
   int width;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is VideoDimension &&
-    other.height == height &&
-    other.width == width;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VideoDimension && other.height == height && other.width == width;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (height.hashCode) +
-    (width.hashCode);
+      // ignore: unnecessary_parenthesis
+      (height.hashCode) + (width.hashCode);
 
   @override
   String toString() => 'VideoDimension[height=$height, width=$width]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'height'] = this.height;
-      json[r'width'] = this.width;
+    json[r'height'] = this.height;
+    json[r'width'] = this.width;
     return json;
   }
 
@@ -54,8 +53,10 @@ class VideoDimension {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "VideoDimension[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "VideoDimension[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "VideoDimension[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "VideoDimension[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +69,10 @@ class VideoDimension {
     return null;
   }
 
-  static List<VideoDimension> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoDimension> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <VideoDimension>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +100,19 @@ class VideoDimension {
   }
 
   // maps a json object with a list of VideoDimension-objects as value to a dart map
-  static Map<String, List<VideoDimension>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<VideoDimension>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<VideoDimension>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = VideoDimension.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = VideoDimension.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +124,3 @@ class VideoDimension {
     'width',
   };
 }
-

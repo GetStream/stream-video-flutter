@@ -23,23 +23,24 @@ class GoLiveResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GoLiveResponse &&
-    other.call == call &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GoLiveResponse &&
+          other.call == call &&
+          other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) + (duration.hashCode);
 
   @override
   String toString() => 'GoLiveResponse[call=$call, duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'duration'] = this.duration;
+    json[r'call'] = this.call;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -55,8 +56,10 @@ class GoLiveResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GoLiveResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GoLiveResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GoLiveResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GoLiveResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -69,7 +72,10 @@ class GoLiveResponse {
     return null;
   }
 
-  static List<GoLiveResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GoLiveResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GoLiveResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -97,13 +103,19 @@ class GoLiveResponse {
   }
 
   // maps a json object with a list of GoLiveResponse-objects as value to a dart map
-  static Map<String, List<GoLiveResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GoLiveResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GoLiveResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GoLiveResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GoLiveResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -115,4 +127,3 @@ class GoLiveResponse {
     'duration',
   };
 }
-

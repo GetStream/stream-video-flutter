@@ -19,20 +19,22 @@ class CallDurationReport {
   List<ReportByHistogramBucket> histogram;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallDurationReport &&
-    _deepEquality.equals(other.histogram, histogram);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallDurationReport &&
+          _deepEquality.equals(other.histogram, histogram);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (histogram.hashCode);
+      // ignore: unnecessary_parenthesis
+      (histogram.hashCode);
 
   @override
   String toString() => 'CallDurationReport[histogram=$histogram]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'histogram'] = this.histogram;
+    json[r'histogram'] = this.histogram;
     return json;
   }
 
@@ -48,8 +50,10 @@ class CallDurationReport {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallDurationReport[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallDurationReport[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallDurationReport[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallDurationReport[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +65,10 @@ class CallDurationReport {
     return null;
   }
 
-  static List<CallDurationReport> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallDurationReport> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallDurationReport>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +96,19 @@ class CallDurationReport {
   }
 
   // maps a json object with a list of CallDurationReport-objects as value to a dart map
-  static Map<String, List<CallDurationReport>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallDurationReport>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallDurationReport>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallDurationReport.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallDurationReport.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +119,3 @@ class CallDurationReport {
     'histogram',
   };
 }
-

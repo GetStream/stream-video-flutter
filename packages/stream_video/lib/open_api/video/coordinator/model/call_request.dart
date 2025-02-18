@@ -58,31 +58,34 @@ class CallRequest {
   bool? video;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    _deepEquality.equals(other.members, members) &&
-    other.settingsOverride == settingsOverride &&
-    other.startsAt == startsAt &&
-    other.team == team &&
-    other.video == video;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallRequest &&
+          _deepEquality.equals(other.custom, custom) &&
+          _deepEquality.equals(other.members, members) &&
+          other.settingsOverride == settingsOverride &&
+          other.startsAt == startsAt &&
+          other.team == team &&
+          other.video == video;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (members.hashCode) +
-    (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
-    (startsAt == null ? 0 : startsAt!.hashCode) +
-    (team == null ? 0 : team!.hashCode) +
-    (video == null ? 0 : video!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (members.hashCode) +
+      (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
+      (startsAt == null ? 0 : startsAt!.hashCode) +
+      (team == null ? 0 : team!.hashCode) +
+      (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallRequest[custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team, video=$video]';
+  String toString() =>
+      'CallRequest[custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
-      json[r'members'] = this.members;
+    json[r'custom'] = this.custom;
+    json[r'members'] = this.members;
     if (this.settingsOverride != null) {
       json[r'settings_override'] = this.settingsOverride;
     } else {
@@ -118,8 +121,10 @@ class CallRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -127,7 +132,8 @@ class CallRequest {
       return CallRequest(
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         members: MemberRequest.listFromJson(json[r'members']),
-        settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
+        settingsOverride:
+            CallSettingsRequest.fromJson(json[r'settings_override']),
         startsAt: mapDateTime(json, r'starts_at', r''),
         team: mapValueOfType<String>(json, r'team'),
         video: mapValueOfType<bool>(json, r'video'),
@@ -136,7 +142,10 @@ class CallRequest {
     return null;
   }
 
-  static List<CallRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -164,20 +173,24 @@ class CallRequest {
   }
 
   // maps a json object with a list of CallRequest-objects as value to a dart map
-  static Map<String, List<CallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

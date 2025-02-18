@@ -47,24 +47,27 @@ class RTMPBroadcastRequest {
   String streamUrl;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RTMPBroadcastRequest &&
-    other.layout == layout &&
-    other.name == name &&
-    other.quality == quality &&
-    other.streamKey == streamKey &&
-    other.streamUrl == streamUrl;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RTMPBroadcastRequest &&
+          other.layout == layout &&
+          other.name == name &&
+          other.quality == quality &&
+          other.streamKey == streamKey &&
+          other.streamUrl == streamUrl;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (layout == null ? 0 : layout!.hashCode) +
-    (name.hashCode) +
-    (quality == null ? 0 : quality!.hashCode) +
-    (streamKey == null ? 0 : streamKey!.hashCode) +
-    (streamUrl.hashCode);
+      // ignore: unnecessary_parenthesis
+      (layout == null ? 0 : layout!.hashCode) +
+      (name.hashCode) +
+      (quality == null ? 0 : quality!.hashCode) +
+      (streamKey == null ? 0 : streamKey!.hashCode) +
+      (streamUrl.hashCode);
 
   @override
-  String toString() => 'RTMPBroadcastRequest[layout=$layout, name=$name, quality=$quality, streamKey=$streamKey, streamUrl=$streamUrl]';
+  String toString() =>
+      'RTMPBroadcastRequest[layout=$layout, name=$name, quality=$quality, streamKey=$streamKey, streamUrl=$streamUrl]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -73,7 +76,7 @@ class RTMPBroadcastRequest {
     } else {
       json[r'layout'] = null;
     }
-      json[r'name'] = this.name;
+    json[r'name'] = this.name;
     if (this.quality != null) {
       json[r'quality'] = this.quality;
     } else {
@@ -84,7 +87,7 @@ class RTMPBroadcastRequest {
     } else {
       json[r'stream_key'] = null;
     }
-      json[r'stream_url'] = this.streamUrl;
+    json[r'stream_url'] = this.streamUrl;
     return json;
   }
 
@@ -100,8 +103,10 @@ class RTMPBroadcastRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RTMPBroadcastRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RTMPBroadcastRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RTMPBroadcastRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RTMPBroadcastRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -117,7 +122,10 @@ class RTMPBroadcastRequest {
     return null;
   }
 
-  static List<RTMPBroadcastRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPBroadcastRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RTMPBroadcastRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -145,13 +153,19 @@ class RTMPBroadcastRequest {
   }
 
   // maps a json object with a list of RTMPBroadcastRequest-objects as value to a dart map
-  static Map<String, List<RTMPBroadcastRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RTMPBroadcastRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RTMPBroadcastRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RTMPBroadcastRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RTMPBroadcastRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -182,11 +196,16 @@ class RTMPBroadcastRequestQualityEnum {
   static const n720p = RTMPBroadcastRequestQualityEnum._(r'720p');
   static const n1080p = RTMPBroadcastRequestQualityEnum._(r'1080p');
   static const n1440p = RTMPBroadcastRequestQualityEnum._(r'1440p');
-  static const portrait360x640 = RTMPBroadcastRequestQualityEnum._(r'portrait-360x640');
-  static const portrait480x854 = RTMPBroadcastRequestQualityEnum._(r'portrait-480x854');
-  static const portrait720x1280 = RTMPBroadcastRequestQualityEnum._(r'portrait-720x1280');
-  static const portrait1080x1920 = RTMPBroadcastRequestQualityEnum._(r'portrait-1080x1920');
-  static const portrait1440x2560 = RTMPBroadcastRequestQualityEnum._(r'portrait-1440x2560');
+  static const portrait360x640 =
+      RTMPBroadcastRequestQualityEnum._(r'portrait-360x640');
+  static const portrait480x854 =
+      RTMPBroadcastRequestQualityEnum._(r'portrait-480x854');
+  static const portrait720x1280 =
+      RTMPBroadcastRequestQualityEnum._(r'portrait-720x1280');
+  static const portrait1080x1920 =
+      RTMPBroadcastRequestQualityEnum._(r'portrait-1080x1920');
+  static const portrait1440x2560 =
+      RTMPBroadcastRequestQualityEnum._(r'portrait-1440x2560');
 
   /// List of all possible values in this [enum][RTMPBroadcastRequestQualityEnum].
   static const values = <RTMPBroadcastRequestQualityEnum>[
@@ -202,9 +221,13 @@ class RTMPBroadcastRequestQualityEnum {
     portrait1440x2560,
   ];
 
-  static RTMPBroadcastRequestQualityEnum? fromJson(dynamic value) => RTMPBroadcastRequestQualityEnumTypeTransformer().decode(value);
+  static RTMPBroadcastRequestQualityEnum? fromJson(dynamic value) =>
+      RTMPBroadcastRequestQualityEnumTypeTransformer().decode(value);
 
-  static List<RTMPBroadcastRequestQualityEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPBroadcastRequestQualityEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RTMPBroadcastRequestQualityEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -221,7 +244,8 @@ class RTMPBroadcastRequestQualityEnum {
 /// Transformation class that can [encode] an instance of [RTMPBroadcastRequestQualityEnum] to String,
 /// and [decode] dynamic data back to [RTMPBroadcastRequestQualityEnum].
 class RTMPBroadcastRequestQualityEnumTypeTransformer {
-  factory RTMPBroadcastRequestQualityEnumTypeTransformer() => _instance ??= const RTMPBroadcastRequestQualityEnumTypeTransformer._();
+  factory RTMPBroadcastRequestQualityEnumTypeTransformer() =>
+      _instance ??= const RTMPBroadcastRequestQualityEnumTypeTransformer._();
 
   const RTMPBroadcastRequestQualityEnumTypeTransformer._();
 
@@ -235,19 +259,30 @@ class RTMPBroadcastRequestQualityEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  RTMPBroadcastRequestQualityEnum? decode(dynamic data, {bool allowNull = true}) {
+  RTMPBroadcastRequestQualityEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'360p': return RTMPBroadcastRequestQualityEnum.n360p;
-        case r'480p': return RTMPBroadcastRequestQualityEnum.n480p;
-        case r'720p': return RTMPBroadcastRequestQualityEnum.n720p;
-        case r'1080p': return RTMPBroadcastRequestQualityEnum.n1080p;
-        case r'1440p': return RTMPBroadcastRequestQualityEnum.n1440p;
-        case r'portrait-360x640': return RTMPBroadcastRequestQualityEnum.portrait360x640;
-        case r'portrait-480x854': return RTMPBroadcastRequestQualityEnum.portrait480x854;
-        case r'portrait-720x1280': return RTMPBroadcastRequestQualityEnum.portrait720x1280;
-        case r'portrait-1080x1920': return RTMPBroadcastRequestQualityEnum.portrait1080x1920;
-        case r'portrait-1440x2560': return RTMPBroadcastRequestQualityEnum.portrait1440x2560;
+        case r'360p':
+          return RTMPBroadcastRequestQualityEnum.n360p;
+        case r'480p':
+          return RTMPBroadcastRequestQualityEnum.n480p;
+        case r'720p':
+          return RTMPBroadcastRequestQualityEnum.n720p;
+        case r'1080p':
+          return RTMPBroadcastRequestQualityEnum.n1080p;
+        case r'1440p':
+          return RTMPBroadcastRequestQualityEnum.n1440p;
+        case r'portrait-360x640':
+          return RTMPBroadcastRequestQualityEnum.portrait360x640;
+        case r'portrait-480x854':
+          return RTMPBroadcastRequestQualityEnum.portrait480x854;
+        case r'portrait-720x1280':
+          return RTMPBroadcastRequestQualityEnum.portrait720x1280;
+        case r'portrait-1080x1920':
+          return RTMPBroadcastRequestQualityEnum.portrait1080x1920;
+        case r'portrait-1440x2560':
+          return RTMPBroadcastRequestQualityEnum.portrait1440x2560;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -260,5 +295,3 @@ class RTMPBroadcastRequestQualityEnumTypeTransformer {
   /// Singleton [RTMPBroadcastRequestQualityEnumTypeTransformer] instance.
   static RTMPBroadcastRequestQualityEnumTypeTransformer? _instance;
 }
-
-

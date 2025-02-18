@@ -17,28 +17,204 @@ import 'dart:typed_data' as $typed_data;
 const SfuEvent$json = {
   '1': 'SfuEvent',
   '2': [
-    {'1': 'subscriber_offer', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.event.SubscriberOffer', '9': 0, '10': 'subscriberOffer'},
-    {'1': 'publisher_answer', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.event.PublisherAnswer', '9': 0, '10': 'publisherAnswer'},
-    {'1': 'connection_quality_changed', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ConnectionQualityChanged', '9': 0, '10': 'connectionQualityChanged'},
-    {'1': 'audio_level_changed', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.event.AudioLevelChanged', '9': 0, '10': 'audioLevelChanged'},
-    {'1': 'ice_trickle', '3': 5, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ICETrickle', '9': 0, '10': 'iceTrickle'},
-    {'1': 'change_publish_quality', '3': 6, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ChangePublishQuality', '9': 0, '10': 'changePublishQuality'},
-    {'1': 'participant_joined', '3': 10, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ParticipantJoined', '9': 0, '10': 'participantJoined'},
-    {'1': 'participant_left', '3': 11, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ParticipantLeft', '9': 0, '10': 'participantLeft'},
-    {'1': 'dominant_speaker_changed', '3': 12, '4': 1, '5': 11, '6': '.stream.video.sfu.event.DominantSpeakerChanged', '9': 0, '10': 'dominantSpeakerChanged'},
-    {'1': 'join_response', '3': 13, '4': 1, '5': 11, '6': '.stream.video.sfu.event.JoinResponse', '9': 0, '10': 'joinResponse'},
-    {'1': 'health_check_response', '3': 14, '4': 1, '5': 11, '6': '.stream.video.sfu.event.HealthCheckResponse', '9': 0, '10': 'healthCheckResponse'},
-    {'1': 'track_published', '3': 16, '4': 1, '5': 11, '6': '.stream.video.sfu.event.TrackPublished', '9': 0, '10': 'trackPublished'},
-    {'1': 'track_unpublished', '3': 17, '4': 1, '5': 11, '6': '.stream.video.sfu.event.TrackUnpublished', '9': 0, '10': 'trackUnpublished'},
-    {'1': 'error', '3': 18, '4': 1, '5': 11, '6': '.stream.video.sfu.event.Error', '9': 0, '10': 'error'},
-    {'1': 'call_grants_updated', '3': 19, '4': 1, '5': 11, '6': '.stream.video.sfu.event.CallGrantsUpdated', '9': 0, '10': 'callGrantsUpdated'},
-    {'1': 'go_away', '3': 20, '4': 1, '5': 11, '6': '.stream.video.sfu.event.GoAway', '9': 0, '10': 'goAway'},
-    {'1': 'ice_restart', '3': 21, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ICERestart', '9': 0, '10': 'iceRestart'},
-    {'1': 'pins_updated', '3': 22, '4': 1, '5': 11, '6': '.stream.video.sfu.event.PinsChanged', '9': 0, '10': 'pinsUpdated'},
-    {'1': 'call_ended', '3': 23, '4': 1, '5': 11, '6': '.stream.video.sfu.event.CallEnded', '9': 0, '10': 'callEnded'},
-    {'1': 'participant_updated', '3': 24, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ParticipantUpdated', '9': 0, '10': 'participantUpdated'},
-    {'1': 'participant_migration_complete', '3': 25, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ParticipantMigrationComplete', '9': 0, '10': 'participantMigrationComplete'},
-    {'1': 'change_publish_options', '3': 27, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ChangePublishOptions', '9': 0, '10': 'changePublishOptions'},
+    {
+      '1': 'subscriber_offer',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.SubscriberOffer',
+      '9': 0,
+      '10': 'subscriberOffer'
+    },
+    {
+      '1': 'publisher_answer',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.PublisherAnswer',
+      '9': 0,
+      '10': 'publisherAnswer'
+    },
+    {
+      '1': 'connection_quality_changed',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ConnectionQualityChanged',
+      '9': 0,
+      '10': 'connectionQualityChanged'
+    },
+    {
+      '1': 'audio_level_changed',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.AudioLevelChanged',
+      '9': 0,
+      '10': 'audioLevelChanged'
+    },
+    {
+      '1': 'ice_trickle',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.ICETrickle',
+      '9': 0,
+      '10': 'iceTrickle'
+    },
+    {
+      '1': 'change_publish_quality',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ChangePublishQuality',
+      '9': 0,
+      '10': 'changePublishQuality'
+    },
+    {
+      '1': 'participant_joined',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ParticipantJoined',
+      '9': 0,
+      '10': 'participantJoined'
+    },
+    {
+      '1': 'participant_left',
+      '3': 11,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ParticipantLeft',
+      '9': 0,
+      '10': 'participantLeft'
+    },
+    {
+      '1': 'dominant_speaker_changed',
+      '3': 12,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.DominantSpeakerChanged',
+      '9': 0,
+      '10': 'dominantSpeakerChanged'
+    },
+    {
+      '1': 'join_response',
+      '3': 13,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.JoinResponse',
+      '9': 0,
+      '10': 'joinResponse'
+    },
+    {
+      '1': 'health_check_response',
+      '3': 14,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.HealthCheckResponse',
+      '9': 0,
+      '10': 'healthCheckResponse'
+    },
+    {
+      '1': 'track_published',
+      '3': 16,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.TrackPublished',
+      '9': 0,
+      '10': 'trackPublished'
+    },
+    {
+      '1': 'track_unpublished',
+      '3': 17,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.TrackUnpublished',
+      '9': 0,
+      '10': 'trackUnpublished'
+    },
+    {
+      '1': 'error',
+      '3': 18,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.Error',
+      '9': 0,
+      '10': 'error'
+    },
+    {
+      '1': 'call_grants_updated',
+      '3': 19,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.CallGrantsUpdated',
+      '9': 0,
+      '10': 'callGrantsUpdated'
+    },
+    {
+      '1': 'go_away',
+      '3': 20,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.GoAway',
+      '9': 0,
+      '10': 'goAway'
+    },
+    {
+      '1': 'ice_restart',
+      '3': 21,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ICERestart',
+      '9': 0,
+      '10': 'iceRestart'
+    },
+    {
+      '1': 'pins_updated',
+      '3': 22,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.PinsChanged',
+      '9': 0,
+      '10': 'pinsUpdated'
+    },
+    {
+      '1': 'call_ended',
+      '3': 23,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.CallEnded',
+      '9': 0,
+      '10': 'callEnded'
+    },
+    {
+      '1': 'participant_updated',
+      '3': 24,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ParticipantUpdated',
+      '9': 0,
+      '10': 'participantUpdated'
+    },
+    {
+      '1': 'participant_migration_complete',
+      '3': 25,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ParticipantMigrationComplete',
+      '9': 0,
+      '10': 'participantMigrationComplete'
+    },
+    {
+      '1': 'change_publish_options',
+      '3': 27,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ChangePublishOptions',
+      '9': 0,
+      '10': 'changePublishOptions'
+    },
   ],
   '8': [
     {'1': 'event_payload'},
@@ -88,7 +264,14 @@ final $typed_data.Uint8List sfuEventDescriptor = $convert.base64Decode(
 const ChangePublishOptions$json = {
   '1': 'ChangePublishOptions',
   '2': [
-    {'1': 'publish_options', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.PublishOption', '10': 'publishOptions'},
+    {
+      '1': 'publish_options',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.PublishOption',
+      '10': 'publishOptions'
+    },
     {'1': 'reason', '3': 2, '4': 1, '5': 9, '10': 'reason'},
   ],
 };
@@ -105,8 +288,8 @@ const ChangePublishOptionsComplete$json = {
 };
 
 /// Descriptor for `ChangePublishOptionsComplete`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List changePublishOptionsCompleteDescriptor = $convert.base64Decode(
-    'ChxDaGFuZ2VQdWJsaXNoT3B0aW9uc0NvbXBsZXRl');
+final $typed_data.Uint8List changePublishOptionsCompleteDescriptor =
+    $convert.base64Decode('ChxDaGFuZ2VQdWJsaXNoT3B0aW9uc0NvbXBsZXRl');
 
 @$core.Deprecated('Use participantMigrationCompleteDescriptor instead')
 const ParticipantMigrationComplete$json = {
@@ -114,14 +297,21 @@ const ParticipantMigrationComplete$json = {
 };
 
 /// Descriptor for `ParticipantMigrationComplete`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantMigrationCompleteDescriptor = $convert.base64Decode(
-    'ChxQYXJ0aWNpcGFudE1pZ3JhdGlvbkNvbXBsZXRl');
+final $typed_data.Uint8List participantMigrationCompleteDescriptor =
+    $convert.base64Decode('ChxQYXJ0aWNpcGFudE1pZ3JhdGlvbkNvbXBsZXRl');
 
 @$core.Deprecated('Use pinsChangedDescriptor instead')
 const PinsChanged$json = {
   '1': 'PinsChanged',
   '2': [
-    {'1': 'pins', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Pin', '10': 'pins'},
+    {
+      '1': 'pins',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Pin',
+      '10': 'pins'
+    },
   ],
 };
 
@@ -134,8 +324,22 @@ final $typed_data.Uint8List pinsChangedDescriptor = $convert.base64Decode(
 const Error$json = {
   '1': 'Error',
   '2': [
-    {'1': 'error', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
-    {'1': 'reconnect_strategy', '3': 5, '4': 1, '5': 14, '6': '.stream.video.sfu.models.WebsocketReconnectStrategy', '10': 'reconnectStrategy'},
+    {
+      '1': 'error',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
+    {
+      '1': 'reconnect_strategy',
+      '3': 5,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.WebsocketReconnectStrategy',
+      '10': 'reconnectStrategy'
+    },
   ],
 };
 
@@ -149,7 +353,14 @@ final $typed_data.Uint8List errorDescriptor = $convert.base64Decode(
 const ICETrickle$json = {
   '1': 'ICETrickle',
   '2': [
-    {'1': 'peer_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+    {
+      '1': 'peer_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.PeerType',
+      '10': 'peerType'
+    },
     {'1': 'ice_candidate', '3': 2, '4': 1, '5': 9, '10': 'iceCandidate'},
   ],
 };
@@ -164,7 +375,14 @@ final $typed_data.Uint8List iCETrickleDescriptor = $convert.base64Decode(
 const ICERestart$json = {
   '1': 'ICERestart',
   '2': [
-    {'1': 'peer_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+    {
+      '1': 'peer_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.PeerType',
+      '10': 'peerType'
+    },
   ],
 };
 
@@ -177,9 +395,33 @@ final $typed_data.Uint8List iCERestartDescriptor = $convert.base64Decode(
 const SfuRequest$json = {
   '1': 'SfuRequest',
   '2': [
-    {'1': 'join_request', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.event.JoinRequest', '9': 0, '10': 'joinRequest'},
-    {'1': 'health_check_request', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.event.HealthCheckRequest', '9': 0, '10': 'healthCheckRequest'},
-    {'1': 'leave_call_request', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.event.LeaveCallRequest', '9': 0, '10': 'leaveCallRequest'},
+    {
+      '1': 'join_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.JoinRequest',
+      '9': 0,
+      '10': 'joinRequest'
+    },
+    {
+      '1': 'health_check_request',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.HealthCheckRequest',
+      '9': 0,
+      '10': 'healthCheckRequest'
+    },
+    {
+      '1': 'leave_call_request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.LeaveCallRequest',
+      '9': 0,
+      '10': 'leaveCallRequest'
+    },
   ],
   '8': [
     {'1': 'request_payload'},
@@ -215,14 +457,21 @@ const HealthCheckRequest$json = {
 };
 
 /// Descriptor for `HealthCheckRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List healthCheckRequestDescriptor = $convert.base64Decode(
-    'ChJIZWFsdGhDaGVja1JlcXVlc3Q=');
+final $typed_data.Uint8List healthCheckRequestDescriptor =
+    $convert.base64Decode('ChJIZWFsdGhDaGVja1JlcXVlc3Q=');
 
 @$core.Deprecated('Use healthCheckResponseDescriptor instead')
 const HealthCheckResponse$json = {
   '1': 'HealthCheckResponse',
   '2': [
-    {'1': 'participant_count', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ParticipantCount', '10': 'participantCount'},
+    {
+      '1': 'participant_count',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.ParticipantCount',
+      '10': 'participantCount'
+    },
   ],
 };
 
@@ -237,8 +486,22 @@ const TrackPublished$json = {
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'type'},
-    {'1': 'participant', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participant'},
+    {
+      '1': 'type',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'type'
+    },
+    {
+      '1': 'participant',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Participant',
+      '10': 'participant'
+    },
   ],
 };
 
@@ -255,9 +518,30 @@ const TrackUnpublished$json = {
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'type'},
-    {'1': 'cause', '3': 4, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackUnpublishReason', '10': 'cause'},
-    {'1': 'participant', '3': 5, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participant'},
+    {
+      '1': 'type',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'type'
+    },
+    {
+      '1': 'cause',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackUnpublishReason',
+      '10': 'cause'
+    },
+    {
+      '1': 'participant',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Participant',
+      '10': 'participant'
+    },
   ],
 };
 
@@ -277,7 +561,14 @@ const JoinRequest$json = {
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     {'1': 'subscriber_sdp', '3': 3, '4': 1, '5': 9, '10': 'subscriberSdp'},
     {'1': 'publisher_sdp', '3': 8, '4': 1, '5': 9, '10': 'publisherSdp'},
-    {'1': 'client_details', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ClientDetails', '10': 'clientDetails'},
+    {
+      '1': 'client_details',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.ClientDetails',
+      '10': 'clientDetails'
+    },
     {
       '1': 'migration',
       '3': 5,
@@ -295,9 +586,30 @@ const JoinRequest$json = {
       '8': {'3': true},
       '10': 'fastReconnect',
     },
-    {'1': 'reconnect_details', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.event.ReconnectDetails', '10': 'reconnectDetails'},
-    {'1': 'preferred_publish_options', '3': 9, '4': 3, '5': 11, '6': '.stream.video.sfu.models.PublishOption', '10': 'preferredPublishOptions'},
-    {'1': 'preferred_subscribe_options', '3': 10, '4': 3, '5': 11, '6': '.stream.video.sfu.models.SubscribeOption', '10': 'preferredSubscribeOptions'},
+    {
+      '1': 'reconnect_details',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ReconnectDetails',
+      '10': 'reconnectDetails'
+    },
+    {
+      '1': 'preferred_publish_options',
+      '3': 9,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.PublishOption',
+      '10': 'preferredPublishOptions'
+    },
+    {
+      '1': 'preferred_subscribe_options',
+      '3': 10,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.SubscribeOption',
+      '10': 'preferredSubscribeOptions'
+    },
   ],
 };
 
@@ -320,12 +632,45 @@ final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode(
 const ReconnectDetails$json = {
   '1': 'ReconnectDetails',
   '2': [
-    {'1': 'strategy', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.WebsocketReconnectStrategy', '10': 'strategy'},
-    {'1': 'announced_tracks', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.models.TrackInfo', '10': 'announcedTracks'},
-    {'1': 'subscriptions', '3': 4, '4': 3, '5': 11, '6': '.stream.video.sfu.signal.TrackSubscriptionDetails', '10': 'subscriptions'},
-    {'1': 'reconnect_attempt', '3': 5, '4': 1, '5': 13, '10': 'reconnectAttempt'},
+    {
+      '1': 'strategy',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.WebsocketReconnectStrategy',
+      '10': 'strategy'
+    },
+    {
+      '1': 'announced_tracks',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.TrackInfo',
+      '10': 'announcedTracks'
+    },
+    {
+      '1': 'subscriptions',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.signal.TrackSubscriptionDetails',
+      '10': 'subscriptions'
+    },
+    {
+      '1': 'reconnect_attempt',
+      '3': 5,
+      '4': 1,
+      '5': 13,
+      '10': 'reconnectAttempt'
+    },
     {'1': 'from_sfu_id', '3': 6, '4': 1, '5': 9, '10': 'fromSfuId'},
-    {'1': 'previous_session_id', '3': 7, '4': 1, '5': 9, '10': 'previousSessionId'},
+    {
+      '1': 'previous_session_id',
+      '3': 7,
+      '4': 1,
+      '5': 9,
+      '10': 'previousSessionId'
+    },
   ],
 };
 
@@ -345,8 +690,22 @@ const Migration$json = {
   '1': 'Migration',
   '2': [
     {'1': 'from_sfu_id', '3': 1, '4': 1, '5': 9, '10': 'fromSfuId'},
-    {'1': 'announced_tracks', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.TrackInfo', '10': 'announcedTracks'},
-    {'1': 'subscriptions', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.signal.TrackSubscriptionDetails', '10': 'subscriptions'},
+    {
+      '1': 'announced_tracks',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.TrackInfo',
+      '10': 'announcedTracks'
+    },
+    {
+      '1': 'subscriptions',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.signal.TrackSubscriptionDetails',
+      '10': 'subscriptions'
+    },
   ],
 };
 
@@ -361,10 +720,30 @@ final $typed_data.Uint8List migrationDescriptor = $convert.base64Decode(
 const JoinResponse$json = {
   '1': 'JoinResponse',
   '2': [
-    {'1': 'call_state', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.CallState', '10': 'callState'},
+    {
+      '1': 'call_state',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.CallState',
+      '10': 'callState'
+    },
     {'1': 'reconnected', '3': 2, '4': 1, '5': 8, '10': 'reconnected'},
-    {'1': 'fast_reconnect_deadline_seconds', '3': 3, '4': 1, '5': 5, '10': 'fastReconnectDeadlineSeconds'},
-    {'1': 'publish_options', '3': 4, '4': 3, '5': 11, '6': '.stream.video.sfu.models.PublishOption', '10': 'publishOptions'},
+    {
+      '1': 'fast_reconnect_deadline_seconds',
+      '3': 3,
+      '4': 1,
+      '5': 5,
+      '10': 'fastReconnectDeadlineSeconds'
+    },
+    {
+      '1': 'publish_options',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.PublishOption',
+      '10': 'publishOptions'
+    },
   ],
 };
 
@@ -381,7 +760,14 @@ const ParticipantJoined$json = {
   '1': 'ParticipantJoined',
   '2': [
     {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    {'1': 'participant', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participant'},
+    {
+      '1': 'participant',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Participant',
+      '10': 'participant'
+    },
   ],
 };
 
@@ -396,7 +782,14 @@ const ParticipantLeft$json = {
   '1': 'ParticipantLeft',
   '2': [
     {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    {'1': 'participant', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participant'},
+    {
+      '1': 'participant',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Participant',
+      '10': 'participant'
+    },
   ],
 };
 
@@ -411,7 +804,14 @@ const ParticipantUpdated$json = {
   '1': 'ParticipantUpdated',
   '2': [
     {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    {'1': 'participant', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participant'},
+    {
+      '1': 'participant',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Participant',
+      '10': 'participant'
+    },
   ],
 };
 
@@ -444,14 +844,21 @@ const PublisherAnswer$json = {
 };
 
 /// Descriptor for `PublisherAnswer`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List publisherAnswerDescriptor = $convert.base64Decode(
-    'Cg9QdWJsaXNoZXJBbnN3ZXISEAoDc2RwGAEgASgJUgNzZHA=');
+final $typed_data.Uint8List publisherAnswerDescriptor =
+    $convert.base64Decode('Cg9QdWJsaXNoZXJBbnN3ZXISEAoDc2RwGAEgASgJUgNzZHA=');
 
 @$core.Deprecated('Use connectionQualityChangedDescriptor instead')
 const ConnectionQualityChanged$json = {
   '1': 'ConnectionQualityChanged',
   '2': [
-    {'1': 'connection_quality_updates', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.event.ConnectionQualityInfo', '10': 'connectionQualityUpdates'},
+    {
+      '1': 'connection_quality_updates',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.ConnectionQualityInfo',
+      '10': 'connectionQualityUpdates'
+    },
   ],
 };
 
@@ -467,7 +874,14 @@ const ConnectionQualityInfo$json = {
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'connection_quality', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.ConnectionQuality', '10': 'connectionQuality'},
+    {
+      '1': 'connection_quality',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ConnectionQuality',
+      '10': 'connectionQuality'
+    },
   ],
 };
 
@@ -488,9 +902,10 @@ const DominantSpeakerChanged$json = {
 };
 
 /// Descriptor for `DominantSpeakerChanged`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dominantSpeakerChangedDescriptor = $convert.base64Decode(
-    'ChZEb21pbmFudFNwZWFrZXJDaGFuZ2VkEhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIdCgpzZX'
-    'NzaW9uX2lkGAIgASgJUglzZXNzaW9uSWQ=');
+final $typed_data.Uint8List dominantSpeakerChangedDescriptor =
+    $convert.base64Decode(
+        'ChZEb21pbmFudFNwZWFrZXJDaGFuZ2VkEhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIdCgpzZX'
+        'NzaW9uX2lkGAIgASgJUglzZXNzaW9uSWQ=');
 
 @$core.Deprecated('Use audioLevelDescriptor instead')
 const AudioLevel$json = {
@@ -513,7 +928,14 @@ final $typed_data.Uint8List audioLevelDescriptor = $convert.base64Decode(
 const AudioLevelChanged$json = {
   '1': 'AudioLevelChanged',
   '2': [
-    {'1': 'audio_levels', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.event.AudioLevel', '10': 'audioLevels'},
+    {
+      '1': 'audio_levels',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.AudioLevel',
+      '10': 'audioLevels'
+    },
   ],
 };
 
@@ -526,8 +948,22 @@ final $typed_data.Uint8List audioLevelChangedDescriptor = $convert.base64Decode(
 const AudioSender$json = {
   '1': 'AudioSender',
   '2': [
-    {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
-    {'1': 'track_type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {
+      '1': 'codec',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codec'
+    },
+    {
+      '1': 'track_type',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
     {'1': 'publish_option_id', '3': 4, '4': 1, '5': 5, '10': 'publishOptionId'},
   ],
 };
@@ -546,8 +982,21 @@ const VideoLayerSetting$json = {
     {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
     {'1': 'active', '3': 2, '4': 1, '5': 8, '10': 'active'},
     {'1': 'max_bitrate', '3': 3, '4': 1, '5': 5, '10': 'maxBitrate'},
-    {'1': 'scale_resolution_down_by', '3': 4, '4': 1, '5': 2, '10': 'scaleResolutionDownBy'},
-    {'1': 'codec', '3': 6, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
+    {
+      '1': 'scale_resolution_down_by',
+      '3': 4,
+      '4': 1,
+      '5': 2,
+      '10': 'scaleResolutionDownBy'
+    },
+    {
+      '1': 'codec',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codec'
+    },
     {'1': 'max_framerate', '3': 7, '4': 1, '5': 13, '10': 'maxFramerate'},
     {'1': 'scalability_mode', '3': 8, '4': 1, '5': 9, '10': 'scalabilityMode'},
   ],
@@ -566,9 +1015,30 @@ final $typed_data.Uint8List videoLayerSettingDescriptor = $convert.base64Decode(
 const VideoSender$json = {
   '1': 'VideoSender',
   '2': [
-    {'1': 'codec', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
-    {'1': 'layers', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.event.VideoLayerSetting', '10': 'layers'},
-    {'1': 'track_type', '3': 4, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {
+      '1': 'codec',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codec'
+    },
+    {
+      '1': 'layers',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.VideoLayerSetting',
+      '10': 'layers'
+    },
+    {
+      '1': 'track_type',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
     {'1': 'publish_option_id', '3': 5, '4': 1, '5': 5, '10': 'publishOptionId'},
   ],
 };
@@ -585,8 +1055,22 @@ final $typed_data.Uint8List videoSenderDescriptor = $convert.base64Decode(
 const ChangePublishQuality$json = {
   '1': 'ChangePublishQuality',
   '2': [
-    {'1': 'audio_senders', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.event.AudioSender', '10': 'audioSenders'},
-    {'1': 'video_senders', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.event.VideoSender', '10': 'videoSenders'},
+    {
+      '1': 'audio_senders',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.AudioSender',
+      '10': 'audioSenders'
+    },
+    {
+      '1': 'video_senders',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.VideoSender',
+      '10': 'videoSenders'
+    },
   ],
 };
 
@@ -601,7 +1085,14 @@ final $typed_data.Uint8List changePublishQualityDescriptor = $convert.base64Deco
 const CallGrantsUpdated$json = {
   '1': 'CallGrantsUpdated',
   '2': [
-    {'1': 'current_grants', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.CallGrants', '10': 'currentGrants'},
+    {
+      '1': 'current_grants',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.CallGrants',
+      '10': 'currentGrants'
+    },
     {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
   ],
 };
@@ -616,7 +1107,14 @@ final $typed_data.Uint8List callGrantsUpdatedDescriptor = $convert.base64Decode(
 const GoAway$json = {
   '1': 'GoAway',
   '2': [
-    {'1': 'reason', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.GoAwayReason', '10': 'reason'},
+    {
+      '1': 'reason',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.GoAwayReason',
+      '10': 'reason'
+    },
   ],
 };
 
@@ -629,7 +1127,14 @@ final $typed_data.Uint8List goAwayDescriptor = $convert.base64Decode(
 const CallEnded$json = {
   '1': 'CallEnded',
   '2': [
-    {'1': 'reason', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.CallEndedReason', '10': 'reason'},
+    {
+      '1': 'reason',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.CallEndedReason',
+      '10': 'reason'
+    },
   ],
 };
 
@@ -637,4 +1142,3 @@ const CallEnded$json = {
 final $typed_data.Uint8List callEndedDescriptor = $convert.base64Decode(
     'CglDYWxsRW5kZWQSQAoGcmVhc29uGAEgASgOMiguc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ2'
     'FsbEVuZGVkUmVhc29uUgZyZWFzb24=');
-

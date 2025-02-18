@@ -25,26 +25,27 @@ class SFUResponse {
   String wsEndpoint;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SFUResponse &&
-    other.edgeName == edgeName &&
-    other.url == url &&
-    other.wsEndpoint == wsEndpoint;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SFUResponse &&
+          other.edgeName == edgeName &&
+          other.url == url &&
+          other.wsEndpoint == wsEndpoint;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (edgeName.hashCode) +
-    (url.hashCode) +
-    (wsEndpoint.hashCode);
+      // ignore: unnecessary_parenthesis
+      (edgeName.hashCode) + (url.hashCode) + (wsEndpoint.hashCode);
 
   @override
-  String toString() => 'SFUResponse[edgeName=$edgeName, url=$url, wsEndpoint=$wsEndpoint]';
+  String toString() =>
+      'SFUResponse[edgeName=$edgeName, url=$url, wsEndpoint=$wsEndpoint]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'edge_name'] = this.edgeName;
-      json[r'url'] = this.url;
-      json[r'ws_endpoint'] = this.wsEndpoint;
+    json[r'edge_name'] = this.edgeName;
+    json[r'url'] = this.url;
+    json[r'ws_endpoint'] = this.wsEndpoint;
     return json;
   }
 
@@ -60,8 +61,10 @@ class SFUResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "SFUResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "SFUResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "SFUResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "SFUResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -75,7 +78,10 @@ class SFUResponse {
     return null;
   }
 
-  static List<SFUResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SFUResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <SFUResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -103,13 +109,19 @@ class SFUResponse {
   }
 
   // maps a json object with a list of SFUResponse-objects as value to a dart map
-  static Map<String, List<SFUResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<SFUResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<SFUResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SFUResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = SFUResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -122,4 +134,3 @@ class SFUResponse {
     'ws_endpoint',
   };
 }
-

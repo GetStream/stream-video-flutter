@@ -25,26 +25,29 @@ class UpdateUserPermissionsRequest {
   String userId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UpdateUserPermissionsRequest &&
-    _deepEquality.equals(other.grantPermissions, grantPermissions) &&
-    _deepEquality.equals(other.revokePermissions, revokePermissions) &&
-    other.userId == userId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UpdateUserPermissionsRequest &&
+          _deepEquality.equals(other.grantPermissions, grantPermissions) &&
+          _deepEquality.equals(other.revokePermissions, revokePermissions) &&
+          other.userId == userId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (grantPermissions.hashCode) +
-    (revokePermissions.hashCode) +
-    (userId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (grantPermissions.hashCode) +
+      (revokePermissions.hashCode) +
+      (userId.hashCode);
 
   @override
-  String toString() => 'UpdateUserPermissionsRequest[grantPermissions=$grantPermissions, revokePermissions=$revokePermissions, userId=$userId]';
+  String toString() =>
+      'UpdateUserPermissionsRequest[grantPermissions=$grantPermissions, revokePermissions=$revokePermissions, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'grant_permissions'] = this.grantPermissions;
-      json[r'revoke_permissions'] = this.revokePermissions;
-      json[r'user_id'] = this.userId;
+    json[r'grant_permissions'] = this.grantPermissions;
+    json[r'revoke_permissions'] = this.revokePermissions;
+    json[r'user_id'] = this.userId;
     return json;
   }
 
@@ -60,18 +63,24 @@ class UpdateUserPermissionsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UpdateUserPermissionsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UpdateUserPermissionsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UpdateUserPermissionsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UpdateUserPermissionsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return UpdateUserPermissionsRequest(
         grantPermissions: json[r'grant_permissions'] is Iterable
-            ? (json[r'grant_permissions'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'grant_permissions'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         revokePermissions: json[r'revoke_permissions'] is Iterable
-            ? (json[r'revoke_permissions'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'revoke_permissions'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         userId: mapValueOfType<String>(json, r'user_id')!,
       );
@@ -79,7 +88,10 @@ class UpdateUserPermissionsRequest {
     return null;
   }
 
-  static List<UpdateUserPermissionsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateUserPermissionsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UpdateUserPermissionsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -107,13 +119,19 @@ class UpdateUserPermissionsRequest {
   }
 
   // maps a json object with a list of UpdateUserPermissionsRequest-objects as value to a dart map
-  static Map<String, List<UpdateUserPermissionsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UpdateUserPermissionsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UpdateUserPermissionsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UpdateUserPermissionsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UpdateUserPermissionsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -124,4 +142,3 @@ class UpdateUserPermissionsRequest {
     'user_id',
   };
 }
-

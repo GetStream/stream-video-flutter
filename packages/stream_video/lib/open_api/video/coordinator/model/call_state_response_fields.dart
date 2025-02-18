@@ -35,33 +35,36 @@ class CallStateResponseFields {
   List<OwnCapability> ownCapabilities;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallStateResponseFields &&
-    other.call == call &&
-    _deepEquality.equals(other.members, members) &&
-    other.membership == membership &&
-    _deepEquality.equals(other.ownCapabilities, ownCapabilities);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallStateResponseFields &&
+          other.call == call &&
+          _deepEquality.equals(other.members, members) &&
+          other.membership == membership &&
+          _deepEquality.equals(other.ownCapabilities, ownCapabilities);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (members.hashCode) +
-    (membership == null ? 0 : membership!.hashCode) +
-    (ownCapabilities.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (members.hashCode) +
+      (membership == null ? 0 : membership!.hashCode) +
+      (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'CallStateResponseFields[call=$call, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
+  String toString() =>
+      'CallStateResponseFields[call=$call, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'members'] = this.members;
+    json[r'call'] = this.call;
+    json[r'members'] = this.members;
     if (this.membership != null) {
       json[r'membership'] = this.membership;
     } else {
       json[r'membership'] = null;
     }
-      json[r'own_capabilities'] = this.ownCapabilities;
+    json[r'own_capabilities'] = this.ownCapabilities;
     return json;
   }
 
@@ -77,8 +80,10 @@ class CallStateResponseFields {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallStateResponseFields[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallStateResponseFields[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallStateResponseFields[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallStateResponseFields[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -93,7 +98,10 @@ class CallStateResponseFields {
     return null;
   }
 
-  static List<CallStateResponseFields> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallStateResponseFields> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallStateResponseFields>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -121,13 +129,19 @@ class CallStateResponseFields {
   }
 
   // maps a json object with a list of CallStateResponseFields-objects as value to a dart map
-  static Map<String, List<CallStateResponseFields>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallStateResponseFields>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallStateResponseFields>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallStateResponseFields.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallStateResponseFields.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -140,4 +154,3 @@ class CallStateResponseFields {
     'own_capabilities',
   };
 }
-

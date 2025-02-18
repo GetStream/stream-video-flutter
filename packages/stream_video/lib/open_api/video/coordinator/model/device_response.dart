@@ -72,34 +72,37 @@ class DeviceResponse {
   bool? voip;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is DeviceResponse &&
-    other.createdAt == createdAt &&
-    other.disabled == disabled &&
-    other.disabledReason == disabledReason &&
-    other.id == id &&
-    other.pushProvider == pushProvider &&
-    other.pushProviderName == pushProviderName &&
-    other.userId == userId &&
-    other.voip == voip;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeviceResponse &&
+          other.createdAt == createdAt &&
+          other.disabled == disabled &&
+          other.disabledReason == disabledReason &&
+          other.id == id &&
+          other.pushProvider == pushProvider &&
+          other.pushProviderName == pushProviderName &&
+          other.userId == userId &&
+          other.voip == voip;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (createdAt.hashCode) +
-    (disabled == null ? 0 : disabled!.hashCode) +
-    (disabledReason == null ? 0 : disabledReason!.hashCode) +
-    (id.hashCode) +
-    (pushProvider.hashCode) +
-    (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
-    (userId.hashCode) +
-    (voip == null ? 0 : voip!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (createdAt.hashCode) +
+      (disabled == null ? 0 : disabled!.hashCode) +
+      (disabledReason == null ? 0 : disabledReason!.hashCode) +
+      (id.hashCode) +
+      (pushProvider.hashCode) +
+      (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
+      (userId.hashCode) +
+      (voip == null ? 0 : voip!.hashCode);
 
   @override
-  String toString() => 'DeviceResponse[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, userId=$userId, voip=$voip]';
+  String toString() =>
+      'DeviceResponse[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, userId=$userId, voip=$voip]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     if (this.disabled != null) {
       json[r'disabled'] = this.disabled;
     } else {
@@ -110,14 +113,14 @@ class DeviceResponse {
     } else {
       json[r'disabled_reason'] = null;
     }
-      json[r'id'] = this.id;
-      json[r'push_provider'] = this.pushProvider;
+    json[r'id'] = this.id;
+    json[r'push_provider'] = this.pushProvider;
     if (this.pushProviderName != null) {
       json[r'push_provider_name'] = this.pushProviderName;
     } else {
       json[r'push_provider_name'] = null;
     }
-      json[r'user_id'] = this.userId;
+    json[r'user_id'] = this.userId;
     if (this.voip != null) {
       json[r'voip'] = this.voip;
     } else {
@@ -138,8 +141,10 @@ class DeviceResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "DeviceResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "DeviceResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "DeviceResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "DeviceResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -158,7 +163,10 @@ class DeviceResponse {
     return null;
   }
 
-  static List<DeviceResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DeviceResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <DeviceResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -186,13 +194,19 @@ class DeviceResponse {
   }
 
   // maps a json object with a list of DeviceResponse-objects as value to a dart map
-  static Map<String, List<DeviceResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DeviceResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DeviceResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = DeviceResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = DeviceResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -206,4 +220,3 @@ class DeviceResponse {
     'user_id',
   };
 }
-

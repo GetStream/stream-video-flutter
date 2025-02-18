@@ -26,13 +26,14 @@ class DeleteCallRequest {
   bool? hard;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is DeleteCallRequest &&
-    other.hard == hard;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeleteCallRequest && other.hard == hard;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (hard == null ? 0 : hard!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (hard == null ? 0 : hard!.hashCode);
 
   @override
   String toString() => 'DeleteCallRequest[hard=$hard]';
@@ -59,8 +60,10 @@ class DeleteCallRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "DeleteCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "DeleteCallRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "DeleteCallRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "DeleteCallRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -72,7 +75,10 @@ class DeleteCallRequest {
     return null;
   }
 
-  static List<DeleteCallRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DeleteCallRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <DeleteCallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -100,20 +106,24 @@ class DeleteCallRequest {
   }
 
   // maps a json object with a list of DeleteCallRequest-objects as value to a dart map
-  static Map<String, List<DeleteCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DeleteCallRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DeleteCallRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = DeleteCallRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = DeleteCallRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

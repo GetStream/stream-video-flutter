@@ -28,29 +28,32 @@ class MediaPubSubHint {
   bool videoSubscribed;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MediaPubSubHint &&
-    other.audioPublished == audioPublished &&
-    other.audioSubscribed == audioSubscribed &&
-    other.videoPublished == videoPublished &&
-    other.videoSubscribed == videoSubscribed;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MediaPubSubHint &&
+          other.audioPublished == audioPublished &&
+          other.audioSubscribed == audioSubscribed &&
+          other.videoPublished == videoPublished &&
+          other.videoSubscribed == videoSubscribed;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (audioPublished.hashCode) +
-    (audioSubscribed.hashCode) +
-    (videoPublished.hashCode) +
-    (videoSubscribed.hashCode);
+      // ignore: unnecessary_parenthesis
+      (audioPublished.hashCode) +
+      (audioSubscribed.hashCode) +
+      (videoPublished.hashCode) +
+      (videoSubscribed.hashCode);
 
   @override
-  String toString() => 'MediaPubSubHint[audioPublished=$audioPublished, audioSubscribed=$audioSubscribed, videoPublished=$videoPublished, videoSubscribed=$videoSubscribed]';
+  String toString() =>
+      'MediaPubSubHint[audioPublished=$audioPublished, audioSubscribed=$audioSubscribed, videoPublished=$videoPublished, videoSubscribed=$videoSubscribed]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'audio_published'] = this.audioPublished;
-      json[r'audio_subscribed'] = this.audioSubscribed;
-      json[r'video_published'] = this.videoPublished;
-      json[r'video_subscribed'] = this.videoSubscribed;
+    json[r'audio_published'] = this.audioPublished;
+    json[r'audio_subscribed'] = this.audioSubscribed;
+    json[r'video_published'] = this.videoPublished;
+    json[r'video_subscribed'] = this.videoSubscribed;
     return json;
   }
 
@@ -66,8 +69,10 @@ class MediaPubSubHint {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MediaPubSubHint[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MediaPubSubHint[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "MediaPubSubHint[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "MediaPubSubHint[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -82,7 +87,10 @@ class MediaPubSubHint {
     return null;
   }
 
-  static List<MediaPubSubHint> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MediaPubSubHint> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MediaPubSubHint>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -110,13 +118,19 @@ class MediaPubSubHint {
   }
 
   // maps a json object with a list of MediaPubSubHint-objects as value to a dart map
-  static Map<String, List<MediaPubSubHint>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MediaPubSubHint>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MediaPubSubHint>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MediaPubSubHint.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MediaPubSubHint.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -130,4 +144,3 @@ class MediaPubSubHint {
     'video_subscribed',
   };
 }
-

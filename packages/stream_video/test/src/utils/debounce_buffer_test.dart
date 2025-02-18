@@ -58,7 +58,6 @@ Future<void> main() async {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     _logger.v(() => '[alreadyCompleted] completed');
 
-
     final firstResult = results.first;
     for (final eachResult in results) {
       expect(eachResult.length, 0);

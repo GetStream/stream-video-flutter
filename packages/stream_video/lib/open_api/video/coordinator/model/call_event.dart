@@ -58,34 +58,37 @@ class CallEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallEvent &&
-    other.category == category &&
-    other.component == component &&
-    other.description == description &&
-    other.endTimestamp == endTimestamp &&
-    other.internal == internal &&
-    _deepEquality.equals(other.issueTags, issueTags) &&
-    other.kind == kind &&
-    other.severity == severity &&
-    other.timestamp == timestamp &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallEvent &&
+          other.category == category &&
+          other.component == component &&
+          other.description == description &&
+          other.endTimestamp == endTimestamp &&
+          other.internal == internal &&
+          _deepEquality.equals(other.issueTags, issueTags) &&
+          other.kind == kind &&
+          other.severity == severity &&
+          other.timestamp == timestamp &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (category == null ? 0 : category!.hashCode) +
-    (component == null ? 0 : component!.hashCode) +
-    (description.hashCode) +
-    (endTimestamp.hashCode) +
-    (internal.hashCode) +
-    (issueTags.hashCode) +
-    (kind.hashCode) +
-    (severity.hashCode) +
-    (timestamp.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (category == null ? 0 : category!.hashCode) +
+      (component == null ? 0 : component!.hashCode) +
+      (description.hashCode) +
+      (endTimestamp.hashCode) +
+      (internal.hashCode) +
+      (issueTags.hashCode) +
+      (kind.hashCode) +
+      (severity.hashCode) +
+      (timestamp.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'CallEvent[category=$category, component=$component, description=$description, endTimestamp=$endTimestamp, internal=$internal, issueTags=$issueTags, kind=$kind, severity=$severity, timestamp=$timestamp, type=$type]';
+  String toString() =>
+      'CallEvent[category=$category, component=$component, description=$description, endTimestamp=$endTimestamp, internal=$internal, issueTags=$issueTags, kind=$kind, severity=$severity, timestamp=$timestamp, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -99,14 +102,14 @@ class CallEvent {
     } else {
       json[r'component'] = null;
     }
-      json[r'description'] = this.description;
-      json[r'end_timestamp'] = this.endTimestamp;
-      json[r'internal'] = this.internal;
-      json[r'issue_tags'] = this.issueTags;
-      json[r'kind'] = this.kind;
-      json[r'severity'] = this.severity;
-      json[r'timestamp'] = this.timestamp;
-      json[r'type'] = this.type;
+    json[r'description'] = this.description;
+    json[r'end_timestamp'] = this.endTimestamp;
+    json[r'internal'] = this.internal;
+    json[r'issue_tags'] = this.issueTags;
+    json[r'kind'] = this.kind;
+    json[r'severity'] = this.severity;
+    json[r'timestamp'] = this.timestamp;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -122,8 +125,10 @@ class CallEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -135,7 +140,9 @@ class CallEvent {
         endTimestamp: mapValueOfType<int>(json, r'end_timestamp')!,
         internal: mapValueOfType<bool>(json, r'internal')!,
         issueTags: json[r'issue_tags'] is Iterable
-            ? (json[r'issue_tags'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'issue_tags'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         kind: mapValueOfType<String>(json, r'kind')!,
         severity: mapValueOfType<int>(json, r'severity')!,
@@ -146,7 +153,10 @@ class CallEvent {
     return null;
   }
 
-  static List<CallEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -174,13 +184,19 @@ class CallEvent {
   }
 
   // maps a json object with a list of CallEvent-objects as value to a dart map
-  static Map<String, List<CallEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -197,4 +213,3 @@ class CallEvent {
     'type',
   };
 }
-

@@ -37,24 +37,30 @@ class AggregatedStats {
   TURNAggregatedStats? turn;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is AggregatedStats &&
-    _deepEquality.equals(other.countrywiseAggregateStats, countrywiseAggregateStats) &&
-    other.publisherAggregateStats == publisherAggregateStats &&
-    other.turn == turn;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AggregatedStats &&
+          _deepEquality.equals(
+              other.countrywiseAggregateStats, countrywiseAggregateStats) &&
+          other.publisherAggregateStats == publisherAggregateStats &&
+          other.turn == turn;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (countrywiseAggregateStats.hashCode) +
-    (publisherAggregateStats == null ? 0 : publisherAggregateStats!.hashCode) +
-    (turn == null ? 0 : turn!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (countrywiseAggregateStats.hashCode) +
+      (publisherAggregateStats == null
+          ? 0
+          : publisherAggregateStats!.hashCode) +
+      (turn == null ? 0 : turn!.hashCode);
 
   @override
-  String toString() => 'AggregatedStats[countrywiseAggregateStats=$countrywiseAggregateStats, publisherAggregateStats=$publisherAggregateStats, turn=$turn]';
+  String toString() =>
+      'AggregatedStats[countrywiseAggregateStats=$countrywiseAggregateStats, publisherAggregateStats=$publisherAggregateStats, turn=$turn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'countrywise_aggregate_stats'] = this.countrywiseAggregateStats;
+    json[r'countrywise_aggregate_stats'] = this.countrywiseAggregateStats;
     if (this.publisherAggregateStats != null) {
       json[r'publisher_aggregate_stats'] = this.publisherAggregateStats;
     } else {
@@ -80,22 +86,29 @@ class AggregatedStats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "AggregatedStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "AggregatedStats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "AggregatedStats[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "AggregatedStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return AggregatedStats(
-        countrywiseAggregateStats: CountrywiseAggregateStats.mapFromJson(json[r'countrywise_aggregate_stats']),
-        publisherAggregateStats: PublisherAggregateStats.fromJson(json[r'publisher_aggregate_stats']),
+        countrywiseAggregateStats: CountrywiseAggregateStats.mapFromJson(
+            json[r'countrywise_aggregate_stats']),
+        publisherAggregateStats: PublisherAggregateStats.fromJson(
+            json[r'publisher_aggregate_stats']),
         turn: TURNAggregatedStats.fromJson(json[r'turn']),
       );
     }
     return null;
   }
 
-  static List<AggregatedStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AggregatedStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <AggregatedStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -123,20 +136,24 @@ class AggregatedStats {
   }
 
   // maps a json object with a list of AggregatedStats-objects as value to a dart map
-  static Map<String, List<AggregatedStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<AggregatedStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<AggregatedStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = AggregatedStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = AggregatedStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

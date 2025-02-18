@@ -19,20 +19,21 @@ class EgressHLSResponse {
   String playlistUrl;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is EgressHLSResponse &&
-    other.playlistUrl == playlistUrl;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EgressHLSResponse && other.playlistUrl == playlistUrl;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (playlistUrl.hashCode);
+      // ignore: unnecessary_parenthesis
+      (playlistUrl.hashCode);
 
   @override
   String toString() => 'EgressHLSResponse[playlistUrl=$playlistUrl]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'playlist_url'] = this.playlistUrl;
+    json[r'playlist_url'] = this.playlistUrl;
     return json;
   }
 
@@ -48,8 +49,10 @@ class EgressHLSResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EgressHLSResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EgressHLSResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "EgressHLSResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "EgressHLSResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +64,10 @@ class EgressHLSResponse {
     return null;
   }
 
-  static List<EgressHLSResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EgressHLSResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <EgressHLSResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +95,19 @@ class EgressHLSResponse {
   }
 
   // maps a json object with a list of EgressHLSResponse-objects as value to a dart map
-  static Map<String, List<EgressHLSResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<EgressHLSResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<EgressHLSResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = EgressHLSResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = EgressHLSResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +118,3 @@ class EgressHLSResponse {
     'playlist_url',
   };
 }
-

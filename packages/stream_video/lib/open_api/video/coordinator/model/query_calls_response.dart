@@ -41,27 +41,30 @@ class QueryCallsResponse {
   String? prev;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is QueryCallsResponse &&
-    _deepEquality.equals(other.calls, calls) &&
-    other.duration == duration &&
-    other.next == next &&
-    other.prev == prev;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is QueryCallsResponse &&
+          _deepEquality.equals(other.calls, calls) &&
+          other.duration == duration &&
+          other.next == next &&
+          other.prev == prev;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (calls.hashCode) +
-    (duration.hashCode) +
-    (next == null ? 0 : next!.hashCode) +
-    (prev == null ? 0 : prev!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (calls.hashCode) +
+      (duration.hashCode) +
+      (next == null ? 0 : next!.hashCode) +
+      (prev == null ? 0 : prev!.hashCode);
 
   @override
-  String toString() => 'QueryCallsResponse[calls=$calls, duration=$duration, next=$next, prev=$prev]';
+  String toString() =>
+      'QueryCallsResponse[calls=$calls, duration=$duration, next=$next, prev=$prev]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'calls'] = this.calls;
-      json[r'duration'] = this.duration;
+    json[r'calls'] = this.calls;
+    json[r'duration'] = this.duration;
     if (this.next != null) {
       json[r'next'] = this.next;
     } else {
@@ -87,8 +90,10 @@ class QueryCallsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "QueryCallsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "QueryCallsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "QueryCallsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "QueryCallsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -103,7 +108,10 @@ class QueryCallsResponse {
     return null;
   }
 
-  static List<QueryCallsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryCallsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <QueryCallsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -131,13 +139,19 @@ class QueryCallsResponse {
   }
 
   // maps a json object with a list of QueryCallsResponse-objects as value to a dart map
-  static Map<String, List<QueryCallsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<QueryCallsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<QueryCallsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = QueryCallsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = QueryCallsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -149,4 +163,3 @@ class QueryCallsResponse {
     'duration',
   };
 }
-

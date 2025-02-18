@@ -31,32 +31,35 @@ class UserInfoResponse {
   List<String> roles;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserInfoResponse &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.id == id &&
-    other.image == image &&
-    other.name == name &&
-    _deepEquality.equals(other.roles, roles);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserInfoResponse &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.id == id &&
+          other.image == image &&
+          other.name == name &&
+          _deepEquality.equals(other.roles, roles);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (id.hashCode) +
-    (image.hashCode) +
-    (name.hashCode) +
-    (roles.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (id.hashCode) +
+      (image.hashCode) +
+      (name.hashCode) +
+      (roles.hashCode);
 
   @override
-  String toString() => 'UserInfoResponse[custom=$custom, id=$id, image=$image, name=$name, roles=$roles]';
+  String toString() =>
+      'UserInfoResponse[custom=$custom, id=$id, image=$image, name=$name, roles=$roles]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
-      json[r'id'] = this.id;
-      json[r'image'] = this.image;
-      json[r'name'] = this.name;
-      json[r'roles'] = this.roles;
+    json[r'custom'] = this.custom;
+    json[r'id'] = this.id;
+    json[r'image'] = this.image;
+    json[r'name'] = this.name;
+    json[r'roles'] = this.roles;
     return json;
   }
 
@@ -72,8 +75,10 @@ class UserInfoResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserInfoResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserInfoResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UserInfoResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UserInfoResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -84,14 +89,19 @@ class UserInfoResponse {
         image: mapValueOfType<String>(json, r'image')!,
         name: mapValueOfType<String>(json, r'name')!,
         roles: json[r'roles'] is Iterable
-            ? (json[r'roles'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'roles'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
       );
     }
     return null;
   }
 
-  static List<UserInfoResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserInfoResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserInfoResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -119,13 +129,19 @@ class UserInfoResponse {
   }
 
   // maps a json object with a list of UserInfoResponse-objects as value to a dart map
-  static Map<String, List<UserInfoResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserInfoResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserInfoResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserInfoResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserInfoResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -140,4 +156,3 @@ class UserInfoResponse {
     'roles',
   };
 }
-

@@ -31,30 +31,33 @@ class SendReactionRequest {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SendReactionRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.emojiCode == emojiCode &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SendReactionRequest &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.emojiCode == emojiCode &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (emojiCode == null ? 0 : emojiCode!.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (emojiCode == null ? 0 : emojiCode!.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'SendReactionRequest[custom=$custom, emojiCode=$emojiCode, type=$type]';
+  String toString() =>
+      'SendReactionRequest[custom=$custom, emojiCode=$emojiCode, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
+    json[r'custom'] = this.custom;
     if (this.emojiCode != null) {
       json[r'emoji_code'] = this.emojiCode;
     } else {
       json[r'emoji_code'] = null;
     }
-      json[r'type'] = this.type;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -70,8 +73,10 @@ class SendReactionRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "SendReactionRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "SendReactionRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "SendReactionRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "SendReactionRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -85,7 +90,10 @@ class SendReactionRequest {
     return null;
   }
 
-  static List<SendReactionRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SendReactionRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <SendReactionRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -113,13 +121,19 @@ class SendReactionRequest {
   }
 
   // maps a json object with a list of SendReactionRequest-objects as value to a dart map
-  static Map<String, List<SendReactionRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<SendReactionRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<SendReactionRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SendReactionRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = SendReactionRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -130,4 +144,3 @@ class SendReactionRequest {
     'type',
   };
 }
-

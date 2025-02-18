@@ -19,20 +19,22 @@ class GeofenceSettingsResponse {
   List<String> names;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GeofenceSettingsResponse &&
-    _deepEquality.equals(other.names, names);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GeofenceSettingsResponse &&
+          _deepEquality.equals(other.names, names);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (names.hashCode);
+      // ignore: unnecessary_parenthesis
+      (names.hashCode);
 
   @override
   String toString() => 'GeofenceSettingsResponse[names=$names]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'names'] = this.names;
+    json[r'names'] = this.names;
     return json;
   }
 
@@ -48,22 +50,29 @@ class GeofenceSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GeofenceSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GeofenceSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GeofenceSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GeofenceSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return GeofenceSettingsResponse(
         names: json[r'names'] is Iterable
-            ? (json[r'names'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'names'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
       );
     }
     return null;
   }
 
-  static List<GeofenceSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GeofenceSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GeofenceSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -91,13 +100,19 @@ class GeofenceSettingsResponse {
   }
 
   // maps a json object with a list of GeofenceSettingsResponse-objects as value to a dart map
-  static Map<String, List<GeofenceSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GeofenceSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GeofenceSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GeofenceSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GeofenceSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -108,4 +123,3 @@ class GeofenceSettingsResponse {
     'names',
   };
 }
-

@@ -27,26 +27,27 @@ class CreateGuestResponse {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CreateGuestResponse &&
-    other.accessToken == accessToken &&
-    other.duration == duration &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateGuestResponse &&
+          other.accessToken == accessToken &&
+          other.duration == duration &&
+          other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (accessToken.hashCode) +
-    (duration.hashCode) +
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (accessToken.hashCode) + (duration.hashCode) + (user.hashCode);
 
   @override
-  String toString() => 'CreateGuestResponse[accessToken=$accessToken, duration=$duration, user=$user]';
+  String toString() =>
+      'CreateGuestResponse[accessToken=$accessToken, duration=$duration, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'access_token'] = this.accessToken;
-      json[r'duration'] = this.duration;
-      json[r'user'] = this.user;
+    json[r'access_token'] = this.accessToken;
+    json[r'duration'] = this.duration;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -62,8 +63,10 @@ class CreateGuestResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CreateGuestResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CreateGuestResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CreateGuestResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CreateGuestResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -77,7 +80,10 @@ class CreateGuestResponse {
     return null;
   }
 
-  static List<CreateGuestResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateGuestResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CreateGuestResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -105,13 +111,19 @@ class CreateGuestResponse {
   }
 
   // maps a json object with a list of CreateGuestResponse-objects as value to a dart map
-  static Map<String, List<CreateGuestResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CreateGuestResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CreateGuestResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CreateGuestResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CreateGuestResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -124,4 +136,3 @@ class CreateGuestResponse {
     'user',
   };
 }
-

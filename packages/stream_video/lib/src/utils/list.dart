@@ -12,7 +12,6 @@ extension ListUtils<T> on List<T> {
     return this;
   }
 
-
   T? getOrNull(int index) {
     if (index >= 0 && index < length) {
       return this[index];
@@ -27,5 +26,4 @@ extension ListUtils<T> on List<T> {
     }
     return or();
   }
-
 }

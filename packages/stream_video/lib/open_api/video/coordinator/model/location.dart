@@ -25,26 +25,29 @@ class Location {
   String subdivisionIsoCode;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Location &&
-    other.continentCode == continentCode &&
-    other.countryIsoCode == countryIsoCode &&
-    other.subdivisionIsoCode == subdivisionIsoCode;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Location &&
+          other.continentCode == continentCode &&
+          other.countryIsoCode == countryIsoCode &&
+          other.subdivisionIsoCode == subdivisionIsoCode;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (continentCode.hashCode) +
-    (countryIsoCode.hashCode) +
-    (subdivisionIsoCode.hashCode);
+      // ignore: unnecessary_parenthesis
+      (continentCode.hashCode) +
+      (countryIsoCode.hashCode) +
+      (subdivisionIsoCode.hashCode);
 
   @override
-  String toString() => 'Location[continentCode=$continentCode, countryIsoCode=$countryIsoCode, subdivisionIsoCode=$subdivisionIsoCode]';
+  String toString() =>
+      'Location[continentCode=$continentCode, countryIsoCode=$countryIsoCode, subdivisionIsoCode=$subdivisionIsoCode]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'continent_code'] = this.continentCode;
-      json[r'country_iso_code'] = this.countryIsoCode;
-      json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
+    json[r'continent_code'] = this.continentCode;
+    json[r'country_iso_code'] = this.countryIsoCode;
+    json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
     return json;
   }
 
@@ -60,8 +63,10 @@ class Location {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Location[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Location[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "Location[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "Location[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -69,13 +74,17 @@ class Location {
       return Location(
         continentCode: mapValueOfType<String>(json, r'continent_code')!,
         countryIsoCode: mapValueOfType<String>(json, r'country_iso_code')!,
-        subdivisionIsoCode: mapValueOfType<String>(json, r'subdivision_iso_code')!,
+        subdivisionIsoCode:
+            mapValueOfType<String>(json, r'subdivision_iso_code')!,
       );
     }
     return null;
   }
 
-  static List<Location> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Location> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Location>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -103,13 +112,19 @@ class Location {
   }
 
   // maps a json object with a list of Location-objects as value to a dart map
-  static Map<String, List<Location>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Location>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Location>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Location.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Location.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -122,4 +137,3 @@ class Location {
     'subdivision_iso_code',
   };
 }
-

@@ -20,20 +20,21 @@ class StopHLSBroadcastingResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StopHLSBroadcastingResponse &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StopHLSBroadcastingResponse && other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode);
 
   @override
   String toString() => 'StopHLSBroadcastingResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -49,8 +50,10 @@ class StopHLSBroadcastingResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StopHLSBroadcastingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StopHLSBroadcastingResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "StopHLSBroadcastingResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "StopHLSBroadcastingResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -62,7 +65,10 @@ class StopHLSBroadcastingResponse {
     return null;
   }
 
-  static List<StopHLSBroadcastingResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StopHLSBroadcastingResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <StopHLSBroadcastingResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,13 +96,19 @@ class StopHLSBroadcastingResponse {
   }
 
   // maps a json object with a list of StopHLSBroadcastingResponse-objects as value to a dart map
-  static Map<String, List<StopHLSBroadcastingResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<StopHLSBroadcastingResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<StopHLSBroadcastingResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StopHLSBroadcastingResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StopHLSBroadcastingResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -107,4 +119,3 @@ class StopHLSBroadcastingResponse {
     'duration',
   };
 }
-

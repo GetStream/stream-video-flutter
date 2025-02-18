@@ -34,33 +34,36 @@ class UserStats {
   List<UserSessionStats> sessionStats;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserStats &&
-    other.info == info &&
-    other.minEventTs == minEventTs &&
-    other.rating == rating &&
-    _deepEquality.equals(other.sessionStats, sessionStats);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserStats &&
+          other.info == info &&
+          other.minEventTs == minEventTs &&
+          other.rating == rating &&
+          _deepEquality.equals(other.sessionStats, sessionStats);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (info.hashCode) +
-    (minEventTs.hashCode) +
-    (rating == null ? 0 : rating!.hashCode) +
-    (sessionStats.hashCode);
+      // ignore: unnecessary_parenthesis
+      (info.hashCode) +
+      (minEventTs.hashCode) +
+      (rating == null ? 0 : rating!.hashCode) +
+      (sessionStats.hashCode);
 
   @override
-  String toString() => 'UserStats[info=$info, minEventTs=$minEventTs, rating=$rating, sessionStats=$sessionStats]';
+  String toString() =>
+      'UserStats[info=$info, minEventTs=$minEventTs, rating=$rating, sessionStats=$sessionStats]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'info'] = this.info;
-      json[r'min_event_ts'] = this.minEventTs;
+    json[r'info'] = this.info;
+    json[r'min_event_ts'] = this.minEventTs;
     if (this.rating != null) {
       json[r'rating'] = this.rating;
     } else {
       json[r'rating'] = null;
     }
-      json[r'session_stats'] = this.sessionStats;
+    json[r'session_stats'] = this.sessionStats;
     return json;
   }
 
@@ -76,8 +79,10 @@ class UserStats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserStats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UserStats[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UserStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -92,7 +97,10 @@ class UserStats {
     return null;
   }
 
-  static List<UserStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -120,13 +128,19 @@ class UserStats {
   }
 
   // maps a json object with a list of UserStats-objects as value to a dart map
-  static Map<String, List<UserStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -139,4 +153,3 @@ class UserStats {
     'session_stats',
   };
 }
-
