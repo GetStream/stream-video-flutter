@@ -1,6 +1,7 @@
 ## 0.8.0
 
 * Updated minimum Flutter version to 3.27.4
+    * Note: If you updated Flutter version and are using `flutterfire_cli` for push notifications you might need to reactivate it by running: `dart pub global activate flutterfire_cli`.
 
 ✅ Added
 * Introduced `disposeAfterResolvingRinging()` and `consumeAndAcceptActiveCall()` methods in `StreamVideo` to simplify the ringing flow implementation.
