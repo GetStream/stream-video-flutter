@@ -19,20 +19,22 @@ class UserFeedbackReportResponse {
   List<DailyAggregateUserFeedbackReportResponse> daily;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserFeedbackReportResponse &&
-    _deepEquality.equals(other.daily, daily);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserFeedbackReportResponse &&
+          _deepEquality.equals(other.daily, daily);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (daily.hashCode);
+      // ignore: unnecessary_parenthesis
+      (daily.hashCode);
 
   @override
   String toString() => 'UserFeedbackReportResponse[daily=$daily]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'daily'] = this.daily;
+    json[r'daily'] = this.daily;
     return json;
   }
 
@@ -48,20 +50,26 @@ class UserFeedbackReportResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserFeedbackReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserFeedbackReportResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UserFeedbackReportResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UserFeedbackReportResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return UserFeedbackReportResponse(
-        daily: DailyAggregateUserFeedbackReportResponse.listFromJson(json[r'daily']),
+        daily: DailyAggregateUserFeedbackReportResponse.listFromJson(
+            json[r'daily']),
       );
     }
     return null;
   }
 
-  static List<UserFeedbackReportResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserFeedbackReportResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserFeedbackReportResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +97,19 @@ class UserFeedbackReportResponse {
   }
 
   // maps a json object with a list of UserFeedbackReportResponse-objects as value to a dart map
-  static Map<String, List<UserFeedbackReportResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserFeedbackReportResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserFeedbackReportResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserFeedbackReportResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserFeedbackReportResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +120,3 @@ class UserFeedbackReportResponse {
     'daily',
   };
 }
-

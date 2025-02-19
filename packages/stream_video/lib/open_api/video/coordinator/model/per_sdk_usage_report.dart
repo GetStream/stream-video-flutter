@@ -22,23 +22,24 @@ class PerSDKUsageReport {
   int total;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PerSDKUsageReport &&
-    _deepEquality.equals(other.byVersion, byVersion) &&
-    other.total == total;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PerSDKUsageReport &&
+          _deepEquality.equals(other.byVersion, byVersion) &&
+          other.total == total;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (byVersion.hashCode) +
-    (total.hashCode);
+      // ignore: unnecessary_parenthesis
+      (byVersion.hashCode) + (total.hashCode);
 
   @override
   String toString() => 'PerSDKUsageReport[byVersion=$byVersion, total=$total]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'by_version'] = this.byVersion;
-      json[r'total'] = this.total;
+    json[r'by_version'] = this.byVersion;
+    json[r'total'] = this.total;
     return json;
   }
 
@@ -54,8 +55,10 @@ class PerSDKUsageReport {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "PerSDKUsageReport[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "PerSDKUsageReport[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "PerSDKUsageReport[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "PerSDKUsageReport[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +71,10 @@ class PerSDKUsageReport {
     return null;
   }
 
-  static List<PerSDKUsageReport> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PerSDKUsageReport> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PerSDKUsageReport>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +102,19 @@ class PerSDKUsageReport {
   }
 
   // maps a json object with a list of PerSDKUsageReport-objects as value to a dart map
-  static Map<String, List<PerSDKUsageReport>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PerSDKUsageReport>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PerSDKUsageReport>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PerSDKUsageReport.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PerSDKUsageReport.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +126,3 @@ class PerSDKUsageReport {
     'total',
   };
 }
-

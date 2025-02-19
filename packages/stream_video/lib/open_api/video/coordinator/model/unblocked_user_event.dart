@@ -29,29 +29,32 @@ class UnblockedUserEvent {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UnblockedUserEvent &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    other.type == type &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnblockedUserEvent &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          other.type == type &&
+          other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (type.hashCode) +
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (type.hashCode) +
+      (user.hashCode);
 
   @override
-  String toString() => 'UnblockedUserEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() =>
+      'UnblockedUserEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'type'] = this.type;
-      json[r'user'] = this.user;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -67,8 +70,10 @@ class UnblockedUserEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UnblockedUserEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UnblockedUserEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UnblockedUserEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UnblockedUserEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -83,7 +88,10 @@ class UnblockedUserEvent {
     return null;
   }
 
-  static List<UnblockedUserEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UnblockedUserEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UnblockedUserEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,13 +119,19 @@ class UnblockedUserEvent {
   }
 
   // maps a json object with a list of UnblockedUserEvent-objects as value to a dart map
-  static Map<String, List<UnblockedUserEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UnblockedUserEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UnblockedUserEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UnblockedUserEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UnblockedUserEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +145,3 @@ class UnblockedUserEvent {
     'user',
   };
 }
-

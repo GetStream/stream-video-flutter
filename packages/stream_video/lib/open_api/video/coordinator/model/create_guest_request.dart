@@ -19,20 +19,21 @@ class CreateGuestRequest {
   UserRequest user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CreateGuestRequest &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateGuestRequest && other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (user.hashCode);
 
   @override
   String toString() => 'CreateGuestRequest[user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'user'] = this.user;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -48,8 +49,10 @@ class CreateGuestRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CreateGuestRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CreateGuestRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CreateGuestRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CreateGuestRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +64,10 @@ class CreateGuestRequest {
     return null;
   }
 
-  static List<CreateGuestRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateGuestRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CreateGuestRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +95,19 @@ class CreateGuestRequest {
   }
 
   // maps a json object with a list of CreateGuestRequest-objects as value to a dart map
-  static Map<String, List<CreateGuestRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CreateGuestRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CreateGuestRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CreateGuestRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CreateGuestRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +118,3 @@ class CreateGuestRequest {
     'user',
   };
 }
-

@@ -33,32 +33,35 @@ class CallMemberRemovedEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallMemberRemovedEvent &&
-    other.call == call &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    _deepEquality.equals(other.members, members) &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallMemberRemovedEvent &&
+          other.call == call &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          _deepEquality.equals(other.members, members) &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (members.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (members.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'CallMemberRemovedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, type=$type]';
+  String toString() =>
+      'CallMemberRemovedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'members'] = this.members;
-      json[r'type'] = this.type;
+    json[r'call'] = this.call;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'members'] = this.members;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -74,8 +77,10 @@ class CallMemberRemovedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallMemberRemovedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallMemberRemovedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallMemberRemovedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallMemberRemovedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -85,7 +90,9 @@ class CallMemberRemovedEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         members: json[r'members'] is Iterable
-            ? (json[r'members'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'members'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         type: mapValueOfType<String>(json, r'type')!,
       );
@@ -93,7 +100,10 @@ class CallMemberRemovedEvent {
     return null;
   }
 
-  static List<CallMemberRemovedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallMemberRemovedEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallMemberRemovedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -121,13 +131,19 @@ class CallMemberRemovedEvent {
   }
 
   // maps a json object with a list of CallMemberRemovedEvent-objects as value to a dart map
-  static Map<String, List<CallMemberRemovedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallMemberRemovedEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallMemberRemovedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallMemberRemovedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallMemberRemovedEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -142,4 +158,3 @@ class CallMemberRemovedEvent {
     'type',
   };
 }
-

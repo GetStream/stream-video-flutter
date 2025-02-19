@@ -20,20 +20,22 @@ class StartRTMPBroadcastsRequest {
   List<RTMPBroadcastRequest> broadcasts;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StartRTMPBroadcastsRequest &&
-    _deepEquality.equals(other.broadcasts, broadcasts);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StartRTMPBroadcastsRequest &&
+          _deepEquality.equals(other.broadcasts, broadcasts);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (broadcasts.hashCode);
+      // ignore: unnecessary_parenthesis
+      (broadcasts.hashCode);
 
   @override
   String toString() => 'StartRTMPBroadcastsRequest[broadcasts=$broadcasts]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'broadcasts'] = this.broadcasts;
+    json[r'broadcasts'] = this.broadcasts;
     return json;
   }
 
@@ -49,8 +51,10 @@ class StartRTMPBroadcastsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StartRTMPBroadcastsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StartRTMPBroadcastsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "StartRTMPBroadcastsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "StartRTMPBroadcastsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -62,7 +66,10 @@ class StartRTMPBroadcastsRequest {
     return null;
   }
 
-  static List<StartRTMPBroadcastsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StartRTMPBroadcastsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <StartRTMPBroadcastsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,13 +97,19 @@ class StartRTMPBroadcastsRequest {
   }
 
   // maps a json object with a list of StartRTMPBroadcastsRequest-objects as value to a dart map
-  static Map<String, List<StartRTMPBroadcastsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<StartRTMPBroadcastsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<StartRTMPBroadcastsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StartRTMPBroadcastsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StartRTMPBroadcastsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -107,4 +120,3 @@ class StartRTMPBroadcastsRequest {
     'broadcasts',
   };
 }
-

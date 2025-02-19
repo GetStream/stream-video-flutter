@@ -24,23 +24,24 @@ class PinRequest {
   String userId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PinRequest &&
-    other.sessionId == sessionId &&
-    other.userId == userId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PinRequest &&
+          other.sessionId == sessionId &&
+          other.userId == userId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (sessionId.hashCode) +
-    (userId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (sessionId.hashCode) + (userId.hashCode);
 
   @override
   String toString() => 'PinRequest[sessionId=$sessionId, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'session_id'] = this.sessionId;
-      json[r'user_id'] = this.userId;
+    json[r'session_id'] = this.sessionId;
+    json[r'user_id'] = this.userId;
     return json;
   }
 
@@ -56,8 +57,10 @@ class PinRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "PinRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "PinRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "PinRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "PinRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -70,7 +73,10 @@ class PinRequest {
     return null;
   }
 
-  static List<PinRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PinRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PinRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -98,13 +104,19 @@ class PinRequest {
   }
 
   // maps a json object with a list of PinRequest-objects as value to a dart map
-  static Map<String, List<PinRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PinRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PinRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PinRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PinRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -116,4 +128,3 @@ class PinRequest {
     'user_id',
   };
 }
-

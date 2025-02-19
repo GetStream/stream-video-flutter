@@ -38,24 +38,27 @@ class BlockedUserEvent {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is BlockedUserEvent &&
-    other.blockedByUser == blockedByUser &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    other.type == type &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BlockedUserEvent &&
+          other.blockedByUser == blockedByUser &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          other.type == type &&
+          other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (type.hashCode) +
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (type.hashCode) +
+      (user.hashCode);
 
   @override
-  String toString() => 'BlockedUserEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() =>
+      'BlockedUserEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -64,10 +67,10 @@ class BlockedUserEvent {
     } else {
       json[r'blocked_by_user'] = null;
     }
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'type'] = this.type;
-      json[r'user'] = this.user;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -83,8 +86,10 @@ class BlockedUserEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "BlockedUserEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "BlockedUserEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "BlockedUserEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "BlockedUserEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -100,7 +105,10 @@ class BlockedUserEvent {
     return null;
   }
 
-  static List<BlockedUserEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BlockedUserEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <BlockedUserEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -128,13 +136,19 @@ class BlockedUserEvent {
   }
 
   // maps a json object with a list of BlockedUserEvent-objects as value to a dart map
-  static Map<String, List<BlockedUserEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<BlockedUserEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<BlockedUserEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = BlockedUserEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = BlockedUserEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -148,4 +162,3 @@ class BlockedUserEvent {
     'user',
   };
 }
-

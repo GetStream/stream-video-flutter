@@ -37,20 +37,23 @@ class QueryAggregateCallStatsRequest {
   String? to;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is QueryAggregateCallStatsRequest &&
-    other.from == from &&
-    _deepEquality.equals(other.reportTypes, reportTypes) &&
-    other.to == to;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is QueryAggregateCallStatsRequest &&
+          other.from == from &&
+          _deepEquality.equals(other.reportTypes, reportTypes) &&
+          other.to == to;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (from == null ? 0 : from!.hashCode) +
-    (reportTypes.hashCode) +
-    (to == null ? 0 : to!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (from == null ? 0 : from!.hashCode) +
+      (reportTypes.hashCode) +
+      (to == null ? 0 : to!.hashCode);
 
   @override
-  String toString() => 'QueryAggregateCallStatsRequest[from=$from, reportTypes=$reportTypes, to=$to]';
+  String toString() =>
+      'QueryAggregateCallStatsRequest[from=$from, reportTypes=$reportTypes, to=$to]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -59,7 +62,7 @@ class QueryAggregateCallStatsRequest {
     } else {
       json[r'from'] = null;
     }
-      json[r'report_types'] = this.reportTypes;
+    json[r'report_types'] = this.reportTypes;
     if (this.to != null) {
       json[r'to'] = this.to;
     } else {
@@ -80,8 +83,10 @@ class QueryAggregateCallStatsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "QueryAggregateCallStatsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "QueryAggregateCallStatsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "QueryAggregateCallStatsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "QueryAggregateCallStatsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -89,7 +94,9 @@ class QueryAggregateCallStatsRequest {
       return QueryAggregateCallStatsRequest(
         from: mapValueOfType<String>(json, r'from'),
         reportTypes: json[r'report_types'] is Iterable
-            ? (json[r'report_types'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'report_types'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         to: mapValueOfType<String>(json, r'to'),
       );
@@ -97,7 +104,10 @@ class QueryAggregateCallStatsRequest {
     return null;
   }
 
-  static List<QueryAggregateCallStatsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryAggregateCallStatsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <QueryAggregateCallStatsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -125,20 +135,24 @@ class QueryAggregateCallStatsRequest {
   }
 
   // maps a json object with a list of QueryAggregateCallStatsRequest-objects as value to a dart map
-  static Map<String, List<QueryAggregateCallStatsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<QueryAggregateCallStatsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<QueryAggregateCallStatsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = QueryAggregateCallStatsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = QueryAggregateCallStatsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

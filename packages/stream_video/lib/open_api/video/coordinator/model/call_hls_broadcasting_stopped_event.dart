@@ -26,26 +26,27 @@ class CallHLSBroadcastingStoppedEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallHLSBroadcastingStoppedEvent &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallHLSBroadcastingStoppedEvent &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (callCid.hashCode) + (createdAt.hashCode) + (type.hashCode);
 
   @override
-  String toString() => 'CallHLSBroadcastingStoppedEvent[callCid=$callCid, createdAt=$createdAt, type=$type]';
+  String toString() =>
+      'CallHLSBroadcastingStoppedEvent[callCid=$callCid, createdAt=$createdAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'type'] = this.type;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -61,8 +62,10 @@ class CallHLSBroadcastingStoppedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallHLSBroadcastingStoppedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallHLSBroadcastingStoppedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallHLSBroadcastingStoppedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallHLSBroadcastingStoppedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -76,7 +79,10 @@ class CallHLSBroadcastingStoppedEvent {
     return null;
   }
 
-  static List<CallHLSBroadcastingStoppedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallHLSBroadcastingStoppedEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallHLSBroadcastingStoppedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,7 +95,8 @@ class CallHLSBroadcastingStoppedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallHLSBroadcastingStoppedEvent> mapFromJson(dynamic json) {
+  static Map<String, CallHLSBroadcastingStoppedEvent> mapFromJson(
+      dynamic json) {
     final map = <String, CallHLSBroadcastingStoppedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
@@ -104,13 +111,19 @@ class CallHLSBroadcastingStoppedEvent {
   }
 
   // maps a json object with a list of CallHLSBroadcastingStoppedEvent-objects as value to a dart map
-  static Map<String, List<CallHLSBroadcastingStoppedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallHLSBroadcastingStoppedEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallHLSBroadcastingStoppedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallHLSBroadcastingStoppedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallHLSBroadcastingStoppedEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -123,4 +136,3 @@ class CallHLSBroadcastingStoppedEvent {
     'type',
   };
 }
-

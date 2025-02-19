@@ -61,24 +61,27 @@ class StopLiveRequest {
   bool? continueTranscription;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StopLiveRequest &&
-    other.continueClosedCaption == continueClosedCaption &&
-    other.continueHls == continueHls &&
-    other.continueRecording == continueRecording &&
-    other.continueRtmpBroadcasts == continueRtmpBroadcasts &&
-    other.continueTranscription == continueTranscription;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StopLiveRequest &&
+          other.continueClosedCaption == continueClosedCaption &&
+          other.continueHls == continueHls &&
+          other.continueRecording == continueRecording &&
+          other.continueRtmpBroadcasts == continueRtmpBroadcasts &&
+          other.continueTranscription == continueTranscription;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (continueClosedCaption == null ? 0 : continueClosedCaption!.hashCode) +
-    (continueHls == null ? 0 : continueHls!.hashCode) +
-    (continueRecording == null ? 0 : continueRecording!.hashCode) +
-    (continueRtmpBroadcasts == null ? 0 : continueRtmpBroadcasts!.hashCode) +
-    (continueTranscription == null ? 0 : continueTranscription!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (continueClosedCaption == null ? 0 : continueClosedCaption!.hashCode) +
+      (continueHls == null ? 0 : continueHls!.hashCode) +
+      (continueRecording == null ? 0 : continueRecording!.hashCode) +
+      (continueRtmpBroadcasts == null ? 0 : continueRtmpBroadcasts!.hashCode) +
+      (continueTranscription == null ? 0 : continueTranscription!.hashCode);
 
   @override
-  String toString() => 'StopLiveRequest[continueClosedCaption=$continueClosedCaption, continueHls=$continueHls, continueRecording=$continueRecording, continueRtmpBroadcasts=$continueRtmpBroadcasts, continueTranscription=$continueTranscription]';
+  String toString() =>
+      'StopLiveRequest[continueClosedCaption=$continueClosedCaption, continueHls=$continueHls, continueRecording=$continueRecording, continueRtmpBroadcasts=$continueRtmpBroadcasts, continueTranscription=$continueTranscription]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -122,24 +125,32 @@ class StopLiveRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StopLiveRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StopLiveRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "StopLiveRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "StopLiveRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return StopLiveRequest(
-        continueClosedCaption: mapValueOfType<bool>(json, r'continue_closed_caption'),
+        continueClosedCaption:
+            mapValueOfType<bool>(json, r'continue_closed_caption'),
         continueHls: mapValueOfType<bool>(json, r'continue_hls'),
         continueRecording: mapValueOfType<bool>(json, r'continue_recording'),
-        continueRtmpBroadcasts: mapValueOfType<bool>(json, r'continue_rtmp_broadcasts'),
-        continueTranscription: mapValueOfType<bool>(json, r'continue_transcription'),
+        continueRtmpBroadcasts:
+            mapValueOfType<bool>(json, r'continue_rtmp_broadcasts'),
+        continueTranscription:
+            mapValueOfType<bool>(json, r'continue_transcription'),
       );
     }
     return null;
   }
 
-  static List<StopLiveRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StopLiveRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <StopLiveRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -167,20 +178,24 @@ class StopLiveRequest {
   }
 
   // maps a json object with a list of StopLiveRequest-objects as value to a dart map
-  static Map<String, List<StopLiveRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<StopLiveRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<StopLiveRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StopLiveRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StopLiveRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

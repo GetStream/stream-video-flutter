@@ -34,33 +34,36 @@ class ReactionResponse {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ReactionResponse &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.emojiCode == emojiCode &&
-    other.type == type &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReactionResponse &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.emojiCode == emojiCode &&
+          other.type == type &&
+          other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (emojiCode == null ? 0 : emojiCode!.hashCode) +
-    (type.hashCode) +
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (emojiCode == null ? 0 : emojiCode!.hashCode) +
+      (type.hashCode) +
+      (user.hashCode);
 
   @override
-  String toString() => 'ReactionResponse[custom=$custom, emojiCode=$emojiCode, type=$type, user=$user]';
+  String toString() =>
+      'ReactionResponse[custom=$custom, emojiCode=$emojiCode, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
+    json[r'custom'] = this.custom;
     if (this.emojiCode != null) {
       json[r'emoji_code'] = this.emojiCode;
     } else {
       json[r'emoji_code'] = null;
     }
-      json[r'type'] = this.type;
-      json[r'user'] = this.user;
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -76,8 +79,10 @@ class ReactionResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ReactionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ReactionResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ReactionResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ReactionResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -92,7 +97,10 @@ class ReactionResponse {
     return null;
   }
 
-  static List<ReactionResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ReactionResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ReactionResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -120,13 +128,19 @@ class ReactionResponse {
   }
 
   // maps a json object with a list of ReactionResponse-objects as value to a dart map
-  static Map<String, List<ReactionResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ReactionResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ReactionResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ReactionResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ReactionResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -138,4 +152,3 @@ class ReactionResponse {
     'user',
   };
 }
-

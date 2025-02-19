@@ -25,26 +25,27 @@ class BroadcastSettingsResponse {
   RTMPSettingsResponse rtmp;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is BroadcastSettingsResponse &&
-    other.enabled == enabled &&
-    other.hls == hls &&
-    other.rtmp == rtmp;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BroadcastSettingsResponse &&
+          other.enabled == enabled &&
+          other.hls == hls &&
+          other.rtmp == rtmp;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (enabled.hashCode) +
-    (hls.hashCode) +
-    (rtmp.hashCode);
+      // ignore: unnecessary_parenthesis
+      (enabled.hashCode) + (hls.hashCode) + (rtmp.hashCode);
 
   @override
-  String toString() => 'BroadcastSettingsResponse[enabled=$enabled, hls=$hls, rtmp=$rtmp]';
+  String toString() =>
+      'BroadcastSettingsResponse[enabled=$enabled, hls=$hls, rtmp=$rtmp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'enabled'] = this.enabled;
-      json[r'hls'] = this.hls;
-      json[r'rtmp'] = this.rtmp;
+    json[r'enabled'] = this.enabled;
+    json[r'hls'] = this.hls;
+    json[r'rtmp'] = this.rtmp;
     return json;
   }
 
@@ -60,8 +61,10 @@ class BroadcastSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "BroadcastSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "BroadcastSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "BroadcastSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "BroadcastSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -75,7 +78,10 @@ class BroadcastSettingsResponse {
     return null;
   }
 
-  static List<BroadcastSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BroadcastSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <BroadcastSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -103,13 +109,19 @@ class BroadcastSettingsResponse {
   }
 
   // maps a json object with a list of BroadcastSettingsResponse-objects as value to a dart map
-  static Map<String, List<BroadcastSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<BroadcastSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<BroadcastSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = BroadcastSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = BroadcastSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -122,4 +134,3 @@ class BroadcastSettingsResponse {
     'rtmp',
   };
 }
-

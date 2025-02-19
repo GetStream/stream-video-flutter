@@ -31,25 +31,28 @@ class ScreensharingSettingsResponse {
   TargetResolution? targetResolution;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ScreensharingSettingsResponse &&
-    other.accessRequestEnabled == accessRequestEnabled &&
-    other.enabled == enabled &&
-    other.targetResolution == targetResolution;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScreensharingSettingsResponse &&
+          other.accessRequestEnabled == accessRequestEnabled &&
+          other.enabled == enabled &&
+          other.targetResolution == targetResolution;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (accessRequestEnabled.hashCode) +
-    (enabled.hashCode) +
-    (targetResolution == null ? 0 : targetResolution!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (accessRequestEnabled.hashCode) +
+      (enabled.hashCode) +
+      (targetResolution == null ? 0 : targetResolution!.hashCode);
 
   @override
-  String toString() => 'ScreensharingSettingsResponse[accessRequestEnabled=$accessRequestEnabled, enabled=$enabled, targetResolution=$targetResolution]';
+  String toString() =>
+      'ScreensharingSettingsResponse[accessRequestEnabled=$accessRequestEnabled, enabled=$enabled, targetResolution=$targetResolution]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'access_request_enabled'] = this.accessRequestEnabled;
-      json[r'enabled'] = this.enabled;
+    json[r'access_request_enabled'] = this.accessRequestEnabled;
+    json[r'enabled'] = this.enabled;
     if (this.targetResolution != null) {
       json[r'target_resolution'] = this.targetResolution;
     } else {
@@ -70,14 +73,17 @@ class ScreensharingSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ScreensharingSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ScreensharingSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ScreensharingSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ScreensharingSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return ScreensharingSettingsResponse(
-        accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled')!,
+        accessRequestEnabled:
+            mapValueOfType<bool>(json, r'access_request_enabled')!,
         enabled: mapValueOfType<bool>(json, r'enabled')!,
         targetResolution: TargetResolution.fromJson(json[r'target_resolution']),
       );
@@ -85,7 +91,10 @@ class ScreensharingSettingsResponse {
     return null;
   }
 
-  static List<ScreensharingSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ScreensharingSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ScreensharingSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -113,13 +122,19 @@ class ScreensharingSettingsResponse {
   }
 
   // maps a json object with a list of ScreensharingSettingsResponse-objects as value to a dart map
-  static Map<String, List<ScreensharingSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ScreensharingSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ScreensharingSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ScreensharingSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ScreensharingSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +146,3 @@ class ScreensharingSettingsResponse {
     'enabled',
   };
 }
-

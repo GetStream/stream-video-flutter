@@ -24,22 +24,31 @@ const StartNoiseCancellationRequest$json = {
 };
 
 /// Descriptor for `StartNoiseCancellationRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startNoiseCancellationRequestDescriptor = $convert.base64Decode(
-    'Ch1TdGFydE5vaXNlQ2FuY2VsbGF0aW9uUmVxdWVzdBIdCgpzZXNzaW9uX2lkGAEgASgJUglzZX'
-    'NzaW9uSWQ=');
+final $typed_data.Uint8List startNoiseCancellationRequestDescriptor =
+    $convert.base64Decode(
+        'Ch1TdGFydE5vaXNlQ2FuY2VsbGF0aW9uUmVxdWVzdBIdCgpzZXNzaW9uX2lkGAEgASgJUglzZX'
+        'NzaW9uSWQ=');
 
 @$core.Deprecated('Use startNoiseCancellationResponseDescriptor instead')
 const StartNoiseCancellationResponse$json = {
   '1': 'StartNoiseCancellationResponse',
   '2': [
-    {'1': 'error', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
 /// Descriptor for `StartNoiseCancellationResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startNoiseCancellationResponseDescriptor = $convert.base64Decode(
-    'Ch5TdGFydE5vaXNlQ2FuY2VsbGF0aW9uUmVzcG9uc2USNAoFZXJyb3IYASABKAsyHi5zdHJlYW'
-    '0udmlkZW8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
+final $typed_data.Uint8List startNoiseCancellationResponseDescriptor =
+    $convert.base64Decode(
+        'Ch5TdGFydE5vaXNlQ2FuY2VsbGF0aW9uUmVzcG9uc2USNAoFZXJyb3IYASABKAsyHi5zdHJlYW'
+        '0udmlkZW8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
 
 @$core.Deprecated('Use stopNoiseCancellationRequestDescriptor instead')
 const StopNoiseCancellationRequest$json = {
@@ -50,29 +59,45 @@ const StopNoiseCancellationRequest$json = {
 };
 
 /// Descriptor for `StopNoiseCancellationRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List stopNoiseCancellationRequestDescriptor = $convert.base64Decode(
-    'ChxTdG9wTm9pc2VDYW5jZWxsYXRpb25SZXF1ZXN0Eh0KCnNlc3Npb25faWQYASABKAlSCXNlc3'
-    'Npb25JZA==');
+final $typed_data.Uint8List stopNoiseCancellationRequestDescriptor =
+    $convert.base64Decode(
+        'ChxTdG9wTm9pc2VDYW5jZWxsYXRpb25SZXF1ZXN0Eh0KCnNlc3Npb25faWQYASABKAlSCXNlc3'
+        'Npb25JZA==');
 
 @$core.Deprecated('Use stopNoiseCancellationResponseDescriptor instead')
 const StopNoiseCancellationResponse$json = {
   '1': 'StopNoiseCancellationResponse',
   '2': [
-    {'1': 'error', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
 /// Descriptor for `StopNoiseCancellationResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List stopNoiseCancellationResponseDescriptor = $convert.base64Decode(
-    'Ch1TdG9wTm9pc2VDYW5jZWxsYXRpb25SZXNwb25zZRI0CgVlcnJvchgBIAEoCzIeLnN0cmVhbS'
-    '52aWRlby5zZnUubW9kZWxzLkVycm9yUgVlcnJvcg==');
+final $typed_data.Uint8List stopNoiseCancellationResponseDescriptor =
+    $convert.base64Decode(
+        'Ch1TdG9wTm9pc2VDYW5jZWxsYXRpb25SZXNwb25zZRI0CgVlcnJvchgBIAEoCzIeLnN0cmVhbS'
+        '52aWRlby5zZnUubW9kZWxzLkVycm9yUgVlcnJvcg==');
 
 @$core.Deprecated('Use reconnectionDescriptor instead')
 const Reconnection$json = {
   '1': 'Reconnection',
   '2': [
     {'1': 'time_seconds', '3': 1, '4': 1, '5': 2, '10': 'timeSeconds'},
-    {'1': 'strategy', '3': 2, '4': 1, '5': 14, '6': '.stream.video.sfu.models.WebsocketReconnectStrategy', '10': 'strategy'},
+    {
+      '1': 'strategy',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.WebsocketReconnectStrategy',
+      '10': 'strategy'
+    },
   ],
 };
 
@@ -86,8 +111,23 @@ final $typed_data.Uint8List reconnectionDescriptor = $convert.base64Decode(
 const Telemetry$json = {
   '1': 'Telemetry',
   '2': [
-    {'1': 'connection_time_seconds', '3': 1, '4': 1, '5': 2, '9': 0, '10': 'connectionTimeSeconds'},
-    {'1': 'reconnection', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.signal.Reconnection', '9': 0, '10': 'reconnection'},
+    {
+      '1': 'connection_time_seconds',
+      '3': 1,
+      '4': 1,
+      '5': 2,
+      '9': 0,
+      '10': 'connectionTimeSeconds'
+    },
+    {
+      '1': 'reconnection',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.signal.Reconnection',
+      '9': 0,
+      '10': 'reconnection'
+    },
   ],
   '8': [
     {'1': 'data'},
@@ -110,11 +150,48 @@ const SendStatsRequest$json = {
     {'1': 'webrtc_version', '3': 4, '4': 1, '5': 9, '10': 'webrtcVersion'},
     {'1': 'sdk', '3': 5, '4': 1, '5': 9, '10': 'sdk'},
     {'1': 'sdk_version', '3': 6, '4': 1, '5': 9, '10': 'sdkVersion'},
-    {'1': 'audio_devices', '3': 7, '4': 1, '5': 11, '6': '.stream.video.sfu.models.InputDevices', '10': 'audioDevices'},
-    {'1': 'video_devices', '3': 8, '4': 1, '5': 11, '6': '.stream.video.sfu.models.InputDevices', '10': 'videoDevices'},
-    {'1': 'android', '3': 9, '4': 1, '5': 11, '6': '.stream.video.sfu.models.AndroidState', '9': 0, '10': 'android'},
-    {'1': 'apple', '3': 10, '4': 1, '5': 11, '6': '.stream.video.sfu.models.AppleState', '9': 0, '10': 'apple'},
-    {'1': 'telemetry', '3': 11, '4': 1, '5': 11, '6': '.stream.video.sfu.signal.Telemetry', '10': 'telemetry'},
+    {
+      '1': 'audio_devices',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.InputDevices',
+      '10': 'audioDevices'
+    },
+    {
+      '1': 'video_devices',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.InputDevices',
+      '10': 'videoDevices'
+    },
+    {
+      '1': 'android',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.AndroidState',
+      '9': 0,
+      '10': 'android'
+    },
+    {
+      '1': 'apple',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.AppleState',
+      '9': 0,
+      '10': 'apple'
+    },
+    {
+      '1': 'telemetry',
+      '3': 11,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.signal.Telemetry',
+      '10': 'telemetry'
+    },
   ],
   '8': [
     {'1': 'device_state'},
@@ -139,7 +216,14 @@ final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
 const SendStatsResponse$json = {
   '1': 'SendStatsResponse',
   '2': [
-    {'1': 'error', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
@@ -153,7 +237,14 @@ const ICERestartRequest$json = {
   '1': 'ICERestartRequest',
   '2': [
     {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'peer_type', '3': 2, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+    {
+      '1': 'peer_type',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.PeerType',
+      '10': 'peerType'
+    },
   ],
 };
 
@@ -167,7 +258,14 @@ final $typed_data.Uint8List iCERestartRequestDescriptor = $convert.base64Decode(
 const ICERestartResponse$json = {
   '1': 'ICERestartResponse',
   '2': [
-    {'1': 'error', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
@@ -181,7 +279,14 @@ const UpdateMuteStatesRequest$json = {
   '1': 'UpdateMuteStatesRequest',
   '2': [
     {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'mute_states', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.signal.TrackMuteState', '10': 'muteStates'},
+    {
+      '1': 'mute_states',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.signal.TrackMuteState',
+      '10': 'muteStates'
+    },
   ],
 };
 
@@ -195,20 +300,35 @@ final $typed_data.Uint8List updateMuteStatesRequestDescriptor = $convert.base64D
 const UpdateMuteStatesResponse$json = {
   '1': 'UpdateMuteStatesResponse',
   '2': [
-    {'1': 'error', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
 /// Descriptor for `UpdateMuteStatesResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateMuteStatesResponseDescriptor = $convert.base64Decode(
-    'ChhVcGRhdGVNdXRlU3RhdGVzUmVzcG9uc2USNAoFZXJyb3IYBCABKAsyHi5zdHJlYW0udmlkZW'
-    '8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
+final $typed_data.Uint8List updateMuteStatesResponseDescriptor =
+    $convert.base64Decode(
+        'ChhVcGRhdGVNdXRlU3RhdGVzUmVzcG9uc2USNAoFZXJyb3IYBCABKAsyHi5zdHJlYW0udmlkZW'
+        '8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
 
 @$core.Deprecated('Use trackMuteStateDescriptor instead')
 const TrackMuteState$json = {
   '1': 'TrackMuteState',
   '2': [
-    {'1': 'track_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
+    {
+      '1': 'track_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
     {'1': 'muted', '3': 2, '4': 1, '5': 8, '10': 'muted'},
   ],
 };
@@ -227,8 +347,8 @@ const AudioMuteChanged$json = {
 };
 
 /// Descriptor for `AudioMuteChanged`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List audioMuteChangedDescriptor = $convert.base64Decode(
-    'ChBBdWRpb011dGVDaGFuZ2VkEhQKBW11dGVkGAEgASgIUgVtdXRlZA==');
+final $typed_data.Uint8List audioMuteChangedDescriptor = $convert
+    .base64Decode('ChBBdWRpb011dGVDaGFuZ2VkEhQKBW11dGVkGAEgASgIUgVtdXRlZA==');
 
 @$core.Deprecated('Use videoMuteChangedDescriptor instead')
 const VideoMuteChanged$json = {
@@ -239,36 +359,52 @@ const VideoMuteChanged$json = {
 };
 
 /// Descriptor for `VideoMuteChanged`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List videoMuteChangedDescriptor = $convert.base64Decode(
-    'ChBWaWRlb011dGVDaGFuZ2VkEhQKBW11dGVkGAIgASgIUgVtdXRlZA==');
+final $typed_data.Uint8List videoMuteChangedDescriptor = $convert
+    .base64Decode('ChBWaWRlb011dGVDaGFuZ2VkEhQKBW11dGVkGAIgASgIUgVtdXRlZA==');
 
 @$core.Deprecated('Use updateSubscriptionsRequestDescriptor instead')
 const UpdateSubscriptionsRequest$json = {
   '1': 'UpdateSubscriptionsRequest',
   '2': [
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'tracks', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.signal.TrackSubscriptionDetails', '10': 'tracks'},
+    {
+      '1': 'tracks',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.signal.TrackSubscriptionDetails',
+      '10': 'tracks'
+    },
   ],
 };
 
 /// Descriptor for `UpdateSubscriptionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateSubscriptionsRequestDescriptor = $convert.base64Decode(
-    'ChpVcGRhdGVTdWJzY3JpcHRpb25zUmVxdWVzdBIdCgpzZXNzaW9uX2lkGAIgASgJUglzZXNzaW'
-    '9uSWQSSQoGdHJhY2tzGAMgAygLMjEuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVHJhY2tTdWJz'
-    'Y3JpcHRpb25EZXRhaWxzUgZ0cmFja3M=');
+final $typed_data.Uint8List updateSubscriptionsRequestDescriptor =
+    $convert.base64Decode(
+        'ChpVcGRhdGVTdWJzY3JpcHRpb25zUmVxdWVzdBIdCgpzZXNzaW9uX2lkGAIgASgJUglzZXNzaW'
+        '9uSWQSSQoGdHJhY2tzGAMgAygLMjEuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVHJhY2tTdWJz'
+        'Y3JpcHRpb25EZXRhaWxzUgZ0cmFja3M=');
 
 @$core.Deprecated('Use updateSubscriptionsResponseDescriptor instead')
 const UpdateSubscriptionsResponse$json = {
   '1': 'UpdateSubscriptionsResponse',
   '2': [
-    {'1': 'error', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
 /// Descriptor for `UpdateSubscriptionsResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateSubscriptionsResponseDescriptor = $convert.base64Decode(
-    'ChtVcGRhdGVTdWJzY3JpcHRpb25zUmVzcG9uc2USNAoFZXJyb3IYBCABKAsyHi5zdHJlYW0udm'
-    'lkZW8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
+final $typed_data.Uint8List updateSubscriptionsResponseDescriptor =
+    $convert.base64Decode(
+        'ChtVcGRhdGVTdWJzY3JpcHRpb25zUmVzcG9uc2USNAoFZXJyb3IYBCABKAsyHi5zdHJlYW0udm'
+        'lkZW8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
 
 @$core.Deprecated('Use trackSubscriptionDetailsDescriptor instead')
 const TrackSubscriptionDetails$json = {
@@ -276,8 +412,22 @@ const TrackSubscriptionDetails$json = {
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'track_type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
-    {'1': 'dimension', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.VideoDimension', '10': 'dimension'},
+    {
+      '1': 'track_type',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {
+      '1': 'dimension',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.VideoDimension',
+      '10': 'dimension'
+    },
   ],
 };
 
@@ -292,7 +442,14 @@ final $typed_data.Uint8List trackSubscriptionDetailsDescriptor = $convert.base64
 const SendAnswerRequest$json = {
   '1': 'SendAnswerRequest',
   '2': [
-    {'1': 'peer_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+    {
+      '1': 'peer_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.PeerType',
+      '10': 'peerType'
+    },
     {'1': 'sdp', '3': 2, '4': 1, '5': 9, '10': 'sdp'},
     {'1': 'session_id', '3': 3, '4': 1, '5': 9, '10': 'sessionId'},
   ],
@@ -308,7 +465,14 @@ final $typed_data.Uint8List sendAnswerRequestDescriptor = $convert.base64Decode(
 const SendAnswerResponse$json = {
   '1': 'SendAnswerResponse',
   '2': [
-    {'1': 'error', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
@@ -321,7 +485,14 @@ final $typed_data.Uint8List sendAnswerResponseDescriptor = $convert.base64Decode
 const ICETrickleResponse$json = {
   '1': 'ICETrickleResponse',
   '2': [
-    {'1': 'error', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
@@ -336,7 +507,14 @@ const SetPublisherRequest$json = {
   '2': [
     {'1': 'sdp', '3': 1, '4': 1, '5': 9, '10': 'sdp'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'tracks', '3': 3, '4': 3, '5': 11, '6': '.stream.video.sfu.models.TrackInfo', '10': 'tracks'},
+    {
+      '1': 'tracks',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.TrackInfo',
+      '10': 'tracks'
+    },
   ],
 };
 
@@ -353,7 +531,14 @@ const SetPublisherResponse$json = {
     {'1': 'sdp', '3': 1, '4': 1, '5': 9, '10': 'sdp'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     {'1': 'ice_restart', '3': 3, '4': 1, '5': 8, '10': 'iceRestart'},
-    {'1': 'error', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+    {
+      '1': 'error',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Error',
+      '10': 'error'
+    },
   ],
 };
 
@@ -366,20 +551,57 @@ final $typed_data.Uint8List setPublisherResponseDescriptor = $convert.base64Deco
 const $core.Map<$core.String, $core.dynamic> SignalServerServiceBase$json = {
   '1': 'SignalServer',
   '2': [
-    {'1': 'SetPublisher', '2': '.stream.video.sfu.signal.SetPublisherRequest', '3': '.stream.video.sfu.signal.SetPublisherResponse'},
-    {'1': 'SendAnswer', '2': '.stream.video.sfu.signal.SendAnswerRequest', '3': '.stream.video.sfu.signal.SendAnswerResponse'},
-    {'1': 'IceTrickle', '2': '.stream.video.sfu.models.ICETrickle', '3': '.stream.video.sfu.signal.ICETrickleResponse'},
-    {'1': 'UpdateSubscriptions', '2': '.stream.video.sfu.signal.UpdateSubscriptionsRequest', '3': '.stream.video.sfu.signal.UpdateSubscriptionsResponse'},
-    {'1': 'UpdateMuteStates', '2': '.stream.video.sfu.signal.UpdateMuteStatesRequest', '3': '.stream.video.sfu.signal.UpdateMuteStatesResponse'},
-    {'1': 'IceRestart', '2': '.stream.video.sfu.signal.ICERestartRequest', '3': '.stream.video.sfu.signal.ICERestartResponse'},
-    {'1': 'SendStats', '2': '.stream.video.sfu.signal.SendStatsRequest', '3': '.stream.video.sfu.signal.SendStatsResponse'},
-    {'1': 'StartNoiseCancellation', '2': '.stream.video.sfu.signal.StartNoiseCancellationRequest', '3': '.stream.video.sfu.signal.StartNoiseCancellationResponse'},
-    {'1': 'StopNoiseCancellation', '2': '.stream.video.sfu.signal.StopNoiseCancellationRequest', '3': '.stream.video.sfu.signal.StopNoiseCancellationResponse'},
+    {
+      '1': 'SetPublisher',
+      '2': '.stream.video.sfu.signal.SetPublisherRequest',
+      '3': '.stream.video.sfu.signal.SetPublisherResponse'
+    },
+    {
+      '1': 'SendAnswer',
+      '2': '.stream.video.sfu.signal.SendAnswerRequest',
+      '3': '.stream.video.sfu.signal.SendAnswerResponse'
+    },
+    {
+      '1': 'IceTrickle',
+      '2': '.stream.video.sfu.models.ICETrickle',
+      '3': '.stream.video.sfu.signal.ICETrickleResponse'
+    },
+    {
+      '1': 'UpdateSubscriptions',
+      '2': '.stream.video.sfu.signal.UpdateSubscriptionsRequest',
+      '3': '.stream.video.sfu.signal.UpdateSubscriptionsResponse'
+    },
+    {
+      '1': 'UpdateMuteStates',
+      '2': '.stream.video.sfu.signal.UpdateMuteStatesRequest',
+      '3': '.stream.video.sfu.signal.UpdateMuteStatesResponse'
+    },
+    {
+      '1': 'IceRestart',
+      '2': '.stream.video.sfu.signal.ICERestartRequest',
+      '3': '.stream.video.sfu.signal.ICERestartResponse'
+    },
+    {
+      '1': 'SendStats',
+      '2': '.stream.video.sfu.signal.SendStatsRequest',
+      '3': '.stream.video.sfu.signal.SendStatsResponse'
+    },
+    {
+      '1': 'StartNoiseCancellation',
+      '2': '.stream.video.sfu.signal.StartNoiseCancellationRequest',
+      '3': '.stream.video.sfu.signal.StartNoiseCancellationResponse'
+    },
+    {
+      '1': 'StopNoiseCancellation',
+      '2': '.stream.video.sfu.signal.StopNoiseCancellationRequest',
+      '3': '.stream.video.sfu.signal.StopNoiseCancellationResponse'
+    },
   ],
 };
 
 @$core.Deprecated('Use signalServerServiceDescriptor instead')
-const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServerServiceBase$messageJson = {
+const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+    SignalServerServiceBase$messageJson = {
   '.stream.video.sfu.signal.SetPublisherRequest': SetPublisherRequest$json,
   '.stream.video.sfu.models.TrackInfo': $0.TrackInfo$json,
   '.stream.video.sfu.models.VideoLayer': $0.VideoLayer$json,
@@ -391,12 +613,17 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.signal.SendAnswerResponse': SendAnswerResponse$json,
   '.stream.video.sfu.models.ICETrickle': $0.ICETrickle$json,
   '.stream.video.sfu.signal.ICETrickleResponse': ICETrickleResponse$json,
-  '.stream.video.sfu.signal.UpdateSubscriptionsRequest': UpdateSubscriptionsRequest$json,
-  '.stream.video.sfu.signal.TrackSubscriptionDetails': TrackSubscriptionDetails$json,
-  '.stream.video.sfu.signal.UpdateSubscriptionsResponse': UpdateSubscriptionsResponse$json,
-  '.stream.video.sfu.signal.UpdateMuteStatesRequest': UpdateMuteStatesRequest$json,
+  '.stream.video.sfu.signal.UpdateSubscriptionsRequest':
+      UpdateSubscriptionsRequest$json,
+  '.stream.video.sfu.signal.TrackSubscriptionDetails':
+      TrackSubscriptionDetails$json,
+  '.stream.video.sfu.signal.UpdateSubscriptionsResponse':
+      UpdateSubscriptionsResponse$json,
+  '.stream.video.sfu.signal.UpdateMuteStatesRequest':
+      UpdateMuteStatesRequest$json,
   '.stream.video.sfu.signal.TrackMuteState': TrackMuteState$json,
-  '.stream.video.sfu.signal.UpdateMuteStatesResponse': UpdateMuteStatesResponse$json,
+  '.stream.video.sfu.signal.UpdateMuteStatesResponse':
+      UpdateMuteStatesResponse$json,
   '.stream.video.sfu.signal.ICERestartRequest': ICERestartRequest$json,
   '.stream.video.sfu.signal.ICERestartResponse': ICERestartResponse$json,
   '.stream.video.sfu.signal.SendStatsRequest': SendStatsRequest$json,
@@ -406,10 +633,14 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.signal.Telemetry': Telemetry$json,
   '.stream.video.sfu.signal.Reconnection': Reconnection$json,
   '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
-  '.stream.video.sfu.signal.StartNoiseCancellationRequest': StartNoiseCancellationRequest$json,
-  '.stream.video.sfu.signal.StartNoiseCancellationResponse': StartNoiseCancellationResponse$json,
-  '.stream.video.sfu.signal.StopNoiseCancellationRequest': StopNoiseCancellationRequest$json,
-  '.stream.video.sfu.signal.StopNoiseCancellationResponse': StopNoiseCancellationResponse$json,
+  '.stream.video.sfu.signal.StartNoiseCancellationRequest':
+      StartNoiseCancellationRequest$json,
+  '.stream.video.sfu.signal.StartNoiseCancellationResponse':
+      StartNoiseCancellationResponse$json,
+  '.stream.video.sfu.signal.StopNoiseCancellationRequest':
+      StopNoiseCancellationRequest$json,
+  '.stream.video.sfu.signal.StopNoiseCancellationResponse':
+      StopNoiseCancellationResponse$json,
 };
 
 /// Descriptor for `SignalServer`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -434,4 +665,3 @@ final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decod
     'I1LnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlN0b3BOb2lzZUNhbmNlbGxhdGlvblJlcXVlc3Qa'
     'Ni5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TdG9wTm9pc2VDYW5jZWxsYXRpb25SZXNwb25zZQ'
     '==');
-

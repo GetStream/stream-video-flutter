@@ -95,46 +95,50 @@ class GetCallStatsResponse {
   List<SFULocationResponse> sfus;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GetCallStatsResponse &&
-    other.aggregated == aggregated &&
-    other.averageConnectionTime == averageConnectionTime &&
-    other.callDurationSeconds == callDurationSeconds &&
-    other.callStatus == callStatus &&
-    other.callTimeline == callTimeline &&
-    other.duration == duration &&
-    other.jitter == jitter &&
-    other.latency == latency &&
-    other.maxFreezesDurationSeconds == maxFreezesDurationSeconds &&
-    other.maxParticipants == maxParticipants &&
-    other.maxTotalQualityLimitationDurationSeconds == maxTotalQualityLimitationDurationSeconds &&
-    _deepEquality.equals(other.participantReport, participantReport) &&
-    other.publishingParticipants == publishingParticipants &&
-    other.qualityScore == qualityScore &&
-    other.sfuCount == sfuCount &&
-    _deepEquality.equals(other.sfus, sfus);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GetCallStatsResponse &&
+          other.aggregated == aggregated &&
+          other.averageConnectionTime == averageConnectionTime &&
+          other.callDurationSeconds == callDurationSeconds &&
+          other.callStatus == callStatus &&
+          other.callTimeline == callTimeline &&
+          other.duration == duration &&
+          other.jitter == jitter &&
+          other.latency == latency &&
+          other.maxFreezesDurationSeconds == maxFreezesDurationSeconds &&
+          other.maxParticipants == maxParticipants &&
+          other.maxTotalQualityLimitationDurationSeconds ==
+              maxTotalQualityLimitationDurationSeconds &&
+          _deepEquality.equals(other.participantReport, participantReport) &&
+          other.publishingParticipants == publishingParticipants &&
+          other.qualityScore == qualityScore &&
+          other.sfuCount == sfuCount &&
+          _deepEquality.equals(other.sfus, sfus);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (aggregated == null ? 0 : aggregated!.hashCode) +
-    (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
-    (callDurationSeconds.hashCode) +
-    (callStatus.hashCode) +
-    (callTimeline == null ? 0 : callTimeline!.hashCode) +
-    (duration.hashCode) +
-    (jitter == null ? 0 : jitter!.hashCode) +
-    (latency == null ? 0 : latency!.hashCode) +
-    (maxFreezesDurationSeconds.hashCode) +
-    (maxParticipants.hashCode) +
-    (maxTotalQualityLimitationDurationSeconds.hashCode) +
-    (participantReport.hashCode) +
-    (publishingParticipants.hashCode) +
-    (qualityScore.hashCode) +
-    (sfuCount.hashCode) +
-    (sfus.hashCode);
+      // ignore: unnecessary_parenthesis
+      (aggregated == null ? 0 : aggregated!.hashCode) +
+      (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
+      (callDurationSeconds.hashCode) +
+      (callStatus.hashCode) +
+      (callTimeline == null ? 0 : callTimeline!.hashCode) +
+      (duration.hashCode) +
+      (jitter == null ? 0 : jitter!.hashCode) +
+      (latency == null ? 0 : latency!.hashCode) +
+      (maxFreezesDurationSeconds.hashCode) +
+      (maxParticipants.hashCode) +
+      (maxTotalQualityLimitationDurationSeconds.hashCode) +
+      (participantReport.hashCode) +
+      (publishingParticipants.hashCode) +
+      (qualityScore.hashCode) +
+      (sfuCount.hashCode) +
+      (sfus.hashCode);
 
   @override
-  String toString() => 'GetCallStatsResponse[aggregated=$aggregated, averageConnectionTime=$averageConnectionTime, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
+  String toString() =>
+      'GetCallStatsResponse[aggregated=$aggregated, averageConnectionTime=$averageConnectionTime, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -148,14 +152,14 @@ class GetCallStatsResponse {
     } else {
       json[r'average_connection_time'] = null;
     }
-      json[r'call_duration_seconds'] = this.callDurationSeconds;
-      json[r'call_status'] = this.callStatus;
+    json[r'call_duration_seconds'] = this.callDurationSeconds;
+    json[r'call_status'] = this.callStatus;
     if (this.callTimeline != null) {
       json[r'call_timeline'] = this.callTimeline;
     } else {
       json[r'call_timeline'] = null;
     }
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     if (this.jitter != null) {
       json[r'jitter'] = this.jitter;
     } else {
@@ -166,14 +170,15 @@ class GetCallStatsResponse {
     } else {
       json[r'latency'] = null;
     }
-      json[r'max_freezes_duration_seconds'] = this.maxFreezesDurationSeconds;
-      json[r'max_participants'] = this.maxParticipants;
-      json[r'max_total_quality_limitation_duration_seconds'] = this.maxTotalQualityLimitationDurationSeconds;
-      json[r'participant_report'] = this.participantReport;
-      json[r'publishing_participants'] = this.publishingParticipants;
-      json[r'quality_score'] = this.qualityScore;
-      json[r'sfu_count'] = this.sfuCount;
-      json[r'sfus'] = this.sfus;
+    json[r'max_freezes_duration_seconds'] = this.maxFreezesDurationSeconds;
+    json[r'max_participants'] = this.maxParticipants;
+    json[r'max_total_quality_limitation_duration_seconds'] =
+        this.maxTotalQualityLimitationDurationSeconds;
+    json[r'participant_report'] = this.participantReport;
+    json[r'publishing_participants'] = this.publishingParticipants;
+    json[r'quality_score'] = this.qualityScore;
+    json[r'sfu_count'] = this.sfuCount;
+    json[r'sfus'] = this.sfus;
     return json;
   }
 
@@ -189,26 +194,33 @@ class GetCallStatsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GetCallStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GetCallStatsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GetCallStatsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GetCallStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return GetCallStatsResponse(
         aggregated: AggregatedStats.fromJson(json[r'aggregated']),
-        averageConnectionTime: mapValueOfType<double>(json, r'average_connection_time'),
-        callDurationSeconds: mapValueOfType<int>(json, r'call_duration_seconds')!,
+        averageConnectionTime:
+            mapValueOfType<double>(json, r'average_connection_time'),
+        callDurationSeconds:
+            mapValueOfType<int>(json, r'call_duration_seconds')!,
         callStatus: mapValueOfType<String>(json, r'call_status')!,
         callTimeline: CallTimeline.fromJson(json[r'call_timeline']),
         duration: mapValueOfType<String>(json, r'duration')!,
         jitter: TimeStats.fromJson(json[r'jitter']),
         latency: TimeStats.fromJson(json[r'latency']),
-        maxFreezesDurationSeconds: mapValueOfType<int>(json, r'max_freezes_duration_seconds')!,
+        maxFreezesDurationSeconds:
+            mapValueOfType<int>(json, r'max_freezes_duration_seconds')!,
         maxParticipants: mapValueOfType<int>(json, r'max_participants')!,
-        maxTotalQualityLimitationDurationSeconds: mapValueOfType<int>(json, r'max_total_quality_limitation_duration_seconds')!,
+        maxTotalQualityLimitationDurationSeconds: mapValueOfType<int>(
+            json, r'max_total_quality_limitation_duration_seconds')!,
         participantReport: UserStats.listFromJson(json[r'participant_report']),
-        publishingParticipants: mapValueOfType<int>(json, r'publishing_participants')!,
+        publishingParticipants:
+            mapValueOfType<int>(json, r'publishing_participants')!,
         qualityScore: mapValueOfType<int>(json, r'quality_score')!,
         sfuCount: mapValueOfType<int>(json, r'sfu_count')!,
         sfus: SFULocationResponse.listFromJson(json[r'sfus']),
@@ -217,7 +229,10 @@ class GetCallStatsResponse {
     return null;
   }
 
-  static List<GetCallStatsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GetCallStatsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GetCallStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -245,13 +260,19 @@ class GetCallStatsResponse {
   }
 
   // maps a json object with a list of GetCallStatsResponse-objects as value to a dart map
-  static Map<String, List<GetCallStatsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GetCallStatsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GetCallStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GetCallStatsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GetCallStatsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -272,4 +293,3 @@ class GetCallStatsResponse {
     'sfus',
   };
 }
-

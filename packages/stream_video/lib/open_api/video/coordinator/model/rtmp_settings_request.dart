@@ -29,18 +29,21 @@ class RTMPSettingsRequest {
   RTMPSettingsRequestQualityEnum? quality;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RTMPSettingsRequest &&
-    other.enabled == enabled &&
-    other.quality == quality;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RTMPSettingsRequest &&
+          other.enabled == enabled &&
+          other.quality == quality;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (enabled == null ? 0 : enabled!.hashCode) +
-    (quality == null ? 0 : quality!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (enabled == null ? 0 : enabled!.hashCode) +
+      (quality == null ? 0 : quality!.hashCode);
 
   @override
-  String toString() => 'RTMPSettingsRequest[enabled=$enabled, quality=$quality]';
+  String toString() =>
+      'RTMPSettingsRequest[enabled=$enabled, quality=$quality]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -69,8 +72,10 @@ class RTMPSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RTMPSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RTMPSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RTMPSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RTMPSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -83,7 +88,10 @@ class RTMPSettingsRequest {
     return null;
   }
 
-  static List<RTMPSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RTMPSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,21 +119,26 @@ class RTMPSettingsRequest {
   }
 
   // maps a json object with a list of RTMPSettingsRequest-objects as value to a dart map
-  static Map<String, List<RTMPSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RTMPSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RTMPSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RTMPSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RTMPSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
 
 /// Resolution to set for the RTMP stream
@@ -146,11 +159,16 @@ class RTMPSettingsRequestQualityEnum {
   static const n720p = RTMPSettingsRequestQualityEnum._(r'720p');
   static const n1080p = RTMPSettingsRequestQualityEnum._(r'1080p');
   static const n1440p = RTMPSettingsRequestQualityEnum._(r'1440p');
-  static const portrait360x640 = RTMPSettingsRequestQualityEnum._(r'portrait-360x640');
-  static const portrait480x854 = RTMPSettingsRequestQualityEnum._(r'portrait-480x854');
-  static const portrait720x1280 = RTMPSettingsRequestQualityEnum._(r'portrait-720x1280');
-  static const portrait1080x1920 = RTMPSettingsRequestQualityEnum._(r'portrait-1080x1920');
-  static const portrait1440x2560 = RTMPSettingsRequestQualityEnum._(r'portrait-1440x2560');
+  static const portrait360x640 =
+      RTMPSettingsRequestQualityEnum._(r'portrait-360x640');
+  static const portrait480x854 =
+      RTMPSettingsRequestQualityEnum._(r'portrait-480x854');
+  static const portrait720x1280 =
+      RTMPSettingsRequestQualityEnum._(r'portrait-720x1280');
+  static const portrait1080x1920 =
+      RTMPSettingsRequestQualityEnum._(r'portrait-1080x1920');
+  static const portrait1440x2560 =
+      RTMPSettingsRequestQualityEnum._(r'portrait-1440x2560');
 
   /// List of all possible values in this [enum][RTMPSettingsRequestQualityEnum].
   static const values = <RTMPSettingsRequestQualityEnum>[
@@ -166,9 +184,13 @@ class RTMPSettingsRequestQualityEnum {
     portrait1440x2560,
   ];
 
-  static RTMPSettingsRequestQualityEnum? fromJson(dynamic value) => RTMPSettingsRequestQualityEnumTypeTransformer().decode(value);
+  static RTMPSettingsRequestQualityEnum? fromJson(dynamic value) =>
+      RTMPSettingsRequestQualityEnumTypeTransformer().decode(value);
 
-  static List<RTMPSettingsRequestQualityEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPSettingsRequestQualityEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RTMPSettingsRequestQualityEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -185,7 +207,8 @@ class RTMPSettingsRequestQualityEnum {
 /// Transformation class that can [encode] an instance of [RTMPSettingsRequestQualityEnum] to String,
 /// and [decode] dynamic data back to [RTMPSettingsRequestQualityEnum].
 class RTMPSettingsRequestQualityEnumTypeTransformer {
-  factory RTMPSettingsRequestQualityEnumTypeTransformer() => _instance ??= const RTMPSettingsRequestQualityEnumTypeTransformer._();
+  factory RTMPSettingsRequestQualityEnumTypeTransformer() =>
+      _instance ??= const RTMPSettingsRequestQualityEnumTypeTransformer._();
 
   const RTMPSettingsRequestQualityEnumTypeTransformer._();
 
@@ -199,19 +222,30 @@ class RTMPSettingsRequestQualityEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  RTMPSettingsRequestQualityEnum? decode(dynamic data, {bool allowNull = true}) {
+  RTMPSettingsRequestQualityEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'360p': return RTMPSettingsRequestQualityEnum.n360p;
-        case r'480p': return RTMPSettingsRequestQualityEnum.n480p;
-        case r'720p': return RTMPSettingsRequestQualityEnum.n720p;
-        case r'1080p': return RTMPSettingsRequestQualityEnum.n1080p;
-        case r'1440p': return RTMPSettingsRequestQualityEnum.n1440p;
-        case r'portrait-360x640': return RTMPSettingsRequestQualityEnum.portrait360x640;
-        case r'portrait-480x854': return RTMPSettingsRequestQualityEnum.portrait480x854;
-        case r'portrait-720x1280': return RTMPSettingsRequestQualityEnum.portrait720x1280;
-        case r'portrait-1080x1920': return RTMPSettingsRequestQualityEnum.portrait1080x1920;
-        case r'portrait-1440x2560': return RTMPSettingsRequestQualityEnum.portrait1440x2560;
+        case r'360p':
+          return RTMPSettingsRequestQualityEnum.n360p;
+        case r'480p':
+          return RTMPSettingsRequestQualityEnum.n480p;
+        case r'720p':
+          return RTMPSettingsRequestQualityEnum.n720p;
+        case r'1080p':
+          return RTMPSettingsRequestQualityEnum.n1080p;
+        case r'1440p':
+          return RTMPSettingsRequestQualityEnum.n1440p;
+        case r'portrait-360x640':
+          return RTMPSettingsRequestQualityEnum.portrait360x640;
+        case r'portrait-480x854':
+          return RTMPSettingsRequestQualityEnum.portrait480x854;
+        case r'portrait-720x1280':
+          return RTMPSettingsRequestQualityEnum.portrait720x1280;
+        case r'portrait-1080x1920':
+          return RTMPSettingsRequestQualityEnum.portrait1080x1920;
+        case r'portrait-1440x2560':
+          return RTMPSettingsRequestQualityEnum.portrait1440x2560;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -224,5 +258,3 @@ class RTMPSettingsRequestQualityEnumTypeTransformer {
   /// Singleton [RTMPSettingsRequestQualityEnumTypeTransformer] instance.
   static RTMPSettingsRequestQualityEnumTypeTransformer? _instance;
 }
-
-

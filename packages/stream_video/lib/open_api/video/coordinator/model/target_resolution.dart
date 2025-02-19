@@ -36,20 +36,23 @@ class TargetResolution {
   int width;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TargetResolution &&
-    other.bitrate == bitrate &&
-    other.height == height &&
-    other.width == width;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TargetResolution &&
+          other.bitrate == bitrate &&
+          other.height == height &&
+          other.width == width;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (bitrate == null ? 0 : bitrate!.hashCode) +
-    (height.hashCode) +
-    (width.hashCode);
+      // ignore: unnecessary_parenthesis
+      (bitrate == null ? 0 : bitrate!.hashCode) +
+      (height.hashCode) +
+      (width.hashCode);
 
   @override
-  String toString() => 'TargetResolution[bitrate=$bitrate, height=$height, width=$width]';
+  String toString() =>
+      'TargetResolution[bitrate=$bitrate, height=$height, width=$width]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -58,8 +61,8 @@ class TargetResolution {
     } else {
       json[r'bitrate'] = null;
     }
-      json[r'height'] = this.height;
-      json[r'width'] = this.width;
+    json[r'height'] = this.height;
+    json[r'width'] = this.width;
     return json;
   }
 
@@ -75,8 +78,10 @@ class TargetResolution {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "TargetResolution[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "TargetResolution[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "TargetResolution[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "TargetResolution[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -90,7 +95,10 @@ class TargetResolution {
     return null;
   }
 
-  static List<TargetResolution> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TargetResolution> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TargetResolution>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -118,13 +126,19 @@ class TargetResolution {
   }
 
   // maps a json object with a list of TargetResolution-objects as value to a dart map
-  static Map<String, List<TargetResolution>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TargetResolution>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TargetResolution>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TargetResolution.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TargetResolution.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -136,4 +150,3 @@ class TargetResolution {
     'width',
   };
 }
-

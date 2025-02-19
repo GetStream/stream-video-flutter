@@ -54,40 +54,43 @@ class APIError {
   bool? unrecoverable;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is APIError &&
-    other.statusCode == statusCode &&
-    other.code == code &&
-    _deepEquality.equals(other.details, details) &&
-    other.duration == duration &&
-    _deepEquality.equals(other.exceptionFields, exceptionFields) &&
-    other.message == message &&
-    other.moreInfo == moreInfo &&
-    other.unrecoverable == unrecoverable;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is APIError &&
+          other.statusCode == statusCode &&
+          other.code == code &&
+          _deepEquality.equals(other.details, details) &&
+          other.duration == duration &&
+          _deepEquality.equals(other.exceptionFields, exceptionFields) &&
+          other.message == message &&
+          other.moreInfo == moreInfo &&
+          other.unrecoverable == unrecoverable;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (statusCode.hashCode) +
-    (code.hashCode) +
-    (details.hashCode) +
-    (duration.hashCode) +
-    (exceptionFields.hashCode) +
-    (message.hashCode) +
-    (moreInfo.hashCode) +
-    (unrecoverable == null ? 0 : unrecoverable!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (statusCode.hashCode) +
+      (code.hashCode) +
+      (details.hashCode) +
+      (duration.hashCode) +
+      (exceptionFields.hashCode) +
+      (message.hashCode) +
+      (moreInfo.hashCode) +
+      (unrecoverable == null ? 0 : unrecoverable!.hashCode);
 
   @override
-  String toString() => 'APIError[statusCode=$statusCode, code=$code, details=$details, duration=$duration, exceptionFields=$exceptionFields, message=$message, moreInfo=$moreInfo, unrecoverable=$unrecoverable]';
+  String toString() =>
+      'APIError[statusCode=$statusCode, code=$code, details=$details, duration=$duration, exceptionFields=$exceptionFields, message=$message, moreInfo=$moreInfo, unrecoverable=$unrecoverable]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'StatusCode'] = this.statusCode;
-      json[r'code'] = this.code;
-      json[r'details'] = this.details;
-      json[r'duration'] = this.duration;
-      json[r'exception_fields'] = this.exceptionFields;
-      json[r'message'] = this.message;
-      json[r'more_info'] = this.moreInfo;
+    json[r'StatusCode'] = this.statusCode;
+    json[r'code'] = this.code;
+    json[r'details'] = this.details;
+    json[r'duration'] = this.duration;
+    json[r'exception_fields'] = this.exceptionFields;
+    json[r'message'] = this.message;
+    json[r'more_info'] = this.moreInfo;
     if (this.unrecoverable != null) {
       json[r'unrecoverable'] = this.unrecoverable;
     } else {
@@ -108,8 +111,10 @@ class APIError {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "APIError[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "APIError[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "APIError[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "APIError[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -121,7 +126,9 @@ class APIError {
             ? (json[r'details'] as Iterable).cast<int>().toList(growable: false)
             : const [],
         duration: mapValueOfType<String>(json, r'duration')!,
-        exceptionFields: mapCastOfType<String, String>(json, r'exception_fields') ?? const {},
+        exceptionFields:
+            mapCastOfType<String, String>(json, r'exception_fields') ??
+                const {},
         message: mapValueOfType<String>(json, r'message')!,
         moreInfo: mapValueOfType<String>(json, r'more_info')!,
         unrecoverable: mapValueOfType<bool>(json, r'unrecoverable'),
@@ -130,7 +137,10 @@ class APIError {
     return null;
   }
 
-  static List<APIError> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<APIError> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <APIError>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -158,13 +168,19 @@ class APIError {
   }
 
   // maps a json object with a list of APIError-objects as value to a dart map
-  static Map<String, List<APIError>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<APIError>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<APIError>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = APIError.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = APIError.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -180,4 +196,3 @@ class APIError {
     'more_info',
   };
 }
-

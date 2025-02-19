@@ -22,23 +22,25 @@ class DailyAggregateQualityScoreReportResponse {
   QualityScoreReport report;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is DailyAggregateQualityScoreReportResponse &&
-    other.date == date &&
-    other.report == report;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DailyAggregateQualityScoreReportResponse &&
+          other.date == date &&
+          other.report == report;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (date.hashCode) +
-    (report.hashCode);
+      // ignore: unnecessary_parenthesis
+      (date.hashCode) + (report.hashCode);
 
   @override
-  String toString() => 'DailyAggregateQualityScoreReportResponse[date=$date, report=$report]';
+  String toString() =>
+      'DailyAggregateQualityScoreReportResponse[date=$date, report=$report]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'date'] = this.date;
-      json[r'report'] = this.report;
+    json[r'date'] = this.date;
+    json[r'report'] = this.report;
     return json;
   }
 
@@ -54,8 +56,10 @@ class DailyAggregateQualityScoreReportResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "DailyAggregateQualityScoreReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "DailyAggregateQualityScoreReportResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "DailyAggregateQualityScoreReportResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "DailyAggregateQualityScoreReportResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +72,10 @@ class DailyAggregateQualityScoreReportResponse {
     return null;
   }
 
-  static List<DailyAggregateQualityScoreReportResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DailyAggregateQualityScoreReportResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <DailyAggregateQualityScoreReportResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -81,12 +88,14 @@ class DailyAggregateQualityScoreReportResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, DailyAggregateQualityScoreReportResponse> mapFromJson(dynamic json) {
+  static Map<String, DailyAggregateQualityScoreReportResponse> mapFromJson(
+      dynamic json) {
     final map = <String, DailyAggregateQualityScoreReportResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = DailyAggregateQualityScoreReportResponse.fromJson(entry.value);
+        final value =
+            DailyAggregateQualityScoreReportResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -96,13 +105,20 @@ class DailyAggregateQualityScoreReportResponse {
   }
 
   // maps a json object with a list of DailyAggregateQualityScoreReportResponse-objects as value to a dart map
-  static Map<String, List<DailyAggregateQualityScoreReportResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DailyAggregateQualityScoreReportResponse>>
+      mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DailyAggregateQualityScoreReportResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = DailyAggregateQualityScoreReportResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = DailyAggregateQualityScoreReportResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +130,3 @@ class DailyAggregateQualityScoreReportResponse {
     'report',
   };
 }
-

@@ -82,49 +82,53 @@ class CallSessionResponse {
   DateTime? timerEndsAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallSessionResponse &&
-    _deepEquality.equals(other.acceptedBy, acceptedBy) &&
-    other.anonymousParticipantCount == anonymousParticipantCount &&
-    other.endedAt == endedAt &&
-    other.id == id &&
-    other.liveEndedAt == liveEndedAt &&
-    other.liveStartedAt == liveStartedAt &&
-    _deepEquality.equals(other.missedBy, missedBy) &&
-    _deepEquality.equals(other.participants, participants) &&
-    _deepEquality.equals(other.participantsCountByRole, participantsCountByRole) &&
-    _deepEquality.equals(other.rejectedBy, rejectedBy) &&
-    other.startedAt == startedAt &&
-    other.timerEndsAt == timerEndsAt;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallSessionResponse &&
+          _deepEquality.equals(other.acceptedBy, acceptedBy) &&
+          other.anonymousParticipantCount == anonymousParticipantCount &&
+          other.endedAt == endedAt &&
+          other.id == id &&
+          other.liveEndedAt == liveEndedAt &&
+          other.liveStartedAt == liveStartedAt &&
+          _deepEquality.equals(other.missedBy, missedBy) &&
+          _deepEquality.equals(other.participants, participants) &&
+          _deepEquality.equals(
+              other.participantsCountByRole, participantsCountByRole) &&
+          _deepEquality.equals(other.rejectedBy, rejectedBy) &&
+          other.startedAt == startedAt &&
+          other.timerEndsAt == timerEndsAt;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (acceptedBy.hashCode) +
-    (anonymousParticipantCount.hashCode) +
-    (endedAt == null ? 0 : endedAt!.hashCode) +
-    (id.hashCode) +
-    (liveEndedAt == null ? 0 : liveEndedAt!.hashCode) +
-    (liveStartedAt == null ? 0 : liveStartedAt!.hashCode) +
-    (missedBy.hashCode) +
-    (participants.hashCode) +
-    (participantsCountByRole.hashCode) +
-    (rejectedBy.hashCode) +
-    (startedAt == null ? 0 : startedAt!.hashCode) +
-    (timerEndsAt == null ? 0 : timerEndsAt!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (acceptedBy.hashCode) +
+      (anonymousParticipantCount.hashCode) +
+      (endedAt == null ? 0 : endedAt!.hashCode) +
+      (id.hashCode) +
+      (liveEndedAt == null ? 0 : liveEndedAt!.hashCode) +
+      (liveStartedAt == null ? 0 : liveStartedAt!.hashCode) +
+      (missedBy.hashCode) +
+      (participants.hashCode) +
+      (participantsCountByRole.hashCode) +
+      (rejectedBy.hashCode) +
+      (startedAt == null ? 0 : startedAt!.hashCode) +
+      (timerEndsAt == null ? 0 : timerEndsAt!.hashCode);
 
   @override
-  String toString() => 'CallSessionResponse[acceptedBy=$acceptedBy, anonymousParticipantCount=$anonymousParticipantCount, endedAt=$endedAt, id=$id, liveEndedAt=$liveEndedAt, liveStartedAt=$liveStartedAt, missedBy=$missedBy, participants=$participants, participantsCountByRole=$participantsCountByRole, rejectedBy=$rejectedBy, startedAt=$startedAt, timerEndsAt=$timerEndsAt]';
+  String toString() =>
+      'CallSessionResponse[acceptedBy=$acceptedBy, anonymousParticipantCount=$anonymousParticipantCount, endedAt=$endedAt, id=$id, liveEndedAt=$liveEndedAt, liveStartedAt=$liveStartedAt, missedBy=$missedBy, participants=$participants, participantsCountByRole=$participantsCountByRole, rejectedBy=$rejectedBy, startedAt=$startedAt, timerEndsAt=$timerEndsAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'accepted_by'] = this.acceptedBy;
-      json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
+    json[r'accepted_by'] = this.acceptedBy;
+    json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
     if (this.endedAt != null) {
       json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
     } else {
       json[r'ended_at'] = null;
     }
-      json[r'id'] = this.id;
+    json[r'id'] = this.id;
     if (this.liveEndedAt != null) {
       json[r'live_ended_at'] = this.liveEndedAt!.toUtc().toIso8601String();
     } else {
@@ -135,10 +139,10 @@ class CallSessionResponse {
     } else {
       json[r'live_started_at'] = null;
     }
-      json[r'missed_by'] = this.missedBy;
-      json[r'participants'] = this.participants;
-      json[r'participants_count_by_role'] = this.participantsCountByRole;
-      json[r'rejected_by'] = this.rejectedBy;
+    json[r'missed_by'] = this.missedBy;
+    json[r'participants'] = this.participants;
+    json[r'participants_count_by_role'] = this.participantsCountByRole;
+    json[r'rejected_by'] = this.rejectedBy;
     if (this.startedAt != null) {
       json[r'started_at'] = this.startedAt!.toUtc().toIso8601String();
     } else {
@@ -164,8 +168,10 @@ class CallSessionResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallSessionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallSessionResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallSessionResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallSessionResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -197,7 +203,10 @@ class CallSessionResponse {
     return null;
   }
 
-  static List<CallSessionResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallSessionResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallSessionResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -225,13 +234,19 @@ class CallSessionResponse {
   }
 
   // maps a json object with a list of CallSessionResponse-objects as value to a dart map
-  static Map<String, List<CallSessionResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallSessionResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallSessionResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallSessionResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallSessionResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -248,4 +263,3 @@ class CallSessionResponse {
     'rejected_by',
   };
 }
-

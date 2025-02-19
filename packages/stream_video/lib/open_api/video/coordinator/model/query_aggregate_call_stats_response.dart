@@ -83,30 +83,35 @@ class QueryAggregateCallStatsResponse {
   UserFeedbackReportResponse? userFeedbackReport;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is QueryAggregateCallStatsResponse &&
-    other.callDurationReport == callDurationReport &&
-    other.callParticipantCountReport == callParticipantCountReport &&
-    other.callsPerDayReport == callsPerDayReport &&
-    other.duration == duration &&
-    other.networkMetricsReport == networkMetricsReport &&
-    other.qualityScoreReport == qualityScoreReport &&
-    other.sdkUsageReport == sdkUsageReport &&
-    other.userFeedbackReport == userFeedbackReport;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is QueryAggregateCallStatsResponse &&
+          other.callDurationReport == callDurationReport &&
+          other.callParticipantCountReport == callParticipantCountReport &&
+          other.callsPerDayReport == callsPerDayReport &&
+          other.duration == duration &&
+          other.networkMetricsReport == networkMetricsReport &&
+          other.qualityScoreReport == qualityScoreReport &&
+          other.sdkUsageReport == sdkUsageReport &&
+          other.userFeedbackReport == userFeedbackReport;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (callDurationReport == null ? 0 : callDurationReport!.hashCode) +
-    (callParticipantCountReport == null ? 0 : callParticipantCountReport!.hashCode) +
-    (callsPerDayReport == null ? 0 : callsPerDayReport!.hashCode) +
-    (duration.hashCode) +
-    (networkMetricsReport == null ? 0 : networkMetricsReport!.hashCode) +
-    (qualityScoreReport == null ? 0 : qualityScoreReport!.hashCode) +
-    (sdkUsageReport == null ? 0 : sdkUsageReport!.hashCode) +
-    (userFeedbackReport == null ? 0 : userFeedbackReport!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (callDurationReport == null ? 0 : callDurationReport!.hashCode) +
+      (callParticipantCountReport == null
+          ? 0
+          : callParticipantCountReport!.hashCode) +
+      (callsPerDayReport == null ? 0 : callsPerDayReport!.hashCode) +
+      (duration.hashCode) +
+      (networkMetricsReport == null ? 0 : networkMetricsReport!.hashCode) +
+      (qualityScoreReport == null ? 0 : qualityScoreReport!.hashCode) +
+      (sdkUsageReport == null ? 0 : sdkUsageReport!.hashCode) +
+      (userFeedbackReport == null ? 0 : userFeedbackReport!.hashCode);
 
   @override
-  String toString() => 'QueryAggregateCallStatsResponse[callDurationReport=$callDurationReport, callParticipantCountReport=$callParticipantCountReport, callsPerDayReport=$callsPerDayReport, duration=$duration, networkMetricsReport=$networkMetricsReport, qualityScoreReport=$qualityScoreReport, sdkUsageReport=$sdkUsageReport, userFeedbackReport=$userFeedbackReport]';
+  String toString() =>
+      'QueryAggregateCallStatsResponse[callDurationReport=$callDurationReport, callParticipantCountReport=$callParticipantCountReport, callsPerDayReport=$callsPerDayReport, duration=$duration, networkMetricsReport=$networkMetricsReport, qualityScoreReport=$qualityScoreReport, sdkUsageReport=$sdkUsageReport, userFeedbackReport=$userFeedbackReport]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -125,7 +130,7 @@ class QueryAggregateCallStatsResponse {
     } else {
       json[r'calls_per_day_report'] = null;
     }
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     if (this.networkMetricsReport != null) {
       json[r'network_metrics_report'] = this.networkMetricsReport;
     } else {
@@ -161,27 +166,39 @@ class QueryAggregateCallStatsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "QueryAggregateCallStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "QueryAggregateCallStatsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "QueryAggregateCallStatsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "QueryAggregateCallStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return QueryAggregateCallStatsResponse(
-        callDurationReport: CallDurationReportResponse.fromJson(json[r'call_duration_report']),
-        callParticipantCountReport: CallParticipantCountReportResponse.fromJson(json[r'call_participant_count_report']),
-        callsPerDayReport: CallsPerDayReportResponse.fromJson(json[r'calls_per_day_report']),
+        callDurationReport:
+            CallDurationReportResponse.fromJson(json[r'call_duration_report']),
+        callParticipantCountReport: CallParticipantCountReportResponse.fromJson(
+            json[r'call_participant_count_report']),
+        callsPerDayReport:
+            CallsPerDayReportResponse.fromJson(json[r'calls_per_day_report']),
         duration: mapValueOfType<String>(json, r'duration')!,
-        networkMetricsReport: NetworkMetricsReportResponse.fromJson(json[r'network_metrics_report']),
-        qualityScoreReport: QualityScoreReportResponse.fromJson(json[r'quality_score_report']),
-        sdkUsageReport: SDKUsageReportResponse.fromJson(json[r'sdk_usage_report']),
-        userFeedbackReport: UserFeedbackReportResponse.fromJson(json[r'user_feedback_report']),
+        networkMetricsReport: NetworkMetricsReportResponse.fromJson(
+            json[r'network_metrics_report']),
+        qualityScoreReport:
+            QualityScoreReportResponse.fromJson(json[r'quality_score_report']),
+        sdkUsageReport:
+            SDKUsageReportResponse.fromJson(json[r'sdk_usage_report']),
+        userFeedbackReport:
+            UserFeedbackReportResponse.fromJson(json[r'user_feedback_report']),
       );
     }
     return null;
   }
 
-  static List<QueryAggregateCallStatsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryAggregateCallStatsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <QueryAggregateCallStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -194,7 +211,8 @@ class QueryAggregateCallStatsResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, QueryAggregateCallStatsResponse> mapFromJson(dynamic json) {
+  static Map<String, QueryAggregateCallStatsResponse> mapFromJson(
+      dynamic json) {
     final map = <String, QueryAggregateCallStatsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
@@ -209,13 +227,19 @@ class QueryAggregateCallStatsResponse {
   }
 
   // maps a json object with a list of QueryAggregateCallStatsResponse-objects as value to a dart map
-  static Map<String, List<QueryAggregateCallStatsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<QueryAggregateCallStatsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<QueryAggregateCallStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = QueryAggregateCallStatsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = QueryAggregateCallStatsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -226,4 +250,3 @@ class QueryAggregateCallStatsResponse {
     'duration',
   };
 }
-

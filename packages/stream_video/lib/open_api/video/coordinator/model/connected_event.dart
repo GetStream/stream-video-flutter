@@ -30,29 +30,32 @@ class ConnectedEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ConnectedEvent &&
-    other.connectionId == connectionId &&
-    other.createdAt == createdAt &&
-    other.me == me &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConnectedEvent &&
+          other.connectionId == connectionId &&
+          other.createdAt == createdAt &&
+          other.me == me &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (connectionId.hashCode) +
-    (createdAt.hashCode) +
-    (me.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (connectionId.hashCode) +
+      (createdAt.hashCode) +
+      (me.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'ConnectedEvent[connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
+  String toString() =>
+      'ConnectedEvent[connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'connection_id'] = this.connectionId;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'me'] = this.me;
-      json[r'type'] = this.type;
+    json[r'connection_id'] = this.connectionId;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'me'] = this.me;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -68,8 +71,10 @@ class ConnectedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ConnectedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ConnectedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ConnectedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ConnectedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -84,7 +89,10 @@ class ConnectedEvent {
     return null;
   }
 
-  static List<ConnectedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ConnectedEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ConnectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -112,13 +120,19 @@ class ConnectedEvent {
   }
 
   // maps a json object with a list of ConnectedEvent-objects as value to a dart map
-  static Map<String, List<ConnectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ConnectedEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ConnectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ConnectedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ConnectedEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -132,4 +146,3 @@ class ConnectedEvent {
     'type',
   };
 }
-

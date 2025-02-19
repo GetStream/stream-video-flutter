@@ -40,39 +40,42 @@ class GetOrCreateCallResponse {
   List<OwnCapability> ownCapabilities;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GetOrCreateCallResponse &&
-    other.call == call &&
-    other.created == created &&
-    other.duration == duration &&
-    _deepEquality.equals(other.members, members) &&
-    other.membership == membership &&
-    _deepEquality.equals(other.ownCapabilities, ownCapabilities);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GetOrCreateCallResponse &&
+          other.call == call &&
+          other.created == created &&
+          other.duration == duration &&
+          _deepEquality.equals(other.members, members) &&
+          other.membership == membership &&
+          _deepEquality.equals(other.ownCapabilities, ownCapabilities);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (created.hashCode) +
-    (duration.hashCode) +
-    (members.hashCode) +
-    (membership == null ? 0 : membership!.hashCode) +
-    (ownCapabilities.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (created.hashCode) +
+      (duration.hashCode) +
+      (members.hashCode) +
+      (membership == null ? 0 : membership!.hashCode) +
+      (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'GetOrCreateCallResponse[call=$call, created=$created, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
+  String toString() =>
+      'GetOrCreateCallResponse[call=$call, created=$created, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'created'] = this.created;
-      json[r'duration'] = this.duration;
-      json[r'members'] = this.members;
+    json[r'call'] = this.call;
+    json[r'created'] = this.created;
+    json[r'duration'] = this.duration;
+    json[r'members'] = this.members;
     if (this.membership != null) {
       json[r'membership'] = this.membership;
     } else {
       json[r'membership'] = null;
     }
-      json[r'own_capabilities'] = this.ownCapabilities;
+    json[r'own_capabilities'] = this.ownCapabilities;
     return json;
   }
 
@@ -88,8 +91,10 @@ class GetOrCreateCallResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GetOrCreateCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GetOrCreateCallResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GetOrCreateCallResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GetOrCreateCallResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -106,7 +111,10 @@ class GetOrCreateCallResponse {
     return null;
   }
 
-  static List<GetOrCreateCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GetOrCreateCallResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GetOrCreateCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -134,13 +142,19 @@ class GetOrCreateCallResponse {
   }
 
   // maps a json object with a list of GetOrCreateCallResponse-objects as value to a dart map
-  static Map<String, List<GetOrCreateCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GetOrCreateCallResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GetOrCreateCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GetOrCreateCallResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GetOrCreateCallResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -155,4 +169,3 @@ class GetOrCreateCallResponse {
     'own_capabilities',
   };
 }
-

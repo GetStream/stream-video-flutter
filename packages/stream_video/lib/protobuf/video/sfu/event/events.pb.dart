@@ -18,28 +18,28 @@ import '../models/models.pbenum.dart' as $0;
 import '../signal_rpc/signal.pb.dart' as $1;
 
 enum SfuEvent_EventPayload {
-  subscriberOffer, 
-  publisherAnswer, 
-  connectionQualityChanged, 
-  audioLevelChanged, 
-  iceTrickle, 
-  changePublishQuality, 
-  participantJoined, 
-  participantLeft, 
-  dominantSpeakerChanged, 
-  joinResponse, 
-  healthCheckResponse, 
-  trackPublished, 
-  trackUnpublished, 
-  error, 
-  callGrantsUpdated, 
-  goAway, 
-  iceRestart, 
-  pinsUpdated, 
-  callEnded, 
-  participantUpdated, 
-  participantMigrationComplete, 
-  changePublishOptions, 
+  subscriberOffer,
+  publisherAnswer,
+  connectionQualityChanged,
+  audioLevelChanged,
+  iceTrickle,
+  changePublishQuality,
+  participantJoined,
+  participantLeft,
+  dominantSpeakerChanged,
+  joinResponse,
+  healthCheckResponse,
+  trackPublished,
+  trackUnpublished,
+  error,
+  callGrantsUpdated,
+  goAway,
+  iceRestart,
+  pinsUpdated,
+  callEnded,
+  participantUpdated,
+  participantMigrationComplete,
+  changePublishOptions,
   notSet
 }
 
@@ -139,71 +139,127 @@ class SfuEvent extends $pb.GeneratedMessage {
     return $result;
   }
   SfuEvent._() : super();
-  factory SfuEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SfuEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory SfuEvent.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory SfuEvent.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static const $core.Map<$core.int, SfuEvent_EventPayload> _SfuEvent_EventPayloadByTag = {
-    1 : SfuEvent_EventPayload.subscriberOffer,
-    2 : SfuEvent_EventPayload.publisherAnswer,
-    3 : SfuEvent_EventPayload.connectionQualityChanged,
-    4 : SfuEvent_EventPayload.audioLevelChanged,
-    5 : SfuEvent_EventPayload.iceTrickle,
-    6 : SfuEvent_EventPayload.changePublishQuality,
-    10 : SfuEvent_EventPayload.participantJoined,
-    11 : SfuEvent_EventPayload.participantLeft,
-    12 : SfuEvent_EventPayload.dominantSpeakerChanged,
-    13 : SfuEvent_EventPayload.joinResponse,
-    14 : SfuEvent_EventPayload.healthCheckResponse,
-    16 : SfuEvent_EventPayload.trackPublished,
-    17 : SfuEvent_EventPayload.trackUnpublished,
-    18 : SfuEvent_EventPayload.error,
-    19 : SfuEvent_EventPayload.callGrantsUpdated,
-    20 : SfuEvent_EventPayload.goAway,
-    21 : SfuEvent_EventPayload.iceRestart,
-    22 : SfuEvent_EventPayload.pinsUpdated,
-    23 : SfuEvent_EventPayload.callEnded,
-    24 : SfuEvent_EventPayload.participantUpdated,
-    25 : SfuEvent_EventPayload.participantMigrationComplete,
-    27 : SfuEvent_EventPayload.changePublishOptions,
-    0 : SfuEvent_EventPayload.notSet
+  static const $core.Map<$core.int, SfuEvent_EventPayload>
+      _SfuEvent_EventPayloadByTag = {
+    1: SfuEvent_EventPayload.subscriberOffer,
+    2: SfuEvent_EventPayload.publisherAnswer,
+    3: SfuEvent_EventPayload.connectionQualityChanged,
+    4: SfuEvent_EventPayload.audioLevelChanged,
+    5: SfuEvent_EventPayload.iceTrickle,
+    6: SfuEvent_EventPayload.changePublishQuality,
+    10: SfuEvent_EventPayload.participantJoined,
+    11: SfuEvent_EventPayload.participantLeft,
+    12: SfuEvent_EventPayload.dominantSpeakerChanged,
+    13: SfuEvent_EventPayload.joinResponse,
+    14: SfuEvent_EventPayload.healthCheckResponse,
+    16: SfuEvent_EventPayload.trackPublished,
+    17: SfuEvent_EventPayload.trackUnpublished,
+    18: SfuEvent_EventPayload.error,
+    19: SfuEvent_EventPayload.callGrantsUpdated,
+    20: SfuEvent_EventPayload.goAway,
+    21: SfuEvent_EventPayload.iceRestart,
+    22: SfuEvent_EventPayload.pinsUpdated,
+    23: SfuEvent_EventPayload.callEnded,
+    24: SfuEvent_EventPayload.participantUpdated,
+    25: SfuEvent_EventPayload.participantMigrationComplete,
+    27: SfuEvent_EventPayload.changePublishOptions,
+    0: SfuEvent_EventPayload.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SfuEvent', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27])
-    ..aOM<SubscriberOffer>(1, _omitFieldNames ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
-    ..aOM<PublisherAnswer>(2, _omitFieldNames ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
-    ..aOM<ConnectionQualityChanged>(3, _omitFieldNames ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
-    ..aOM<AudioLevelChanged>(4, _omitFieldNames ? '' : 'audioLevelChanged', subBuilder: AudioLevelChanged.create)
-    ..aOM<$0.ICETrickle>(5, _omitFieldNames ? '' : 'iceTrickle', subBuilder: $0.ICETrickle.create)
-    ..aOM<ChangePublishQuality>(6, _omitFieldNames ? '' : 'changePublishQuality', subBuilder: ChangePublishQuality.create)
-    ..aOM<ParticipantJoined>(10, _omitFieldNames ? '' : 'participantJoined', subBuilder: ParticipantJoined.create)
-    ..aOM<ParticipantLeft>(11, _omitFieldNames ? '' : 'participantLeft', subBuilder: ParticipantLeft.create)
-    ..aOM<DominantSpeakerChanged>(12, _omitFieldNames ? '' : 'dominantSpeakerChanged', subBuilder: DominantSpeakerChanged.create)
-    ..aOM<JoinResponse>(13, _omitFieldNames ? '' : 'joinResponse', subBuilder: JoinResponse.create)
-    ..aOM<HealthCheckResponse>(14, _omitFieldNames ? '' : 'healthCheckResponse', subBuilder: HealthCheckResponse.create)
-    ..aOM<TrackPublished>(16, _omitFieldNames ? '' : 'trackPublished', subBuilder: TrackPublished.create)
-    ..aOM<TrackUnpublished>(17, _omitFieldNames ? '' : 'trackUnpublished', subBuilder: TrackUnpublished.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SfuEvent',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..oo(0, [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      10,
+      11,
+      12,
+      13,
+      14,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      27
+    ])
+    ..aOM<SubscriberOffer>(1, _omitFieldNames ? '' : 'subscriberOffer',
+        subBuilder: SubscriberOffer.create)
+    ..aOM<PublisherAnswer>(2, _omitFieldNames ? '' : 'publisherAnswer',
+        subBuilder: PublisherAnswer.create)
+    ..aOM<ConnectionQualityChanged>(
+        3, _omitFieldNames ? '' : 'connectionQualityChanged',
+        subBuilder: ConnectionQualityChanged.create)
+    ..aOM<AudioLevelChanged>(4, _omitFieldNames ? '' : 'audioLevelChanged',
+        subBuilder: AudioLevelChanged.create)
+    ..aOM<$0.ICETrickle>(5, _omitFieldNames ? '' : 'iceTrickle',
+        subBuilder: $0.ICETrickle.create)
+    ..aOM<ChangePublishQuality>(
+        6, _omitFieldNames ? '' : 'changePublishQuality',
+        subBuilder: ChangePublishQuality.create)
+    ..aOM<ParticipantJoined>(10, _omitFieldNames ? '' : 'participantJoined',
+        subBuilder: ParticipantJoined.create)
+    ..aOM<ParticipantLeft>(11, _omitFieldNames ? '' : 'participantLeft',
+        subBuilder: ParticipantLeft.create)
+    ..aOM<DominantSpeakerChanged>(
+        12, _omitFieldNames ? '' : 'dominantSpeakerChanged',
+        subBuilder: DominantSpeakerChanged.create)
+    ..aOM<JoinResponse>(13, _omitFieldNames ? '' : 'joinResponse',
+        subBuilder: JoinResponse.create)
+    ..aOM<HealthCheckResponse>(14, _omitFieldNames ? '' : 'healthCheckResponse',
+        subBuilder: HealthCheckResponse.create)
+    ..aOM<TrackPublished>(16, _omitFieldNames ? '' : 'trackPublished',
+        subBuilder: TrackPublished.create)
+    ..aOM<TrackUnpublished>(17, _omitFieldNames ? '' : 'trackUnpublished',
+        subBuilder: TrackUnpublished.create)
     ..aOM<Error>(18, _omitFieldNames ? '' : 'error', subBuilder: Error.create)
-    ..aOM<CallGrantsUpdated>(19, _omitFieldNames ? '' : 'callGrantsUpdated', subBuilder: CallGrantsUpdated.create)
-    ..aOM<GoAway>(20, _omitFieldNames ? '' : 'goAway', subBuilder: GoAway.create)
-    ..aOM<ICERestart>(21, _omitFieldNames ? '' : 'iceRestart', subBuilder: ICERestart.create)
-    ..aOM<PinsChanged>(22, _omitFieldNames ? '' : 'pinsUpdated', subBuilder: PinsChanged.create)
-    ..aOM<CallEnded>(23, _omitFieldNames ? '' : 'callEnded', subBuilder: CallEnded.create)
-    ..aOM<ParticipantUpdated>(24, _omitFieldNames ? '' : 'participantUpdated', subBuilder: ParticipantUpdated.create)
-    ..aOM<ParticipantMigrationComplete>(25, _omitFieldNames ? '' : 'participantMigrationComplete', subBuilder: ParticipantMigrationComplete.create)
-    ..aOM<ChangePublishOptions>(27, _omitFieldNames ? '' : 'changePublishOptions', subBuilder: ChangePublishOptions.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<CallGrantsUpdated>(19, _omitFieldNames ? '' : 'callGrantsUpdated',
+        subBuilder: CallGrantsUpdated.create)
+    ..aOM<GoAway>(20, _omitFieldNames ? '' : 'goAway',
+        subBuilder: GoAway.create)
+    ..aOM<ICERestart>(21, _omitFieldNames ? '' : 'iceRestart',
+        subBuilder: ICERestart.create)
+    ..aOM<PinsChanged>(22, _omitFieldNames ? '' : 'pinsUpdated',
+        subBuilder: PinsChanged.create)
+    ..aOM<CallEnded>(23, _omitFieldNames ? '' : 'callEnded',
+        subBuilder: CallEnded.create)
+    ..aOM<ParticipantUpdated>(24, _omitFieldNames ? '' : 'participantUpdated',
+        subBuilder: ParticipantUpdated.create)
+    ..aOM<ParticipantMigrationComplete>(
+        25, _omitFieldNames ? '' : 'participantMigrationComplete',
+        subBuilder: ParticipantMigrationComplete.create)
+    ..aOM<ChangePublishOptions>(
+        27, _omitFieldNames ? '' : 'changePublishOptions',
+        subBuilder: ChangePublishOptions.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   SfuEvent clone() => SfuEvent()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SfuEvent copyWith(void Function(SfuEvent) updates) => super.copyWith((message) => updates(message as SfuEvent)) as SfuEvent;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  SfuEvent copyWith(void Function(SfuEvent) updates) =>
+      super.copyWith((message) => updates(message as SfuEvent)) as SfuEvent;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -212,10 +268,12 @@ class SfuEvent extends $pb.GeneratedMessage {
   SfuEvent createEmptyInstance() => create();
   static $pb.PbList<SfuEvent> createRepeated() => $pb.PbList<SfuEvent>();
   @$core.pragma('dart2js:noInline')
-  static SfuEvent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SfuEvent>(create);
+  static SfuEvent getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SfuEvent>(create);
   static SfuEvent? _defaultInstance;
 
-  SfuEvent_EventPayload whichEventPayload() => _SfuEvent_EventPayloadByTag[$_whichOneof(0)]!;
+  SfuEvent_EventPayload whichEventPayload() =>
+      _SfuEvent_EventPayloadByTag[$_whichOneof(0)]!;
   void clearEventPayload() => clearField($_whichOneof(0));
 
   /// SubscriberOffer sends the SDP offer for establishing the
@@ -223,7 +281,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   SubscriberOffer get subscriberOffer => $_getN(0);
   @$pb.TagNumber(1)
-  set subscriberOffer(SubscriberOffer v) { setField(1, v); }
+  set subscriberOffer(SubscriberOffer v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasSubscriberOffer() => $_has(0);
   @$pb.TagNumber(1)
@@ -236,7 +297,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   PublisherAnswer get publisherAnswer => $_getN(1);
   @$pb.TagNumber(2)
-  set publisherAnswer(PublisherAnswer v) { setField(2, v); }
+  set publisherAnswer(PublisherAnswer v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasPublisherAnswer() => $_has(1);
   @$pb.TagNumber(2)
@@ -250,7 +314,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   ConnectionQualityChanged get connectionQualityChanged => $_getN(2);
   @$pb.TagNumber(3)
-  set connectionQualityChanged(ConnectionQualityChanged v) { setField(3, v); }
+  set connectionQualityChanged(ConnectionQualityChanged v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasConnectionQualityChanged() => $_has(2);
   @$pb.TagNumber(3)
@@ -263,7 +330,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   AudioLevelChanged get audioLevelChanged => $_getN(3);
   @$pb.TagNumber(4)
-  set audioLevelChanged(AudioLevelChanged v) { setField(4, v); }
+  set audioLevelChanged(AudioLevelChanged v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasAudioLevelChanged() => $_has(3);
   @$pb.TagNumber(4)
@@ -277,7 +347,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $0.ICETrickle get iceTrickle => $_getN(4);
   @$pb.TagNumber(5)
-  set iceTrickle($0.ICETrickle v) { setField(5, v); }
+  set iceTrickle($0.ICETrickle v) {
+    setField(5, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasIceTrickle() => $_has(4);
   @$pb.TagNumber(5)
@@ -291,7 +364,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   ChangePublishQuality get changePublishQuality => $_getN(5);
   @$pb.TagNumber(6)
-  set changePublishQuality(ChangePublishQuality v) { setField(6, v); }
+  set changePublishQuality(ChangePublishQuality v) {
+    setField(6, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasChangePublishQuality() => $_has(5);
   @$pb.TagNumber(6)
@@ -304,7 +380,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   ParticipantJoined get participantJoined => $_getN(6);
   @$pb.TagNumber(10)
-  set participantJoined(ParticipantJoined v) { setField(10, v); }
+  set participantJoined(ParticipantJoined v) {
+    setField(10, v);
+  }
+
   @$pb.TagNumber(10)
   $core.bool hasParticipantJoined() => $_has(6);
   @$pb.TagNumber(10)
@@ -317,7 +396,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(11)
   ParticipantLeft get participantLeft => $_getN(7);
   @$pb.TagNumber(11)
-  set participantLeft(ParticipantLeft v) { setField(11, v); }
+  set participantLeft(ParticipantLeft v) {
+    setField(11, v);
+  }
+
   @$pb.TagNumber(11)
   $core.bool hasParticipantLeft() => $_has(7);
   @$pb.TagNumber(11)
@@ -331,7 +413,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(12)
   DominantSpeakerChanged get dominantSpeakerChanged => $_getN(8);
   @$pb.TagNumber(12)
-  set dominantSpeakerChanged(DominantSpeakerChanged v) { setField(12, v); }
+  set dominantSpeakerChanged(DominantSpeakerChanged v) {
+    setField(12, v);
+  }
+
   @$pb.TagNumber(12)
   $core.bool hasDominantSpeakerChanged() => $_has(8);
   @$pb.TagNumber(12)
@@ -344,7 +429,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(13)
   JoinResponse get joinResponse => $_getN(9);
   @$pb.TagNumber(13)
-  set joinResponse(JoinResponse v) { setField(13, v); }
+  set joinResponse(JoinResponse v) {
+    setField(13, v);
+  }
+
   @$pb.TagNumber(13)
   $core.bool hasJoinResponse() => $_has(9);
   @$pb.TagNumber(13)
@@ -357,7 +445,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(14)
   HealthCheckResponse get healthCheckResponse => $_getN(10);
   @$pb.TagNumber(14)
-  set healthCheckResponse(HealthCheckResponse v) { setField(14, v); }
+  set healthCheckResponse(HealthCheckResponse v) {
+    setField(14, v);
+  }
+
   @$pb.TagNumber(14)
   $core.bool hasHealthCheckResponse() => $_has(10);
   @$pb.TagNumber(14)
@@ -370,7 +461,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(16)
   TrackPublished get trackPublished => $_getN(11);
   @$pb.TagNumber(16)
-  set trackPublished(TrackPublished v) { setField(16, v); }
+  set trackPublished(TrackPublished v) {
+    setField(16, v);
+  }
+
   @$pb.TagNumber(16)
   $core.bool hasTrackPublished() => $_has(11);
   @$pb.TagNumber(16)
@@ -384,7 +478,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(17)
   TrackUnpublished get trackUnpublished => $_getN(12);
   @$pb.TagNumber(17)
-  set trackUnpublished(TrackUnpublished v) { setField(17, v); }
+  set trackUnpublished(TrackUnpublished v) {
+    setField(17, v);
+  }
+
   @$pb.TagNumber(17)
   $core.bool hasTrackUnpublished() => $_has(12);
   @$pb.TagNumber(17)
@@ -398,7 +495,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(18)
   Error get error => $_getN(13);
   @$pb.TagNumber(18)
-  set error(Error v) { setField(18, v); }
+  set error(Error v) {
+    setField(18, v);
+  }
+
   @$pb.TagNumber(18)
   $core.bool hasError() => $_has(13);
   @$pb.TagNumber(18)
@@ -410,7 +510,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(19)
   CallGrantsUpdated get callGrantsUpdated => $_getN(14);
   @$pb.TagNumber(19)
-  set callGrantsUpdated(CallGrantsUpdated v) { setField(19, v); }
+  set callGrantsUpdated(CallGrantsUpdated v) {
+    setField(19, v);
+  }
+
   @$pb.TagNumber(19)
   $core.bool hasCallGrantsUpdated() => $_has(14);
   @$pb.TagNumber(19)
@@ -423,7 +526,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(20)
   GoAway get goAway => $_getN(15);
   @$pb.TagNumber(20)
-  set goAway(GoAway v) { setField(20, v); }
+  set goAway(GoAway v) {
+    setField(20, v);
+  }
+
   @$pb.TagNumber(20)
   $core.bool hasGoAway() => $_has(15);
   @$pb.TagNumber(20)
@@ -435,7 +541,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(21)
   ICERestart get iceRestart => $_getN(16);
   @$pb.TagNumber(21)
-  set iceRestart(ICERestart v) { setField(21, v); }
+  set iceRestart(ICERestart v) {
+    setField(21, v);
+  }
+
   @$pb.TagNumber(21)
   $core.bool hasIceRestart() => $_has(16);
   @$pb.TagNumber(21)
@@ -447,7 +556,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(22)
   PinsChanged get pinsUpdated => $_getN(17);
   @$pb.TagNumber(22)
-  set pinsUpdated(PinsChanged v) { setField(22, v); }
+  set pinsUpdated(PinsChanged v) {
+    setField(22, v);
+  }
+
   @$pb.TagNumber(22)
   $core.bool hasPinsUpdated() => $_has(17);
   @$pb.TagNumber(22)
@@ -460,7 +572,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(23)
   CallEnded get callEnded => $_getN(18);
   @$pb.TagNumber(23)
-  set callEnded(CallEnded v) { setField(23, v); }
+  set callEnded(CallEnded v) {
+    setField(23, v);
+  }
+
   @$pb.TagNumber(23)
   $core.bool hasCallEnded() => $_has(18);
   @$pb.TagNumber(23)
@@ -472,7 +587,10 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(24)
   ParticipantUpdated get participantUpdated => $_getN(19);
   @$pb.TagNumber(24)
-  set participantUpdated(ParticipantUpdated v) { setField(24, v); }
+  set participantUpdated(ParticipantUpdated v) {
+    setField(24, v);
+  }
+
   @$pb.TagNumber(24)
   $core.bool hasParticipantUpdated() => $_has(19);
   @$pb.TagNumber(24)
@@ -484,19 +602,26 @@ class SfuEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(25)
   ParticipantMigrationComplete get participantMigrationComplete => $_getN(20);
   @$pb.TagNumber(25)
-  set participantMigrationComplete(ParticipantMigrationComplete v) { setField(25, v); }
+  set participantMigrationComplete(ParticipantMigrationComplete v) {
+    setField(25, v);
+  }
+
   @$pb.TagNumber(25)
   $core.bool hasParticipantMigrationComplete() => $_has(20);
   @$pb.TagNumber(25)
   void clearParticipantMigrationComplete() => clearField(25);
   @$pb.TagNumber(25)
-  ParticipantMigrationComplete ensureParticipantMigrationComplete() => $_ensure(20);
+  ParticipantMigrationComplete ensureParticipantMigrationComplete() =>
+      $_ensure(20);
 
   /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
   @$pb.TagNumber(27)
   ChangePublishOptions get changePublishOptions => $_getN(21);
   @$pb.TagNumber(27)
-  set changePublishOptions(ChangePublishOptions v) { setField(27, v); }
+  set changePublishOptions(ChangePublishOptions v) {
+    setField(27, v);
+  }
+
   @$pb.TagNumber(27)
   $core.bool hasChangePublishOptions() => $_has(21);
   @$pb.TagNumber(27)
@@ -520,34 +645,46 @@ class ChangePublishOptions extends $pb.GeneratedMessage {
     return $result;
   }
   ChangePublishOptions._() : super();
-  factory ChangePublishOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChangePublishOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ChangePublishOptions.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ChangePublishOptions.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChangePublishOptions', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<$0.PublishOption>(1, _omitFieldNames ? '' : 'publishOptions', $pb.PbFieldType.PM, subBuilder: $0.PublishOption.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChangePublishOptions',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..pc<$0.PublishOption>(
+        1, _omitFieldNames ? '' : 'publishOptions', $pb.PbFieldType.PM,
+        subBuilder: $0.PublishOption.create)
     ..aOS(2, _omitFieldNames ? '' : 'reason')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ChangePublishOptions clone() => ChangePublishOptions()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ChangePublishOptions copyWith(void Function(ChangePublishOptions) updates) => super.copyWith((message) => updates(message as ChangePublishOptions)) as ChangePublishOptions;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ChangePublishOptions clone() =>
+      ChangePublishOptions()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ChangePublishOptions copyWith(void Function(ChangePublishOptions) updates) =>
+      super.copyWith((message) => updates(message as ChangePublishOptions))
+          as ChangePublishOptions;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ChangePublishOptions create() => ChangePublishOptions._();
   ChangePublishOptions createEmptyInstance() => create();
-  static $pb.PbList<ChangePublishOptions> createRepeated() => $pb.PbList<ChangePublishOptions>();
+  static $pb.PbList<ChangePublishOptions> createRepeated() =>
+      $pb.PbList<ChangePublishOptions>();
   @$core.pragma('dart2js:noInline')
-  static ChangePublishOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChangePublishOptions>(create);
+  static ChangePublishOptions getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChangePublishOptions>(create);
   static ChangePublishOptions? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -556,7 +693,10 @@ class ChangePublishOptions extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get reason => $_getSZ(1);
   @$pb.TagNumber(2)
-  set reason($core.String v) { $_setString(1, v); }
+  set reason($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasReason() => $_has(1);
   @$pb.TagNumber(2)
@@ -566,64 +706,90 @@ class ChangePublishOptions extends $pb.GeneratedMessage {
 class ChangePublishOptionsComplete extends $pb.GeneratedMessage {
   factory ChangePublishOptionsComplete() => create();
   ChangePublishOptionsComplete._() : super();
-  factory ChangePublishOptionsComplete.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChangePublishOptionsComplete.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ChangePublishOptionsComplete.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ChangePublishOptionsComplete.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChangePublishOptionsComplete', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChangePublishOptionsComplete',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ChangePublishOptionsComplete clone() => ChangePublishOptionsComplete()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ChangePublishOptionsComplete copyWith(void Function(ChangePublishOptionsComplete) updates) => super.copyWith((message) => updates(message as ChangePublishOptionsComplete)) as ChangePublishOptionsComplete;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ChangePublishOptionsComplete clone() =>
+      ChangePublishOptionsComplete()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ChangePublishOptionsComplete copyWith(
+          void Function(ChangePublishOptionsComplete) updates) =>
+      super.copyWith(
+              (message) => updates(message as ChangePublishOptionsComplete))
+          as ChangePublishOptionsComplete;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static ChangePublishOptionsComplete create() => ChangePublishOptionsComplete._();
+  static ChangePublishOptionsComplete create() =>
+      ChangePublishOptionsComplete._();
   ChangePublishOptionsComplete createEmptyInstance() => create();
-  static $pb.PbList<ChangePublishOptionsComplete> createRepeated() => $pb.PbList<ChangePublishOptionsComplete>();
+  static $pb.PbList<ChangePublishOptionsComplete> createRepeated() =>
+      $pb.PbList<ChangePublishOptionsComplete>();
   @$core.pragma('dart2js:noInline')
-  static ChangePublishOptionsComplete getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChangePublishOptionsComplete>(create);
+  static ChangePublishOptionsComplete getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChangePublishOptionsComplete>(create);
   static ChangePublishOptionsComplete? _defaultInstance;
 }
 
 class ParticipantMigrationComplete extends $pb.GeneratedMessage {
   factory ParticipantMigrationComplete() => create();
   ParticipantMigrationComplete._() : super();
-  factory ParticipantMigrationComplete.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ParticipantMigrationComplete.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ParticipantMigrationComplete.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ParticipantMigrationComplete.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantMigrationComplete', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ParticipantMigrationComplete',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ParticipantMigrationComplete clone() => ParticipantMigrationComplete()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ParticipantMigrationComplete copyWith(void Function(ParticipantMigrationComplete) updates) => super.copyWith((message) => updates(message as ParticipantMigrationComplete)) as ParticipantMigrationComplete;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ParticipantMigrationComplete clone() =>
+      ParticipantMigrationComplete()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ParticipantMigrationComplete copyWith(
+          void Function(ParticipantMigrationComplete) updates) =>
+      super.copyWith(
+              (message) => updates(message as ParticipantMigrationComplete))
+          as ParticipantMigrationComplete;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static ParticipantMigrationComplete create() => ParticipantMigrationComplete._();
+  static ParticipantMigrationComplete create() =>
+      ParticipantMigrationComplete._();
   ParticipantMigrationComplete createEmptyInstance() => create();
-  static $pb.PbList<ParticipantMigrationComplete> createRepeated() => $pb.PbList<ParticipantMigrationComplete>();
+  static $pb.PbList<ParticipantMigrationComplete> createRepeated() =>
+      $pb.PbList<ParticipantMigrationComplete>();
   @$core.pragma('dart2js:noInline')
-  static ParticipantMigrationComplete getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantMigrationComplete>(create);
+  static ParticipantMigrationComplete getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ParticipantMigrationComplete>(create);
   static ParticipantMigrationComplete? _defaultInstance;
 }
 
@@ -638,24 +804,32 @@ class PinsChanged extends $pb.GeneratedMessage {
     return $result;
   }
   PinsChanged._() : super();
-  factory PinsChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory PinsChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory PinsChanged.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory PinsChanged.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PinsChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<$0.Pin>(1, _omitFieldNames ? '' : 'pins', $pb.PbFieldType.PM, subBuilder: $0.Pin.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PinsChanged',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..pc<$0.Pin>(1, _omitFieldNames ? '' : 'pins', $pb.PbFieldType.PM,
+        subBuilder: $0.Pin.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   PinsChanged clone() => PinsChanged()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  PinsChanged copyWith(void Function(PinsChanged) updates) => super.copyWith((message) => updates(message as PinsChanged)) as PinsChanged;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  PinsChanged copyWith(void Function(PinsChanged) updates) =>
+      super.copyWith((message) => updates(message as PinsChanged))
+          as PinsChanged;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -664,7 +838,8 @@ class PinsChanged extends $pb.GeneratedMessage {
   PinsChanged createEmptyInstance() => create();
   static $pb.PbList<PinsChanged> createRepeated() => $pb.PbList<PinsChanged>();
   @$core.pragma('dart2js:noInline')
-  static PinsChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PinsChanged>(create);
+  static PinsChanged getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PinsChanged>(create);
   static PinsChanged? _defaultInstance;
 
   /// the list of pins in the call.
@@ -688,25 +863,37 @@ class Error extends $pb.GeneratedMessage {
     return $result;
   }
   Error._() : super();
-  factory Error.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Error.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory Error.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory Error.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Error', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.Error>(4, _omitFieldNames ? '' : 'error', subBuilder: $0.Error.create)
-    ..e<$0.WebsocketReconnectStrategy>(5, _omitFieldNames ? '' : 'reconnectStrategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Error',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOM<$0.Error>(4, _omitFieldNames ? '' : 'error',
+        subBuilder: $0.Error.create)
+    ..e<$0.WebsocketReconnectStrategy>(
+        5, _omitFieldNames ? '' : 'reconnectStrategy', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.WebsocketReconnectStrategy
+            .WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+        valueOf: $0.WebsocketReconnectStrategy.valueOf,
+        enumValues: $0.WebsocketReconnectStrategy.values)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   Error clone() => Error()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error)) as Error;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  Error copyWith(void Function(Error) updates) =>
+      super.copyWith((message) => updates(message as Error)) as Error;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -715,13 +902,17 @@ class Error extends $pb.GeneratedMessage {
   Error createEmptyInstance() => create();
   static $pb.PbList<Error> createRepeated() => $pb.PbList<Error>();
   @$core.pragma('dart2js:noInline')
-  static Error getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Error>(create);
+  static Error getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Error>(create);
   static Error? _defaultInstance;
 
   @$pb.TagNumber(4)
   $0.Error get error => $_getN(0);
   @$pb.TagNumber(4)
-  set error($0.Error v) { setField(4, v); }
+  set error($0.Error v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasError() => $_has(0);
   @$pb.TagNumber(4)
@@ -733,7 +924,10 @@ class Error extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $0.WebsocketReconnectStrategy get reconnectStrategy => $_getN(1);
   @$pb.TagNumber(5)
-  set reconnectStrategy($0.WebsocketReconnectStrategy v) { setField(5, v); }
+  set reconnectStrategy($0.WebsocketReconnectStrategy v) {
+    setField(5, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasReconnectStrategy() => $_has(1);
   @$pb.TagNumber(5)
@@ -755,25 +949,34 @@ class ICETrickle extends $pb.GeneratedMessage {
     return $result;
   }
   ICETrickle._() : super();
-  factory ICETrickle.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ICETrickle.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ICETrickle.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ICETrickle.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ICETrickle', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ICETrickle',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..e<$0.PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+        valueOf: $0.PeerType.valueOf,
+        enumValues: $0.PeerType.values)
     ..aOS(2, _omitFieldNames ? '' : 'iceCandidate')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   ICETrickle clone() => ICETrickle()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ICETrickle copyWith(void Function(ICETrickle) updates) => super.copyWith((message) => updates(message as ICETrickle)) as ICETrickle;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ICETrickle copyWith(void Function(ICETrickle) updates) =>
+      super.copyWith((message) => updates(message as ICETrickle)) as ICETrickle;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -782,13 +985,17 @@ class ICETrickle extends $pb.GeneratedMessage {
   ICETrickle createEmptyInstance() => create();
   static $pb.PbList<ICETrickle> createRepeated() => $pb.PbList<ICETrickle>();
   @$core.pragma('dart2js:noInline')
-  static ICETrickle getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICETrickle>(create);
+  static ICETrickle getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ICETrickle>(create);
   static ICETrickle? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.PeerType get peerType => $_getN(0);
   @$pb.TagNumber(1)
-  set peerType($0.PeerType v) { setField(1, v); }
+  set peerType($0.PeerType v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasPeerType() => $_has(0);
   @$pb.TagNumber(1)
@@ -797,7 +1004,10 @@ class ICETrickle extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get iceCandidate => $_getSZ(1);
   @$pb.TagNumber(2)
-  set iceCandidate($core.String v) { $_setString(1, v); }
+  set iceCandidate($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasIceCandidate() => $_has(1);
   @$pb.TagNumber(2)
@@ -815,24 +1025,33 @@ class ICERestart extends $pb.GeneratedMessage {
     return $result;
   }
   ICERestart._() : super();
-  factory ICERestart.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ICERestart.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ICERestart.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ICERestart.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ICERestart', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ICERestart',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..e<$0.PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+        valueOf: $0.PeerType.valueOf,
+        enumValues: $0.PeerType.values)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   ICERestart clone() => ICERestart()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ICERestart copyWith(void Function(ICERestart) updates) => super.copyWith((message) => updates(message as ICERestart)) as ICERestart;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ICERestart copyWith(void Function(ICERestart) updates) =>
+      super.copyWith((message) => updates(message as ICERestart)) as ICERestart;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -841,13 +1060,17 @@ class ICERestart extends $pb.GeneratedMessage {
   ICERestart createEmptyInstance() => create();
   static $pb.PbList<ICERestart> createRepeated() => $pb.PbList<ICERestart>();
   @$core.pragma('dart2js:noInline')
-  static ICERestart getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICERestart>(create);
+  static ICERestart getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ICERestart>(create);
   static ICERestart? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.PeerType get peerType => $_getN(0);
   @$pb.TagNumber(1)
-  set peerType($0.PeerType v) { setField(1, v); }
+  set peerType($0.PeerType v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasPeerType() => $_has(0);
   @$pb.TagNumber(1)
@@ -855,9 +1078,9 @@ class ICERestart extends $pb.GeneratedMessage {
 }
 
 enum SfuRequest_RequestPayload {
-  joinRequest, 
-  healthCheckRequest, 
-  leaveCallRequest, 
+  joinRequest,
+  healthCheckRequest,
+  leaveCallRequest,
   notSet
 }
 
@@ -881,33 +1104,43 @@ class SfuRequest extends $pb.GeneratedMessage {
     return $result;
   }
   SfuRequest._() : super();
-  factory SfuRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SfuRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory SfuRequest.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory SfuRequest.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static const $core.Map<$core.int, SfuRequest_RequestPayload> _SfuRequest_RequestPayloadByTag = {
-    1 : SfuRequest_RequestPayload.joinRequest,
-    2 : SfuRequest_RequestPayload.healthCheckRequest,
-    3 : SfuRequest_RequestPayload.leaveCallRequest,
-    0 : SfuRequest_RequestPayload.notSet
+  static const $core.Map<$core.int, SfuRequest_RequestPayload>
+      _SfuRequest_RequestPayloadByTag = {
+    1: SfuRequest_RequestPayload.joinRequest,
+    2: SfuRequest_RequestPayload.healthCheckRequest,
+    3: SfuRequest_RequestPayload.leaveCallRequest,
+    0: SfuRequest_RequestPayload.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SfuRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SfuRequest',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..oo(0, [1, 2, 3])
-    ..aOM<JoinRequest>(1, _omitFieldNames ? '' : 'joinRequest', subBuilder: JoinRequest.create)
-    ..aOM<HealthCheckRequest>(2, _omitFieldNames ? '' : 'healthCheckRequest', subBuilder: HealthCheckRequest.create)
-    ..aOM<LeaveCallRequest>(3, _omitFieldNames ? '' : 'leaveCallRequest', subBuilder: LeaveCallRequest.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<JoinRequest>(1, _omitFieldNames ? '' : 'joinRequest',
+        subBuilder: JoinRequest.create)
+    ..aOM<HealthCheckRequest>(2, _omitFieldNames ? '' : 'healthCheckRequest',
+        subBuilder: HealthCheckRequest.create)
+    ..aOM<LeaveCallRequest>(3, _omitFieldNames ? '' : 'leaveCallRequest',
+        subBuilder: LeaveCallRequest.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   SfuRequest clone() => SfuRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SfuRequest copyWith(void Function(SfuRequest) updates) => super.copyWith((message) => updates(message as SfuRequest)) as SfuRequest;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  SfuRequest copyWith(void Function(SfuRequest) updates) =>
+      super.copyWith((message) => updates(message as SfuRequest)) as SfuRequest;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -916,16 +1149,21 @@ class SfuRequest extends $pb.GeneratedMessage {
   SfuRequest createEmptyInstance() => create();
   static $pb.PbList<SfuRequest> createRepeated() => $pb.PbList<SfuRequest>();
   @$core.pragma('dart2js:noInline')
-  static SfuRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SfuRequest>(create);
+  static SfuRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SfuRequest>(create);
   static SfuRequest? _defaultInstance;
 
-  SfuRequest_RequestPayload whichRequestPayload() => _SfuRequest_RequestPayloadByTag[$_whichOneof(0)]!;
+  SfuRequest_RequestPayload whichRequestPayload() =>
+      _SfuRequest_RequestPayloadByTag[$_whichOneof(0)]!;
   void clearRequestPayload() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   JoinRequest get joinRequest => $_getN(0);
   @$pb.TagNumber(1)
-  set joinRequest(JoinRequest v) { setField(1, v); }
+  set joinRequest(JoinRequest v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasJoinRequest() => $_has(0);
   @$pb.TagNumber(1)
@@ -936,7 +1174,10 @@ class SfuRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   HealthCheckRequest get healthCheckRequest => $_getN(1);
   @$pb.TagNumber(2)
-  set healthCheckRequest(HealthCheckRequest v) { setField(2, v); }
+  set healthCheckRequest(HealthCheckRequest v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasHealthCheckRequest() => $_has(1);
   @$pb.TagNumber(2)
@@ -947,7 +1188,10 @@ class SfuRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   LeaveCallRequest get leaveCallRequest => $_getN(2);
   @$pb.TagNumber(3)
-  set leaveCallRequest(LeaveCallRequest v) { setField(3, v); }
+  set leaveCallRequest(LeaveCallRequest v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasLeaveCallRequest() => $_has(2);
   @$pb.TagNumber(3)
@@ -971,40 +1215,52 @@ class LeaveCallRequest extends $pb.GeneratedMessage {
     return $result;
   }
   LeaveCallRequest._() : super();
-  factory LeaveCallRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory LeaveCallRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory LeaveCallRequest.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory LeaveCallRequest.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'LeaveCallRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LeaveCallRequest',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'sessionId')
     ..aOS(2, _omitFieldNames ? '' : 'reason')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   LeaveCallRequest clone() => LeaveCallRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  LeaveCallRequest copyWith(void Function(LeaveCallRequest) updates) => super.copyWith((message) => updates(message as LeaveCallRequest)) as LeaveCallRequest;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  LeaveCallRequest copyWith(void Function(LeaveCallRequest) updates) =>
+      super.copyWith((message) => updates(message as LeaveCallRequest))
+          as LeaveCallRequest;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static LeaveCallRequest create() => LeaveCallRequest._();
   LeaveCallRequest createEmptyInstance() => create();
-  static $pb.PbList<LeaveCallRequest> createRepeated() => $pb.PbList<LeaveCallRequest>();
+  static $pb.PbList<LeaveCallRequest> createRepeated() =>
+      $pb.PbList<LeaveCallRequest>();
   @$core.pragma('dart2js:noInline')
-  static LeaveCallRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LeaveCallRequest>(create);
+  static LeaveCallRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LeaveCallRequest>(create);
   static LeaveCallRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get sessionId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set sessionId($core.String v) { $_setString(0, v); }
+  set sessionId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasSessionId() => $_has(0);
   @$pb.TagNumber(1)
@@ -1013,7 +1269,10 @@ class LeaveCallRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get reason => $_getSZ(1);
   @$pb.TagNumber(2)
-  set reason($core.String v) { $_setString(1, v); }
+  set reason($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasReason() => $_has(1);
   @$pb.TagNumber(2)
@@ -1023,32 +1282,41 @@ class LeaveCallRequest extends $pb.GeneratedMessage {
 class HealthCheckRequest extends $pb.GeneratedMessage {
   factory HealthCheckRequest() => create();
   HealthCheckRequest._() : super();
-  factory HealthCheckRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory HealthCheckRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory HealthCheckRequest.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory HealthCheckRequest.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HealthCheckRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'HealthCheckRequest',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   HealthCheckRequest clone() => HealthCheckRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  HealthCheckRequest copyWith(void Function(HealthCheckRequest) updates) => super.copyWith((message) => updates(message as HealthCheckRequest)) as HealthCheckRequest;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  HealthCheckRequest copyWith(void Function(HealthCheckRequest) updates) =>
+      super.copyWith((message) => updates(message as HealthCheckRequest))
+          as HealthCheckRequest;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static HealthCheckRequest create() => HealthCheckRequest._();
   HealthCheckRequest createEmptyInstance() => create();
-  static $pb.PbList<HealthCheckRequest> createRepeated() => $pb.PbList<HealthCheckRequest>();
+  static $pb.PbList<HealthCheckRequest> createRepeated() =>
+      $pb.PbList<HealthCheckRequest>();
   @$core.pragma('dart2js:noInline')
-  static HealthCheckRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HealthCheckRequest>(create);
+  static HealthCheckRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<HealthCheckRequest>(create);
   static HealthCheckRequest? _defaultInstance;
 }
 
@@ -1063,39 +1331,52 @@ class HealthCheckResponse extends $pb.GeneratedMessage {
     return $result;
   }
   HealthCheckResponse._() : super();
-  factory HealthCheckResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory HealthCheckResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory HealthCheckResponse.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory HealthCheckResponse.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HealthCheckResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.ParticipantCount>(1, _omitFieldNames ? '' : 'participantCount', subBuilder: $0.ParticipantCount.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'HealthCheckResponse',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOM<$0.ParticipantCount>(1, _omitFieldNames ? '' : 'participantCount',
+        subBuilder: $0.ParticipantCount.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   HealthCheckResponse clone() => HealthCheckResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  HealthCheckResponse copyWith(void Function(HealthCheckResponse) updates) => super.copyWith((message) => updates(message as HealthCheckResponse)) as HealthCheckResponse;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  HealthCheckResponse copyWith(void Function(HealthCheckResponse) updates) =>
+      super.copyWith((message) => updates(message as HealthCheckResponse))
+          as HealthCheckResponse;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static HealthCheckResponse create() => HealthCheckResponse._();
   HealthCheckResponse createEmptyInstance() => create();
-  static $pb.PbList<HealthCheckResponse> createRepeated() => $pb.PbList<HealthCheckResponse>();
+  static $pb.PbList<HealthCheckResponse> createRepeated() =>
+      $pb.PbList<HealthCheckResponse>();
   @$core.pragma('dart2js:noInline')
-  static HealthCheckResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HealthCheckResponse>(create);
+  static HealthCheckResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<HealthCheckResponse>(create);
   static HealthCheckResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.ParticipantCount get participantCount => $_getN(0);
   @$pb.TagNumber(1)
-  set participantCount($0.ParticipantCount v) { setField(1, v); }
+  set participantCount($0.ParticipantCount v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasParticipantCount() => $_has(0);
   @$pb.TagNumber(1)
@@ -1127,42 +1408,58 @@ class TrackPublished extends $pb.GeneratedMessage {
     return $result;
   }
   TrackPublished._() : super();
-  factory TrackPublished.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory TrackPublished.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory TrackPublished.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory TrackPublished.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'TrackPublished', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TrackPublished',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..aOS(2, _omitFieldNames ? '' : 'sessionId')
-    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
-    ..aOM<$0.Participant>(4, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED,
+        valueOf: $0.TrackType.valueOf,
+        enumValues: $0.TrackType.values)
+    ..aOM<$0.Participant>(4, _omitFieldNames ? '' : 'participant',
+        subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   TrackPublished clone() => TrackPublished()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  TrackPublished copyWith(void Function(TrackPublished) updates) => super.copyWith((message) => updates(message as TrackPublished)) as TrackPublished;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  TrackPublished copyWith(void Function(TrackPublished) updates) =>
+      super.copyWith((message) => updates(message as TrackPublished))
+          as TrackPublished;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static TrackPublished create() => TrackPublished._();
   TrackPublished createEmptyInstance() => create();
-  static $pb.PbList<TrackPublished> createRepeated() => $pb.PbList<TrackPublished>();
+  static $pb.PbList<TrackPublished> createRepeated() =>
+      $pb.PbList<TrackPublished>();
   @$core.pragma('dart2js:noInline')
-  static TrackPublished getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackPublished>(create);
+  static TrackPublished getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<TrackPublished>(create);
   static TrackPublished? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
@@ -1171,7 +1468,10 @@ class TrackPublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sessionId($core.String v) { $_setString(1, v); }
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
@@ -1180,7 +1480,10 @@ class TrackPublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $0.TrackType get type => $_getN(2);
   @$pb.TagNumber(3)
-  set type($0.TrackType v) { setField(3, v); }
+  set type($0.TrackType v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
@@ -1194,7 +1497,10 @@ class TrackPublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.Participant get participant => $_getN(3);
   @$pb.TagNumber(4)
-  set participant($0.Participant v) { setField(4, v); }
+  set participant($0.Participant v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasParticipant() => $_has(3);
   @$pb.TagNumber(4)
@@ -1230,43 +1536,64 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     return $result;
   }
   TrackUnpublished._() : super();
-  factory TrackUnpublished.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory TrackUnpublished.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory TrackUnpublished.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory TrackUnpublished.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'TrackUnpublished', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TrackUnpublished',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..aOS(2, _omitFieldNames ? '' : 'sessionId')
-    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
-    ..e<$0.TrackUnpublishReason>(4, _omitFieldNames ? '' : 'cause', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackUnpublishReason.TRACK_UNPUBLISH_REASON_UNSPECIFIED, valueOf: $0.TrackUnpublishReason.valueOf, enumValues: $0.TrackUnpublishReason.values)
-    ..aOM<$0.Participant>(5, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED,
+        valueOf: $0.TrackType.valueOf,
+        enumValues: $0.TrackType.values)
+    ..e<$0.TrackUnpublishReason>(
+        4, _omitFieldNames ? '' : 'cause', $pb.PbFieldType.OE,
+        defaultOrMaker:
+            $0.TrackUnpublishReason.TRACK_UNPUBLISH_REASON_UNSPECIFIED,
+        valueOf: $0.TrackUnpublishReason.valueOf,
+        enumValues: $0.TrackUnpublishReason.values)
+    ..aOM<$0.Participant>(5, _omitFieldNames ? '' : 'participant',
+        subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   TrackUnpublished clone() => TrackUnpublished()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  TrackUnpublished copyWith(void Function(TrackUnpublished) updates) => super.copyWith((message) => updates(message as TrackUnpublished)) as TrackUnpublished;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  TrackUnpublished copyWith(void Function(TrackUnpublished) updates) =>
+      super.copyWith((message) => updates(message as TrackUnpublished))
+          as TrackUnpublished;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static TrackUnpublished create() => TrackUnpublished._();
   TrackUnpublished createEmptyInstance() => create();
-  static $pb.PbList<TrackUnpublished> createRepeated() => $pb.PbList<TrackUnpublished>();
+  static $pb.PbList<TrackUnpublished> createRepeated() =>
+      $pb.PbList<TrackUnpublished>();
   @$core.pragma('dart2js:noInline')
-  static TrackUnpublished getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackUnpublished>(create);
+  static TrackUnpublished getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<TrackUnpublished>(create);
   static TrackUnpublished? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
@@ -1275,7 +1602,10 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sessionId($core.String v) { $_setString(1, v); }
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
@@ -1284,7 +1614,10 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $0.TrackType get type => $_getN(2);
   @$pb.TagNumber(3)
-  set type($0.TrackType v) { setField(3, v); }
+  set type($0.TrackType v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
@@ -1293,7 +1626,10 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.TrackUnpublishReason get cause => $_getN(3);
   @$pb.TagNumber(4)
-  set cause($0.TrackUnpublishReason v) { setField(4, v); }
+  set cause($0.TrackUnpublishReason v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasCause() => $_has(3);
   @$pb.TagNumber(4)
@@ -1307,7 +1643,10 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $0.Participant get participant => $_getN(4);
   @$pb.TagNumber(5)
-  set participant($0.Participant v) { setField(5, v); }
+  set participant($0.Participant v) {
+    setField(5, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasParticipant() => $_has(4);
   @$pb.TagNumber(5)
@@ -1322,10 +1661,8 @@ class JoinRequest extends $pb.GeneratedMessage {
     $core.String? sessionId,
     $core.String? subscriberSdp,
     $0.ClientDetails? clientDetails,
-  @$core.Deprecated('This field is deprecated.')
-    Migration? migration,
-  @$core.Deprecated('This field is deprecated.')
-    $core.bool? fastReconnect,
+    @$core.Deprecated('This field is deprecated.') Migration? migration,
+    @$core.Deprecated('This field is deprecated.') $core.bool? fastReconnect,
     ReconnectDetails? reconnectDetails,
     $core.String? publisherSdp,
     $core.Iterable<$0.PublishOption>? preferredPublishOptions,
@@ -1367,33 +1704,47 @@ class JoinRequest extends $pb.GeneratedMessage {
     return $result;
   }
   JoinRequest._() : super();
-  factory JoinRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory JoinRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory JoinRequest.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory JoinRequest.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'JoinRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'JoinRequest',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOS(2, _omitFieldNames ? '' : 'sessionId')
     ..aOS(3, _omitFieldNames ? '' : 'subscriberSdp')
-    ..aOM<$0.ClientDetails>(4, _omitFieldNames ? '' : 'clientDetails', subBuilder: $0.ClientDetails.create)
-    ..aOM<Migration>(5, _omitFieldNames ? '' : 'migration', subBuilder: Migration.create)
+    ..aOM<$0.ClientDetails>(4, _omitFieldNames ? '' : 'clientDetails',
+        subBuilder: $0.ClientDetails.create)
+    ..aOM<Migration>(5, _omitFieldNames ? '' : 'migration',
+        subBuilder: Migration.create)
     ..aOB(6, _omitFieldNames ? '' : 'fastReconnect')
-    ..aOM<ReconnectDetails>(7, _omitFieldNames ? '' : 'reconnectDetails', subBuilder: ReconnectDetails.create)
+    ..aOM<ReconnectDetails>(7, _omitFieldNames ? '' : 'reconnectDetails',
+        subBuilder: ReconnectDetails.create)
     ..aOS(8, _omitFieldNames ? '' : 'publisherSdp')
-    ..pc<$0.PublishOption>(9, _omitFieldNames ? '' : 'preferredPublishOptions', $pb.PbFieldType.PM, subBuilder: $0.PublishOption.create)
-    ..pc<$0.SubscribeOption>(10, _omitFieldNames ? '' : 'preferredSubscribeOptions', $pb.PbFieldType.PM, subBuilder: $0.SubscribeOption.create)
-    ..hasRequiredFields = false
-  ;
+    ..pc<$0.PublishOption>(
+        9, _omitFieldNames ? '' : 'preferredPublishOptions', $pb.PbFieldType.PM,
+        subBuilder: $0.PublishOption.create)
+    ..pc<$0.SubscribeOption>(10,
+        _omitFieldNames ? '' : 'preferredSubscribeOptions', $pb.PbFieldType.PM,
+        subBuilder: $0.SubscribeOption.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   JoinRequest clone() => JoinRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  JoinRequest copyWith(void Function(JoinRequest) updates) => super.copyWith((message) => updates(message as JoinRequest)) as JoinRequest;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  JoinRequest copyWith(void Function(JoinRequest) updates) =>
+      super.copyWith((message) => updates(message as JoinRequest))
+          as JoinRequest;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -1402,13 +1753,17 @@ class JoinRequest extends $pb.GeneratedMessage {
   JoinRequest createEmptyInstance() => create();
   static $pb.PbList<JoinRequest> createRepeated() => $pb.PbList<JoinRequest>();
   @$core.pragma('dart2js:noInline')
-  static JoinRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<JoinRequest>(create);
+  static JoinRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<JoinRequest>(create);
   static JoinRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get token => $_getSZ(0);
   @$pb.TagNumber(1)
-  set token($core.String v) { $_setString(0, v); }
+  set token($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasToken() => $_has(0);
   @$pb.TagNumber(1)
@@ -1417,7 +1772,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sessionId($core.String v) { $_setString(1, v); }
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
@@ -1427,7 +1785,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.String get subscriberSdp => $_getSZ(2);
   @$pb.TagNumber(3)
-  set subscriberSdp($core.String v) { $_setString(2, v); }
+  set subscriberSdp($core.String v) {
+    $_setString(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasSubscriberSdp() => $_has(2);
   @$pb.TagNumber(3)
@@ -1436,7 +1797,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.ClientDetails get clientDetails => $_getN(3);
   @$pb.TagNumber(4)
-  set clientDetails($0.ClientDetails v) { setField(4, v); }
+  set clientDetails($0.ClientDetails v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasClientDetails() => $_has(3);
   @$pb.TagNumber(4)
@@ -1450,7 +1814,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   Migration get migration => $_getN(4);
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
-  set migration(Migration v) { setField(5, v); }
+  set migration(Migration v) {
+    setField(5, v);
+  }
+
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   $core.bool hasMigration() => $_has(4);
@@ -1475,7 +1842,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   $core.bool get fastReconnect => $_getBF(5);
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
-  set fastReconnect($core.bool v) { $_setBool(5, v); }
+  set fastReconnect($core.bool v) {
+    $_setBool(5, v);
+  }
+
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
   $core.bool hasFastReconnect() => $_has(5);
@@ -1486,7 +1856,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   ReconnectDetails get reconnectDetails => $_getN(6);
   @$pb.TagNumber(7)
-  set reconnectDetails(ReconnectDetails v) { setField(7, v); }
+  set reconnectDetails(ReconnectDetails v) {
+    setField(7, v);
+  }
+
   @$pb.TagNumber(7)
   $core.bool hasReconnectDetails() => $_has(6);
   @$pb.TagNumber(7)
@@ -1497,7 +1870,10 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.String get publisherSdp => $_getSZ(7);
   @$pb.TagNumber(8)
-  set publisherSdp($core.String v) { $_setString(7, v); }
+  set publisherSdp($core.String v) {
+    $_setString(7, v);
+  }
+
   @$pb.TagNumber(8)
   $core.bool hasPublisherSdp() => $_has(7);
   @$pb.TagNumber(8)
@@ -1541,44 +1917,66 @@ class ReconnectDetails extends $pb.GeneratedMessage {
     return $result;
   }
   ReconnectDetails._() : super();
-  factory ReconnectDetails.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ReconnectDetails.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ReconnectDetails.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ReconnectDetails.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ReconnectDetails', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.WebsocketReconnectStrategy>(1, _omitFieldNames ? '' : 'strategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
-    ..pc<$0.TrackInfo>(3, _omitFieldNames ? '' : 'announcedTracks', $pb.PbFieldType.PM, subBuilder: $0.TrackInfo.create)
-    ..pc<$1.TrackSubscriptionDetails>(4, _omitFieldNames ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: $1.TrackSubscriptionDetails.create)
-    ..a<$core.int>(5, _omitFieldNames ? '' : 'reconnectAttempt', $pb.PbFieldType.OU3)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ReconnectDetails',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..e<$0.WebsocketReconnectStrategy>(
+        1, _omitFieldNames ? '' : 'strategy', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.WebsocketReconnectStrategy
+            .WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+        valueOf: $0.WebsocketReconnectStrategy.valueOf,
+        enumValues: $0.WebsocketReconnectStrategy.values)
+    ..pc<$0.TrackInfo>(
+        3, _omitFieldNames ? '' : 'announcedTracks', $pb.PbFieldType.PM,
+        subBuilder: $0.TrackInfo.create)
+    ..pc<$1.TrackSubscriptionDetails>(
+        4, _omitFieldNames ? '' : 'subscriptions', $pb.PbFieldType.PM,
+        subBuilder: $1.TrackSubscriptionDetails.create)
+    ..a<$core.int>(
+        5, _omitFieldNames ? '' : 'reconnectAttempt', $pb.PbFieldType.OU3)
     ..aOS(6, _omitFieldNames ? '' : 'fromSfuId')
     ..aOS(7, _omitFieldNames ? '' : 'previousSessionId')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   ReconnectDetails clone() => ReconnectDetails()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ReconnectDetails copyWith(void Function(ReconnectDetails) updates) => super.copyWith((message) => updates(message as ReconnectDetails)) as ReconnectDetails;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ReconnectDetails copyWith(void Function(ReconnectDetails) updates) =>
+      super.copyWith((message) => updates(message as ReconnectDetails))
+          as ReconnectDetails;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ReconnectDetails create() => ReconnectDetails._();
   ReconnectDetails createEmptyInstance() => create();
-  static $pb.PbList<ReconnectDetails> createRepeated() => $pb.PbList<ReconnectDetails>();
+  static $pb.PbList<ReconnectDetails> createRepeated() =>
+      $pb.PbList<ReconnectDetails>();
   @$core.pragma('dart2js:noInline')
-  static ReconnectDetails getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ReconnectDetails>(create);
+  static ReconnectDetails getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ReconnectDetails>(create);
   static ReconnectDetails? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.WebsocketReconnectStrategy get strategy => $_getN(0);
   @$pb.TagNumber(1)
-  set strategy($0.WebsocketReconnectStrategy v) { setField(1, v); }
+  set strategy($0.WebsocketReconnectStrategy v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasStrategy() => $_has(0);
   @$pb.TagNumber(1)
@@ -1593,7 +1991,10 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.int get reconnectAttempt => $_getIZ(3);
   @$pb.TagNumber(5)
-  set reconnectAttempt($core.int v) { $_setUnsignedInt32(3, v); }
+  set reconnectAttempt($core.int v) {
+    $_setUnsignedInt32(3, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasReconnectAttempt() => $_has(3);
   @$pb.TagNumber(5)
@@ -1602,7 +2003,10 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.String get fromSfuId => $_getSZ(4);
   @$pb.TagNumber(6)
-  set fromSfuId($core.String v) { $_setString(4, v); }
+  set fromSfuId($core.String v) {
+    $_setString(4, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasFromSfuId() => $_has(4);
   @$pb.TagNumber(6)
@@ -1612,7 +2016,10 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.String get previousSessionId => $_getSZ(5);
   @$pb.TagNumber(7)
-  set previousSessionId($core.String v) { $_setString(5, v); }
+  set previousSessionId($core.String v) {
+    $_setString(5, v);
+  }
+
   @$pb.TagNumber(7)
   $core.bool hasPreviousSessionId() => $_has(5);
   @$pb.TagNumber(7)
@@ -1638,26 +2045,36 @@ class Migration extends $pb.GeneratedMessage {
     return $result;
   }
   Migration._() : super();
-  factory Migration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Migration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory Migration.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory Migration.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Migration', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Migration',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'fromSfuId')
-    ..pc<$0.TrackInfo>(2, _omitFieldNames ? '' : 'announcedTracks', $pb.PbFieldType.PM, subBuilder: $0.TrackInfo.create)
-    ..pc<$1.TrackSubscriptionDetails>(3, _omitFieldNames ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: $1.TrackSubscriptionDetails.create)
-    ..hasRequiredFields = false
-  ;
+    ..pc<$0.TrackInfo>(
+        2, _omitFieldNames ? '' : 'announcedTracks', $pb.PbFieldType.PM,
+        subBuilder: $0.TrackInfo.create)
+    ..pc<$1.TrackSubscriptionDetails>(
+        3, _omitFieldNames ? '' : 'subscriptions', $pb.PbFieldType.PM,
+        subBuilder: $1.TrackSubscriptionDetails.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   Migration clone() => Migration()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  Migration copyWith(void Function(Migration) updates) => super.copyWith((message) => updates(message as Migration)) as Migration;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  Migration copyWith(void Function(Migration) updates) =>
+      super.copyWith((message) => updates(message as Migration)) as Migration;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -1666,13 +2083,17 @@ class Migration extends $pb.GeneratedMessage {
   Migration createEmptyInstance() => create();
   static $pb.PbList<Migration> createRepeated() => $pb.PbList<Migration>();
   @$core.pragma('dart2js:noInline')
-  static Migration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Migration>(create);
+  static Migration getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Migration>(create);
   static Migration? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get fromSfuId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set fromSfuId($core.String v) { $_setString(0, v); }
+  set fromSfuId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasFromSfuId() => $_has(0);
   @$pb.TagNumber(1)
@@ -1708,42 +2129,58 @@ class JoinResponse extends $pb.GeneratedMessage {
     return $result;
   }
   JoinResponse._() : super();
-  factory JoinResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory JoinResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory JoinResponse.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory JoinResponse.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'JoinResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.CallState>(1, _omitFieldNames ? '' : 'callState', subBuilder: $0.CallState.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'JoinResponse',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOM<$0.CallState>(1, _omitFieldNames ? '' : 'callState',
+        subBuilder: $0.CallState.create)
     ..aOB(2, _omitFieldNames ? '' : 'reconnected')
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'fastReconnectDeadlineSeconds', $pb.PbFieldType.O3)
-    ..pc<$0.PublishOption>(4, _omitFieldNames ? '' : 'publishOptions', $pb.PbFieldType.PM, subBuilder: $0.PublishOption.create)
-    ..hasRequiredFields = false
-  ;
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'fastReconnectDeadlineSeconds',
+        $pb.PbFieldType.O3)
+    ..pc<$0.PublishOption>(
+        4, _omitFieldNames ? '' : 'publishOptions', $pb.PbFieldType.PM,
+        subBuilder: $0.PublishOption.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   JoinResponse clone() => JoinResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  JoinResponse copyWith(void Function(JoinResponse) updates) => super.copyWith((message) => updates(message as JoinResponse)) as JoinResponse;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  JoinResponse copyWith(void Function(JoinResponse) updates) =>
+      super.copyWith((message) => updates(message as JoinResponse))
+          as JoinResponse;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static JoinResponse create() => JoinResponse._();
   JoinResponse createEmptyInstance() => create();
-  static $pb.PbList<JoinResponse> createRepeated() => $pb.PbList<JoinResponse>();
+  static $pb.PbList<JoinResponse> createRepeated() =>
+      $pb.PbList<JoinResponse>();
   @$core.pragma('dart2js:noInline')
-  static JoinResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<JoinResponse>(create);
+  static JoinResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<JoinResponse>(create);
   static JoinResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.CallState get callState => $_getN(0);
   @$pb.TagNumber(1)
-  set callState($0.CallState v) { setField(1, v); }
+  set callState($0.CallState v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasCallState() => $_has(0);
   @$pb.TagNumber(1)
@@ -1754,7 +2191,10 @@ class JoinResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool get reconnected => $_getBF(1);
   @$pb.TagNumber(2)
-  set reconnected($core.bool v) { $_setBool(1, v); }
+  set reconnected($core.bool v) {
+    $_setBool(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasReconnected() => $_has(1);
   @$pb.TagNumber(2)
@@ -1763,7 +2203,10 @@ class JoinResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.int get fastReconnectDeadlineSeconds => $_getIZ(2);
   @$pb.TagNumber(3)
-  set fastReconnectDeadlineSeconds($core.int v) { $_setSignedInt32(2, v); }
+  set fastReconnectDeadlineSeconds($core.int v) {
+    $_setSignedInt32(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasFastReconnectDeadlineSeconds() => $_has(2);
   @$pb.TagNumber(3)
@@ -1789,40 +2232,53 @@ class ParticipantJoined extends $pb.GeneratedMessage {
     return $result;
   }
   ParticipantJoined._() : super();
-  factory ParticipantJoined.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ParticipantJoined.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ParticipantJoined.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ParticipantJoined.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantJoined', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ParticipantJoined',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'callCid')
-    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant',
+        subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   ParticipantJoined clone() => ParticipantJoined()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ParticipantJoined copyWith(void Function(ParticipantJoined) updates) => super.copyWith((message) => updates(message as ParticipantJoined)) as ParticipantJoined;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ParticipantJoined copyWith(void Function(ParticipantJoined) updates) =>
+      super.copyWith((message) => updates(message as ParticipantJoined))
+          as ParticipantJoined;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ParticipantJoined create() => ParticipantJoined._();
   ParticipantJoined createEmptyInstance() => create();
-  static $pb.PbList<ParticipantJoined> createRepeated() => $pb.PbList<ParticipantJoined>();
+  static $pb.PbList<ParticipantJoined> createRepeated() =>
+      $pb.PbList<ParticipantJoined>();
   @$core.pragma('dart2js:noInline')
-  static ParticipantJoined getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantJoined>(create);
+  static ParticipantJoined getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ParticipantJoined>(create);
   static ParticipantJoined? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get callCid => $_getSZ(0);
   @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
+  set callCid($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
@@ -1831,7 +2287,10 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $0.Participant get participant => $_getN(1);
   @$pb.TagNumber(2)
-  set participant($0.Participant v) { setField(2, v); }
+  set participant($0.Participant v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasParticipant() => $_has(1);
   @$pb.TagNumber(2)
@@ -1856,40 +2315,53 @@ class ParticipantLeft extends $pb.GeneratedMessage {
     return $result;
   }
   ParticipantLeft._() : super();
-  factory ParticipantLeft.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ParticipantLeft.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ParticipantLeft.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ParticipantLeft.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantLeft', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ParticipantLeft',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'callCid')
-    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant',
+        subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   ParticipantLeft clone() => ParticipantLeft()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ParticipantLeft copyWith(void Function(ParticipantLeft) updates) => super.copyWith((message) => updates(message as ParticipantLeft)) as ParticipantLeft;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ParticipantLeft copyWith(void Function(ParticipantLeft) updates) =>
+      super.copyWith((message) => updates(message as ParticipantLeft))
+          as ParticipantLeft;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ParticipantLeft create() => ParticipantLeft._();
   ParticipantLeft createEmptyInstance() => create();
-  static $pb.PbList<ParticipantLeft> createRepeated() => $pb.PbList<ParticipantLeft>();
+  static $pb.PbList<ParticipantLeft> createRepeated() =>
+      $pb.PbList<ParticipantLeft>();
   @$core.pragma('dart2js:noInline')
-  static ParticipantLeft getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantLeft>(create);
+  static ParticipantLeft getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ParticipantLeft>(create);
   static ParticipantLeft? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get callCid => $_getSZ(0);
   @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
+  set callCid($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
@@ -1898,7 +2370,10 @@ class ParticipantLeft extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $0.Participant get participant => $_getN(1);
   @$pb.TagNumber(2)
-  set participant($0.Participant v) { setField(2, v); }
+  set participant($0.Participant v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasParticipant() => $_has(1);
   @$pb.TagNumber(2)
@@ -1923,40 +2398,53 @@ class ParticipantUpdated extends $pb.GeneratedMessage {
     return $result;
   }
   ParticipantUpdated._() : super();
-  factory ParticipantUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ParticipantUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ParticipantUpdated.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ParticipantUpdated.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ParticipantUpdated', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ParticipantUpdated',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'callCid')
-    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant', subBuilder: $0.Participant.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant',
+        subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   ParticipantUpdated clone() => ParticipantUpdated()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ParticipantUpdated copyWith(void Function(ParticipantUpdated) updates) => super.copyWith((message) => updates(message as ParticipantUpdated)) as ParticipantUpdated;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ParticipantUpdated copyWith(void Function(ParticipantUpdated) updates) =>
+      super.copyWith((message) => updates(message as ParticipantUpdated))
+          as ParticipantUpdated;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ParticipantUpdated create() => ParticipantUpdated._();
   ParticipantUpdated createEmptyInstance() => create();
-  static $pb.PbList<ParticipantUpdated> createRepeated() => $pb.PbList<ParticipantUpdated>();
+  static $pb.PbList<ParticipantUpdated> createRepeated() =>
+      $pb.PbList<ParticipantUpdated>();
   @$core.pragma('dart2js:noInline')
-  static ParticipantUpdated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantUpdated>(create);
+  static ParticipantUpdated getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ParticipantUpdated>(create);
   static ParticipantUpdated? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get callCid => $_getSZ(0);
   @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
+  set callCid($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
@@ -1965,7 +2453,10 @@ class ParticipantUpdated extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $0.Participant get participant => $_getN(1);
   @$pb.TagNumber(2)
-  set participant($0.Participant v) { setField(2, v); }
+  set participant($0.Participant v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasParticipant() => $_has(1);
   @$pb.TagNumber(2)
@@ -1990,40 +2481,52 @@ class SubscriberOffer extends $pb.GeneratedMessage {
     return $result;
   }
   SubscriberOffer._() : super();
-  factory SubscriberOffer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SubscriberOffer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory SubscriberOffer.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory SubscriberOffer.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SubscriberOffer', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SubscriberOffer',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'iceRestart')
     ..aOS(2, _omitFieldNames ? '' : 'sdp')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   SubscriberOffer clone() => SubscriberOffer()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  SubscriberOffer copyWith(void Function(SubscriberOffer) updates) => super.copyWith((message) => updates(message as SubscriberOffer)) as SubscriberOffer;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  SubscriberOffer copyWith(void Function(SubscriberOffer) updates) =>
+      super.copyWith((message) => updates(message as SubscriberOffer))
+          as SubscriberOffer;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static SubscriberOffer create() => SubscriberOffer._();
   SubscriberOffer createEmptyInstance() => create();
-  static $pb.PbList<SubscriberOffer> createRepeated() => $pb.PbList<SubscriberOffer>();
+  static $pb.PbList<SubscriberOffer> createRepeated() =>
+      $pb.PbList<SubscriberOffer>();
   @$core.pragma('dart2js:noInline')
-  static SubscriberOffer getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubscriberOffer>(create);
+  static SubscriberOffer getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SubscriberOffer>(create);
   static SubscriberOffer? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get iceRestart => $_getBF(0);
   @$pb.TagNumber(1)
-  set iceRestart($core.bool v) { $_setBool(0, v); }
+  set iceRestart($core.bool v) {
+    $_setBool(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasIceRestart() => $_has(0);
   @$pb.TagNumber(1)
@@ -2032,7 +2535,10 @@ class SubscriberOffer extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sdp => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sdp($core.String v) { $_setString(1, v); }
+  set sdp($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSdp() => $_has(1);
   @$pb.TagNumber(2)
@@ -2050,39 +2556,51 @@ class PublisherAnswer extends $pb.GeneratedMessage {
     return $result;
   }
   PublisherAnswer._() : super();
-  factory PublisherAnswer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory PublisherAnswer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory PublisherAnswer.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory PublisherAnswer.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PublisherAnswer', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PublisherAnswer',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'sdp')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   PublisherAnswer clone() => PublisherAnswer()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  PublisherAnswer copyWith(void Function(PublisherAnswer) updates) => super.copyWith((message) => updates(message as PublisherAnswer)) as PublisherAnswer;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  PublisherAnswer copyWith(void Function(PublisherAnswer) updates) =>
+      super.copyWith((message) => updates(message as PublisherAnswer))
+          as PublisherAnswer;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static PublisherAnswer create() => PublisherAnswer._();
   PublisherAnswer createEmptyInstance() => create();
-  static $pb.PbList<PublisherAnswer> createRepeated() => $pb.PbList<PublisherAnswer>();
+  static $pb.PbList<PublisherAnswer> createRepeated() =>
+      $pb.PbList<PublisherAnswer>();
   @$core.pragma('dart2js:noInline')
-  static PublisherAnswer getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PublisherAnswer>(create);
+  static PublisherAnswer getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PublisherAnswer>(create);
   static PublisherAnswer? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get sdp => $_getSZ(0);
   @$pb.TagNumber(1)
-  set sdp($core.String v) { $_setString(0, v); }
+  set sdp($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasSdp() => $_has(0);
   @$pb.TagNumber(1)
@@ -2102,37 +2620,51 @@ class ConnectionQualityChanged extends $pb.GeneratedMessage {
     return $result;
   }
   ConnectionQualityChanged._() : super();
-  factory ConnectionQualityChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ConnectionQualityChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ConnectionQualityChanged.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ConnectionQualityChanged.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionQualityChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<ConnectionQualityInfo>(1, _omitFieldNames ? '' : 'connectionQualityUpdates', $pb.PbFieldType.PM, subBuilder: ConnectionQualityInfo.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConnectionQualityChanged',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..pc<ConnectionQualityInfo>(1,
+        _omitFieldNames ? '' : 'connectionQualityUpdates', $pb.PbFieldType.PM,
+        subBuilder: ConnectionQualityInfo.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ConnectionQualityChanged clone() => ConnectionQualityChanged()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ConnectionQualityChanged copyWith(void Function(ConnectionQualityChanged) updates) => super.copyWith((message) => updates(message as ConnectionQualityChanged)) as ConnectionQualityChanged;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ConnectionQualityChanged clone() =>
+      ConnectionQualityChanged()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ConnectionQualityChanged copyWith(
+          void Function(ConnectionQualityChanged) updates) =>
+      super.copyWith((message) => updates(message as ConnectionQualityChanged))
+          as ConnectionQualityChanged;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ConnectionQualityChanged create() => ConnectionQualityChanged._();
   ConnectionQualityChanged createEmptyInstance() => create();
-  static $pb.PbList<ConnectionQualityChanged> createRepeated() => $pb.PbList<ConnectionQualityChanged>();
+  static $pb.PbList<ConnectionQualityChanged> createRepeated() =>
+      $pb.PbList<ConnectionQualityChanged>();
   @$core.pragma('dart2js:noInline')
-  static ConnectionQualityChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionQualityChanged>(create);
+  static ConnectionQualityChanged getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ConnectionQualityChanged>(create);
   static ConnectionQualityChanged? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<ConnectionQualityInfo> get connectionQualityUpdates => $_getList(0);
+  $core.List<ConnectionQualityInfo> get connectionQualityUpdates =>
+      $_getList(0);
 }
 
 class ConnectionQualityInfo extends $pb.GeneratedMessage {
@@ -2154,41 +2686,59 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
     return $result;
   }
   ConnectionQualityInfo._() : super();
-  factory ConnectionQualityInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ConnectionQualityInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ConnectionQualityInfo.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ConnectionQualityInfo.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionQualityInfo', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConnectionQualityInfo',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..aOS(2, _omitFieldNames ? '' : 'sessionId')
-    ..e<$0.ConnectionQuality>(3, _omitFieldNames ? '' : 'connectionQuality', $pb.PbFieldType.OE, defaultOrMaker: $0.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED, valueOf: $0.ConnectionQuality.valueOf, enumValues: $0.ConnectionQuality.values)
-    ..hasRequiredFields = false
-  ;
+    ..e<$0.ConnectionQuality>(
+        3, _omitFieldNames ? '' : 'connectionQuality', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED,
+        valueOf: $0.ConnectionQuality.valueOf,
+        enumValues: $0.ConnectionQuality.values)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ConnectionQualityInfo clone() => ConnectionQualityInfo()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ConnectionQualityInfo copyWith(void Function(ConnectionQualityInfo) updates) => super.copyWith((message) => updates(message as ConnectionQualityInfo)) as ConnectionQualityInfo;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ConnectionQualityInfo clone() =>
+      ConnectionQualityInfo()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ConnectionQualityInfo copyWith(
+          void Function(ConnectionQualityInfo) updates) =>
+      super.copyWith((message) => updates(message as ConnectionQualityInfo))
+          as ConnectionQualityInfo;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ConnectionQualityInfo create() => ConnectionQualityInfo._();
   ConnectionQualityInfo createEmptyInstance() => create();
-  static $pb.PbList<ConnectionQualityInfo> createRepeated() => $pb.PbList<ConnectionQualityInfo>();
+  static $pb.PbList<ConnectionQualityInfo> createRepeated() =>
+      $pb.PbList<ConnectionQualityInfo>();
   @$core.pragma('dart2js:noInline')
-  static ConnectionQualityInfo getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionQualityInfo>(create);
+  static ConnectionQualityInfo getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ConnectionQualityInfo>(create);
   static ConnectionQualityInfo? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
@@ -2197,7 +2747,10 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sessionId($core.String v) { $_setString(1, v); }
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
@@ -2206,7 +2759,10 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $0.ConnectionQuality get connectionQuality => $_getN(2);
   @$pb.TagNumber(3)
-  set connectionQuality($0.ConnectionQuality v) { setField(3, v); }
+  set connectionQuality($0.ConnectionQuality v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasConnectionQuality() => $_has(2);
   @$pb.TagNumber(3)
@@ -2229,40 +2785,54 @@ class DominantSpeakerChanged extends $pb.GeneratedMessage {
     return $result;
   }
   DominantSpeakerChanged._() : super();
-  factory DominantSpeakerChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DominantSpeakerChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory DominantSpeakerChanged.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory DominantSpeakerChanged.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DominantSpeakerChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DominantSpeakerChanged',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..aOS(2, _omitFieldNames ? '' : 'sessionId')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  DominantSpeakerChanged clone() => DominantSpeakerChanged()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  DominantSpeakerChanged copyWith(void Function(DominantSpeakerChanged) updates) => super.copyWith((message) => updates(message as DominantSpeakerChanged)) as DominantSpeakerChanged;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  DominantSpeakerChanged clone() =>
+      DominantSpeakerChanged()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  DominantSpeakerChanged copyWith(
+          void Function(DominantSpeakerChanged) updates) =>
+      super.copyWith((message) => updates(message as DominantSpeakerChanged))
+          as DominantSpeakerChanged;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static DominantSpeakerChanged create() => DominantSpeakerChanged._();
   DominantSpeakerChanged createEmptyInstance() => create();
-  static $pb.PbList<DominantSpeakerChanged> createRepeated() => $pb.PbList<DominantSpeakerChanged>();
+  static $pb.PbList<DominantSpeakerChanged> createRepeated() =>
+      $pb.PbList<DominantSpeakerChanged>();
   @$core.pragma('dart2js:noInline')
-  static DominantSpeakerChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DominantSpeakerChanged>(create);
+  static DominantSpeakerChanged getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DominantSpeakerChanged>(create);
   static DominantSpeakerChanged? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
@@ -2271,7 +2841,10 @@ class DominantSpeakerChanged extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sessionId($core.String v) { $_setString(1, v); }
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
@@ -2301,27 +2874,33 @@ class AudioLevel extends $pb.GeneratedMessage {
     return $result;
   }
   AudioLevel._() : super();
-  factory AudioLevel.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AudioLevel.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AudioLevel.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory AudioLevel.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioLevel', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AudioLevel',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
     ..aOS(2, _omitFieldNames ? '' : 'sessionId')
     ..a<$core.double>(3, _omitFieldNames ? '' : 'level', $pb.PbFieldType.OF)
     ..aOB(4, _omitFieldNames ? '' : 'isSpeaking')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   AudioLevel clone() => AudioLevel()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  AudioLevel copyWith(void Function(AudioLevel) updates) => super.copyWith((message) => updates(message as AudioLevel)) as AudioLevel;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  AudioLevel copyWith(void Function(AudioLevel) updates) =>
+      super.copyWith((message) => updates(message as AudioLevel)) as AudioLevel;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -2330,13 +2909,17 @@ class AudioLevel extends $pb.GeneratedMessage {
   AudioLevel createEmptyInstance() => create();
   static $pb.PbList<AudioLevel> createRepeated() => $pb.PbList<AudioLevel>();
   @$core.pragma('dart2js:noInline')
-  static AudioLevel getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AudioLevel>(create);
+  static AudioLevel getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AudioLevel>(create);
   static AudioLevel? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
@@ -2345,7 +2928,10 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sessionId($core.String v) { $_setString(1, v); }
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
@@ -2355,7 +2941,10 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.double get level => $_getN(2);
   @$pb.TagNumber(3)
-  set level($core.double v) { $_setFloat(2, v); }
+  set level($core.double v) {
+    $_setFloat(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasLevel() => $_has(2);
   @$pb.TagNumber(3)
@@ -2364,7 +2953,10 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool get isSpeaking => $_getBF(3);
   @$pb.TagNumber(4)
-  set isSpeaking($core.bool v) { $_setBool(3, v); }
+  set isSpeaking($core.bool v) {
+    $_setBool(3, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasIsSpeaking() => $_has(3);
   @$pb.TagNumber(4)
@@ -2383,33 +2975,44 @@ class AudioLevelChanged extends $pb.GeneratedMessage {
     return $result;
   }
   AudioLevelChanged._() : super();
-  factory AudioLevelChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AudioLevelChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AudioLevelChanged.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory AudioLevelChanged.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioLevelChanged', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<AudioLevel>(1, _omitFieldNames ? '' : 'audioLevels', $pb.PbFieldType.PM, subBuilder: AudioLevel.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AudioLevelChanged',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..pc<AudioLevel>(
+        1, _omitFieldNames ? '' : 'audioLevels', $pb.PbFieldType.PM,
+        subBuilder: AudioLevel.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   AudioLevelChanged clone() => AudioLevelChanged()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  AudioLevelChanged copyWith(void Function(AudioLevelChanged) updates) => super.copyWith((message) => updates(message as AudioLevelChanged)) as AudioLevelChanged;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  AudioLevelChanged copyWith(void Function(AudioLevelChanged) updates) =>
+      super.copyWith((message) => updates(message as AudioLevelChanged))
+          as AudioLevelChanged;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static AudioLevelChanged create() => AudioLevelChanged._();
   AudioLevelChanged createEmptyInstance() => create();
-  static $pb.PbList<AudioLevelChanged> createRepeated() => $pb.PbList<AudioLevelChanged>();
+  static $pb.PbList<AudioLevelChanged> createRepeated() =>
+      $pb.PbList<AudioLevelChanged>();
   @$core.pragma('dart2js:noInline')
-  static AudioLevelChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AudioLevelChanged>(create);
+  static AudioLevelChanged getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AudioLevelChanged>(create);
   static AudioLevelChanged? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -2435,26 +3038,38 @@ class AudioSender extends $pb.GeneratedMessage {
     return $result;
   }
   AudioSender._() : super();
-  factory AudioSender.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AudioSender.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AudioSender.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory AudioSender.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AudioSender', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
-    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AudioSender',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec',
+        subBuilder: $0.Codec.create)
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED,
+        valueOf: $0.TrackType.valueOf,
+        enumValues: $0.TrackType.values)
+    ..a<$core.int>(
+        4, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   AudioSender clone() => AudioSender()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  AudioSender copyWith(void Function(AudioSender) updates) => super.copyWith((message) => updates(message as AudioSender)) as AudioSender;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  AudioSender copyWith(void Function(AudioSender) updates) =>
+      super.copyWith((message) => updates(message as AudioSender))
+          as AudioSender;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -2463,13 +3078,17 @@ class AudioSender extends $pb.GeneratedMessage {
   AudioSender createEmptyInstance() => create();
   static $pb.PbList<AudioSender> createRepeated() => $pb.PbList<AudioSender>();
   @$core.pragma('dart2js:noInline')
-  static AudioSender getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AudioSender>(create);
+  static AudioSender getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AudioSender>(create);
   static AudioSender? _defaultInstance;
 
   @$pb.TagNumber(2)
   $0.Codec get codec => $_getN(0);
   @$pb.TagNumber(2)
-  set codec($0.Codec v) { setField(2, v); }
+  set codec($0.Codec v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasCodec() => $_has(0);
   @$pb.TagNumber(2)
@@ -2480,7 +3099,10 @@ class AudioSender extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $0.TrackType get trackType => $_getN(1);
   @$pb.TagNumber(3)
-  set trackType($0.TrackType v) { setField(3, v); }
+  set trackType($0.TrackType v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasTrackType() => $_has(1);
   @$pb.TagNumber(3)
@@ -2489,7 +3111,10 @@ class AudioSender extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.int get publishOptionId => $_getIZ(2);
   @$pb.TagNumber(4)
-  set publishOptionId($core.int v) { $_setSignedInt32(2, v); }
+  set publishOptionId($core.int v) {
+    $_setSignedInt32(2, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasPublishOptionId() => $_has(2);
   @$pb.TagNumber(4)
@@ -2534,45 +3159,60 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
     return $result;
   }
   VideoLayerSetting._() : super();
-  factory VideoLayerSetting.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory VideoLayerSetting.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory VideoLayerSetting.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory VideoLayerSetting.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoLayerSetting', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'VideoLayerSetting',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'name')
     ..aOB(2, _omitFieldNames ? '' : 'active')
     ..a<$core.int>(3, _omitFieldNames ? '' : 'maxBitrate', $pb.PbFieldType.O3)
-    ..a<$core.double>(4, _omitFieldNames ? '' : 'scaleResolutionDownBy', $pb.PbFieldType.OF)
-    ..aOM<$0.Codec>(6, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
-    ..a<$core.int>(7, _omitFieldNames ? '' : 'maxFramerate', $pb.PbFieldType.OU3)
+    ..a<$core.double>(
+        4, _omitFieldNames ? '' : 'scaleResolutionDownBy', $pb.PbFieldType.OF)
+    ..aOM<$0.Codec>(6, _omitFieldNames ? '' : 'codec',
+        subBuilder: $0.Codec.create)
+    ..a<$core.int>(
+        7, _omitFieldNames ? '' : 'maxFramerate', $pb.PbFieldType.OU3)
     ..aOS(8, _omitFieldNames ? '' : 'scalabilityMode')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   VideoLayerSetting clone() => VideoLayerSetting()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  VideoLayerSetting copyWith(void Function(VideoLayerSetting) updates) => super.copyWith((message) => updates(message as VideoLayerSetting)) as VideoLayerSetting;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  VideoLayerSetting copyWith(void Function(VideoLayerSetting) updates) =>
+      super.copyWith((message) => updates(message as VideoLayerSetting))
+          as VideoLayerSetting;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static VideoLayerSetting create() => VideoLayerSetting._();
   VideoLayerSetting createEmptyInstance() => create();
-  static $pb.PbList<VideoLayerSetting> createRepeated() => $pb.PbList<VideoLayerSetting>();
+  static $pb.PbList<VideoLayerSetting> createRepeated() =>
+      $pb.PbList<VideoLayerSetting>();
   @$core.pragma('dart2js:noInline')
-  static VideoLayerSetting getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VideoLayerSetting>(create);
+  static VideoLayerSetting getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<VideoLayerSetting>(create);
   static VideoLayerSetting? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get name => $_getSZ(0);
   @$pb.TagNumber(1)
-  set name($core.String v) { $_setString(0, v); }
+  set name($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
@@ -2581,7 +3221,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool get active => $_getBF(1);
   @$pb.TagNumber(2)
-  set active($core.bool v) { $_setBool(1, v); }
+  set active($core.bool v) {
+    $_setBool(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasActive() => $_has(1);
   @$pb.TagNumber(2)
@@ -2590,7 +3233,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.int get maxBitrate => $_getIZ(2);
   @$pb.TagNumber(3)
-  set maxBitrate($core.int v) { $_setSignedInt32(2, v); }
+  set maxBitrate($core.int v) {
+    $_setSignedInt32(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasMaxBitrate() => $_has(2);
   @$pb.TagNumber(3)
@@ -2599,7 +3245,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.double get scaleResolutionDownBy => $_getN(3);
   @$pb.TagNumber(4)
-  set scaleResolutionDownBy($core.double v) { $_setFloat(3, v); }
+  set scaleResolutionDownBy($core.double v) {
+    $_setFloat(3, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasScaleResolutionDownBy() => $_has(3);
   @$pb.TagNumber(4)
@@ -2608,7 +3257,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $0.Codec get codec => $_getN(4);
   @$pb.TagNumber(6)
-  set codec($0.Codec v) { setField(6, v); }
+  set codec($0.Codec v) {
+    setField(6, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasCodec() => $_has(4);
   @$pb.TagNumber(6)
@@ -2619,7 +3271,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.int get maxFramerate => $_getIZ(5);
   @$pb.TagNumber(7)
-  set maxFramerate($core.int v) { $_setUnsignedInt32(5, v); }
+  set maxFramerate($core.int v) {
+    $_setUnsignedInt32(5, v);
+  }
+
   @$pb.TagNumber(7)
   $core.bool hasMaxFramerate() => $_has(5);
   @$pb.TagNumber(7)
@@ -2628,7 +3283,10 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.String get scalabilityMode => $_getSZ(6);
   @$pb.TagNumber(8)
-  set scalabilityMode($core.String v) { $_setString(6, v); }
+  set scalabilityMode($core.String v) {
+    $_setString(6, v);
+  }
+
   @$pb.TagNumber(8)
   $core.bool hasScalabilityMode() => $_has(6);
   @$pb.TagNumber(8)
@@ -2658,27 +3316,41 @@ class VideoSender extends $pb.GeneratedMessage {
     return $result;
   }
   VideoSender._() : super();
-  factory VideoSender.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory VideoSender.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory VideoSender.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory VideoSender.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoSender', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: $0.Codec.create)
-    ..pc<VideoLayerSetting>(3, _omitFieldNames ? '' : 'layers', $pb.PbFieldType.PM, subBuilder: VideoLayerSetting.create)
-    ..e<$0.TrackType>(4, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
-    ..a<$core.int>(5, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'VideoSender',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOM<$0.Codec>(2, _omitFieldNames ? '' : 'codec',
+        subBuilder: $0.Codec.create)
+    ..pc<VideoLayerSetting>(
+        3, _omitFieldNames ? '' : 'layers', $pb.PbFieldType.PM,
+        subBuilder: VideoLayerSetting.create)
+    ..e<$0.TrackType>(4, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED,
+        valueOf: $0.TrackType.valueOf,
+        enumValues: $0.TrackType.values)
+    ..a<$core.int>(
+        5, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   VideoSender clone() => VideoSender()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  VideoSender copyWith(void Function(VideoSender) updates) => super.copyWith((message) => updates(message as VideoSender)) as VideoSender;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  VideoSender copyWith(void Function(VideoSender) updates) =>
+      super.copyWith((message) => updates(message as VideoSender))
+          as VideoSender;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -2687,13 +3359,17 @@ class VideoSender extends $pb.GeneratedMessage {
   VideoSender createEmptyInstance() => create();
   static $pb.PbList<VideoSender> createRepeated() => $pb.PbList<VideoSender>();
   @$core.pragma('dart2js:noInline')
-  static VideoSender getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VideoSender>(create);
+  static VideoSender getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<VideoSender>(create);
   static VideoSender? _defaultInstance;
 
   @$pb.TagNumber(2)
   $0.Codec get codec => $_getN(0);
   @$pb.TagNumber(2)
-  set codec($0.Codec v) { setField(2, v); }
+  set codec($0.Codec v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasCodec() => $_has(0);
   @$pb.TagNumber(2)
@@ -2707,7 +3383,10 @@ class VideoSender extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $0.TrackType get trackType => $_getN(2);
   @$pb.TagNumber(4)
-  set trackType($0.TrackType v) { setField(4, v); }
+  set trackType($0.TrackType v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasTrackType() => $_has(2);
   @$pb.TagNumber(4)
@@ -2716,7 +3395,10 @@ class VideoSender extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.int get publishOptionId => $_getIZ(3);
   @$pb.TagNumber(5)
-  set publishOptionId($core.int v) { $_setSignedInt32(3, v); }
+  set publishOptionId($core.int v) {
+    $_setSignedInt32(3, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasPublishOptionId() => $_has(3);
   @$pb.TagNumber(5)
@@ -2739,34 +3421,48 @@ class ChangePublishQuality extends $pb.GeneratedMessage {
     return $result;
   }
   ChangePublishQuality._() : super();
-  factory ChangePublishQuality.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChangePublishQuality.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ChangePublishQuality.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ChangePublishQuality.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChangePublishQuality', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..pc<AudioSender>(1, _omitFieldNames ? '' : 'audioSenders', $pb.PbFieldType.PM, subBuilder: AudioSender.create)
-    ..pc<VideoSender>(2, _omitFieldNames ? '' : 'videoSenders', $pb.PbFieldType.PM, subBuilder: VideoSender.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChangePublishQuality',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..pc<AudioSender>(
+        1, _omitFieldNames ? '' : 'audioSenders', $pb.PbFieldType.PM,
+        subBuilder: AudioSender.create)
+    ..pc<VideoSender>(
+        2, _omitFieldNames ? '' : 'videoSenders', $pb.PbFieldType.PM,
+        subBuilder: VideoSender.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ChangePublishQuality clone() => ChangePublishQuality()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ChangePublishQuality copyWith(void Function(ChangePublishQuality) updates) => super.copyWith((message) => updates(message as ChangePublishQuality)) as ChangePublishQuality;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ChangePublishQuality clone() =>
+      ChangePublishQuality()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ChangePublishQuality copyWith(void Function(ChangePublishQuality) updates) =>
+      super.copyWith((message) => updates(message as ChangePublishQuality))
+          as ChangePublishQuality;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static ChangePublishQuality create() => ChangePublishQuality._();
   ChangePublishQuality createEmptyInstance() => create();
-  static $pb.PbList<ChangePublishQuality> createRepeated() => $pb.PbList<ChangePublishQuality>();
+  static $pb.PbList<ChangePublishQuality> createRepeated() =>
+      $pb.PbList<ChangePublishQuality>();
   @$core.pragma('dart2js:noInline')
-  static ChangePublishQuality getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChangePublishQuality>(create);
+  static ChangePublishQuality getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChangePublishQuality>(create);
   static ChangePublishQuality? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -2807,40 +3503,53 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
     return $result;
   }
   CallGrantsUpdated._() : super();
-  factory CallGrantsUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallGrantsUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CallGrantsUpdated.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory CallGrantsUpdated.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CallGrantsUpdated', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.CallGrants>(1, _omitFieldNames ? '' : 'currentGrants', subBuilder: $0.CallGrants.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CallGrantsUpdated',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOM<$0.CallGrants>(1, _omitFieldNames ? '' : 'currentGrants',
+        subBuilder: $0.CallGrants.create)
     ..aOS(2, _omitFieldNames ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   CallGrantsUpdated clone() => CallGrantsUpdated()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallGrantsUpdated copyWith(void Function(CallGrantsUpdated) updates) => super.copyWith((message) => updates(message as CallGrantsUpdated)) as CallGrantsUpdated;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  CallGrantsUpdated copyWith(void Function(CallGrantsUpdated) updates) =>
+      super.copyWith((message) => updates(message as CallGrantsUpdated))
+          as CallGrantsUpdated;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static CallGrantsUpdated create() => CallGrantsUpdated._();
   CallGrantsUpdated createEmptyInstance() => create();
-  static $pb.PbList<CallGrantsUpdated> createRepeated() => $pb.PbList<CallGrantsUpdated>();
+  static $pb.PbList<CallGrantsUpdated> createRepeated() =>
+      $pb.PbList<CallGrantsUpdated>();
   @$core.pragma('dart2js:noInline')
-  static CallGrantsUpdated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallGrantsUpdated>(create);
+  static CallGrantsUpdated getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CallGrantsUpdated>(create);
   static CallGrantsUpdated? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.CallGrants get currentGrants => $_getN(0);
   @$pb.TagNumber(1)
-  set currentGrants($0.CallGrants v) { setField(1, v); }
+  set currentGrants($0.CallGrants v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasCurrentGrants() => $_has(0);
   @$pb.TagNumber(1)
@@ -2851,7 +3560,10 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
@@ -2871,24 +3583,33 @@ class GoAway extends $pb.GeneratedMessage {
     return $result;
   }
   GoAway._() : super();
-  factory GoAway.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory GoAway.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory GoAway.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory GoAway.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GoAway', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.GoAwayReason>(1, _omitFieldNames ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED, valueOf: $0.GoAwayReason.valueOf, enumValues: $0.GoAwayReason.values)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GoAway',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..e<$0.GoAwayReason>(1, _omitFieldNames ? '' : 'reason', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED,
+        valueOf: $0.GoAwayReason.valueOf,
+        enumValues: $0.GoAwayReason.values)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   GoAway clone() => GoAway()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  GoAway copyWith(void Function(GoAway) updates) => super.copyWith((message) => updates(message as GoAway)) as GoAway;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  GoAway copyWith(void Function(GoAway) updates) =>
+      super.copyWith((message) => updates(message as GoAway)) as GoAway;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -2897,13 +3618,17 @@ class GoAway extends $pb.GeneratedMessage {
   GoAway createEmptyInstance() => create();
   static $pb.PbList<GoAway> createRepeated() => $pb.PbList<GoAway>();
   @$core.pragma('dart2js:noInline')
-  static GoAway getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GoAway>(create);
+  static GoAway getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GoAway>(create);
   static GoAway? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.GoAwayReason get reason => $_getN(0);
   @$pb.TagNumber(1)
-  set reason($0.GoAwayReason v) { setField(1, v); }
+  set reason($0.GoAwayReason v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasReason() => $_has(0);
   @$pb.TagNumber(1)
@@ -2923,24 +3648,34 @@ class CallEnded extends $pb.GeneratedMessage {
     return $result;
   }
   CallEnded._() : super();
-  factory CallEnded.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallEnded.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CallEnded.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory CallEnded.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CallEnded', package: const $pb.PackageName(_omitMessageNames ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..e<$0.CallEndedReason>(1, _omitFieldNames ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.CallEndedReason.CALL_ENDED_REASON_UNSPECIFIED, valueOf: $0.CallEndedReason.valueOf, enumValues: $0.CallEndedReason.values)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CallEnded',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..e<$0.CallEndedReason>(
+        1, _omitFieldNames ? '' : 'reason', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.CallEndedReason.CALL_ENDED_REASON_UNSPECIFIED,
+        valueOf: $0.CallEndedReason.valueOf,
+        enumValues: $0.CallEndedReason.values)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   CallEnded clone() => CallEnded()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallEnded copyWith(void Function(CallEnded) updates) => super.copyWith((message) => updates(message as CallEnded)) as CallEnded;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  CallEnded copyWith(void Function(CallEnded) updates) =>
+      super.copyWith((message) => updates(message as CallEnded)) as CallEnded;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -2949,19 +3684,23 @@ class CallEnded extends $pb.GeneratedMessage {
   CallEnded createEmptyInstance() => create();
   static $pb.PbList<CallEnded> createRepeated() => $pb.PbList<CallEnded>();
   @$core.pragma('dart2js:noInline')
-  static CallEnded getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallEnded>(create);
+  static CallEnded getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallEnded>(create);
   static CallEnded? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.CallEndedReason get reason => $_getN(0);
   @$pb.TagNumber(1)
-  set reason($0.CallEndedReason v) { setField(1, v); }
+  set reason($0.CallEndedReason v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasReason() => $_has(0);
   @$pb.TagNumber(1)
   void clearReason() => clearField(1);
 }
 
-
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

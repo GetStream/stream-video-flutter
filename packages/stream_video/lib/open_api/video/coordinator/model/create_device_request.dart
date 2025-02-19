@@ -44,27 +44,30 @@ class CreateDeviceRequest {
   bool? voipToken;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CreateDeviceRequest &&
-    other.id == id &&
-    other.pushProvider == pushProvider &&
-    other.pushProviderName == pushProviderName &&
-    other.voipToken == voipToken;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateDeviceRequest &&
+          other.id == id &&
+          other.pushProvider == pushProvider &&
+          other.pushProviderName == pushProviderName &&
+          other.voipToken == voipToken;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (pushProvider.hashCode) +
-    (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
-    (voipToken == null ? 0 : voipToken!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (pushProvider.hashCode) +
+      (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
+      (voipToken == null ? 0 : voipToken!.hashCode);
 
   @override
-  String toString() => 'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voipToken=$voipToken]';
+  String toString() =>
+      'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voipToken=$voipToken]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'push_provider'] = this.pushProvider;
+    json[r'id'] = this.id;
+    json[r'push_provider'] = this.pushProvider;
     if (this.pushProviderName != null) {
       json[r'push_provider_name'] = this.pushProviderName;
     } else {
@@ -90,15 +93,18 @@ class CreateDeviceRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CreateDeviceRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CreateDeviceRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CreateDeviceRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CreateDeviceRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return CreateDeviceRequest(
         id: mapValueOfType<String>(json, r'id')!,
-        pushProvider: CreateDeviceRequestPushProviderEnum.fromJson(json[r'push_provider'])!,
+        pushProvider: CreateDeviceRequestPushProviderEnum.fromJson(
+            json[r'push_provider'])!,
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
         voipToken: mapValueOfType<bool>(json, r'voip_token'),
       );
@@ -106,7 +112,10 @@ class CreateDeviceRequest {
     return null;
   }
 
-  static List<CreateDeviceRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateDeviceRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CreateDeviceRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -134,13 +143,19 @@ class CreateDeviceRequest {
   }
 
   // maps a json object with a list of CreateDeviceRequest-objects as value to a dart map
-  static Map<String, List<CreateDeviceRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CreateDeviceRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CreateDeviceRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CreateDeviceRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CreateDeviceRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -179,9 +194,13 @@ class CreateDeviceRequestPushProviderEnum {
     xiaomi,
   ];
 
-  static CreateDeviceRequestPushProviderEnum? fromJson(dynamic value) => CreateDeviceRequestPushProviderEnumTypeTransformer().decode(value);
+  static CreateDeviceRequestPushProviderEnum? fromJson(dynamic value) =>
+      CreateDeviceRequestPushProviderEnumTypeTransformer().decode(value);
 
-  static List<CreateDeviceRequestPushProviderEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateDeviceRequestPushProviderEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CreateDeviceRequestPushProviderEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -198,7 +217,8 @@ class CreateDeviceRequestPushProviderEnum {
 /// Transformation class that can [encode] an instance of [CreateDeviceRequestPushProviderEnum] to String,
 /// and [decode] dynamic data back to [CreateDeviceRequestPushProviderEnum].
 class CreateDeviceRequestPushProviderEnumTypeTransformer {
-  factory CreateDeviceRequestPushProviderEnumTypeTransformer() => _instance ??= const CreateDeviceRequestPushProviderEnumTypeTransformer._();
+  factory CreateDeviceRequestPushProviderEnumTypeTransformer() => _instance ??=
+      const CreateDeviceRequestPushProviderEnumTypeTransformer._();
 
   const CreateDeviceRequestPushProviderEnumTypeTransformer._();
 
@@ -212,13 +232,18 @@ class CreateDeviceRequestPushProviderEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  CreateDeviceRequestPushProviderEnum? decode(dynamic data, {bool allowNull = true}) {
+  CreateDeviceRequestPushProviderEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'firebase': return CreateDeviceRequestPushProviderEnum.firebase;
-        case r'apn': return CreateDeviceRequestPushProviderEnum.apn;
-        case r'huawei': return CreateDeviceRequestPushProviderEnum.huawei;
-        case r'xiaomi': return CreateDeviceRequestPushProviderEnum.xiaomi;
+        case r'firebase':
+          return CreateDeviceRequestPushProviderEnum.firebase;
+        case r'apn':
+          return CreateDeviceRequestPushProviderEnum.apn;
+        case r'huawei':
+          return CreateDeviceRequestPushProviderEnum.huawei;
+        case r'xiaomi':
+          return CreateDeviceRequestPushProviderEnum.xiaomi;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -231,5 +256,3 @@ class CreateDeviceRequestPushProviderEnumTypeTransformer {
   /// Singleton [CreateDeviceRequestPushProviderEnumTypeTransformer] instance.
   static CreateDeviceRequestPushProviderEnumTypeTransformer? _instance;
 }
-
-

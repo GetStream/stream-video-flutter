@@ -40,27 +40,30 @@ class EgressRTMPResponse {
   String? streamUrl;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is EgressRTMPResponse &&
-    other.name == name &&
-    other.startedAt == startedAt &&
-    other.streamKey == streamKey &&
-    other.streamUrl == streamUrl;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EgressRTMPResponse &&
+          other.name == name &&
+          other.startedAt == startedAt &&
+          other.streamKey == streamKey &&
+          other.streamUrl == streamUrl;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (name.hashCode) +
-    (startedAt.hashCode) +
-    (streamKey == null ? 0 : streamKey!.hashCode) +
-    (streamUrl == null ? 0 : streamUrl!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (name.hashCode) +
+      (startedAt.hashCode) +
+      (streamKey == null ? 0 : streamKey!.hashCode) +
+      (streamUrl == null ? 0 : streamUrl!.hashCode);
 
   @override
-  String toString() => 'EgressRTMPResponse[name=$name, startedAt=$startedAt, streamKey=$streamKey, streamUrl=$streamUrl]';
+  String toString() =>
+      'EgressRTMPResponse[name=$name, startedAt=$startedAt, streamKey=$streamKey, streamUrl=$streamUrl]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'name'] = this.name;
-      json[r'started_at'] = this.startedAt.toUtc().toIso8601String();
+    json[r'name'] = this.name;
+    json[r'started_at'] = this.startedAt.toUtc().toIso8601String();
     if (this.streamKey != null) {
       json[r'stream_key'] = this.streamKey;
     } else {
@@ -86,8 +89,10 @@ class EgressRTMPResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EgressRTMPResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EgressRTMPResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "EgressRTMPResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "EgressRTMPResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -102,7 +107,10 @@ class EgressRTMPResponse {
     return null;
   }
 
-  static List<EgressRTMPResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EgressRTMPResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <EgressRTMPResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -130,13 +138,19 @@ class EgressRTMPResponse {
   }
 
   // maps a json object with a list of EgressRTMPResponse-objects as value to a dart map
-  static Map<String, List<EgressRTMPResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<EgressRTMPResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<EgressRTMPResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = EgressRTMPResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = EgressRTMPResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -148,4 +162,3 @@ class EgressRTMPResponse {
     'started_at',
   };
 }
-

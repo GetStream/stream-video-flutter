@@ -28,22 +28,25 @@ class BackstageSettingsResponse {
   int? joinAheadTimeSeconds;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is BackstageSettingsResponse &&
-    other.enabled == enabled &&
-    other.joinAheadTimeSeconds == joinAheadTimeSeconds;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BackstageSettingsResponse &&
+          other.enabled == enabled &&
+          other.joinAheadTimeSeconds == joinAheadTimeSeconds;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (enabled.hashCode) +
-    (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (enabled.hashCode) +
+      (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode);
 
   @override
-  String toString() => 'BackstageSettingsResponse[enabled=$enabled, joinAheadTimeSeconds=$joinAheadTimeSeconds]';
+  String toString() =>
+      'BackstageSettingsResponse[enabled=$enabled, joinAheadTimeSeconds=$joinAheadTimeSeconds]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'enabled'] = this.enabled;
+    json[r'enabled'] = this.enabled;
     if (this.joinAheadTimeSeconds != null) {
       json[r'join_ahead_time_seconds'] = this.joinAheadTimeSeconds;
     } else {
@@ -64,21 +67,27 @@ class BackstageSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "BackstageSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "BackstageSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "BackstageSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "BackstageSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return BackstageSettingsResponse(
         enabled: mapValueOfType<bool>(json, r'enabled')!,
-        joinAheadTimeSeconds: mapValueOfType<int>(json, r'join_ahead_time_seconds'),
+        joinAheadTimeSeconds:
+            mapValueOfType<int>(json, r'join_ahead_time_seconds'),
       );
     }
     return null;
   }
 
-  static List<BackstageSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BackstageSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <BackstageSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -106,13 +115,19 @@ class BackstageSettingsResponse {
   }
 
   // maps a json object with a list of BackstageSettingsResponse-objects as value to a dart map
-  static Map<String, List<BackstageSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<BackstageSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<BackstageSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = BackstageSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = BackstageSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -123,4 +138,3 @@ class BackstageSettingsResponse {
     'enabled',
   };
 }
-

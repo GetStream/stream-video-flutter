@@ -43,20 +43,23 @@ class PublishedTrackInfo {
   String? trackType;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PublishedTrackInfo &&
-    other.codecMimeType == codecMimeType &&
-    other.durationSeconds == durationSeconds &&
-    other.trackType == trackType;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PublishedTrackInfo &&
+          other.codecMimeType == codecMimeType &&
+          other.durationSeconds == durationSeconds &&
+          other.trackType == trackType;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (codecMimeType == null ? 0 : codecMimeType!.hashCode) +
-    (durationSeconds == null ? 0 : durationSeconds!.hashCode) +
-    (trackType == null ? 0 : trackType!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (codecMimeType == null ? 0 : codecMimeType!.hashCode) +
+      (durationSeconds == null ? 0 : durationSeconds!.hashCode) +
+      (trackType == null ? 0 : trackType!.hashCode);
 
   @override
-  String toString() => 'PublishedTrackInfo[codecMimeType=$codecMimeType, durationSeconds=$durationSeconds, trackType=$trackType]';
+  String toString() =>
+      'PublishedTrackInfo[codecMimeType=$codecMimeType, durationSeconds=$durationSeconds, trackType=$trackType]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -90,8 +93,10 @@ class PublishedTrackInfo {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "PublishedTrackInfo[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "PublishedTrackInfo[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "PublishedTrackInfo[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "PublishedTrackInfo[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -105,7 +110,10 @@ class PublishedTrackInfo {
     return null;
   }
 
-  static List<PublishedTrackInfo> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PublishedTrackInfo> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PublishedTrackInfo>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -133,20 +141,24 @@ class PublishedTrackInfo {
   }
 
   // maps a json object with a list of PublishedTrackInfo-objects as value to a dart map
-  static Map<String, List<PublishedTrackInfo>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PublishedTrackInfo>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PublishedTrackInfo>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PublishedTrackInfo.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PublishedTrackInfo.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

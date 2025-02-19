@@ -28,29 +28,32 @@ class CallParticipantResponse {
   String userSessionId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallParticipantResponse &&
-    other.joinedAt == joinedAt &&
-    other.role == role &&
-    other.user == user &&
-    other.userSessionId == userSessionId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallParticipantResponse &&
+          other.joinedAt == joinedAt &&
+          other.role == role &&
+          other.user == user &&
+          other.userSessionId == userSessionId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (joinedAt.hashCode) +
-    (role.hashCode) +
-    (user.hashCode) +
-    (userSessionId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (joinedAt.hashCode) +
+      (role.hashCode) +
+      (user.hashCode) +
+      (userSessionId.hashCode);
 
   @override
-  String toString() => 'CallParticipantResponse[joinedAt=$joinedAt, role=$role, user=$user, userSessionId=$userSessionId]';
+  String toString() =>
+      'CallParticipantResponse[joinedAt=$joinedAt, role=$role, user=$user, userSessionId=$userSessionId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'joined_at'] = this.joinedAt.toUtc().toIso8601String();
-      json[r'role'] = this.role;
-      json[r'user'] = this.user;
-      json[r'user_session_id'] = this.userSessionId;
+    json[r'joined_at'] = this.joinedAt.toUtc().toIso8601String();
+    json[r'role'] = this.role;
+    json[r'user'] = this.user;
+    json[r'user_session_id'] = this.userSessionId;
     return json;
   }
 
@@ -66,8 +69,10 @@ class CallParticipantResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallParticipantResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallParticipantResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallParticipantResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallParticipantResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -82,7 +87,10 @@ class CallParticipantResponse {
     return null;
   }
 
-  static List<CallParticipantResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallParticipantResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallParticipantResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -110,13 +118,19 @@ class CallParticipantResponse {
   }
 
   // maps a json object with a list of CallParticipantResponse-objects as value to a dart map
-  static Map<String, List<CallParticipantResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallParticipantResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallParticipantResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallParticipantResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallParticipantResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -130,4 +144,3 @@ class CallParticipantResponse {
     'user_session_id',
   };
 }
-

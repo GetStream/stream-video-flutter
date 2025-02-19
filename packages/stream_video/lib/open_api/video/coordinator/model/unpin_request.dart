@@ -24,23 +24,24 @@ class UnpinRequest {
   String userId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UnpinRequest &&
-    other.sessionId == sessionId &&
-    other.userId == userId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnpinRequest &&
+          other.sessionId == sessionId &&
+          other.userId == userId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (sessionId.hashCode) +
-    (userId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (sessionId.hashCode) + (userId.hashCode);
 
   @override
   String toString() => 'UnpinRequest[sessionId=$sessionId, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'session_id'] = this.sessionId;
-      json[r'user_id'] = this.userId;
+    json[r'session_id'] = this.sessionId;
+    json[r'user_id'] = this.userId;
     return json;
   }
 
@@ -56,8 +57,10 @@ class UnpinRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UnpinRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UnpinRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UnpinRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UnpinRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -70,7 +73,10 @@ class UnpinRequest {
     return null;
   }
 
-  static List<UnpinRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UnpinRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UnpinRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -98,13 +104,19 @@ class UnpinRequest {
   }
 
   // maps a json object with a list of UnpinRequest-objects as value to a dart map
-  static Map<String, List<UnpinRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UnpinRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UnpinRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UnpinRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UnpinRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -116,4 +128,3 @@ class UnpinRequest {
     'user_id',
   };
 }
-

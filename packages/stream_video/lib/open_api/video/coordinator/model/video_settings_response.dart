@@ -31,32 +31,35 @@ class VideoSettingsResponse {
   TargetResolution targetResolution;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is VideoSettingsResponse &&
-    other.accessRequestEnabled == accessRequestEnabled &&
-    other.cameraDefaultOn == cameraDefaultOn &&
-    other.cameraFacing == cameraFacing &&
-    other.enabled == enabled &&
-    other.targetResolution == targetResolution;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VideoSettingsResponse &&
+          other.accessRequestEnabled == accessRequestEnabled &&
+          other.cameraDefaultOn == cameraDefaultOn &&
+          other.cameraFacing == cameraFacing &&
+          other.enabled == enabled &&
+          other.targetResolution == targetResolution;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (accessRequestEnabled.hashCode) +
-    (cameraDefaultOn.hashCode) +
-    (cameraFacing.hashCode) +
-    (enabled.hashCode) +
-    (targetResolution.hashCode);
+      // ignore: unnecessary_parenthesis
+      (accessRequestEnabled.hashCode) +
+      (cameraDefaultOn.hashCode) +
+      (cameraFacing.hashCode) +
+      (enabled.hashCode) +
+      (targetResolution.hashCode);
 
   @override
-  String toString() => 'VideoSettingsResponse[accessRequestEnabled=$accessRequestEnabled, cameraDefaultOn=$cameraDefaultOn, cameraFacing=$cameraFacing, enabled=$enabled, targetResolution=$targetResolution]';
+  String toString() =>
+      'VideoSettingsResponse[accessRequestEnabled=$accessRequestEnabled, cameraDefaultOn=$cameraDefaultOn, cameraFacing=$cameraFacing, enabled=$enabled, targetResolution=$targetResolution]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'access_request_enabled'] = this.accessRequestEnabled;
-      json[r'camera_default_on'] = this.cameraDefaultOn;
-      json[r'camera_facing'] = this.cameraFacing;
-      json[r'enabled'] = this.enabled;
-      json[r'target_resolution'] = this.targetResolution;
+    json[r'access_request_enabled'] = this.accessRequestEnabled;
+    json[r'camera_default_on'] = this.cameraDefaultOn;
+    json[r'camera_facing'] = this.cameraFacing;
+    json[r'enabled'] = this.enabled;
+    json[r'target_resolution'] = this.targetResolution;
     return json;
   }
 
@@ -72,24 +75,32 @@ class VideoSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "VideoSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "VideoSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "VideoSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "VideoSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return VideoSettingsResponse(
-        accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled')!,
+        accessRequestEnabled:
+            mapValueOfType<bool>(json, r'access_request_enabled')!,
         cameraDefaultOn: mapValueOfType<bool>(json, r'camera_default_on')!,
-        cameraFacing: VideoSettingsResponseCameraFacingEnum.fromJson(json[r'camera_facing'])!,
+        cameraFacing: VideoSettingsResponseCameraFacingEnum.fromJson(
+            json[r'camera_facing'])!,
         enabled: mapValueOfType<bool>(json, r'enabled')!,
-        targetResolution: TargetResolution.fromJson(json[r'target_resolution'])!,
+        targetResolution:
+            TargetResolution.fromJson(json[r'target_resolution'])!,
       );
     }
     return null;
   }
 
-  static List<VideoSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <VideoSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -117,13 +128,19 @@ class VideoSettingsResponse {
   }
 
   // maps a json object with a list of VideoSettingsResponse-objects as value to a dart map
-  static Map<String, List<VideoSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<VideoSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<VideoSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = VideoSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = VideoSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -138,7 +155,6 @@ class VideoSettingsResponse {
     'target_resolution',
   };
 }
-
 
 class VideoSettingsResponseCameraFacingEnum {
   /// Instantiate a new enum with the provided [value].
@@ -163,9 +179,13 @@ class VideoSettingsResponseCameraFacingEnum {
     external_,
   ];
 
-  static VideoSettingsResponseCameraFacingEnum? fromJson(dynamic value) => VideoSettingsResponseCameraFacingEnumTypeTransformer().decode(value);
+  static VideoSettingsResponseCameraFacingEnum? fromJson(dynamic value) =>
+      VideoSettingsResponseCameraFacingEnumTypeTransformer().decode(value);
 
-  static List<VideoSettingsResponseCameraFacingEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoSettingsResponseCameraFacingEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <VideoSettingsResponseCameraFacingEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -182,7 +202,9 @@ class VideoSettingsResponseCameraFacingEnum {
 /// Transformation class that can [encode] an instance of [VideoSettingsResponseCameraFacingEnum] to String,
 /// and [decode] dynamic data back to [VideoSettingsResponseCameraFacingEnum].
 class VideoSettingsResponseCameraFacingEnumTypeTransformer {
-  factory VideoSettingsResponseCameraFacingEnumTypeTransformer() => _instance ??= const VideoSettingsResponseCameraFacingEnumTypeTransformer._();
+  factory VideoSettingsResponseCameraFacingEnumTypeTransformer() =>
+      _instance ??=
+          const VideoSettingsResponseCameraFacingEnumTypeTransformer._();
 
   const VideoSettingsResponseCameraFacingEnumTypeTransformer._();
 
@@ -196,12 +218,16 @@ class VideoSettingsResponseCameraFacingEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  VideoSettingsResponseCameraFacingEnum? decode(dynamic data, {bool allowNull = true}) {
+  VideoSettingsResponseCameraFacingEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'front': return VideoSettingsResponseCameraFacingEnum.front;
-        case r'back': return VideoSettingsResponseCameraFacingEnum.back;
-        case r'external': return VideoSettingsResponseCameraFacingEnum.external_;
+        case r'front':
+          return VideoSettingsResponseCameraFacingEnum.front;
+        case r'back':
+          return VideoSettingsResponseCameraFacingEnum.back;
+        case r'external':
+          return VideoSettingsResponseCameraFacingEnum.external_;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -214,5 +240,3 @@ class VideoSettingsResponseCameraFacingEnumTypeTransformer {
   /// Singleton [VideoSettingsResponseCameraFacingEnumTypeTransformer] instance.
   static VideoSettingsResponseCameraFacingEnumTypeTransformer? _instance;
 }
-
-

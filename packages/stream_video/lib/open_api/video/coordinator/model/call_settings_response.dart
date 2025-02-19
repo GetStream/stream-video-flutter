@@ -49,50 +49,53 @@ class CallSettingsResponse {
   VideoSettingsResponse video;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallSettingsResponse &&
-    other.audio == audio &&
-    other.backstage == backstage &&
-    other.broadcasting == broadcasting &&
-    other.geofencing == geofencing &&
-    other.limits == limits &&
-    other.recording == recording &&
-    other.ring == ring &&
-    other.screensharing == screensharing &&
-    other.thumbnails == thumbnails &&
-    other.transcription == transcription &&
-    other.video == video;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallSettingsResponse &&
+          other.audio == audio &&
+          other.backstage == backstage &&
+          other.broadcasting == broadcasting &&
+          other.geofencing == geofencing &&
+          other.limits == limits &&
+          other.recording == recording &&
+          other.ring == ring &&
+          other.screensharing == screensharing &&
+          other.thumbnails == thumbnails &&
+          other.transcription == transcription &&
+          other.video == video;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (audio.hashCode) +
-    (backstage.hashCode) +
-    (broadcasting.hashCode) +
-    (geofencing.hashCode) +
-    (limits.hashCode) +
-    (recording.hashCode) +
-    (ring.hashCode) +
-    (screensharing.hashCode) +
-    (thumbnails.hashCode) +
-    (transcription.hashCode) +
-    (video.hashCode);
+      // ignore: unnecessary_parenthesis
+      (audio.hashCode) +
+      (backstage.hashCode) +
+      (broadcasting.hashCode) +
+      (geofencing.hashCode) +
+      (limits.hashCode) +
+      (recording.hashCode) +
+      (ring.hashCode) +
+      (screensharing.hashCode) +
+      (thumbnails.hashCode) +
+      (transcription.hashCode) +
+      (video.hashCode);
 
   @override
-  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+  String toString() =>
+      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'audio'] = this.audio;
-      json[r'backstage'] = this.backstage;
-      json[r'broadcasting'] = this.broadcasting;
-      json[r'geofencing'] = this.geofencing;
-      json[r'limits'] = this.limits;
-      json[r'recording'] = this.recording;
-      json[r'ring'] = this.ring;
-      json[r'screensharing'] = this.screensharing;
-      json[r'thumbnails'] = this.thumbnails;
-      json[r'transcription'] = this.transcription;
-      json[r'video'] = this.video;
+    json[r'audio'] = this.audio;
+    json[r'backstage'] = this.backstage;
+    json[r'broadcasting'] = this.broadcasting;
+    json[r'geofencing'] = this.geofencing;
+    json[r'limits'] = this.limits;
+    json[r'recording'] = this.recording;
+    json[r'ring'] = this.ring;
+    json[r'screensharing'] = this.screensharing;
+    json[r'thumbnails'] = this.thumbnails;
+    json[r'transcription'] = this.transcription;
+    json[r'video'] = this.video;
     return json;
   }
 
@@ -108,8 +111,10 @@ class CallSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -117,21 +122,27 @@ class CallSettingsResponse {
       return CallSettingsResponse(
         audio: AudioSettingsResponse.fromJson(json[r'audio'])!,
         backstage: BackstageSettingsResponse.fromJson(json[r'backstage'])!,
-        broadcasting: BroadcastSettingsResponse.fromJson(json[r'broadcasting'])!,
+        broadcasting:
+            BroadcastSettingsResponse.fromJson(json[r'broadcasting'])!,
         geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
         limits: LimitsSettingsResponse.fromJson(json[r'limits'])!,
         recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
         ring: RingSettingsResponse.fromJson(json[r'ring'])!,
-        screensharing: ScreensharingSettingsResponse.fromJson(json[r'screensharing'])!,
+        screensharing:
+            ScreensharingSettingsResponse.fromJson(json[r'screensharing'])!,
         thumbnails: ThumbnailsSettingsResponse.fromJson(json[r'thumbnails'])!,
-        transcription: TranscriptionSettingsResponse.fromJson(json[r'transcription'])!,
+        transcription:
+            TranscriptionSettingsResponse.fromJson(json[r'transcription'])!,
         video: VideoSettingsResponse.fromJson(json[r'video'])!,
       );
     }
     return null;
   }
 
-  static List<CallSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -159,13 +170,19 @@ class CallSettingsResponse {
   }
 
   // maps a json object with a list of CallSettingsResponse-objects as value to a dart map
-  static Map<String, List<CallSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -186,4 +203,3 @@ class CallSettingsResponse {
     'video',
   };
 }
-

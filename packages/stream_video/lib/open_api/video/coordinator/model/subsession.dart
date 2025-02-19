@@ -34,33 +34,36 @@ class Subsession {
   String sfuId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Subsession &&
-    other.endedAt == endedAt &&
-    other.joinedAt == joinedAt &&
-    other.pubSubHint == pubSubHint &&
-    other.sfuId == sfuId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Subsession &&
+          other.endedAt == endedAt &&
+          other.joinedAt == joinedAt &&
+          other.pubSubHint == pubSubHint &&
+          other.sfuId == sfuId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (endedAt.hashCode) +
-    (joinedAt.hashCode) +
-    (pubSubHint == null ? 0 : pubSubHint!.hashCode) +
-    (sfuId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (endedAt.hashCode) +
+      (joinedAt.hashCode) +
+      (pubSubHint == null ? 0 : pubSubHint!.hashCode) +
+      (sfuId.hashCode);
 
   @override
-  String toString() => 'Subsession[endedAt=$endedAt, joinedAt=$joinedAt, pubSubHint=$pubSubHint, sfuId=$sfuId]';
+  String toString() =>
+      'Subsession[endedAt=$endedAt, joinedAt=$joinedAt, pubSubHint=$pubSubHint, sfuId=$sfuId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'ended_at'] = this.endedAt;
-      json[r'joined_at'] = this.joinedAt;
+    json[r'ended_at'] = this.endedAt;
+    json[r'joined_at'] = this.joinedAt;
     if (this.pubSubHint != null) {
       json[r'pub_sub_hint'] = this.pubSubHint;
     } else {
       json[r'pub_sub_hint'] = null;
     }
-      json[r'sfu_id'] = this.sfuId;
+    json[r'sfu_id'] = this.sfuId;
     return json;
   }
 
@@ -76,8 +79,10 @@ class Subsession {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Subsession[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Subsession[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "Subsession[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "Subsession[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -92,7 +97,10 @@ class Subsession {
     return null;
   }
 
-  static List<Subsession> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Subsession> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Subsession>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -120,13 +128,19 @@ class Subsession {
   }
 
   // maps a json object with a list of Subsession-objects as value to a dart map
-  static Map<String, List<Subsession>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Subsession>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Subsession>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Subsession.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Subsession.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -139,4 +153,3 @@ class Subsession {
     'sfu_id',
   };
 }
-

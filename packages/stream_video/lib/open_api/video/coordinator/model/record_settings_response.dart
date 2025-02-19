@@ -25,26 +25,27 @@ class RecordSettingsResponse {
   String quality;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RecordSettingsResponse &&
-    other.audioOnly == audioOnly &&
-    other.mode == mode &&
-    other.quality == quality;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RecordSettingsResponse &&
+          other.audioOnly == audioOnly &&
+          other.mode == mode &&
+          other.quality == quality;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (audioOnly.hashCode) +
-    (mode.hashCode) +
-    (quality.hashCode);
+      // ignore: unnecessary_parenthesis
+      (audioOnly.hashCode) + (mode.hashCode) + (quality.hashCode);
 
   @override
-  String toString() => 'RecordSettingsResponse[audioOnly=$audioOnly, mode=$mode, quality=$quality]';
+  String toString() =>
+      'RecordSettingsResponse[audioOnly=$audioOnly, mode=$mode, quality=$quality]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'audio_only'] = this.audioOnly;
-      json[r'mode'] = this.mode;
-      json[r'quality'] = this.quality;
+    json[r'audio_only'] = this.audioOnly;
+    json[r'mode'] = this.mode;
+    json[r'quality'] = this.quality;
     return json;
   }
 
@@ -60,8 +61,10 @@ class RecordSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RecordSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RecordSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RecordSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RecordSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -75,7 +78,10 @@ class RecordSettingsResponse {
     return null;
   }
 
-  static List<RecordSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RecordSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -103,13 +109,19 @@ class RecordSettingsResponse {
   }
 
   // maps a json object with a list of RecordSettingsResponse-objects as value to a dart map
-  static Map<String, List<RecordSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RecordSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RecordSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RecordSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RecordSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -122,4 +134,3 @@ class RecordSettingsResponse {
     'quality',
   };
 }
-

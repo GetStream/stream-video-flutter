@@ -23,23 +23,25 @@ class ListTranscriptionsResponse {
   List<CallTranscription> transcriptions;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ListTranscriptionsResponse &&
-    other.duration == duration &&
-    _deepEquality.equals(other.transcriptions, transcriptions);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ListTranscriptionsResponse &&
+          other.duration == duration &&
+          _deepEquality.equals(other.transcriptions, transcriptions);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode) +
-    (transcriptions.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode) + (transcriptions.hashCode);
 
   @override
-  String toString() => 'ListTranscriptionsResponse[duration=$duration, transcriptions=$transcriptions]';
+  String toString() =>
+      'ListTranscriptionsResponse[duration=$duration, transcriptions=$transcriptions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
-      json[r'transcriptions'] = this.transcriptions;
+    json[r'duration'] = this.duration;
+    json[r'transcriptions'] = this.transcriptions;
     return json;
   }
 
@@ -55,8 +57,10 @@ class ListTranscriptionsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ListTranscriptionsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ListTranscriptionsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ListTranscriptionsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ListTranscriptionsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -69,7 +73,10 @@ class ListTranscriptionsResponse {
     return null;
   }
 
-  static List<ListTranscriptionsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ListTranscriptionsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ListTranscriptionsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -97,13 +104,19 @@ class ListTranscriptionsResponse {
   }
 
   // maps a json object with a list of ListTranscriptionsResponse-objects as value to a dart map
-  static Map<String, List<ListTranscriptionsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ListTranscriptionsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ListTranscriptionsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ListTranscriptionsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ListTranscriptionsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -115,4 +128,3 @@ class ListTranscriptionsResponse {
     'transcriptions',
   };
 }
-

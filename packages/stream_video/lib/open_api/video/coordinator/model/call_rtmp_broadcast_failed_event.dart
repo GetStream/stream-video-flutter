@@ -32,29 +32,32 @@ class CallRtmpBroadcastFailedEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRtmpBroadcastFailedEvent &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    other.name == name &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallRtmpBroadcastFailedEvent &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          other.name == name &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (name.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (name.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'CallRtmpBroadcastFailedEvent[callCid=$callCid, createdAt=$createdAt, name=$name, type=$type]';
+  String toString() =>
+      'CallRtmpBroadcastFailedEvent[callCid=$callCid, createdAt=$createdAt, name=$name, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'name'] = this.name;
-      json[r'type'] = this.type;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'name'] = this.name;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -70,8 +73,10 @@ class CallRtmpBroadcastFailedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRtmpBroadcastFailedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRtmpBroadcastFailedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallRtmpBroadcastFailedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallRtmpBroadcastFailedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -86,7 +91,10 @@ class CallRtmpBroadcastFailedEvent {
     return null;
   }
 
-  static List<CallRtmpBroadcastFailedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallRtmpBroadcastFailedEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallRtmpBroadcastFailedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -114,13 +122,19 @@ class CallRtmpBroadcastFailedEvent {
   }
 
   // maps a json object with a list of CallRtmpBroadcastFailedEvent-objects as value to a dart map
-  static Map<String, List<CallRtmpBroadcastFailedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallRtmpBroadcastFailedEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallRtmpBroadcastFailedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallRtmpBroadcastFailedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallRtmpBroadcastFailedEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -134,4 +148,3 @@ class CallRtmpBroadcastFailedEvent {
     'type',
   };
 }
-

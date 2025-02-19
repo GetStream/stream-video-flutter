@@ -67,33 +67,36 @@ class ConnectUserDetailsRequest {
   Object? privacySettings;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ConnectUserDetailsRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.id == id &&
-    other.image == image &&
-    other.invisible == invisible &&
-    other.language == language &&
-    other.name == name &&
-    other.privacySettings == privacySettings;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConnectUserDetailsRequest &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.id == id &&
+          other.image == image &&
+          other.invisible == invisible &&
+          other.language == language &&
+          other.name == name &&
+          other.privacySettings == privacySettings;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (id.hashCode) +
-    (image == null ? 0 : image!.hashCode) +
-    (invisible == null ? 0 : invisible!.hashCode) +
-    (language == null ? 0 : language!.hashCode) +
-    (name == null ? 0 : name!.hashCode) +
-    (privacySettings == null ? 0 : privacySettings!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (id.hashCode) +
+      (image == null ? 0 : image!.hashCode) +
+      (invisible == null ? 0 : invisible!.hashCode) +
+      (language == null ? 0 : language!.hashCode) +
+      (name == null ? 0 : name!.hashCode) +
+      (privacySettings == null ? 0 : privacySettings!.hashCode);
 
   @override
-  String toString() => 'ConnectUserDetailsRequest[custom=$custom, id=$id, image=$image, invisible=$invisible, language=$language, name=$name, privacySettings=$privacySettings]';
+  String toString() =>
+      'ConnectUserDetailsRequest[custom=$custom, id=$id, image=$image, invisible=$invisible, language=$language, name=$name, privacySettings=$privacySettings]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
-      json[r'id'] = this.id;
+    json[r'custom'] = this.custom;
+    json[r'id'] = this.id;
     if (this.image != null) {
       json[r'image'] = this.image;
     } else {
@@ -134,8 +137,10 @@ class ConnectUserDetailsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ConnectUserDetailsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ConnectUserDetailsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ConnectUserDetailsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ConnectUserDetailsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -153,7 +158,10 @@ class ConnectUserDetailsRequest {
     return null;
   }
 
-  static List<ConnectUserDetailsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ConnectUserDetailsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ConnectUserDetailsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -181,13 +189,19 @@ class ConnectUserDetailsRequest {
   }
 
   // maps a json object with a list of ConnectUserDetailsRequest-objects as value to a dart map
-  static Map<String, List<ConnectUserDetailsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ConnectUserDetailsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ConnectUserDetailsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ConnectUserDetailsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ConnectUserDetailsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -198,4 +212,3 @@ class ConnectUserDetailsRequest {
     'id',
   };
 }
-

@@ -46,38 +46,41 @@ class ReportByHistogramBucket {
   Bound? upperBound;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ReportByHistogramBucket &&
-    other.category == category &&
-    other.count == count &&
-    other.lowerBound == lowerBound &&
-    other.mean == mean &&
-    other.sum == sum &&
-    other.upperBound == upperBound;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReportByHistogramBucket &&
+          other.category == category &&
+          other.count == count &&
+          other.lowerBound == lowerBound &&
+          other.mean == mean &&
+          other.sum == sum &&
+          other.upperBound == upperBound;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (category.hashCode) +
-    (count.hashCode) +
-    (lowerBound == null ? 0 : lowerBound!.hashCode) +
-    (mean.hashCode) +
-    (sum.hashCode) +
-    (upperBound == null ? 0 : upperBound!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (category.hashCode) +
+      (count.hashCode) +
+      (lowerBound == null ? 0 : lowerBound!.hashCode) +
+      (mean.hashCode) +
+      (sum.hashCode) +
+      (upperBound == null ? 0 : upperBound!.hashCode);
 
   @override
-  String toString() => 'ReportByHistogramBucket[category=$category, count=$count, lowerBound=$lowerBound, mean=$mean, sum=$sum, upperBound=$upperBound]';
+  String toString() =>
+      'ReportByHistogramBucket[category=$category, count=$count, lowerBound=$lowerBound, mean=$mean, sum=$sum, upperBound=$upperBound]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'category'] = this.category;
-      json[r'count'] = this.count;
+    json[r'category'] = this.category;
+    json[r'count'] = this.count;
     if (this.lowerBound != null) {
       json[r'lower_bound'] = this.lowerBound;
     } else {
       json[r'lower_bound'] = null;
     }
-      json[r'mean'] = this.mean;
-      json[r'sum'] = this.sum;
+    json[r'mean'] = this.mean;
+    json[r'sum'] = this.sum;
     if (this.upperBound != null) {
       json[r'upper_bound'] = this.upperBound;
     } else {
@@ -98,8 +101,10 @@ class ReportByHistogramBucket {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ReportByHistogramBucket[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ReportByHistogramBucket[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ReportByHistogramBucket[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ReportByHistogramBucket[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -116,7 +121,10 @@ class ReportByHistogramBucket {
     return null;
   }
 
-  static List<ReportByHistogramBucket> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ReportByHistogramBucket> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ReportByHistogramBucket>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -144,13 +152,19 @@ class ReportByHistogramBucket {
   }
 
   // maps a json object with a list of ReportByHistogramBucket-objects as value to a dart map
-  static Map<String, List<ReportByHistogramBucket>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ReportByHistogramBucket>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ReportByHistogramBucket>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ReportByHistogramBucket.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ReportByHistogramBucket.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -164,4 +178,3 @@ class ReportByHistogramBucket {
     'sum',
   };
 }
-

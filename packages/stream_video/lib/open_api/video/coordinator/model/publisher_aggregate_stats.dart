@@ -28,22 +28,24 @@ class PublisherAggregateStats {
   Count? total;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PublisherAggregateStats &&
-    _deepEquality.equals(other.byTrackType, byTrackType) &&
-    other.total == total;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PublisherAggregateStats &&
+          _deepEquality.equals(other.byTrackType, byTrackType) &&
+          other.total == total;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (byTrackType.hashCode) +
-    (total == null ? 0 : total!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (byTrackType.hashCode) + (total == null ? 0 : total!.hashCode);
 
   @override
-  String toString() => 'PublisherAggregateStats[byTrackType=$byTrackType, total=$total]';
+  String toString() =>
+      'PublisherAggregateStats[byTrackType=$byTrackType, total=$total]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'by_track_type'] = this.byTrackType;
+    json[r'by_track_type'] = this.byTrackType;
     if (this.total != null) {
       json[r'total'] = this.total;
     } else {
@@ -64,8 +66,10 @@ class PublisherAggregateStats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "PublisherAggregateStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "PublisherAggregateStats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "PublisherAggregateStats[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "PublisherAggregateStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -78,7 +82,10 @@ class PublisherAggregateStats {
     return null;
   }
 
-  static List<PublisherAggregateStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PublisherAggregateStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PublisherAggregateStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -106,20 +113,24 @@ class PublisherAggregateStats {
   }
 
   // maps a json object with a list of PublisherAggregateStats-objects as value to a dart map
-  static Map<String, List<PublisherAggregateStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PublisherAggregateStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PublisherAggregateStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PublisherAggregateStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PublisherAggregateStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

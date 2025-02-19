@@ -23,23 +23,24 @@ class GetEdgesResponse {
   List<EdgeResponse> edges;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is GetEdgesResponse &&
-    other.duration == duration &&
-    _deepEquality.equals(other.edges, edges);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GetEdgesResponse &&
+          other.duration == duration &&
+          _deepEquality.equals(other.edges, edges);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode) +
-    (edges.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode) + (edges.hashCode);
 
   @override
   String toString() => 'GetEdgesResponse[duration=$duration, edges=$edges]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
-      json[r'edges'] = this.edges;
+    json[r'duration'] = this.duration;
+    json[r'edges'] = this.edges;
     return json;
   }
 
@@ -55,8 +56,10 @@ class GetEdgesResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "GetEdgesResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "GetEdgesResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "GetEdgesResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "GetEdgesResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -69,7 +72,10 @@ class GetEdgesResponse {
     return null;
   }
 
-  static List<GetEdgesResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GetEdgesResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <GetEdgesResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -97,13 +103,19 @@ class GetEdgesResponse {
   }
 
   // maps a json object with a list of GetEdgesResponse-objects as value to a dart map
-  static Map<String, List<GetEdgesResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<GetEdgesResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<GetEdgesResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = GetEdgesResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = GetEdgesResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -115,4 +127,3 @@ class GetEdgesResponse {
     'edges',
   };
 }
-

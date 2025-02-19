@@ -61,24 +61,27 @@ class CountrywiseAggregateStats {
   TimeStats? subscriberLatency;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CountrywiseAggregateStats &&
-    other.participantCount == participantCount &&
-    other.publisherJitter == publisherJitter &&
-    other.publisherLatency == publisherLatency &&
-    other.subscriberJitter == subscriberJitter &&
-    other.subscriberLatency == subscriberLatency;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CountrywiseAggregateStats &&
+          other.participantCount == participantCount &&
+          other.publisherJitter == publisherJitter &&
+          other.publisherLatency == publisherLatency &&
+          other.subscriberJitter == subscriberJitter &&
+          other.subscriberLatency == subscriberLatency;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (participantCount == null ? 0 : participantCount!.hashCode) +
-    (publisherJitter == null ? 0 : publisherJitter!.hashCode) +
-    (publisherLatency == null ? 0 : publisherLatency!.hashCode) +
-    (subscriberJitter == null ? 0 : subscriberJitter!.hashCode) +
-    (subscriberLatency == null ? 0 : subscriberLatency!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (participantCount == null ? 0 : participantCount!.hashCode) +
+      (publisherJitter == null ? 0 : publisherJitter!.hashCode) +
+      (publisherLatency == null ? 0 : publisherLatency!.hashCode) +
+      (subscriberJitter == null ? 0 : subscriberJitter!.hashCode) +
+      (subscriberLatency == null ? 0 : subscriberLatency!.hashCode);
 
   @override
-  String toString() => 'CountrywiseAggregateStats[participantCount=$participantCount, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency]';
+  String toString() =>
+      'CountrywiseAggregateStats[participantCount=$participantCount, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -122,8 +125,10 @@ class CountrywiseAggregateStats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CountrywiseAggregateStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CountrywiseAggregateStats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CountrywiseAggregateStats[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CountrywiseAggregateStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -139,7 +144,10 @@ class CountrywiseAggregateStats {
     return null;
   }
 
-  static List<CountrywiseAggregateStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CountrywiseAggregateStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CountrywiseAggregateStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -167,20 +175,24 @@ class CountrywiseAggregateStats {
   }
 
   // maps a json object with a list of CountrywiseAggregateStats-objects as value to a dart map
-  static Map<String, List<CountrywiseAggregateStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CountrywiseAggregateStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CountrywiseAggregateStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CountrywiseAggregateStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CountrywiseAggregateStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

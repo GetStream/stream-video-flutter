@@ -10,15 +10,15 @@
 
 part of openapi.api;
 
-
 class ProductvideoApi {
-  ProductvideoApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  ProductvideoApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
   /// Accept Call
   ///
-  ///   Sends events: - call.accepted 
+  ///   Sends events: - call.accepted
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -27,11 +27,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> acceptCallWithHttpInfo(String type, String id,) async {
+  Future<Response> acceptCallWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/accept'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -42,7 +45,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -56,31 +58,40 @@ class ProductvideoApi {
 
   /// Accept Call
   ///
-  ///   Sends events: - call.accepted 
+  ///   Sends events: - call.accepted
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<AcceptCallResponse?> acceptCall(String type, String id,) async {
-    final response = await acceptCallWithHttpInfo(type, id,);
+  Future<AcceptCallResponse?> acceptCall(
+    String type,
+    String id,
+  ) async {
+    final response = await acceptCallWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'AcceptCallResponse',) as AcceptCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'AcceptCallResponse',
+      ) as AcceptCallResponse;
     }
     return null;
   }
 
   /// Block user on a call
   ///
-  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user 
+  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -92,11 +103,15 @@ class ProductvideoApi {
   ///
   /// * [BlockUserRequest] blockUserRequest (required):
   ///   BlockUserRequest
-  Future<Response> blockUserWithHttpInfo(String type, String id, BlockUserRequest blockUserRequest,) async {
+  Future<Response> blockUserWithHttpInfo(
+    String type,
+    String id,
+    BlockUserRequest blockUserRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/block'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = blockUserRequest;
@@ -107,7 +122,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -121,7 +135,7 @@ class ProductvideoApi {
 
   /// Block user on a call
   ///
-  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user 
+  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user
   ///
   /// Parameters:
   ///
@@ -131,24 +145,35 @@ class ProductvideoApi {
   ///
   /// * [BlockUserRequest] blockUserRequest (required):
   ///   BlockUserRequest
-  Future<BlockUserResponse?> blockUser(String type, String id, BlockUserRequest blockUserRequest,) async {
-    final response = await blockUserWithHttpInfo(type, id, blockUserRequest,);
+  Future<BlockUserResponse?> blockUser(
+    String type,
+    String id,
+    BlockUserRequest blockUserRequest,
+  ) async {
+    final response = await blockUserWithHttpInfo(
+      type,
+      id,
+      blockUserRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BlockUserResponse',) as BlockUserResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'BlockUserResponse',
+      ) as BlockUserResponse;
     }
     return null;
   }
 
   /// Collect user feedback
   ///
-  ///  
+  ///
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -161,12 +186,17 @@ class ProductvideoApi {
   /// * [String] session (required):
   ///
   /// * [CollectUserFeedbackRequest] collectUserFeedbackRequest (required):
-  Future<Response> collectUserFeedbackWithHttpInfo(String type, String id, String session, CollectUserFeedbackRequest collectUserFeedbackRequest,) async {
+  Future<Response> collectUserFeedbackWithHttpInfo(
+    String type,
+    String id,
+    String session,
+    CollectUserFeedbackRequest collectUserFeedbackRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/feedback/{session}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{session}', session);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id)
+        .replaceAll('{session}', session);
 
     // ignore: prefer_final_locals
     Object? postBody = collectUserFeedbackRequest;
@@ -176,7 +206,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -191,7 +220,7 @@ class ProductvideoApi {
 
   /// Collect user feedback
   ///
-  ///  
+  ///
   ///
   /// Parameters:
   ///
@@ -202,24 +231,37 @@ class ProductvideoApi {
   /// * [String] session (required):
   ///
   /// * [CollectUserFeedbackRequest] collectUserFeedbackRequest (required):
-  Future<CollectUserFeedbackResponse?> collectUserFeedback(String type, String id, String session, CollectUserFeedbackRequest collectUserFeedbackRequest,) async {
-    final response = await collectUserFeedbackWithHttpInfo(type, id, session, collectUserFeedbackRequest,);
+  Future<CollectUserFeedbackResponse?> collectUserFeedback(
+    String type,
+    String id,
+    String session,
+    CollectUserFeedbackRequest collectUserFeedbackRequest,
+  ) async {
+    final response = await collectUserFeedbackWithHttpInfo(
+      type,
+      id,
+      session,
+      collectUserFeedbackRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CollectUserFeedbackResponse',) as CollectUserFeedbackResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'CollectUserFeedbackResponse',
+      ) as CollectUserFeedbackResponse;
     }
     return null;
   }
 
   /// Create device
   ///
-  /// Adds a new device to a user, if the same device already exists the call will have no effect 
+  /// Adds a new device to a user, if the same device already exists the call will have no effect
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -227,7 +269,9 @@ class ProductvideoApi {
   ///
   /// * [CreateDeviceRequest] createDeviceRequest (required):
   ///   CreateDeviceRequest
-  Future<Response> createDeviceWithHttpInfo(CreateDeviceRequest createDeviceRequest,) async {
+  Future<Response> createDeviceWithHttpInfo(
+    CreateDeviceRequest createDeviceRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/devices';
 
@@ -240,7 +284,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -254,38 +297,47 @@ class ProductvideoApi {
 
   /// Create device
   ///
-  /// Adds a new device to a user, if the same device already exists the call will have no effect 
+  /// Adds a new device to a user, if the same device already exists the call will have no effect
   ///
   /// Parameters:
   ///
   /// * [CreateDeviceRequest] createDeviceRequest (required):
   ///   CreateDeviceRequest
   // MANUAL_EDIT Response -> DurationResponse
-  Future<DurationResponse?> createDevice(CreateDeviceRequest createDeviceRequest,) async {
-    final response = await createDeviceWithHttpInfo(createDeviceRequest,);
+  Future<DurationResponse?> createDevice(
+    CreateDeviceRequest createDeviceRequest,
+  ) async {
+    final response = await createDeviceWithHttpInfo(
+      createDeviceRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DurationResponse',) as DurationResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DurationResponse',
+      ) as DurationResponse;
     }
     return null;
   }
 
   /// Create Guest
   ///
-  ///  
+  ///
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [CreateGuestRequest] createGuestRequest (required):
-  Future<Response> createGuestWithHttpInfo(CreateGuestRequest createGuestRequest,) async {
+  Future<Response> createGuestWithHttpInfo(
+    CreateGuestRequest createGuestRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/guest';
 
@@ -298,7 +350,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -312,29 +363,36 @@ class ProductvideoApi {
 
   /// Create Guest
   ///
-  ///  
+  ///
   ///
   /// Parameters:
   ///
   /// * [CreateGuestRequest] createGuestRequest (required):
-  Future<CreateGuestResponse?> createGuest(CreateGuestRequest createGuestRequest,) async {
-    final response = await createGuestWithHttpInfo(createGuestRequest,);
+  Future<CreateGuestResponse?> createGuest(
+    CreateGuestRequest createGuestRequest,
+  ) async {
+    final response = await createGuestWithHttpInfo(
+      createGuestRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CreateGuestResponse',) as CreateGuestResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'CreateGuestResponse',
+      ) as CreateGuestResponse;
     }
     return null;
   }
 
   /// Delete Call
   ///
-  ///   Sends events: - call.deleted 
+  ///   Sends events: - call.deleted
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -346,11 +404,15 @@ class ProductvideoApi {
   ///
   /// * [DeleteCallRequest] deleteCallRequest (required):
   ///   DeleteCallRequest
-  Future<Response> deleteCallWithHttpInfo(String type, String id, DeleteCallRequest deleteCallRequest,) async {
+  Future<Response> deleteCallWithHttpInfo(
+    String type,
+    String id,
+    DeleteCallRequest deleteCallRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/delete'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = deleteCallRequest;
@@ -361,7 +423,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -375,7 +436,7 @@ class ProductvideoApi {
 
   /// Delete Call
   ///
-  ///   Sends events: - call.deleted 
+  ///   Sends events: - call.deleted
   ///
   /// Parameters:
   ///
@@ -385,31 +446,44 @@ class ProductvideoApi {
   ///
   /// * [DeleteCallRequest] deleteCallRequest (required):
   ///   DeleteCallRequest
-  Future<DeleteCallResponse?> deleteCall(String type, String id, DeleteCallRequest deleteCallRequest,) async {
-    final response = await deleteCallWithHttpInfo(type, id, deleteCallRequest,);
+  Future<DeleteCallResponse?> deleteCall(
+    String type,
+    String id,
+    DeleteCallRequest deleteCallRequest,
+  ) async {
+    final response = await deleteCallWithHttpInfo(
+      type,
+      id,
+      deleteCallRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DeleteCallResponse',) as DeleteCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DeleteCallResponse',
+      ) as DeleteCallResponse;
     }
     return null;
   }
 
   /// Delete device
   ///
-  /// Deletes one device 
+  /// Deletes one device
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> deleteDeviceWithHttpInfo(String id,) async {
+  Future<Response> deleteDeviceWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/devices';
 
@@ -420,10 +494,9 @@ class ProductvideoApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'id', id));
+    queryParams.addAll(_queryParams('', 'id', id));
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -438,30 +511,37 @@ class ProductvideoApi {
 
   /// Delete device
   ///
-  /// Deletes one device 
+  /// Deletes one device
   ///
   /// Parameters:
   ///
   /// * [String] id (required):
   // MANUAL_EDIT Response -> DurationResponse
-  Future<DurationResponse?> deleteDevice(String id,) async {
-    final response = await deleteDeviceWithHttpInfo(id,);
+  Future<DurationResponse?> deleteDevice(
+    String id,
+  ) async {
+    final response = await deleteDeviceWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DurationResponse',) as DurationResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DurationResponse',
+      ) as DurationResponse;
     }
     return null;
   }
 
   /// Delete recording
   ///
-  /// Deletes recording 
+  /// Deletes recording
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -474,13 +554,18 @@ class ProductvideoApi {
   /// * [String] session (required):
   ///
   /// * [String] filename (required):
-  Future<Response> deleteRecordingWithHttpInfo(String type, String id, String session, String filename,) async {
+  Future<Response> deleteRecordingWithHttpInfo(
+    String type,
+    String id,
+    String session,
+    String filename,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/{session}/recordings/{filename}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{session}', session)
-      .replaceAll('{filename}', filename);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id)
+        .replaceAll('{session}', session)
+        .replaceAll('{filename}', filename);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -490,7 +575,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -505,7 +589,7 @@ class ProductvideoApi {
 
   /// Delete recording
   ///
-  /// Deletes recording 
+  /// Deletes recording
   ///
   /// Parameters:
   ///
@@ -516,24 +600,37 @@ class ProductvideoApi {
   /// * [String] session (required):
   ///
   /// * [String] filename (required):
-  Future<DeleteRecordingResponse?> deleteRecording(String type, String id, String session, String filename,) async {
-    final response = await deleteRecordingWithHttpInfo(type, id, session, filename,);
+  Future<DeleteRecordingResponse?> deleteRecording(
+    String type,
+    String id,
+    String session,
+    String filename,
+  ) async {
+    final response = await deleteRecordingWithHttpInfo(
+      type,
+      id,
+      session,
+      filename,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DeleteRecordingResponse',) as DeleteRecordingResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DeleteRecordingResponse',
+      ) as DeleteRecordingResponse;
     }
     return null;
   }
 
   /// Delete transcription
   ///
-  /// Deletes transcription 
+  /// Deletes transcription
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -546,13 +643,18 @@ class ProductvideoApi {
   /// * [String] session (required):
   ///
   /// * [String] filename (required):
-  Future<Response> deleteTranscriptionWithHttpInfo(String type, String id, String session, String filename,) async {
+  Future<Response> deleteTranscriptionWithHttpInfo(
+    String type,
+    String id,
+    String session,
+    String filename,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/{session}/transcriptions/{filename}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{session}', session)
-      .replaceAll('{filename}', filename);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id)
+        .replaceAll('{session}', session)
+        .replaceAll('{filename}', filename);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -562,7 +664,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -577,7 +678,7 @@ class ProductvideoApi {
 
   /// Delete transcription
   ///
-  /// Deletes transcription 
+  /// Deletes transcription
   ///
   /// Parameters:
   ///
@@ -588,24 +689,37 @@ class ProductvideoApi {
   /// * [String] session (required):
   ///
   /// * [String] filename (required):
-  Future<DeleteTranscriptionResponse?> deleteTranscription(String type, String id, String session, String filename,) async {
-    final response = await deleteTranscriptionWithHttpInfo(type, id, session, filename,);
+  Future<DeleteTranscriptionResponse?> deleteTranscription(
+    String type,
+    String id,
+    String session,
+    String filename,
+  ) async {
+    final response = await deleteTranscriptionWithHttpInfo(
+      type,
+      id,
+      session,
+      filename,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DeleteTranscriptionResponse',) as DeleteTranscriptionResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DeleteTranscriptionResponse',
+      ) as DeleteTranscriptionResponse;
     }
     return null;
   }
 
   /// End call
   ///
-  ///   Sends events: - call.ended 
+  ///   Sends events: - call.ended
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -614,11 +728,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> endCallWithHttpInfo(String type, String id,) async {
+  Future<Response> endCallWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/mark_ended'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -628,7 +745,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -643,31 +759,40 @@ class ProductvideoApi {
 
   /// End call
   ///
-  ///   Sends events: - call.ended 
+  ///   Sends events: - call.ended
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<EndCallResponse?> endCall(String type, String id,) async {
-    final response = await endCallWithHttpInfo(type, id,);
+  Future<EndCallResponse?> endCall(
+    String type,
+    String id,
+  ) async {
+    final response = await endCallWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'EndCallResponse',) as EndCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'EndCallResponse',
+      ) as EndCallResponse;
     }
     return null;
   }
 
   /// Get Call
   ///
-  ///  
+  ///
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -686,11 +811,19 @@ class ProductvideoApi {
   /// * [bool] notify:
   ///
   /// * [bool] video:
-  Future<Response> getCallWithHttpInfo(String type, String id, { String? connectionId, int? membersLimit, bool? ring, bool? notify, bool? video, }) async {
+  Future<Response> getCallWithHttpInfo(
+    String type,
+    String id, {
+    String? connectionId,
+    int? membersLimit,
+    bool? ring,
+    bool? notify,
+    bool? video,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -717,7 +850,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -731,7 +863,7 @@ class ProductvideoApi {
 
   /// Get Call
   ///
-  ///  
+  ///
   ///
   /// Parameters:
   ///
@@ -748,24 +880,43 @@ class ProductvideoApi {
   /// * [bool] notify:
   ///
   /// * [bool] video:
-  Future<GetCallResponse?> getCall(String type, String id, { String? connectionId, int? membersLimit, bool? ring, bool? notify, bool? video, }) async {
-    final response = await getCallWithHttpInfo(type, id,  connectionId: connectionId, membersLimit: membersLimit, ring: ring, notify: notify, video: video, );
+  Future<GetCallResponse?> getCall(
+    String type,
+    String id, {
+    String? connectionId,
+    int? membersLimit,
+    bool? ring,
+    bool? notify,
+    bool? video,
+  }) async {
+    final response = await getCallWithHttpInfo(
+      type,
+      id,
+      connectionId: connectionId,
+      membersLimit: membersLimit,
+      ring: ring,
+      notify: notify,
+      video: video,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetCallResponse',) as GetCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GetCallResponse',
+      ) as GetCallResponse;
     }
     return null;
   }
 
   /// Get Call Stats
   ///
-  ///  
+  ///
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -776,12 +927,16 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [String] session (required):
-  Future<Response> getCallStatsWithHttpInfo(String type, String id, String session,) async {
+  Future<Response> getCallStatsWithHttpInfo(
+    String type,
+    String id,
+    String session,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stats/{session}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{session}', session);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id)
+        .replaceAll('{session}', session);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -791,7 +946,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -806,7 +960,7 @@ class ProductvideoApi {
 
   /// Get Call Stats
   ///
-  ///  
+  ///
   ///
   /// Parameters:
   ///
@@ -815,24 +969,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [String] session (required):
-  Future<GetCallStatsResponse?> getCallStats(String type, String id, String session,) async {
-    final response = await getCallStatsWithHttpInfo(type, id, session,);
+  Future<GetCallStatsResponse?> getCallStats(
+    String type,
+    String id,
+    String session,
+  ) async {
+    final response = await getCallStatsWithHttpInfo(
+      type,
+      id,
+      session,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetCallStatsResponse',) as GetCallStatsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GetCallStatsResponse',
+      ) as GetCallStatsResponse;
     }
     return null;
   }
 
   /// Get Edges
   ///
-  /// Returns the list of all edges available for video calls. 
+  /// Returns the list of all edges available for video calls.
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> getEdgesWithHttpInfo() async {
@@ -848,7 +1013,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -862,7 +1026,7 @@ class ProductvideoApi {
 
   /// Get Edges
   ///
-  /// Returns the list of all edges available for video calls. 
+  /// Returns the list of all edges available for video calls.
   Future<GetEdgesResponse?> getEdges() async {
     final response = await getEdgesWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
@@ -871,16 +1035,19 @@ class ProductvideoApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetEdgesResponse',) as GetEdgesResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GetEdgesResponse',
+      ) as GetEdgesResponse;
     }
     return null;
   }
 
   /// Get or create a call
   ///
-  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring 
+  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -894,11 +1061,16 @@ class ProductvideoApi {
   ///   GetOrCreateCallRequest
   ///
   /// * [String] connectionId:
-  Future<Response> getOrCreateCallWithHttpInfo(String type, String id, GetOrCreateCallRequest getOrCreateCallRequest, { String? connectionId, }) async {
+  Future<Response> getOrCreateCallWithHttpInfo(
+    String type,
+    String id,
+    GetOrCreateCallRequest getOrCreateCallRequest, {
+    String? connectionId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = getOrCreateCallRequest;
@@ -913,7 +1085,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -927,7 +1098,7 @@ class ProductvideoApi {
 
   /// Get or create a call
   ///
-  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring 
+  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring
   ///
   /// Parameters:
   ///
@@ -939,24 +1110,37 @@ class ProductvideoApi {
   ///   GetOrCreateCallRequest
   ///
   /// * [String] connectionId:
-  Future<GetOrCreateCallResponse?> getOrCreateCall(String type, String id, GetOrCreateCallRequest getOrCreateCallRequest, { String? connectionId, }) async {
-    final response = await getOrCreateCallWithHttpInfo(type, id, getOrCreateCallRequest,  connectionId: connectionId, );
+  Future<GetOrCreateCallResponse?> getOrCreateCall(
+    String type,
+    String id,
+    GetOrCreateCallRequest getOrCreateCallRequest, {
+    String? connectionId,
+  }) async {
+    final response = await getOrCreateCallWithHttpInfo(
+      type,
+      id,
+      getOrCreateCallRequest,
+      connectionId: connectionId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetOrCreateCallResponse',) as GetOrCreateCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GetOrCreateCallResponse',
+      ) as GetOrCreateCallResponse;
     }
     return null;
   }
 
   /// Set call as live
   ///
-  ///   Sends events: - call.live_started 
+  ///   Sends events: - call.live_started
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -968,11 +1152,15 @@ class ProductvideoApi {
   ///
   /// * [GoLiveRequest] goLiveRequest (required):
   ///   GoLiveRequest
-  Future<Response> goLiveWithHttpInfo(String type, String id, GoLiveRequest goLiveRequest,) async {
+  Future<Response> goLiveWithHttpInfo(
+    String type,
+    String id,
+    GoLiveRequest goLiveRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/go_live'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = goLiveRequest;
@@ -982,7 +1170,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -997,7 +1184,7 @@ class ProductvideoApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.live_started 
+  ///   Sends events: - call.live_started
   ///
   /// Parameters:
   ///
@@ -1007,24 +1194,35 @@ class ProductvideoApi {
   ///
   /// * [GoLiveRequest] goLiveRequest (required):
   ///   GoLiveRequest
-  Future<GoLiveResponse?> goLive(String type, String id, GoLiveRequest goLiveRequest,) async {
-    final response = await goLiveWithHttpInfo(type, id, goLiveRequest,);
+  Future<GoLiveResponse?> goLive(
+    String type,
+    String id,
+    GoLiveRequest goLiveRequest,
+  ) async {
+    final response = await goLiveWithHttpInfo(
+      type,
+      id,
+      goLiveRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GoLiveResponse',) as GoLiveResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GoLiveResponse',
+      ) as GoLiveResponse;
     }
     return null;
   }
 
   /// Join call
   ///
-  /// Request to join a call 
+  /// Request to join a call
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1038,11 +1236,16 @@ class ProductvideoApi {
   ///   JoinCallRequest
   ///
   /// * [String] connectionId:
-  Future<Response> joinCallWithHttpInfo(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
+  Future<Response> joinCallWithHttpInfo(
+    String type,
+    String id,
+    JoinCallRequest joinCallRequest, {
+    String? connectionId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/join'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = joinCallRequest;
@@ -1057,7 +1260,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1071,7 +1273,7 @@ class ProductvideoApi {
 
   /// Join call
   ///
-  /// Request to join a call 
+  /// Request to join a call
   ///
   /// Parameters:
   ///
@@ -1083,24 +1285,37 @@ class ProductvideoApi {
   ///   JoinCallRequest
   ///
   /// * [String] connectionId:
-  Future<JoinCallResponse?> joinCall(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
-    final response = await joinCallWithHttpInfo(type, id, joinCallRequest,  connectionId: connectionId, );
+  Future<JoinCallResponse?> joinCall(
+    String type,
+    String id,
+    JoinCallRequest joinCallRequest, {
+    String? connectionId,
+  }) async {
+    final response = await joinCallWithHttpInfo(
+      type,
+      id,
+      joinCallRequest,
+      connectionId: connectionId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'JoinCallResponse',) as JoinCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'JoinCallResponse',
+      ) as JoinCallResponse;
     }
     return null;
   }
 
   /// List devices
   ///
-  /// Returns all available devices 
+  /// Returns all available devices
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> listDevicesWithHttpInfo() async {
@@ -1116,7 +1331,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -1130,7 +1344,7 @@ class ProductvideoApi {
 
   /// List devices
   ///
-  /// Returns all available devices 
+  /// Returns all available devices
   Future<ListDevicesResponse?> listDevices() async {
     final response = await listDevicesWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
@@ -1139,16 +1353,19 @@ class ProductvideoApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListDevicesResponse',) as ListDevicesResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ListDevicesResponse',
+      ) as ListDevicesResponse;
     }
     return null;
   }
 
   /// List recordings
   ///
-  /// Lists recordings 
+  /// Lists recordings
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1157,11 +1374,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> listRecordingsWithHttpInfo(String type, String id,) async {
+  Future<Response> listRecordingsWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/recordings'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -1171,7 +1391,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -1186,31 +1405,40 @@ class ProductvideoApi {
 
   /// List recordings
   ///
-  /// Lists recordings 
+  /// Lists recordings
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<ListRecordingsResponse?> listRecordings(String type, String id,) async {
-    final response = await listRecordingsWithHttpInfo(type, id,);
+  Future<ListRecordingsResponse?> listRecordings(
+    String type,
+    String id,
+  ) async {
+    final response = await listRecordingsWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListRecordingsResponse',) as ListRecordingsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ListRecordingsResponse',
+      ) as ListRecordingsResponse;
     }
     return null;
   }
 
   /// List transcriptions
   ///
-  /// Lists transcriptions 
+  /// Lists transcriptions
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1219,11 +1447,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> listTranscriptionsWithHttpInfo(String type, String id,) async {
+  Future<Response> listTranscriptionsWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/transcriptions'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -1233,7 +1464,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -1248,31 +1478,40 @@ class ProductvideoApi {
 
   /// List transcriptions
   ///
-  /// Lists transcriptions 
+  /// Lists transcriptions
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<ListTranscriptionsResponse?> listTranscriptions(String type, String id,) async {
-    final response = await listTranscriptionsWithHttpInfo(type, id,);
+  Future<ListTranscriptionsResponse?> listTranscriptions(
+    String type,
+    String id,
+  ) async {
+    final response = await listTranscriptionsWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListTranscriptionsResponse',) as ListTranscriptionsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ListTranscriptionsResponse',
+      ) as ListTranscriptionsResponse;
     }
     return null;
   }
 
   /// Mute users
   ///
-  /// Mutes users in a call 
+  /// Mutes users in a call
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1284,11 +1523,15 @@ class ProductvideoApi {
   ///
   /// * [MuteUsersRequest] muteUsersRequest (required):
   ///   MuteUsersRequest
-  Future<Response> muteUsersWithHttpInfo(String type, String id, MuteUsersRequest muteUsersRequest,) async {
+  Future<Response> muteUsersWithHttpInfo(
+    String type,
+    String id,
+    MuteUsersRequest muteUsersRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/mute_users'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = muteUsersRequest;
@@ -1298,7 +1541,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -1313,7 +1555,7 @@ class ProductvideoApi {
 
   /// Mute users
   ///
-  /// Mutes users in a call 
+  /// Mutes users in a call
   ///
   /// Parameters:
   ///
@@ -1323,31 +1565,44 @@ class ProductvideoApi {
   ///
   /// * [MuteUsersRequest] muteUsersRequest (required):
   ///   MuteUsersRequest
-  Future<MuteUsersResponse?> muteUsers(String type, String id, MuteUsersRequest muteUsersRequest,) async {
-    final response = await muteUsersWithHttpInfo(type, id, muteUsersRequest,);
+  Future<MuteUsersResponse?> muteUsers(
+    String type,
+    String id,
+    MuteUsersRequest muteUsersRequest,
+  ) async {
+    final response = await muteUsersWithHttpInfo(
+      type,
+      id,
+      muteUsersRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'MuteUsersResponse',) as MuteUsersResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'MuteUsersResponse',
+      ) as MuteUsersResponse;
     }
     return null;
   }
 
   /// Query Aggregate call Stats
   ///
-  ///  
+  ///
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [QueryAggregateCallStatsRequest] queryAggregateCallStatsRequest (required):
-  Future<Response> queryAggregateCallStatsWithHttpInfo(QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,) async {
+  Future<Response> queryAggregateCallStatsWithHttpInfo(
+    QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/stats';
 
@@ -1360,7 +1615,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1374,36 +1628,45 @@ class ProductvideoApi {
 
   /// Query Aggregate call Stats
   ///
-  ///  
+  ///
   ///
   /// Parameters:
   ///
   /// * [QueryAggregateCallStatsRequest] queryAggregateCallStatsRequest (required):
-  Future<QueryAggregateCallStatsResponse?> queryAggregateCallStats(QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,) async {
-    final response = await queryAggregateCallStatsWithHttpInfo(queryAggregateCallStatsRequest,);
+  Future<QueryAggregateCallStatsResponse?> queryAggregateCallStats(
+    QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,
+  ) async {
+    final response = await queryAggregateCallStatsWithHttpInfo(
+      queryAggregateCallStatsRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryAggregateCallStatsResponse',) as QueryAggregateCallStatsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryAggregateCallStatsResponse',
+      ) as QueryAggregateCallStatsResponse;
     }
     return null;
   }
 
   /// Query call members
   ///
-  /// Query call members with filter query 
+  /// Query call members with filter query
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [QueryCallMembersRequest] queryCallMembersRequest (required):
-  Future<Response> queryCallMembersWithHttpInfo(QueryCallMembersRequest queryCallMembersRequest,) async {
+  Future<Response> queryCallMembersWithHttpInfo(
+    QueryCallMembersRequest queryCallMembersRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/members';
 
@@ -1416,7 +1679,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1430,36 +1692,45 @@ class ProductvideoApi {
 
   /// Query call members
   ///
-  /// Query call members with filter query 
+  /// Query call members with filter query
   ///
   /// Parameters:
   ///
   /// * [QueryCallMembersRequest] queryCallMembersRequest (required):
-  Future<QueryCallMembersResponse?> queryCallMembers(QueryCallMembersRequest queryCallMembersRequest,) async {
-    final response = await queryCallMembersWithHttpInfo(queryCallMembersRequest,);
+  Future<QueryCallMembersResponse?> queryCallMembers(
+    QueryCallMembersRequest queryCallMembersRequest,
+  ) async {
+    final response = await queryCallMembersWithHttpInfo(
+      queryCallMembersRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryCallMembersResponse',) as QueryCallMembersResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallMembersResponse',
+      ) as QueryCallMembersResponse;
     }
     return null;
   }
 
   /// Query Call Stats
   ///
-  ///  
+  ///
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [QueryCallStatsRequest] queryCallStatsRequest (required):
-  Future<Response> queryCallStatsWithHttpInfo(QueryCallStatsRequest queryCallStatsRequest,) async {
+  Future<Response> queryCallStatsWithHttpInfo(
+    QueryCallStatsRequest queryCallStatsRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/stats';
 
@@ -1471,7 +1742,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -1486,29 +1756,36 @@ class ProductvideoApi {
 
   /// Query Call Stats
   ///
-  ///  
+  ///
   ///
   /// Parameters:
   ///
   /// * [QueryCallStatsRequest] queryCallStatsRequest (required):
-  Future<QueryCallStatsResponse?> queryCallStats(QueryCallStatsRequest queryCallStatsRequest,) async {
-    final response = await queryCallStatsWithHttpInfo(queryCallStatsRequest,);
+  Future<QueryCallStatsResponse?> queryCallStats(
+    QueryCallStatsRequest queryCallStatsRequest,
+  ) async {
+    final response = await queryCallStatsWithHttpInfo(
+      queryCallStatsRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryCallStatsResponse',) as QueryCallStatsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallStatsResponse',
+      ) as QueryCallStatsResponse;
     }
     return null;
   }
 
   /// Query call
   ///
-  /// Query calls with filter query 
+  /// Query calls with filter query
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1518,7 +1795,10 @@ class ProductvideoApi {
   ///   QueryCallsRequest
   ///
   /// * [String] connectionId:
-  Future<Response> queryCallsWithHttpInfo(QueryCallsRequest queryCallsRequest, { String? connectionId, }) async {
+  Future<Response> queryCallsWithHttpInfo(
+    QueryCallsRequest queryCallsRequest, {
+    String? connectionId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/video/calls';
 
@@ -1535,7 +1815,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1549,7 +1828,7 @@ class ProductvideoApi {
 
   /// Query call
   ///
-  /// Query calls with filter query 
+  /// Query calls with filter query
   ///
   /// Parameters:
   ///
@@ -1557,24 +1836,33 @@ class ProductvideoApi {
   ///   QueryCallsRequest
   ///
   /// * [String] connectionId:
-  Future<QueryCallsResponse?> queryCalls(QueryCallsRequest queryCallsRequest, { String? connectionId, }) async {
-    final response = await queryCallsWithHttpInfo(queryCallsRequest,  connectionId: connectionId, );
+  Future<QueryCallsResponse?> queryCalls(
+    QueryCallsRequest queryCallsRequest, {
+    String? connectionId,
+  }) async {
+    final response = await queryCallsWithHttpInfo(
+      queryCallsRequest,
+      connectionId: connectionId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryCallsResponse',) as QueryCallsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallsResponse',
+      ) as QueryCallsResponse;
     }
     return null;
   }
 
   /// Reject Call
   ///
-  ///   Sends events: - call.rejected 
+  ///   Sends events: - call.rejected
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1586,11 +1874,15 @@ class ProductvideoApi {
   ///
   /// * [RejectCallRequest] rejectCallRequest (required):
   ///   RejectCallRequest
-  Future<Response> rejectCallWithHttpInfo(String type, String id, RejectCallRequest rejectCallRequest,) async {
+  Future<Response> rejectCallWithHttpInfo(
+    String type,
+    String id,
+    RejectCallRequest rejectCallRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/reject'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = rejectCallRequest;
@@ -1601,7 +1893,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1615,7 +1906,7 @@ class ProductvideoApi {
 
   /// Reject Call
   ///
-  ///   Sends events: - call.rejected 
+  ///   Sends events: - call.rejected
   ///
   /// Parameters:
   ///
@@ -1625,24 +1916,35 @@ class ProductvideoApi {
   ///
   /// * [RejectCallRequest] rejectCallRequest (required):
   ///   RejectCallRequest
-  Future<RejectCallResponse?> rejectCall(String type, String id, RejectCallRequest rejectCallRequest,) async {
-    final response = await rejectCallWithHttpInfo(type, id, rejectCallRequest,);
+  Future<RejectCallResponse?> rejectCall(
+    String type,
+    String id,
+    RejectCallRequest rejectCallRequest,
+  ) async {
+    final response = await rejectCallWithHttpInfo(
+      type,
+      id,
+      rejectCallRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'RejectCallResponse',) as RejectCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'RejectCallResponse',
+      ) as RejectCallResponse;
     }
     return null;
   }
 
   /// Request permission
   ///
-  /// Request permission to perform an action  Sends events: - call.permission_request 
+  /// Request permission to perform an action  Sends events: - call.permission_request
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1654,11 +1956,15 @@ class ProductvideoApi {
   ///
   /// * [RequestPermissionRequest] requestPermissionRequest (required):
   ///   RequestPermissionRequest
-  Future<Response> requestPermissionWithHttpInfo(String type, String id, RequestPermissionRequest requestPermissionRequest,) async {
+  Future<Response> requestPermissionWithHttpInfo(
+    String type,
+    String id,
+    RequestPermissionRequest requestPermissionRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/request_permission'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = requestPermissionRequest;
@@ -1669,7 +1975,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1683,7 +1988,7 @@ class ProductvideoApi {
 
   /// Request permission
   ///
-  /// Request permission to perform an action  Sends events: - call.permission_request 
+  /// Request permission to perform an action  Sends events: - call.permission_request
   ///
   /// Parameters:
   ///
@@ -1693,24 +1998,35 @@ class ProductvideoApi {
   ///
   /// * [RequestPermissionRequest] requestPermissionRequest (required):
   ///   RequestPermissionRequest
-  Future<RequestPermissionResponse?> requestPermission(String type, String id, RequestPermissionRequest requestPermissionRequest,) async {
-    final response = await requestPermissionWithHttpInfo(type, id, requestPermissionRequest,);
+  Future<RequestPermissionResponse?> requestPermission(
+    String type,
+    String id,
+    RequestPermissionRequest requestPermissionRequest,
+  ) async {
+    final response = await requestPermissionWithHttpInfo(
+      type,
+      id,
+      requestPermissionRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'RequestPermissionResponse',) as RequestPermissionResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'RequestPermissionResponse',
+      ) as RequestPermissionResponse;
     }
     return null;
   }
 
   /// Send custom event
   ///
-  /// Sends custom event to the call  Sends events: - custom 
+  /// Sends custom event to the call  Sends events: - custom
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1722,11 +2038,15 @@ class ProductvideoApi {
   ///
   /// * [SendCallEventRequest] sendCallEventRequest (required):
   ///   SendCallEventRequest
-  Future<Response> sendCallEventWithHttpInfo(String type, String id, SendCallEventRequest sendCallEventRequest,) async {
+  Future<Response> sendCallEventWithHttpInfo(
+    String type,
+    String id,
+    SendCallEventRequest sendCallEventRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/event'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = sendCallEventRequest;
@@ -1737,7 +2057,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1751,7 +2070,7 @@ class ProductvideoApi {
 
   /// Send custom event
   ///
-  /// Sends custom event to the call  Sends events: - custom 
+  /// Sends custom event to the call  Sends events: - custom
   ///
   /// Parameters:
   ///
@@ -1761,24 +2080,35 @@ class ProductvideoApi {
   ///
   /// * [SendCallEventRequest] sendCallEventRequest (required):
   ///   SendCallEventRequest
-  Future<SendCallEventResponse?> sendCallEvent(String type, String id, SendCallEventRequest sendCallEventRequest,) async {
-    final response = await sendCallEventWithHttpInfo(type, id, sendCallEventRequest,);
+  Future<SendCallEventResponse?> sendCallEvent(
+    String type,
+    String id,
+    SendCallEventRequest sendCallEventRequest,
+  ) async {
+    final response = await sendCallEventWithHttpInfo(
+      type,
+      id,
+      sendCallEventRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SendCallEventResponse',) as SendCallEventResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'SendCallEventResponse',
+      ) as SendCallEventResponse;
     }
     return null;
   }
 
   /// Send reaction to the call
   ///
-  /// Sends reaction to the call  Sends events: - call.reaction_new 
+  /// Sends reaction to the call  Sends events: - call.reaction_new
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1789,11 +2119,15 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<Response> sendVideoReactionWithHttpInfo(String type, String id, SendReactionRequest sendReactionRequest,) async {
+  Future<Response> sendVideoReactionWithHttpInfo(
+    String type,
+    String id,
+    SendReactionRequest sendReactionRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/reaction'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = sendReactionRequest;
@@ -1804,7 +2138,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1818,7 +2151,7 @@ class ProductvideoApi {
 
   /// Send reaction to the call
   ///
-  /// Sends reaction to the call  Sends events: - call.reaction_new 
+  /// Sends reaction to the call  Sends events: - call.reaction_new
   ///
   /// Parameters:
   ///
@@ -1827,24 +2160,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<SendReactionResponse?> sendVideoReaction(String type, String id, SendReactionRequest sendReactionRequest,) async {
-    final response = await sendVideoReactionWithHttpInfo(type, id, sendReactionRequest,);
+  Future<SendReactionResponse?> sendVideoReaction(
+    String type,
+    String id,
+    SendReactionRequest sendReactionRequest,
+  ) async {
+    final response = await sendVideoReactionWithHttpInfo(
+      type,
+      id,
+      sendReactionRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SendReactionResponse',) as SendReactionResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'SendReactionResponse',
+      ) as SendReactionResponse;
     }
     return null;
   }
 
   /// Start closed captions
   ///
-  /// Starts closed captions 
+  /// Starts closed captions
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1855,11 +2199,15 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StartClosedCaptionsRequest] startClosedCaptionsRequest (required):
-  Future<Response> startClosedCaptionsWithHttpInfo(String type, String id, StartClosedCaptionsRequest startClosedCaptionsRequest,) async {
+  Future<Response> startClosedCaptionsWithHttpInfo(
+    String type,
+    String id,
+    StartClosedCaptionsRequest startClosedCaptionsRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/start_closed_captions'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = startClosedCaptionsRequest;
@@ -1870,7 +2218,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -1884,7 +2231,7 @@ class ProductvideoApi {
 
   /// Start closed captions
   ///
-  /// Starts closed captions 
+  /// Starts closed captions
   ///
   /// Parameters:
   ///
@@ -1893,24 +2240,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StartClosedCaptionsRequest] startClosedCaptionsRequest (required):
-  Future<StartClosedCaptionsResponse?> startClosedCaptions(String type, String id, StartClosedCaptionsRequest startClosedCaptionsRequest,) async {
-    final response = await startClosedCaptionsWithHttpInfo(type, id, startClosedCaptionsRequest,);
+  Future<StartClosedCaptionsResponse?> startClosedCaptions(
+    String type,
+    String id,
+    StartClosedCaptionsRequest startClosedCaptionsRequest,
+  ) async {
+    final response = await startClosedCaptionsWithHttpInfo(
+      type,
+      id,
+      startClosedCaptionsRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartClosedCaptionsResponse',) as StartClosedCaptionsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartClosedCaptionsResponse',
+      ) as StartClosedCaptionsResponse;
     }
     return null;
   }
 
   /// Start HLS broadcasting
   ///
-  /// Starts HLS broadcasting 
+  /// Starts HLS broadcasting
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1919,11 +2277,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> startHLSBroadcastingWithHttpInfo(String type, String id,) async {
+  Future<Response> startHLSBroadcastingWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/start_broadcasting'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -1933,7 +2294,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -1948,31 +2308,40 @@ class ProductvideoApi {
 
   /// Start HLS broadcasting
   ///
-  /// Starts HLS broadcasting 
+  /// Starts HLS broadcasting
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StartHLSBroadcastingResponse?> startHLSBroadcasting(String type, String id,) async {
-    final response = await startHLSBroadcastingWithHttpInfo(type, id,);
+  Future<StartHLSBroadcastingResponse?> startHLSBroadcasting(
+    String type,
+    String id,
+  ) async {
+    final response = await startHLSBroadcastingWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartHLSBroadcastingResponse',) as StartHLSBroadcastingResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartHLSBroadcastingResponse',
+      ) as StartHLSBroadcastingResponse;
     }
     return null;
   }
 
   /// Start RTMP broadcasts
   ///
-  /// Starts RTMP broadcasts for the provided RTMP destinations 
+  /// Starts RTMP broadcasts for the provided RTMP destinations
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -1984,11 +2353,15 @@ class ProductvideoApi {
   ///
   /// * [StartRTMPBroadcastsRequest] startRTMPBroadcastsRequest (required):
   ///   StartRTMPBroadcastsRequest
-  Future<Response> startRTMPBroadcastsWithHttpInfo(String type, String id, StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,) async {
+  Future<Response> startRTMPBroadcastsWithHttpInfo(
+    String type,
+    String id,
+    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/rtmp_broadcasts'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = startRTMPBroadcastsRequest;
@@ -1999,7 +2372,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2013,7 +2385,7 @@ class ProductvideoApi {
 
   /// Start RTMP broadcasts
   ///
-  /// Starts RTMP broadcasts for the provided RTMP destinations 
+  /// Starts RTMP broadcasts for the provided RTMP destinations
   ///
   /// Parameters:
   ///
@@ -2023,24 +2395,35 @@ class ProductvideoApi {
   ///
   /// * [StartRTMPBroadcastsRequest] startRTMPBroadcastsRequest (required):
   ///   StartRTMPBroadcastsRequest
-  Future<StartRTMPBroadcastsResponse?> startRTMPBroadcasts(String type, String id, StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,) async {
-    final response = await startRTMPBroadcastsWithHttpInfo(type, id, startRTMPBroadcastsRequest,);
+  Future<StartRTMPBroadcastsResponse?> startRTMPBroadcasts(
+    String type,
+    String id,
+    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
+  ) async {
+    final response = await startRTMPBroadcastsWithHttpInfo(
+      type,
+      id,
+      startRTMPBroadcastsRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartRTMPBroadcastsResponse',) as StartRTMPBroadcastsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartRTMPBroadcastsResponse',
+      ) as StartRTMPBroadcastsResponse;
     }
     return null;
   }
 
   /// Start recording
   ///
-  /// Starts recording  Sends events: - call.recording_started 
+  /// Starts recording  Sends events: - call.recording_started
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2052,11 +2435,15 @@ class ProductvideoApi {
   ///
   /// * [StartRecordingRequest] startRecordingRequest (required):
   ///   StartRecordingRequest
-  Future<Response> startRecordingWithHttpInfo(String type, String id, StartRecordingRequest startRecordingRequest,) async {
+  Future<Response> startRecordingWithHttpInfo(
+    String type,
+    String id,
+    StartRecordingRequest startRecordingRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/start_recording'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = startRecordingRequest;
@@ -2067,7 +2454,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2081,7 +2467,7 @@ class ProductvideoApi {
 
   /// Start recording
   ///
-  /// Starts recording  Sends events: - call.recording_started 
+  /// Starts recording  Sends events: - call.recording_started
   ///
   /// Parameters:
   ///
@@ -2091,24 +2477,35 @@ class ProductvideoApi {
   ///
   /// * [StartRecordingRequest] startRecordingRequest (required):
   ///   StartRecordingRequest
-  Future<StartRecordingResponse?> startRecording(String type, String id, StartRecordingRequest startRecordingRequest,) async {
-    final response = await startRecordingWithHttpInfo(type, id, startRecordingRequest,);
+  Future<StartRecordingResponse?> startRecording(
+    String type,
+    String id,
+    StartRecordingRequest startRecordingRequest,
+  ) async {
+    final response = await startRecordingWithHttpInfo(
+      type,
+      id,
+      startRecordingRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartRecordingResponse',) as StartRecordingResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartRecordingResponse',
+      ) as StartRecordingResponse;
     }
     return null;
   }
 
   /// Start transcription
   ///
-  /// Starts transcription 
+  /// Starts transcription
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2119,11 +2516,15 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StartTranscriptionRequest] startTranscriptionRequest (required):
-  Future<Response> startTranscriptionWithHttpInfo(String type, String id, StartTranscriptionRequest startTranscriptionRequest,) async {
+  Future<Response> startTranscriptionWithHttpInfo(
+    String type,
+    String id,
+    StartTranscriptionRequest startTranscriptionRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/start_transcription'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = startTranscriptionRequest;
@@ -2134,7 +2535,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2148,7 +2548,7 @@ class ProductvideoApi {
 
   /// Start transcription
   ///
-  /// Starts transcription 
+  /// Starts transcription
   ///
   /// Parameters:
   ///
@@ -2157,24 +2557,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StartTranscriptionRequest] startTranscriptionRequest (required):
-  Future<StartTranscriptionResponse?> startTranscription(String type, String id, StartTranscriptionRequest startTranscriptionRequest,) async {
-    final response = await startTranscriptionWithHttpInfo(type, id, startTranscriptionRequest,);
+  Future<StartTranscriptionResponse?> startTranscription(
+    String type,
+    String id,
+    StartTranscriptionRequest startTranscriptionRequest,
+  ) async {
+    final response = await startTranscriptionWithHttpInfo(
+      type,
+      id,
+      startTranscriptionRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartTranscriptionResponse',) as StartTranscriptionResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartTranscriptionResponse',
+      ) as StartTranscriptionResponse;
     }
     return null;
   }
 
   /// Stop all RTMP broadcasts for a call
   ///
-  /// Stop all RTMP broadcasts for the provided call 
+  /// Stop all RTMP broadcasts for the provided call
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2183,11 +2594,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stopAllRTMPBroadcastsWithHttpInfo(String type, String id,) async {
+  Future<Response> stopAllRTMPBroadcastsWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/rtmp_broadcasts/stop'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -2197,7 +2611,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -2212,31 +2625,40 @@ class ProductvideoApi {
 
   /// Stop all RTMP broadcasts for a call
   ///
-  /// Stop all RTMP broadcasts for the provided call 
+  /// Stop all RTMP broadcasts for the provided call
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StopAllRTMPBroadcastsResponse?> stopAllRTMPBroadcasts(String type, String id,) async {
-    final response = await stopAllRTMPBroadcastsWithHttpInfo(type, id,);
+  Future<StopAllRTMPBroadcastsResponse?> stopAllRTMPBroadcasts(
+    String type,
+    String id,
+  ) async {
+    final response = await stopAllRTMPBroadcastsWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopAllRTMPBroadcastsResponse',) as StopAllRTMPBroadcastsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopAllRTMPBroadcastsResponse',
+      ) as StopAllRTMPBroadcastsResponse;
     }
     return null;
   }
 
   /// Stop closed captions
   ///
-  /// Stops closed captions  Sends events: - call.transcription_stopped 
+  /// Stops closed captions  Sends events: - call.transcription_stopped
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2247,11 +2669,15 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StopClosedCaptionsRequest] stopClosedCaptionsRequest (required):
-  Future<Response> stopClosedCaptionsWithHttpInfo(String type, String id, StopClosedCaptionsRequest stopClosedCaptionsRequest,) async {
+  Future<Response> stopClosedCaptionsWithHttpInfo(
+    String type,
+    String id,
+    StopClosedCaptionsRequest stopClosedCaptionsRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_closed_captions'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = stopClosedCaptionsRequest;
@@ -2262,7 +2688,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2276,7 +2701,7 @@ class ProductvideoApi {
 
   /// Stop closed captions
   ///
-  /// Stops closed captions  Sends events: - call.transcription_stopped 
+  /// Stops closed captions  Sends events: - call.transcription_stopped
   ///
   /// Parameters:
   ///
@@ -2285,24 +2710,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StopClosedCaptionsRequest] stopClosedCaptionsRequest (required):
-  Future<StopClosedCaptionsResponse?> stopClosedCaptions(String type, String id, StopClosedCaptionsRequest stopClosedCaptionsRequest,) async {
-    final response = await stopClosedCaptionsWithHttpInfo(type, id, stopClosedCaptionsRequest,);
+  Future<StopClosedCaptionsResponse?> stopClosedCaptions(
+    String type,
+    String id,
+    StopClosedCaptionsRequest stopClosedCaptionsRequest,
+  ) async {
+    final response = await stopClosedCaptionsWithHttpInfo(
+      type,
+      id,
+      stopClosedCaptionsRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopClosedCaptionsResponse',) as StopClosedCaptionsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopClosedCaptionsResponse',
+      ) as StopClosedCaptionsResponse;
     }
     return null;
   }
 
   /// Stop HLS broadcasting
   ///
-  /// Stops HLS broadcasting 
+  /// Stops HLS broadcasting
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2311,11 +2747,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stopHLSBroadcastingWithHttpInfo(String type, String id,) async {
+  Future<Response> stopHLSBroadcastingWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_broadcasting'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -2325,7 +2764,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -2340,31 +2778,40 @@ class ProductvideoApi {
 
   /// Stop HLS broadcasting
   ///
-  /// Stops HLS broadcasting 
+  /// Stops HLS broadcasting
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StopHLSBroadcastingResponse?> stopHLSBroadcasting(String type, String id,) async {
-    final response = await stopHLSBroadcastingWithHttpInfo(type, id,);
+  Future<StopHLSBroadcastingResponse?> stopHLSBroadcasting(
+    String type,
+    String id,
+  ) async {
+    final response = await stopHLSBroadcastingWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopHLSBroadcastingResponse',) as StopHLSBroadcastingResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopHLSBroadcastingResponse',
+      ) as StopHLSBroadcastingResponse;
     }
     return null;
   }
 
   /// Set call as not live
   ///
-  ///   Sends events: - call.updated 
+  ///   Sends events: - call.updated
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2376,11 +2823,15 @@ class ProductvideoApi {
   ///
   /// * [StopLiveRequest] stopLiveRequest (required):
   ///   StopLiveRequest
-  Future<Response> stopLiveWithHttpInfo(String type, String id, StopLiveRequest stopLiveRequest,) async {
+  Future<Response> stopLiveWithHttpInfo(
+    String type,
+    String id,
+    StopLiveRequest stopLiveRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_live'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = stopLiveRequest;
@@ -2391,7 +2842,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2405,7 +2855,7 @@ class ProductvideoApi {
 
   /// Set call as not live
   ///
-  ///   Sends events: - call.updated 
+  ///   Sends events: - call.updated
   ///
   /// Parameters:
   ///
@@ -2415,24 +2865,35 @@ class ProductvideoApi {
   ///
   /// * [StopLiveRequest] stopLiveRequest (required):
   ///   StopLiveRequest
-  Future<StopLiveResponse?> stopLive(String type, String id, StopLiveRequest stopLiveRequest,) async {
-    final response = await stopLiveWithHttpInfo(type, id, stopLiveRequest,);
+  Future<StopLiveResponse?> stopLive(
+    String type,
+    String id,
+    StopLiveRequest stopLiveRequest,
+  ) async {
+    final response = await stopLiveWithHttpInfo(
+      type,
+      id,
+      stopLiveRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopLiveResponse',) as StopLiveResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopLiveResponse',
+      ) as StopLiveResponse;
     }
     return null;
   }
 
   /// Stop RTMP broadcasts
   ///
-  /// Stop RTMP broadcasts for the provided RTMP destinations 
+  /// Stop RTMP broadcasts for the provided RTMP destinations
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2446,12 +2907,17 @@ class ProductvideoApi {
   ///
   /// * [Object] body (required):
   ///   StopRTMPBroadcastsRequest
-  Future<Response> stopRTMPBroadcastWithHttpInfo(String type, String id, String name, Object body,) async {
+  Future<Response> stopRTMPBroadcastWithHttpInfo(
+    String type,
+    String id,
+    String name,
+    Object body,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{name}', name);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id)
+        .replaceAll('{name}', name);
 
     // ignore: prefer_final_locals
     Object? postBody = body;
@@ -2462,7 +2928,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2476,7 +2941,7 @@ class ProductvideoApi {
 
   /// Stop RTMP broadcasts
   ///
-  /// Stop RTMP broadcasts for the provided RTMP destinations 
+  /// Stop RTMP broadcasts for the provided RTMP destinations
   ///
   /// Parameters:
   ///
@@ -2488,24 +2953,37 @@ class ProductvideoApi {
   ///
   /// * [Object] body (required):
   ///   StopRTMPBroadcastsRequest
-  Future<StopRTMPBroadcastsResponse?> stopRTMPBroadcast(String type, String id, String name, Object body,) async {
-    final response = await stopRTMPBroadcastWithHttpInfo(type, id, name, body,);
+  Future<StopRTMPBroadcastsResponse?> stopRTMPBroadcast(
+    String type,
+    String id,
+    String name,
+    Object body,
+  ) async {
+    final response = await stopRTMPBroadcastWithHttpInfo(
+      type,
+      id,
+      name,
+      body,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopRTMPBroadcastsResponse',) as StopRTMPBroadcastsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopRTMPBroadcastsResponse',
+      ) as StopRTMPBroadcastsResponse;
     }
     return null;
   }
 
   /// Stop recording
   ///
-  /// Stops recording  Sends events: - call.recording_stopped 
+  /// Stops recording  Sends events: - call.recording_stopped
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2514,11 +2992,14 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stopRecordingWithHttpInfo(String type, String id,) async {
+  Future<Response> stopRecordingWithHttpInfo(
+    String type,
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_recording'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -2529,7 +3010,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2543,31 +3023,40 @@ class ProductvideoApi {
 
   /// Stop recording
   ///
-  /// Stops recording  Sends events: - call.recording_stopped 
+  /// Stops recording  Sends events: - call.recording_stopped
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<StopRecordingResponse?> stopRecording(String type, String id,) async {
-    final response = await stopRecordingWithHttpInfo(type, id,);
+  Future<StopRecordingResponse?> stopRecording(
+    String type,
+    String id,
+  ) async {
+    final response = await stopRecordingWithHttpInfo(
+      type,
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopRecordingResponse',) as StopRecordingResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopRecordingResponse',
+      ) as StopRecordingResponse;
     }
     return null;
   }
 
   /// Stop transcription
   ///
-  /// Stops transcription  Sends events: - call.transcription_stopped 
+  /// Stops transcription  Sends events: - call.transcription_stopped
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2578,11 +3067,15 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StopTranscriptionRequest] stopTranscriptionRequest (required):
-  Future<Response> stopTranscriptionWithHttpInfo(String type, String id, StopTranscriptionRequest stopTranscriptionRequest,) async {
+  Future<Response> stopTranscriptionWithHttpInfo(
+    String type,
+    String id,
+    StopTranscriptionRequest stopTranscriptionRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/stop_transcription'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = stopTranscriptionRequest;
@@ -2593,7 +3086,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2607,7 +3099,7 @@ class ProductvideoApi {
 
   /// Stop transcription
   ///
-  /// Stops transcription  Sends events: - call.transcription_stopped 
+  /// Stops transcription  Sends events: - call.transcription_stopped
   ///
   /// Parameters:
   ///
@@ -2616,24 +3108,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [StopTranscriptionRequest] stopTranscriptionRequest (required):
-  Future<StopTranscriptionResponse?> stopTranscription(String type, String id, StopTranscriptionRequest stopTranscriptionRequest,) async {
-    final response = await stopTranscriptionWithHttpInfo(type, id, stopTranscriptionRequest,);
+  Future<StopTranscriptionResponse?> stopTranscription(
+    String type,
+    String id,
+    StopTranscriptionRequest stopTranscriptionRequest,
+  ) async {
+    final response = await stopTranscriptionWithHttpInfo(
+      type,
+      id,
+      stopTranscriptionRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopTranscriptionResponse',) as StopTranscriptionResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopTranscriptionResponse',
+      ) as StopTranscriptionResponse;
     }
     return null;
   }
 
   /// Unblocks user on a call
   ///
-  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user 
+  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2645,11 +3148,15 @@ class ProductvideoApi {
   ///
   /// * [UnblockUserRequest] unblockUserRequest (required):
   ///   UnblockUserRequest
-  Future<Response> unblockUserWithHttpInfo(String type, String id, UnblockUserRequest unblockUserRequest,) async {
+  Future<Response> unblockUserWithHttpInfo(
+    String type,
+    String id,
+    UnblockUserRequest unblockUserRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/unblock'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = unblockUserRequest;
@@ -2659,7 +3166,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -2674,7 +3180,7 @@ class ProductvideoApi {
 
   /// Unblocks user on a call
   ///
-  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user 
+  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user
   ///
   /// Parameters:
   ///
@@ -2684,24 +3190,35 @@ class ProductvideoApi {
   ///
   /// * [UnblockUserRequest] unblockUserRequest (required):
   ///   UnblockUserRequest
-  Future<UnblockUserResponse?> unblockUser(String type, String id, UnblockUserRequest unblockUserRequest,) async {
-    final response = await unblockUserWithHttpInfo(type, id, unblockUserRequest,);
+  Future<UnblockUserResponse?> unblockUser(
+    String type,
+    String id,
+    UnblockUserRequest unblockUserRequest,
+  ) async {
+    final response = await unblockUserWithHttpInfo(
+      type,
+      id,
+      unblockUserRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UnblockUserResponse',) as UnblockUserResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UnblockUserResponse',
+      ) as UnblockUserResponse;
     }
     return null;
   }
 
   /// Update Call
   ///
-  ///   Sends events: - call.updated 
+  ///   Sends events: - call.updated
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2713,11 +3230,15 @@ class ProductvideoApi {
   ///
   /// * [UpdateCallRequest] updateCallRequest (required):
   ///   UpdateCallRequest
-  Future<Response> updateCallWithHttpInfo(String type, String id, UpdateCallRequest updateCallRequest,) async {
+  Future<Response> updateCallWithHttpInfo(
+    String type,
+    String id,
+    UpdateCallRequest updateCallRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = updateCallRequest;
@@ -2727,7 +3248,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -2742,7 +3262,7 @@ class ProductvideoApi {
 
   /// Update Call
   ///
-  ///   Sends events: - call.updated 
+  ///   Sends events: - call.updated
   ///
   /// Parameters:
   ///
@@ -2752,24 +3272,35 @@ class ProductvideoApi {
   ///
   /// * [UpdateCallRequest] updateCallRequest (required):
   ///   UpdateCallRequest
-  Future<UpdateCallResponse?> updateCall(String type, String id, UpdateCallRequest updateCallRequest,) async {
-    final response = await updateCallWithHttpInfo(type, id, updateCallRequest,);
+  Future<UpdateCallResponse?> updateCall(
+    String type,
+    String id,
+    UpdateCallRequest updateCallRequest,
+  ) async {
+    final response = await updateCallWithHttpInfo(
+      type,
+      id,
+      updateCallRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UpdateCallResponse',) as UpdateCallResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UpdateCallResponse',
+      ) as UpdateCallResponse;
     }
     return null;
   }
 
   /// Update Call Member
   ///
-  ///   Sends events: - call.member_added - call.member_removed - call.member_updated 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2781,11 +3312,15 @@ class ProductvideoApi {
   ///
   /// * [UpdateCallMembersRequest] updateCallMembersRequest (required):
   ///   UpdateCallMembersRequest
-  Future<Response> updateCallMembersWithHttpInfo(String type, String id, UpdateCallMembersRequest updateCallMembersRequest,) async {
+  Future<Response> updateCallMembersWithHttpInfo(
+    String type,
+    String id,
+    UpdateCallMembersRequest updateCallMembersRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/members'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = updateCallMembersRequest;
@@ -2796,7 +3331,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2810,7 +3344,7 @@ class ProductvideoApi {
 
   /// Update Call Member
   ///
-  ///   Sends events: - call.member_added - call.member_removed - call.member_updated 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated
   ///
   /// Parameters:
   ///
@@ -2820,24 +3354,35 @@ class ProductvideoApi {
   ///
   /// * [UpdateCallMembersRequest] updateCallMembersRequest (required):
   ///   UpdateCallMembersRequest
-  Future<UpdateCallMembersResponse?> updateCallMembers(String type, String id, UpdateCallMembersRequest updateCallMembersRequest,) async {
-    final response = await updateCallMembersWithHttpInfo(type, id, updateCallMembersRequest,);
+  Future<UpdateCallMembersResponse?> updateCallMembers(
+    String type,
+    String id,
+    UpdateCallMembersRequest updateCallMembersRequest,
+  ) async {
+    final response = await updateCallMembersWithHttpInfo(
+      type,
+      id,
+      updateCallMembersRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UpdateCallMembersResponse',) as UpdateCallMembersResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UpdateCallMembersResponse',
+      ) as UpdateCallMembersResponse;
     }
     return null;
   }
 
   /// Update user permissions
   ///
-  /// Updates user permissions  Sends events: - call.permissions_updated 
+  /// Updates user permissions  Sends events: - call.permissions_updated
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2848,11 +3393,15 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [UpdateUserPermissionsRequest] updateUserPermissionsRequest (required):
-  Future<Response> updateUserPermissionsWithHttpInfo(String type, String id, UpdateUserPermissionsRequest updateUserPermissionsRequest,) async {
+  Future<Response> updateUserPermissionsWithHttpInfo(
+    String type,
+    String id,
+    UpdateUserPermissionsRequest updateUserPermissionsRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/user_permissions'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = updateUserPermissionsRequest;
@@ -2862,7 +3411,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -2877,7 +3425,7 @@ class ProductvideoApi {
 
   /// Update user permissions
   ///
-  /// Updates user permissions  Sends events: - call.permissions_updated 
+  /// Updates user permissions  Sends events: - call.permissions_updated
   ///
   /// Parameters:
   ///
@@ -2886,24 +3434,35 @@ class ProductvideoApi {
   /// * [String] id (required):
   ///
   /// * [UpdateUserPermissionsRequest] updateUserPermissionsRequest (required):
-  Future<UpdateUserPermissionsResponse?> updateUserPermissions(String type, String id, UpdateUserPermissionsRequest updateUserPermissionsRequest,) async {
-    final response = await updateUserPermissionsWithHttpInfo(type, id, updateUserPermissionsRequest,);
+  Future<UpdateUserPermissionsResponse?> updateUserPermissions(
+    String type,
+    String id,
+    UpdateUserPermissionsRequest updateUserPermissionsRequest,
+  ) async {
+    final response = await updateUserPermissionsWithHttpInfo(
+      type,
+      id,
+      updateUserPermissionsRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UpdateUserPermissionsResponse',) as UpdateUserPermissionsResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UpdateUserPermissionsResponse',
+      ) as UpdateUserPermissionsResponse;
     }
     return null;
   }
 
   /// Video Connect (WebSocket)
   ///
-  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok 
+  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> videoConnectWithHttpInfo() async {
@@ -2919,7 +3478,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -2933,7 +3491,7 @@ class ProductvideoApi {
 
   /// Video Connect (WebSocket)
   ///
-  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok 
+  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok
   Future<void> videoConnect() async {
     final response = await videoConnectWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
@@ -2943,7 +3501,7 @@ class ProductvideoApi {
 
   /// Pin
   ///
-  /// Pins a track for all users in the call. 
+  /// Pins a track for all users in the call.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -2955,11 +3513,15 @@ class ProductvideoApi {
   ///
   /// * [PinRequest] pinRequest (required):
   ///   PinRequest
-  Future<Response> videoPinWithHttpInfo(String type, String id, PinRequest pinRequest,) async {
+  Future<Response> videoPinWithHttpInfo(
+    String type,
+    String id,
+    PinRequest pinRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/pin'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = pinRequest;
@@ -2970,7 +3532,6 @@ class ProductvideoApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -2984,7 +3545,7 @@ class ProductvideoApi {
 
   /// Pin
   ///
-  /// Pins a track for all users in the call. 
+  /// Pins a track for all users in the call.
   ///
   /// Parameters:
   ///
@@ -2994,24 +3555,35 @@ class ProductvideoApi {
   ///
   /// * [PinRequest] pinRequest (required):
   ///   PinRequest
-  Future<PinResponse?> videoPin(String type, String id, PinRequest pinRequest,) async {
-    final response = await videoPinWithHttpInfo(type, id, pinRequest,);
+  Future<PinResponse?> videoPin(
+    String type,
+    String id,
+    PinRequest pinRequest,
+  ) async {
+    final response = await videoPinWithHttpInfo(
+      type,
+      id,
+      pinRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'PinResponse',) as PinResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'PinResponse',
+      ) as PinResponse;
     }
     return null;
   }
 
   /// Unpin
   ///
-  /// Unpins a track for all users in the call. 
+  /// Unpins a track for all users in the call.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -3023,11 +3595,15 @@ class ProductvideoApi {
   ///
   /// * [UnpinRequest] unpinRequest (required):
   ///   UnpinRequest
-  Future<Response> videoUnpinWithHttpInfo(String type, String id, UnpinRequest unpinRequest,) async {
+  Future<Response> videoUnpinWithHttpInfo(
+    String type,
+    String id,
+    UnpinRequest unpinRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/unpin'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = unpinRequest;
@@ -3037,7 +3613,6 @@ class ProductvideoApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -3052,7 +3627,7 @@ class ProductvideoApi {
 
   /// Unpin
   ///
-  /// Unpins a track for all users in the call. 
+  /// Unpins a track for all users in the call.
   ///
   /// Parameters:
   ///
@@ -3062,17 +3637,28 @@ class ProductvideoApi {
   ///
   /// * [UnpinRequest] unpinRequest (required):
   ///   UnpinRequest
-  Future<UnpinResponse?> videoUnpin(String type, String id, UnpinRequest unpinRequest,) async {
-    final response = await videoUnpinWithHttpInfo(type, id, unpinRequest,);
+  Future<UnpinResponse?> videoUnpin(
+    String type,
+    String id,
+    UnpinRequest unpinRequest,
+  ) async {
+    final response = await videoUnpinWithHttpInfo(
+      type,
+      id,
+      unpinRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UnpinResponse',) as UnpinResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UnpinResponse',
+      ) as UnpinResponse;
     }
     return null;
   }

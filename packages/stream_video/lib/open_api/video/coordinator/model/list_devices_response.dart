@@ -23,23 +23,25 @@ class ListDevicesResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ListDevicesResponse &&
-    _deepEquality.equals(other.devices, devices) &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ListDevicesResponse &&
+          _deepEquality.equals(other.devices, devices) &&
+          other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (devices.hashCode) +
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (devices.hashCode) + (duration.hashCode);
 
   @override
-  String toString() => 'ListDevicesResponse[devices=$devices, duration=$duration]';
+  String toString() =>
+      'ListDevicesResponse[devices=$devices, duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'devices'] = this.devices;
-      json[r'duration'] = this.duration;
+    json[r'devices'] = this.devices;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -55,8 +57,10 @@ class ListDevicesResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ListDevicesResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ListDevicesResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "ListDevicesResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "ListDevicesResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -69,7 +73,10 @@ class ListDevicesResponse {
     return null;
   }
 
-  static List<ListDevicesResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ListDevicesResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ListDevicesResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -97,13 +104,19 @@ class ListDevicesResponse {
   }
 
   // maps a json object with a list of ListDevicesResponse-objects as value to a dart map
-  static Map<String, List<ListDevicesResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ListDevicesResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ListDevicesResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ListDevicesResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ListDevicesResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -115,4 +128,3 @@ class ListDevicesResponse {
     'duration',
   };
 }
-

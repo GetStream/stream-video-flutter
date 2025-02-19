@@ -43,24 +43,27 @@ class HealthCheckEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is HealthCheckEvent &&
-    other.cid == cid &&
-    other.connectionId == connectionId &&
-    other.createdAt == createdAt &&
-    other.receivedAt == receivedAt &&
-    other.type == type;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HealthCheckEvent &&
+          other.cid == cid &&
+          other.connectionId == connectionId &&
+          other.createdAt == createdAt &&
+          other.receivedAt == receivedAt &&
+          other.type == type;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (cid == null ? 0 : cid!.hashCode) +
-    (connectionId.hashCode) +
-    (createdAt.hashCode) +
-    (receivedAt == null ? 0 : receivedAt!.hashCode) +
-    (type.hashCode);
+      // ignore: unnecessary_parenthesis
+      (cid == null ? 0 : cid!.hashCode) +
+      (connectionId.hashCode) +
+      (createdAt.hashCode) +
+      (receivedAt == null ? 0 : receivedAt!.hashCode) +
+      (type.hashCode);
 
   @override
-  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, receivedAt=$receivedAt, type=$type]';
+  String toString() =>
+      'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, receivedAt=$receivedAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -69,14 +72,14 @@ class HealthCheckEvent {
     } else {
       json[r'cid'] = null;
     }
-      json[r'connection_id'] = this.connectionId;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'connection_id'] = this.connectionId;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     if (this.receivedAt != null) {
       json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
     } else {
       json[r'received_at'] = null;
     }
-      json[r'type'] = this.type;
+    json[r'type'] = this.type;
     return json;
   }
 
@@ -92,8 +95,10 @@ class HealthCheckEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "HealthCheckEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "HealthCheckEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "HealthCheckEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "HealthCheckEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -109,7 +114,10 @@ class HealthCheckEvent {
     return null;
   }
 
-  static List<HealthCheckEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<HealthCheckEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <HealthCheckEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -137,13 +145,19 @@ class HealthCheckEvent {
   }
 
   // maps a json object with a list of HealthCheckEvent-objects as value to a dart map
-  static Map<String, List<HealthCheckEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<HealthCheckEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<HealthCheckEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = HealthCheckEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = HealthCheckEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -156,4 +170,3 @@ class HealthCheckEvent {
     'type',
   };
 }
-

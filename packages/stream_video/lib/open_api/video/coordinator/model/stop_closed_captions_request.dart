@@ -25,16 +25,19 @@ class StopClosedCaptionsRequest {
   bool? stopTranscription;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StopClosedCaptionsRequest &&
-    other.stopTranscription == stopTranscription;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StopClosedCaptionsRequest &&
+          other.stopTranscription == stopTranscription;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (stopTranscription == null ? 0 : stopTranscription!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (stopTranscription == null ? 0 : stopTranscription!.hashCode);
 
   @override
-  String toString() => 'StopClosedCaptionsRequest[stopTranscription=$stopTranscription]';
+  String toString() =>
+      'StopClosedCaptionsRequest[stopTranscription=$stopTranscription]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -58,8 +61,10 @@ class StopClosedCaptionsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StopClosedCaptionsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StopClosedCaptionsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "StopClosedCaptionsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "StopClosedCaptionsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -71,7 +76,10 @@ class StopClosedCaptionsRequest {
     return null;
   }
 
-  static List<StopClosedCaptionsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StopClosedCaptionsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <StopClosedCaptionsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -99,20 +107,24 @@ class StopClosedCaptionsRequest {
   }
 
   // maps a json object with a list of StopClosedCaptionsRequest-objects as value to a dart map
-  static Map<String, List<StopClosedCaptionsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<StopClosedCaptionsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<StopClosedCaptionsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StopClosedCaptionsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StopClosedCaptionsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

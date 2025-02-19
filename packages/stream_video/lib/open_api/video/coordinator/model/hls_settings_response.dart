@@ -25,26 +25,27 @@ class HLSSettingsResponse {
   List<String> qualityTracks;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is HLSSettingsResponse &&
-    other.autoOn == autoOn &&
-    other.enabled == enabled &&
-    _deepEquality.equals(other.qualityTracks, qualityTracks);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HLSSettingsResponse &&
+          other.autoOn == autoOn &&
+          other.enabled == enabled &&
+          _deepEquality.equals(other.qualityTracks, qualityTracks);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (autoOn.hashCode) +
-    (enabled.hashCode) +
-    (qualityTracks.hashCode);
+      // ignore: unnecessary_parenthesis
+      (autoOn.hashCode) + (enabled.hashCode) + (qualityTracks.hashCode);
 
   @override
-  String toString() => 'HLSSettingsResponse[autoOn=$autoOn, enabled=$enabled, qualityTracks=$qualityTracks]';
+  String toString() =>
+      'HLSSettingsResponse[autoOn=$autoOn, enabled=$enabled, qualityTracks=$qualityTracks]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'auto_on'] = this.autoOn;
-      json[r'enabled'] = this.enabled;
-      json[r'quality_tracks'] = this.qualityTracks;
+    json[r'auto_on'] = this.autoOn;
+    json[r'enabled'] = this.enabled;
+    json[r'quality_tracks'] = this.qualityTracks;
     return json;
   }
 
@@ -60,8 +61,10 @@ class HLSSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "HLSSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "HLSSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "HLSSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "HLSSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -70,14 +73,19 @@ class HLSSettingsResponse {
         autoOn: mapValueOfType<bool>(json, r'auto_on')!,
         enabled: mapValueOfType<bool>(json, r'enabled')!,
         qualityTracks: json[r'quality_tracks'] is Iterable
-            ? (json[r'quality_tracks'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'quality_tracks'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
       );
     }
     return null;
   }
 
-  static List<HLSSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<HLSSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <HLSSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -105,13 +113,19 @@ class HLSSettingsResponse {
   }
 
   // maps a json object with a list of HLSSettingsResponse-objects as value to a dart map
-  static Map<String, List<HLSSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<HLSSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<HLSSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = HLSSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = HLSSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -124,4 +138,3 @@ class HLSSettingsResponse {
     'quality_tracks',
   };
 }
-

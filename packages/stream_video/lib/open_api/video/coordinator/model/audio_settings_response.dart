@@ -43,42 +43,45 @@ class AudioSettingsResponse {
   bool speakerDefaultOn;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is AudioSettingsResponse &&
-    other.accessRequestEnabled == accessRequestEnabled &&
-    other.defaultDevice == defaultDevice &&
-    other.micDefaultOn == micDefaultOn &&
-    other.noiseCancellation == noiseCancellation &&
-    other.opusDtxEnabled == opusDtxEnabled &&
-    other.redundantCodingEnabled == redundantCodingEnabled &&
-    other.speakerDefaultOn == speakerDefaultOn;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AudioSettingsResponse &&
+          other.accessRequestEnabled == accessRequestEnabled &&
+          other.defaultDevice == defaultDevice &&
+          other.micDefaultOn == micDefaultOn &&
+          other.noiseCancellation == noiseCancellation &&
+          other.opusDtxEnabled == opusDtxEnabled &&
+          other.redundantCodingEnabled == redundantCodingEnabled &&
+          other.speakerDefaultOn == speakerDefaultOn;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (accessRequestEnabled.hashCode) +
-    (defaultDevice.hashCode) +
-    (micDefaultOn.hashCode) +
-    (noiseCancellation == null ? 0 : noiseCancellation!.hashCode) +
-    (opusDtxEnabled.hashCode) +
-    (redundantCodingEnabled.hashCode) +
-    (speakerDefaultOn.hashCode);
+      // ignore: unnecessary_parenthesis
+      (accessRequestEnabled.hashCode) +
+      (defaultDevice.hashCode) +
+      (micDefaultOn.hashCode) +
+      (noiseCancellation == null ? 0 : noiseCancellation!.hashCode) +
+      (opusDtxEnabled.hashCode) +
+      (redundantCodingEnabled.hashCode) +
+      (speakerDefaultOn.hashCode);
 
   @override
-  String toString() => 'AudioSettingsResponse[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
+  String toString() =>
+      'AudioSettingsResponse[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'access_request_enabled'] = this.accessRequestEnabled;
-      json[r'default_device'] = this.defaultDevice;
-      json[r'mic_default_on'] = this.micDefaultOn;
+    json[r'access_request_enabled'] = this.accessRequestEnabled;
+    json[r'default_device'] = this.defaultDevice;
+    json[r'mic_default_on'] = this.micDefaultOn;
     if (this.noiseCancellation != null) {
       json[r'noise_cancellation'] = this.noiseCancellation;
     } else {
       json[r'noise_cancellation'] = null;
     }
-      json[r'opus_dtx_enabled'] = this.opusDtxEnabled;
-      json[r'redundant_coding_enabled'] = this.redundantCodingEnabled;
-      json[r'speaker_default_on'] = this.speakerDefaultOn;
+    json[r'opus_dtx_enabled'] = this.opusDtxEnabled;
+    json[r'redundant_coding_enabled'] = this.redundantCodingEnabled;
+    json[r'speaker_default_on'] = this.speakerDefaultOn;
     return json;
   }
 
@@ -94,26 +97,35 @@ class AudioSettingsResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "AudioSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "AudioSettingsResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "AudioSettingsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "AudioSettingsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return AudioSettingsResponse(
-        accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled')!,
-        defaultDevice: AudioSettingsResponseDefaultDeviceEnum.fromJson(json[r'default_device'])!,
+        accessRequestEnabled:
+            mapValueOfType<bool>(json, r'access_request_enabled')!,
+        defaultDevice: AudioSettingsResponseDefaultDeviceEnum.fromJson(
+            json[r'default_device'])!,
         micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on')!,
-        noiseCancellation: NoiseCancellationSettings.fromJson(json[r'noise_cancellation']),
+        noiseCancellation:
+            NoiseCancellationSettings.fromJson(json[r'noise_cancellation']),
         opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled')!,
-        redundantCodingEnabled: mapValueOfType<bool>(json, r'redundant_coding_enabled')!,
+        redundantCodingEnabled:
+            mapValueOfType<bool>(json, r'redundant_coding_enabled')!,
         speakerDefaultOn: mapValueOfType<bool>(json, r'speaker_default_on')!,
       );
     }
     return null;
   }
 
-  static List<AudioSettingsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AudioSettingsResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <AudioSettingsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -141,13 +153,19 @@ class AudioSettingsResponse {
   }
 
   // maps a json object with a list of AudioSettingsResponse-objects as value to a dart map
-  static Map<String, List<AudioSettingsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<AudioSettingsResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<AudioSettingsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = AudioSettingsResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = AudioSettingsResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -163,7 +181,6 @@ class AudioSettingsResponse {
     'speaker_default_on',
   };
 }
-
 
 class AudioSettingsResponseDefaultDeviceEnum {
   /// Instantiate a new enum with the provided [value].
@@ -186,9 +203,13 @@ class AudioSettingsResponseDefaultDeviceEnum {
     earpiece,
   ];
 
-  static AudioSettingsResponseDefaultDeviceEnum? fromJson(dynamic value) => AudioSettingsResponseDefaultDeviceEnumTypeTransformer().decode(value);
+  static AudioSettingsResponseDefaultDeviceEnum? fromJson(dynamic value) =>
+      AudioSettingsResponseDefaultDeviceEnumTypeTransformer().decode(value);
 
-  static List<AudioSettingsResponseDefaultDeviceEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AudioSettingsResponseDefaultDeviceEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <AudioSettingsResponseDefaultDeviceEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -205,7 +226,9 @@ class AudioSettingsResponseDefaultDeviceEnum {
 /// Transformation class that can [encode] an instance of [AudioSettingsResponseDefaultDeviceEnum] to String,
 /// and [decode] dynamic data back to [AudioSettingsResponseDefaultDeviceEnum].
 class AudioSettingsResponseDefaultDeviceEnumTypeTransformer {
-  factory AudioSettingsResponseDefaultDeviceEnumTypeTransformer() => _instance ??= const AudioSettingsResponseDefaultDeviceEnumTypeTransformer._();
+  factory AudioSettingsResponseDefaultDeviceEnumTypeTransformer() =>
+      _instance ??=
+          const AudioSettingsResponseDefaultDeviceEnumTypeTransformer._();
 
   const AudioSettingsResponseDefaultDeviceEnumTypeTransformer._();
 
@@ -219,11 +242,14 @@ class AudioSettingsResponseDefaultDeviceEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  AudioSettingsResponseDefaultDeviceEnum? decode(dynamic data, {bool allowNull = true}) {
+  AudioSettingsResponseDefaultDeviceEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'speaker': return AudioSettingsResponseDefaultDeviceEnum.speaker;
-        case r'earpiece': return AudioSettingsResponseDefaultDeviceEnum.earpiece;
+        case r'speaker':
+          return AudioSettingsResponseDefaultDeviceEnum.speaker;
+        case r'earpiece':
+          return AudioSettingsResponseDefaultDeviceEnum.earpiece;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -236,5 +262,3 @@ class AudioSettingsResponseDefaultDeviceEnumTypeTransformer {
   /// Singleton [AudioSettingsResponseDefaultDeviceEnumTypeTransformer] instance.
   static AudioSettingsResponseDefaultDeviceEnumTypeTransformer? _instance;
 }
-
-

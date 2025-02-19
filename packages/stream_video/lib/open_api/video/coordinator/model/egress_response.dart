@@ -31,30 +31,33 @@ class EgressResponse {
   List<EgressRTMPResponse> rtmps;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is EgressResponse &&
-    other.broadcasting == broadcasting &&
-    other.hls == hls &&
-    _deepEquality.equals(other.rtmps, rtmps);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EgressResponse &&
+          other.broadcasting == broadcasting &&
+          other.hls == hls &&
+          _deepEquality.equals(other.rtmps, rtmps);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (broadcasting.hashCode) +
-    (hls == null ? 0 : hls!.hashCode) +
-    (rtmps.hashCode);
+      // ignore: unnecessary_parenthesis
+      (broadcasting.hashCode) +
+      (hls == null ? 0 : hls!.hashCode) +
+      (rtmps.hashCode);
 
   @override
-  String toString() => 'EgressResponse[broadcasting=$broadcasting, hls=$hls, rtmps=$rtmps]';
+  String toString() =>
+      'EgressResponse[broadcasting=$broadcasting, hls=$hls, rtmps=$rtmps]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'broadcasting'] = this.broadcasting;
+    json[r'broadcasting'] = this.broadcasting;
     if (this.hls != null) {
       json[r'hls'] = this.hls;
     } else {
       json[r'hls'] = null;
     }
-      json[r'rtmps'] = this.rtmps;
+    json[r'rtmps'] = this.rtmps;
     return json;
   }
 
@@ -70,8 +73,10 @@ class EgressResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EgressResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EgressResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "EgressResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "EgressResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -85,7 +90,10 @@ class EgressResponse {
     return null;
   }
 
-  static List<EgressResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EgressResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <EgressResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -113,13 +121,19 @@ class EgressResponse {
   }
 
   // maps a json object with a list of EgressResponse-objects as value to a dart map
-  static Map<String, List<EgressResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<EgressResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<EgressResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = EgressResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = EgressResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +145,3 @@ class EgressResponse {
     'rtmps',
   };
 }
-

@@ -25,20 +25,23 @@ class TranscriptionSettingsRequest {
   TranscriptionSettingsRequestModeEnum mode;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TranscriptionSettingsRequest &&
-    other.closedCaptionMode == closedCaptionMode &&
-    other.language == language &&
-    other.mode == mode;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TranscriptionSettingsRequest &&
+          other.closedCaptionMode == closedCaptionMode &&
+          other.language == language &&
+          other.mode == mode;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (closedCaptionMode == null ? 0 : closedCaptionMode!.hashCode) +
-    (language == null ? 0 : language!.hashCode) +
-    (mode.hashCode);
+      // ignore: unnecessary_parenthesis
+      (closedCaptionMode == null ? 0 : closedCaptionMode!.hashCode) +
+      (language == null ? 0 : language!.hashCode) +
+      (mode.hashCode);
 
   @override
-  String toString() => 'TranscriptionSettingsRequest[closedCaptionMode=$closedCaptionMode, language=$language, mode=$mode]';
+  String toString() =>
+      'TranscriptionSettingsRequest[closedCaptionMode=$closedCaptionMode, language=$language, mode=$mode]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -52,7 +55,7 @@ class TranscriptionSettingsRequest {
     } else {
       json[r'language'] = null;
     }
-      json[r'mode'] = this.mode;
+    json[r'mode'] = this.mode;
     return json;
   }
 
@@ -68,22 +71,30 @@ class TranscriptionSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "TranscriptionSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "TranscriptionSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "TranscriptionSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "TranscriptionSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return TranscriptionSettingsRequest(
-        closedCaptionMode: TranscriptionSettingsRequestClosedCaptionModeEnum.fromJson(json[r'closed_caption_mode']),
-        language: TranscriptionSettingsRequestLanguageEnum.fromJson(json[r'language']),
+        closedCaptionMode:
+            TranscriptionSettingsRequestClosedCaptionModeEnum.fromJson(
+                json[r'closed_caption_mode']),
+        language: TranscriptionSettingsRequestLanguageEnum.fromJson(
+            json[r'language']),
         mode: TranscriptionSettingsRequestModeEnum.fromJson(json[r'mode'])!,
       );
     }
     return null;
   }
 
-  static List<TranscriptionSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TranscriptionSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TranscriptionSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,13 +122,19 @@ class TranscriptionSettingsRequest {
   }
 
   // maps a json object with a list of TranscriptionSettingsRequest-objects as value to a dart map
-  static Map<String, List<TranscriptionSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TranscriptionSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TranscriptionSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TranscriptionSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TranscriptionSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -128,7 +145,6 @@ class TranscriptionSettingsRequest {
     'mode',
   };
 }
-
 
 class TranscriptionSettingsRequestClosedCaptionModeEnum {
   /// Instantiate a new enum with the provided [value].
@@ -142,9 +158,12 @@ class TranscriptionSettingsRequestClosedCaptionModeEnum {
 
   String toJson() => value;
 
-  static const available = TranscriptionSettingsRequestClosedCaptionModeEnum._(r'available');
-  static const disabled = TranscriptionSettingsRequestClosedCaptionModeEnum._(r'disabled');
-  static const autoOn = TranscriptionSettingsRequestClosedCaptionModeEnum._(r'auto-on');
+  static const available =
+      TranscriptionSettingsRequestClosedCaptionModeEnum._(r'available');
+  static const disabled =
+      TranscriptionSettingsRequestClosedCaptionModeEnum._(r'disabled');
+  static const autoOn =
+      TranscriptionSettingsRequestClosedCaptionModeEnum._(r'auto-on');
 
   /// List of all possible values in this [enum][TranscriptionSettingsRequestClosedCaptionModeEnum].
   static const values = <TranscriptionSettingsRequestClosedCaptionModeEnum>[
@@ -153,13 +172,20 @@ class TranscriptionSettingsRequestClosedCaptionModeEnum {
     autoOn,
   ];
 
-  static TranscriptionSettingsRequestClosedCaptionModeEnum? fromJson(dynamic value) => TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer().decode(value);
+  static TranscriptionSettingsRequestClosedCaptionModeEnum? fromJson(
+          dynamic value) =>
+      TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer()
+          .decode(value);
 
-  static List<TranscriptionSettingsRequestClosedCaptionModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TranscriptionSettingsRequestClosedCaptionModeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TranscriptionSettingsRequestClosedCaptionModeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = TranscriptionSettingsRequestClosedCaptionModeEnum.fromJson(row);
+        final value =
+            TranscriptionSettingsRequestClosedCaptionModeEnum.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -172,11 +198,15 @@ class TranscriptionSettingsRequestClosedCaptionModeEnum {
 /// Transformation class that can [encode] an instance of [TranscriptionSettingsRequestClosedCaptionModeEnum] to String,
 /// and [decode] dynamic data back to [TranscriptionSettingsRequestClosedCaptionModeEnum].
 class TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer {
-  factory TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer() => _instance ??= const TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer._();
+  factory TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer() =>
+      _instance ??=
+          const TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer
+              ._();
 
   const TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer._();
 
-  String encode(TranscriptionSettingsRequestClosedCaptionModeEnum data) => data.value;
+  String encode(TranscriptionSettingsRequestClosedCaptionModeEnum data) =>
+      data.value;
 
   /// Decodes a [dynamic value][data] to a TranscriptionSettingsRequestClosedCaptionModeEnum.
   ///
@@ -186,12 +216,16 @@ class TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  TranscriptionSettingsRequestClosedCaptionModeEnum? decode(dynamic data, {bool allowNull = true}) {
+  TranscriptionSettingsRequestClosedCaptionModeEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'available': return TranscriptionSettingsRequestClosedCaptionModeEnum.available;
-        case r'disabled': return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
-        case r'auto-on': return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
+        case r'available':
+          return TranscriptionSettingsRequestClosedCaptionModeEnum.available;
+        case r'disabled':
+          return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
+        case r'auto-on':
+          return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -202,10 +236,9 @@ class TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer {
   }
 
   /// Singleton [TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer] instance.
-  static TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer? _instance;
+  static TranscriptionSettingsRequestClosedCaptionModeEnumTypeTransformer?
+      _instance;
 }
-
-
 
 class TranscriptionSettingsRequestLanguageEnum {
   /// Instantiate a new enum with the provided [value].
@@ -290,9 +323,13 @@ class TranscriptionSettingsRequestLanguageEnum {
     uk,
   ];
 
-  static TranscriptionSettingsRequestLanguageEnum? fromJson(dynamic value) => TranscriptionSettingsRequestLanguageEnumTypeTransformer().decode(value);
+  static TranscriptionSettingsRequestLanguageEnum? fromJson(dynamic value) =>
+      TranscriptionSettingsRequestLanguageEnumTypeTransformer().decode(value);
 
-  static List<TranscriptionSettingsRequestLanguageEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TranscriptionSettingsRequestLanguageEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TranscriptionSettingsRequestLanguageEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -309,7 +346,9 @@ class TranscriptionSettingsRequestLanguageEnum {
 /// Transformation class that can [encode] an instance of [TranscriptionSettingsRequestLanguageEnum] to String,
 /// and [decode] dynamic data back to [TranscriptionSettingsRequestLanguageEnum].
 class TranscriptionSettingsRequestLanguageEnumTypeTransformer {
-  factory TranscriptionSettingsRequestLanguageEnumTypeTransformer() => _instance ??= const TranscriptionSettingsRequestLanguageEnumTypeTransformer._();
+  factory TranscriptionSettingsRequestLanguageEnumTypeTransformer() =>
+      _instance ??=
+          const TranscriptionSettingsRequestLanguageEnumTypeTransformer._();
 
   const TranscriptionSettingsRequestLanguageEnumTypeTransformer._();
 
@@ -323,42 +362,76 @@ class TranscriptionSettingsRequestLanguageEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  TranscriptionSettingsRequestLanguageEnum? decode(dynamic data, {bool allowNull = true}) {
+  TranscriptionSettingsRequestLanguageEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'auto': return TranscriptionSettingsRequestLanguageEnum.auto;
-        case r'en': return TranscriptionSettingsRequestLanguageEnum.en;
-        case r'fr': return TranscriptionSettingsRequestLanguageEnum.fr;
-        case r'es': return TranscriptionSettingsRequestLanguageEnum.es;
-        case r'de': return TranscriptionSettingsRequestLanguageEnum.de;
-        case r'it': return TranscriptionSettingsRequestLanguageEnum.it;
-        case r'nl': return TranscriptionSettingsRequestLanguageEnum.nl;
-        case r'pt': return TranscriptionSettingsRequestLanguageEnum.pt;
-        case r'pl': return TranscriptionSettingsRequestLanguageEnum.pl;
-        case r'ca': return TranscriptionSettingsRequestLanguageEnum.ca;
-        case r'cs': return TranscriptionSettingsRequestLanguageEnum.cs;
-        case r'da': return TranscriptionSettingsRequestLanguageEnum.da;
-        case r'el': return TranscriptionSettingsRequestLanguageEnum.el;
-        case r'fi': return TranscriptionSettingsRequestLanguageEnum.fi;
-        case r'id': return TranscriptionSettingsRequestLanguageEnum.id;
-        case r'ja': return TranscriptionSettingsRequestLanguageEnum.ja;
-        case r'ru': return TranscriptionSettingsRequestLanguageEnum.ru;
-        case r'sv': return TranscriptionSettingsRequestLanguageEnum.sv;
-        case r'ta': return TranscriptionSettingsRequestLanguageEnum.ta;
-        case r'th': return TranscriptionSettingsRequestLanguageEnum.th;
-        case r'tr': return TranscriptionSettingsRequestLanguageEnum.tr;
-        case r'hu': return TranscriptionSettingsRequestLanguageEnum.hu;
-        case r'ro': return TranscriptionSettingsRequestLanguageEnum.ro;
-        case r'zh': return TranscriptionSettingsRequestLanguageEnum.zh;
-        case r'ar': return TranscriptionSettingsRequestLanguageEnum.ar;
-        case r'tl': return TranscriptionSettingsRequestLanguageEnum.tl;
-        case r'he': return TranscriptionSettingsRequestLanguageEnum.he;
-        case r'hi': return TranscriptionSettingsRequestLanguageEnum.hi;
-        case r'hr': return TranscriptionSettingsRequestLanguageEnum.hr;
-        case r'ko': return TranscriptionSettingsRequestLanguageEnum.ko;
-        case r'ms': return TranscriptionSettingsRequestLanguageEnum.ms;
-        case r'no': return TranscriptionSettingsRequestLanguageEnum.no;
-        case r'uk': return TranscriptionSettingsRequestLanguageEnum.uk;
+        case r'auto':
+          return TranscriptionSettingsRequestLanguageEnum.auto;
+        case r'en':
+          return TranscriptionSettingsRequestLanguageEnum.en;
+        case r'fr':
+          return TranscriptionSettingsRequestLanguageEnum.fr;
+        case r'es':
+          return TranscriptionSettingsRequestLanguageEnum.es;
+        case r'de':
+          return TranscriptionSettingsRequestLanguageEnum.de;
+        case r'it':
+          return TranscriptionSettingsRequestLanguageEnum.it;
+        case r'nl':
+          return TranscriptionSettingsRequestLanguageEnum.nl;
+        case r'pt':
+          return TranscriptionSettingsRequestLanguageEnum.pt;
+        case r'pl':
+          return TranscriptionSettingsRequestLanguageEnum.pl;
+        case r'ca':
+          return TranscriptionSettingsRequestLanguageEnum.ca;
+        case r'cs':
+          return TranscriptionSettingsRequestLanguageEnum.cs;
+        case r'da':
+          return TranscriptionSettingsRequestLanguageEnum.da;
+        case r'el':
+          return TranscriptionSettingsRequestLanguageEnum.el;
+        case r'fi':
+          return TranscriptionSettingsRequestLanguageEnum.fi;
+        case r'id':
+          return TranscriptionSettingsRequestLanguageEnum.id;
+        case r'ja':
+          return TranscriptionSettingsRequestLanguageEnum.ja;
+        case r'ru':
+          return TranscriptionSettingsRequestLanguageEnum.ru;
+        case r'sv':
+          return TranscriptionSettingsRequestLanguageEnum.sv;
+        case r'ta':
+          return TranscriptionSettingsRequestLanguageEnum.ta;
+        case r'th':
+          return TranscriptionSettingsRequestLanguageEnum.th;
+        case r'tr':
+          return TranscriptionSettingsRequestLanguageEnum.tr;
+        case r'hu':
+          return TranscriptionSettingsRequestLanguageEnum.hu;
+        case r'ro':
+          return TranscriptionSettingsRequestLanguageEnum.ro;
+        case r'zh':
+          return TranscriptionSettingsRequestLanguageEnum.zh;
+        case r'ar':
+          return TranscriptionSettingsRequestLanguageEnum.ar;
+        case r'tl':
+          return TranscriptionSettingsRequestLanguageEnum.tl;
+        case r'he':
+          return TranscriptionSettingsRequestLanguageEnum.he;
+        case r'hi':
+          return TranscriptionSettingsRequestLanguageEnum.hi;
+        case r'hr':
+          return TranscriptionSettingsRequestLanguageEnum.hr;
+        case r'ko':
+          return TranscriptionSettingsRequestLanguageEnum.ko;
+        case r'ms':
+          return TranscriptionSettingsRequestLanguageEnum.ms;
+        case r'no':
+          return TranscriptionSettingsRequestLanguageEnum.no;
+        case r'uk':
+          return TranscriptionSettingsRequestLanguageEnum.uk;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -371,8 +444,6 @@ class TranscriptionSettingsRequestLanguageEnumTypeTransformer {
   /// Singleton [TranscriptionSettingsRequestLanguageEnumTypeTransformer] instance.
   static TranscriptionSettingsRequestLanguageEnumTypeTransformer? _instance;
 }
-
-
 
 class TranscriptionSettingsRequestModeEnum {
   /// Instantiate a new enum with the provided [value].
@@ -397,9 +468,13 @@ class TranscriptionSettingsRequestModeEnum {
     autoOn,
   ];
 
-  static TranscriptionSettingsRequestModeEnum? fromJson(dynamic value) => TranscriptionSettingsRequestModeEnumTypeTransformer().decode(value);
+  static TranscriptionSettingsRequestModeEnum? fromJson(dynamic value) =>
+      TranscriptionSettingsRequestModeEnumTypeTransformer().decode(value);
 
-  static List<TranscriptionSettingsRequestModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TranscriptionSettingsRequestModeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TranscriptionSettingsRequestModeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -416,7 +491,8 @@ class TranscriptionSettingsRequestModeEnum {
 /// Transformation class that can [encode] an instance of [TranscriptionSettingsRequestModeEnum] to String,
 /// and [decode] dynamic data back to [TranscriptionSettingsRequestModeEnum].
 class TranscriptionSettingsRequestModeEnumTypeTransformer {
-  factory TranscriptionSettingsRequestModeEnumTypeTransformer() => _instance ??= const TranscriptionSettingsRequestModeEnumTypeTransformer._();
+  factory TranscriptionSettingsRequestModeEnumTypeTransformer() => _instance ??=
+      const TranscriptionSettingsRequestModeEnumTypeTransformer._();
 
   const TranscriptionSettingsRequestModeEnumTypeTransformer._();
 
@@ -430,12 +506,16 @@ class TranscriptionSettingsRequestModeEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  TranscriptionSettingsRequestModeEnum? decode(dynamic data, {bool allowNull = true}) {
+  TranscriptionSettingsRequestModeEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'available': return TranscriptionSettingsRequestModeEnum.available;
-        case r'disabled': return TranscriptionSettingsRequestModeEnum.disabled;
-        case r'auto-on': return TranscriptionSettingsRequestModeEnum.autoOn;
+        case r'available':
+          return TranscriptionSettingsRequestModeEnum.available;
+        case r'disabled':
+          return TranscriptionSettingsRequestModeEnum.disabled;
+        case r'auto-on':
+          return TranscriptionSettingsRequestModeEnum.autoOn;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -448,5 +528,3 @@ class TranscriptionSettingsRequestModeEnumTypeTransformer {
   /// Singleton [TranscriptionSettingsRequestModeEnumTypeTransformer] instance.
   static TranscriptionSettingsRequestModeEnumTypeTransformer? _instance;
 }
-
-

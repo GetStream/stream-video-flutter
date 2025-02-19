@@ -22,23 +22,25 @@ class UserFeedbackReport {
   int unreportedCount;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserFeedbackReport &&
-    _deepEquality.equals(other.countByRating, countByRating) &&
-    other.unreportedCount == unreportedCount;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserFeedbackReport &&
+          _deepEquality.equals(other.countByRating, countByRating) &&
+          other.unreportedCount == unreportedCount;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (countByRating.hashCode) +
-    (unreportedCount.hashCode);
+      // ignore: unnecessary_parenthesis
+      (countByRating.hashCode) + (unreportedCount.hashCode);
 
   @override
-  String toString() => 'UserFeedbackReport[countByRating=$countByRating, unreportedCount=$unreportedCount]';
+  String toString() =>
+      'UserFeedbackReport[countByRating=$countByRating, unreportedCount=$unreportedCount]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'count_by_rating'] = this.countByRating;
-      json[r'unreported_count'] = this.unreportedCount;
+    json[r'count_by_rating'] = this.countByRating;
+    json[r'unreported_count'] = this.unreportedCount;
     return json;
   }
 
@@ -54,8 +56,10 @@ class UserFeedbackReport {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserFeedbackReport[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserFeedbackReport[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UserFeedbackReport[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UserFeedbackReport[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +72,10 @@ class UserFeedbackReport {
     return null;
   }
 
-  static List<UserFeedbackReport> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserFeedbackReport> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserFeedbackReport>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +103,19 @@ class UserFeedbackReport {
   }
 
   // maps a json object with a list of UserFeedbackReport-objects as value to a dart map
-  static Map<String, List<UserFeedbackReport>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserFeedbackReport>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserFeedbackReport>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserFeedbackReport.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserFeedbackReport.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +127,3 @@ class UserFeedbackReport {
     'unreported_count',
   };
 }
-

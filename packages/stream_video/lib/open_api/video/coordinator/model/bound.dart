@@ -22,23 +22,22 @@ class Bound {
   double value;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Bound &&
-    other.inclusive == inclusive &&
-    other.value == value;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Bound && other.inclusive == inclusive && other.value == value;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (inclusive.hashCode) +
-    (value.hashCode);
+      // ignore: unnecessary_parenthesis
+      (inclusive.hashCode) + (value.hashCode);
 
   @override
   String toString() => 'Bound[inclusive=$inclusive, value=$value]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'inclusive'] = this.inclusive;
-      json[r'value'] = this.value;
+    json[r'inclusive'] = this.inclusive;
+    json[r'value'] = this.value;
     return json;
   }
 
@@ -54,8 +53,10 @@ class Bound {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Bound[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Bound[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "Bound[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "Bound[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +69,10 @@ class Bound {
     return null;
   }
 
-  static List<Bound> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Bound> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Bound>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +100,19 @@ class Bound {
   }
 
   // maps a json object with a list of Bound-objects as value to a dart map
-  static Map<String, List<Bound>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Bound>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Bound>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Bound.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Bound.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +124,3 @@ class Bound {
     'value',
   };
 }
-

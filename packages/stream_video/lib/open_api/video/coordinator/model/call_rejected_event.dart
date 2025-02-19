@@ -41,39 +41,42 @@ class CallRejectedEvent {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRejectedEvent &&
-    other.call == call &&
-    other.callCid == callCid &&
-    other.createdAt == createdAt &&
-    other.reason == reason &&
-    other.type == type &&
-    other.user == user;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallRejectedEvent &&
+          other.call == call &&
+          other.callCid == callCid &&
+          other.createdAt == createdAt &&
+          other.reason == reason &&
+          other.type == type &&
+          other.user == user;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (callCid.hashCode) +
-    (createdAt.hashCode) +
-    (reason == null ? 0 : reason!.hashCode) +
-    (type.hashCode) +
-    (user.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) +
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (reason == null ? 0 : reason!.hashCode) +
+      (type.hashCode) +
+      (user.hashCode);
 
   @override
-  String toString() => 'CallRejectedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, reason=$reason, type=$type, user=$user]';
+  String toString() =>
+      'CallRejectedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, reason=$reason, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'call_cid'] = this.callCid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'call'] = this.call;
+    json[r'call_cid'] = this.callCid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     if (this.reason != null) {
       json[r'reason'] = this.reason;
     } else {
       json[r'reason'] = null;
     }
-      json[r'type'] = this.type;
-      json[r'user'] = this.user;
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -89,8 +92,10 @@ class CallRejectedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRejectedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRejectedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallRejectedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallRejectedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -107,7 +112,10 @@ class CallRejectedEvent {
     return null;
   }
 
-  static List<CallRejectedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallRejectedEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallRejectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -135,13 +143,19 @@ class CallRejectedEvent {
   }
 
   // maps a json object with a list of CallRejectedEvent-objects as value to a dart map
-  static Map<String, List<CallRejectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallRejectedEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallRejectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallRejectedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallRejectedEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -156,4 +170,3 @@ class CallRejectedEvent {
     'user',
   };
 }
-

@@ -19,20 +19,22 @@ class RequestPermissionRequest {
   List<String> permissions;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RequestPermissionRequest &&
-    _deepEquality.equals(other.permissions, permissions);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RequestPermissionRequest &&
+          _deepEquality.equals(other.permissions, permissions);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (permissions.hashCode);
+      // ignore: unnecessary_parenthesis
+      (permissions.hashCode);
 
   @override
   String toString() => 'RequestPermissionRequest[permissions=$permissions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'permissions'] = this.permissions;
+    json[r'permissions'] = this.permissions;
     return json;
   }
 
@@ -48,22 +50,29 @@ class RequestPermissionRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RequestPermissionRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RequestPermissionRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RequestPermissionRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RequestPermissionRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return RequestPermissionRequest(
         permissions: json[r'permissions'] is Iterable
-            ? (json[r'permissions'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'permissions'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
       );
     }
     return null;
   }
 
-  static List<RequestPermissionRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RequestPermissionRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RequestPermissionRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -91,13 +100,19 @@ class RequestPermissionRequest {
   }
 
   // maps a json object with a list of RequestPermissionRequest-objects as value to a dart map
-  static Map<String, List<RequestPermissionRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RequestPermissionRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RequestPermissionRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RequestPermissionRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RequestPermissionRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -108,4 +123,3 @@ class RequestPermissionRequest {
     'permissions',
   };
 }
-

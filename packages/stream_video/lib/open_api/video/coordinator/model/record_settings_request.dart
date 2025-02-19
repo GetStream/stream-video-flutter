@@ -31,20 +31,23 @@ class RecordSettingsRequest {
   RecordSettingsRequestQualityEnum? quality;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RecordSettingsRequest &&
-    other.audioOnly == audioOnly &&
-    other.mode == mode &&
-    other.quality == quality;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RecordSettingsRequest &&
+          other.audioOnly == audioOnly &&
+          other.mode == mode &&
+          other.quality == quality;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (audioOnly == null ? 0 : audioOnly!.hashCode) +
-    (mode.hashCode) +
-    (quality == null ? 0 : quality!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (audioOnly == null ? 0 : audioOnly!.hashCode) +
+      (mode.hashCode) +
+      (quality == null ? 0 : quality!.hashCode);
 
   @override
-  String toString() => 'RecordSettingsRequest[audioOnly=$audioOnly, mode=$mode, quality=$quality]';
+  String toString() =>
+      'RecordSettingsRequest[audioOnly=$audioOnly, mode=$mode, quality=$quality]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -53,7 +56,7 @@ class RecordSettingsRequest {
     } else {
       json[r'audio_only'] = null;
     }
-      json[r'mode'] = this.mode;
+    json[r'mode'] = this.mode;
     if (this.quality != null) {
       json[r'quality'] = this.quality;
     } else {
@@ -74,8 +77,10 @@ class RecordSettingsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RecordSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RecordSettingsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "RecordSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "RecordSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -89,7 +94,10 @@ class RecordSettingsRequest {
     return null;
   }
 
-  static List<RecordSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RecordSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -117,13 +125,19 @@ class RecordSettingsRequest {
   }
 
   // maps a json object with a list of RecordSettingsRequest-objects as value to a dart map
-  static Map<String, List<RecordSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RecordSettingsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RecordSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RecordSettingsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RecordSettingsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -134,7 +148,6 @@ class RecordSettingsRequest {
     'mode',
   };
 }
-
 
 class RecordSettingsRequestModeEnum {
   /// Instantiate a new enum with the provided [value].
@@ -159,9 +172,13 @@ class RecordSettingsRequestModeEnum {
     autoOn,
   ];
 
-  static RecordSettingsRequestModeEnum? fromJson(dynamic value) => RecordSettingsRequestModeEnumTypeTransformer().decode(value);
+  static RecordSettingsRequestModeEnum? fromJson(dynamic value) =>
+      RecordSettingsRequestModeEnumTypeTransformer().decode(value);
 
-  static List<RecordSettingsRequestModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsRequestModeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RecordSettingsRequestModeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -178,7 +195,8 @@ class RecordSettingsRequestModeEnum {
 /// Transformation class that can [encode] an instance of [RecordSettingsRequestModeEnum] to String,
 /// and [decode] dynamic data back to [RecordSettingsRequestModeEnum].
 class RecordSettingsRequestModeEnumTypeTransformer {
-  factory RecordSettingsRequestModeEnumTypeTransformer() => _instance ??= const RecordSettingsRequestModeEnumTypeTransformer._();
+  factory RecordSettingsRequestModeEnumTypeTransformer() =>
+      _instance ??= const RecordSettingsRequestModeEnumTypeTransformer._();
 
   const RecordSettingsRequestModeEnumTypeTransformer._();
 
@@ -195,9 +213,12 @@ class RecordSettingsRequestModeEnumTypeTransformer {
   RecordSettingsRequestModeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'available': return RecordSettingsRequestModeEnum.available;
-        case r'disabled': return RecordSettingsRequestModeEnum.disabled;
-        case r'auto-on': return RecordSettingsRequestModeEnum.autoOn;
+        case r'available':
+          return RecordSettingsRequestModeEnum.available;
+        case r'disabled':
+          return RecordSettingsRequestModeEnum.disabled;
+        case r'auto-on':
+          return RecordSettingsRequestModeEnum.autoOn;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -210,8 +231,6 @@ class RecordSettingsRequestModeEnumTypeTransformer {
   /// Singleton [RecordSettingsRequestModeEnumTypeTransformer] instance.
   static RecordSettingsRequestModeEnumTypeTransformer? _instance;
 }
-
-
 
 class RecordSettingsRequestQualityEnum {
   /// Instantiate a new enum with the provided [value].
@@ -230,11 +249,16 @@ class RecordSettingsRequestQualityEnum {
   static const n720p = RecordSettingsRequestQualityEnum._(r'720p');
   static const n1080p = RecordSettingsRequestQualityEnum._(r'1080p');
   static const n1440p = RecordSettingsRequestQualityEnum._(r'1440p');
-  static const portrait360x640 = RecordSettingsRequestQualityEnum._(r'portrait-360x640');
-  static const portrait480x854 = RecordSettingsRequestQualityEnum._(r'portrait-480x854');
-  static const portrait720x1280 = RecordSettingsRequestQualityEnum._(r'portrait-720x1280');
-  static const portrait1080x1920 = RecordSettingsRequestQualityEnum._(r'portrait-1080x1920');
-  static const portrait1440x2560 = RecordSettingsRequestQualityEnum._(r'portrait-1440x2560');
+  static const portrait360x640 =
+      RecordSettingsRequestQualityEnum._(r'portrait-360x640');
+  static const portrait480x854 =
+      RecordSettingsRequestQualityEnum._(r'portrait-480x854');
+  static const portrait720x1280 =
+      RecordSettingsRequestQualityEnum._(r'portrait-720x1280');
+  static const portrait1080x1920 =
+      RecordSettingsRequestQualityEnum._(r'portrait-1080x1920');
+  static const portrait1440x2560 =
+      RecordSettingsRequestQualityEnum._(r'portrait-1440x2560');
 
   /// List of all possible values in this [enum][RecordSettingsRequestQualityEnum].
   static const values = <RecordSettingsRequestQualityEnum>[
@@ -250,9 +274,13 @@ class RecordSettingsRequestQualityEnum {
     portrait1440x2560,
   ];
 
-  static RecordSettingsRequestQualityEnum? fromJson(dynamic value) => RecordSettingsRequestQualityEnumTypeTransformer().decode(value);
+  static RecordSettingsRequestQualityEnum? fromJson(dynamic value) =>
+      RecordSettingsRequestQualityEnumTypeTransformer().decode(value);
 
-  static List<RecordSettingsRequestQualityEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsRequestQualityEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RecordSettingsRequestQualityEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -269,7 +297,8 @@ class RecordSettingsRequestQualityEnum {
 /// Transformation class that can [encode] an instance of [RecordSettingsRequestQualityEnum] to String,
 /// and [decode] dynamic data back to [RecordSettingsRequestQualityEnum].
 class RecordSettingsRequestQualityEnumTypeTransformer {
-  factory RecordSettingsRequestQualityEnumTypeTransformer() => _instance ??= const RecordSettingsRequestQualityEnumTypeTransformer._();
+  factory RecordSettingsRequestQualityEnumTypeTransformer() =>
+      _instance ??= const RecordSettingsRequestQualityEnumTypeTransformer._();
 
   const RecordSettingsRequestQualityEnumTypeTransformer._();
 
@@ -283,19 +312,30 @@ class RecordSettingsRequestQualityEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  RecordSettingsRequestQualityEnum? decode(dynamic data, {bool allowNull = true}) {
+  RecordSettingsRequestQualityEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'360p': return RecordSettingsRequestQualityEnum.n360p;
-        case r'480p': return RecordSettingsRequestQualityEnum.n480p;
-        case r'720p': return RecordSettingsRequestQualityEnum.n720p;
-        case r'1080p': return RecordSettingsRequestQualityEnum.n1080p;
-        case r'1440p': return RecordSettingsRequestQualityEnum.n1440p;
-        case r'portrait-360x640': return RecordSettingsRequestQualityEnum.portrait360x640;
-        case r'portrait-480x854': return RecordSettingsRequestQualityEnum.portrait480x854;
-        case r'portrait-720x1280': return RecordSettingsRequestQualityEnum.portrait720x1280;
-        case r'portrait-1080x1920': return RecordSettingsRequestQualityEnum.portrait1080x1920;
-        case r'portrait-1440x2560': return RecordSettingsRequestQualityEnum.portrait1440x2560;
+        case r'360p':
+          return RecordSettingsRequestQualityEnum.n360p;
+        case r'480p':
+          return RecordSettingsRequestQualityEnum.n480p;
+        case r'720p':
+          return RecordSettingsRequestQualityEnum.n720p;
+        case r'1080p':
+          return RecordSettingsRequestQualityEnum.n1080p;
+        case r'1440p':
+          return RecordSettingsRequestQualityEnum.n1440p;
+        case r'portrait-360x640':
+          return RecordSettingsRequestQualityEnum.portrait360x640;
+        case r'portrait-480x854':
+          return RecordSettingsRequestQualityEnum.portrait480x854;
+        case r'portrait-720x1280':
+          return RecordSettingsRequestQualityEnum.portrait720x1280;
+        case r'portrait-1080x1920':
+          return RecordSettingsRequestQualityEnum.portrait1080x1920;
+        case r'portrait-1440x2560':
+          return RecordSettingsRequestQualityEnum.portrait1440x2560;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -308,5 +348,3 @@ class RecordSettingsRequestQualityEnumTypeTransformer {
   /// Singleton [RecordSettingsRequestQualityEnumTypeTransformer] instance.
   static RecordSettingsRequestQualityEnumTypeTransformer? _instance;
 }
-
-

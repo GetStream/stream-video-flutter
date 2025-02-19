@@ -32,30 +32,33 @@ class MemberRequest {
   String userId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MemberRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.role == role &&
-    other.userId == userId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemberRequest &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.role == role &&
+          other.userId == userId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (role == null ? 0 : role!.hashCode) +
-    (userId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (role == null ? 0 : role!.hashCode) +
+      (userId.hashCode);
 
   @override
-  String toString() => 'MemberRequest[custom=$custom, role=$role, userId=$userId]';
+  String toString() =>
+      'MemberRequest[custom=$custom, role=$role, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
+    json[r'custom'] = this.custom;
     if (this.role != null) {
       json[r'role'] = this.role;
     } else {
       json[r'role'] = null;
     }
-      json[r'user_id'] = this.userId;
+    json[r'user_id'] = this.userId;
     return json;
   }
 
@@ -71,8 +74,10 @@ class MemberRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MemberRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MemberRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "MemberRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "MemberRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -86,7 +91,10 @@ class MemberRequest {
     return null;
   }
 
-  static List<MemberRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MemberRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MemberRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -114,13 +122,19 @@ class MemberRequest {
   }
 
   // maps a json object with a list of MemberRequest-objects as value to a dart map
-  static Map<String, List<MemberRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MemberRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MemberRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MemberRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MemberRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -131,4 +145,3 @@ class MemberRequest {
     'user_id',
   };
 }
-

@@ -42,39 +42,42 @@ class CollectUserFeedbackRequest {
   String userSessionId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CollectUserFeedbackRequest &&
-    _deepEquality.equals(other.custom, custom) &&
-    other.rating == rating &&
-    other.reason == reason &&
-    other.sdk == sdk &&
-    other.sdkVersion == sdkVersion &&
-    other.userSessionId == userSessionId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CollectUserFeedbackRequest &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.rating == rating &&
+          other.reason == reason &&
+          other.sdk == sdk &&
+          other.sdkVersion == sdkVersion &&
+          other.userSessionId == userSessionId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (rating.hashCode) +
-    (reason == null ? 0 : reason!.hashCode) +
-    (sdk.hashCode) +
-    (sdkVersion.hashCode) +
-    (userSessionId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (custom.hashCode) +
+      (rating.hashCode) +
+      (reason == null ? 0 : reason!.hashCode) +
+      (sdk.hashCode) +
+      (sdkVersion.hashCode) +
+      (userSessionId.hashCode);
 
   @override
-  String toString() => 'CollectUserFeedbackRequest[custom=$custom, rating=$rating, reason=$reason, sdk=$sdk, sdkVersion=$sdkVersion, userSessionId=$userSessionId]';
+  String toString() =>
+      'CollectUserFeedbackRequest[custom=$custom, rating=$rating, reason=$reason, sdk=$sdk, sdkVersion=$sdkVersion, userSessionId=$userSessionId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
-      json[r'rating'] = this.rating;
+    json[r'custom'] = this.custom;
+    json[r'rating'] = this.rating;
     if (this.reason != null) {
       json[r'reason'] = this.reason;
     } else {
       json[r'reason'] = null;
     }
-      json[r'sdk'] = this.sdk;
-      json[r'sdk_version'] = this.sdkVersion;
-      json[r'user_session_id'] = this.userSessionId;
+    json[r'sdk'] = this.sdk;
+    json[r'sdk_version'] = this.sdkVersion;
+    json[r'user_session_id'] = this.userSessionId;
     return json;
   }
 
@@ -90,8 +93,10 @@ class CollectUserFeedbackRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CollectUserFeedbackRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CollectUserFeedbackRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CollectUserFeedbackRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CollectUserFeedbackRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -108,7 +113,10 @@ class CollectUserFeedbackRequest {
     return null;
   }
 
-  static List<CollectUserFeedbackRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CollectUserFeedbackRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CollectUserFeedbackRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -136,13 +144,19 @@ class CollectUserFeedbackRequest {
   }
 
   // maps a json object with a list of CollectUserFeedbackRequest-objects as value to a dart map
-  static Map<String, List<CollectUserFeedbackRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CollectUserFeedbackRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CollectUserFeedbackRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CollectUserFeedbackRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CollectUserFeedbackRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -156,4 +170,3 @@ class CollectUserFeedbackRequest {
     'user_session_id',
   };
 }
-

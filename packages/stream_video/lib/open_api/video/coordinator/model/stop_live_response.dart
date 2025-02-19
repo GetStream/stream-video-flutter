@@ -22,23 +22,24 @@ class StopLiveResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is StopLiveResponse &&
-    other.call == call &&
-    other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StopLiveResponse &&
+          other.call == call &&
+          other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (call.hashCode) + (duration.hashCode);
 
   @override
   String toString() => 'StopLiveResponse[call=$call, duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'duration'] = this.duration;
+    json[r'call'] = this.call;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -54,8 +55,10 @@ class StopLiveResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "StopLiveResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "StopLiveResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "StopLiveResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "StopLiveResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -68,7 +71,10 @@ class StopLiveResponse {
     return null;
   }
 
-  static List<StopLiveResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StopLiveResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <StopLiveResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +102,19 @@ class StopLiveResponse {
   }
 
   // maps a json object with a list of StopLiveResponse-objects as value to a dart map
-  static Map<String, List<StopLiveResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<StopLiveResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<StopLiveResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StopLiveResponse.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StopLiveResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +126,3 @@ class StopLiveResponse {
     'duration',
   };
 }
-

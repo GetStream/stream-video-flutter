@@ -19,20 +19,21 @@ class CallTimeline {
   List<CallEvent> events;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallTimeline &&
-    _deepEquality.equals(other.events, events);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallTimeline && _deepEquality.equals(other.events, events);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (events.hashCode);
+      // ignore: unnecessary_parenthesis
+      (events.hashCode);
 
   @override
   String toString() => 'CallTimeline[events=$events]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'events'] = this.events;
+    json[r'events'] = this.events;
     return json;
   }
 
@@ -48,8 +49,10 @@ class CallTimeline {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallTimeline[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallTimeline[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallTimeline[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallTimeline[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +64,10 @@ class CallTimeline {
     return null;
   }
 
-  static List<CallTimeline> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallTimeline> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallTimeline>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +95,19 @@ class CallTimeline {
   }
 
   // maps a json object with a list of CallTimeline-objects as value to a dart map
-  static Map<String, List<CallTimeline>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallTimeline>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallTimeline>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallTimeline.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallTimeline.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +118,3 @@ class CallTimeline {
     'events',
   };
 }
-

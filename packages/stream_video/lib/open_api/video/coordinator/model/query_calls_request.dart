@@ -61,30 +61,33 @@ class QueryCallsRequest {
   bool? watch;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is QueryCallsRequest &&
-    _deepEquality.equals(other.filterConditions, filterConditions) &&
-    other.limit == limit &&
-    other.next == next &&
-    other.prev == prev &&
-    _deepEquality.equals(other.sort, sort) &&
-    other.watch == watch;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is QueryCallsRequest &&
+          _deepEquality.equals(other.filterConditions, filterConditions) &&
+          other.limit == limit &&
+          other.next == next &&
+          other.prev == prev &&
+          _deepEquality.equals(other.sort, sort) &&
+          other.watch == watch;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (filterConditions.hashCode) +
-    (limit == null ? 0 : limit!.hashCode) +
-    (next == null ? 0 : next!.hashCode) +
-    (prev == null ? 0 : prev!.hashCode) +
-    (sort.hashCode) +
-    (watch == null ? 0 : watch!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (filterConditions.hashCode) +
+      (limit == null ? 0 : limit!.hashCode) +
+      (next == null ? 0 : next!.hashCode) +
+      (prev == null ? 0 : prev!.hashCode) +
+      (sort.hashCode) +
+      (watch == null ? 0 : watch!.hashCode);
 
   @override
-  String toString() => 'QueryCallsRequest[filterConditions=$filterConditions, limit=$limit, next=$next, prev=$prev, sort=$sort, watch=$watch]';
+  String toString() =>
+      'QueryCallsRequest[filterConditions=$filterConditions, limit=$limit, next=$next, prev=$prev, sort=$sort, watch=$watch]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'filter_conditions'] = this.filterConditions;
+    json[r'filter_conditions'] = this.filterConditions;
     if (this.limit != null) {
       json[r'limit'] = this.limit;
     } else {
@@ -100,7 +103,7 @@ class QueryCallsRequest {
     } else {
       json[r'prev'] = null;
     }
-      json[r'sort'] = this.sort;
+    json[r'sort'] = this.sort;
     if (this.watch != null) {
       json[r'watch'] = this.watch;
     } else {
@@ -121,14 +124,18 @@ class QueryCallsRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "QueryCallsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "QueryCallsRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "QueryCallsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "QueryCallsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return QueryCallsRequest(
-        filterConditions: mapCastOfType<String, Object>(json, r'filter_conditions') ?? const {},
+        filterConditions:
+            mapCastOfType<String, Object>(json, r'filter_conditions') ??
+                const {},
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
@@ -139,7 +146,10 @@ class QueryCallsRequest {
     return null;
   }
 
-  static List<QueryCallsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryCallsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <QueryCallsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -167,20 +177,24 @@ class QueryCallsRequest {
   }
 
   // maps a json object with a list of QueryCallsRequest-objects as value to a dart map
-  static Map<String, List<QueryCallsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<QueryCallsRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<QueryCallsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = QueryCallsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = QueryCallsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

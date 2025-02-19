@@ -24,23 +24,25 @@ class UpdateCallMembersRequest {
   List<MemberRequest> updateMembers;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UpdateCallMembersRequest &&
-    _deepEquality.equals(other.removeMembers, removeMembers) &&
-    _deepEquality.equals(other.updateMembers, updateMembers);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UpdateCallMembersRequest &&
+          _deepEquality.equals(other.removeMembers, removeMembers) &&
+          _deepEquality.equals(other.updateMembers, updateMembers);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (removeMembers.hashCode) +
-    (updateMembers.hashCode);
+      // ignore: unnecessary_parenthesis
+      (removeMembers.hashCode) + (updateMembers.hashCode);
 
   @override
-  String toString() => 'UpdateCallMembersRequest[removeMembers=$removeMembers, updateMembers=$updateMembers]';
+  String toString() =>
+      'UpdateCallMembersRequest[removeMembers=$removeMembers, updateMembers=$updateMembers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'remove_members'] = this.removeMembers;
-      json[r'update_members'] = this.updateMembers;
+    json[r'remove_members'] = this.removeMembers;
+    json[r'update_members'] = this.updateMembers;
     return json;
   }
 
@@ -56,15 +58,19 @@ class UpdateCallMembersRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UpdateCallMembersRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UpdateCallMembersRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "UpdateCallMembersRequest[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "UpdateCallMembersRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return UpdateCallMembersRequest(
         removeMembers: json[r'remove_members'] is Iterable
-            ? (json[r'remove_members'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'remove_members'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         updateMembers: MemberRequest.listFromJson(json[r'update_members']),
       );
@@ -72,7 +78,10 @@ class UpdateCallMembersRequest {
     return null;
   }
 
-  static List<UpdateCallMembersRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallMembersRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UpdateCallMembersRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -100,20 +109,24 @@ class UpdateCallMembersRequest {
   }
 
   // maps a json object with a list of UpdateCallMembersRequest-objects as value to a dart map
-  static Map<String, List<UpdateCallMembersRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UpdateCallMembersRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UpdateCallMembersRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UpdateCallMembersRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UpdateCallMembersRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

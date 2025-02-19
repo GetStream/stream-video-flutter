@@ -19,20 +19,21 @@ class CallsPerDayReport {
   int count;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallsPerDayReport &&
-    other.count == count;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallsPerDayReport && other.count == count;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (count.hashCode);
+      // ignore: unnecessary_parenthesis
+      (count.hashCode);
 
   @override
   String toString() => 'CallsPerDayReport[count=$count]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'count'] = this.count;
+    json[r'count'] = this.count;
     return json;
   }
 
@@ -48,8 +49,10 @@ class CallsPerDayReport {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallsPerDayReport[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallsPerDayReport[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallsPerDayReport[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallsPerDayReport[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -61,7 +64,10 @@ class CallsPerDayReport {
     return null;
   }
 
-  static List<CallsPerDayReport> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallsPerDayReport> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallsPerDayReport>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -89,13 +95,19 @@ class CallsPerDayReport {
   }
 
   // maps a json object with a list of CallsPerDayReport-objects as value to a dart map
-  static Map<String, List<CallsPerDayReport>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallsPerDayReport>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallsPerDayReport>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallsPerDayReport.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallsPerDayReport.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -106,4 +118,3 @@ class CallsPerDayReport {
     'count',
   };
 }
-
