@@ -118,7 +118,7 @@ class _StreamDogFoodingAppContentState
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {
-    if (CurrentPlatform.isIos) return;
+    if (!CurrentPlatform.isAndroid) return;
 
     if (_router.routerDelegate.navigatorKey.currentContext == null) {
       // App is not running yet. Postpone consuming after app is in the foreground
@@ -143,32 +143,36 @@ class _StreamDogFoodingAppContentState
   void _observeCallKitEvents() {
     final streamVideo = locator.get<StreamVideo>();
 
-    _compositeSubscription.add(
-      streamVideo.observeCoreCallKitEvents(
-        onCallAccepted: (callToJoin) {
-          // Navigate to the call screen.
-          final extra = (
-            call: callToJoin,
-            connectOptions: null,
-          );
+    // On mobile we depend on call kit notifications.
+    // On desktop and web they are (currently) not available, so we depend on a
+    // websocket which can receive a call when the app is open.
+    if (CurrentPlatform.isMobile) {
+      _compositeSubscription.add(
+        streamVideo.observeCoreCallKitEvents(
+          onCallAccepted: (callToJoin) {
+            // Navigate to the call screen.
+            final extra = (
+              call: callToJoin,
+              connectOptions: null,
+            );
 
-          _router.push(CallRoute($extra: extra).location, extra: extra);
-        },
-      ),
-    );
+            _router.push(CallRoute($extra: extra).location, extra: extra);
+          },
+        ),
+      );
+    } else {
+      _compositeSubscription.add(streamVideo.state.incomingCall.listen((call) {
+        if (call == null) return;
 
-    // UNCOMMENT THIS TO SHOW IN-APP INCOMING SCREEN
-    // _compositeSubscription.add(streamVideo.state.incomingCall.listen((call) {
-    //   if (call == null) return;
+        // Navigate to the call screen.
+        final extra = (
+          call: call,
+          connectOptions: null,
+        );
 
-    //   // Navigate to the call screen.
-    //   final extra = (
-    //     call: call,
-    //     connectOptions: null,
-    //   );
-
-    //   _router.push(CallRoute($extra: extra).location, extra: extra);
-    // }));
+        _router.push(CallRoute($extra: extra).location, extra: extra);
+      }));
+    }
   }
 
   _observeFcmMessages() {

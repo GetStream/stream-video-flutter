@@ -67,7 +67,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     this.callerCustomizationCallback,
     this.registerApnDeviceToken = false,
   }) : _client = client {
-    if (CurrentPlatform.isWeb) return;
+    if (!CurrentPlatform.isMobile) return;
 
     SharedPreferences.getInstance().then((prefs) => _sharedPreferences = prefs);
 
@@ -363,7 +363,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<List<CallData>> activeCalls() async {
-    if (CurrentPlatform.isWeb) return [];
+    if (!CurrentPlatform.isMobile) return [];
 
     final activeCalls = await FlutterCallkitIncoming.activeCalls();
     if (activeCalls is! List) return [];
@@ -395,7 +395,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         .toList();
 
     // This is a workaround for the issue in flutter_callkit_incoming
-    // where second CallKit call overrids data in showCallkitIncoming native method
+    // where second CallKit call overrides data in showCallkitIncoming native method
     // and it's not possible to end the call by callCid
     if (activeCalls.length == calls.length) {
       await endAllCalls();
