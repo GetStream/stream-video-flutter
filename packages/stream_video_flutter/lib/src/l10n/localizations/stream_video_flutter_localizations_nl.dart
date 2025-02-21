@@ -5,7 +5,8 @@ import 'stream_video_flutter_localizations.dart';
 // ignore_for_file: type=lint
 
 /// The translations for Dutch Flemish (`nl`).
-class StreamVideoFlutterLocalizationsNl extends StreamVideoFlutterLocalizations {
+class StreamVideoFlutterLocalizationsNl
+    extends StreamVideoFlutterLocalizations {
   StreamVideoFlutterLocalizationsNl([String locale = 'nl']) : super(locale);
 
   @override

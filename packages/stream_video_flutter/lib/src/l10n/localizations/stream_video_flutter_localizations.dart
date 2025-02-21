@@ -62,15 +62,18 @@ import 'stream_video_flutter_localizations_nl.dart';
 /// be consistent with the languages listed in the StreamVideoFlutterLocalizations.supportedLocales
 /// property.
 abstract class StreamVideoFlutterLocalizations {
-  StreamVideoFlutterLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  StreamVideoFlutterLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
   static StreamVideoFlutterLocalizations? of(BuildContext context) {
-    return Localizations.of<StreamVideoFlutterLocalizations>(context, StreamVideoFlutterLocalizations);
+    return Localizations.of<StreamVideoFlutterLocalizations>(
+        context, StreamVideoFlutterLocalizations);
   }
 
-  static const LocalizationsDelegate<StreamVideoFlutterLocalizations> delegate = _StreamVideoFlutterLocalizationsDelegate();
+  static const LocalizationsDelegate<StreamVideoFlutterLocalizations> delegate =
+      _StreamVideoFlutterLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,7 +85,8 @@ abstract class StreamVideoFlutterLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -126,34 +130,37 @@ abstract class StreamVideoFlutterLocalizations {
   String get desktopScreenShareWindow;
 }
 
-class _StreamVideoFlutterLocalizationsDelegate extends LocalizationsDelegate<StreamVideoFlutterLocalizations> {
+class _StreamVideoFlutterLocalizationsDelegate
+    extends LocalizationsDelegate<StreamVideoFlutterLocalizations> {
   const _StreamVideoFlutterLocalizationsDelegate();
 
   @override
   Future<StreamVideoFlutterLocalizations> load(Locale locale) {
-    return SynchronousFuture<StreamVideoFlutterLocalizations>(lookupStreamVideoFlutterLocalizations(locale));
+    return SynchronousFuture<StreamVideoFlutterLocalizations>(
+        lookupStreamVideoFlutterLocalizations(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'nl'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'nl'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StreamVideoFlutterLocalizationsDelegate old) => false;
 }
 
-StreamVideoFlutterLocalizations lookupStreamVideoFlutterLocalizations(Locale locale) {
-
-
+StreamVideoFlutterLocalizations lookupStreamVideoFlutterLocalizations(
+    Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return StreamVideoFlutterLocalizationsEn();
-    case 'nl': return StreamVideoFlutterLocalizationsNl();
+    case 'en':
+      return StreamVideoFlutterLocalizationsEn();
+    case 'nl':
+      return StreamVideoFlutterLocalizationsNl();
   }
 
   throw FlutterError(
-    'StreamVideoFlutterLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'StreamVideoFlutterLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

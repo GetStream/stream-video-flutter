@@ -41,8 +41,6 @@ flutter:
       fonts:
         - asset: fonts/StreamIcons.ttf
 
-  generate: true
-
   uses-material-design: true
 
   plugin:
