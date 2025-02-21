@@ -40,13 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    [
-      Permission.notification,
-      Permission.camera,
-      Permission.microphone,
-    ].request();
+    if (CurrentPlatform.isMobile || CurrentPlatform.isWeb) {
+      [
+        Permission.notification,
+        Permission.camera,
+        Permission.microphone,
+      ].request();
 
-    StreamVideoPushNotificationManager.ensureFullScreenIntentPermission();
+      StreamVideoPushNotificationManager.ensureFullScreenIntentPermission();
+    }
 
     StreamBackgroundService.init(
       StreamVideo.instance,
