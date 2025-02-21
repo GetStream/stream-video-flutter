@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
-import '../l10n/localization_extension.dart';
 import '../../stream_video_flutter.dart';
-import 'screen_selector_state_notifier.dart';
-import 'screen_share_thumbnail_widget.dart';
+import '../l10n/localization_extension.dart';
 
 typedef DesktopScreenSelectorBuilder = Future<DesktopCapturerSource?> Function(
   BuildContext context,
 );
 
+/// Default screen selection dialog. This shows a dialog with 2 tabs for screens and windows.
+/// Can be styled using [overlay] from [StreamColorTheme]; [body], [bodyBold] and [tabBar] from [StreamTextTheme].
+///
+/// For more customizations you can use [TabbedScreenSelectWidget] or [ThumbnailGrid] directly.
 Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
   BuildContext context,
 ) {
@@ -29,7 +30,7 @@ Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
         TextButton(
           child: Text(translations.desktopScreenShareChooseDialogCancel),
           onPressed: () {
-            Navigator.pop<DesktopCapturerSource>(context, null);
+            Navigator.pop<DesktopCapturerSource>(context);
             screenSelectorState.dispose();
           },
         ),
@@ -37,7 +38,9 @@ Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
           child: Text(translations.desktopScreenShareChooseDialogShare),
           onPressed: () {
             Navigator.pop<DesktopCapturerSource>(
-                context, screenSelectorState.value.selectedSource);
+              context,
+              screenSelectorState.value.selectedSource,
+            );
             screenSelectorState.dispose();
           },
         ),

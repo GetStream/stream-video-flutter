@@ -2,12 +2,20 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
+import 'desktop_screen_selector.dart';
 import 'screen_share_logger.dart';
 
+/// The [ScreenSelectorStateNotifier] is used to keep track of the available screens and windows to share.
+/// This is used by [showDefaultScreenSelectionDialog], but can be used directly if you want to build a custom widget.
+/// Can be used in combination with a [ValueListenableBuilder] to get stateful updates.
 class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
-  ScreenSelectorStateNotifier() : super(const ScreenSelectorState._()) {
+  /// Constructor of the [ScreenSelectorStateNotifier]. The [sourceTypes] can be used to set which source types are loaded first.
+  ScreenSelectorStateNotifier({
+    List<SourceType> sourceTypes = const [SourceType.Screen],
+  }) : super(ScreenSelectorState._(sourceTypes: sourceTypes)) {
     Future.delayed(const Duration(milliseconds: 100), _getSources);
     _subscriptions.add(
       desktopCapturer.onAdded.stream.listen((source) {
@@ -35,6 +43,8 @@ class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
   final List<StreamSubscription<DesktopCapturerSource>> _subscriptions = [];
   Timer? _timer;
 
+  /// Update the sourceTypes. It's recommended to only show [SourceType.Screen] or
+  /// [SourceType.Window], but it is possible to show both.
   void setSourceType(List<SourceType> sourceTypes) {
     if (listEquals(sourceTypes, value.sourceTypes)) return;
 
@@ -42,6 +52,8 @@ class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
     _getSources();
   }
 
+  /// Updates the current selected source. Has no real effect other than the
+  /// option to show the selection in the UI.
   void setSelectedSource(DesktopCapturerSource source) {
     value = value._copyWith(selectedSource: source);
   }
@@ -79,7 +91,7 @@ class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
 class ScreenSelectorState {
   const ScreenSelectorState._({
     this.sources = const {},
-    this.sourceTypes = const [SourceType.Screen],
+    required this.sourceTypes,
     this.selectedSource,
   });
   final Map<String, DesktopCapturerSource> sources;
