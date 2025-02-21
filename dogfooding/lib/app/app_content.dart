@@ -5,12 +5,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/app/custom_video_localizations.dart';
 import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
@@ -258,6 +260,11 @@ class _StreamDogFoodingAppContentState
       title: kAppName,
       routerConfig: _router,
       theme: _buildTheme(Brightness.dark),
+      supportedLocales: const [Locale('en'), Locale('nl')],
+      localizationsDelegates: [
+        CustomVideoLocalizationsNL.delegate,
+        ...StreamVideoFlutterLocalizations.localizationsDelegates,
+      ],
       builder: (context, child) {
         return child!;
       },

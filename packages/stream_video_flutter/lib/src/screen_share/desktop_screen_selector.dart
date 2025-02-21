@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
+import '../l10n/localization_extension.dart';
 import '../../stream_video_flutter.dart';
 import 'screen_selector_state_notifier.dart';
 import 'screen_share_thumbnail_widget.dart';
@@ -14,25 +15,26 @@ Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
 ) {
   final streamVideoTheme = StreamVideoTheme.of(context);
   final screenSelectorState = ScreenSelectorStateNotifier();
+  final translations = context.translations;
 
   return showDialog<DesktopCapturerSource>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Choose what to share'),
+      title: Text(translations.desktopScreenShareChooseDialogTitle),
       backgroundColor: streamVideoTheme.colorTheme.overlay,
       content: TabbedScreenSelectWidget(
         screenSelectorState: screenSelectorState,
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('Cancel'),
+          child: Text(translations.desktopScreenShareChooseDialogCancel),
           onPressed: () {
             Navigator.pop<DesktopCapturerSource>(context, null);
             screenSelectorState.dispose();
           },
         ),
-        TextButton(
-          child: const Text('Share'),
+        ElevatedButton(
+          child: Text(translations.desktopScreenShareChooseDialogShare),
           onPressed: () {
             Navigator.pop<DesktopCapturerSource>(
                 context, screenSelectorState.value.selectedSource);
@@ -57,6 +59,8 @@ class TabbedScreenSelectWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translations = context.translations;
+
     return SizedBox(
       width: 640,
       height: 560,
@@ -74,7 +78,10 @@ class TabbedScreenSelectWidget extends StatelessWidget {
                   onTap: (value) => _screenSelectorState.setSourceType(
                     [if (value == 0) SourceType.Screen else SourceType.Window],
                   ),
-                  tabs: ['Entire Screen', 'Window']
+                  tabs: [
+                    translations.desktopScreenShareEntireScreen,
+                    translations.desktopScreenShareWindow,
+                  ]
                       .map(
                         (e) => Tab(child: Text(e, style: textTheme.tabBar)),
                       )

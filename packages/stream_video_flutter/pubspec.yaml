@@ -16,6 +16,9 @@ dependencies:
   equatable: ^2.0.5
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ">=0.18.1 <=0.21.0"
   ios_platform_images: ^0.2.4
   permission_handler: ^11.3.1
   plugin_platform_interface: ^2.1.8
@@ -37,6 +40,8 @@ flutter:
     - family: StreamIcons
       fonts:
         - asset: fonts/StreamIcons.ttf
+
+  generate: true
 
   uses-material-design: true
 
