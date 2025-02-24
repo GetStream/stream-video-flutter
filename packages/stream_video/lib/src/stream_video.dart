@@ -188,7 +188,7 @@ class StreamVideo extends Disposable {
     );
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
-    unawaited(_setupClientVersionDetails());
+    unawaited(_setClientVersionDetails());
 
     if (options.autoConnect) {
       unawaited(
@@ -968,7 +968,7 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
   }
 }
 
-Future<String?> _setupClientVersionDetails() async {
+Future<String?> _setClientVersionDetails() async {
   try {
     final packageInfo = await PackageInfo.fromPlatform();
 
@@ -981,7 +981,7 @@ Future<String?> _setupClientVersionDetails() async {
     if (CurrentPlatform.isAndroid) {
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
       osVersion = deviceInfo.version.release;
-      deviceModel = '${deviceInfo.manufacturer} : ${deviceInfo.model}';
+      deviceModel = '${deviceInfo.manufacturer} ${deviceInfo.model}';
     } else if (CurrentPlatform.isIos) {
       final deviceInfo = await DeviceInfoPlugin().iosInfo;
       osVersion = deviceInfo.systemVersion;
