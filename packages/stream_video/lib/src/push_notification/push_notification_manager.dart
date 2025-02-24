@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../coordinator/coordinator_client.dart';
@@ -21,12 +20,10 @@ abstract class PushNotificationManager {
   /// Stream of [CallKitEvent] for call-related events.
   Stream<CallKitEvent> get onCallEvent;
 
-  /// Registers the device for push notifications. Internal use only.
-  @internal
+  /// Registers the device for push notifications.
   void registerDevice();
 
-  /// Unregisters the device for push notifications. Internal use only.
-  @internal
+  /// Unregisters the device for push notifications.
   Future<void> unregisterDevice();
 
   /// Displays an incoming call notification.
