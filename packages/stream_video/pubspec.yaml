@@ -26,6 +26,7 @@ dependencies:
   intl: ">=0.18.1 <=0.19.0"
   jose: ^0.3.4
   meta: ^1.9.1
+  package_info_plus: ^8.2.1
   protobuf: ^3.1.0
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2

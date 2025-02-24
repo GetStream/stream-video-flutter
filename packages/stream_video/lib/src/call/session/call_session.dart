@@ -126,12 +126,14 @@ class CallSession extends Disposable {
       sfu_models.Device? device;
       sfu_models.Browser? browser;
 
-      var os = sfu_models.OS();
+      var os = sfu_models.OS(
+        name: CurrentPlatform.name,
+      );
 
       if (CurrentPlatform.isAndroid) {
         final deviceInfo = await DeviceInfoPlugin().androidInfo;
         os = sfu_models.OS(
-          name: 'Android',
+          name: CurrentPlatform.name,
           version: deviceInfo.version.release,
           architecture: SysInfo.rawKernelArchitecture,
         );
@@ -141,7 +143,7 @@ class CallSession extends Disposable {
       } else if (CurrentPlatform.isIos) {
         final deviceInfo = await DeviceInfoPlugin().iosInfo;
         os = sfu_models.OS(
-          name: 'iOS',
+          name: CurrentPlatform.name,
           version: deviceInfo.systemVersion,
         );
         device = sfu_models.Device(
@@ -155,21 +157,29 @@ class CallSession extends Disposable {
         );
       } else if (CurrentPlatform.isMacOS) {
         final deviceInfo = await DeviceInfoPlugin().macOsInfo;
+        os = sfu_models.OS(
+          name: CurrentPlatform.name,
+          version:
+              '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}',
+          architecture: deviceInfo.arch,
+        );
         device = sfu_models.Device(
           name: deviceInfo.model,
           version: deviceInfo.osRelease,
         );
       } else if (CurrentPlatform.isWindows) {
         final deviceInfo = await DeviceInfoPlugin().windowsInfo;
-        device = sfu_models.Device(
-          name: deviceInfo.productName,
-          version: deviceInfo.buildNumber.toString(),
+        os = sfu_models.OS(
+          name: CurrentPlatform.name,
+          version:
+              '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}',
+          architecture: deviceInfo.buildLabEx,
         );
       } else if (CurrentPlatform.isLinux) {
         final deviceInfo = await DeviceInfoPlugin().linuxInfo;
-        device = sfu_models.Device(
-          name: deviceInfo.name,
-          version: deviceInfo.version,
+        os = sfu_models.OS(
+          name: CurrentPlatform.name,
+          version: '${deviceInfo.name} ${deviceInfo.version}',
         );
       }
 
