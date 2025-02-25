@@ -16,7 +16,6 @@ class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
   ScreenSelectorStateNotifier({
     List<SourceType> sourceTypes = const [SourceType.Screen],
   }) : super(ScreenSelectorState._(sourceTypes: sourceTypes)) {
-    Future.delayed(const Duration(milliseconds: 100), _getSources);
     _subscriptions.add(
       desktopCapturer.onAdded.stream.listen((source) {
         final map = Map<String, DesktopCapturerSource>.from(value.sources);
@@ -38,6 +37,8 @@ class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
         value = value._copyWith();
       }),
     );
+
+    _getSources();
   }
 
   final List<StreamSubscription<DesktopCapturerSource>> _subscriptions = [];
