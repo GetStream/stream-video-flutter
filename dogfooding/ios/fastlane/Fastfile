@@ -31,7 +31,7 @@ platform :ios do
     config_only = options[:config_only] || false
     config_param = config_only ? '--config-only' : ''
 
-    sh_on_root(command: "flutter build ios --no-pub --suppress-analytics --release #{sign_param} #{config_param}")
+    sh_on_root(command: "flutter build ios --flavor #{options[:flavor]} --no-pub --suppress-analytics --release #{sign_param} #{config_param}")
   end
 
   lane :build_and_deploy do
@@ -57,7 +57,10 @@ platform :ios do
 
     increment_build_number(build_number: current_build_number + 1)
 
-    build(sign_enabled: true)
+    build(
+        sign_enabled: true,
+        flavor: options[:flavor]
+    )
     archive(method: 'app-store')
 
     begin
