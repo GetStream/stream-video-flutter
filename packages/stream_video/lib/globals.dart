@@ -5,7 +5,7 @@ const String streamVideoVersion = '0.8.0';
 const String androidWebRTCVersion = 'libwebrtc-m125.6422.03';
 const String iosWebRTCVersion = 'libwebrtc-m125.6422.06';
 
-String streamDefaultUserAgent = 'stream-video-dart-v$streamVideoVersion';
+const String streamDefaultUserAgent = 'stream-video-dart-v$streamVideoVersion';
 final xStreamClientHeader = '$streamDefaultUserAgent|$clientVersionDetails';
 
 @internal
