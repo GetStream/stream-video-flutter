@@ -53,6 +53,7 @@ class StreamCallContainer extends StatefulWidget {
     this.onAcceptCallTap,
     this.onDeclineCallTap,
     this.onCancelCallTap,
+    this.onCallDisconnected,
     this.incomingCallBuilder,
     this.outgoingCallBuilder,
     this.callContentBuilder,
@@ -79,6 +80,9 @@ class StreamCallContainer extends StatefulWidget {
 
   /// The action to perform when the cancel call button is tapped.
   final VoidCallback? onCancelCallTap;
+
+  /// The action to perform when the call is disconnected. By default, it pops the current route.
+  final VoidCallback? onCallDisconnected;
 
   /// Builder used to create a custom incoming call widget.
   final IncomingCallBuilder? incomingCallBuilder;
@@ -127,7 +131,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       _callState = callState;
     });
     if (callState.status.isDisconnected) {
-      _leave();
+      (widget.onCallDisconnected ?? _leave).call();
     }
   }
 

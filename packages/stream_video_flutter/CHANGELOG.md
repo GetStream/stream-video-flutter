@@ -1,3 +1,9 @@
+## Unreleased
+
+✅ Added 
+* Introduced the `onCallDisconnected` callback in `StreamCallContainer`, enabling customization of the default behavior, which invokes `Navigator.pop` upon call disconnection.
+* Made `registerDevice()` and `unregisterDevice()` methods publicly available in `PushNotificationManager`.
+
 ## 0.8.0
 
 * Updated minimum Flutter version to 3.27.4
