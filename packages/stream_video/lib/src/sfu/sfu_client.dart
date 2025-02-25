@@ -1,7 +1,7 @@
 import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../composed_version.dart';
+import '../../globals.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
@@ -112,7 +112,7 @@ class SfuClient {
     ctx ??= Context();
     return withHttpRequestHeaders(ctx, {
       'Authorization': 'Bearer $sfuToken',
-      'X-Stream-Client': streamClientVersion,
+      'X-Stream-Client': xStreamClientHeader,
       'x-client-request-id': const Uuid().v4(),
     });
   }

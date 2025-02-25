@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
-import '../composed_version.dart';
+import '../globals.dart';
 import '../open_api/video/coordinator/api.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';

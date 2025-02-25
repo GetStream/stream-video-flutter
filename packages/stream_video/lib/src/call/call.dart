@@ -10,9 +10,9 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../globals.dart';
 import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
-import '../../version.g.dart';
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';

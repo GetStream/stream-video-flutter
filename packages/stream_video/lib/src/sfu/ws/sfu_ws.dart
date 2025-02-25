@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../../../composed_version.dart';
+import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../errors/video_error_composer.dart';
 import '../../logger/impl/tagged_logger.dart';
@@ -44,7 +44,7 @@ class SfuWebSocket extends StreamWebSocket
           .toString();
     }
     final finalWsEndpoint =
-        '$sfuWsEndpoint?X-Stream-Client=$streamClientVersion';
+        '$sfuWsEndpoint?X-Stream-Client=$xStreamClientHeader';
     streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     streamLog.i(tag, () => '<factory> sfuWsEndpoint: $sfuWsEndpoint');
     streamLog.i(tag, () => '<factory> finalWsEndpoint: $finalWsEndpoint');
