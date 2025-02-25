@@ -6,6 +6,13 @@ on:
       - main
 
   workflow_dispatch:
+    inputs:
+      flavor:
+        type: choice
+        description: Build flavor
+        options:
+          - beta
+          - prod
 
 env:
   FLUTTER_VERSION: "3.29.0"
@@ -65,10 +72,19 @@ jobs:
           working-directory: dogfooding/ios
           bundler-cache: true
 
+      - name: Set build flavor to Env
+        run: |
+          if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
+          FLAVOR=${{ inputs.flavor }}
+          else
+          FLAVOR=beta
+          fi
+          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
+
       - name: Build and Distribute
         run: |
           cd dogfooding/ios
-          bundle exec fastlane ios build_and_deploy
+          bundle exec fastlane ios build_and_deploy flavor:${{ env.FLAVOR }}
 
   build_and_deploy_android:
     name: Build and Distribute Dogfooding Android
@@ -113,7 +129,15 @@ jobs:
           echo ${{ secrets.KEYSTORE }} | base64 --decode > dogfooding/android/upload-keystore.jks
           echo ${{ secrets.KEYSTORE_PROPERTIES }} | base64 --decode > dogfooding/android/key.properties
 
+      - name: Set build flavor to Env
+        run: |
+          if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
+          echo "FLAVOR=${{ inputs.flavor }}" >> $GITHUB_ENV
+          else
+          echo "FLAVOR=beta" >> $GITHUB_ENV
+          fi
+
       - name: Build and Distribute
         run: |
           cd dogfooding/android
-          bundle exec fastlane android build_and_deploy
+          bundle exec fastlane android build_and_deploy flavor:${{ env.FLAVOR }}
