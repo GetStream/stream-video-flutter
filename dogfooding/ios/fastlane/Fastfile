@@ -12,6 +12,8 @@ platform :ios do
     method = options[:method]
 
     build_app(
+      scheme: options[:flavor],
+      configuration: "Release-#{options[:flavor]}",
       export_method: method,
       silent: true,
       clean: true,
@@ -34,7 +36,7 @@ platform :ios do
     sh_on_root(command: "flutter build ios --flavor #{options[:flavor]} --no-pub --suppress-analytics --release #{sign_param} #{config_param}")
   end
 
-  lane :build_and_deploy do
+  lane :build_and_deploy do |options|
     match(
       api_key: appstore_api_key,
       type: 'appstore',
@@ -61,7 +63,10 @@ platform :ios do
         sign_enabled: true,
         flavor: options[:flavor]
     )
-    archive(method: 'app-store')
+    archive(
+        method: 'app-store',
+        flavor: options[:flavor]
+    )
 
     begin
       upload_to_testflight(
