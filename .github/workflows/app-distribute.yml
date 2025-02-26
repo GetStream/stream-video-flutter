@@ -44,7 +44,7 @@ jobs:
     name: Build and Distribute Dogfooding Ios
     runs-on: macos-latest
     timeout-minutes: 60
-    if: ${{ inputs.build_ios != false }}
+    if: ${{ github.event_name == 'push' || inputs.build_ios == true }}
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.9.0
@@ -99,7 +99,7 @@ jobs:
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ inputs.build_android != false }}
+    if: ${{ github.event_name == 'push' || inputs.build_android == true }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
