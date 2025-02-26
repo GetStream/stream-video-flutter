@@ -13,6 +13,7 @@ platform :ios do
 
     build_app(
       scheme: options[:flavor],
+      configuration: "Release-#{options[:flavor]}",
       export_method: method,
       silent: true,
       clean: true,
