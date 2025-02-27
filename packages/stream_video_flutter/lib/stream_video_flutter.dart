@@ -40,6 +40,7 @@ export 'src/livestream/livestream_toggle.dart';
 export 'src/models/mute_toggle_titles.dart';
 export 'src/models/stream_icon_toggle.dart';
 export 'src/renderer/video_renderer.dart';
+export 'src/screen_share/screen_share.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart';
 export 'src/video_effects/video_effects_manager.dart';
