@@ -46,6 +46,7 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.4.2
   mocktail: ^1.0.0
+  pubspec_parse: ^1.2.1
 
 topics:
   - video
