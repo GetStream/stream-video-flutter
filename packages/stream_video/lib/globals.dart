@@ -9,7 +9,6 @@ const String streamDefaultUserAgent =
     'stream-video-flutter-v$streamVideoVersion';
 final xStreamClientHeader = '$streamDefaultUserAgent|$clientVersionDetails';
 
-@internal
-
 /// Details regarding app name, version, os and device. Is set during initialization of StreamVideo instance.
+@internal
 String? clientVersionDetails;
