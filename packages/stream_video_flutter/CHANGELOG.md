@@ -1,4 +1,4 @@
-## Unreleased
+## 0.8.1
 
 ✅ Added 
 * Introduced the `onCallDisconnected` callback in `StreamCallContainer`, enabling customization of the default behavior, which invokes `Navigator.pop` upon call disconnection.
