@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:uuid/uuid.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../../composed_version.dart';
+import '../../../globals.dart';
 import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -1374,7 +1374,7 @@ class _Authentication extends open.Authentication {
     if (userToken.rawValue.isNotEmpty) {
       headerParams['Authorization'] = userToken.rawValue;
     }
-    headerParams['X-Stream-Client'] = streamClientVersion;
+    headerParams['X-Stream-Client'] = xStreamClientHeader;
     headerParams['x-client-request-id'] = const Uuid().v4();
   }
 }

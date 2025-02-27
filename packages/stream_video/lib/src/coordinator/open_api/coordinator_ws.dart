@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import '../../../composed_version.dart';
+import '../../../globals.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
@@ -29,7 +29,7 @@ String _buildUrl(String baseUrl, String apiKey) {
   return '$baseUrl'
       '?api_key=$apiKey'
       '&stream-auth-type=jwt'
-      '&X-Stream-Client=$streamClientVersion';
+      '&X-Stream-Client=$xStreamClientHeader';
 }
 
 class CoordinatorWebSocket extends StreamWebSocket

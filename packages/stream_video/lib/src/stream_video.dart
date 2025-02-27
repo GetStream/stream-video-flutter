@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:async/async.dart' as async;
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../globals.dart';
 import '../open_api/video/coordinator/api.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';
@@ -151,6 +154,7 @@ class StreamVideo extends Disposable {
         pushNotificationManagerProvider?.call(_client, this);
 
     _state.user.value = user;
+
     final tokenProvider = switch (user.type) {
       UserType.authenticated => TokenProvider.from(
           userToken?.let(UserToken.jwt),
@@ -184,6 +188,7 @@ class StreamVideo extends Disposable {
     );
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
+    unawaited(_setClientVersionDetails());
 
     if (options.autoConnect) {
       unawaited(
@@ -960,6 +965,46 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
       const ConsoleStreamLogger(),
       ExternalStreamLogger(logHandlerFunction),
     ]);
+  }
+}
+
+Future<String?> _setClientVersionDetails() async {
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    final appName = packageInfo.appName;
+    final appVersion = packageInfo.version;
+
+    var osVersion = '';
+    var deviceModel = '';
+
+    if (CurrentPlatform.isAndroid) {
+      final deviceInfo = await DeviceInfoPlugin().androidInfo;
+      osVersion = deviceInfo.version.release;
+      deviceModel = '${deviceInfo.manufacturer} ${deviceInfo.model}';
+    } else if (CurrentPlatform.isIos) {
+      final deviceInfo = await DeviceInfoPlugin().iosInfo;
+      osVersion = deviceInfo.systemVersion;
+      deviceModel = deviceInfo.utsname.machine;
+    } else if (CurrentPlatform.isMacOS) {
+      final deviceInfo = await DeviceInfoPlugin().macOsInfo;
+      osVersion =
+          '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}';
+      deviceModel = deviceInfo.model;
+    } else if (CurrentPlatform.isWindows) {
+      final deviceInfo = await DeviceInfoPlugin().windowsInfo;
+      osVersion =
+          '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}';
+    } else if (CurrentPlatform.isLinux) {
+      final deviceInfo = await DeviceInfoPlugin().linuxInfo;
+      osVersion = '${deviceInfo.name} ${deviceInfo.version}';
+    }
+
+    return clientVersionDetails ??=
+        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.name} $osVersion${deviceModel.isNotEmpty ? '|device_model=$deviceModel' : ''}';
+  } catch (e) {
+    streamLog.e(_tag, () => '[_setupComposeVersion] failed: $e');
+    return null;
   }
 }
 
