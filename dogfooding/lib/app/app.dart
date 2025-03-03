@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 // 📦 Package imports:
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/services.dart' show appFlavor;
 import 'package:flutter_dogfooding/core/repos/token_service.dart';
 
 // 🌎 Project imports:
