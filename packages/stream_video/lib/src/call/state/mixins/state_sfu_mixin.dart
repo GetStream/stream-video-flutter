@@ -169,7 +169,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     final isLocal = state.currentUserId == event.participant.userId;
     final participant = CallParticipantState(
       userId: event.participant.userId,
-      roles: const [],
+      roles: event.participant.roles,
       name: event.participant.userName,
       custom: event.participant.custom,
       image: event.participant.userImage,
