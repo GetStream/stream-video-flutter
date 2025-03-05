@@ -901,6 +901,7 @@ class StreamVideo extends Disposable {
   Future<Result<Call>> consumeIncomingCall({
     required String uuid,
     required String cid,
+    CallPreferences? preferences,
   }) async {
     _logger.d(() => '[consumeIncomingCall] uuid: $uuid, cid: $cid');
     final manager = pushNotificationManager;
@@ -926,6 +927,7 @@ class StreamVideo extends Disposable {
         ringing: true,
         metadata: callResult.data.metadata,
       ),
+      preferences: preferences,
     );
 
     return Result.success(call);
