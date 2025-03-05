@@ -1,3 +1,8 @@
+## Unreleased
+
+✅ Added 
+* Added `CallPreferences? preferences` parameter to `consumeIncomingCall()` method in `StreamVideo` to make it possible to configure the consumed call.
+
 ## 0.8.1
 
 ✅ Added 
