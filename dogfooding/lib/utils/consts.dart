@@ -9,6 +9,5 @@ bool get kIsProd => switch (appFlavor) {
       'dev' => false,
       'beta' => false,
       'prod' => true,
-      _ => throw ArgumentError(
-          'Flavors are required. Supported are dev, beta and prod'),
+      _ => true,
     };
