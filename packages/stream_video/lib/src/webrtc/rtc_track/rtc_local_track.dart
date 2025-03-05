@@ -369,6 +369,7 @@ extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
     }
 
     return mediaConstraints.useiOSBroadcastExtension ==
-        constraints.useiOSBroadcastExtension;
+            constraints.useiOSBroadcastExtension &&
+        mediaConstraints.deviceId == constraints.deviceId;
   }
 }
