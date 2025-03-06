@@ -61,6 +61,8 @@ class CallParticipantState
 
   /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.
+  ///
+  /// If you want to update the audioLevel, consider using [copyWithUpdatedAudioLevels].
   CallParticipantState copyWith({
     String? userId,
     List<String>? roles,
@@ -74,20 +76,13 @@ class CallParticipantState
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
     double? audioLevel,
+    List<double>? audioLevels,
     bool? isSpeaking,
     bool? isDominantSpeaker,
     bool? isPinned,
     CallReaction? reaction,
     ViewportVisibility? viewportVisibility,
   }) {
-    final levels = audioLevels;
-    if (audioLevel != null) {
-      levels.add(audioLevel);
-      while (levels.length > 10) {
-        levels.removeAt(0);
-      }
-    }
-
     return CallParticipantState(
       userId: userId ?? this.userId,
       roles: roles ?? this.roles,
@@ -101,12 +96,30 @@ class CallParticipantState
       connectionQuality: connectionQuality ?? this.connectionQuality,
       isOnline: isOnline ?? this.isOnline,
       audioLevel: audioLevel ?? this.audioLevel,
-      audioLevels: levels,
+      audioLevels: audioLevels ?? this.audioLevels,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
       isPinned: isPinned ?? this.isPinned,
       reaction: reaction ?? this.reaction,
       viewportVisibility: viewportVisibility ?? this.viewportVisibility,
+    );
+  }
+
+  /// Copies the current state and adds the latest [audioLevel] to the last 10 [audioLevels].
+  CallParticipantState copyWithUpdatedAudioLevels({
+    required double audioLevel,
+    bool? isSpeaking,
+  }) {
+    final levels = audioLevels;
+    levels.add(audioLevel);
+    while (levels.length > 10) {
+      levels.removeAt(0);
+    }
+
+    return copyWith(
+      audioLevel: audioLevel,
+      audioLevels: audioLevels,
+      isSpeaking: isSpeaking,
     );
   }
 
