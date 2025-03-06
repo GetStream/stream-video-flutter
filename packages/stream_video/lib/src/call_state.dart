@@ -141,6 +141,10 @@ class CallState extends Equatable {
     return callParticipants.where((element) => !element.isLocal).toList();
   }
 
+  List<CallParticipantState> get activeSpeakers {
+    return callParticipants.where((element) => element.isSpeaking).toList();
+  }
+
   /// Returns a copy of this [CallState] with the given fields replaced
   /// with the new values.
   CallState copyWith({

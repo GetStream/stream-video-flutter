@@ -1,3 +1,9 @@
+## unreleased
+
+✅ Added
+* Added `CallParticipantState.audioLevels` with the 10 last audio levels of the participant.
+* Added `CallState.activeSpeakers` to get list of currently active speakers.
+
 ## 0.8.2
 
 ✅ Added 

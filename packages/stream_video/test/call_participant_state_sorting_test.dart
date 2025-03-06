@@ -51,7 +51,7 @@ void main() {
     ),
 
     // Muted
-    const CallParticipantState(
+    CallParticipantState(
       name: 'C',
       userId: '3',
       sessionId: '3',

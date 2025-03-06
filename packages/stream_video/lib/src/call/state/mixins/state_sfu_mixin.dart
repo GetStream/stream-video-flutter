@@ -106,7 +106,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
               level.sessionId == participant.sessionId;
         });
         if (levelInfo != null) {
-          return participant.copyWith(
+          return participant.copyWithUpdatedAudioLevels(
             audioLevel: levelInfo.level,
             isSpeaking: levelInfo.isSpeaking,
           );
@@ -207,17 +207,18 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     final participants = state.callParticipants.map((it) {
       if (it.userId == participant.userId &&
           it.sessionId == participant.sessionId) {
-        return it.copyWith(
-          name: participant.userName,
-          custom: participant.custom,
-          image: participant.userImage,
-          trackIdPrefix: participant.trackLookupPrefix,
-          audioLevel: participant.audioLevel,
-          isSpeaking: participant.isSpeaking,
-          isDominantSpeaker: participant.isDominantSpeaker,
-          connectionQuality: participant.connectionQuality,
-          roles: participant.roles,
-        );
+        return it
+            .copyWith(
+              name: participant.userName,
+              custom: participant.custom,
+              image: participant.userImage,
+              trackIdPrefix: participant.trackLookupPrefix,
+              isSpeaking: participant.isSpeaking,
+              isDominantSpeaker: participant.isDominantSpeaker,
+              connectionQuality: participant.connectionQuality,
+              roles: participant.roles,
+            )
+            .copyWithUpdatedAudioLevels(audioLevel: participant.audioLevel);
       } else {
         return it;
       }
