@@ -47,7 +47,7 @@ class CallParticipantState
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
 
-  /// The audio level for the user.
+  /// The latest audio level for the user.
   final double audioLevel;
 
   /// List of the last 10 audio levels.
