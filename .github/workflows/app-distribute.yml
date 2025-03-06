@@ -177,9 +177,17 @@ jobs:
           cache: true
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
+      - run: |
+          flutter build web --profile --base-href /stream-video-flutter/
+        shell: bash
+        working-directory: dogfooding
+      - run: git --work-tree build/web add --all
+        shell: bash
+        working-directory: dogfooding
+      - run: git commit -m "Automatic deployment by github-actions"
+        shell: bash
+        working-directory: dogfooding
+      - run: git push origin HEAD:gh-pages --force
+        shell: bash
+        working-directory: dogfooding
 
-      - name: Build and Deploy
-        uses: bluefireteam/flutter-gh-pages@v9
-        with:
-          baseHref: /stream-video-flutter/
-          workingDir: dogfooding
