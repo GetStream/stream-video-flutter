@@ -183,14 +183,14 @@ class _StreamDogFoodingAppContentState
   }
 
   Future<void> _observeDeepLinks() async {
-    // The app was in the background.
-    if (!kIsWeb) {
-      final deepLinkSubscription = AppLinks().uriLinkStream.listen((uri) {
-        if (mounted) _handleDeepLink(uri);
-      });
+    if (kIsWeb) return;
 
-      _compositeSubscription.add(deepLinkSubscription);
-    }
+    // The app was in the background.
+    final deepLinkSubscription = AppLinks().uriLinkStream.listen((uri) {
+      if (mounted) _handleDeepLink(uri);
+    });
+
+    _compositeSubscription.add(deepLinkSubscription);
 
     // The app was terminated.
     try {
