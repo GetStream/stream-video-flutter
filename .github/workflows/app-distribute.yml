@@ -21,6 +21,10 @@ on:
         type: boolean
         description: Android
         default: true
+      build_web:
+        type: boolean
+        description: Web
+        default: true
 
 env:
   FLUTTER_VERSION: "3.29.0"
@@ -151,3 +155,31 @@ jobs:
         run: |
           cd dogfooding/android
           bundle exec fastlane android build_and_deploy flavor:${{ env.FLAVOR }}
+
+  build_and_deploy_web:
+    name: Build and Deploy Dogfooding Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ github.event_name == 'push' || inputs.build_web == true }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: config git
+        run: |
+          git config --global user.email "$(git log --format='%ae' HEAD^!)"
+          git config --global user.name "$(git log --format='%an' HEAD^!)"
+          git fetch origin gh-pages:gh-pages
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          cache: true
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Build and Deploy
+        uses: bluefireteam/flutter-gh-pages@v9
+        with:
+          baseHref: /stream-video-flutter/
+          workingDir: dogfooding
