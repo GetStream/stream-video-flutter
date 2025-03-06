@@ -1,16 +1,17 @@
-## Unreleased
+## 0.8.2
 
 ✅ Added 
 * Added `CallPreferences? preferences` parameter to `consumeIncomingCall()` method in `StreamVideo` to make it possible to configure the consumed call.
+
+🐞 Fixed
+* Fixed remote participant roles array being empty after joining the call.
+* Fixed and issue with `thermal` package throwing exception on Android 9 and lower.
 
 ## 0.8.1
 
 ✅ Added 
 * Introduced the `onCallDisconnected` callback in `StreamCallContainer`, enabling customization of the default behavior, which invokes `Navigator.pop` upon call disconnection.
 * Made `registerDevice()` and `unregisterDevice()` methods publicly available in `PushNotificationManager`.
-
-🐞 Fixed
-* Fixed remote participant roles array being empty after joining the call.
 
 ## 0.8.0
 
