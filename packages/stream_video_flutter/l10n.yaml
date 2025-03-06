@@ -1,0 +1,6 @@
+synthetic-package: false
+arb-dir: lib/src/l10n/arb
+output-dir: lib/src/l10n/localizations
+template-arb-file: stream_video_flutter_en.arb
+output-localization-file: stream_video_flutter_localizations.dart
+output-class: StreamVideoFlutterLocalizations

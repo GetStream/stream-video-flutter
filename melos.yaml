@@ -95,6 +95,10 @@ scripts:
     run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
     description: Build all generated files for Flutter packages in this project.
 
+  gen-l10n: >
+    melos exec -c 1 --fail-fast --depends-on=flutter_localizations -- \
+     "flutter gen-l10n && dart format ."
+
   test:all:
     run: melos run test:dart --no-select && melos run test:flutter --no-select
     description: Run all Dart & Flutter tests in this project.
