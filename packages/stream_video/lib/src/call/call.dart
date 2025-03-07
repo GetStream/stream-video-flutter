@@ -566,8 +566,10 @@ class Call {
   /// Joins the call.
   ///
   /// - [connectOptions]: optional initial call configuration
+  /// - [membersLimit]: Sets the total number of members to return as part of the response.
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
+    int? membersLimit,
   }) async {
     await _init();
 
@@ -601,7 +603,10 @@ class Call {
     }
 
     await _streamVideo.state.setActiveCall(this);
-    final result = await _join(connectOptions: connectOptions)
+    final result = await _join(
+      connectOptions: connectOptions,
+      membersLimit: membersLimit,
+    )
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrDefault(Result.error('connect cancelled'));
@@ -618,6 +623,7 @@ class Call {
 
   Future<Result<None>> _join({
     CallConnectOptions? connectOptions,
+    int? membersLimit,
   }) async {
     if (_callJoinLock.locked) {
       _logger.w(() => '[join] rejected (already joining)');
@@ -662,6 +668,7 @@ class Call {
 
       final joinedResult = await _joinIfNeeded(
         connectOptions: connectOptions,
+        membersLimit: membersLimit,
       );
 
       if (joinedResult is! Success<CallCredentials>) {
@@ -793,6 +800,7 @@ class Call {
 
   Future<Result<CallCredentials>> _joinIfNeeded({
     CallConnectOptions? connectOptions,
+    int? membersLimit,
   }) async {
     _logger.d(
       () => '[joinIfNeeded] options: $connectOptions, '
@@ -814,6 +822,7 @@ class Call {
         migratingFrom: _reconnectStrategy == SfuReconnectionStrategy.migrate
             ? _session?.config.sfuName
             : null,
+        membersLimit: membersLimit,
       );
 
       return joinedResult.fold(
@@ -839,6 +848,7 @@ class Call {
     bool create = false,
     bool video = false,
     String? migratingFrom,
+    int? membersLimit,
     CallConnectOptions? connectOptions,
   }) async {
     _logger.d(() => '[joinCall] cid: $callCid, migratingFrom: $migratingFrom');
@@ -848,6 +858,7 @@ class Call {
       create: create,
       migratingFrom: migratingFrom,
       video: video,
+      membersLimit: membersLimit,
     );
 
     if (joinResult is! Success<CoordinatorJoined>) {
@@ -1689,6 +1700,7 @@ class Call {
   /// - [notify]: If `true`, sends a standard push notification.
   /// - [video]: Marks the call as a video call if `true`; otherwise, audio-only.
   /// - [watch]:  If `true`, listens to coordinator events and updates call state accordingly.
+  /// - [membersLimit]: Sets the total number of members to return as part of the response.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     bool ringing = false,
@@ -1697,6 +1709,7 @@ class Call {
     bool? notify,
     String? team,
     DateTime? startsAt,
+    int? membersLimit,
     StreamBackstageSettings? backstage,
     StreamLimitsSettings? limits,
     StreamRecordingSettings? recording,
@@ -1740,6 +1753,7 @@ class Call {
       notify: notify,
       video: video,
       startsAt: startsAt,
+      membersLimit: membersLimit,
       settingsOverride: settingsOverride,
       custom: custom,
     );
@@ -2349,7 +2363,7 @@ class Call {
   }
 
   Future<Result<QueriedMembers>> queryMembers({
-    required Map<String, Object> filterConditions,
+    Map<String, Object> filterConditions = const {},
     String? next,
     String? prev,
     List<SortParamRequest> sorts = const [],

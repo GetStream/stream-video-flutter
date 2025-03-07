@@ -1,3 +1,8 @@
+## Unreleased
+
+✅ Added
+* Added `membersLimit` parameter to `getOrCreate()` and `join()` methods in `Call` class to limit number of members listed in the response.
+
 ## 0.8.3
 
 ✅ Added

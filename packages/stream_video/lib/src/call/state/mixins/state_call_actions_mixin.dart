@@ -6,28 +6,28 @@ final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateCallActionsMixin on StateNotifier<CallState> {
   void setCallLive({required bool isLive}) {
-    _logger.e(() => '[setCallLive] isLive:$isLive');
+    _logger.v(() => '[setCallLive] isLive:$isLive');
     state = state.copyWith(
       isBackstage: !isLive,
     );
   }
 
   void setCallRecording({required bool isRecording}) {
-    _logger.e(() => '[setCallRecording] isRecording:$isRecording');
+    _logger.v(() => '[setCallRecording] isRecording:$isRecording');
     state = state.copyWith(
       isRecording: isRecording,
     );
   }
 
   void setCallTranscribing({required bool isTranscribing}) {
-    _logger.e(() => '[setCallTranscribing] isTranscribing:$isTranscribing');
+    _logger.v(() => '[setCallTranscribing] isTranscribing:$isTranscribing');
     state = state.copyWith(
       isTranscribing: isTranscribing,
     );
   }
 
   void setCallClosedCaptioning({required bool isCaptioning}) {
-    _logger.e(() => '[setCallClosedCaptioning] isCaptioning:$isCaptioning');
+    _logger.v(() => '[setCallClosedCaptioning] isCaptioning:$isCaptioning');
     state = state.copyWith(
       isCaptioning: isCaptioning,
     );
@@ -37,7 +37,7 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     required bool isBroadcasting,
     String? hlsPlaylistUrl,
   }) {
-    _logger.e(
+    _logger.v(
       () => '[setCallBroadcasting] isBroadcasting:$isBroadcasting'
           ', hlsPlaylistUrl: $hlsPlaylistUrl',
     );
