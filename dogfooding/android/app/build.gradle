@@ -128,5 +128,4 @@ flutter {
 
 dependencies {
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'io.getstream:stream-video-android-noise-cancellation:1.0.3'
 }
