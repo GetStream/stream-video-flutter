@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/closed_captions_menu_item.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/noise_cancellation_menu_item.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu_item.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/standard_action_menu_item.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../utils/feedback_dialog.dart';
+import '../../utils/feedback_dialog.dart';
 
 CallReactionData _raisedHandReaction = const CallReactionData(
   emojiCode: ':raise-hand:',
@@ -201,47 +205,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
           });
         },
       ),
-      StreamBuilder(
-          stream: widget.call.state.asStream(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final callState = snapshot.data as CallState;
-
-              if (callState.settings.transcription.closedCaptionMode ==
-                  ClosedCaptionSettingsMode.disabled) {
-                return const SizedBox.shrink();
-              }
-
-              return Column(
-                children: [
-                  const SizedBox(height: 16),
-                  StandardActionMenuItem(
-                    icon: callState.isCaptioning
-                        ? Icons.closed_caption_sharp
-                        : Icons.closed_caption_disabled_sharp,
-                    label: 'Toggle Closed Caption',
-                    trailing: Text(
-                      callState.isCaptioning ? 'On' : 'Off',
-                      style: TextStyle(
-                        color: callState.isCaptioning
-                            ? AppColorPalette.appGreen
-                            : null,
-                      ),
-                    ),
-                    onPressed: () {
-                      if (!callState.isCaptioning) {
-                        widget.call.startClosedCaptions();
-                      } else {
-                        widget.call.stopClosedCaptions();
-                      }
-                    },
-                  ),
-                ],
-              );
-            }
-
-            return const SizedBox.shrink();
-          }),
+      ClosedCaptionsMenuItem(widget: widget),
+      NoiseCancellationMenuItem(call: widget.call),
       const SizedBox(height: 16),
       StandardActionMenuItem(
         icon: Icons.high_quality_sharp,
@@ -333,47 +298,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 onPressed: () {
                   widget.call.setAudioInputDevice(device);
                   widget.onAudioInputChange?.call(device);
-                },
-              );
-            },
-          )
-          .cast()
-          .insertBetween(const SizedBox(height: 16)),
-    ];
-  }
-
-  List<Widget> _buildIncomingQualityMenu() {
-    return [
-      GestureDetector(
-        onTap: () {
-          setState(() {
-            showIncomingQuality = false;
-          });
-        },
-        child: const Align(
-          alignment: Alignment.centerLeft,
-          child: Icon(Icons.arrow_back, size: 24),
-        ),
-      ),
-      const SizedBox(height: 16),
-      ...IncomingVideoQuality.values
-          .map(
-            (quality) {
-              return StandardActionMenuItem(
-                icon: Icons.video_settings,
-                label: quality.name,
-                color: getIncomingVideoQuality(widget
-                            .call.dynascaleManager.incomingVideoSettings) ==
-                        quality
-                    ? AppColorPalette.appGreen
-                    : null,
-                onPressed: () {
-                  if (quality == IncomingVideoQuality.off) {
-                    widget.call.setIncomingVideoEnabled(false);
-                  } else {
-                    widget.call.setPreferredIncomingVideoResolution(
-                        getIncomingVideoResolution(quality));
-                  }
                 },
               );
             },
@@ -564,6 +488,47 @@ class _SettingsMenuState extends State<SettingsMenu> {
     ];
   }
 
+  List<Widget> _buildIncomingQualityMenu() {
+    return [
+      GestureDetector(
+        onTap: () {
+          setState(() {
+            showIncomingQuality = false;
+          });
+        },
+        child: const Align(
+          alignment: Alignment.centerLeft,
+          child: Icon(Icons.arrow_back, size: 24),
+        ),
+      ),
+      const SizedBox(height: 16),
+      ...IncomingVideoQuality.values
+          .map(
+            (quality) {
+              return StandardActionMenuItem(
+                icon: Icons.video_settings,
+                label: quality.name,
+                color: getIncomingVideoQuality(widget
+                            .call.dynascaleManager.incomingVideoSettings) ==
+                        quality
+                    ? AppColorPalette.appGreen
+                    : null,
+                onPressed: () {
+                  if (quality == IncomingVideoQuality.off) {
+                    widget.call.setIncomingVideoEnabled(false);
+                  } else {
+                    widget.call.setPreferredIncomingVideoResolution(
+                        getIncomingVideoResolution(quality));
+                  }
+                },
+              );
+            },
+          )
+          .cast()
+          .insertBetween(const SizedBox(height: 16)),
+    ];
+  }
+
   VideoDimension? getIncomingVideoResolution(IncomingVideoQuality quality) {
     switch (quality) {
       case IncomingVideoQuality.auto:
@@ -602,77 +567,5 @@ class _SettingsMenuState extends State<SettingsMenu> {
     } else {
       return IncomingVideoQuality.auto;
     }
-  }
-}
-
-class SettingsMenuItem extends StatelessWidget {
-  const SettingsMenuItem({
-    super.key,
-    required this.child,
-    this.onPressed,
-  });
-
-  final Widget child;
-  final void Function()? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        constraints: const BoxConstraints.expand(height: 40),
-        decoration: BoxDecoration(
-          color: AppColorPalette.buttonSecondary,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: child,
-      ),
-    );
-  }
-}
-
-class StandardActionMenuItem extends StatelessWidget {
-  const StandardActionMenuItem({
-    super.key,
-    required this.icon,
-    required this.label,
-    this.color,
-    this.onPressed,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final String label;
-  final Widget? trailing;
-  final Color? color;
-  final void Function()? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SettingsMenuItem(
-      onPressed: onPressed,
-      child: Row(
-        children: [
-          const SizedBox(width: 8),
-          Icon(
-            icon,
-            size: 20,
-            color: color,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Spacer(),
-          if (trailing != null) trailing!,
-          const SizedBox(width: 8),
-        ],
-      ),
-    );
   }
 }

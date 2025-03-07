@@ -18,6 +18,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../coordinator/open_api/error/open_api_error.dart';
+import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
@@ -894,6 +895,16 @@ class Call {
       callConnectOptions: connectOptions,
     );
 
+    if (joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
+        NoiceCancellationSettingsMode.autoOn) {
+      // AutoOn will enable noise cancellation if the device has sufficient processing power
+      unawaited(
+        startAudioProcessing(
+          requireAdvancedAudioProcessingSupport: true,
+        ),
+      );
+    }
+
     _logger.v(() => '[joinCall] completed: $joined');
     return Result.success(joined);
   }
@@ -1258,6 +1269,11 @@ class Call {
 
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
+
+    if (state.value.settings.audio.noiseCancellation?.mode ==
+        NoiceCancellationSettingsMode.autoOn) {
+      await stopAudioProcessing();
+    }
 
     for (final timer in [..._reactionTimers, ..._captionsTimers.values]) {
       timer.cancel();
@@ -1866,6 +1882,58 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.setCallClosedCaptioning(isCaptioning: false);
+    }
+
+    return result;
+  }
+
+  /// Starts audio processing for the call.
+  Future<Result<None>> startAudioProcessing({
+    bool requireAdvancedAudioProcessingSupport = false,
+  }) async {
+    if (!_permissionsManager
+        .hasPermission(CallPermission.enableNoiseCancellation)) {
+      _logger.w(() => '[startAudioProcessing] rejected (no permission)');
+      return Result.error('Cannot start audio processing (no permission)');
+    }
+
+    if (requireAdvancedAudioProcessingSupport) {
+      final supportResult =
+          await _streamVideo.deviceSupportsAdvancedAudioProcessing();
+
+      if (supportResult.isFailure) {
+        return Result.error(
+          'Cannot start audio processing (faild to check advanced audio processing support)',
+        );
+      } else {
+        if (!(supportResult.getDataOrNull() ?? false)) {
+          return const Result.failure(
+            VideoError(
+              message:
+                  'Cannot start audio processing (device does not support required advanced audio processing)',
+            ),
+          );
+        }
+      }
+    }
+
+    final result = await _streamVideo.setAudioProcessingEnabled(true);
+
+    if (result.isSuccess) {
+      await _session?.notifyNoiseCancellationStarted();
+      _stateManager.setCallAudioProcessing(isAudioProcessing: true);
+    }
+
+    return result;
+  }
+
+  /// Stops audio processing for the call.
+  Future<Result<None>> stopAudioProcessing() async {
+    final result = await _streamVideo.setAudioProcessingEnabled(false);
+
+    if (result.isSuccess) {
+      await _session?.notifyNoiseCancellationStopped();
+      _stateManager.setCallAudioProcessing(isAudioProcessing: false);
     }
 
     return result;

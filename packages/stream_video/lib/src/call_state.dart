@@ -25,6 +25,7 @@ class CallState extends Equatable {
       isTranscribing: false,
       isCaptioning: false,
       isBackstage: false,
+      isAudioProcessing: false,
       settings: const CallSettings(),
       egress: const CallEgress(),
       rtmpIngress: '',
@@ -65,6 +66,7 @@ class CallState extends Equatable {
     required this.isTranscribing,
     required this.isCaptioning,
     required this.isBackstage,
+    required this.isAudioProcessing,
     required this.settings,
     required this.egress,
     required this.rtmpIngress,
@@ -106,6 +108,7 @@ class CallState extends Equatable {
   final bool isTranscribing;
   final bool isCaptioning;
   final bool isBackstage;
+  final bool isAudioProcessing;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
   final RtcMediaDevice? audioOutputDevice;
@@ -159,6 +162,7 @@ class CallState extends Equatable {
     bool? isTranscribing,
     bool? isCaptioning,
     bool? isBackstage,
+    bool? isAudioProcessing,
     CallSettings? settings,
     CallEgress? egress,
     String? rtmpIngress,
@@ -197,6 +201,7 @@ class CallState extends Equatable {
       isTranscribing: isTranscribing ?? this.isTranscribing,
       isCaptioning: isCaptioning ?? this.isCaptioning,
       isBackstage: isBackstage ?? this.isBackstage,
+      isAudioProcessing: isAudioProcessing ?? this.isAudioProcessing,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
       rtmpIngress: rtmpIngress ?? this.rtmpIngress,
@@ -269,6 +274,7 @@ class CallState extends Equatable {
         isCaptioning,
         isBroadcasting,
         isBackstage,
+        isAudioProcessing,
         settings,
         egress,
         rtmpIngress,
