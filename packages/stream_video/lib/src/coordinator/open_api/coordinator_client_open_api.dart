@@ -442,6 +442,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? notify,
     bool? video,
     DateTime? startsAt,
+    int? membersLimit,
     CallSettingsRequest? settingsOverride,
     Map<String, Object> custom = const {},
   }) async {
@@ -469,6 +470,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             settingsOverride: settingsOverride,
             custom: custom,
           ),
+          membersLimit: membersLimit,
           ring: ringing,
           notify: notify,
           video: video,
@@ -507,6 +509,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? create,
     String? migratingFrom,
     bool? video,
+    int? membersLimit,
   }) async {
     try {
       _logger.d(
@@ -528,6 +531,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           create: create,
           ring: ringing,
           location: location,
+          membersLimit: membersLimit,
           migratingFrom: migratingFrom,
           video: video,
         ),
@@ -973,7 +977,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<QueriedMembers>> queryMembers({
     required StreamCallCid callCid,
-    required Map<String, Object> filterConditions,
+    Map<String, Object> filterConditions = const {},
     String? next,
     String? prev,
     List<open.SortParamRequest> sorts = const [],
