@@ -1,0 +1,22 @@
+{
+  "desktopScreenShareChooseDialogTitle": "Choose what to share",
+  "@desktopScreenShareChooseDialogTitle": {
+    "description": "Title for dialog to choose for a window or screen to share"
+  },
+  "desktopScreenShareChooseDialogShare": "Share",
+  "@desktopScreenShareChooseDialogShare": {
+    "description": "Share action to start sharing"
+  },
+  "desktopScreenShareChooseDialogCancel": "Cancel",
+  "@desktopScreenShareChooseDialogCancel": {
+    "description": "Cancel action to go back without sharing"
+  },
+  "desktopScreenShareEntireScreen": "Entire Screen",
+  "@desktopScreenShareEntireScreen": {
+    "description": "Tab to select a screen to share"
+  },
+  "desktopScreenShareWindow": "Window",
+  "@desktopScreenShareWindow": {
+    "description": "Tab to select a single window to share"
+  }
+}

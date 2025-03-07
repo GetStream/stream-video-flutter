@@ -23,6 +23,8 @@ import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
 import '../widgets/closed_captions_widget.dart';
 
+const _useCustomDesktopScreenShareOption = false;
+
 class CallScreen extends StatefulWidget {
   const CallScreen({
     super.key,
@@ -264,6 +266,10 @@ class _CallScreenState extends State<CallScreen> {
                         enabledScreenShareBackgroundColor:
                             AppColorPalette.primary,
                         disabledScreenShareIcon: Icons.screen_share,
+                        desktopScreenSelectorBuilder:
+                            _useCustomDesktopScreenShareOption
+                                ? _customDesktopScreenShareSelector
+                                : null,
                       ),
                       ToggleMicrophoneOption(
                         call: call,
@@ -329,4 +335,31 @@ class ChatBottomSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+// This is an example of a bottom sheet that only allows the selection of a screen.
+// After tapping a screen the bottom sheet is directly closed and the screen is shared.
+Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
+    BuildContext context) {
+  final ScreenSelectorStateNotifier stateNotifier =
+      ScreenSelectorStateNotifier(sourceTypes: [SourceType.Screen]);
+
+  return showModalBottomSheet<DesktopCapturerSource?>(
+    context: context,
+    builder: (BuildContext context) {
+      return ValueListenableBuilder(
+        valueListenable: stateNotifier,
+        builder:
+            (BuildContext context, ScreenSelectorState value, Widget? child) =>
+                Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ThumbnailGrid(
+            sources: value.sources.values.toList(),
+            selectedSource: value.selectedSource,
+            onSelectSource: (source) => Navigator.pop(context, source),
+          ),
+        ),
+      );
+    },
+  );
 }

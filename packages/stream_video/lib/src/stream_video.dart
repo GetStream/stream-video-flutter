@@ -614,6 +614,7 @@ class StreamVideo extends Disposable {
 
   Future<bool> consumeAndAcceptActiveCall({
     void Function(Call)? onCallAccepted,
+    CallPreferences? callPreferences,
   }) async {
     final calls = await pushNotificationManager?.activeCalls();
     if (calls == null || calls.isEmpty) return false;
@@ -621,6 +622,7 @@ class StreamVideo extends Disposable {
     final callResult = await consumeIncomingCall(
       uuid: calls.first.uuid!,
       cid: calls.first.callCid!,
+      preferences: callPreferences,
     );
 
     callResult.fold(
@@ -646,11 +648,14 @@ class StreamVideo extends Disposable {
 
   CompositeSubscription observeCoreCallKitEvents({
     void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
   }) {
     final callKitEventSubscriptions = CompositeSubscription();
 
-    observeCallAcceptCallKitEvent(onCallAccepted: onCallAccepted)
-        ?.addTo(callKitEventSubscriptions);
+    observeCallAcceptCallKitEvent(
+      onCallAccepted: onCallAccepted,
+      acceptCallPreferences: acceptCallPreferences,
+    )?.addTo(callKitEventSubscriptions);
 
     observeCallDeclinedCallKitEvent()?.addTo(callKitEventSubscriptions);
     observeCallEndedCallKitEvent()?.addTo(callKitEventSubscriptions);
@@ -660,11 +665,13 @@ class StreamVideo extends Disposable {
 
   StreamSubscription<ActionCallAccept>? observeCallAcceptCallKitEvent({
     void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
   }) {
     return onCallKitEvent<ActionCallAccept>(
       (event) => _onCallAccept(
         event,
         onCallAccepted: onCallAccepted,
+        callPreferences: acceptCallPreferences,
       ),
     );
   }
@@ -680,6 +687,7 @@ class StreamVideo extends Disposable {
   Future<void> _onCallAccept(
     ActionCallAccept event, {
     void Function(Call)? onCallAccepted,
+    CallPreferences? callPreferences,
   }) async {
     _logger.d(() => '[onCallAccept] event: $event');
 
@@ -687,7 +695,11 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    final call = await consumeIncomingCall(uuid: uuid, cid: cid);
+    final call = await consumeIncomingCall(
+      uuid: uuid,
+      cid: cid,
+      preferences: callPreferences,
+    );
     final callToJoin = call.getDataOrNull();
     if (callToJoin == null) return;
 
@@ -903,6 +915,7 @@ class StreamVideo extends Disposable {
   Future<Result<Call>> consumeIncomingCall({
     required String uuid,
     required String cid,
+    CallPreferences? preferences,
   }) async {
     _logger.d(() => '[consumeIncomingCall] uuid: $uuid, cid: $cid');
     final manager = pushNotificationManager;
@@ -928,6 +941,7 @@ class StreamVideo extends Disposable {
         ringing: true,
         metadata: callResult.data.metadata,
       ),
+      preferences: preferences,
     );
 
     return Result.success(call);

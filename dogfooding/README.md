@@ -58,7 +58,32 @@ To run the macOS app the FlutterFire CLI tool needs to be installed. Install usi
 dart pub global activate flutterfire_cli
 ```
 
-5. Run the app
+5. Android setup
+
+Please ensure that you have JDK version 17 or lower installed on your machine. The build process may fail with JDK versions higher than 17.
+
+If you have multiple JDK versions installed, you can specify which version to use by running the following command:
+```bash
+## Ensure you're in the dogfooding directory
+flutter config --jdk-dir="path/to/jdk"
+```
+
+You can also try setting the JDK path in the `gradle.properties` file:
+```properties
+## Located in the dogfooding/android directory
+org.gradle.java.home=/path/to/jdk
+```
+
+Run `clean` and `doctor` commands to ensure everything is set up correctly:
+```bash
+## Ensure you're in the dogfooding directory
+flutter clean
+flutter doctor -v
+```
+
+In the output go to the `Android toolchain` section and ensure that the JDK version is correct.
+
+6. Run the app
 Once the setup is complete, you can run the app using Flutter:
 
 ```bash
