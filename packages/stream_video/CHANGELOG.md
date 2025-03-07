@@ -1,8 +1,14 @@
-## unreleased
+## 0.8.3
 
 ✅ Added
-* Added `CallParticipantState.audioLevels` with the 10 last audio levels of the participant.
-* Added `CallState.activeSpeakers` to get list of currently active speakers.
+* Introduced `CallParticipantState.audioLevels`, which stores the last 10 audio levels of a participant.
+* Added `CallState.activeSpeakers` to retrieve a list of currently active speakers.
+* Enhanced `observeCoreCallKitEvents()` in `StreamVideo` with a new `CallPreferences? preferences` parameter, allowing for configuration of the accepted call.
+* Implemented localization support for the SDK's UI components. See the [documentation](https://getstream.io/video/docs/flutter/localization/) for details.
+* Added the ability to customize the screen share selector on desktop devices. See the [updated documentation](https://getstream.io/video/docs/flutter/advanced/screen_sharing/) for details.
+
+🐞 Fixed
+* Resolved various issues related to screen sharing on desktop devices.
 
 ## 0.8.2
 
