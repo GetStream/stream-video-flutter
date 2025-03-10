@@ -1,3 +1,8 @@
+## Unreleased
+
+🐞 Fixed
+* (iOS) Fixed an issue where PiP will not stop when bringing app back to foreground
+
 ## 0.8.3
 
 ✅ Added
