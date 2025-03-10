@@ -9,7 +9,6 @@ import stream_webrtc_flutter
 
 /// A controller class for picture-in-picture whenever that is possible.
 final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
-
     // MARK: - Properties
 
     /// The RTCVideoTrack for which the picture-in-picture session is created.
@@ -80,7 +79,12 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         self.contentViewController = contentViewController
         self.canStartPictureInPictureAutomaticallyFromInline =
             canStartPictureInPictureAutomaticallyFromInline
+
         super.init()
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(handleAppDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     // MARK: - AVPictureInPictureControllerDelegate
@@ -179,4 +183,15 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     private func didUpdatePictureInPictureActiveState(_ isActive: Bool) {
         trackStateAdapter.isEnabled = isActive
     }
+
+    @objc private func handleAppDidBecomeActive() {
+        guard
+            let pictureInPictureController,
+            pictureInPictureController.isPictureInPictureActive == true
+        else {
+            return
+        }
+        pictureInPictureController.stopPictureInPicture()
+    }
+
 }
