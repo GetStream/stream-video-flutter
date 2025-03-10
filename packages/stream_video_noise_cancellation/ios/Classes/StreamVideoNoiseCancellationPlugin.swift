@@ -25,11 +25,11 @@ public class StreamVideoNoiseCancellationPlugin: NSObject, FlutterPlugin {
         process: noiseCancellationProcessor.process,
         release: noiseCancellationProcessor.release)
 
-      AudioManager.sharedInstance().audioProcessingModule = processingModule.processingModule
+      AudioManager.sharedInstance().audioProcessingModule = processingModule
 
       result(nil)
     case "isEnabled":
-      result(processingModule.activeAudioFilterId != nil)
+      result(processingModule.activeAudioFilter != nil)
     case "setEnabled":
       if noiseCancellationFilter == nil {
         result(
@@ -54,7 +54,9 @@ public class StreamVideoNoiseCancellationPlugin: NSObject, FlutterPlugin {
         if enabled {
           processingModule.setAudioFilter(noiseCancellationFilter)
         } else {
-          processingModule.setAudioFilter(nil)
+          if processingModule.activeAudioFilter != nil {
+            processingModule.setAudioFilter(nil)
+          }
         }
       }
 

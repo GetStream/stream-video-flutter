@@ -8,8 +8,8 @@ import stream_webrtc_flutter
 /// A protocol defining requirements for an audio processing module that supports audio filters.
 public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {
 
-    /// The identifier of the currently active audio filter.
-    var activeAudioFilterId: String? { get }
+    /// The currently active audio filter.
+    var activeAudioFilter: AudioFilter? { get }
 
     /// Sets the audio filter to be used for audio processing.
     /// - Parameter filter: The audio filter to set.
@@ -17,14 +17,11 @@ public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {
 }
 
 /// A custom audio processing module that integrates with an audio filter for stream processing.
-open class StreamAudioFilterProcessingModule: NSObject, RTCAudioProcessingModule,
+open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule,
     AudioProcessingModule, @unchecked Sendable
 {
 
-    /// The actual processingModule.
-    public let processingModule: RTCDefaultAudioProcessingModule
-
-    public let capturePostProcessingDelegate: AudioFilterCapturePostProcessingModule
+    private let _capturePostProcessingDelegate: AudioFilterCapturePostProcessingModule
 
     /// Initializes a new instance of `StreamAudioFilterProcessingModule`.
     /// - Parameters:
@@ -36,28 +33,26 @@ open class StreamAudioFilterProcessingModule: NSObject, RTCAudioProcessingModule
             StreamAudioFilterCapturePostProcessingModule(),
         renderPreProcessingDelegate: RTCAudioCustomProcessingDelegate? = nil
     ) {
-        processingModule = .init(
+        _capturePostProcessingDelegate = capturePostProcessingDelegate
+        super.init(
             config: config,
             capturePostProcessingDelegate: capturePostProcessingDelegate,
             renderPreProcessingDelegate: renderPreProcessingDelegate
         )
-        self.capturePostProcessingDelegate = capturePostProcessingDelegate
     }
 
-    public func apply(_ config: RTCAudioProcessingConfig) {
-        processingModule.apply(config)
+    override public func apply(_ config: RTCAudioProcessingConfig) {
+        super.apply(config)
     }
 
     /// Retrieves the identifier of the currently active audio filter.
-    public var activeAudioFilterId: String? {
-        // Delegates the retrieval to the capture post-processing delegate.
-        capturePostProcessingDelegate.activeAudioFilterId
+    public var activeAudioFilter: AudioFilter? {
+        _capturePostProcessingDelegate.audioFilter
     }
 
     /// Sets the audio filter for stream processing.
     /// - Parameter filter: The audio filter to set.
     public func setAudioFilter(_ filter: AudioFilter?) {
-        /// Delegates the setting of audio filter to the capture post-processing delegate.
-        capturePostProcessingDelegate.setAudioFilter(filter)
+        _capturePostProcessingDelegate.setAudioFilter(filter)
     }
 }
