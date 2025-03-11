@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show appFlavor;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -9,5 +10,5 @@ bool get kIsProd => switch (appFlavor) {
       'dev' => false,
       'beta' => false,
       'prod' => true,
-      _ => true,
+      _ => !kIsWeb, // On our web builds we enable non-prod features.
     };
