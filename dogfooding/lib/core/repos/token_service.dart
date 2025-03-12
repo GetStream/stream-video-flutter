@@ -4,7 +4,6 @@ import 'dart:convert';
 // 📦 Package imports:
 import 'package:http/http.dart' as http;
 
-import '../../di/injector.dart';
 import 'custom_environment_loader.dart';
 
 enum Environment {
