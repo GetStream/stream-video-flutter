@@ -120,7 +120,7 @@ The **Dogfooding** app is primarily for Stream employees to test the Video SDK i
 
 With **Dogfooding** connected yo your own **Stream app** you will have access to full configuration as well as **Call Stats**, **Events Logs** etc.
 
-Additionaly **APN Push Provider** used for ringing on **iOS devices** is tied to the iOS app **bundle identifier**. Since you will have to change the identifier to run the Dogfooding app using your own Apple Developer account, ringing won't work on iOS.
+Additionaly **APN Push Provider** used for ringing on **iOS devices** is tied to the iOS app **bundle identifier**. Since you will have to change the identifier to run the Dogfooding app using your own Apple Developer account, ringing won't work on iOS with the default environments.
 Using your **Stream app** will allow you to create an iOS certificate and APN provider configuration bound to your bundle ID and fully experience the ringing flow.
 
 ### Steps to Set Up a Custom Environment
