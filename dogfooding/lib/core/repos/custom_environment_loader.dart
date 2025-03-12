@@ -1,3 +1,5 @@
+import 'dart:async';
+
 /// If you want to use dogfooding with your own environment, you can provide a custom environment loader here.
 /// This will allow you to use your own tokens and API key.
 ///
@@ -11,7 +13,7 @@
 ///     apiKey: '{API_KEY}');
 /// ```
 class CustomEnvironmentLoader {
-  final String Function(String) tokenLoader;
+  final FutureOr<String> Function(String) tokenLoader;
   final String apiKey;
 
   const CustomEnvironmentLoader({

@@ -89,8 +89,10 @@ class TokenService {
             'Custom environment is not configured. Provide customEnvironmentLoader to AppInjector.init method to use it.');
       }
 
+      final userToken = await customEnvironmentLoader!.tokenLoader(userId);
+
       return TokenResponse(
-        customEnvironmentLoader!.tokenLoader(userId),
+        userToken,
         customEnvironmentLoader!.apiKey,
       );
     }
