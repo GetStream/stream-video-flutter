@@ -369,7 +369,7 @@ class PermissionsManager {
   }
 
   Future<Result<QueriedMembers>> queryMembers({
-    required Map<String, Object> filterConditions,
+    Map<String, Object> filterConditions = const {},
     String? next,
     String? prev,
     List<SortParamRequest> sorts = const [],
