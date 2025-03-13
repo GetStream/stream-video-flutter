@@ -432,6 +432,42 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> videoPin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.videoPin(
+        callCid: callCid,
+        sessionId: sessionId,
+        userId: userId,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('videoPin', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> videoUnpin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.videoUnpin(
+        callCid: callCid,
+        sessionId: sessionId,
+        userId: userId,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('videoUnpin', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid callCid,
     required String eventType,

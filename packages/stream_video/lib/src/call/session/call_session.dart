@@ -351,6 +351,8 @@ class CallSession extends Disposable {
       await onRtcManagerCreatedCallback?.call(rtcManager!);
       _rtcManagerSubject!.add(rtcManager!);
 
+      stateManager.sfuPinsUpdated(event.callState.pins);
+
       _logger.d(() => '[start] completed');
       return Result.success(
         (
@@ -436,6 +438,8 @@ class CallSession extends Disposable {
         for (final track in remoteTracks) {
           await _onRemoteTrackReceived(rtcManager!.subscriber, track);
         }
+
+        stateManager.sfuPinsUpdated(event.callState.pins);
 
         _logger.d(() => '[fastReconnect] completed');
         return Result.success(
@@ -546,6 +550,8 @@ class CallSession extends Disposable {
         stateManager.sfuTrackUnpublished(event);
       } else if (event is SfuDominantSpeakerChangedEvent) {
         stateManager.sfuDominantSpeakerChanged(event);
+      } else if (event is SfuPinsUpdatedEvent) {
+        stateManager.sfuPinsUpdated(event.pins);
       }
     });
   }
