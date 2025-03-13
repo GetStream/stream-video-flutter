@@ -22,10 +22,11 @@ For a more basic example of how to use the Stream Video Flutter package, check o
 
 ## Getting Started
 
-To set up and run the app, follow these steps:
+Follow these steps to set up and run the app:
 
-1. Clone the repo and install the dependencies
-First, clone the repository to your local machine and install the required Flutter packages:
+### 1. Clone the Repository & Install Dependencies
+
+First, clone the repository and install the required Flutter packages:
 
 ```bash
 git clone https://github.com/GetStream/stream-video-flutter.git
@@ -33,48 +34,55 @@ cd stream-video-flutter/dogfooding
 flutter pub get
 ```
 
-2. (iOS setup) Open iOS project in Xcode
+### 2. iOS Setup
+
+#### Open the iOS Project in Xcode
 
 ```bash
 cd ios
 open Runner.xcworkspace
 ```
 
-3. (iOS setup) Update the Bundle Identifier and Configure Signing
+#### Update the Bundle Identifier & Configure Signing
 
-- In Xcode, go to the Signing & Capabilities tab.
-- Under Team, select your own development team.
-- Update the bundle identifier for both Runner and ScreenSharing targets to something unique:
+- In Xcode, go to the **Signing & Capabilities** tab.
+- Under **Team**, select your development team.
+- Update the **Bundle Identifier** for both `Runner` and `ScreenSharing` targets:
     - Example: `com.yourname.StreamDogfooding`
-    - Example (ScreenSharing): com.yourname.StreamDogfooding.ScreenSharing
-- Update the App Group for both targets:
+    - Example (ScreenSharing): `com.yourname.StreamDogfooding.ScreenSharing`
+- Update the **App Group** for both targets:
     - Remove the existing group.
     - Create a new app group based on your updated bundle identifier.
     - Example: `group.com.yourname.StreamDogfooding`
 
-4. (macOS setup) Install FlutterFire
+### 3. macOS Setup
+
 To run the macOS app the FlutterFire CLI tool needs to be installed. Install using:
+
 ```bash
 dart pub global activate flutterfire_cli
 ```
 
-5. Android setup
+### 4. Android setup
 
 Please ensure that you have JDK version 17 or lower installed on your machine. The build process may fail with JDK versions higher than 17.
 
 If you have multiple JDK versions installed, you can specify which version to use by running the following command:
+
 ```bash
 ## Ensure you're in the dogfooding directory
 flutter config --jdk-dir="path/to/jdk"
 ```
 
 You can also try setting the JDK path in the `gradle.properties` file:
+
 ```properties
 ## Located in the dogfooding/android directory
 org.gradle.java.home=/path/to/jdk
 ```
 
 Run `clean` and `doctor` commands to ensure everything is set up correctly:
+
 ```bash
 ## Ensure you're in the dogfooding directory
 flutter clean
@@ -83,23 +91,54 @@ flutter doctor -v
 
 In the output go to the `Android toolchain` section and ensure that the JDK version is correct.
 
-6. Run the app
-Once the setup is complete, you can run the app using Flutter:
+### 5. Run the app
+
+Once the setup is complete, launch the app:
 
 ```bash
 ## Ensure you're in the dogfooding directory
 flutter run
 ```
 
-The app should now launch on your connected device or simulator.
+The app should now start on your connected device or simulator.
 
-:::note
-When logging in with an email address, note that the user_id for the created user will automatically replace the `@` and `.` characters with underscores (`_`).
+### 6. Important notes
 
-For example, if you log in with `test@test.com`, the corresponding `user_id` will be `test_test_com`.
+#### Email-Based Login & User ID Conversion
 
-This is crucial to keep in mind, especially when testing direct calls, as you'll need to reference the correct `user_id`.
-:::
+When logging in with an email, the user_id automatically replaces @ and . with underscores (_).
+For example:
+
+- Email: test@test.com
+- User ID: test_test_com
+
+This is crucial for testing direct calls, as you'll need to reference the correct user_id.
+
+## Custom Environment Setup
+
+The **Dogfooding** app is primarily for Stream employees to test the Video SDK internally. You can use one of our environments (prefereably `demo` which is most stable one) for testing, however, it is recommended to configure a custom environment if you have a **Stream app** created in the **Stream Dashboard**.
+
+With **Dogfooding** connected yo your own **Stream app** you will have access to full configuration as well as **Call Stats**, **Events Logs** etc.
+
+Additionaly **APN Push Provider** used for ringing on **iOS devices** is tied to the iOS app **bundle identifier**. Since you will have to change the identifier to run the Dogfooding app using your own Apple Developer account, ringing won't work on iOS with the default environments.
+Using your **Stream app** will allow you to create an iOS certificate and APN provider configuration bound to your bundle ID and fully experience the ringing flow.
+
+### Steps to Set Up a Custom Environment
+
+1. Modify the `custom_environment_loader.dart` file:
+    - Replace the global variable `customEnvironmentLoader` with your own `CustomEnvironmentLoader` implementation.
+    - This should return hardcoded tokens or fetch tokens from your backend.
+    - You can manually generate tokens using [this form](https://getstream.io/chat/docs/flutter-dart/tokens_and_authentication/#manually-generating-tokens).
+
+2. Run the Dogfooding App:
+    - On the login page, select `custom` from the environment switcher in the top-right corner.
+
+3. Set Up Push Providers (if not configured yet):
+    - [Firebase Push Provider for Android](https://getstream.io/video/docs/flutter/advanced/incoming-calls/providers-configuration/#creating-firebase-provider)
+    - [APN Push Provider for iOS](https://getstream.io/video/docs/flutter/advanced/incoming-calls/providers-configuration/#creating-apns-provider)
+
+4. Update Push Providers in `injector.dart`: 
+    - Replace the default provider names in the `_initStreamVideo()` method with the ones you created.
 
 ## License
 

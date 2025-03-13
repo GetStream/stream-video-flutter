@@ -4,6 +4,8 @@ import 'dart:convert';
 // 📦 Package imports:
 import 'package:http/http.dart' as http;
 
+import 'custom_environment_loader.dart';
+
 enum Environment {
   pronto(
     'Pronto',
@@ -26,6 +28,11 @@ enum Environment {
     'Staging',
     'staging',
     'pronto.getstream.io',
+  ),
+  custom(
+    'Custom',
+    'custom',
+    '',
   );
 
   final String displayName;
@@ -66,13 +73,29 @@ class TokenResponse {
 }
 
 class TokenService {
-  const TokenService();
+  final CustomEnvironmentLoader? customEnvironmentLoader;
+
+  const TokenService({this.customEnvironmentLoader});
 
   Future<TokenResponse> loadToken({
     required String userId,
     required Environment environment,
     Duration? expiresIn,
   }) async {
+    if (environment == Environment.custom) {
+      if (customEnvironmentLoader == null) {
+        throw Exception(
+            'Custom environment is not configured. Provide customEnvironmentLoader to AppInjector.init method to use it.');
+      }
+
+      final userToken = await customEnvironmentLoader!.tokenLoader(userId);
+
+      return TokenResponse(
+        userToken,
+        customEnvironmentLoader!.apiKey,
+      );
+    }
+
     final queryParameters = <String, dynamic>{
       'environment': environment.envName,
       'user_id': userId,

@@ -12,6 +12,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
 import '../app/user_auth_controller.dart';
+import '../core/repos/custom_environment_loader.dart';
 import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
 import '../log_config.dart';
@@ -23,7 +24,9 @@ GetIt locator = GetIt.instance;
 /// and injecting them into the app.
 class AppInjector {
   // Register dependencies
-  static Future<void> init({Environment? forceEnvironment}) async {
+  static Future<void> init({
+    Environment? forceEnvironment,
+  }) async {
     // Google sign in
     locator.registerSingleton<GoogleSignIn>(
       GoogleSignIn(hostedDomain: 'getstream.io'),
@@ -40,7 +43,11 @@ class AppInjector {
     locator.registerSingleton<AppPreferences>(appPrefs);
 
     // Repositories
-    locator.registerSingleton(const TokenService());
+    locator.registerSingleton(
+      TokenService(
+        customEnvironmentLoader: customEnvironmentLoader,
+      ),
+    );
 
     locator.registerFactoryParam<UserAuthRepository, User, TokenResponse>(
       (user, tokenResponse) {

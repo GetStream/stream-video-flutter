@@ -18,7 +18,8 @@ command:
 
     # Dependencies used in the project.
     dependencies:
-      stream_webrtc_flutter: ^0.12.9+1
+      dart_webrtc: ^1.4.10
+      stream_webrtc_flutter: ^0.12.12+1
 
 scripts:
   postclean:
@@ -48,7 +49,7 @@ scripts:
     description: |
       Run `dart analyze` in all packages.
        Flags all compiler `errors` in the project.
-  
+
   analyze:error:
     run: |
       melos exec -c 5 --ignore="*example*" -- \
@@ -129,7 +130,7 @@ scripts:
     description: Removes all the ignored files from the coverage report.
     packageFilters:
       dirExists: coverage
-      
+
   build:example:android:
     run: |
       cd ./packages/stream_video_flutter/example && 
