@@ -7,6 +7,7 @@ import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_level.dart';
 import '../sfu/data/models/sfu_call_grants.dart';
 import '../sfu/data/models/sfu_connection_info.dart';
+import '../sfu/data/models/sfu_pin.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/sfu_extensions.dart';
 import '../shared_emitter.dart';
@@ -134,6 +135,22 @@ class StreamCallDominantSpeakerChangedEvent extends StreamSfuCallEvent {
         ...super.props,
         userId,
         sessionId,
+      ];
+}
+
+/// Event that is triggered when pinned participants are updated
+class StreamPinsUpdatedEvent extends StreamSfuCallEvent {
+  const StreamPinsUpdatedEvent(
+    super.callCid, {
+    required this.pins,
+  });
+
+  final List<SfuPin> pins;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        pins,
       ];
 }
 
@@ -941,6 +958,10 @@ extension SfuEventX on SfuEvent {
           state.callCid,
           userId: event.userId,
           sessionId: event.sessionId,
+        ),
+      final SfuPinsUpdatedEvent event => StreamPinsUpdatedEvent(
+          state.callCid,
+          pins: event.pins,
         ),
       final SfuTrackPublishedEvent event => StreamCallSfuTrackPublishedEvent(
           state.callCid,

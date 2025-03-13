@@ -272,4 +272,16 @@ abstract class CoordinatorClient {
     String? image,
     Map<String, Object> custom = const {},
   });
+
+  Future<Result<None>> videoPin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  });
+
+  Future<Result<None>> videoUnpin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  });
 }

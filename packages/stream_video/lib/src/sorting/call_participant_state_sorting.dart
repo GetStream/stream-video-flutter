@@ -40,8 +40,16 @@ int publishingAudio(CallParticipantState a, CallParticipantState b) {
 
 /// A comparator which prioritizes participants who are pinned.
 int pinned(CallParticipantState a, CallParticipantState b) {
-  if (a.isPinned && !b.isPinned) return -1;
-  if (!a.isPinned && b.isPinned) return 1;
+  if (a.pin != null && b.pin != null) {
+    if (!a.pin!.isLocalPin && b.pin!.isLocalPin) return -1;
+    if (a.pin!.isLocalPin && !b.pin!.isLocalPin) return 1;
+    if (a.pin!.pinnedAt.isAfter(b.pin!.pinnedAt)) return -1;
+    if (a.pin!.pinnedAt.isBefore(b.pin!.pinnedAt)) return 1;
+  }
+
+  if (a.pin != null && b.pin == null) return -1;
+  if (a.pin == null && b.pin != null) return 1;
+
   return 0;
 }
 
