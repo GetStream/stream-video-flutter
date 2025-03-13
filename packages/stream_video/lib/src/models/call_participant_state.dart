@@ -5,6 +5,7 @@ import '../sfu/data/models/sfu_connection_quality.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sorting/call_participant_sorting_presets.dart';
 import '../utils/string.dart';
+import 'call_participant_pin.dart';
 import 'call_reaction.dart';
 import 'call_track_state.dart';
 import 'user_info.dart';
@@ -30,7 +31,7 @@ class CallParticipantState
     List<double>? audioLevels,
     this.isSpeaking = false,
     this.isDominantSpeaker = false,
-    this.isPinned = false,
+    this.pin,
     this.reaction,
     this.viewportVisibility = ViewportVisibility.unknown,
   }) : audioLevels = audioLevels ?? [audioLevel];
@@ -55,9 +56,11 @@ class CallParticipantState
 
   final bool isSpeaking;
   final bool isDominantSpeaker;
-  final bool isPinned;
+  final CallParticipantPin? pin;
   final CallReaction? reaction;
   final ViewportVisibility viewportVisibility;
+
+  bool get isPinned => pin != null;
 
   /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.
@@ -79,7 +82,7 @@ class CallParticipantState
     List<double>? audioLevels,
     bool? isSpeaking,
     bool? isDominantSpeaker,
-    bool? isPinned,
+    CallParticipantPin? pin,
     CallReaction? reaction,
     ViewportVisibility? viewportVisibility,
   }) {
@@ -99,7 +102,7 @@ class CallParticipantState
       audioLevels: audioLevels ?? this.audioLevels,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
-      isPinned: isPinned ?? this.isPinned,
+      pin: pin ?? this.pin,
       reaction: reaction ?? this.reaction,
       viewportVisibility: viewportVisibility ?? this.viewportVisibility,
     );
@@ -120,6 +123,31 @@ class CallParticipantState
       audioLevel: audioLevel,
       audioLevels: audioLevels,
       isSpeaking: isSpeaking,
+    );
+  }
+
+  CallParticipantState copyWithPin({
+    required CallParticipantPin? participantPin,
+  }) {
+    return CallParticipantState(
+      userId: userId,
+      roles: roles,
+      name: name,
+      custom: custom,
+      image: image,
+      sessionId: sessionId,
+      trackIdPrefix: trackIdPrefix,
+      publishedTracks: publishedTracks,
+      isLocal: isLocal,
+      connectionQuality: connectionQuality,
+      isOnline: isOnline,
+      audioLevel: audioLevel,
+      audioLevels: audioLevels,
+      isSpeaking: isSpeaking,
+      isDominantSpeaker: isDominantSpeaker,
+      pin: participantPin,
+      reaction: reaction,
+      viewportVisibility: viewportVisibility,
     );
   }
 
@@ -170,7 +198,7 @@ class CallParticipantState
         audioLevels,
         isSpeaking,
         isDominantSpeaker,
-        isPinned,
+        pin,
         reaction,
         viewportVisibility,
       ];

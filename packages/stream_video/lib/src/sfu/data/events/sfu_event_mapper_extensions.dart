@@ -12,6 +12,7 @@ import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_model_mapper_extensions.dart';
 import '../models/sfu_participant.dart';
+import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_layer_setting.dart';
@@ -124,6 +125,10 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           userId: dominantSpeakerChanged.userId,
           sessionId: dominantSpeakerChanged.sessionId,
         );
+      case sfu_events.SfuEvent_EventPayload.pinsUpdated:
+        return SfuPinsUpdatedEvent(
+          pins: pinsUpdated.pins.map((p) => p.toDomain()).toList(),
+        );
       case sfu_events.SfuEvent_EventPayload.trackPublished:
         return SfuTrackPublishedEvent(
           userId: trackPublished.userId,
@@ -187,6 +192,7 @@ extension SfuCallStateExtension on sfu_models.CallState {
       participants: participants.map((it) => it.toDomain()).toList(),
       participantCount: participantCount.toDomain(),
       startedAt: startedAt.toDateTime(),
+      pins: pins.map((it) => it.toDomain()).toList(),
     );
   }
 }
@@ -226,7 +232,6 @@ extension SfuParticipantExtension on sfu_models.Participant {
   }
 }
 
-/// TODO
 extension SfuConnectionQualityExtension on sfu_models.ConnectionQuality {
   SfuConnectionQuality toDomain() {
     switch (this) {
@@ -244,7 +249,6 @@ extension SfuConnectionQualityExtension on sfu_models.ConnectionQuality {
   }
 }
 
-/// TODO
 extension SfuGoAwayReasonExtension on sfu_models.GoAwayReason {
   SfuGoAwayReason toDomain() {
     switch (this) {
@@ -260,7 +264,6 @@ extension SfuGoAwayReasonExtension on sfu_models.GoAwayReason {
   }
 }
 
-/// TODO
 extension SfuTrackTypeExtension on sfu_models.TrackType {
   SfuTrackType toDomain() {
     switch (this) {
@@ -280,7 +283,6 @@ extension SfuTrackTypeExtension on sfu_models.TrackType {
   }
 }
 
-/// TODO
 extension SfuErrorCodeExtension on sfu_models.ErrorCode {
   SfuErrorCode toDomain() {
     switch (this) {
@@ -399,6 +401,15 @@ extension on sfu_models.PublishOption {
       maxTemporalLayers: maxTemporalLayers,
       bitrate: bitrate,
       fps: fps,
+    );
+  }
+}
+
+extension on sfu_models.Pin {
+  SfuPin toDomain() {
+    return SfuPin(
+      userId: userId,
+      sessionId: sessionId,
     );
   }
 }

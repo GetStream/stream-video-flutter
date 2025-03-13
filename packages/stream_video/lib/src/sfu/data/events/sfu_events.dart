@@ -12,6 +12,7 @@ import '../models/sfu_connection_info.dart';
 import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_participant.dart';
+import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_sender.dart';
@@ -192,6 +193,18 @@ class SfuDominantSpeakerChangedEvent extends SfuEvent {
 
   @override
   List<Object> get props => [userId, sessionId];
+}
+
+@internal
+class SfuPinsUpdatedEvent extends SfuEvent {
+  const SfuPinsUpdatedEvent({
+    required this.pins,
+  });
+
+  final List<SfuPin> pins;
+
+  @override
+  List<Object> get props => [pins];
 }
 
 @internal

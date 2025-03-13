@@ -685,6 +685,64 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> videoPin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[videoPin] no connection established');
+        return connectionResult;
+      }
+      final result = await _defaultApi.videoPin(
+        callCid.type.value,
+        callCid.id,
+        open.PinRequest(
+          sessionId: sessionId,
+          userId: userId,
+        ),
+      );
+      if (result == null) {
+        return Result.error('[videoPin] result is null');
+      }
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> videoUnpin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[videoUnpin] no connection established');
+        return connectionResult;
+      }
+      final result = await _defaultApi.videoUnpin(
+        callCid.type.value,
+        callCid.id,
+        open.UnpinRequest(
+          sessionId: sessionId,
+          userId: userId,
+        ),
+      );
+      if (result == null) {
+        return Result.error('[videoUnpin] result is null');
+      }
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<None>> updateUserPermissions({
     required StreamCallCid callCid,
     required String userId,
