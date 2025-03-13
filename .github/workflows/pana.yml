@@ -1,0 +1,58 @@
+name: pana
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stream_video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+      - name: 📊 Verify Pana Score
+        uses: ./.github/actions/pana
+        with:
+          working_directory: packages/stream_video
+          min_score: 120
+
+  stream_video_flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+      - name: 📊 Verify Pana Score
+        uses: ./.github/actions/pana
+        with:
+          working_directory: packages/stream_video_flutter
+          min_score: 150
+
+  stream_video_push_notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+      - name: 📊 Verify Pana Score
+        uses: ./.github/actions/pana
+        with:
+          working_directory: packages/stream_video_push_notification
+          min_score: 140
+
+  stream_video_screen_sharing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+      - name: 📊 Verify Pana Score
+        uses: ./.github/actions/pana
+        with:
+          working_directory: packages/stream_video_screen_sharing
+          min_score: 140
