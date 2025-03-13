@@ -1,5 +1,8 @@
 ## Unreleased
 
+🐞 Fixed
+* (iOS) Fixed an issue where PiP will not stop when bringing app back to foreground
+
 ✅ Added
 * Added `membersLimit` parameter to `getOrCreate()` and `join()` methods in `Call` class to limit number of members listed in the response.
 
