@@ -6,6 +6,9 @@
 ✅ Added
 * Added `membersLimit` parameter to `getOrCreate()` and `join()` methods in `Call` class to limit number of members listed in the response.
 
+🔄 Changed
+* Update stream_webrtc_flutter and device_info_plus dependencies
+
 ## 0.8.3
 
 ✅ Added
