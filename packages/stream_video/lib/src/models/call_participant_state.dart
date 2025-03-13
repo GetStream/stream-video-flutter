@@ -198,7 +198,6 @@ class CallParticipantState
         audioLevels,
         isSpeaking,
         isDominantSpeaker,
-        isPinned,
         pin,
         reaction,
         viewportVisibility,

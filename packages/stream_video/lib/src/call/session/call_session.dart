@@ -814,16 +814,6 @@ class CallSession extends Disposable {
     }
   }
 
-  Future<Result<None>> setParticipantPinned({
-    required String sessionId,
-    required String userId,
-    required bool pinned,
-  }) async {
-    _logger.d(() => '[setParticipantPinned]');
-    // Nothing to do here, this is handled by the UI
-    return const Result.success(none);
-  }
-
   Future<Result<None>> updateViewportVisibility(
     VisibilityChange visibilityChange,
   ) async {

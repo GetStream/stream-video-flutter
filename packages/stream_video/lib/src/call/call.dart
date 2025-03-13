@@ -2141,14 +2141,13 @@ class Call {
     return result;
   }
 
-  /// Pins/unpins the given session to the top of the participants list.
-  /// The change is done locally and won't affect other participants.
+  @Deprecated('Use setParticipantPinnedLocally instead')
   Future<Result<None>> setParticipantPinned({
     required String sessionId,
     required String userId,
     required bool pinned,
   }) async {
-    _stateManager.setParticipantPinned(
+    setParticipantPinnedLocally(
       sessionId: sessionId,
       userId: userId,
       pinned: pinned,
@@ -2157,8 +2156,22 @@ class Call {
     return const Result.success(none);
   }
 
+  /// Pins/unpins the given session to the top of the participants list.
+  /// The change is done locally and won't affect other participants.
+  void setParticipantPinnedLocally({
+    required String sessionId,
+    required String userId,
+    required bool pinned,
+  }) {
+    _stateManager.setParticipantPinned(
+      sessionId: sessionId,
+      userId: userId,
+      pinned: pinned,
+    );
+  }
+
   /// Pins/unpins the given session to the top of the participants list for everyone in the call.
-  /// You can execute this method only if you have the `pin-for-everyone` capability.
+  /// This method requires current user to have the `pin-for-everyone` capability.
   Future<Result<None>> setParticipantPinnedForEveryone({
     required String sessionId,
     required String userId,
