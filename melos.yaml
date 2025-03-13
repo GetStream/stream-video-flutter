@@ -20,7 +20,7 @@ command:
     dependencies:
       dart_webrtc: ^1.4.10
       device_info_plus: '>=10.1.2 <12.0.0'
-      stream_chat_flutter: ^9.5.0
+      stream_chat_flutter: ^9.6.0
       stream_webrtc_flutter: ^0.12.12+2
 
 scripts:
