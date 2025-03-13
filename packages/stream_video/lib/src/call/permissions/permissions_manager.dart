@@ -313,6 +313,42 @@ class PermissionsManager {
     );
   }
 
+  Future<Result<None>> pinForEveryone({
+    required String userId,
+    required String sessionId,
+  }) async {
+    if (!hasPermission(CallPermission.pinForEveryone)) {
+      _logger.w(() => '[pinForEveryone] rejected (no permission)');
+      return Result.error('Cannot pin session for everyone (no permission)');
+    }
+
+    _logger.d(() => '[pinForEveryone] pinning $userId for everyone');
+
+    return coordinatorClient.videoPin(
+      callCid: callCid,
+      sessionId: sessionId,
+      userId: userId,
+    );
+  }
+
+  Future<Result<None>> unpinForEveryone({
+    required String userId,
+    required String sessionId,
+  }) async {
+    if (!hasPermission(CallPermission.pinForEveryone)) {
+      _logger.w(() => '[unpinForEveryone] rejected (no permission)');
+      return Result.error('Cannot unpin session for everyone (no permission)');
+    }
+
+    _logger.d(() => '[unpinForEveryone] unpinning $userId for everyone');
+
+    return coordinatorClient.videoUnpin(
+      callCid: callCid,
+      sessionId: sessionId,
+      userId: userId,
+    );
+  }
+
   Future<Result<CallReaction>> sendReaction({
     required String reactionType,
     String? emojiCode,
@@ -333,7 +369,7 @@ class PermissionsManager {
   }
 
   Future<Result<QueriedMembers>> queryMembers({
-    required Map<String, Object> filterConditions,
+    Map<String, Object> filterConditions = const {},
     String? next,
     String? prev,
     List<SortParamRequest> sorts = const [],

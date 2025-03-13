@@ -77,6 +77,7 @@ abstract class CoordinatorClient {
     bool? notify,
     bool? video,
     DateTime? startsAt,
+    int? membersLimit,
     open.CallSettingsRequest? settingsOverride,
     Map<String, Object> custom = const {},
   });
@@ -87,6 +88,7 @@ abstract class CoordinatorClient {
     bool? create,
     String? migratingFrom,
     bool? video,
+    int? membersLimit,
   });
 
   Future<Result<None>> acceptCall({required StreamCallCid cid});
@@ -271,5 +273,17 @@ abstract class CoordinatorClient {
     String? name,
     String? image,
     Map<String, Object> custom = const {},
+  });
+
+  Future<Result<None>> videoPin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  });
+
+  Future<Result<None>> videoUnpin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
   });
 }

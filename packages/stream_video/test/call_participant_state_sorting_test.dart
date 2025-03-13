@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_video/src/models/call_participant_pin.dart';
 import 'package:stream_video/src/models/call_participant_state.dart';
 import 'package:stream_video/src/models/call_track_state.dart';
 import 'package:stream_video/src/models/viewport_visibility.dart';
@@ -26,7 +27,7 @@ void main() {
       isDominantSpeaker: false,
       audioLevel: 0,
       viewportVisibility: ViewportVisibility.visible,
-      isPinned: false,
+      pin: null,
     ),
 
     // Presenter, video, audio
@@ -47,7 +48,7 @@ void main() {
       isDominantSpeaker: false,
       audioLevel: 0,
       viewportVisibility: ViewportVisibility.visible,
-      isPinned: false,
+      pin: null,
     ),
 
     // Muted
@@ -64,7 +65,7 @@ void main() {
       isDominantSpeaker: false,
       audioLevel: 0,
       viewportVisibility: ViewportVisibility.visible,
-      isPinned: false,
+      pin: null,
     ),
 
     // Dominant speaker
@@ -81,7 +82,7 @@ void main() {
       isDominantSpeaker: true,
       audioLevel: 0,
       viewportVisibility: ViewportVisibility.visible,
-      isPinned: false,
+      pin: null,
     ),
 
     // Presenter only
@@ -98,7 +99,7 @@ void main() {
       isDominantSpeaker: false,
       audioLevel: 0,
       viewportVisibility: ViewportVisibility.visible,
-      isPinned: false,
+      pin: null,
     ),
 
     // pinned
@@ -118,7 +119,7 @@ void main() {
       isDominantSpeaker: false,
       audioLevel: 0,
       viewportVisibility: ViewportVisibility.visible,
-      isPinned: true,
+      pin: CallParticipantPin(isLocalPin: true, pinnedAt: DateTime.now()),
     ),
   ];
 
