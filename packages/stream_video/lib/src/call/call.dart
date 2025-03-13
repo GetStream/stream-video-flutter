@@ -566,7 +566,7 @@ class Call {
   /// Joins the call.
   ///
   /// - [connectOptions]: optional initial call configuration
-  /// - [membersLimit]: Sets the total number of members to return as part of the response.
+  /// - [membersLimit]: Sets the maximum number of members to return as part of the response.
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
