@@ -35,7 +35,7 @@ jobs:
           working_directory: packages/stream_video_flutter
           min_score: 150
 
-  stream_video_push_notifications:
+  stream_video_push_notification:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
@@ -43,7 +43,7 @@ jobs:
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
-          working_directory: packages/stream_video_push_notifications
+          working_directory: packages/stream_video_push_notification
           min_score: 140
 
   stream_video_screen_sharing:
