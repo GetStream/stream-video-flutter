@@ -17,7 +17,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleUpdateUserId(
     String userId,
   ) {
-    _logger.d(
+    _logger.i(
       () => '[lifecycleUpdateUserId] userId: $userId, state: $state',
     );
     state = state.copyWith(
@@ -59,7 +59,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     bool ringing = false,
     bool notify = false,
   }) {
-    _logger.d(
+    _logger.i(
       () => '[lifecycleCallReceived] ringing: $ringing'
           ', notify: $notify, state: $state',
     );
@@ -97,7 +97,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     required CallConnectOptions callConnectOptions,
     bool ringing = false,
   }) {
-    _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
+    _logger.i(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
 
     state = state
         .copyFromMetadata(
@@ -119,7 +119,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallRinging(
     CallRingingData data,
   ) {
-    _logger.d(() => '[lifecycleCallRinging] state: $state');
+    _logger.i(() => '[lifecycleCallRinging] state: $state');
     state = state
         .copyFromMetadata(
           data.metadata,
@@ -136,7 +136,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallJoining() {
-    _logger.d(() => '[lifecycleCallJoining] state: $state');
+    _logger.i(() => '[lifecycleCallJoining] state: $state');
     state = state.copyWith(
       status: CallStatus.joining(),
     );
@@ -147,7 +147,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     CallConnectOptions? callConnectOptions,
   }) {
     final status = state.status.isJoining ? CallStatus.joined() : state.status;
-    _logger.d(() => '[lifecycleCallJoined] state: $state;\nnewStatus: $status');
+    _logger.i(() => '[lifecycleCallJoined] state: $state;\nnewStatus: $status');
 
     state = state
         .copyFromMetadata(
@@ -175,7 +175,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallDisconnected({DisconnectReason? reason}) {
-    _logger.w(() => '[lifecycleCallDisconnected] state: $state');
+    _logger.i(
+      () => '[lifecycleCallDisconnected] state: $state, reason: $reason',
+    );
 
     state = state.copyWith(
       status: CallStatus.disconnected(
@@ -210,7 +212,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     required int attempt,
     SfuReconnectionStrategy? strategy,
   }) {
-    _logger.d(() => '[lifecycleCallConnectingAction] state: $state');
+    _logger.i(() => '[lifecycleCallConnectingAction] state: $state');
     final CallStatus status;
 
     if (strategy == SfuReconnectionStrategy.migrate) {
@@ -246,7 +248,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     required String sessionId,
     LocalStats? localStats,
   }) {
-    _logger.d(() => '[lifecycleCallSessionStart] state: $state');
+    _logger.i(() => '[lifecycleCallSessionStart] state: $state');
     state = state.copyWith(
       sessionId: sessionId,
       localStats: localStats,
@@ -254,7 +256,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallConnected() {
-    _logger.d(() => '[lifecycleCallConnected] state: $state');
+    _logger.i(() => '[lifecycleCallConnected] state: $state');
     state = state.copyWith(
       status: CallStatus.connected(),
     );

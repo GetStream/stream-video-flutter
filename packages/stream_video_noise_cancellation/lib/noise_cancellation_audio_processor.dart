@@ -1,9 +1,18 @@
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_noise_cancellation/stream_video_noise_cancellation.dart';
+import '../errors/video_error.dart';
 
 class NoiseCancellationAudioProcessor extends AudioProcessor {
+  final _logger = taggedLogger(tag: 'SV:NoiseCancellationAudioProcessor');
+
   NoiseCancellationAudioProcessor() {
-    StreamVideoNoiseCancellation().registerProcessor();
+    try {
+      StreamVideoNoiseCancellation().registerProcessor();
+    } on UnimplementedError catch (e) {
+      _logger.w(
+        () => 'Noise cancellation is not supported on this platform: $e',
+      );
+    }
   }
 
   @override
@@ -11,6 +20,14 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
     try {
       await StreamVideoNoiseCancellation().isEnabled() ?? false;
       return Result.success(true);
+    } on UnimplementedError catch (e) {
+      _logger.e(
+        () => 'Noise cancellation is not supported on this platform: $e',
+      );
+
+      return Result.error(
+        'Noise cancellation is not supported on this platform',
+      );
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }
@@ -21,6 +38,14 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
     try {
       await StreamVideoNoiseCancellation().setEnabled(enabled);
       return Result.success(none);
+    } on UnimplementedError catch (e) {
+      _logger.e(
+        () => 'Noise cancellation is not supported on this platform: $e',
+      );
+
+      return Result.error(
+        'Noise cancellation is not supported on this platform',
+      );
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }
@@ -33,6 +58,14 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
               .deviceSupportsAdvancedAudioProcessing() ??
           false;
       return Result.success(result);
+    } on UnimplementedError catch (e) {
+      _logger.e(
+        () => 'Noise cancellation is not supported on this platform: $e',
+      );
+
+      return Result.error(
+        'Noise cancellation is not supported on this platform',
+      );
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }
