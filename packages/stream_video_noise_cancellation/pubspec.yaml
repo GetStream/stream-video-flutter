@@ -13,8 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
-  stream_video: ^0.8.3
-  stream_webrtc_flutter: ^0.2.0
+  stream_video: ^0.8.4
+  stream_webrtc_flutter: ^1.0.0-dev.1
 
 dev_dependencies:
   flutter_test:
