@@ -29,6 +29,7 @@ enum CallPermission {
   startClosedCaptionsCall('start-closed-captions-call'),
   stopClosedCaptionsCall('stop-closed-captions-call'),
   pinForEveryone('pin-for-everyone'),
+  enableNoiseCancellation('enable-noise-cancellation'),
   unknown('unknown');
 
   const CallPermission(this.alias);
