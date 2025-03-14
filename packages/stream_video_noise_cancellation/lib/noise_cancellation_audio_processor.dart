@@ -1,6 +1,5 @@
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_noise_cancellation/stream_video_noise_cancellation.dart';
-import '../errors/video_error.dart';
 
 class NoiseCancellationAudioProcessor extends AudioProcessor {
   final _logger = taggedLogger(tag: 'SV:NoiseCancellationAudioProcessor');
