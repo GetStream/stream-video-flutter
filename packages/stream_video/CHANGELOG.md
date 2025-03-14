@@ -1,3 +1,17 @@
+## 0.8.4
+
+🔄 Changed
+* Updated the `device_info_plus` dependency to support a wider range of versions and resolve potential conflicts.
+* Deprecated the `setParticipantPinned()` method in the `Call` class — use `setParticipantPinnedLocally()` instead.
+* Replaced the `isPinned` parameter in `CallParticipantState` with a `pin` object, which now differentiates between local and remote pinning.
+
+✅ Added
+* Introduced a `membersLimit` parameter in the `getOrCreate()` and `join()` methods of the `Call` class to limit the number of members included in the response.
+* Added `setParticipantPinnedForEveryone()`, allowing users with the required permissions to pin participants for all. The `setParticipantPinned()` method has been replaced with `setParticipantPinnedLocally()`, which, as before, only pins participants locally.
+
+🔄 Changed
+* Update stream_webrtc_flutter and device_info_plus dependencies
+
 ## 0.8.3
 
 ✅ Added

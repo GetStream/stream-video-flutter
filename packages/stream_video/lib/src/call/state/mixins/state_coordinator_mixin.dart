@@ -414,8 +414,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           audioLevel: e.audioLevel,
           isSpeaking: e.isSpeaking,
           isDominantSpeaker: e.isDominantSpeaker,
-          isPinned: e.isPinned,
           viewportVisibility: e.viewportVisibility,
+          pin: e.pin,
         );
       } else {
         return e;

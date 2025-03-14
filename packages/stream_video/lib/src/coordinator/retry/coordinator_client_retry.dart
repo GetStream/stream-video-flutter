@@ -145,6 +145,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     bool? notify,
     bool? video,
     DateTime? startsAt,
+    int? membersLimit,
     open.CallSettingsRequest? settingsOverride,
     Map<String, Object> custom = const {},
   }) {
@@ -157,6 +158,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         notify: notify,
         video: video,
         startsAt: startsAt,
+        membersLimit: membersLimit,
         settingsOverride: settingsOverride,
         custom: custom,
       ),
@@ -249,6 +251,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     bool? create,
     String? migratingFrom,
     bool? video,
+    int? membersLimit,
   }) {
     return _retryManager.execute(
       () => _delegate.joinCall(
@@ -394,7 +397,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
   @override
   Future<Result<QueriedMembers>> queryMembers({
     required StreamCallCid callCid,
-    required Map<String, Object> filterConditions,
+    Map<String, Object> filterConditions = const {},
     String? next,
     String? prev,
     List<open.SortParamRequest> sorts = const [],
@@ -427,6 +430,42 @@ class CoordinatorClientRetry extends CoordinatorClient {
       ),
       (error, nextAttemptDelay) async {
         _logRetry('requestPermissions', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> videoPin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.videoPin(
+        callCid: callCid,
+        sessionId: sessionId,
+        userId: userId,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('videoPin', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> videoUnpin({
+    required StreamCallCid callCid,
+    required String sessionId,
+    required String userId,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.videoUnpin(
+        callCid: callCid,
+        sessionId: sessionId,
+        userId: userId,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('videoUnpin', error, nextAttemptDelay);
       },
     );
   }
