@@ -51,14 +51,18 @@ class _ScreenShareThumbnailWidgetState
   }
 
   void _subscribe() {
-    _subscriptions.add(widget.source.onThumbnailChanged.stream.listen((event) {
-      setState(() {
-        _thumbnail = event;
-      });
-    }));
-    _subscriptions.add(widget.source.onNameChanged.stream.listen((event) {
-      setState(() {});
-    }));
+    _subscriptions.add(
+      widget.source.onThumbnailChanged.stream.listen((event) {
+        setState(() {
+          _thumbnail = event;
+        });
+      }),
+    );
+    _subscriptions.add(
+      widget.source.onNameChanged.stream.listen((event) {
+        setState(() {});
+      }),
+    );
   }
 
   void _unsubscribe() {
