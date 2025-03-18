@@ -5,11 +5,19 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
   final _logger = taggedLogger(tag: 'SV:NoiseCancellationAudioProcessor');
 
   NoiseCancellationAudioProcessor() {
+    _init();
+  }
+
+  Future<void> _init() async {
     try {
-      StreamVideoNoiseCancellation().registerProcessor();
+      await StreamVideoNoiseCancellation().registerProcessor();
     } on UnimplementedError catch (e) {
       _logger.w(
         () => 'Noise cancellation is not supported on this platform: $e',
+      );
+    } catch (err) {
+      _logger.e(
+        () => err.toString(),
       );
     }
   }
@@ -17,16 +25,14 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
   @override
   Future<Result<bool>> isEnabled() async {
     try {
-      await StreamVideoNoiseCancellation().isEnabled() ?? false;
-      return Result.success(true);
+      final result = await StreamVideoNoiseCancellation().isEnabled() ?? false;
+      return Result.success(result);
     } on UnimplementedError catch (e) {
-      _logger.e(
+      _logger.w(
         () => 'Noise cancellation is not supported on this platform: $e',
       );
 
-      return Result.error(
-        'Noise cancellation is not supported on this platform',
-      );
+      return Result.success(false);
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }
@@ -58,13 +64,11 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
           false;
       return Result.success(result);
     } on UnimplementedError catch (e) {
-      _logger.e(
+      _logger.w(
         () => 'Noise cancellation is not supported on this platform: $e',
       );
 
-      return Result.error(
-        'Noise cancellation is not supported on this platform',
-      );
+      return Result.success(false);
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }

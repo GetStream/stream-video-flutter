@@ -24,7 +24,8 @@ class MethodChannelStreamVideoNoiseCancellation
   @override
   Future<bool?> isEnabled() async {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
-      return false;
+      throw UnimplementedError(
+          'The current platform (${CurrentPlatform.name}) does not support audio processing.');
     }
 
     return methodChannel.invokeMethod<bool>('isEnabled');

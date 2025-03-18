@@ -34,6 +34,12 @@ class StreamVideoNoiseCancellationPlugin: FlutterPlugin, MethodCallHandler {
     when (call.method) {
       "registerProcessor" -> {
         try {
+          if (controller != null) {
+            Log.w(TAG, "Noise cancellation processor is already registered")
+            result.success(null)
+            return
+          }
+
           controller = NoiseCancellationAudioProcessingController(applicationContext)
           FlutterWebRTCPlugin.sharedSingleton.setAudioProcessingFactoryProvider(controller)
           Log.d(TAG, "Noise cancellation processor registered successfully")

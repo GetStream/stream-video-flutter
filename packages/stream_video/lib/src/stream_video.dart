@@ -959,6 +959,11 @@ class StreamVideo extends Disposable {
         const Result.failure(VideoError(message: 'No audio processor found.'));
   }
 
+  /// This method returns true if the iOS device supports Apple's Neural Engine
+  /// or if an Android device has the FEATURE_AUDIO_PRO feature enabled.
+  /// Devices with this capability are better suited for handling noise cancellation efficiently.
+  ///
+  /// Returns false on other platforms.
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     return await _options.audioProcessor
             ?.deviceSupportsAdvancedAudioProcessing() ??
