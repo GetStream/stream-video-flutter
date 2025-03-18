@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:async/async.dart' as async;
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart';
+import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';
 import 'call/call_ringing_state.dart';
@@ -944,6 +946,29 @@ class StreamVideo extends Disposable {
 
     return Result.success(call);
   }
+
+  @internal
+  Future<Result<bool>> isAudioProcessingEnabled() async {
+    return await _options.audioProcessor?.isEnabled() ??
+        const Result.failure(VideoError(message: 'No audio processor found.'));
+  }
+
+  @internal
+  Future<Result<None>> setAudioProcessingEnabled(bool enabled) async {
+    return await _options.audioProcessor?.setEnabled(enabled) ??
+        const Result.failure(VideoError(message: 'No audio processor found.'));
+  }
+
+  /// This method returns true if the iOS device supports Apple's Neural Engine
+  /// or if an Android device has the FEATURE_AUDIO_PRO feature enabled.
+  /// Devices with this capability are better suited for handling noise cancellation efficiently.
+  ///
+  /// Returns false on other platforms.
+  Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
+    return await _options.audioProcessor
+            ?.deviceSupportsAdvancedAudioProcessing() ??
+        const Result.failure(VideoError(message: 'No audio processor found.'));
+  }
 }
 
 CoordinatorClient buildCoordinatorClient({
@@ -1040,6 +1065,7 @@ class StreamVideoOptions {
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
     this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
+    this.audioProcessor,
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
     this.muteVideoWhenInBackground = false,
@@ -1061,6 +1087,8 @@ class StreamVideoOptions {
 
   final Priority logPriority;
   final LogHandlerFunction logHandlerFunction;
+
+  final AudioProcessor? audioProcessor;
 
   final bool muteVideoWhenInBackground;
   final bool muteAudioWhenInBackground;

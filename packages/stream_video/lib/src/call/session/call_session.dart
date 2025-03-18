@@ -937,6 +937,26 @@ class CallSession extends Disposable {
     return result.map((_) => none);
   }
 
+  Future<Result<None>> notifyNoiseCancellationStarted() async {
+    final result = await sfuClient.startNoiseCancellation(
+      sfu.StartNoiseCancellationRequest(
+        sessionId: sessionId,
+      ),
+    );
+
+    return result.map((_) => none);
+  }
+
+  Future<Result<None>> notifyNoiseCancellationStopped() async {
+    final result = await sfuClient.stopNoiseCancellation(
+      sfu.StopNoiseCancellationRequest(
+        sessionId: sessionId,
+      ),
+    );
+
+    return result.map((_) => none);
+  }
+
   @override
   String toString() => 'CallSession{seq: $sessionSeq, id: $sessionId}';
 }

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'stream_video_flutter'
-  s.version          = '0.0.1'
+  s.version          = '0.8.3'
   s.summary          = 'Official Flutter Plugin for Stream Video.'
   s.description      = <<-DESC
 Official Flutter Plugin for Stream Video..
@@ -18,7 +18,7 @@ Official Flutter Plugin for Stream Video..
   s.dependency 'stream_webrtc_flutter'
   s.dependency 'ios_platform_images'
   s.static_framework = true
-  s.platform = :ios, '11.0'
+  s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

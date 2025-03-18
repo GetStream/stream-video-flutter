@@ -12,7 +12,7 @@ import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/utils/feedback_dialog.dart';
 import 'package:flutter_dogfooding/widgets/badged_call_option.dart';
 import 'package:flutter_dogfooding/widgets/call_duration_title.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu.dart';
 import 'package:flutter_dogfooding/widgets/share_call_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
