@@ -257,6 +257,24 @@ class Call {
   SfuReconnectionStrategy _reconnectStrategy =
       SfuReconnectionStrategy.unspecified;
   Future<InternetStatus>? _awaitNetworkAvailableFuture;
+  InternetConnection? _internetConnectionInstance;
+  InternetConnection get _internetConnection =>
+      _internetConnectionInstance ??= _preferences.internetConnectionInstance ??
+          InternetConnection.createInstance(
+            useDefaultOptions: _preferences.healthCheckEndpoints == null ||
+                _preferences.healthCheckEndpoints!.isEmpty,
+            customCheckOptions: _preferences.healthCheckEndpoints
+                ?.map(
+                  (e) => InternetCheckOption(
+                    uri: e.uri,
+                    responseStatusFn: (response) =>
+                        e.validStatusCodes.contains(response.statusCode),
+                    timeout: e.timeout,
+                  ),
+                )
+                .toList(),
+            checkInterval: _preferences.healthCheckInterval,
+          );
   bool _initialized = false;
 
   final List<Timer> _reactionTimers = [];
@@ -356,7 +374,7 @@ class Call {
   void _observeReconnectEvents() {
     _subscriptions.add(
       _idReconnect,
-      InternetConnection.createInstance().onStatusChange.listen(
+      _internetConnection.onStatusChange.listen(
         (status) {
           if (status == InternetStatus.disconnected) {
             _logger.d(() => '[observeReconnectEvents] network disconnected');
@@ -1206,10 +1224,10 @@ class Call {
       }
     });
 
-    final connectionStatus = await InternetConnection.createInstance(
-      checkInterval: const Duration(seconds: 1),
-    )
-        .onStatusChange
+    final previousCheckInterval = _internetConnection.checkInterval;
+    _internetConnection.setIntervalAndResetTimer(const Duration(seconds: 1));
+
+    final connectionStatus = await _internetConnection.onStatusChange
         .firstWhere((status) => status == InternetStatus.connected)
         .timeout(
           _retryPolicy.config.callRejoinTimeout,
@@ -1221,8 +1239,10 @@ class Call {
         .asCancelable()
         .storeIn(_idFastReconnectTimeout, _cancelables)
         .valueOrDefault(InternetStatus.disconnected);
+    _internetConnection.setIntervalAndResetTimer(previousCheckInterval);
 
     fastReconnectTimer.cancel();
+
     return connectionStatus;
   }
 

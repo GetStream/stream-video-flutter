@@ -19,6 +19,7 @@ export 'call_status.dart';
 export 'call_track_state.dart';
 export 'disconnect_reason.dart';
 export 'guest_created_data.dart';
+export 'health_check_endpoint.dart';
 export 'push_device.dart';
 export 'push_provider.dart';
 export 'queried_calls.dart';
