@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:battery_plus/battery_plus.dart';
-import 'package:thermal/thermal.dart';
 import 'package:flutter/services.dart';
+import 'package:thermal/thermal.dart';
 
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../globals.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../extensions/thermal_status_ext.dart';
+import '../logger/impl/tagged_logger.dart';
 import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
 import '../sfu/data/models/sfu_error.dart';
@@ -31,7 +32,7 @@ class SfuStatsReporter {
           _thermalStatus = status;
         });
       } catch (e) {
-        // ignore: thermal status not available
+        _logger.d(() => 'Failed to subscribe to thermal status changes');
       }
     }
 
@@ -53,6 +54,8 @@ class SfuStatsReporter {
 
   final CallSession callSession;
   final CallStateNotifier stateManager;
+
+  final _logger = taggedLogger(tag: 'SV:SfuStatsReporter');
 
   StreamSubscription<List<RtcMediaDevice>>? _mediaDeviceSubscription;
   StreamSubscription<ThermalStatus>? _thermalStatusSubscription;
@@ -87,12 +90,13 @@ class SfuStatsReporter {
         CurrentPlatform.isIos ||
         CurrentPlatform.isMacOS ||
         CurrentPlatform.isWindows;
-    bool lowPowerMode = false;
+
+    bool? lowPowerMode;
     if (batterySaveModeAvailable) {
       try {
         lowPowerMode = await Battery().isInBatterySaveMode;
       } on PlatformException {
-        // no-op
+        _logger.d(() => 'Failed to get battery save mode from the device');
       }
     }
 
