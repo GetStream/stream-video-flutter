@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:thermal/thermal.dart';
+import 'package:flutter/services.dart';
 
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../globals.dart';
@@ -86,8 +87,14 @@ class SfuStatsReporter {
         CurrentPlatform.isIos ||
         CurrentPlatform.isMacOS ||
         CurrentPlatform.isWindows;
-    final lowPowerMode =
-        batterySaveModeAvailable && await Battery().isInBatterySaveMode;
+    bool lowPowerMode = false;
+    if (batterySaveModeAvailable) {
+      try {
+        lowPowerMode = await Battery().isInBatterySaveMode;
+      } on PlatformException {
+        // no-op
+      }
+    }
 
     sfu_models.AndroidState? androidState;
     sfu_models.AppleState? appleState;
