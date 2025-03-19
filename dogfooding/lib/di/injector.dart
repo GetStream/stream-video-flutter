@@ -30,7 +30,7 @@ class AppInjector {
   }) async {
     // Google sign in
     locator.registerSingleton<GoogleSignIn>(
-      GoogleSignIn(hostedDomain: 'getstream.io'),
+      GoogleSignIn(hostedDomain: 'getstream.github.io'),
     );
 
     // App Preferences
