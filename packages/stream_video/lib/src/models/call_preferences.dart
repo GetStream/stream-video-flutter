@@ -1,4 +1,7 @@
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+
 import 'call_client_publish_options.dart';
+import 'health_check_endpoint.dart';
 
 abstract class CallPreferences {
   Duration get connectTimeout;
@@ -10,6 +13,10 @@ abstract class CallPreferences {
 
   int get closedCaptionsVisibilityDurationMs;
   int get closedCaptionsVisibleCaptions;
+
+  InternetConnection? get internetConnectionInstance;
+  List<HealthCheckEndpoint>? get healthCheckEndpoints;
+  Duration get healthCheckInterval;
 }
 
 class DefaultCallPreferences implements CallPreferences {
@@ -21,6 +28,9 @@ class DefaultCallPreferences implements CallPreferences {
     this.clientPublishOptions,
     this.closedCaptionsVisibilityDurationMs = 2700,
     this.closedCaptionsVisibleCaptions = 2,
+    this.internetConnectionInstance,
+    this.healthCheckEndpoints,
+    this.healthCheckInterval = const Duration(seconds: 1),
   });
 
   @override
@@ -43,4 +53,13 @@ class DefaultCallPreferences implements CallPreferences {
 
   @override
   final int closedCaptionsVisibleCaptions;
+
+  @override
+  final InternetConnection? internetConnectionInstance;
+
+  @override
+  final List<HealthCheckEndpoint>? healthCheckEndpoints;
+
+  @override
+  final Duration healthCheckInterval;
 }
