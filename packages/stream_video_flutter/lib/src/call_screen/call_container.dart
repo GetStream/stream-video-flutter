@@ -82,7 +82,7 @@ class StreamCallContainer extends StatefulWidget {
   final VoidCallback? onCancelCallTap;
 
   /// The action to perform when the call is disconnected. By default, it pops the current route.
-  final VoidCallback? onCallDisconnected;
+  final void Function(DisconnectReason)? onCallDisconnected;
 
   /// Builder used to create a custom incoming call widget.
   final IncomingCallBuilder? incomingCallBuilder;
@@ -131,7 +131,12 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       _callState = callState;
     });
     if (callState.status.isDisconnected) {
-      (widget.onCallDisconnected ?? _leave).call();
+      if (widget.onCallDisconnected != null) {
+        final disconnectedStatus = callState.status as CallStatusDisconnected;
+        widget.onCallDisconnected?.call(disconnectedStatus.reason);
+      } else {
+        _leave();
+      }
     }
   }
 
