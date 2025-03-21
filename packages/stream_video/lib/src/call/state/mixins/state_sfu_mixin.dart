@@ -195,7 +195,9 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     _logger.d(
       () => '[sfuParticipantJoined] ${state.sessionId}; event: $event',
     );
-    final isLocal = state.currentUserId == event.participant.userId;
+    final isLocal = state.currentUserId == event.participant.userId &&
+        state.sessionId == event.participant.sessionId;
+
     final participant = CallParticipantState(
       userId: event.participant.userId,
       roles: event.participant.roles,
