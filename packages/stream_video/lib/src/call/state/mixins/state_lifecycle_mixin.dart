@@ -305,11 +305,14 @@ extension on CallMetadata {
 
     for (final participant in participantsData) {
       final userId = participant.userId;
+      final sessionId = participant.userSessionId;
       final member = members[userId];
       final user = users[userId];
-      final currentState =
-          state.callParticipants.firstWhereOrNull((it) => it.userId == userId);
-      final isLocal = state.currentUserId == userId;
+      final currentState = state.callParticipants.firstWhereOrNull(
+        (it) => it.userId == userId && it.sessionId == sessionId,
+      );
+      final isLocal =
+          state.currentUserId == userId && state.sessionId == sessionId;
 
       result.add(
         currentState?.copyWith(
@@ -317,7 +320,7 @@ extension on CallMetadata {
               name: user?.name ?? '',
               custom: user?.custom ?? {},
               image: user?.image ?? '',
-              sessionId: participant.userSessionId,
+              sessionId: sessionId,
               isLocal: isLocal,
               isOnline: !isLocal,
             ) ??
