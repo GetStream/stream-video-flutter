@@ -309,10 +309,12 @@ extension on CallMetadata {
       final member = members[userId];
       final user = users[userId];
       final currentState = state.callParticipants.firstWhereOrNull(
-        (it) => it.userId == userId && it.sessionId == sessionId,
+        (it) =>
+            it.userId == userId &&
+            (sessionId == null || it.sessionId == sessionId),
       );
-      final isLocal =
-          state.currentUserId == userId && state.sessionId == sessionId;
+      final isLocal = state.currentUserId == userId &&
+          (sessionId == null || state.sessionId == sessionId);
 
       result.add(
         currentState?.copyWith(
