@@ -80,7 +80,6 @@ const _idSessionEvents = 4;
 const _idSessionStats = 5;
 const _idConnect = 6;
 const _idAwait = 7;
-const _idReconnect = 7;
 const _idFastReconnectTimeout = 8;
 
 const _tag = 'SV:Call';
@@ -95,6 +94,7 @@ class Call {
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
+    required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -104,6 +104,7 @@ class Call {
       callCid: callCid,
       coordinatorClient: coordinatorClient,
       streamVideo: streamVideo,
+      networkMonitor: networkMonitor,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -117,6 +118,7 @@ class Call {
     required CallCreatedData data,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
+    required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -126,6 +128,7 @@ class Call {
       callCid: data.callCid,
       coordinatorClient: coordinatorClient,
       streamVideo: streamVideo,
+      networkMonitor: networkMonitor,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -144,6 +147,7 @@ class Call {
     required CallRingingData data,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
+    required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -153,6 +157,7 @@ class Call {
       callCid: data.callCid,
       coordinatorClient: coordinatorClient,
       streamVideo: streamVideo,
+      networkMonitor: networkMonitor,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -163,6 +168,7 @@ class Call {
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
+    required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -189,6 +195,7 @@ class Call {
     return Call._(
       coordinatorClient: coordinatorClient,
       streamVideo: streamVideo,
+      networkMonitor: networkMonitor,
       preferences: finalCallPreferences,
       stateManager: stateManager,
       credentials: credentials,
@@ -204,6 +211,7 @@ class Call {
     required CallPreferences preferences,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
+    required InternetConnection networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
     CallCredentials? credentials,
@@ -217,6 +225,7 @@ class Call {
         _permissionsManager = permissionManager,
         _coordinatorClient = coordinatorClient,
         _streamVideo = streamVideo,
+        networkMonitor = networkMonitor,
         _preferences = preferences,
         _retryPolicy = retryPolicy,
         _credentials = credentials,
@@ -244,6 +253,7 @@ class Call {
   final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
   final DynascaleManager dynascaleManager;
+  final InternetConnection networkMonitor;
 
   CallCredentials? _credentials;
   CallSession? _session;
@@ -257,6 +267,7 @@ class Call {
   SfuReconnectionStrategy _reconnectStrategy =
       SfuReconnectionStrategy.unspecified;
   Future<InternetStatus>? _awaitNetworkAvailableFuture;
+  Future<Result<None>>? _awaitMigrationCompleteFuture;
   bool _initialized = false;
 
   final List<Timer> _reactionTimers = [];
@@ -323,7 +334,6 @@ class Call {
 
       _observeEvents();
       _observeState();
-      _observeReconnectEvents();
       _observeUserId();
 
       _logger.v(() => '[_init] initialized');
@@ -350,21 +360,6 @@ class Call {
             .emitIfNotNull(_callEvents)
             ?.also(_onCoordinatorEvent);
       }),
-    );
-  }
-
-  void _observeReconnectEvents() {
-    _subscriptions.add(
-      _idReconnect,
-      InternetConnection.createInstance().onStatusChange.listen(
-        (status) {
-          if (status == InternetStatus.disconnected) {
-            _logger.d(() => '[observeReconnectEvents] network disconnected');
-            _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
-            _reconnect(SfuReconnectionStrategy.fast);
-          }
-        },
-      ),
     );
   }
 
@@ -683,17 +678,15 @@ class Call {
       _credentials = joinedResult.data;
       _previousSession = _session;
 
-      final isWsHealthy = _previousSession?.sfuWS.isConnected ?? false;
-
       final reconnectDetails =
           _reconnectStrategy == SfuReconnectionStrategy.unspecified
               ? null
               : await _previousSession?.getReconnectDetails(_reconnectStrategy);
 
-      if (performingRejoin || performingMigration || !isWsHealthy) {
+      if (performingRejoin || performingMigration || !performingFastReconnect) {
         _logger.v(
           () =>
-              '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration, wsHealthy: $isWsHealthy)',
+              '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration, fast: $performingFastReconnect)',
         );
 
         _session = await _sessionFactory.makeCallSession(
@@ -703,6 +696,7 @@ class Call {
           credentials: _credentials!,
           stateManager: _stateManager,
           dynascaleManager: dynascaleManager,
+          networkMonitor: networkMonitor,
           onPeerConnectionFailure: (pc) async {
             if (state.value.status is! CallStatusReconnecting) {
               await pc.pc.restartIce().onError((_, __) {
@@ -713,6 +707,10 @@ class Call {
           clientPublishOptions: _preferences.clientPublishOptions,
         );
 
+        if (performingMigration) {
+          _awaitMigrationCompleteFuture = _session!.waitForMigrationComplete();
+        }
+
         dynascaleManager.init(
           sfuClient: _session!.sfuClient,
           sessionId: _session!.sessionId,
@@ -720,7 +718,7 @@ class Call {
       } else {
         _logger.v(
           () =>
-              '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration, wsHealthy: $isWsHealthy)',
+              '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
         );
 
         _session = _previousSession;
@@ -743,21 +741,20 @@ class Call {
         }
       }
 
-      if (performingFastReconnect && isWsHealthy) {
+      if (performingFastReconnect) {
         _logger.d(() => '[join] fast reconnecting');
+        final result = await _session!.fastReconnect();
 
-        final result = await _session?.fastReconnect();
+        if (result.isFailure) {
+          _logger.e(() => '[join] fast reconnecting failed: $result');
+          _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+          return Result.error('fast reconnecting failed');
+        }
 
-        result?.fold(
-          success: (success) {
-            _logger.v(() => '[join] fast reconnecting success');
-            _fastReconnectDeadline = success.data.fastReconnectDeadline;
-          },
-          failure: (failure) {
-            _logger.e(() => '[join] fast reconnecting failed: $failure');
-            return failure;
-          },
-        );
+        _logger.v(() => '[join] fast reconnecting success');
+        _fastReconnectDeadline =
+            result.getDataOrNull()?.fastReconnectDeadline ??
+                _fastReconnectDeadline;
       }
 
       // make sure we only track connection timing if we are not calling this method as part of a migration flow
@@ -776,16 +773,11 @@ class Call {
               'Closing previous WS after reconnect with strategy: ${_reconnectStrategy.name}',
         );
         await _previousSession?.dispose();
-      } else if (!isWsHealthy) {
-        _logger.v(() => '[join] closing unhealthy WS');
-        await _previousSession?.close(
-          StreamWebSocketCloseCode.disposeOldSocket,
-          closeReason: 'Closing unhealthy WS after reconnect',
-        );
       }
 
       // For migration we have to wait for confirmation before we can complete the flow
       if (_reconnectStrategy != SfuReconnectionStrategy.migrate) {
+        _logger.e(() => '[join] connected');
         _previousSession = null;
         _stateManager.lifecycleCallConnected();
       }
@@ -1055,8 +1047,10 @@ class Call {
 
     if (sfuEvent is SfuSocketDisconnected) {
       _logger.w(() => '[onSfuEvent] socket disconnected');
+      await _reconnect(SfuReconnectionStrategy.fast);
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
+      await _reconnect(SfuReconnectionStrategy.fast);
     } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
       await _reconnect(SfuReconnectionStrategy.migrate);
@@ -1097,6 +1091,7 @@ class Call {
 
     await _callReconnectLock.synchronized(() async {
       _reconnectStrategy = strategy;
+      _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
       do {
         if (strategy != SfuReconnectionStrategy.migrate) {
@@ -1176,25 +1171,42 @@ class Call {
     final migrateTimeStopwatch = Stopwatch()..start();
 
     _reconnectStrategy = SfuReconnectionStrategy.migrate;
-    await _join();
-    final result = await _session?.waitForMigrationComplete();
+    final joinResult = await _join();
+
+    if (joinResult.isFailure) {
+      _logger.e(() => '[reconnectMigrate] join failed: $joinResult');
+      _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+      return;
+    }
 
     await _previousSession?.close(StreamWebSocketCloseCode.disposeOldSocket);
 
-    result?.fold(
+    final migrationResult = await _awaitMigrationCompleteFuture;
+    if (migrationResult == null) {
+      _logger.e(() => '[reconnectMigrate] migration failed');
+      _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+      return;
+    }
+
+    migrationResult.fold(
       success: (_) {
         _stateManager.lifecycleCallConnected();
       },
       failure: (_) {
+        _logger.e(
+          () => '[reconnectMigrate] migration did not complete correctly',
+        );
         _reconnectStrategy = SfuReconnectionStrategy.rejoin;
       },
     );
 
-    migrateTimeStopwatch.stop();
-    await _sfuStatsReporter?.sendSfuStats(
-      connectionTimeMs: migrateTimeStopwatch.elapsedMilliseconds,
-      reconnectionStrategy: _reconnectStrategy,
-    );
+    if (migrationResult.isSuccess) {
+      migrateTimeStopwatch.stop();
+      await _sfuStatsReporter?.sendSfuStats(
+        connectionTimeMs: migrateTimeStopwatch.elapsedMilliseconds,
+        reconnectionStrategy: _reconnectStrategy,
+      );
+    }
   }
 
   Future<InternetStatus> _awaitNetworkAvailable() async {
@@ -1210,6 +1222,7 @@ class Call {
       checkInterval: const Duration(seconds: 1),
     )
         .onStatusChange
+        .startWithFuture(networkMonitor.internetStatus)
         .firstWhere((status) => status == InternetStatus.connected)
         .timeout(
           _retryPolicy.config.callRejoinTimeout,
@@ -1220,9 +1233,12 @@ class Call {
         )
         .asCancelable()
         .storeIn(_idFastReconnectTimeout, _cancelables)
-        .valueOrDefault(InternetStatus.disconnected);
+        .valueOrDefault(InternetStatus.disconnected)
+        .then((status) {
+          fastReconnectTimer.cancel();
+          return status;
+        });
 
-    fastReconnectTimer.cancel();
     return connectionStatus;
   }
 
@@ -2606,5 +2622,12 @@ enum TrackType {
       default:
         throw Exception('Unknown mute type: $this');
     }
+  }
+}
+
+extension FutureStartWithEx<T> on Stream<T> {
+  Stream<T> startWithFuture(Future<T> futureValue) async* {
+    yield await futureValue;
+    yield* this;
   }
 }

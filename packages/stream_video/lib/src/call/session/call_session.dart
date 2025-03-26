@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
@@ -63,6 +64,7 @@ class CallSession extends Disposable {
     required this.dynascaleManager,
     required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
+    required this.networkMonitor,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
   })  : sfuClient = SfuClient(
@@ -74,6 +76,7 @@ class CallSession extends Disposable {
           sfuUrl: config.sfuUrl,
           sfuWsEndpoint: config.sfuWsEndpoint,
           sessionId: sessionId,
+          networkMonitor: networkMonitor,
         ),
         rtcManagerFactory = RtcManagerFactory(
           sessionId: sessionId,
@@ -97,6 +100,7 @@ class CallSession extends Disposable {
   final RtcManagerFactory rtcManagerFactory;
   final OnPeerConnectionIssue onPeerConnectionIssue;
   final ClientPublishOptions? clientPublishOptions;
+  final InternetConnection networkMonitor;
 
   final Duration joinResponseTimeout;
 
@@ -217,8 +221,9 @@ class CallSession extends Disposable {
       strategy: strategy.toDto(),
       announcedTracks: announcedTracks?.toDTO(),
       subscriptions: subscribedTracks,
-      previousSessionId: sessionId,
-      fromSfuId: migratingFromSfuId ?? '',
+      previousSessionId:
+          strategy == SfuReconnectionStrategy.rejoin ? sessionId : null,
+      fromSfuId: migratingFromSfuId,
       reconnectAttempt: reconnectAttempts,
     );
   }
@@ -382,7 +387,7 @@ class CallSession extends Disposable {
     }
   }
 
-  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
+  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
       fastReconnect() async {
     try {
       _logger.d(() => '[fastReconnect] no args');
@@ -399,61 +404,65 @@ class CallSession extends Disposable {
 
       await _ensureClientDetails();
 
-      await _eventsSubscription?.cancel();
-      _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
-      await sfuWS.connect();
+      Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
+          result;
 
-      sfuWS.send(
-        sfu_events.SfuRequest(
-          joinRequest: sfu_events.JoinRequest(
-            clientDetails: _clientDetails,
-            token: config.sfuToken,
-            sessionId: sessionId,
-            subscriberSdp: subscriberSdp,
-            publisherSdp: publisherSdp,
-            reconnectDetails:
-                await getReconnectDetails(SfuReconnectionStrategy.fast),
-            preferredPublishOptions:
-                rtcManager?.publishOptions.map((o) => o.toDTO()),
+      if (!sfuWS.isConnected) {
+        _logger.d(() => '[fastReconnect] sfu not connected, recreating');
+        await sfuWS.recreate();
+
+        _logger.d(() => '[fastReconnect] sfu connected, sending join request');
+        sfuWS.send(
+          sfu_events.SfuRequest(
+            joinRequest: sfu_events.JoinRequest(
+              clientDetails: _clientDetails,
+              token: config.sfuToken,
+              sessionId: sessionId,
+              subscriberSdp: subscriberSdp,
+              publisherSdp: publisherSdp,
+              reconnectDetails:
+                  await getReconnectDetails(SfuReconnectionStrategy.fast),
+              preferredPublishOptions:
+                  rtcManager?.publishOptions.map((o) => o.toDTO()),
+            ),
           ),
-        ),
-      );
-
-      _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
-      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
-        timeLimit: const Duration(seconds: 30),
-      );
-
-      if (event.isReconnected) {
-        _logger.v(
-          () =>
-              '[fastReconnect] fast-reconnect possible - requesting ICE restarts',
         );
 
-        await rtcManager?.publisher?.pc.restartIce();
+        _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
+        final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
+          timeLimit: const Duration(seconds: 30),
+        );
 
-        final remoteTracks =
-            rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
+        if (event.isReconnected) {
+          _logger.v(() => '[fastReconnect] fast-reconnect done');
 
-        for (final track in remoteTracks) {
-          await _onRemoteTrackReceived(rtcManager!.subscriber, track);
+          stateManager.sfuPinsUpdated(event.callState.pins);
+
+          result = Result.success(
+            (
+              callState: event.callState,
+              fastReconnectDeadline: event.fastReconnectDeadline
+            ),
+          );
+        } else {
+          _logger.v(() => '[fastReconnect] fast-reconnect not possible');
+          return const Result.failure(
+            VideoError(message: 'Fast reconnect not possible'),
+          );
         }
-
-        stateManager.sfuPinsUpdated(event.callState.pins);
-
-        _logger.d(() => '[fastReconnect] completed');
-        return Result.success(
-          (
-            callState: event.callState,
-            fastReconnectDeadline: event.fastReconnectDeadline
-          ),
-        );
-      } else {
-        _logger.v(() => '[fastReconnect] fast-reconnect not possible');
-        return const Result.failure(
-          VideoError(message: 'Fast reconnect not possible'),
-        );
       }
+
+      _logger.v(() => '[fastReconnect] restarting ICE');
+      await rtcManager?.publisher?.pc.restartIce();
+
+      final remoteTracks =
+          rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
+
+      for (final track in remoteTracks) {
+        await _onRemoteTrackReceived(rtcManager!.subscriber, track);
+      }
+
+      return result ?? const Result.success(null);
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));

@@ -63,6 +63,11 @@ abstract class StreamWebSocket {
   bool get connectRequestInProgress => _connectRequestInProgress;
   bool _connectRequestInProgress = false;
 
+  Future<Result<None>> recreate() async {
+    await disconnect(StreamWebSocketCloseCode.disposeOldSocket.value);
+    return connect();
+  }
+
   /// Creates a new websocket connection.
   ///
   /// Connects to [url] using and returns a channel that can be used to
