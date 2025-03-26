@@ -43,7 +43,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     CallParticipantState participant,
   ) {
     return StreamCallParticipant(
-      key: ValueKey(participant.userId),
+      key: ValueKey(participant.uniqueParticipantKey),
       call: call,
       participant: participant,
     );

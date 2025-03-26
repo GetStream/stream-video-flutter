@@ -123,7 +123,7 @@ class MobileCallParticipantsGrid extends StatelessWidget {
             Widget getParticipantTile(int index) {
               if (index < pageParticipantsCount) {
                 return Expanded(
-                  key: ValueKey(pageParticipants[index].sessionId),
+                  key: ValueKey(pageParticipants[index].uniqueParticipantKey),
                   child: itemBuilder(context, call, pageParticipants[index]),
                 );
               }
