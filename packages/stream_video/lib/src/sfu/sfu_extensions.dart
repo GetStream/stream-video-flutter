@@ -7,7 +7,8 @@ import 'data/models/sfu_participant.dart';
 
 extension SfuParticipantX on SfuParticipant {
   CallParticipantState toParticipantState(CallState state) {
-    final isLocal = userId == state.currentUserId;
+    final isLocal =
+        userId == state.currentUserId && sessionId == state.sessionId;
     final existing = state.callParticipants.firstWhereOrNull(
       (it) => it.userId == userId,
     );

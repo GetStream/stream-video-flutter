@@ -2208,16 +2208,13 @@ class Call {
       );
 
       if (enabled) {
-        _session?.rtcManager
-            ?.getPublisherTrackByType(SfuTrackType.screenShare)
-            ?.mediaTrack
-            .onEnded = () {
+        result.getDataOrNull()?.mediaTrack.onEnded = () {
           setScreenShareEnabled(enabled: false);
         };
       }
     }
 
-    return result;
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {

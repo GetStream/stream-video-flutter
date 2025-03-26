@@ -333,7 +333,7 @@ class CallSession extends Disposable {
       } else {
         final currentUserId = stateManager.callState.currentUserId;
         final localParticipant = event.callState.participants.firstWhere(
-          (it) => it.userId == currentUserId,
+          (it) => it.userId == currentUserId && it.sessionId == sessionId,
         );
         final localTrackId = localParticipant.trackLookupPrefix;
 
@@ -899,7 +899,7 @@ class CallSession extends Disposable {
     return result.map((_) => none);
   }
 
-  Future<Result<None>> setScreenShareEnabled(
+  Future<Result<RtcLocalTrack>> setScreenShareEnabled(
     bool enabled, {
     ScreenShareConstraints? constraints,
   }) async {
@@ -913,7 +913,7 @@ class CallSession extends Disposable {
       constraints: constraints,
     );
 
-    return result.map((_) => none);
+    return result;
   }
 
   Future<Result<RtcLocalTrack<CameraConstraints>>> flipCamera() async {
