@@ -2,7 +2,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 
 class NetworkMonitorSettings {
   const NetworkMonitorSettings({
-    this.checkInterval = const Duration(seconds: 1),
+    this.checkInterval = const Duration(seconds: 2),
     this.customEndpoints = const [],
     this.internetConnectionInstance,
   });
@@ -29,7 +29,7 @@ class NetworkMonitorEndpoint {
   const NetworkMonitorEndpoint({
     required this.url,
     this.headers = const {},
-    this.timeout = const Duration(seconds: 10),
+    this.timeout = const Duration(seconds: 3),
     this.validCodes = const [200],
   });
 
