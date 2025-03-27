@@ -211,7 +211,7 @@ class Call {
     required CallPreferences preferences,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
-    required InternetConnection networkMonitor,
+    required this.networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
     CallCredentials? credentials,
@@ -225,7 +225,6 @@ class Call {
         _permissionsManager = permissionManager,
         _coordinatorClient = coordinatorClient,
         _streamVideo = streamVideo,
-        networkMonitor = networkMonitor,
         _preferences = preferences,
         _retryPolicy = retryPolicy,
         _credentials = credentials,
@@ -1042,8 +1041,9 @@ class Call {
     }
 
     if (sfuEvent is SfuSocketDisconnected) {
-      if (sfuEvent.reason.closeCode !=
-          StreamWebSocketCloseCode.normalClosure.value) {
+      if (!StreamWebSocketCloseCode.isIntentionalClosure(
+        sfuEvent.reason.closeCode,
+      )) {
         _logger.w(() => '[onSfuEvent] socket disconnected');
         await _reconnect(SfuReconnectionStrategy.fast);
       }
@@ -1293,6 +1293,7 @@ class Call {
     }
 
     _stateManager.lifecycleCallDisconnected(reason: reason);
+
     _logger.v(() => '[leave] finished');
 
     return const Result.success(none);

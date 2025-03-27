@@ -66,7 +66,8 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
           children: [
             ScreenShareContent(
               key: ValueKey(
-                  '${participant.uniqueParticipantKey} - screenShareContent'),
+                '${participant.uniqueParticipantKey} - screenShareContent',
+              ),
               call: call,
               participant: participant,
             ),
