@@ -777,7 +777,7 @@ class Call {
 
       // For migration we have to wait for confirmation before we can complete the flow
       if (_reconnectStrategy != SfuReconnectionStrategy.migrate) {
-        _logger.e(() => '[join] connected');
+        _logger.v(() => '[join] connected');
         _previousSession = null;
         _stateManager.lifecycleCallConnected();
       }
@@ -1081,6 +1081,11 @@ class Call {
   }
 
   Future<void> _reconnect(SfuReconnectionStrategy strategy) async {
+    if (state.value.status is CallStatusDisconnected) {
+      _logger.w(() => '[reconnect] rejected (call is already disconnected)');
+      return;
+    }
+
     if (_callReconnectLock.locked) {
       _logger.w(
         () =>
