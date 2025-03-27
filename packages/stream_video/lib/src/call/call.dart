@@ -715,16 +715,7 @@ class Call {
           sfuClient: _session!.sfuClient,
           sessionId: _session!.sessionId,
         );
-      } else {
-        _logger.v(
-          () =>
-              '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
-        );
 
-        _session = _previousSession;
-      }
-
-      if (_session?.sessionSeq != _previousSession?.sessionSeq) {
         _logger.d(() => '[join] starting sfu session');
 
         final sessionResult = await _startSession(
@@ -739,9 +730,14 @@ class Call {
           _stateManager.lifecycleCallConnectFailed(error: error);
           return sessionResult;
         }
-      }
+      } else {
+        _logger.v(
+          () =>
+              '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
+        );
 
-      if (performingFastReconnect) {
+        _session = _previousSession;
+
         _logger.d(() => '[join] fast reconnecting');
         final result = await _session!.fastReconnect();
 
@@ -1046,8 +1042,11 @@ class Call {
     }
 
     if (sfuEvent is SfuSocketDisconnected) {
-      _logger.w(() => '[onSfuEvent] socket disconnected');
-      await _reconnect(SfuReconnectionStrategy.fast);
+      if (sfuEvent.reason.closeCode !=
+          StreamWebSocketCloseCode.normalClosure.value) {
+        _logger.w(() => '[onSfuEvent] socket disconnected');
+        await _reconnect(SfuReconnectionStrategy.fast);
+      }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
       await _reconnect(SfuReconnectionStrategy.fast);
