@@ -683,10 +683,10 @@ class Call {
               ? null
               : await _previousSession?.getReconnectDetails(_reconnectStrategy);
 
-      if (performingRejoin || performingMigration || !performingFastReconnect) {
+      if (!performingFastReconnect) {
         _logger.v(
           () =>
-              '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration, fast: $performingFastReconnect)',
+              '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
         );
 
         _session = await _sessionFactory.makeCallSession(
