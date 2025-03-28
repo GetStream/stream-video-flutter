@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
@@ -38,12 +39,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required TokenManager tokenManager,
     required LatencyService latencyService,
     required RetryPolicy retryPolicy,
+    required InternetConnection networkMonitor,
     this.isAnonymous = false,
   })  : _rpcUrl = rpcUrl,
         _wsUrl = wsUrl,
         _apiKey = apiKey,
         _tokenManager = tokenManager,
         _latencyService = latencyService,
+        _networkMonitor = networkMonitor,
         _retryPolicy = retryPolicy;
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
@@ -54,6 +57,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   // ignore: unused_field
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
+  final InternetConnection _networkMonitor;
 
   final bool isAnonymous;
 
@@ -246,6 +250,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       tokenManager: _tokenManager,
       retryPolicy: _retryPolicy,
       includeUserDetails: includeUserDetails,
+      networkMonitor: _networkMonitor,
     );
   }
 

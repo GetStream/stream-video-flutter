@@ -61,6 +61,7 @@ class CallParticipantState
   final ViewportVisibility viewportVisibility;
 
   bool get isPinned => pin != null;
+  String get uniqueParticipantKey => '$userId-$sessionId';
 
   /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.

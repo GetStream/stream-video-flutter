@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../logger/impl/tagged_logger.dart';
 
@@ -34,10 +35,15 @@ typedef SendPing = void Function();
 typedef OnPongTimeout = void Function(Duration timeout);
 
 class HealthMonitorImpl implements HealthMonitor {
-  HealthMonitorImpl(this.owner, this.listener);
+  HealthMonitorImpl(
+    this.owner,
+    this.listener, {
+    required InternetConnection? networkMonitor,
+  }) : _networkMonitor = networkMonitor ?? InternetConnection.createInstance();
 
   final String owner;
   final HealthListener listener;
+  final InternetConnection _networkMonitor;
 
   late final _logger = taggedLogger(tag: 'SV:$owner-HM');
   final _pingPeriod = const Duration(seconds: 7);
@@ -46,7 +52,7 @@ class HealthMonitorImpl implements HealthMonitor {
   bool _started = false;
   Timer? _pingTimer;
   Timer? _pongTimer;
-  StreamSubscription<List<ConnectivityResult>>? _networkChangeSubscription;
+  StreamSubscription<InternetStatus>? _networkChangeSubscription;
 
   @override
   bool get isStarted => _started;
@@ -74,7 +80,7 @@ class HealthMonitorImpl implements HealthMonitor {
       _stopPinging();
       listener.onPongTimeout(_pongTimeout);
     });
-    _startPinging();
+    _ensurePingingStarted();
   }
 
   @override
@@ -115,14 +121,15 @@ class HealthMonitorImpl implements HealthMonitor {
     _stopListeningNetworkChanges();
   }
 
-  Future<void> _startPinging() async {
+  Future<void> _ensurePingingStarted() async {
     if (_pingTimer != null) {
-      _logger.v(() => '[startPinging] rejected (pinging already started)');
       return;
     }
-    _logger.d(() => '[startPinging] no args');
+
+    _logger.d(() => '[ensurePingingStarted] starting timer');
     _pingTimer?.cancel();
     _pingTimer = Timer.periodic(_pingPeriod, (_) {
+      _logger.d(() => '[pingTimer] ping requested');
       listener.onPingRequested();
     });
   }
@@ -140,17 +147,19 @@ class HealthMonitorImpl implements HealthMonitor {
   }
 
   void _listenNetworkChanges() {
-    _networkChangeSubscription =
-        Connectivity().onConnectivityChanged.listen((result) {
-      _logger.v(() => '[onConnectivityChanged] result: $result');
-      if (result.contains(ConnectivityResult.none)) {
-        listener.onNetworkDisconnected();
-        _stopPinging();
-        _stopPongTimer();
-      } else {
-        listener.onNetworkConnected();
-      }
-    });
+    _networkChangeSubscription = _networkMonitor.onStatusChange.listen(
+      (status) {
+        _logger.v(() => '[onConnectivityChanged] status: $status');
+        if (status == InternetStatus.disconnected) {
+          _logger.d(() => '[_listenNetworkChanges] no network');
+          listener.onNetworkDisconnected();
+          _stopPinging();
+          _stopPongTimer();
+        } else {
+          listener.onNetworkConnected();
+        }
+      },
+    );
   }
 
   void _stopListeningNetworkChanges() {

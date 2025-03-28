@@ -93,7 +93,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
           bodyWidget = StreamCallParticipant(
             // We use the sessionId as the key to avoid rebuilding the widget
             // when the participant changes.
-            key: ValueKey(participant.sessionId),
+            key: ValueKey(participant.uniqueParticipantKey),
             call: call,
             participant: participant,
             showConnectionQualityIndicator: false,

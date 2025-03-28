@@ -85,7 +85,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       ownCapabilities: data.metadata.details.ownCapabilities.toList(),
       callParticipants: data.metadata.toCallParticipants(
         state,
-        fromMembers: !status.isConnected,
+        fromMembers: !status.isConnected && !status.isReconnecting,
       ),
       liveStartedAt: data.metadata.session.liveStartedAt,
       liveEndedAt: data.metadata.session.liveEndedAt,

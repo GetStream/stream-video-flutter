@@ -38,7 +38,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
     CallParticipantState participant,
   ) {
     return StreamCallParticipant(
-      key: ValueKey(participant.userId),
+      key: ValueKey(participant.uniqueParticipantKey),
       call: call,
       participant: participant,
     );
@@ -65,7 +65,9 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
         return Stack(
           children: [
             ScreenShareContent(
-              key: ValueKey('${participant.userId} - screenShareContent'),
+              key: ValueKey(
+                '${participant.uniqueParticipantKey} - screenShareContent',
+              ),
               call: call,
               participant: participant,
             ),

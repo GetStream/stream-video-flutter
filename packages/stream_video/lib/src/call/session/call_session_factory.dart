@@ -1,3 +1,4 @@
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/utils.dart';
@@ -31,6 +32,7 @@ class CallSessionFactory {
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
     required OnPeerConnectionIssue onPeerConnectionFailure,
+    required InternetConnection networkMonitor,
     ClientPublishOptions? clientPublishOptions,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
@@ -61,6 +63,7 @@ class CallSessionFactory {
       sdpEditor: sdpEditor,
       onPeerConnectionIssue: onPeerConnectionFailure,
       clientPublishOptions: clientPublishOptions,
+      networkMonitor: networkMonitor,
     );
   }
 

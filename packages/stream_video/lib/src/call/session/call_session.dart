@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
@@ -63,6 +64,7 @@ class CallSession extends Disposable {
     required this.dynascaleManager,
     required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
+    required this.networkMonitor,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
   })  : sfuClient = SfuClient(
@@ -74,6 +76,7 @@ class CallSession extends Disposable {
           sfuUrl: config.sfuUrl,
           sfuWsEndpoint: config.sfuWsEndpoint,
           sessionId: sessionId,
+          networkMonitor: networkMonitor,
         ),
         rtcManagerFactory = RtcManagerFactory(
           sessionId: sessionId,
@@ -97,6 +100,7 @@ class CallSession extends Disposable {
   final RtcManagerFactory rtcManagerFactory;
   final OnPeerConnectionIssue onPeerConnectionIssue;
   final ClientPublishOptions? clientPublishOptions;
+  final InternetConnection networkMonitor;
 
   final Duration joinResponseTimeout;
 
@@ -217,8 +221,9 @@ class CallSession extends Disposable {
       strategy: strategy.toDto(),
       announcedTracks: announcedTracks?.toDTO(),
       subscriptions: subscribedTracks,
-      previousSessionId: sessionId,
-      fromSfuId: migratingFromSfuId ?? '',
+      previousSessionId:
+          strategy == SfuReconnectionStrategy.rejoin ? sessionId : null,
+      fromSfuId: migratingFromSfuId,
       reconnectAttempt: reconnectAttempts,
     );
   }
@@ -382,7 +387,7 @@ class CallSession extends Disposable {
     }
   }
 
-  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
+  Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
       fastReconnect() async {
     try {
       _logger.d(() => '[fastReconnect] no args');
@@ -392,17 +397,15 @@ class CallSession extends Disposable {
       final publisherSdp =
           await RtcManager.getGenericSdp(rtc.TransceiverDirection.SendOnly);
 
-      _logger.v(
-        () => '[fastReconnect] subscriberSdp.len: ${subscriberSdp.length}, '
-            'publisherSdp.len: ${publisherSdp.length},',
-      );
-
       await _ensureClientDetails();
 
-      await _eventsSubscription?.cancel();
-      _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
-      await sfuWS.connect();
+      Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
+          result;
 
+      _logger.d(() => '[fastReconnect] sfu not connected, recreating');
+      await sfuWS.recreate();
+
+      _logger.d(() => '[fastReconnect] sfu connected, sending join request');
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
@@ -425,24 +428,11 @@ class CallSession extends Disposable {
       );
 
       if (event.isReconnected) {
-        _logger.v(
-          () =>
-              '[fastReconnect] fast-reconnect possible - requesting ICE restarts',
-        );
-
-        await rtcManager?.publisher?.pc.restartIce();
-
-        final remoteTracks =
-            rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
-
-        for (final track in remoteTracks) {
-          await _onRemoteTrackReceived(rtcManager!.subscriber, track);
-        }
+        _logger.v(() => '[fastReconnect] fast-reconnect done');
 
         stateManager.sfuPinsUpdated(event.callState.pins);
 
-        _logger.d(() => '[fastReconnect] completed');
-        return Result.success(
+        result = Result.success(
           (
             callState: event.callState,
             fastReconnectDeadline: event.fastReconnectDeadline
@@ -454,6 +444,18 @@ class CallSession extends Disposable {
           VideoError(message: 'Fast reconnect not possible'),
         );
       }
+
+      _logger.v(() => '[fastReconnect] restarting ICE');
+      await rtcManager?.publisher?.pc.restartIce();
+
+      final remoteTracks =
+          rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
+
+      for (final track in remoteTracks) {
+        await _onRemoteTrackReceived(rtcManager!.subscriber, track);
+      }
+
+      return result;
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -749,6 +751,11 @@ class CallSession extends Disposable {
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
+    if (stateManager.callState.status.isDisconnected) {
+      _logger.w(() => '[negotiate] call is disconnected');
+      return;
+    }
+
     await _negotiationLock.synchronized(() async {
       _logger.d(() => '[negotiate] type: ${pc.type}');
 

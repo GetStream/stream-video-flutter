@@ -91,7 +91,7 @@ class StreamCallParticipants extends StatefulWidget {
   ) {
     return StreamCallParticipant(
       // We use the sessionId as the key to map the state to the participant.
-      key: Key(participant.sessionId),
+      key: Key(participant.uniqueParticipantKey),
       call: call,
       participant: participant,
     );
@@ -153,7 +153,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
       if (_screenShareParticipant != null) {
         return ScreenShareContent(
           key: ValueKey(
-            '${_screenShareParticipant!.userId} - screenShareContent',
+            '${_screenShareParticipant!.uniqueParticipantKey} - screenShareContent',
           ),
           call: widget.call,
           participant: _screenShareParticipant!,
