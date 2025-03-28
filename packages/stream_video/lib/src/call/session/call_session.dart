@@ -397,59 +397,52 @@ class CallSession extends Disposable {
       final publisherSdp =
           await RtcManager.getGenericSdp(rtc.TransceiverDirection.SendOnly);
 
-      _logger.v(
-        () => '[fastReconnect] subscriberSdp.len: ${subscriberSdp.length}, '
-            'publisherSdp.len: ${publisherSdp.length},',
-      );
-
       await _ensureClientDetails();
 
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
           result;
 
-      if (!sfuWS.isConnected) {
-        _logger.d(() => '[fastReconnect] sfu not connected, recreating');
-        await sfuWS.recreate();
+      _logger.d(() => '[fastReconnect] sfu not connected, recreating');
+      await sfuWS.recreate();
 
-        _logger.d(() => '[fastReconnect] sfu connected, sending join request');
-        sfuWS.send(
-          sfu_events.SfuRequest(
-            joinRequest: sfu_events.JoinRequest(
-              clientDetails: _clientDetails,
-              token: config.sfuToken,
-              sessionId: sessionId,
-              subscriberSdp: subscriberSdp,
-              publisherSdp: publisherSdp,
-              reconnectDetails:
-                  await getReconnectDetails(SfuReconnectionStrategy.fast),
-              preferredPublishOptions:
-                  rtcManager?.publishOptions.map((o) => o.toDTO()),
-            ),
+      _logger.d(() => '[fastReconnect] sfu connected, sending join request');
+      sfuWS.send(
+        sfu_events.SfuRequest(
+          joinRequest: sfu_events.JoinRequest(
+            clientDetails: _clientDetails,
+            token: config.sfuToken,
+            sessionId: sessionId,
+            subscriberSdp: subscriberSdp,
+            publisherSdp: publisherSdp,
+            reconnectDetails:
+                await getReconnectDetails(SfuReconnectionStrategy.fast),
+            preferredPublishOptions:
+                rtcManager?.publishOptions.map((o) => o.toDTO()),
+          ),
+        ),
+      );
+
+      _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
+      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
+        timeLimit: const Duration(seconds: 30),
+      );
+
+      if (event.isReconnected) {
+        _logger.v(() => '[fastReconnect] fast-reconnect done');
+
+        stateManager.sfuPinsUpdated(event.callState.pins);
+
+        result = Result.success(
+          (
+            callState: event.callState,
+            fastReconnectDeadline: event.fastReconnectDeadline
           ),
         );
-
-        _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
-        final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
-          timeLimit: const Duration(seconds: 30),
+      } else {
+        _logger.v(() => '[fastReconnect] fast-reconnect not possible');
+        return const Result.failure(
+          VideoError(message: 'Fast reconnect not possible'),
         );
-
-        if (event.isReconnected) {
-          _logger.v(() => '[fastReconnect] fast-reconnect done');
-
-          stateManager.sfuPinsUpdated(event.callState.pins);
-
-          result = Result.success(
-            (
-              callState: event.callState,
-              fastReconnectDeadline: event.fastReconnectDeadline
-            ),
-          );
-        } else {
-          _logger.v(() => '[fastReconnect] fast-reconnect not possible');
-          return const Result.failure(
-            VideoError(message: 'Fast reconnect not possible'),
-          );
-        }
       }
 
       _logger.v(() => '[fastReconnect] restarting ICE');
@@ -758,6 +751,11 @@ class CallSession extends Disposable {
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
+    if (stateManager.callState.status.isDisconnected) {
+      _logger.w(() => '[negotiate] call is disconnected');
+      return;
+    }
+
     await _negotiationLock.synchronized(() async {
       _logger.d(() => '[negotiate] type: ${pc.type}');
 

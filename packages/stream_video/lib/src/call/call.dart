@@ -81,6 +81,7 @@ const _idSessionStats = 5;
 const _idConnect = 6;
 const _idAwait = 7;
 const _idFastReconnectTimeout = 8;
+const _idReconnect = 9;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -333,6 +334,7 @@ class Call {
 
       _observeEvents();
       _observeState();
+      _observeReconnectEvents();
       _observeUserId();
 
       _logger.v(() => '[_init] initialized');
@@ -359,6 +361,20 @@ class Call {
             .emitIfNotNull(_callEvents)
             ?.also(_onCoordinatorEvent);
       }),
+    );
+  }
+
+  void _observeReconnectEvents() {
+    _subscriptions.add(
+      _idReconnect,
+      networkMonitor.onStatusChange.listen(
+        (status) {
+          if (status == InternetStatus.disconnected) {
+            _logger.d(() => '[observeReconnectEvents] network disconnected');
+            _reconnect(SfuReconnectionStrategy.fast);
+          }
+        },
+      ),
     );
   }
 
@@ -1222,6 +1238,9 @@ class Call {
       }
     });
 
+    final previousCheckInterval = networkMonitor.checkInterval;
+    networkMonitor.setIntervalAndResetTimer(const Duration(seconds: 1));
+
     final connectionStatus = await InternetConnection.createInstance(
       checkInterval: const Duration(seconds: 1),
     )
@@ -1237,11 +1256,10 @@ class Call {
         )
         .asCancelable()
         .storeIn(_idFastReconnectTimeout, _cancelables)
-        .valueOrDefault(InternetStatus.disconnected)
-        .then((status) {
-          fastReconnectTimer.cancel();
-          return status;
-        });
+        .valueOrDefault(InternetStatus.disconnected);
+
+    fastReconnectTimer.cancel();
+    networkMonitor.setIntervalAndResetTimer(previousCheckInterval);
 
     return connectionStatus;
   }
@@ -2393,6 +2411,11 @@ class Call {
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
   }) async {
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[updateSubscription] rejected (disconnected)');
+      return const Result.success(none);
+    }
+
     final result = await dynascaleManager.updateSubscription(
       SubscriptionChange.update(
         userId: userId,
@@ -2423,6 +2446,11 @@ class Call {
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
   }) async {
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[removeSubscription] rejected (disconnected)');
+      return const Result.success(none);
+    }
+
     final result = await dynascaleManager.updateSubscription(
       SubscriptionChange.update(
         userId: userId,
