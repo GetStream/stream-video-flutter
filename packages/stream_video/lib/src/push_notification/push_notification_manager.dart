@@ -107,6 +107,9 @@ abstract class PushNotificationManager {
   /// [uuid] is the unique identifier for the call.
   Future<void> setCallConnected(String uuid);
 
+  /// Sets call as muted/unmuted (iOS only).
+  Future<void> setCallMutedByCid(String cid, bool isMuted);
+
   /// Retrieves a list of active calls.
   Future<List<CallData>> activeCalls();
 

@@ -176,7 +176,19 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       _idCallKit,
       onCallEvent.listen(
         (event) {
-          if (event is ActionCallIncoming) {
+          if (event is ActionCallToggleMute) {
+            {
+              _logger.d(() =>
+                  '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}');
+              final call = activeCall;
+              if (call != null) {
+                call.setMicrophoneEnabled(enabled: !event.isMuted);
+              } else {
+                _logger.w(
+                    () => '[onCallEvent] Cannot toggle mute: no active call');
+              }
+            }
+          } else if (event is ActionCallIncoming) {
             if (!client.isConnected) {
               client.openConnection();
             }
@@ -403,6 +415,21 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       for (final call in calls) {
         await endCall(call.uuid!);
       }
+    }
+  }
+
+  @override
+  Future<void> setCallMutedByCid(String cid, bool isMuted) async {
+    final activeCalls = await this.activeCalls();
+    final calls = activeCalls
+        .where((call) => call.callCid == cid && call.uuid != null)
+        .toList();
+
+    for (final call in calls) {
+      // Silence events to avoid infinite loop
+      FlutterCallkitIncoming.silenceEvents();
+      await FlutterCallkitIncoming.muteCall(call.uuid!, isMuted: isMuted);
+      FlutterCallkitIncoming.unsilenceEvents();
     }
   }
 
