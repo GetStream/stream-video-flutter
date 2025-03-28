@@ -455,7 +455,7 @@ class CallSession extends Disposable {
         await _onRemoteTrackReceived(rtcManager!.subscriber, track);
       }
 
-      return result ?? const Result.success(null);
+      return result;
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
