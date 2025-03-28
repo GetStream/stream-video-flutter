@@ -1,2 +1,0 @@
-package_name("io.getstream.video.flutter.dogfooding") # e.g. com.krausefx.app
-json_key_file("firebase-service-account.json")
