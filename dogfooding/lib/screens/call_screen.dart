@@ -141,6 +141,15 @@ class _CallScreenState extends State<CallScreen> {
           onCancelCallTap: () async {
             await widget.call.reject(reason: CallRejectReason.cancel());
           },
+          onCallDisconnected: (disconnectedProperties) {
+            final reason = disconnectedProperties.reason;
+            if (reason is DisconnectReasonCancelled ||
+                reason is DisconnectReasonEnded ||
+                reason is DisconnectReasonLastParticipantLeft) {
+              Navigator.of(context).pop();
+              showFeedbackDialog(context, call: widget.call);
+            }
+          },
           callContentBuilder: (
             BuildContext context,
             Call call,
@@ -211,10 +220,6 @@ class _CallScreenState extends State<CallScreen> {
                 return CallAppBar(
                   call: call,
                   leadingWidth: 120,
-                  onLeaveCallTap: () {
-                    call.leave();
-                    showFeedbackDialog(context, call: call);
-                  },
                   leading: Row(
                     children: [
                       ToggleLayoutOption(
