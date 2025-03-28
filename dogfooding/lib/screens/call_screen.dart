@@ -141,7 +141,8 @@ class _CallScreenState extends State<CallScreen> {
           onCancelCallTap: () async {
             await widget.call.reject(reason: CallRejectReason.cancel());
           },
-          onCallDisconnected: (reason) {
+          onCallDisconnected: (disconnectedProperties) {
+            final reason = disconnectedProperties.reason;
             if (reason is DisconnectReasonCancelled ||
                 reason is DisconnectReasonEnded ||
                 reason is DisconnectReasonLastParticipantLeft) {
