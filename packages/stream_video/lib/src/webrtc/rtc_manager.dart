@@ -1173,9 +1173,6 @@ extension RtcManagerTrackHelper on RtcManager {
       if (enabled &&
           track is RtcLocalScreenShareTrack &&
           !track.compareScreenShareMode(constraints)) {
-        // If existing screen share track has different broadcast extension constraints, unpublish it and create a new one.
-        await unpublishTrack(trackId: track.trackId);
-
         return _createAndPublishTrack(
           trackType: trackType,
           constraints: constraints,

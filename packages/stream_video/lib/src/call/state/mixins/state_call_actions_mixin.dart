@@ -33,6 +33,15 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     );
   }
 
+  void setCallAudioProcessing({required bool isAudioProcessing}) {
+    _logger.v(
+      () => '[setCallAudioProcessing] isAudioProcessing:$isAudioProcessing',
+    );
+    state = state.copyWith(
+      isAudioProcessing: isAudioProcessing,
+    );
+  }
+
   void setCallBroadcasting({
     required bool isBroadcasting,
     String? hlsPlaylistUrl,

@@ -174,13 +174,9 @@ abstract class CoordinatorClient {
   /// Stops transcription for the call described by the given [callCid].
   Future<Result<None>> stopTranscription(StreamCallCid callCid);
 
-  Future<Result<None>> startClosedCaptions(
-    StreamCallCid callCid,
-  );
+  Future<Result<None>> startClosedCaptions(StreamCallCid callCid);
 
-  Future<Result<None>> stopClosedCaptions(
-    StreamCallCid callCid,
-  );
+  Future<Result<None>> stopClosedCaptions(StreamCallCid callCid);
 
   /// Starts broadcasting for the call described by the given [callCid].
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid);

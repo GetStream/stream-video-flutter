@@ -8,7 +8,7 @@ import '../../stream_video_flutter.dart';
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
 
 /// Widget that renders a single video track for a call participant.
-class StreamVideoRenderer extends StatelessWidget {
+class StreamVideoRenderer extends StatefulWidget {
   /// Creates a new instance of [StreamVideoRenderer].
   const StreamVideoRenderer({
     super.key,
@@ -39,39 +39,65 @@ class StreamVideoRenderer extends StatelessWidget {
   final ValueSetter<Size>? onSizeChanged;
 
   @override
+  State<StreamVideoRenderer> createState() => _StreamVideoRendererState();
+}
+
+class _StreamVideoRendererState extends State<StreamVideoRenderer> {
+  VisibilityInfo? latestVisibilityInfo;
+
+  @override
+  void didUpdateWidget(covariant StreamVideoRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final prevTrackState =
+        oldWidget.participant.publishedTracks[oldWidget.videoTrackType];
+    final newTrackState =
+        widget.participant.publishedTracks[widget.videoTrackType];
+
+    if (prevTrackState == null && newTrackState != null) {
+      // The video track has been published.
+      if (latestVisibilityInfo != null) {
+        _onVisibilityChanged(latestVisibilityInfo!, widget.participant.userId);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final trackState = participant.publishedTracks[videoTrackType];
+    final trackState =
+        widget.participant.publishedTracks[widget.videoTrackType];
 
     final Widget child;
     if (trackState == null) {
       // The video track hasn't been published or subscribed yet.
-      child = placeholderBuilder.call(context);
+      child = widget.placeholderBuilder.call(context);
     } else if (trackState is! RemoteTrackState) {
       // The video track is local and is already published.
       child = _buildVideoTrackRenderer(context, trackState);
     } else if (trackState.subscribed && trackState.received) {
-      final incomingVideoSettingsEnabled = call
-              .dynascaleManager.incomingVideoSettings
-              ?.isParticipantVideoEnabled(participant.sessionId) ??
+      final incomingVideoSettingsEnabled = widget
+              .call.dynascaleManager.incomingVideoSettings
+              ?.isParticipantVideoEnabled(widget.participant.sessionId) ??
           true;
 
       if (!incomingVideoSettingsEnabled) {
         // The video track is remote and has been received, but has been disabled.
-        child = placeholderBuilder.call(context);
+        child = widget.placeholderBuilder.call(context);
       } else {
         // The video track is remote and has been received.
         child = _buildVideoTrackRenderer(context, trackState);
       }
     } else {
       // The video track is remote and hasn't been received yet.
-      child = placeholderBuilder.call(context);
+      child = widget.placeholderBuilder.call(context);
     }
 
     return VisibilityDetector(
       key: Key(
-        '${participant.userId}${participant.sessionId}$videoTrackType${trackState?.muted}',
+        '${widget.participant.userId}${widget.participant.sessionId}${widget.videoTrackType}',
       ),
-      onVisibilityChanged: _onVisibilityChanged,
+      onVisibilityChanged: (info) =>
+          _onVisibilityChanged(info, widget.participant.userId),
       child: child,
     );
   }
@@ -79,20 +105,20 @@ class StreamVideoRenderer extends StatelessWidget {
   Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
     // If the track is muted, display the placeholder.
     if (trackState.muted) {
-      return placeholderBuilder.call(context);
+      return widget.placeholderBuilder.call(context);
     }
 
-    final videoTrack = call.getTrack(
-      participant.trackIdPrefix,
-      videoTrackType,
+    final videoTrack = widget.call.getTrack(
+      widget.participant.trackIdPrefix,
+      widget.videoTrackType,
     );
 
     // If the track is not available, display the placeholder.
     if (videoTrack == null) {
-      return placeholderBuilder.call(context);
+      return widget.placeholderBuilder.call(context);
     }
 
-    var mirror = participant.isLocal;
+    var mirror = widget.participant.isLocal;
 
     if (videoTrack is RtcLocalScreenShareTrack) {
       mirror = false;
@@ -109,24 +135,25 @@ class StreamVideoRenderer extends StatelessWidget {
 
     return VideoTrackRenderer(
       key: ValueKey(videoTrack.trackId),
-      videoFit: videoFit,
+      videoFit: widget.videoFit,
       videoTrack: videoTrack,
       mirror: mirror,
-      placeholderBuilder: placeholderBuilder,
+      placeholderBuilder: widget.placeholderBuilder,
     );
   }
 
-  void _onVisibilityChanged(VisibilityInfo info) {
+  void _onVisibilityChanged(VisibilityInfo info, String participantId) {
+    latestVisibilityInfo = info;
     final fraction = info.visibleFraction;
 
-    final prevVisibility = participant.viewportVisibility;
+    final prevVisibility = widget.participant.viewportVisibility;
     final visibility = ViewportVisibility.fromVisibleFraction(fraction);
 
     // Update the viewport visibility of the participant.
     if (prevVisibility != visibility) {
-      call.updateViewportVisibility(
-        sessionId: participant.sessionId,
-        userId: participant.userId,
+      widget.call.updateViewportVisibility(
+        sessionId: widget.participant.sessionId,
+        userId: widget.participant.userId,
         visibility: visibility,
       );
     }
@@ -137,17 +164,18 @@ class StreamVideoRenderer extends StatelessWidget {
       size = Size.zero;
     }
 
-    return _onSizeChanged(size);
+    return _onSizeChanged(size, participantId);
   }
 
-  void _onSizeChanged(Size size) {
+  void _onSizeChanged(Size size, String participantId) {
     // Notify the listener.
-    if (onSizeChanged != null) {
-      onSizeChanged!.call(size);
+    if (widget.onSizeChanged != null) {
+      widget.onSizeChanged!.call(size);
     }
 
     // We only care about remote tracks.
-    final trackState = participant.publishedTracks[videoTrackType];
+    final trackState =
+        widget.participant.publishedTracks[widget.videoTrackType];
     if (trackState is! RemoteTrackState) return;
 
     final prevDim = trackState.videoDimension;
@@ -161,19 +189,19 @@ class StreamVideoRenderer extends StatelessWidget {
 
     if (newDim.isEmpty) {
       // Remove the video subscription of the track.
-      call.removeSubscription(
-        userId: participant.userId,
-        sessionId: participant.sessionId,
-        trackIdPrefix: participant.trackIdPrefix,
-        trackType: videoTrackType,
+      widget.call.removeSubscription(
+        userId: widget.participant.userId,
+        sessionId: widget.participant.sessionId,
+        trackIdPrefix: widget.participant.trackIdPrefix,
+        trackType: widget.videoTrackType,
       );
     } else {
       // Update the video subscription of the track.
-      call.updateSubscription(
-        userId: participant.userId,
-        sessionId: participant.sessionId,
-        trackIdPrefix: participant.trackIdPrefix,
-        trackType: videoTrackType,
+      widget.call.updateSubscription(
+        userId: widget.participant.userId,
+        sessionId: widget.participant.sessionId,
+        trackIdPrefix: widget.participant.trackIdPrefix,
+        trackType: widget.videoTrackType,
         videoDimension: newDim,
       );
     }
