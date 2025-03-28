@@ -969,6 +969,11 @@ class StreamVideo extends Disposable {
   }
 
   @internal
+  bool isAudioProcessorConfigured() {
+    return _options.audioProcessor != null;
+  }
+
+  @internal
   Future<Result<bool>> isAudioProcessingEnabled() async {
     return await _options.audioProcessor?.isEnabled() ??
         const Result.failure(VideoError(message: 'No audio processor found.'));

@@ -909,8 +909,9 @@ class Call {
       callConnectOptions: connectOptions,
     );
 
-    if (joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
-        NoiceCancellationSettingsMode.autoOn) {
+    if (_streamVideo.isAudioProcessorConfigured() &&
+        joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
+            NoiceCancellationSettingsMode.autoOn) {
       // AutoOn will enable noise cancellation if the device has sufficient processing power
       unawaited(
         startAudioProcessing(
@@ -1944,6 +1945,11 @@ class Call {
   Future<Result<None>> startAudioProcessing({
     bool requireAdvancedAudioProcessingSupport = false,
   }) async {
+    if (!_streamVideo.isAudioProcessorConfigured()) {
+      _logger.w(() => '[startAudioProcessing] rejected (not configured)');
+      return Result.error('Cannot start audio processing (not configured)');
+    }
+
     if (!_permissionsManager
         .hasPermission(CallPermission.enableNoiseCancellation)) {
       _logger.w(() => '[startAudioProcessing] rejected (no permission)');
@@ -1982,6 +1988,11 @@ class Call {
 
   /// Stops audio processing for the call.
   Future<Result<None>> stopAudioProcessing() async {
+    if (!_streamVideo.isAudioProcessorConfigured()) {
+      _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
+      return Result.error('Cannot stop audio processing (not configured)');
+    }
+
     final result = await _streamVideo.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {

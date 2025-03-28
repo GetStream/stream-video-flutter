@@ -1,3 +1,8 @@
+## Unreleased
+
+🚧 (Breaking Changes)
+* Updated the `onCallDisconnected` callback in `StreamCallContainer`: It now includes a `DisconnectReason` parameter that specifies the reason for the disconnection.
+
 ## 0.8.4
 
 🐞 Fixed
