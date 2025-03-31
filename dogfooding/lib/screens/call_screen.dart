@@ -143,10 +143,12 @@ class _CallScreenState extends State<CallScreen> {
           },
           onCallDisconnected: (disconnectedProperties) {
             final reason = disconnectedProperties.reason;
+
+            Navigator.of(context).pop();
+
             if (reason is DisconnectReasonCancelled ||
                 reason is DisconnectReasonEnded ||
                 reason is DisconnectReasonLastParticipantLeft) {
-              Navigator.of(context).pop();
               showFeedbackDialog(context, call: widget.call);
             }
           },
