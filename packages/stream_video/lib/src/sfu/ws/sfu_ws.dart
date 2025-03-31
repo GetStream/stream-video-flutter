@@ -194,13 +194,13 @@ class SfuWebSocket extends StreamWebSocket
 
     await _networkChangeSubscription?.cancel();
 
+    // Stop sending keep alive messages.
+    healthMonitor.stop();
+
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       return const Result.success(none);
     }
-
-    // Stop sending keep alive messages.
-    healthMonitor.stop();
 
     // If no close code is provided,
     // means we are manually closing the connection.
