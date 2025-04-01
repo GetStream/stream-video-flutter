@@ -2,7 +2,7 @@ import 'package:state_notifier/state_notifier.dart';
 
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
-import '../../models/call_preferences.dart';
+import '../../models/models.dart';
 import '../../state_emitter.dart';
 import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
@@ -19,16 +19,12 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateRtcMixin,
         StateSfuMixin,
         StateCallActionsMixin {
-  CallStateNotifier(CallState initialState, this.callPreferences)
-      : super(initialState) {
+  CallStateNotifier(CallState initialState) : super(initialState) {
     callStateStream =
         MutableStateEmitterImpl<CallState>(initialState, sync: true);
   }
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
-
-  @override
-  final CallPreferences callPreferences;
 
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
@@ -41,6 +37,11 @@ class CallStateNotifier extends StateNotifier<CallState>
 
     super.state = value;
     callStateStream.value = value;
+  }
+
+  void updateCallPreferences(CallPreferences preferences) {
+    _logger.v(() => '[updateCallPreferences] $preferences');
+    state = state.copyWith(preferences: preferences);
   }
 
   @override

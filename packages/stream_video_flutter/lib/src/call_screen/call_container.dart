@@ -131,6 +131,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       _callState = callState;
     });
     if (callState.status.isDisconnected) {
+      _callStateSubscription?.cancel();
       if (widget.onCallDisconnected != null) {
         final disconnectedStatus = callState.status as CallStatusDisconnected;
         final disconnectedProperties = CallDisconnectedProperties(
