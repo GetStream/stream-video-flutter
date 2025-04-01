@@ -420,6 +420,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<void> setCallMutedByCid(String cid, bool isMuted) async {
+    // Muting call on CallKit screen
+    if (!CurrentPlatform.isIos) {
+      return;
+    }
+
     final activeCalls = await this.activeCalls();
     final calls = activeCalls
         .where((call) => call.callCid == cid && call.uuid != null)
