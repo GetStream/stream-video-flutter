@@ -189,7 +189,6 @@ class Call {
     return Call._(
       coordinatorClient: coordinatorClient,
       streamVideo: streamVideo,
-      preferences: finalCallPreferences,
       stateManager: stateManager,
       credentials: credentials,
       retryPolicy: finalRetryPolicy,
@@ -201,7 +200,6 @@ class Call {
   Call._({
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
-    required CallPreferences preferences,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     required RetryPolicy retryPolicy,
@@ -217,7 +215,6 @@ class Call {
         _permissionsManager = permissionManager,
         _coordinatorClient = coordinatorClient,
         _streamVideo = streamVideo,
-        _preferences = preferences,
         _retryPolicy = retryPolicy,
         _credentials = credentials,
         dynascaleManager = DynascaleManager(stateManager: stateManager) {
@@ -239,7 +236,6 @@ class Call {
   final CoordinatorClient _coordinatorClient;
   final StreamVideo _streamVideo;
   final RetryPolicy _retryPolicy;
-  final CallPreferences _preferences;
   final CallSessionFactory _sessionFactory;
   final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
@@ -468,7 +464,8 @@ class Call {
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
         _reactionTimers.add(
-          Timer(_preferences.reactionAutoDismissTime, () {
+          Timer(_stateManager.callState.preferences.reactionAutoDismissTime,
+              () {
             _stateManager.resetCallReaction(event.user.id);
           }),
         );
@@ -486,6 +483,11 @@ class Call {
       default:
         break;
     }
+  }
+
+  void updateCallPreferences(CallPreferences preferences) {
+    _logger.i(() => '[updateCallPreferences] $preferences');
+    _stateManager.updateCallPreferences(preferences);
   }
 
   /// Accepts the incoming call.
@@ -592,7 +594,7 @@ class Call {
 
       final status = await state.firstWhere(
         (it) => it.status is CallStatusConnected,
-        timeLimit: _preferences.connectTimeout,
+        timeLimit: _stateManager.callState.preferences.connectTimeout,
       );
 
       if (status is! CallStatusConnected) {
@@ -710,7 +712,8 @@ class Call {
               });
             }
           },
-          clientPublishOptions: _preferences.clientPublishOptions,
+          clientPublishOptions:
+              _stateManager.callState.preferences.clientPublishOptions,
         );
 
         dynascaleManager.init(
@@ -1004,7 +1007,10 @@ class Call {
           rtcManager: session.rtcManager!,
           stateManager: _stateManager,
         )
-            .run(interval: _preferences.callStatsReportingInterval)
+            .run(
+          interval:
+              _stateManager.callState.preferences.callStatsReportingInterval,
+        )
             .listen((stats) {
           _stats.emit(stats);
         }),
@@ -1044,7 +1050,7 @@ class Call {
       if (callParticipants.length == 1 &&
           callParticipants.first.userId == _streamVideo.currentUser.id &&
           state.value.isRingingFlow &&
-          _stateManager.callPreferences.dropIfAloneInRingingFlow) {
+          _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
         await leave();
       }
     } else if (sfuEvent is SfuHealthCheckResponseEvent) {
@@ -1585,9 +1591,10 @@ class Call {
 
       final newQueue = [...queue, currentCaption];
 
-      final visibilityDurationMs =
-          _preferences.closedCaptionsVisibilityDurationMs;
-      final visibileCaptions = _preferences.closedCaptionsVisibleCaptions;
+      final visibilityDurationMs = _stateManager
+          .callState.preferences.closedCaptionsVisibilityDurationMs;
+      final visibileCaptions =
+          _stateManager.callState.preferences.closedCaptionsVisibleCaptions;
 
       try {
         // schedule the removal of the closed caption after the retention time
@@ -2572,10 +2579,10 @@ CallStateNotifier _makeStateManager(
 
   return CallStateNotifier(
     CallState(
+      preferences: callPreferences,
       currentUserId: currentUserId,
       callCid: callCid,
     ),
-    callPreferences,
   );
 }
 

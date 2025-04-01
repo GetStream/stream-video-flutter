@@ -12,8 +12,10 @@ class CallState extends Equatable {
   factory CallState({
     required String currentUserId,
     required StreamCallCid callCid,
+    required CallPreferences preferences,
   }) {
     return CallState._(
+      preferences: preferences,
       currentUserId: currentUserId,
       callCid: callCid,
       createdByUserId: '',
@@ -55,6 +57,7 @@ class CallState extends Equatable {
   }
 
   const CallState._({
+    required this.preferences,
     required this.currentUserId,
     required this.callCid,
     required this.createdByUserId,
@@ -94,6 +97,7 @@ class CallState extends Equatable {
     required this.custom,
   });
 
+  final CallPreferences preferences;
   final String currentUserId;
   final StreamCallCid callCid;
   final String createdByUserId;
@@ -151,6 +155,7 @@ class CallState extends Equatable {
   /// Returns a copy of this [CallState] with the given fields replaced
   /// with the new values.
   CallState copyWith({
+    CallPreferences? preferences,
     String? currentUserId,
     StreamCallCid? callCid,
     String? createdByUserId,
@@ -190,6 +195,7 @@ class CallState extends Equatable {
     Map<String, Object>? custom,
   }) {
     return CallState._(
+      preferences: preferences ?? this.preferences,
       currentUserId: currentUserId ?? this.currentUserId,
       callCid: callCid ?? this.callCid,
       createdByUserId: createdByUserId ?? this.createdByUserId,

@@ -419,7 +419,6 @@ class StreamVideo extends Disposable {
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
       final call = _makeCallFromRinging(data: event.data);
-
       _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
@@ -505,7 +504,7 @@ class StreamVideo extends Disposable {
       streamVideo: this,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
-      preferences: preferences,
+      preferences: preferences ?? _options.defaultCallPreferences,
     );
   }
 
@@ -519,7 +518,7 @@ class StreamVideo extends Disposable {
       streamVideo: this,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
-      preferences: preferences,
+      preferences: preferences ?? _options.defaultCallPreferences,
     );
   }
 
@@ -695,19 +694,26 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    final call = await consumeIncomingCall(
+    final consumeResult = await consumeIncomingCall(
       uuid: uuid,
       cid: cid,
       preferences: callPreferences,
     );
-    final callToJoin = call.getDataOrNull();
+
+    if (consumeResult.isFailure) {
+      _logger.w(
+        () => '[onCallAccept] error consuming incoming call}',
+      );
+      return;
+    }
+
+    final callToJoin = consumeResult.getDataOrNull();
     if (callToJoin == null) return;
 
     final acceptResult = await callToJoin.accept();
 
-    // Return if cannot accept call
     if (acceptResult.isFailure) {
-      _logger.d(() => '[onCallAccept] error accepting call: $call');
+      _logger.d(() => '[onCallAccept] error accepting call: $callToJoin');
       return;
     }
 
@@ -925,8 +931,13 @@ class StreamVideo extends Disposable {
       );
     }
 
+    // If call was already created by consuming ringing event, use the same instance.
     if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
-      return Result.success(_state.incomingCall.value!);
+      final call = _state.incomingCall.value!;
+      if (preferences != null) {
+        call.updateCallPreferences(preferences);
+      }
+      return Result.success(call);
     }
 
     final callCid = StreamCallCid(cid: cid);
@@ -941,7 +952,7 @@ class StreamVideo extends Disposable {
         ringing: true,
         metadata: callResult.data.metadata,
       ),
-      preferences: preferences,
+      preferences: preferences ?? _options.defaultCallPreferences,
     );
 
     return Result.success(call);
@@ -1069,6 +1080,7 @@ class StreamVideoOptions {
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
+    this.defaultCallPreferences,
     this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
     this.audioProcessor,
     this.logPriority = Priority.none,
@@ -1086,6 +1098,7 @@ class StreamVideoOptions {
 
   /// Returns the current [RetryPolicy].
   final RetryPolicy retryPolicy;
+  final CallPreferences? defaultCallPreferences;
 
   /// Returns the current [SdpPolicy].
   final SdpPolicy sdpPolicy;
