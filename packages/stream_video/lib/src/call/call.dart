@@ -2156,6 +2156,9 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      await _streamVideo.pushNotificationManager
+          ?.setCallMutedByCid(callCid.value, !enabled);
+
       _stateManager.participantSetMicrophoneEnabled(
         enabled: enabled,
       );
