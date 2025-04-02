@@ -20,6 +20,11 @@ enum StreamWebSocketCloseCode {
   normalClosure(1000),
 
   // /**
+  //  * The going away code. Used when the server is going down.
+  //  */
+  goingAway(1001),
+
+  // /**
   //  * The error code used when the SFU connection is unhealthy.
   //  * Usually, this means that no message has been received from the SFU for
   //  * a certain amount of time (`connectionCheckTimeout`).
@@ -36,6 +41,9 @@ enum StreamWebSocketCloseCode {
 
   const StreamWebSocketCloseCode(this.value);
   final int value;
+
+  static bool isIntentionalClosure(int? code) =>
+      code == normalClosure.value || code == goingAway.value;
 }
 
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
@@ -62,6 +70,11 @@ abstract class StreamWebSocket {
   /// Returns true if the ws connection is in progress.
   bool get connectRequestInProgress => _connectRequestInProgress;
   bool _connectRequestInProgress = false;
+
+  Future<Result<None>> recreate() async {
+    await disconnect(StreamWebSocketCloseCode.disposeOldSocket.value);
+    return connect();
+  }
 
   /// Creates a new websocket connection.
   ///

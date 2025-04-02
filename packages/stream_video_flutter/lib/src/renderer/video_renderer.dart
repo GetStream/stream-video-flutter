@@ -94,7 +94,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
 
     return VisibilityDetector(
       key: Key(
-        '${widget.participant.userId}${widget.participant.sessionId}${widget.videoTrackType}',
+        '${widget.participant.uniqueParticipantKey}${widget.videoTrackType}',
       ),
       onVisibilityChanged: (info) =>
           _onVisibilityChanged(info, widget.participant.userId),

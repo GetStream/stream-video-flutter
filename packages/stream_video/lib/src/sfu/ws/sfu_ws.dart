@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../errors/video_error_composer.dart';
@@ -24,6 +26,7 @@ class SfuWebSocket extends StreamWebSocket
     required String sessionId,
     required String sfuUrl,
     required String sfuWsEndpoint,
+    required InternetConnection networkMonitor,
     Iterable<String>? protocols,
   }) {
     final tag = '$_tag-$sessionSeq';
@@ -53,6 +56,7 @@ class SfuWebSocket extends StreamWebSocket
       protocols: protocols,
       sessionSeq: sessionSeq,
       sessionId: sessionId,
+      networkMonitor: networkMonitor,
     );
   }
 
@@ -62,6 +66,7 @@ class SfuWebSocket extends StreamWebSocket
     super.protocols,
     required this.sessionSeq,
     required this.sessionId,
+    required this.networkMonitor,
   }) : super(tag: '$_tag-$sessionSeq') {
     _logger.i(() => '<init> sessionId: $sessionId');
 
@@ -70,21 +75,35 @@ class SfuWebSocket extends StreamWebSocket
 
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
-  late final HealthMonitor healthMonitor = HealthMonitorImpl('Sfu', this);
+  late final HealthMonitor healthMonitor = HealthMonitorImpl(
+    'Sfu',
+    this,
+    networkMonitor: networkMonitor,
+  );
 
   final int sessionSeq;
   final String sessionId;
+  final InternetConnection networkMonitor;
 
   bool _manuallyClosed = false;
+  bool _recreating = false;
 
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
+  StreamSubscription<InternetStatus>? _networkChangeSubscription;
+
+  @override
+  Future<Result<None>> recreate() {
+    _recreating = true;
+    return super.recreate();
+  }
 
   @override
   Future<Result<None>> connect() {
     _logger.i(() => '[connect] connectionState: $connectionState');
     connectionState = ConnectionState.connecting;
     healthMonitor.start();
+
     return super.connect();
   }
 
@@ -92,6 +111,7 @@ class SfuWebSocket extends StreamWebSocket
   void onOpen() {
     _logger.i(() => '[onOpen] url: $url');
     connectionState = ConnectionState.connected;
+    _recreating = false;
     healthMonitor.onSocketOpen();
 
     _events.emit(SfuSocketConnected(sessionId: sessionId, url: url));
@@ -146,9 +166,11 @@ class SfuWebSocket extends StreamWebSocket
       () => '[onClose] closeCode: $closeCode, closeReason: $closeReason, '
           'manuallyClosed: $_manuallyClosed',
     );
+
     healthMonitor.onSocketClose();
-    if (_manuallyClosed) {
-      connectionState = ConnectionState.disconnected;
+    connectionState = ConnectionState.disconnected;
+
+    if (_manuallyClosed || _recreating) {
       return;
     }
 
@@ -169,13 +191,16 @@ class SfuWebSocket extends StreamWebSocket
     _logger.i(
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
+
+    await _networkChangeSubscription?.cancel();
+
+    // Stop sending keep alive messages.
+    healthMonitor.stop();
+
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       return const Result.success(none);
     }
-
-    // Stop sending keep alive messages.
-    healthMonitor.stop();
 
     // If no close code is provided,
     // means we are manually closing the connection.
@@ -221,7 +246,7 @@ class SfuWebSocket extends StreamWebSocket
   Future<void> onPongTimeout(Duration timeout) async {
     _logger.d(() => '[onPongTimeout] timeout: $timeout');
 
-    await super.disconnect();
+    await disconnect();
   }
 
   @override

@@ -15,14 +15,14 @@ dependencies:
   battery_plus: ^6.2.0
   collection: ^1.18.0
   connectivity_plus: ^6.0.4
-  dart_webrtc: ^1.4.10
+  dart_webrtc: ^1.5.3
   device_info_plus: ">=10.1.2 <12.0.0"
   equatable: ^2.0.5
   fixnum: ^1.1.0
   flutter:
     sdk: flutter
   http: ^1.1.0
-  internet_connection_checker_plus: ^2.5.2
+  internet_connection_checker_plus: ^2.7.1
   intl: ">=0.18.1 <=0.21.0"
   jose: ^0.3.4
   meta: ^1.9.1
@@ -31,7 +31,7 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^1.0.0-dev.1
+  stream_webrtc_flutter: ^1.0.1
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1

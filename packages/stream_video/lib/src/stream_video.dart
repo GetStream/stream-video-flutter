@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:async/async.dart' as async;
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
@@ -44,6 +45,7 @@ import 'models/push_provider.dart';
 import 'models/queried_calls.dart';
 import 'models/user.dart';
 import 'models/user_info.dart';
+import 'network_monitor_settings.dart';
 import 'platform_detector/platform_detector.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
@@ -141,6 +143,20 @@ class StreamVideo extends Disposable {
     PNManagerProvider? pushNotificationManagerProvider,
   })  : _options = options,
         _state = MutableClientState(user) {
+    _networkMonitor =
+        _options.networkMonitorSettings.internetConnectionInstance ??
+            InternetConnection.createInstance(
+              checkInterval: _options.networkMonitorSettings.checkInterval,
+              useDefaultOptions:
+                  _options.networkMonitorSettings.customEndpoints.isEmpty,
+              customCheckOptions:
+                  _options.networkMonitorSettings.customEndpoints.isEmpty
+                      ? null
+                      : _options.networkMonitorSettings.customEndpoints
+                          .map((option) => option.toInternetCheckOption())
+                          .toList(),
+            );
+
     _client = buildCoordinatorClient(
       user: user,
       apiKey: apiKey,
@@ -149,6 +165,7 @@ class StreamVideo extends Disposable {
       retryPolicy: _options.retryPolicy,
       rpcUrl: _options.coordinatorRpcUrl,
       wsUrl: _options.coordinatorWsUrl,
+      networkMonitor: _networkMonitor,
     );
 
     // Initialize the push notification manager if the provider is provided.
@@ -233,7 +250,9 @@ class StreamVideo extends Disposable {
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
+
   late final CoordinatorClient _client;
+  late final InternetConnection _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
 
   bool _mutedCameraByStateChange = false;
@@ -502,6 +521,7 @@ class StreamVideo extends Disposable {
       ),
       coordinatorClient: _client,
       streamVideo: this,
+      networkMonitor: _networkMonitor,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences ?? _options.defaultCallPreferences,
@@ -516,6 +536,7 @@ class StreamVideo extends Disposable {
       data: data,
       coordinatorClient: _client,
       streamVideo: this,
+      networkMonitor: _networkMonitor,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences ?? _options.defaultCallPreferences,
@@ -995,6 +1016,7 @@ CoordinatorClient buildCoordinatorClient({
   required TokenManager tokenManager,
   required RetryPolicy retryPolicy,
   required LatencySettings latencySettings,
+  required InternetConnection networkMonitor,
 }) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
@@ -1005,6 +1027,7 @@ CoordinatorClient buildCoordinatorClient({
       apiKey: apiKey,
       tokenManager: tokenManager,
       latencyService: LatencyService(settings: latencySettings),
+      networkMonitor: networkMonitor,
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,
@@ -1090,6 +1113,7 @@ class StreamVideoOptions {
     this.autoConnect = true,
     this.includeUserDetailsForAutoConnect = true,
     this.keepConnectionsAliveWhenInBackground = false,
+    this.networkMonitorSettings = const NetworkMonitorSettings(),
   });
 
   final String coordinatorRpcUrl;
@@ -1113,4 +1137,7 @@ class StreamVideoOptions {
   final bool autoConnect;
   final bool includeUserDetailsForAutoConnect;
   final bool keepConnectionsAliveWhenInBackground;
+
+  /// Returns the current [NetworkMonitorSettings].
+  final NetworkMonitorSettings networkMonitorSettings;
 }
