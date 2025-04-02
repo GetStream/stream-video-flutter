@@ -1,3 +1,25 @@
+## 0.9.0
+
+✅ Added
+* Introducing noise cancellation support to enhance call audio quality. Implement this feature easily by following our [documentation](https://getstream.io/video/docs/flutter/guides/noise-cancellation/).
+* Added `networkMonitorSettings` to `StreamVideoOptions` for configuring network monitoring, including customization of test URLs for connection checks.
+
+🚧 (Breaking Changes)
+* Improved `setScreenShareEnabled` method in `CallSession` class to return the screen sharing track.
+* Relocated `callPreferences` property from `CallStateNotifier` to `CallState` for better state management.
+* Increased minimum platform requirements
+    * **Android:** Minimum SDK 21 (Android 5.0 Lollipop)
+    * **iOS:** iOS 14.0 or higher
+
+🐞 Fixed
+* Enhanced fast reconnect flow for more reliable connection recovery during network interruptions.
+* Resolved an issue where video tracks weren't properly subscribed when participants joined calls.
+* Fixed multi-device support to properly handle when the same user joins from multiple devices.
+* Corrected screen sharing source switching when changing between multiple sources.
+* Fixed a bug where `CallPreferences` could be ignored when accepting a ringing call.
+* (Android) Resolved compatibility issues with `battery_plus` plugin on older Android devices.
+* (Web) Fixed screen sharing termination when using browser UI controls to stop sharing.
+
 ## 0.8.4
 
 🔄 Changed
