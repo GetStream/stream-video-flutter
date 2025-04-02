@@ -1,3 +1,4 @@
-## 0.0.1
+## 0.9.0
 
-* TODO: Describe initial release.
+✅ Added
+* Introducing noise cancellation support to enhance call audio quality. Implement this feature easily by following our [documentation](https://getstream.io/video/docs/flutter/guides/noise-cancellation/).

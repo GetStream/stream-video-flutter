@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'stream_video_noise_cancellation'
-  s.version          = '0.8.3'
+  s.version          = '0.9.0'
   s.summary          = 'Official Noise Cancellation Plugin for Stream Video.'
   s.description      = <<-DESC
 Official Noise Cancellation Plugin for Stream Video.
