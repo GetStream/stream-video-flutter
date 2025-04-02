@@ -38,6 +38,8 @@ class RTCConfiguration {
     return <String, dynamic>{
       // only supports unified plan
       'sdpSemantics': 'unified-plan',
+      'bundlePolicy':
+          'max-bundle', // https://linear.app/stream/issue/FLU-91/peerconnection-rtp-bundle
       if (iceServersMap.isNotEmpty) 'iceServers': iceServersMap,
       if (iceCandidatePoolSize != null)
         'iceCandidatePoolSize': iceCandidatePoolSize,
