@@ -1,3 +1,10 @@
+## Unreleased
+
+✅ Added
+* Added camera focus and zoom control features:
+  * New `Call.setZoom()` method that allows adjusting camera zoom level.
+  * New `Call.focus()` method that enables setting focus and exposure points on the camera.
+
 ## 0.9.0
 
 ✅ Added

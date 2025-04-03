@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -2135,6 +2136,62 @@ class Call {
     }
 
     return const Result.success(false);
+  }
+
+  Future<Result<None>> setZoom({
+    required double zoomLevel,
+  }) async {
+    _logger.d(() => '[setZoom] zoomLevel: $zoomLevel');
+
+    final localTrackIdPrefix = state.value.localParticipant?.trackIdPrefix;
+
+    if (localTrackIdPrefix == null) {
+      _logger.w(() => '[setZoom] local participant not found');
+      return Result.error('Local participant not found');
+    }
+    final localTrack =
+        _session?.getTrack(localTrackIdPrefix, SfuTrackType.video);
+
+    if (localTrack == null) {
+      _logger.w(() => '[setZoom] local track not found');
+      return Result.error('Local track not found');
+    }
+
+    try {
+      await rtc.Helper.setZoom(localTrack.mediaTrack, zoomLevel);
+      return const Result.success(none);
+    } catch (error, stackTrace) {
+      _logger.e(() => '[setZoom] Failed to set zoom: $error');
+      return Result.error('Failed to set zoom', stackTrace);
+    }
+  }
+
+  Future<Result<None>> focus({Point<double>? focusPoint}) async {
+    _logger.d(() => '[focus] focusPoint: $focusPoint');
+
+    final localTrackIdPrefix = state.value.localParticipant?.trackIdPrefix;
+
+    if (localTrackIdPrefix == null) {
+      _logger.w(() => '[focus] local participant not found');
+      return Result.error('Local participant not found');
+    }
+
+    final localTrack =
+        _session?.getTrack(localTrackIdPrefix, SfuTrackType.video);
+    if (localTrack == null) {
+      _logger.w(() => '[focus] local track not found');
+      return Result.error('Local track not found');
+    }
+
+    try {
+      await Helper.setFocusPoint(localTrack.mediaTrack, focusPoint);
+      await Helper.setExposurePoint(localTrack.mediaTrack, focusPoint);
+    } catch (error, stackTrace) {
+      _logger.e(() => '[focus] Failed to set focus: $error');
+      return Result.error('Failed to set focus', stackTrace);
+    }
+
+    return const Result.success(none);
   }
 
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
