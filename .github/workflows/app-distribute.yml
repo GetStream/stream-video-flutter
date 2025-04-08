@@ -46,7 +46,7 @@ concurrency:
 jobs:
   build_and_deploy_ios:
     name: Build and Distribute Dogfooding Ios
-    runs-on: macos-latest
+    runs-on: macos-15
     timeout-minutes: 60
     if: ${{ github.event_name == 'push' || inputs.build_ios == true }}
     steps:
