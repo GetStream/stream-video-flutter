@@ -17,6 +17,7 @@ class StreamVideoPushParams extends CallKitParams {
     super.textAccept,
     super.textDecline,
     super.missedCallNotification,
+    super.callingNotification,
     super.extra,
     super.headers,
     super.android,
@@ -34,6 +35,7 @@ class StreamVideoPushParams extends CallKitParams {
     super.textAccept,
     super.textDecline,
     super.missedCallNotification,
+    super.callingNotification,
     super.extra,
     super.headers,
     super.android,
@@ -52,6 +54,7 @@ class StreamVideoPushParams extends CallKitParams {
     String? textAccept,
     String? textDecline,
     NotificationParams? missedCallNotification,
+    NotificationParams? callingNotification,
     Map<String, Object?>? extra,
     Map<String, Object?>? headers,
     AndroidParams? android,
@@ -69,6 +72,7 @@ class StreamVideoPushParams extends CallKitParams {
       textDecline: textDecline ?? this.textDecline,
       missedCallNotification:
           missedCallNotification ?? this.missedCallNotification,
+      callingNotification: callingNotification ?? this.callingNotification,
       extra: extra ?? this.extra,
       headers: headers ?? this.headers,
       android: android ?? this.android,
@@ -92,6 +96,8 @@ class StreamVideoPushParams extends CallKitParams {
       textDecline: other.textDecline,
       missedCallNotification:
           missedCallNotification?.merge(other.missedCallNotification),
+      callingNotification:
+          callingNotification?.merge(other.callingNotification),
       extra: other.extra,
       headers: other.headers,
       android: android?.merge(other.android),

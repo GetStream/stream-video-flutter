@@ -485,6 +485,9 @@ const _defaultPushParams = StreamVideoPushParams(
     subtitle: 'Missed call',
     callbackText: 'Call back',
   ),
+  callingNotification: NotificationParams(
+    showNotification: false,
+  ),
   android: AndroidParams(
     isCustomNotification: true,
     isShowLogo: false,
