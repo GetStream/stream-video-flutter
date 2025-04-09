@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_video
-          min_score: 120
+          min_score: 130
 
   stream_video_flutter:
     runs-on: ubuntu-latest
