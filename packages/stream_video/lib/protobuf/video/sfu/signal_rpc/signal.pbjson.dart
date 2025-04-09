@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: video/sfu/signal_rpc/signal.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names, library_prefixes
@@ -192,6 +192,28 @@ const SendStatsRequest$json = {
       '6': '.stream.video.sfu.signal.Telemetry',
       '10': 'telemetry'
     },
+    {
+      '1': 'rtmp',
+      '3': 12,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RTMPIngress',
+      '10': 'rtmp'
+    },
+    {
+      '1': 'subscriber_rtc_stats',
+      '3': 13,
+      '4': 1,
+      '5': 9,
+      '10': 'subscriberRtcStats'
+    },
+    {
+      '1': 'publisher_rtc_stats',
+      '3': 14,
+      '4': 1,
+      '5': 9,
+      '10': 'publisherRtcStats'
+    },
   ],
   '8': [
     {'1': 'device_state'},
@@ -210,7 +232,10 @@ final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
     'ABKAsyJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BbmRyb2lkU3RhdGVIAFIHYW5kcm9pZBI7'
     'CgVhcHBsZRgKIAEoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkFwcGxlU3RhdGVIAFIFYX'
     'BwbGUSQAoJdGVsZW1ldHJ5GAsgASgLMiIuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVGVsZW1l'
-    'dHJ5Ugl0ZWxlbWV0cnlCDgoMZGV2aWNlX3N0YXRl');
+    'dHJ5Ugl0ZWxlbWV0cnkSOAoEcnRtcBgMIAEoCzIkLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLl'
+    'JUTVBJbmdyZXNzUgRydG1wEjAKFHN1YnNjcmliZXJfcnRjX3N0YXRzGA0gASgJUhJzdWJzY3Jp'
+    'YmVyUnRjU3RhdHMSLgoTcHVibGlzaGVyX3J0Y19zdGF0cxgOIAEoCVIRcHVibGlzaGVyUnRjU3'
+    'RhdHNCDgoMZGV2aWNlX3N0YXRl');
 
 @$core.Deprecated('Use sendStatsResponseDescriptor instead')
 const SendStatsResponse$json = {
@@ -632,6 +657,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.stream.video.sfu.models.AppleState': $0.AppleState$json,
   '.stream.video.sfu.signal.Telemetry': Telemetry$json,
   '.stream.video.sfu.signal.Reconnection': Reconnection$json,
+  '.stream.video.sfu.models.RTMPIngress': $0.RTMPIngress$json,
   '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
   '.stream.video.sfu.signal.StartNoiseCancellationRequest':
       StartNoiseCancellationRequest$json,
