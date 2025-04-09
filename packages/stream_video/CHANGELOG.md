@@ -6,6 +6,7 @@
   * New `Call.focus()` method for setting focus and exposure points on the camera.
 
 🐞 Fixed
+* [Android] Fixes the device orientation detection when screen-sharing on some Android devices. 
 * Addressed minor bugs and improved performance.
 
 ## 0.9.0
