@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_video
-          min_score: 120
+          min_score: 130
 
   stream_video_flutter:
     runs-on: ubuntu-latest
@@ -56,3 +56,14 @@ jobs:
         with:
           working_directory: packages/stream_video_screen_sharing
           min_score: 140
+
+  stream_video_noise_cancellation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+      - name: 📊 Verify Pana Score
+        uses: ./.github/actions/pana
+        with:
+          working_directory: packages/stream_video_noise_cancellation
+          min_score: 130
