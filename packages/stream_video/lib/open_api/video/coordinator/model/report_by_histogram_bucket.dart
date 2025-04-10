@@ -16,7 +16,6 @@ class ReportByHistogramBucket {
     required this.category,
     required this.count,
     this.lowerBound,
-    required this.mean,
     required this.sum,
     this.upperBound,
   });
@@ -32,8 +31,6 @@ class ReportByHistogramBucket {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   Bound? lowerBound;
-
-  double mean;
 
   double sum;
 
@@ -52,7 +49,6 @@ class ReportByHistogramBucket {
           other.category == category &&
           other.count == count &&
           other.lowerBound == lowerBound &&
-          other.mean == mean &&
           other.sum == sum &&
           other.upperBound == upperBound;
 
@@ -62,13 +58,12 @@ class ReportByHistogramBucket {
       (category.hashCode) +
       (count.hashCode) +
       (lowerBound == null ? 0 : lowerBound!.hashCode) +
-      (mean.hashCode) +
       (sum.hashCode) +
       (upperBound == null ? 0 : upperBound!.hashCode);
 
   @override
   String toString() =>
-      'ReportByHistogramBucket[category=$category, count=$count, lowerBound=$lowerBound, mean=$mean, sum=$sum, upperBound=$upperBound]';
+      'ReportByHistogramBucket[category=$category, count=$count, lowerBound=$lowerBound, sum=$sum, upperBound=$upperBound]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -79,7 +74,6 @@ class ReportByHistogramBucket {
     } else {
       json[r'lower_bound'] = null;
     }
-    json[r'mean'] = this.mean;
     json[r'sum'] = this.sum;
     if (this.upperBound != null) {
       json[r'upper_bound'] = this.upperBound;
@@ -113,7 +107,6 @@ class ReportByHistogramBucket {
         category: mapValueOfType<String>(json, r'category')!,
         count: mapValueOfType<int>(json, r'count')!,
         lowerBound: Bound.fromJson(json[r'lower_bound']),
-        mean: mapValueOfType<double>(json, r'mean')!,
         sum: mapValueOfType<double>(json, r'sum')!,
         upperBound: Bound.fromJson(json[r'upper_bound']),
       );
@@ -174,7 +167,6 @@ class ReportByHistogramBucket {
   static const requiredKeys = <String>{
     'category',
     'count',
-    'mean',
     'sum',
   };
 }

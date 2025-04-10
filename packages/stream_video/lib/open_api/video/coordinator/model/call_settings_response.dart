@@ -16,11 +16,13 @@ class CallSettingsResponse {
     required this.audio,
     required this.backstage,
     required this.broadcasting,
+    required this.frameRecording,
     required this.geofencing,
     required this.limits,
     required this.recording,
     required this.ring,
     required this.screensharing,
+    required this.session,
     required this.thumbnails,
     required this.transcription,
     required this.video,
@@ -32,6 +34,8 @@ class CallSettingsResponse {
 
   BroadcastSettingsResponse broadcasting;
 
+  FrameRecordingSettingsResponse frameRecording;
+
   GeofenceSettingsResponse geofencing;
 
   LimitsSettingsResponse limits;
@@ -41,6 +45,8 @@ class CallSettingsResponse {
   RingSettingsResponse ring;
 
   ScreensharingSettingsResponse screensharing;
+
+  SessionSettingsResponse session;
 
   ThumbnailsSettingsResponse thumbnails;
 
@@ -55,11 +61,13 @@ class CallSettingsResponse {
           other.audio == audio &&
           other.backstage == backstage &&
           other.broadcasting == broadcasting &&
+          other.frameRecording == frameRecording &&
           other.geofencing == geofencing &&
           other.limits == limits &&
           other.recording == recording &&
           other.ring == ring &&
           other.screensharing == screensharing &&
+          other.session == session &&
           other.thumbnails == thumbnails &&
           other.transcription == transcription &&
           other.video == video;
@@ -70,29 +78,33 @@ class CallSettingsResponse {
       (audio.hashCode) +
       (backstage.hashCode) +
       (broadcasting.hashCode) +
+      (frameRecording.hashCode) +
       (geofencing.hashCode) +
       (limits.hashCode) +
       (recording.hashCode) +
       (ring.hashCode) +
       (screensharing.hashCode) +
+      (session.hashCode) +
       (thumbnails.hashCode) +
       (transcription.hashCode) +
       (video.hashCode);
 
   @override
   String toString() =>
-      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'audio'] = this.audio;
     json[r'backstage'] = this.backstage;
     json[r'broadcasting'] = this.broadcasting;
+    json[r'frame_recording'] = this.frameRecording;
     json[r'geofencing'] = this.geofencing;
     json[r'limits'] = this.limits;
     json[r'recording'] = this.recording;
     json[r'ring'] = this.ring;
     json[r'screensharing'] = this.screensharing;
+    json[r'session'] = this.session;
     json[r'thumbnails'] = this.thumbnails;
     json[r'transcription'] = this.transcription;
     json[r'video'] = this.video;
@@ -124,12 +136,15 @@ class CallSettingsResponse {
         backstage: BackstageSettingsResponse.fromJson(json[r'backstage'])!,
         broadcasting:
             BroadcastSettingsResponse.fromJson(json[r'broadcasting'])!,
+        frameRecording:
+            FrameRecordingSettingsResponse.fromJson(json[r'frame_recording'])!,
         geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
         limits: LimitsSettingsResponse.fromJson(json[r'limits'])!,
         recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
         ring: RingSettingsResponse.fromJson(json[r'ring'])!,
         screensharing:
             ScreensharingSettingsResponse.fromJson(json[r'screensharing'])!,
+        session: SessionSettingsResponse.fromJson(json[r'session'])!,
         thumbnails: ThumbnailsSettingsResponse.fromJson(json[r'thumbnails'])!,
         transcription:
             TranscriptionSettingsResponse.fromJson(json[r'transcription'])!,
@@ -193,11 +208,13 @@ class CallSettingsResponse {
     'audio',
     'backstage',
     'broadcasting',
+    'frame_recording',
     'geofencing',
     'limits',
     'recording',
     'ring',
     'screensharing',
+    'session',
     'thumbnails',
     'transcription',
     'video',

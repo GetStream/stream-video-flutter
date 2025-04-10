@@ -13,11 +13,14 @@ part of openapi.api;
 class CallHLSBroadcastingStartedEvent {
   /// Returns a new [CallHLSBroadcastingStartedEvent] instance.
   CallHLSBroadcastingStartedEvent({
+    required this.call,
     required this.callCid,
     required this.createdAt,
     required this.hlsPlaylistUrl,
     this.type = 'call.hls_broadcasting_started',
   });
+
+  CallResponse call;
 
   String callCid;
 
@@ -32,6 +35,7 @@ class CallHLSBroadcastingStartedEvent {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CallHLSBroadcastingStartedEvent &&
+          other.call == call &&
           other.callCid == callCid &&
           other.createdAt == createdAt &&
           other.hlsPlaylistUrl == hlsPlaylistUrl &&
@@ -40,6 +44,7 @@ class CallHLSBroadcastingStartedEvent {
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
+      (call.hashCode) +
       (callCid.hashCode) +
       (createdAt.hashCode) +
       (hlsPlaylistUrl.hashCode) +
@@ -47,10 +52,11 @@ class CallHLSBroadcastingStartedEvent {
 
   @override
   String toString() =>
-      'CallHLSBroadcastingStartedEvent[callCid=$callCid, createdAt=$createdAt, hlsPlaylistUrl=$hlsPlaylistUrl, type=$type]';
+      'CallHLSBroadcastingStartedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, hlsPlaylistUrl=$hlsPlaylistUrl, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    json[r'call'] = this.call;
     json[r'call_cid'] = this.callCid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
@@ -79,6 +85,7 @@ class CallHLSBroadcastingStartedEvent {
       }());
 
       return CallHLSBroadcastingStartedEvent(
+        call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
@@ -140,6 +147,7 @@ class CallHLSBroadcastingStartedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'call',
     'call_cid',
     'created_at',
     'hls_playlist_url',

@@ -16,6 +16,7 @@ class CallRecordingReadyEvent {
     required this.callCid,
     required this.callRecording,
     required this.createdAt,
+    required this.egressId,
     this.type = 'call.recording_ready',
   });
 
@@ -24,6 +25,8 @@ class CallRecordingReadyEvent {
   CallRecording callRecording;
 
   DateTime createdAt;
+
+  String egressId;
 
   /// The type of event: \"call.recording_ready\" in this case
   String type;
@@ -35,6 +38,7 @@ class CallRecordingReadyEvent {
           other.callCid == callCid &&
           other.callRecording == callRecording &&
           other.createdAt == createdAt &&
+          other.egressId == egressId &&
           other.type == type;
 
   @override
@@ -43,17 +47,19 @@ class CallRecordingReadyEvent {
       (callCid.hashCode) +
       (callRecording.hashCode) +
       (createdAt.hashCode) +
+      (egressId.hashCode) +
       (type.hashCode);
 
   @override
   String toString() =>
-      'CallRecordingReadyEvent[callCid=$callCid, callRecording=$callRecording, createdAt=$createdAt, type=$type]';
+      'CallRecordingReadyEvent[callCid=$callCid, callRecording=$callRecording, createdAt=$createdAt, egressId=$egressId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call_cid'] = this.callCid;
     json[r'call_recording'] = this.callRecording;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'egress_id'] = this.egressId;
     json[r'type'] = this.type;
     return json;
   }
@@ -82,6 +88,7 @@ class CallRecordingReadyEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         callRecording: CallRecording.fromJson(json[r'call_recording'])!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        egressId: mapValueOfType<String>(json, r'egress_id')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -142,6 +149,7 @@ class CallRecordingReadyEvent {
     'call_cid',
     'call_recording',
     'created_at',
+    'egress_id',
     'type',
   };
 }

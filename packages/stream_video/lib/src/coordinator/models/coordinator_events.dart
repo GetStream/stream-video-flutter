@@ -469,18 +469,21 @@ class CoordinatorCallBroadcastingStartedEvent extends CoordinatorCallEvent {
     required this.callCid,
     required this.hlsPlaylistUrl,
     required this.createdAt,
+    required this.metadata,
   });
 
   @override
   final StreamCallCid callCid;
   final String hlsPlaylistUrl;
   final DateTime createdAt;
+  final CallMetadata metadata;
 
   @override
   List<Object?> get props => [
         ...super.props,
         hlsPlaylistUrl,
         createdAt,
+        metadata,
       ];
 }
 

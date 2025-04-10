@@ -287,7 +287,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.collectUserFeedback(
         callType,
         callId,
-        sessionId,
         input,
       );
 
@@ -1179,7 +1178,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<CallMetadata>> goLive({
     required StreamCallCid callCid,
     bool? startHls,
-    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
     bool? startClosedCaption,
@@ -1199,7 +1197,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           startRecording: startRecording,
           startTranscription: startTranscription,
           startClosedCaption: startClosedCaption,
-          startRtmpBroadcasts: startRtmpBroadcasts,
           transcriptionStorageName: transcriptionStorageName,
         ),
       );

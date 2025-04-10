@@ -51,6 +51,10 @@ class OpenApiEvent with EquatableMixin {
     this.callClosedCaptionsStopped,
     this.callClosedCaptionsFailed,
     this.callClosedCaption,
+    this.callFrameRecordingStarted,
+    this.callFrameRecordingFailed,
+    this.callFrameRecordingStopped,
+    this.callFrameRecordingFrameReady,
     this.custom,
     this.unknown,
   });
@@ -192,6 +196,18 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callClosedCaption:
         final event = open.ClosedCaptionEvent.fromJson(jsonObj);
         return result.copyWith(callClosedCaption: event);
+      case EventType.callFrameRecordingStarted:
+        final event = open.CallFrameRecordingStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callFrameRecordingStarted: event);
+      case EventType.callFrameRecordingStopped:
+        final event = open.CallFrameRecordingStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(callFrameRecordingStopped: event);
+      case EventType.callFrameRecordingFailed:
+        final event = open.CallFrameRecordingFailedEvent.fromJson(jsonObj);
+        return result.copyWith(callFrameRecordingFailed: event);
+      case EventType.callFrameRecordingReady:
+        final event = open.CallFrameRecordingFrameReadyEvent.fromJson(jsonObj);
+        return result.copyWith(callFrameRecordingFrameReady: event);
       case EventType.unknown:
         streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -241,6 +257,10 @@ class OpenApiEvent with EquatableMixin {
   final open.CallClosedCaptionsFailedEvent? callClosedCaptionsFailed;
   final open.ClosedCaptionEvent? callClosedCaption;
   final open.CustomVideoEvent? custom;
+  final open.CallFrameRecordingStartedEvent? callFrameRecordingStarted;
+  final open.CallFrameRecordingFailedEvent? callFrameRecordingFailed;
+  final open.CallFrameRecordingStoppedEvent? callFrameRecordingStopped;
+  final open.CallFrameRecordingFrameReadyEvent? callFrameRecordingFrameReady;
   final Object? unknown;
 
   OpenApiEvent copyWith({
@@ -287,6 +307,10 @@ class OpenApiEvent with EquatableMixin {
     open.CallClosedCaptionsFailedEvent? callClosedCaptionsFailed,
     open.ClosedCaptionEvent? callClosedCaption,
     open.CustomVideoEvent? custom,
+    open.CallFrameRecordingStartedEvent? callFrameRecordingStarted,
+    open.CallFrameRecordingFailedEvent? callFrameRecordingFailed,
+    open.CallFrameRecordingStoppedEvent? callFrameRecordingStopped,
+    open.CallFrameRecordingFrameReadyEvent? callFrameRecordingFrameReady,
     Object? unknown,
   }) {
     return OpenApiEvent(
@@ -346,6 +370,14 @@ class OpenApiEvent with EquatableMixin {
       callClosedCaptionsFailed:
           callClosedCaptionsFailed ?? this.callClosedCaptionsFailed,
       callClosedCaption: callClosedCaption ?? this.callClosedCaption,
+      callFrameRecordingStarted:
+          callFrameRecordingStarted ?? this.callFrameRecordingStarted,
+      callFrameRecordingFailed:
+          callFrameRecordingFailed ?? this.callFrameRecordingFailed,
+      callFrameRecordingStopped:
+          callFrameRecordingStopped ?? this.callFrameRecordingStopped,
+      callFrameRecordingFrameReady:
+          callFrameRecordingFrameReady ?? this.callFrameRecordingFrameReady,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
     );
@@ -396,6 +428,10 @@ class OpenApiEvent with EquatableMixin {
         callClosedCaptionsStopped,
         callClosedCaptionsFailed,
         callClosedCaption,
+        callFrameRecordingStarted,
+        callFrameRecordingFailed,
+        callFrameRecordingStopped,
+        callFrameRecordingFrameReady,
         custom,
         unknown,
       ];

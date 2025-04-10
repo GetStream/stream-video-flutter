@@ -18,14 +18,20 @@ class RingSettingsRequest {
     this.missedCallTimeoutMs,
   });
 
+  /// When none of the callees accept a ring call in this time a rejection will be sent by the caller with reason 'timeout' by the SDKs
+  ///
   /// Minimum value: 5000
   /// Maximum value: 180000
   int autoCancelTimeoutMs;
 
+  /// When a callee is online but doesn't answer a ring call in this time a rejection will be sent with reason 'timeout' by the SDKs
+  ///
   /// Minimum value: 5000
   /// Maximum value: 180000
   int incomingCallTimeoutMs;
 
+  /// When a callee doesn't accept or reject a ring call in this time a missed call event will be sent
+  ///
   /// Minimum value: 5000
   /// Maximum value: 180000
   ///

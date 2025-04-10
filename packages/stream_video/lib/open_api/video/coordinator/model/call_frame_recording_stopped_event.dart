@@ -10,15 +10,14 @@
 
 part of openapi.api;
 
-class CallRejectedEvent {
-  /// Returns a new [CallRejectedEvent] instance.
-  CallRejectedEvent({
+class CallFrameRecordingStoppedEvent {
+  /// Returns a new [CallFrameRecordingStoppedEvent] instance.
+  CallFrameRecordingStoppedEvent({
     required this.call,
     required this.callCid,
     required this.createdAt,
-    this.reason,
-    this.type = 'call.rejected',
-    required this.user,
+    required this.egressId,
+    this.type = 'call.frame_recording_stopped',
   });
 
   CallResponse call;
@@ -27,30 +26,20 @@ class CallRejectedEvent {
 
   DateTime createdAt;
 
-  /// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: rejected, cancel, timeout and busy
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
+  String egressId;
 
-  /// The type of event: \"call.rejected\" in this case
+  /// The type of event: \"call.frame_recording_stopped\" in this case
   String type;
-
-  UserResponse user;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CallRejectedEvent &&
+      other is CallFrameRecordingStoppedEvent &&
           other.call == call &&
           other.callCid == callCid &&
           other.createdAt == createdAt &&
-          other.reason == reason &&
-          other.type == type &&
-          other.user == user;
+          other.egressId == egressId &&
+          other.type == type;
 
   @override
   int get hashCode =>
@@ -58,33 +47,27 @@ class CallRejectedEvent {
       (call.hashCode) +
       (callCid.hashCode) +
       (createdAt.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
-      (type.hashCode) +
-      (user.hashCode);
+      (egressId.hashCode) +
+      (type.hashCode);
 
   @override
   String toString() =>
-      'CallRejectedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, reason=$reason, type=$type, user=$user]';
+      'CallFrameRecordingStoppedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, egressId=$egressId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call'] = this.call;
     json[r'call_cid'] = this.callCid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
-    }
+    json[r'egress_id'] = this.egressId;
     json[r'type'] = this.type;
-    json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [CallRejectedEvent] instance and imports its values from
+  /// Returns a new [CallFrameRecordingStoppedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallRejectedEvent? fromJson(dynamic value) {
+  static CallFrameRecordingStoppedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -94,33 +77,32 @@ class CallRejectedEvent {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "CallRejectedEvent[$key]" is missing from JSON.');
+              'Required key "CallFrameRecordingStoppedEvent[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "CallRejectedEvent[$key]" has a null value in JSON.');
+              'Required key "CallFrameRecordingStoppedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallRejectedEvent(
+      return CallFrameRecordingStoppedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        reason: mapValueOfType<String>(json, r'reason'),
+        egressId: mapValueOfType<String>(json, r'egress_id')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
   }
 
-  static List<CallRejectedEvent> listFromJson(
+  static List<CallFrameRecordingStoppedEvent> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <CallRejectedEvent>[];
+    final result = <CallFrameRecordingStoppedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallRejectedEvent.fromJson(row);
+        final value = CallFrameRecordingStoppedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -129,12 +111,12 @@ class CallRejectedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallRejectedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallRejectedEvent>{};
+  static Map<String, CallFrameRecordingStoppedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallFrameRecordingStoppedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRejectedEvent.fromJson(entry.value);
+        final value = CallFrameRecordingStoppedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -143,17 +125,17 @@ class CallRejectedEvent {
     return map;
   }
 
-  // maps a json object with a list of CallRejectedEvent-objects as value to a dart map
-  static Map<String, List<CallRejectedEvent>> mapListFromJson(
+  // maps a json object with a list of CallFrameRecordingStoppedEvent-objects as value to a dart map
+  static Map<String, List<CallFrameRecordingStoppedEvent>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<CallRejectedEvent>>{};
+    final map = <String, List<CallFrameRecordingStoppedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallRejectedEvent.listFromJson(
+        map[entry.key] = CallFrameRecordingStoppedEvent.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -167,7 +149,7 @@ class CallRejectedEvent {
     'call',
     'call_cid',
     'created_at',
+    'egress_id',
     'type',
-    'user',
   };
 }

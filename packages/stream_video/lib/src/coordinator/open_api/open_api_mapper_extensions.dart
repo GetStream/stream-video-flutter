@@ -186,6 +186,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           hlsPlaylistUrl: event.hlsPlaylistUrl,
           createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
         );
       case EventType.callBroadcastingStopped:
         final event = callBroadcastingStopped!;
@@ -293,6 +294,18 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           text: event.closedCaption.text,
           user: event.closedCaption.user.toCallUser(),
         );
+      case EventType.callFrameRecordingStarted:
+        // TODO: Handle event
+        break;
+      case EventType.callFrameRecordingStopped:
+        // TODO: Handle event
+        break;
+      case EventType.callFrameRecordingFailed:
+        // TODO: Handle event
+        break;
+      case EventType.callFrameRecordingReady:
+        // TODO: Handle event
+        break;
       case EventType.callNotification:
         // TODO: Handle event
         break;

@@ -14,12 +14,16 @@ class UserUpdatedEvent {
   /// Returns a new [UserUpdatedEvent] instance.
   UserUpdatedEvent({
     required this.createdAt,
+    this.custom = const {},
     this.receivedAt,
     this.type = 'user.updated',
     required this.user,
   });
 
+  /// Date/time of creation
   DateTime createdAt;
+
+  Map<String, Object> custom;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -29,15 +33,17 @@ class UserUpdatedEvent {
   ///
   DateTime? receivedAt;
 
+  /// The type of event: \"user.updated\" in this case
   String type;
 
-  UserEventPayload user;
+  UserResponsePrivacyFields user;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UserUpdatedEvent &&
           other.createdAt == createdAt &&
+          _deepEquality.equals(other.custom, custom) &&
           other.receivedAt == receivedAt &&
           other.type == type &&
           other.user == user;
@@ -46,17 +52,19 @@ class UserUpdatedEvent {
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (createdAt.hashCode) +
+      (custom.hashCode) +
       (receivedAt == null ? 0 : receivedAt!.hashCode) +
       (type.hashCode) +
       (user.hashCode);
 
   @override
   String toString() =>
-      'UserUpdatedEvent[createdAt=$createdAt, receivedAt=$receivedAt, type=$type, user=$user]';
+      'UserUpdatedEvent[createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'custom'] = this.custom;
     if (this.receivedAt != null) {
       json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
     } else {
@@ -89,9 +97,10 @@ class UserUpdatedEvent {
 
       return UserUpdatedEvent(
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         receivedAt: mapDateTime(json, r'received_at', r''),
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserEventPayload.fromJson(json[r'user'])!,
+        user: UserResponsePrivacyFields.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -149,6 +158,7 @@ class UserUpdatedEvent {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'created_at',
+    'custom',
     'type',
     'user',
   };

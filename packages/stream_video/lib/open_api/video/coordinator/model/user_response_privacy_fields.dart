@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class UserEventPayload {
-  /// Returns a new [UserEventPayload] instance.
-  UserEventPayload({
+class UserResponsePrivacyFields {
+  /// Returns a new [UserResponsePrivacyFields] instance.
+  UserResponsePrivacyFields({
     this.blockedUserIds = const [],
     required this.createdAt,
     this.custom = const {},
@@ -28,6 +28,7 @@ class UserEventPayload {
     this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
+    this.teamsRole = const {},
     required this.updatedAt,
   });
 
@@ -109,12 +110,14 @@ class UserEventPayload {
 
   List<String> teams;
 
+  Map<String, String> teamsRole;
+
   DateTime updatedAt;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserEventPayload &&
+      other is UserResponsePrivacyFields &&
           _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
           other.createdAt == createdAt &&
           _deepEquality.equals(other.custom, custom) &&
@@ -130,6 +133,7 @@ class UserEventPayload {
           other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
           other.role == role &&
           _deepEquality.equals(other.teams, teams) &&
+          _deepEquality.equals(other.teamsRole, teamsRole) &&
           other.updatedAt == updatedAt;
 
   @override
@@ -152,11 +156,12 @@ class UserEventPayload {
           : revokeTokensIssuedBefore!.hashCode) +
       (role.hashCode) +
       (teams.hashCode) +
+      (teamsRole.hashCode) +
       (updatedAt.hashCode);
 
   @override
   String toString() =>
-      'UserEventPayload[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+      'UserResponsePrivacyFields[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -208,14 +213,15 @@ class UserEventPayload {
     }
     json[r'role'] = this.role;
     json[r'teams'] = this.teams;
+    json[r'teams_role'] = this.teamsRole;
     json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
 
-  /// Returns a new [UserEventPayload] instance and imports its values from
+  /// Returns a new [UserResponsePrivacyFields] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static UserEventPayload? fromJson(dynamic value) {
+  static UserResponsePrivacyFields? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -225,14 +231,14 @@ class UserEventPayload {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "UserEventPayload[$key]" is missing from JSON.');
+              'Required key "UserResponsePrivacyFields[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "UserEventPayload[$key]" has a null value in JSON.');
+              'Required key "UserResponsePrivacyFields[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return UserEventPayload(
+      return UserResponsePrivacyFields(
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
             ? (json[r'blocked_user_ids'] as Iterable)
                 .cast<String>()
@@ -257,20 +263,22 @@ class UserEventPayload {
                 .cast<String>()
                 .toList(growable: false)
             : const [],
+        teamsRole:
+            mapCastOfType<String, String>(json, r'teams_role') ?? const {},
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }
     return null;
   }
 
-  static List<UserEventPayload> listFromJson(
+  static List<UserResponsePrivacyFields> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <UserEventPayload>[];
+    final result = <UserResponsePrivacyFields>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = UserEventPayload.fromJson(row);
+        final value = UserResponsePrivacyFields.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -279,12 +287,12 @@ class UserEventPayload {
     return result.toList(growable: growable);
   }
 
-  static Map<String, UserEventPayload> mapFromJson(dynamic json) {
-    final map = <String, UserEventPayload>{};
+  static Map<String, UserResponsePrivacyFields> mapFromJson(dynamic json) {
+    final map = <String, UserResponsePrivacyFields>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UserEventPayload.fromJson(entry.value);
+        final value = UserResponsePrivacyFields.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -293,17 +301,17 @@ class UserEventPayload {
     return map;
   }
 
-  // maps a json object with a list of UserEventPayload-objects as value to a dart map
-  static Map<String, List<UserEventPayload>> mapListFromJson(
+  // maps a json object with a list of UserResponsePrivacyFields-objects as value to a dart map
+  static Map<String, List<UserResponsePrivacyFields>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<UserEventPayload>>{};
+    final map = <String, List<UserResponsePrivacyFields>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserEventPayload.listFromJson(
+        map[entry.key] = UserResponsePrivacyFields.listFromJson(
           entry.value,
           growable: growable,
         );

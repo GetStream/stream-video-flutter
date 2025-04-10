@@ -10,44 +10,43 @@
 
 part of openapi.api;
 
-class StatsOptions {
-  /// Returns a new [StatsOptions] instance.
-  StatsOptions({
-    required this.enableRtcStats,
-    required this.reportingIntervalMs,
+class FPSStats {
+  /// Returns a new [FPSStats] instance.
+  FPSStats({
+    required this.averageFps,
+    required this.tracked,
   });
 
-  bool enableRtcStats;
+  double averageFps;
 
-  int reportingIntervalMs;
+  int tracked;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StatsOptions &&
-          other.enableRtcStats == enableRtcStats &&
-          other.reportingIntervalMs == reportingIntervalMs;
+      other is FPSStats &&
+          other.averageFps == averageFps &&
+          other.tracked == tracked;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (enableRtcStats.hashCode) + (reportingIntervalMs.hashCode);
+      (averageFps.hashCode) + (tracked.hashCode);
 
   @override
-  String toString() =>
-      'StatsOptions[enableRtcStats=$enableRtcStats, reportingIntervalMs=$reportingIntervalMs]';
+  String toString() => 'FPSStats[averageFps=$averageFps, tracked=$tracked]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'enable_rtc_stats'] = this.enableRtcStats;
-    json[r'reporting_interval_ms'] = this.reportingIntervalMs;
+    json[r'average_fps'] = this.averageFps;
+    json[r'tracked'] = this.tracked;
     return json;
   }
 
-  /// Returns a new [StatsOptions] instance and imports its values from
+  /// Returns a new [FPSStats] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static StatsOptions? fromJson(dynamic value) {
+  static FPSStats? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -57,30 +56,29 @@ class StatsOptions {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "StatsOptions[$key]" is missing from JSON.');
+              'Required key "FPSStats[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "StatsOptions[$key]" has a null value in JSON.');
+              'Required key "FPSStats[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return StatsOptions(
-        enableRtcStats: mapValueOfType<bool>(json, r'enable_rtc_stats')!,
-        reportingIntervalMs:
-            mapValueOfType<int>(json, r'reporting_interval_ms')!,
+      return FPSStats(
+        averageFps: mapValueOfType<double>(json, r'average_fps')!,
+        tracked: mapValueOfType<int>(json, r'tracked')!,
       );
     }
     return null;
   }
 
-  static List<StatsOptions> listFromJson(
+  static List<FPSStats> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <StatsOptions>[];
+    final result = <FPSStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = StatsOptions.fromJson(row);
+        final value = FPSStats.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -89,12 +87,12 @@ class StatsOptions {
     return result.toList(growable: growable);
   }
 
-  static Map<String, StatsOptions> mapFromJson(dynamic json) {
-    final map = <String, StatsOptions>{};
+  static Map<String, FPSStats> mapFromJson(dynamic json) {
+    final map = <String, FPSStats>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = StatsOptions.fromJson(entry.value);
+        final value = FPSStats.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -103,17 +101,17 @@ class StatsOptions {
     return map;
   }
 
-  // maps a json object with a list of StatsOptions-objects as value to a dart map
-  static Map<String, List<StatsOptions>> mapListFromJson(
+  // maps a json object with a list of FPSStats-objects as value to a dart map
+  static Map<String, List<FPSStats>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<StatsOptions>>{};
+    final map = <String, List<FPSStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StatsOptions.listFromJson(
+        map[entry.key] = FPSStats.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -124,7 +122,7 @@ class StatsOptions {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'enable_rtc_stats',
-    'reporting_interval_ms',
+    'average_fps',
+    'tracked',
   };
 }

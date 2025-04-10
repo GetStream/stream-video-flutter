@@ -232,7 +232,6 @@ abstract class CoordinatorClient {
   Future<Result<CallMetadata>> goLive({
     required StreamCallCid callCid,
     bool? startHls,
-    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
     bool? startClosedCaption,

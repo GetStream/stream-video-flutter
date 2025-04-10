@@ -26,6 +26,7 @@ class UserResponse {
     this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
+    this.teamsRole = const {},
     required this.updatedAt,
   });
 
@@ -103,6 +104,8 @@ class UserResponse {
   /// List of teams user is a part of
   List<String> teams;
 
+  Map<String, String> teamsRole;
+
   /// Date/time of the last update
   DateTime updatedAt;
 
@@ -123,6 +126,7 @@ class UserResponse {
           other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
           other.role == role &&
           _deepEquality.equals(other.teams, teams) &&
+          _deepEquality.equals(other.teamsRole, teamsRole) &&
           other.updatedAt == updatedAt;
 
   @override
@@ -143,11 +147,12 @@ class UserResponse {
           : revokeTokensIssuedBefore!.hashCode) +
       (role.hashCode) +
       (teams.hashCode) +
+      (teamsRole.hashCode) +
       (updatedAt.hashCode);
 
   @override
   String toString() =>
-      'UserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+      'UserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -189,6 +194,7 @@ class UserResponse {
     }
     json[r'role'] = this.role;
     json[r'teams'] = this.teams;
+    json[r'teams_role'] = this.teamsRole;
     json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
@@ -237,6 +243,8 @@ class UserResponse {
                 .cast<String>()
                 .toList(growable: false)
             : const [],
+        teamsRole:
+            mapCastOfType<String, String>(json, r'teams_role') ?? const {},
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }

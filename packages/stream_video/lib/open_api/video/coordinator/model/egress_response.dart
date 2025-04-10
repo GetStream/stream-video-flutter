@@ -14,11 +14,20 @@ class EgressResponse {
   /// Returns a new [EgressResponse] instance.
   EgressResponse({
     required this.broadcasting,
+    this.frameRecording,
     this.hls,
     this.rtmps = const [],
   });
 
   bool broadcasting;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  FrameRecordingResponse? frameRecording;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -35,6 +44,7 @@ class EgressResponse {
       identical(this, other) ||
       other is EgressResponse &&
           other.broadcasting == broadcasting &&
+          other.frameRecording == frameRecording &&
           other.hls == hls &&
           _deepEquality.equals(other.rtmps, rtmps);
 
@@ -42,16 +52,22 @@ class EgressResponse {
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (broadcasting.hashCode) +
+      (frameRecording == null ? 0 : frameRecording!.hashCode) +
       (hls == null ? 0 : hls!.hashCode) +
       (rtmps.hashCode);
 
   @override
   String toString() =>
-      'EgressResponse[broadcasting=$broadcasting, hls=$hls, rtmps=$rtmps]';
+      'EgressResponse[broadcasting=$broadcasting, frameRecording=$frameRecording, hls=$hls, rtmps=$rtmps]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'broadcasting'] = this.broadcasting;
+    if (this.frameRecording != null) {
+      json[r'frame_recording'] = this.frameRecording;
+    } else {
+      json[r'frame_recording'] = null;
+    }
     if (this.hls != null) {
       json[r'hls'] = this.hls;
     } else {
@@ -83,6 +99,8 @@ class EgressResponse {
 
       return EgressResponse(
         broadcasting: mapValueOfType<bool>(json, r'broadcasting')!,
+        frameRecording:
+            FrameRecordingResponse.fromJson(json[r'frame_recording']),
         hls: EgressHLSResponse.fromJson(json[r'hls']),
         rtmps: EgressRTMPResponse.listFromJson(json[r'rtmps']),
       );

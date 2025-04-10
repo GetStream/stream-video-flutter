@@ -43,6 +43,10 @@ enum EventType {
   callClosedCaptionStopped('call.closed_captions_stopped'),
   callClosedCaptionFailed('call.closed_captions_failed'),
   callClosedCaption('call.closed_caption'),
+  callFrameRecordingStarted('call.frame_recording_started'),
+  callFrameRecordingStopped('call.frame_recording_stopped'),
+  callFrameRecordingFailed('call.frame_recording_failed'),
+  callFrameRecordingReady('call.frame_recording_ready'),
   custom('custom'),
   unknown('unknown');
 

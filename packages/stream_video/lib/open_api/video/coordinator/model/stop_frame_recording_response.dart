@@ -10,44 +10,38 @@
 
 part of openapi.api;
 
-class StatsOptions {
-  /// Returns a new [StatsOptions] instance.
-  StatsOptions({
-    required this.enableRtcStats,
-    required this.reportingIntervalMs,
+class StopFrameRecordingResponse {
+  /// Returns a new [StopFrameRecordingResponse] instance.
+  StopFrameRecordingResponse({
+    required this.duration,
   });
 
-  bool enableRtcStats;
-
-  int reportingIntervalMs;
+  /// Duration of the request in milliseconds
+  String duration;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StatsOptions &&
-          other.enableRtcStats == enableRtcStats &&
-          other.reportingIntervalMs == reportingIntervalMs;
+      other is StopFrameRecordingResponse && other.duration == duration;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (enableRtcStats.hashCode) + (reportingIntervalMs.hashCode);
+      (duration.hashCode);
 
   @override
-  String toString() =>
-      'StatsOptions[enableRtcStats=$enableRtcStats, reportingIntervalMs=$reportingIntervalMs]';
+  String toString() => 'StopFrameRecordingResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'enable_rtc_stats'] = this.enableRtcStats;
-    json[r'reporting_interval_ms'] = this.reportingIntervalMs;
+    json[r'duration'] = this.duration;
     return json;
   }
 
-  /// Returns a new [StatsOptions] instance and imports its values from
+  /// Returns a new [StopFrameRecordingResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static StatsOptions? fromJson(dynamic value) {
+  static StopFrameRecordingResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -57,30 +51,28 @@ class StatsOptions {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "StatsOptions[$key]" is missing from JSON.');
+              'Required key "StopFrameRecordingResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "StatsOptions[$key]" has a null value in JSON.');
+              'Required key "StopFrameRecordingResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return StatsOptions(
-        enableRtcStats: mapValueOfType<bool>(json, r'enable_rtc_stats')!,
-        reportingIntervalMs:
-            mapValueOfType<int>(json, r'reporting_interval_ms')!,
+      return StopFrameRecordingResponse(
+        duration: mapValueOfType<String>(json, r'duration')!,
       );
     }
     return null;
   }
 
-  static List<StatsOptions> listFromJson(
+  static List<StopFrameRecordingResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <StatsOptions>[];
+    final result = <StopFrameRecordingResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = StatsOptions.fromJson(row);
+        final value = StopFrameRecordingResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -89,12 +81,12 @@ class StatsOptions {
     return result.toList(growable: growable);
   }
 
-  static Map<String, StatsOptions> mapFromJson(dynamic json) {
-    final map = <String, StatsOptions>{};
+  static Map<String, StopFrameRecordingResponse> mapFromJson(dynamic json) {
+    final map = <String, StopFrameRecordingResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = StatsOptions.fromJson(entry.value);
+        final value = StopFrameRecordingResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -103,17 +95,17 @@ class StatsOptions {
     return map;
   }
 
-  // maps a json object with a list of StatsOptions-objects as value to a dart map
-  static Map<String, List<StatsOptions>> mapListFromJson(
+  // maps a json object with a list of StopFrameRecordingResponse-objects as value to a dart map
+  static Map<String, List<StopFrameRecordingResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<StatsOptions>>{};
+    final map = <String, List<StopFrameRecordingResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = StatsOptions.listFromJson(
+        map[entry.key] = StopFrameRecordingResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -124,7 +116,6 @@ class StatsOptions {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'enable_rtc_stats',
-    'reporting_interval_ms',
+    'duration',
   };
 }

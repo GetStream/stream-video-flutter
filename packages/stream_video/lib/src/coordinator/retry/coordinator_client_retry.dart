@@ -172,7 +172,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   Future<Result<CallMetadata>> goLive({
     required StreamCallCid callCid,
     bool? startHls,
-    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
     bool? startClosedCaption,
@@ -182,7 +181,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.goLive(
         callCid: callCid,
         startHls: startHls,
-        startRtmpBroadcasts: startRtmpBroadcasts,
         startRecording: startRecording,
         startTranscription: startTranscription,
         startClosedCaption: startClosedCaption,

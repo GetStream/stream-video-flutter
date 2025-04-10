@@ -10,11 +10,10 @@
 
 part of openapi.api;
 
-class AggregatedStats {
-  /// Returns a new [AggregatedStats] instance.
-  AggregatedStats({
-    this.publisherAggregateStats,
-    this.turn,
+class StartFrameRecordingRequest {
+  /// Returns a new [StartFrameRecordingRequest] instance.
+  StartFrameRecordingRequest({
+    this.recordingExternalStorage,
   });
 
   ///
@@ -23,54 +22,39 @@ class AggregatedStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PublisherAggregateStats? publisherAggregateStats;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  TURNAggregatedStats? turn;
+  String? recordingExternalStorage;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AggregatedStats &&
-          other.publisherAggregateStats == publisherAggregateStats &&
-          other.turn == turn;
+      other is StartFrameRecordingRequest &&
+          other.recordingExternalStorage == recordingExternalStorage;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (publisherAggregateStats == null
+      (recordingExternalStorage == null
           ? 0
-          : publisherAggregateStats!.hashCode) +
-      (turn == null ? 0 : turn!.hashCode);
+          : recordingExternalStorage!.hashCode);
 
   @override
   String toString() =>
-      'AggregatedStats[publisherAggregateStats=$publisherAggregateStats, turn=$turn]';
+      'StartFrameRecordingRequest[recordingExternalStorage=$recordingExternalStorage]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.publisherAggregateStats != null) {
-      json[r'publisher_aggregate_stats'] = this.publisherAggregateStats;
+    if (this.recordingExternalStorage != null) {
+      json[r'recording_external_storage'] = this.recordingExternalStorage;
     } else {
-      json[r'publisher_aggregate_stats'] = null;
-    }
-    if (this.turn != null) {
-      json[r'turn'] = this.turn;
-    } else {
-      json[r'turn'] = null;
+      json[r'recording_external_storage'] = null;
     }
     return json;
   }
 
-  /// Returns a new [AggregatedStats] instance and imports its values from
+  /// Returns a new [StartFrameRecordingRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static AggregatedStats? fromJson(dynamic value) {
+  static StartFrameRecordingRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -80,30 +64,29 @@ class AggregatedStats {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "AggregatedStats[$key]" is missing from JSON.');
+              'Required key "StartFrameRecordingRequest[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "AggregatedStats[$key]" has a null value in JSON.');
+              'Required key "StartFrameRecordingRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return AggregatedStats(
-        publisherAggregateStats: PublisherAggregateStats.fromJson(
-            json[r'publisher_aggregate_stats']),
-        turn: TURNAggregatedStats.fromJson(json[r'turn']),
+      return StartFrameRecordingRequest(
+        recordingExternalStorage:
+            mapValueOfType<String>(json, r'recording_external_storage'),
       );
     }
     return null;
   }
 
-  static List<AggregatedStats> listFromJson(
+  static List<StartFrameRecordingRequest> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <AggregatedStats>[];
+    final result = <StartFrameRecordingRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = AggregatedStats.fromJson(row);
+        final value = StartFrameRecordingRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -112,12 +95,12 @@ class AggregatedStats {
     return result.toList(growable: growable);
   }
 
-  static Map<String, AggregatedStats> mapFromJson(dynamic json) {
-    final map = <String, AggregatedStats>{};
+  static Map<String, StartFrameRecordingRequest> mapFromJson(dynamic json) {
+    final map = <String, StartFrameRecordingRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = AggregatedStats.fromJson(entry.value);
+        final value = StartFrameRecordingRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -126,17 +109,17 @@ class AggregatedStats {
     return map;
   }
 
-  // maps a json object with a list of AggregatedStats-objects as value to a dart map
-  static Map<String, List<AggregatedStats>> mapListFromJson(
+  // maps a json object with a list of StartFrameRecordingRequest-objects as value to a dart map
+  static Map<String, List<StartFrameRecordingRequest>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<AggregatedStats>>{};
+    final map = <String, List<StartFrameRecordingRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = AggregatedStats.listFromJson(
+        map[entry.key] = StartFrameRecordingRequest.listFromJson(
           entry.value,
           growable: growable,
         );

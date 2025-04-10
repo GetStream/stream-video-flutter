@@ -2405,7 +2405,6 @@ class Call {
     final result = await _coordinatorClient.goLive(
       callCid: callCid,
       startHls: startHls,
-      startRtmpBroadcasts: startRtmpBroadcasts,
       startRecording: startRecording,
       startTranscription: startTranscription,
       startClosedCaption: startClosedCaption,

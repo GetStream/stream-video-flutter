@@ -21,6 +21,7 @@ class UserSessionStats {
     this.deviceModel,
     this.deviceVersion,
     this.distanceToSfuKilometers,
+    this.fps,
     required this.freezeDurationSeconds,
     this.geolocation,
     required this.group,
@@ -130,6 +131,14 @@ class UserSessionStats {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   double? distanceToSfuKilometers;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  FPSStats? fps;
 
   int freezeDurationSeconds;
 
@@ -399,6 +408,7 @@ class UserSessionStats {
           other.deviceModel == deviceModel &&
           other.deviceVersion == deviceVersion &&
           other.distanceToSfuKilometers == distanceToSfuKilometers &&
+          other.fps == fps &&
           other.freezeDurationSeconds == freezeDurationSeconds &&
           other.geolocation == geolocation &&
           other.group == group &&
@@ -462,6 +472,7 @@ class UserSessionStats {
       (distanceToSfuKilometers == null
           ? 0
           : distanceToSfuKilometers!.hashCode) +
+      (fps == null ? 0 : fps!.hashCode) +
       (freezeDurationSeconds.hashCode) +
       (geolocation == null ? 0 : geolocation!.hashCode) +
       (group.hashCode) +
@@ -519,7 +530,7 @@ class UserSessionStats {
 
   @override
   String toString() =>
-      'UserSessionStats[averageConnectionTime=$averageConnectionTime, browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
+      'UserSessionStats[averageConnectionTime=$averageConnectionTime, browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, fps=$fps, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, group=$group, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -562,6 +573,11 @@ class UserSessionStats {
       json[r'distance_to_sfu_kilometers'] = this.distanceToSfuKilometers;
     } else {
       json[r'distance_to_sfu_kilometers'] = null;
+    }
+    if (this.fps != null) {
+      json[r'fps'] = this.fps;
+    } else {
+      json[r'fps'] = null;
     }
     json[r'freeze_duration_seconds'] = this.freezeDurationSeconds;
     if (this.geolocation != null) {
@@ -757,6 +773,7 @@ class UserSessionStats {
         deviceVersion: mapValueOfType<String>(json, r'device_version'),
         distanceToSfuKilometers:
             mapValueOfType<double>(json, r'distance_to_sfu_kilometers'),
+        fps: FPSStats.fromJson(json[r'fps']),
         freezeDurationSeconds:
             mapValueOfType<int>(json, r'freeze_duration_seconds')!,
         geolocation: GeolocationResult.fromJson(json[r'geolocation']),
