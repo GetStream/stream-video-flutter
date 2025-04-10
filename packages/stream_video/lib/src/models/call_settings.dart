@@ -17,6 +17,8 @@ class CallSettings with EquatableMixin {
     this.backstage = const StreamBackstageSettings(),
     this.geofencing = const StreamGeofencingSettings(),
     this.limits = const StreamLimitsSettings(),
+    this.session = const StreamSessionSettings(),
+    this.frameRecording = const StreamFrameRecordingSettings(),
   });
 
   final StreamRingSettings ring;
@@ -29,6 +31,8 @@ class CallSettings with EquatableMixin {
   final StreamBackstageSettings backstage;
   final StreamGeofencingSettings geofencing;
   final StreamLimitsSettings limits;
+  final StreamSessionSettings session;
+  final StreamFrameRecordingSettings frameRecording;
 
   @override
   List<Object?> get props => [audio, video, screenShare];
@@ -46,6 +50,8 @@ class CallSettings with EquatableMixin {
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
     StreamLimitsSettings? limits,
+    StreamSessionSettings? session,
+    StreamFrameRecordingSettings? frameRecording,
   }) {
     return CallSettings(
       ring: ring ?? this.ring,
@@ -58,6 +64,8 @@ class CallSettings with EquatableMixin {
       backstage: backstage ?? this.backstage,
       geofencing: geofencing ?? this.geofencing,
       limits: limits ?? this.limits,
+      session: session ?? this.session,
+      frameRecording: frameRecording ?? this.frameRecording,
     );
   }
 }
@@ -260,6 +268,52 @@ class StreamGeofencingSettings extends AbstractSettings {
   GeofenceSettingsRequest toOpenDto() {
     return GeofenceSettingsRequest(
       names: names,
+    );
+  }
+}
+
+class StreamFrameRecordingSettings extends AbstractSettings {
+  const StreamFrameRecordingSettings({
+    this.captureIntervalInSeconds = 5,
+    this.mode = FrameRecordingSettingsMode.disabled,
+    this.quality,
+  });
+
+  final int captureIntervalInSeconds;
+  final FrameRecordingSettingsMode mode;
+  final FrameRecordingSettingsQuality? quality;
+
+  @override
+  List<Object?> get props => [
+        captureIntervalInSeconds,
+        mode,
+        quality,
+      ];
+
+  FrameRecordingSettingsRequest toOpenDto() {
+    return FrameRecordingSettingsRequest(
+      captureIntervalInSeconds: captureIntervalInSeconds,
+      mode: mode.toOpenDto(),
+      quality: quality?.toOpenDto(),
+    );
+  }
+}
+
+class StreamSessionSettings extends AbstractSettings {
+  const StreamSessionSettings({
+    this.inactivityTimeoutSeconds = 30,
+  });
+
+  final int inactivityTimeoutSeconds;
+
+  @override
+  List<Object?> get props => [
+        inactivityTimeoutSeconds,
+      ];
+
+  SessionSettingsRequest toOpenDto() {
+    return SessionSettingsRequest(
+      inactivityTimeoutSeconds: inactivityTimeoutSeconds,
     );
   }
 }
@@ -503,6 +557,39 @@ enum RecordSettingsMode {
   }
 }
 
+enum FrameRecordingSettingsMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  FrameRecordingSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case FrameRecordingSettingsMode.available:
+        return FrameRecordingSettingsRequestModeEnum.available;
+      case FrameRecordingSettingsMode.disabled:
+        return FrameRecordingSettingsRequestModeEnum.disabled;
+      case FrameRecordingSettingsMode.autoOn:
+        return FrameRecordingSettingsRequestModeEnum.autoOn;
+    }
+  }
+
+  static FrameRecordingSettingsMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return FrameRecordingSettingsMode.available;
+      case 'disabled':
+        return FrameRecordingSettingsMode.disabled;
+      case 'autoOn':
+        return FrameRecordingSettingsMode.autoOn;
+      default:
+        return FrameRecordingSettingsMode.disabled;
+    }
+  }
+}
+
 enum RTMPSettingsQuality {
   n360p,
   n480p,
@@ -610,6 +697,49 @@ enum RecordSettingsQuality {
         return RecordSettingsQuality.n1440p;
       default:
         return RecordSettingsQuality.n360p;
+    }
+  }
+}
+
+enum FrameRecordingSettingsQuality {
+  n360p,
+  n480p,
+  n720p,
+  n1080p,
+  n1440p;
+
+  @override
+  String toString() => name;
+
+  FrameRecordingSettingsRequestQualityEnum toOpenDto() {
+    switch (this) {
+      case FrameRecordingSettingsQuality.n360p:
+        return FrameRecordingSettingsRequestQualityEnum.n360p;
+      case FrameRecordingSettingsQuality.n480p:
+        return FrameRecordingSettingsRequestQualityEnum.n480p;
+      case FrameRecordingSettingsQuality.n720p:
+        return FrameRecordingSettingsRequestQualityEnum.n720p;
+      case FrameRecordingSettingsQuality.n1080p:
+        return FrameRecordingSettingsRequestQualityEnum.n1080p;
+      case FrameRecordingSettingsQuality.n1440p:
+        return FrameRecordingSettingsRequestQualityEnum.n1440p;
+    }
+  }
+
+  static FrameRecordingSettingsQuality fromString(String quality) {
+    switch (quality) {
+      case 'n360p':
+        return FrameRecordingSettingsQuality.n360p;
+      case 'n480p':
+        return FrameRecordingSettingsQuality.n480p;
+      case 'n720p':
+        return FrameRecordingSettingsQuality.n720p;
+      case 'n1080p':
+        return FrameRecordingSettingsQuality.n1080p;
+      case 'n1440p':
+        return FrameRecordingSettingsQuality.n1440p;
+      default:
+        return FrameRecordingSettingsQuality.n360p;
     }
   }
 }

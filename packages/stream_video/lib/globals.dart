@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 
 const String streamSdkName = 'stream-flutter';
 const String streamVideoVersion = '0.9.1';
+const String openapiModelsVersion = '167.9.1';
+const String protocolModelsVersion = '1.32.0';
 const String androidWebRTCVersion = '1.3.8';
 const String iosWebRTCVersion = '125.6422.65';
 

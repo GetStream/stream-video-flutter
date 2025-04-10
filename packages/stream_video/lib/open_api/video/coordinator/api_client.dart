@@ -524,6 +524,8 @@ class ApiClient {
           return PinRequest.fromJson(value);
         case 'PinResponse':
           return PinResponse.fromJson(value);
+        case 'PrivacySettings':
+          return PrivacySettings.fromJson(value);
         case 'PublishedTrackInfo':
           return PublishedTrackInfo.fromJson(value);
         case 'PublisherAggregateStats':
@@ -673,6 +675,8 @@ class ApiClient {
           return TranscriptionSettingsRequest.fromJson(value);
         case 'TranscriptionSettingsResponse':
           return TranscriptionSettingsResponse.fromJson(value);
+        case 'TypingIndicators':
+          return TypingIndicators.fromJson(value);
         case 'UnblockUserRequest':
           return UnblockUserRequest.fromJson(value);
         case 'UnblockUserResponse':
@@ -697,12 +701,22 @@ class ApiClient {
           return UpdateUserPermissionsResponse.fromJson(value);
         case 'UpdatedCallPermissionsEvent':
           return UpdatedCallPermissionsEvent.fromJson(value);
+        case 'User':
+          return User.fromJson(value);
+        case 'UserBannedEvent':
+          return UserBannedEvent.fromJson(value);
+        case 'UserDeactivatedEvent':
+          return UserDeactivatedEvent.fromJson(value);
         case 'UserFeedbackReport':
           return UserFeedbackReport.fromJson(value);
         case 'UserFeedbackReportResponse':
           return UserFeedbackReportResponse.fromJson(value);
         case 'UserInfoResponse':
           return UserInfoResponse.fromJson(value);
+        case 'UserMutedEvent':
+          return UserMutedEvent.fromJson(value);
+        case 'UserReactivatedEvent':
+          return UserReactivatedEvent.fromJson(value);
         case 'UserRequest':
           return UserRequest.fromJson(value);
         case 'UserResponse':

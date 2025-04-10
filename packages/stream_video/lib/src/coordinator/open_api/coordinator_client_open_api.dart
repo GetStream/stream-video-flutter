@@ -1295,6 +1295,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
     StreamLimitsSettings? limits,
+    StreamBroadcastingSettings? broadcasting,
+    StreamSessionSettings? session,
+    StreamFrameRecordingSettings? frameRecording,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1316,6 +1319,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             backstage: backstage?.toOpenDto(),
             geofencing: geofencing?.toOpenDto(),
             limits: limits?.toOpenDto(),
+            broadcasting: broadcasting?.toOpenDto(),
+            session: session?.toOpenDto(),
+            frameRecording: frameRecording?.toOpenDto(),
           ),
           custom: custom,
         ),

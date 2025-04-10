@@ -261,6 +261,9 @@ abstract class CoordinatorClient {
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
     StreamLimitsSettings? limits,
+    StreamBroadcastingSettings? broadcasting,
+    StreamSessionSettings? session,
+    StreamFrameRecordingSettings? frameRecording,
   });
 
   Future<Result<GuestCreatedData>> loadGuest({

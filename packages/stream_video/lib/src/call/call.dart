@@ -12,7 +12,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart';
+import '../../open_api/video/coordinator/api.dart' hide User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
@@ -940,6 +940,8 @@ class Call {
     StreamGeofencingSettings? geofencing,
     StreamLimitsSettings? limits,
     StreamBroadcastingSettings? broadcasting,
+    StreamSessionSettings? session,
+    StreamFrameRecordingSettings? frameRecording,
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
@@ -953,6 +955,9 @@ class Call {
       backstage: backstage,
       geofencing: geofencing,
       limits: limits,
+      broadcasting: broadcasting,
+      session: session,
+      frameRecording: frameRecording,
     );
   }
 
@@ -1774,12 +1779,18 @@ class Call {
     String? team,
     DateTime? startsAt,
     int? membersLimit,
+    StreamRingSettings? ring,
+    StreamAudioSettings? audio,
+    StreamVideoSettings? videoSettings,
+    StreamScreenShareSettings? screenShare,
     StreamBackstageSettings? backstage,
     StreamLimitsSettings? limits,
     StreamRecordingSettings? recording,
     StreamTranscriptionSettings? transcription,
     StreamBroadcastingSettings? broadcasting,
     StreamGeofencingSettings? geofencing,
+    StreamSessionSettings? session,
+    StreamFrameRecordingSettings? frameRecording,
     Map<String, Object> custom = const {},
   }) async {
     _logger.d(
@@ -1796,12 +1807,18 @@ class Call {
     }
 
     final settingsOverride = CallSettingsRequest(
+      audio: audio?.toOpenDto(),
+      video: videoSettings?.toOpenDto(),
+      screensharing: screenShare?.toOpenDto(),
+      ring: ring?.toOpenDto(),
       backstage: backstage?.toOpenDto(),
       limits: limits?.toOpenDto(),
       transcription: transcription?.toOpenDto(),
       recording: recording?.toOpenDto(),
       broadcasting: broadcasting?.toOpenDto(),
       geofencing: geofencing?.toOpenDto(),
+      session: session?.toOpenDto(),
+      frameRecording: frameRecording?.toOpenDto(),
     );
 
     final response = await _coordinatorClient.getOrCreateCall(
@@ -2396,6 +2413,9 @@ class Call {
   /// Starts the livestreaming of the call.
   Future<Result<CallMetadata>> goLive({
     bool? startHls,
+    @Deprecated(
+      'RTMP broadcast initiation should be managed by the backend. This property is no longer used.',
+    )
     bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
