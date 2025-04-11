@@ -12,22 +12,29 @@ enum Environment {
     'pronto',
     'pronto.getstream.io',
     aliases: ['stream-calls-dogfood'],
+    baseUrls: [
+      'https://pronto.getstream.io',
+      'https://stream-calls-dogfood.vercel.app'
+    ],
   ),
   prontoStaging(
     'Pronto Staging',
     'pronto',
     'pronto-staging.getstream.io',
+    baseUrls: ['https://pronto-staging.getstream.io'],
   ),
   demo(
     'Demo',
     'demo',
     'pronto.getstream.io',
     aliases: [''],
+    baseUrls: ['https://getstream.io'],
   ),
   staging(
     'Staging',
     'staging',
     'pronto.getstream.io',
+    baseUrls: ['https://staging.getstream.io'],
   ),
   custom(
     'Custom',
@@ -39,12 +46,14 @@ enum Environment {
   final String envName;
   final String hostName;
   final List<String> aliases;
+  final List<String> baseUrls;
 
   const Environment(
     this.displayName,
     this.envName,
     this.hostName, {
     this.aliases = const [],
+    this.baseUrls = const [],
   });
 
   factory Environment.fromSubdomain(String subdomain) {
@@ -59,6 +68,12 @@ enum Environment {
     final String envAlias = hostParts.length < 2 ? '' : hostParts[0];
 
     return Environment.fromSubdomain(envAlias);
+  }
+
+  factory Environment.fromBaseUrl(String baseUrl) {
+    return Environment.values.firstWhere(
+      (env) => env.baseUrls.contains(baseUrl),
+    );
   }
 }
 

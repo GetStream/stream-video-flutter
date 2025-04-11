@@ -406,7 +406,13 @@ class _JoinForm extends StatelessWidget {
       return;
     }
 
-    final environment = Environment.fromHost(uri.host);
+    final Environment environment;
+    try {
+      environment = Environment.fromBaseUrl(uri.origin);
+    } on StateError catch (_) {
+      // no valid environment found
+      return;
+    }
 
     if (environment != currentEnvironment) {
       if (!kIsProd) {
