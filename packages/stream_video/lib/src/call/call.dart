@@ -822,7 +822,7 @@ class Call {
         _statsReportingIntervalMs == null ||
         _reconnectStrategy == SfuReconnectionStrategy.rejoin ||
         _reconnectStrategy == SfuReconnectionStrategy.migrate) {
-      _logger.w(() => '[joinIfNeeded] joining');
+      _logger.d(() => '[joinIfNeeded] joining');
 
       final joinedResult = await _performJoinCallRequest(
         create: true,
@@ -1609,7 +1609,7 @@ class Call {
       },
       timeLimit: const Duration(seconds: 60),
     ).then((value) {
-      _logger.e(() => '[awaitCallToBeJoined] completed');
+      _logger.d(() => '[awaitCallToBeJoined] completed');
       return const Result.success(none);
     }).onError((e, stk) {
       _logger.e(() => '[awaitCallToBeJoined] failed: $e');

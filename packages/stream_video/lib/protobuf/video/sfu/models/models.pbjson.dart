@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: video/sfu/models/models.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names, library_prefixes
@@ -793,6 +793,27 @@ const Browser$json = {
 final $typed_data.Uint8List browserDescriptor = $convert.base64Decode(
     'CgdCcm93c2VyEhIKBG5hbWUYASABKAlSBG5hbWUSGAoHdmVyc2lvbhgCIAEoCVIHdmVyc2lvbg'
     '==');
+
+@$core.Deprecated('Use rTMPIngressDescriptor instead')
+const RTMPIngress$json = {
+  '1': 'RTMPIngress',
+  '2': [
+    {'1': 'width', '3': 1, '4': 1, '5': 13, '10': 'width'},
+    {'1': 'height', '3': 2, '4': 1, '5': 13, '10': 'height'},
+    {'1': 'frame_rate', '3': 3, '4': 1, '5': 1, '10': 'frameRate'},
+    {'1': 'software', '3': 4, '4': 1, '5': 9, '10': 'software'},
+    {'1': 'version', '3': 5, '4': 1, '5': 9, '10': 'version'},
+    {'1': 'encoder', '3': 6, '4': 1, '5': 9, '10': 'encoder'},
+    {'1': 'remote_addr', '3': 7, '4': 1, '5': 9, '10': 'remoteAddr'},
+  ],
+};
+
+/// Descriptor for `RTMPIngress`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rTMPIngressDescriptor = $convert.base64Decode(
+    'CgtSVE1QSW5ncmVzcxIUCgV3aWR0aBgBIAEoDVIFd2lkdGgSFgoGaGVpZ2h0GAIgASgNUgZoZW'
+    'lnaHQSHQoKZnJhbWVfcmF0ZRgDIAEoAVIJZnJhbWVSYXRlEhoKCHNvZnR3YXJlGAQgASgJUghz'
+    'b2Z0d2FyZRIYCgd2ZXJzaW9uGAUgASgJUgd2ZXJzaW9uEhgKB2VuY29kZXIYBiABKAlSB2VuY2'
+    '9kZXISHwoLcmVtb3RlX2FkZHIYByABKAlSCnJlbW90ZUFkZHI=');
 
 @$core.Deprecated('Use deviceDescriptor instead')
 const Device$json = {

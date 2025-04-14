@@ -911,13 +911,13 @@ class StreamVideo extends Disposable {
 
         if (callData.metadata.session.acceptedBy
             .containsKey(_state.currentUser.id)) {
-          _logger.e(() => '[getCallRingingState] call already accepted');
+          _logger.d(() => '[getCallRingingState] call already accepted');
           return CallRingingState.accepted;
         }
 
         if (callData.metadata.session.rejectedBy
             .containsKey(_state.currentUser.id)) {
-          _logger.e(() => '[getCallRingingState] call already rejected');
+          _logger.d(() => '[getCallRingingState] call already rejected');
           return CallRingingState.rejected;
         }
 
@@ -926,7 +926,7 @@ class StreamVideo extends Disposable {
         if (callData.metadata.session.rejectedBy.keys
             .toSet()
             .containsAll(otherMembers)) {
-          _logger.e(
+          _logger.d(
             () =>
                 '[getCallRingingState] call already rejected by all other members',
           );

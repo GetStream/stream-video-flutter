@@ -199,7 +199,7 @@ class CoordinatorWebSocket extends StreamWebSocket
 
   @override
   void onMessage(dynamic message) {
-    _logger.i(() => '[onRawMessage] message: $message');
+    _logger.v(() => '[onRawMessage] message: $message');
     OpenApiError? dtoError;
     OpenApiEvent? dtoEvent;
     try {
@@ -260,7 +260,7 @@ class CoordinatorWebSocket extends StreamWebSocket
   }
 
   void sendPing() {
-    _logger.d(() => '[sendPing] no args');
+    _logger.v(() => '[sendPing] no args');
     final healthCheck = [
       {
         'type': 'health.check',
@@ -278,7 +278,7 @@ class CoordinatorWebSocket extends StreamWebSocket
 
   @override
   void send(dynamic message) {
-    _logger.d(() => '[send] message: $message');
+    _logger.v(() => '[send] message: $message');
     super.send(message);
   }
 

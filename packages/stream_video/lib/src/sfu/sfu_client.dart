@@ -67,9 +67,9 @@ class SfuClient {
     sfu.SetPublisherRequest request,
   ) async {
     try {
-      _logger.d(() => '[setPublisher] request: ${request.stringify()}');
+      _logger.v(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
-      _logger.d(() => '[setPublisher] response: ${response.stringify()}');
+      _logger.v(() => '[setPublisher] response: ${response.stringify()}');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -80,7 +80,7 @@ class SfuClient {
     sfu.UpdateMuteStatesRequest request,
   ) async {
     try {
-      _logger.d(() => '[updateMuteState] request: $request');
+      _logger.v(() => '[updateMuteState] request: $request');
       final response = await _client.updateMuteStates(
         _withAuthHeaders(),
         request,
@@ -96,7 +96,7 @@ class SfuClient {
     sfu.UpdateSubscriptionsRequest request,
   ) async {
     try {
-      _logger.d(() => '[updateSubscriptions] request: $request');
+      _logger.v(() => '[updateSubscriptions] request: $request');
       final response = await _client.updateSubscriptions(
         _withAuthHeaders(),
         request,
@@ -112,7 +112,7 @@ class SfuClient {
     sfu.StartNoiseCancellationRequest request,
   ) async {
     try {
-      _logger.d(() => '[startNoiseCancellation] request: $request');
+      _logger.v(() => '[startNoiseCancellation] request: $request');
       final response = await _client.startNoiseCancellation(
         _withAuthHeaders(),
         request,
@@ -128,7 +128,7 @@ class SfuClient {
     sfu.StopNoiseCancellationRequest request,
   ) async {
     try {
-      _logger.d(() => '[stopNoiseCancellation] request: $request');
+      _logger.v(() => '[stopNoiseCancellation] request: $request');
       final response = await _client.stopNoiseCancellation(
         _withAuthHeaders(),
         request,
