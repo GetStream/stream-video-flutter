@@ -471,6 +471,8 @@ class Call {
           event.metadata,
           capabilitiesByRole: event.capabilitiesByRole,
         );
+      case StreamCallLiveStartedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
