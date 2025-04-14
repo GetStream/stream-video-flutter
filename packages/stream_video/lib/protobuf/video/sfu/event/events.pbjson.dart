@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: video/sfu/event/events.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names, library_prefixes
@@ -671,6 +671,7 @@ const ReconnectDetails$json = {
       '5': 9,
       '10': 'previousSessionId'
     },
+    {'1': 'reason', '3': 8, '4': 1, '5': 9, '10': 'reason'},
   ],
 };
 
@@ -683,7 +684,7 @@ final $typed_data.Uint8List reconnectDetailsDescriptor = $convert.base64Decode(
     'aWduYWwuVHJhY2tTdWJzY3JpcHRpb25EZXRhaWxzUg1zdWJzY3JpcHRpb25zEisKEXJlY29ubm'
     'VjdF9hdHRlbXB0GAUgASgNUhByZWNvbm5lY3RBdHRlbXB0Eh4KC2Zyb21fc2Z1X2lkGAYgASgJ'
     'Uglmcm9tU2Z1SWQSLgoTcHJldmlvdXNfc2Vzc2lvbl9pZBgHIAEoCVIRcHJldmlvdXNTZXNzaW'
-    '9uSWQ=');
+    '9uSWQSFgoGcmVhc29uGAggASgJUgZyZWFzb24=');
 
 @$core.Deprecated('Use migrationDescriptor instead')
 const Migration$json = {

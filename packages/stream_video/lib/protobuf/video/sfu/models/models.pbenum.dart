@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: video/sfu/models/models.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names, library_prefixes
@@ -14,6 +14,7 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class PeerType extends $pb.ProtobufEnum {
+  /// todo fix me (marcelo)
   static const PeerType PEER_TYPE_PUBLISHER_UNSPECIFIED =
       PeerType._(0, _omitEnumNames ? '' : 'PEER_TYPE_PUBLISHER_UNSPECIFIED');
   static const PeerType PEER_TYPE_SUBSCRIBER =
@@ -28,7 +29,7 @@ class PeerType extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static PeerType? valueOf($core.int value) => _byValue[value];
 
-  const PeerType._($core.int v, $core.String n) : super(v, n);
+  const PeerType._(super.v, super.n);
 }
 
 class ConnectionQuality extends $pb.ProtobufEnum {
@@ -54,7 +55,7 @@ class ConnectionQuality extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static ConnectionQuality? valueOf($core.int value) => _byValue[value];
 
-  const ConnectionQuality._($core.int v, $core.String n) : super(v, n);
+  const ConnectionQuality._(super.v, super.n);
 }
 
 class VideoQuality extends $pb.ProtobufEnum {
@@ -78,7 +79,7 @@ class VideoQuality extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static VideoQuality? valueOf($core.int value) => _byValue[value];
 
-  const VideoQuality._($core.int v, $core.String n) : super(v, n);
+  const VideoQuality._(super.v, super.n);
 }
 
 class TrackType extends $pb.ProtobufEnum {
@@ -105,7 +106,7 @@ class TrackType extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static TrackType? valueOf($core.int value) => _byValue[value];
 
-  const TrackType._($core.int v, $core.String n) : super(v, n);
+  const TrackType._(super.v, super.n);
 }
 
 class ErrorCode extends $pb.ProtobufEnum {
@@ -185,7 +186,7 @@ class ErrorCode extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static ErrorCode? valueOf($core.int value) => _byValue[value];
 
-  const ErrorCode._($core.int v, $core.String n) : super(v, n);
+  const ErrorCode._(super.v, super.n);
 }
 
 class SdkType extends $pb.ProtobufEnum {
@@ -227,19 +228,32 @@ class SdkType extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static SdkType? valueOf($core.int value) => _byValue[value];
 
-  const SdkType._($core.int v, $core.String n) : super(v, n);
+  const SdkType._(super.v, super.n);
 }
 
 class TrackUnpublishReason extends $pb.ProtobufEnum {
+  /// Default value which is used when the specific reason
+  /// for muting the track is not known.
   static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_UNSPECIFIED =
       TrackUnpublishReason._(
           0, _omitEnumNames ? '' : 'TRACK_UNPUBLISH_REASON_UNSPECIFIED');
+
+  /// Represents user muting their tracks.
   static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_USER_MUTED =
       TrackUnpublishReason._(
           1, _omitEnumNames ? '' : 'TRACK_UNPUBLISH_REASON_USER_MUTED');
+
+  /// Represents muting the track because the permission to
+  /// publish the track has been revoked.
   static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED =
       TrackUnpublishReason._(
           2, _omitEnumNames ? '' : 'TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED');
+
+  /// Represents muting the track due to moderation actions.
+  /// This is different from permission revoked because the
+  /// participant can unmute themselves here whereas in case
+  /// of "permission revoke" it is not possible until the
+  /// call permissions are updated.
   static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_MODERATION =
       TrackUnpublishReason._(
           3, _omitEnumNames ? '' : 'TRACK_UNPUBLISH_REASON_MODERATION');
@@ -255,7 +269,7 @@ class TrackUnpublishReason extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static TrackUnpublishReason? valueOf($core.int value) => _byValue[value];
 
-  const TrackUnpublishReason._($core.int v, $core.String n) : super(v, n);
+  const TrackUnpublishReason._(super.v, super.n);
 }
 
 /// GoAwayReason represents the reason for the SFU to
@@ -278,7 +292,7 @@ class GoAwayReason extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static GoAwayReason? valueOf($core.int value) => _byValue[value];
 
-  const GoAwayReason._($core.int v, $core.String n) : super(v, n);
+  const GoAwayReason._(super.v, super.n);
 }
 
 /// CallEndedReason represents the reason for the call to end.
@@ -308,7 +322,7 @@ class CallEndedReason extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static CallEndedReason? valueOf($core.int value) => _byValue[value];
 
-  const CallEndedReason._($core.int v, $core.String n) : super(v, n);
+  const CallEndedReason._(super.v, super.n);
 }
 
 /// WebsocketReconnectStrategy defines the ws strategies available for handling reconnections.
@@ -316,15 +330,25 @@ class WebsocketReconnectStrategy extends $pb.ProtobufEnum {
   static const WebsocketReconnectStrategy
       WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED = WebsocketReconnectStrategy._(
           0, _omitEnumNames ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED');
+
+  /// Sent after reaching the maximum reconnection attempts, or any other unrecoverable error leading to permanent disconnect.
   static const WebsocketReconnectStrategy
       WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT = WebsocketReconnectStrategy._(
           1, _omitEnumNames ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT');
+
+  /// SDK should maintaining existing publisher/subscriber pc instances
+  /// and establish a new WebSocket connection.
   static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_FAST =
       WebsocketReconnectStrategy._(
           2, _omitEnumNames ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_FAST');
+
+  /// SDK should obtain new credentials from the coordinator, drops existing pc instances, set a new session_id and initializes
+  /// a completely new WebSocket connection, ensuring a comprehensive reset.
   static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_REJOIN =
       WebsocketReconnectStrategy._(
           3, _omitEnumNames ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_REJOIN');
+
+  /// SDK should migrate to a new SFU instance
   static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_MIGRATE =
       WebsocketReconnectStrategy._(
           4, _omitEnumNames ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_MIGRATE');
@@ -343,7 +367,7 @@ class WebsocketReconnectStrategy extends $pb.ProtobufEnum {
   static WebsocketReconnectStrategy? valueOf($core.int value) =>
       _byValue[value];
 
-  const WebsocketReconnectStrategy._($core.int v, $core.String n) : super(v, n);
+  const WebsocketReconnectStrategy._(super.v, super.n);
 }
 
 /// AndroidThermalState is reported by the Android API. The full list of values is documented here
@@ -389,7 +413,7 @@ class AndroidThermalState extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static AndroidThermalState? valueOf($core.int value) => _byValue[value];
 
-  const AndroidThermalState._($core.int v, $core.String n) : super(v, n);
+  const AndroidThermalState._(super.v, super.n);
 }
 
 /// AppleThermalState is the thermal state as reported by Apple devices when available or applicable to the platform.
@@ -422,7 +446,7 @@ class AppleThermalState extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static AppleThermalState? valueOf($core.int value) => _byValue[value];
 
-  const AppleThermalState._($core.int v, $core.String n) : super(v, n);
+  const AppleThermalState._(super.v, super.n);
 }
 
 const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

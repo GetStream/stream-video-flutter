@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: video/sfu/models/models.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names, library_prefixes
@@ -16,6 +16,8 @@ import 'package:protobuf/protobuf.dart' as $pb;
 import '../../../google/protobuf/struct.pb.dart' as $1;
 import '../../../google/protobuf/timestamp.pb.dart' as $0;
 import 'models.pbenum.dart';
+
+export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'models.pbenum.dart';
 
@@ -94,20 +96,20 @@ class CallState extends $pb.GeneratedMessage {
   /// than the counts returned in participant_count. Anonymous
   /// participants are **NOT** included in the list.
   @$pb.TagNumber(1)
-  $core.List<Participant> get participants => $_getList(0);
+  $pb.PbList<Participant> get participants => $_getList(0);
 
   /// started_at is the time the call session actually started.
   @$pb.TagNumber(2)
   $0.Timestamp get startedAt => $_getN(1);
   @$pb.TagNumber(2)
   set startedAt($0.Timestamp v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasStartedAt() => $_has(1);
   @$pb.TagNumber(2)
-  void clearStartedAt() => clearField(2);
+  void clearStartedAt() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Timestamp ensureStartedAt() => $_ensure(1);
 
@@ -116,20 +118,20 @@ class CallState extends $pb.GeneratedMessage {
   ParticipantCount get participantCount => $_getN(2);
   @$pb.TagNumber(3)
   set participantCount(ParticipantCount v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasParticipantCount() => $_has(2);
   @$pb.TagNumber(3)
-  void clearParticipantCount() => clearField(3);
+  void clearParticipantCount() => $_clearField(3);
   @$pb.TagNumber(3)
   ParticipantCount ensureParticipantCount() => $_ensure(2);
 
   /// the list of pins in the call.
   /// Pins are ordered in descending order (most important first).
   @$pb.TagNumber(4)
-  $core.List<Pin> get pins => $_getList(3);
+  $pb.PbList<Pin> get pins => $_getList(3);
 }
 
 class ParticipantCount extends $pb.GeneratedMessage {
@@ -198,7 +200,7 @@ class ParticipantCount extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasTotal() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTotal() => clearField(1);
+  void clearTotal() => $_clearField(1);
 
   /// Total number of anonymous participants in the call.
   @$pb.TagNumber(2)
@@ -211,7 +213,7 @@ class ParticipantCount extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasAnonymous() => $_has(1);
   @$pb.TagNumber(2)
-  void clearAnonymous() => clearField(2);
+  void clearAnonymous() => $_clearField(2);
 }
 
 class Pin extends $pb.GeneratedMessage {
@@ -277,7 +279,7 @@ class Pin extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   /// the user sesion_id to pin, if not provided, applies to all sessions
   @$pb.TagNumber(2)
@@ -290,7 +292,7 @@ class Pin extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 }
 
 /// those who are online in the call
@@ -423,7 +425,7 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -435,23 +437,23 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 
   /// map of track id to track type
   @$pb.TagNumber(3)
-  $core.List<TrackType> get publishedTracks => $_getList(2);
+  $pb.PbList<TrackType> get publishedTracks => $_getList(2);
 
   @$pb.TagNumber(4)
   $0.Timestamp get joinedAt => $_getN(3);
   @$pb.TagNumber(4)
   set joinedAt($0.Timestamp v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasJoinedAt() => $_has(3);
   @$pb.TagNumber(4)
-  void clearJoinedAt() => clearField(4);
+  void clearJoinedAt() => $_clearField(4);
   @$pb.TagNumber(4)
   $0.Timestamp ensureJoinedAt() => $_ensure(3);
 
@@ -465,19 +467,19 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.bool hasTrackLookupPrefix() => $_has(4);
   @$pb.TagNumber(5)
-  void clearTrackLookupPrefix() => clearField(5);
+  void clearTrackLookupPrefix() => $_clearField(5);
 
   @$pb.TagNumber(6)
   ConnectionQuality get connectionQuality => $_getN(5);
   @$pb.TagNumber(6)
   set connectionQuality(ConnectionQuality v) {
-    setField(6, v);
+    $_setField(6, v);
   }
 
   @$pb.TagNumber(6)
   $core.bool hasConnectionQuality() => $_has(5);
   @$pb.TagNumber(6)
-  void clearConnectionQuality() => clearField(6);
+  void clearConnectionQuality() => $_clearField(6);
 
   @$pb.TagNumber(7)
   $core.bool get isSpeaking => $_getBF(6);
@@ -489,7 +491,7 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.bool hasIsSpeaking() => $_has(6);
   @$pb.TagNumber(7)
-  void clearIsSpeaking() => clearField(7);
+  void clearIsSpeaking() => $_clearField(7);
 
   @$pb.TagNumber(8)
   $core.bool get isDominantSpeaker => $_getBF(7);
@@ -501,7 +503,7 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.bool hasIsDominantSpeaker() => $_has(7);
   @$pb.TagNumber(8)
-  void clearIsDominantSpeaker() => clearField(8);
+  void clearIsDominantSpeaker() => $_clearField(8);
 
   @$pb.TagNumber(9)
   $core.double get audioLevel => $_getN(8);
@@ -513,7 +515,7 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   $core.bool hasAudioLevel() => $_has(8);
   @$pb.TagNumber(9)
-  void clearAudioLevel() => clearField(9);
+  void clearAudioLevel() => $_clearField(9);
 
   @$pb.TagNumber(10)
   $core.String get name => $_getSZ(9);
@@ -525,7 +527,7 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   $core.bool hasName() => $_has(9);
   @$pb.TagNumber(10)
-  void clearName() => clearField(10);
+  void clearName() => $_clearField(10);
 
   @$pb.TagNumber(11)
   $core.String get image => $_getSZ(10);
@@ -537,24 +539,24 @@ class Participant extends $pb.GeneratedMessage {
   @$pb.TagNumber(11)
   $core.bool hasImage() => $_has(10);
   @$pb.TagNumber(11)
-  void clearImage() => clearField(11);
+  void clearImage() => $_clearField(11);
 
   @$pb.TagNumber(12)
   $1.Struct get custom => $_getN(11);
   @$pb.TagNumber(12)
   set custom($1.Struct v) {
-    setField(12, v);
+    $_setField(12, v);
   }
 
   @$pb.TagNumber(12)
   $core.bool hasCustom() => $_has(11);
   @$pb.TagNumber(12)
-  void clearCustom() => clearField(12);
+  void clearCustom() => $_clearField(12);
   @$pb.TagNumber(12)
   $1.Struct ensureCustom() => $_ensure(11);
 
   @$pb.TagNumber(13)
-  $core.List<$core.String> get roles => $_getList(12);
+  $pb.PbList<$core.String> get roles => $_getList(12);
 }
 
 class StreamQuality extends $pb.GeneratedMessage {
@@ -619,13 +621,13 @@ class StreamQuality extends $pb.GeneratedMessage {
   VideoQuality get videoQuality => $_getN(0);
   @$pb.TagNumber(1)
   set videoQuality(VideoQuality v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasVideoQuality() => $_has(0);
   @$pb.TagNumber(1)
-  void clearVideoQuality() => clearField(1);
+  void clearVideoQuality() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get userId => $_getSZ(1);
@@ -637,7 +639,7 @@ class StreamQuality extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasUserId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearUserId() => clearField(2);
+  void clearUserId() => $_clearField(2);
 }
 
 class VideoDimension extends $pb.GeneratedMessage {
@@ -704,7 +706,7 @@ class VideoDimension extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasWidth() => $_has(0);
   @$pb.TagNumber(1)
-  void clearWidth() => clearField(1);
+  void clearWidth() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.int get height => $_getIZ(1);
@@ -716,7 +718,7 @@ class VideoDimension extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasHeight() => $_has(1);
   @$pb.TagNumber(2)
-  void clearHeight() => clearField(2);
+  void clearHeight() => $_clearField(2);
 }
 
 class VideoLayer extends $pb.GeneratedMessage {
@@ -801,19 +803,19 @@ class VideoLayer extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasRid() => $_has(0);
   @$pb.TagNumber(1)
-  void clearRid() => clearField(1);
+  void clearRid() => $_clearField(1);
 
   @$pb.TagNumber(2)
   VideoDimension get videoDimension => $_getN(1);
   @$pb.TagNumber(2)
   set videoDimension(VideoDimension v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasVideoDimension() => $_has(1);
   @$pb.TagNumber(2)
-  void clearVideoDimension() => clearField(2);
+  void clearVideoDimension() => $_clearField(2);
   @$pb.TagNumber(2)
   VideoDimension ensureVideoDimension() => $_ensure(1);
 
@@ -828,7 +830,7 @@ class VideoLayer extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasBitrate() => $_has(2);
   @$pb.TagNumber(4)
-  void clearBitrate() => clearField(4);
+  void clearBitrate() => $_clearField(4);
 
   @$pb.TagNumber(5)
   $core.int get fps => $_getIZ(3);
@@ -840,19 +842,19 @@ class VideoLayer extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.bool hasFps() => $_has(3);
   @$pb.TagNumber(5)
-  void clearFps() => clearField(5);
+  void clearFps() => $_clearField(5);
 
   @$pb.TagNumber(6)
   VideoQuality get quality => $_getN(4);
   @$pb.TagNumber(6)
   set quality(VideoQuality v) {
-    setField(6, v);
+    $_setField(6, v);
   }
 
   @$pb.TagNumber(6)
   $core.bool hasQuality() => $_has(4);
   @$pb.TagNumber(6)
-  void clearQuality() => clearField(6);
+  void clearQuality() => $_clearField(6);
 }
 
 /// SubscribeOption represents the configuration options for subscribing to a track.
@@ -919,17 +921,17 @@ class SubscribeOption extends $pb.GeneratedMessage {
   TrackType get trackType => $_getN(0);
   @$pb.TagNumber(1)
   set trackType(TrackType v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasTrackType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTrackType() => clearField(1);
+  void clearTrackType() => $_clearField(1);
 
   /// The codecs supported by the subscriber for decoding tracks.
   @$pb.TagNumber(2)
-  $core.List<Codec> get codecs => $_getList(1);
+  $pb.PbList<Codec> get codecs => $_getList(1);
 }
 
 /// PublishOption represents the configuration options for publishing a track.
@@ -1028,26 +1030,26 @@ class PublishOption extends $pb.GeneratedMessage {
   TrackType get trackType => $_getN(0);
   @$pb.TagNumber(1)
   set trackType(TrackType v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasTrackType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTrackType() => clearField(1);
+  void clearTrackType() => $_clearField(1);
 
   /// The codec to be used for encoding the track (e.g., VP8, VP9, H264).
   @$pb.TagNumber(2)
   Codec get codec => $_getN(1);
   @$pb.TagNumber(2)
   set codec(Codec v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasCodec() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCodec() => clearField(2);
+  void clearCodec() => $_clearField(2);
   @$pb.TagNumber(2)
   Codec ensureCodec() => $_ensure(1);
 
@@ -1062,7 +1064,7 @@ class PublishOption extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasBitrate() => $_has(2);
   @$pb.TagNumber(3)
-  void clearBitrate() => clearField(3);
+  void clearBitrate() => $_clearField(3);
 
   /// The target frames per second (FPS) for video encoding.
   @$pb.TagNumber(4)
@@ -1075,7 +1077,7 @@ class PublishOption extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasFps() => $_has(3);
   @$pb.TagNumber(4)
-  void clearFps() => clearField(4);
+  void clearFps() => $_clearField(4);
 
   /// The maximum number of spatial layers to send.
   /// - For SVC (e.g., VP9), spatial layers downscale by a factor of 2:
@@ -1094,7 +1096,7 @@ class PublishOption extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.bool hasMaxSpatialLayers() => $_has(4);
   @$pb.TagNumber(5)
-  void clearMaxSpatialLayers() => clearField(5);
+  void clearMaxSpatialLayers() => $_clearField(5);
 
   /// The maximum number of temporal layers for scalable video coding (SVC).
   /// Temporal layers allow varying frame rates for different bandwidths.
@@ -1108,7 +1110,7 @@ class PublishOption extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.bool hasMaxTemporalLayers() => $_has(5);
   @$pb.TagNumber(6)
-  void clearMaxTemporalLayers() => clearField(6);
+  void clearMaxTemporalLayers() => $_clearField(6);
 
   /// The dimensions of the video (e.g., width and height in pixels).
   /// Spatial layers are based on this base resolution. For example, if the base
@@ -1120,13 +1122,13 @@ class PublishOption extends $pb.GeneratedMessage {
   VideoDimension get videoDimension => $_getN(6);
   @$pb.TagNumber(7)
   set videoDimension(VideoDimension v) {
-    setField(7, v);
+    $_setField(7, v);
   }
 
   @$pb.TagNumber(7)
   $core.bool hasVideoDimension() => $_has(6);
   @$pb.TagNumber(7)
-  void clearVideoDimension() => clearField(7);
+  void clearVideoDimension() => $_clearField(7);
   @$pb.TagNumber(7)
   VideoDimension ensureVideoDimension() => $_ensure(6);
 
@@ -1152,7 +1154,7 @@ class PublishOption extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.bool hasId() => $_has(7);
   @$pb.TagNumber(8)
-  void clearId() => clearField(8);
+  void clearId() => $_clearField(8);
 }
 
 class Codec extends $pb.GeneratedMessage {
@@ -1233,7 +1235,7 @@ class Codec extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(10)
-  void clearName() => clearField(10);
+  void clearName() => $_clearField(10);
 
   @$pb.TagNumber(12)
   $core.String get fmtp => $_getSZ(1);
@@ -1245,7 +1247,7 @@ class Codec extends $pb.GeneratedMessage {
   @$pb.TagNumber(12)
   $core.bool hasFmtp() => $_has(1);
   @$pb.TagNumber(12)
-  void clearFmtp() => clearField(12);
+  void clearFmtp() => $_clearField(12);
 
   @$pb.TagNumber(14)
   $core.int get clockRate => $_getIZ(2);
@@ -1257,7 +1259,7 @@ class Codec extends $pb.GeneratedMessage {
   @$pb.TagNumber(14)
   $core.bool hasClockRate() => $_has(2);
   @$pb.TagNumber(14)
-  void clearClockRate() => clearField(14);
+  void clearClockRate() => $_clearField(14);
 
   @$pb.TagNumber(15)
   $core.String get encodingParameters => $_getSZ(3);
@@ -1269,7 +1271,7 @@ class Codec extends $pb.GeneratedMessage {
   @$pb.TagNumber(15)
   $core.bool hasEncodingParameters() => $_has(3);
   @$pb.TagNumber(15)
-  void clearEncodingParameters() => clearField(15);
+  void clearEncodingParameters() => $_clearField(15);
 
   @$pb.TagNumber(16)
   $core.int get payloadType => $_getIZ(4);
@@ -1281,7 +1283,7 @@ class Codec extends $pb.GeneratedMessage {
   @$pb.TagNumber(16)
   $core.bool hasPayloadType() => $_has(4);
   @$pb.TagNumber(16)
-  void clearPayloadType() => clearField(16);
+  void clearPayloadType() => $_clearField(16);
 }
 
 class ICETrickle extends $pb.GeneratedMessage {
@@ -1348,13 +1350,13 @@ class ICETrickle extends $pb.GeneratedMessage {
   PeerType get peerType => $_getN(0);
   @$pb.TagNumber(1)
   set peerType(PeerType v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasPeerType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearPeerType() => clearField(1);
+  void clearPeerType() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get iceCandidate => $_getSZ(1);
@@ -1366,7 +1368,7 @@ class ICETrickle extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasIceCandidate() => $_has(1);
   @$pb.TagNumber(2)
-  void clearIceCandidate() => clearField(2);
+  void clearIceCandidate() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get sessionId => $_getSZ(2);
@@ -1378,7 +1380,7 @@ class ICETrickle extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasSessionId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearSessionId() => clearField(3);
+  void clearSessionId() => $_clearField(3);
 }
 
 class TrackInfo extends $pb.GeneratedMessage {
@@ -1488,22 +1490,22 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasTrackId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTrackId() => clearField(1);
+  void clearTrackId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   TrackType get trackType => $_getN(1);
   @$pb.TagNumber(2)
   set trackType(TrackType v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasTrackType() => $_has(1);
   @$pb.TagNumber(2)
-  void clearTrackType() => clearField(2);
+  void clearTrackType() => $_clearField(2);
 
   @$pb.TagNumber(5)
-  $core.List<VideoLayer> get layers => $_getList(2);
+  $pb.PbList<VideoLayer> get layers => $_getList(2);
 
   @$pb.TagNumber(6)
   $core.String get mid => $_getSZ(3);
@@ -1515,7 +1517,7 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.bool hasMid() => $_has(3);
   @$pb.TagNumber(6)
-  void clearMid() => clearField(6);
+  void clearMid() => $_clearField(6);
 
   /// for audio tracks
   @$pb.TagNumber(7)
@@ -1528,7 +1530,7 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.bool hasDtx() => $_has(4);
   @$pb.TagNumber(7)
-  void clearDtx() => clearField(7);
+  void clearDtx() => $_clearField(7);
 
   @$pb.TagNumber(8)
   $core.bool get stereo => $_getBF(5);
@@ -1540,7 +1542,7 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.bool hasStereo() => $_has(5);
   @$pb.TagNumber(8)
-  void clearStereo() => clearField(8);
+  void clearStereo() => $_clearField(8);
 
   @$pb.TagNumber(9)
   $core.bool get red => $_getBF(6);
@@ -1552,7 +1554,7 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   $core.bool hasRed() => $_has(6);
   @$pb.TagNumber(9)
-  void clearRed() => clearField(9);
+  void clearRed() => $_clearField(9);
 
   @$pb.TagNumber(10)
   $core.bool get muted => $_getBF(7);
@@ -1564,19 +1566,19 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   $core.bool hasMuted() => $_has(7);
   @$pb.TagNumber(10)
-  void clearMuted() => clearField(10);
+  void clearMuted() => $_clearField(10);
 
   @$pb.TagNumber(11)
   Codec get codec => $_getN(8);
   @$pb.TagNumber(11)
   set codec(Codec v) {
-    setField(11, v);
+    $_setField(11, v);
   }
 
   @$pb.TagNumber(11)
   $core.bool hasCodec() => $_has(8);
   @$pb.TagNumber(11)
-  void clearCodec() => clearField(11);
+  void clearCodec() => $_clearField(11);
   @$pb.TagNumber(11)
   Codec ensureCodec() => $_ensure(8);
 
@@ -1590,7 +1592,7 @@ class TrackInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(12)
   $core.bool hasPublishOptionId() => $_has(9);
   @$pb.TagNumber(12)
-  void clearPublishOptionId() => clearField(12);
+  void clearPublishOptionId() => $_clearField(12);
 }
 
 class Error extends $pb.GeneratedMessage {
@@ -1657,13 +1659,13 @@ class Error extends $pb.GeneratedMessage {
   ErrorCode get code => $_getN(0);
   @$pb.TagNumber(1)
   set code(ErrorCode v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasCode() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCode() => clearField(1);
+  void clearCode() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
@@ -1675,7 +1677,7 @@ class Error extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.bool get shouldRetry => $_getBF(2);
@@ -1687,7 +1689,7 @@ class Error extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasShouldRetry() => $_has(2);
   @$pb.TagNumber(3)
-  void clearShouldRetry() => clearField(3);
+  void clearShouldRetry() => $_clearField(3);
 }
 
 class ClientDetails extends $pb.GeneratedMessage {
@@ -1759,13 +1761,13 @@ class ClientDetails extends $pb.GeneratedMessage {
   Sdk get sdk => $_getN(0);
   @$pb.TagNumber(1)
   set sdk(Sdk v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasSdk() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSdk() => clearField(1);
+  void clearSdk() => $_clearField(1);
   @$pb.TagNumber(1)
   Sdk ensureSdk() => $_ensure(0);
 
@@ -1773,13 +1775,13 @@ class ClientDetails extends $pb.GeneratedMessage {
   OS get os => $_getN(1);
   @$pb.TagNumber(2)
   set os(OS v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasOs() => $_has(1);
   @$pb.TagNumber(2)
-  void clearOs() => clearField(2);
+  void clearOs() => $_clearField(2);
   @$pb.TagNumber(2)
   OS ensureOs() => $_ensure(1);
 
@@ -1787,13 +1789,13 @@ class ClientDetails extends $pb.GeneratedMessage {
   Browser get browser => $_getN(2);
   @$pb.TagNumber(3)
   set browser(Browser v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasBrowser() => $_has(2);
   @$pb.TagNumber(3)
-  void clearBrowser() => clearField(3);
+  void clearBrowser() => $_clearField(3);
   @$pb.TagNumber(3)
   Browser ensureBrowser() => $_ensure(2);
 
@@ -1801,13 +1803,13 @@ class ClientDetails extends $pb.GeneratedMessage {
   Device get device => $_getN(3);
   @$pb.TagNumber(4)
   set device(Device v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasDevice() => $_has(3);
   @$pb.TagNumber(4)
-  void clearDevice() => clearField(4);
+  void clearDevice() => $_clearField(4);
   @$pb.TagNumber(4)
   Device ensureDevice() => $_ensure(3);
 }
@@ -1881,13 +1883,13 @@ class Sdk extends $pb.GeneratedMessage {
   SdkType get type => $_getN(0);
   @$pb.TagNumber(1)
   set type(SdkType v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearType() => clearField(1);
+  void clearType() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get major => $_getSZ(1);
@@ -1899,7 +1901,7 @@ class Sdk extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasMajor() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMajor() => clearField(2);
+  void clearMajor() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get minor => $_getSZ(2);
@@ -1911,7 +1913,7 @@ class Sdk extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasMinor() => $_has(2);
   @$pb.TagNumber(3)
-  void clearMinor() => clearField(3);
+  void clearMinor() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.String get patch => $_getSZ(3);
@@ -1923,7 +1925,7 @@ class Sdk extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasPatch() => $_has(3);
   @$pb.TagNumber(4)
-  void clearPatch() => clearField(4);
+  void clearPatch() => $_clearField(4);
 }
 
 class OS extends $pb.GeneratedMessage {
@@ -1993,7 +1995,7 @@ class OS extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearName() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get version => $_getSZ(1);
@@ -2005,7 +2007,7 @@ class OS extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasVersion() => $_has(1);
   @$pb.TagNumber(2)
-  void clearVersion() => clearField(2);
+  void clearVersion() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get architecture => $_getSZ(2);
@@ -2017,7 +2019,7 @@ class OS extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasArchitecture() => $_has(2);
   @$pb.TagNumber(3)
-  void clearArchitecture() => clearField(3);
+  void clearArchitecture() => $_clearField(3);
 }
 
 class Browser extends $pb.GeneratedMessage {
@@ -2082,7 +2084,7 @@ class Browser extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearName() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get version => $_getSZ(1);
@@ -2094,7 +2096,173 @@ class Browser extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasVersion() => $_has(1);
   @$pb.TagNumber(2)
-  void clearVersion() => clearField(2);
+  void clearVersion() => $_clearField(2);
+}
+
+class RTMPIngress extends $pb.GeneratedMessage {
+  factory RTMPIngress({
+    $core.int? width,
+    $core.int? height,
+    $core.double? frameRate,
+    $core.String? software,
+    $core.String? version,
+    $core.String? encoder,
+    $core.String? remoteAddr,
+  }) {
+    final $result = create();
+    if (width != null) {
+      $result.width = width;
+    }
+    if (height != null) {
+      $result.height = height;
+    }
+    if (frameRate != null) {
+      $result.frameRate = frameRate;
+    }
+    if (software != null) {
+      $result.software = software;
+    }
+    if (version != null) {
+      $result.version = version;
+    }
+    if (encoder != null) {
+      $result.encoder = encoder;
+    }
+    if (remoteAddr != null) {
+      $result.remoteAddr = remoteAddr;
+    }
+    return $result;
+  }
+  RTMPIngress._() : super();
+  factory RTMPIngress.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory RTMPIngress.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RTMPIngress',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'width', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'height', $pb.PbFieldType.OU3)
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'frameRate', $pb.PbFieldType.OD)
+    ..aOS(4, _omitFieldNames ? '' : 'software')
+    ..aOS(5, _omitFieldNames ? '' : 'version')
+    ..aOS(6, _omitFieldNames ? '' : 'encoder')
+    ..aOS(7, _omitFieldNames ? '' : 'remoteAddr')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  RTMPIngress clone() => RTMPIngress()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  RTMPIngress copyWith(void Function(RTMPIngress) updates) =>
+      super.copyWith((message) => updates(message as RTMPIngress))
+          as RTMPIngress;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RTMPIngress create() => RTMPIngress._();
+  RTMPIngress createEmptyInstance() => create();
+  static $pb.PbList<RTMPIngress> createRepeated() => $pb.PbList<RTMPIngress>();
+  @$core.pragma('dart2js:noInline')
+  static RTMPIngress getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RTMPIngress>(create);
+  static RTMPIngress? _defaultInstance;
+
+  /// Video dimensions and frame rate
+  @$pb.TagNumber(1)
+  $core.int get width => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set width($core.int v) {
+    $_setUnsignedInt32(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasWidth() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearWidth() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get height => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set height($core.int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasHeight() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHeight() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get frameRate => $_getN(2);
+  @$pb.TagNumber(3)
+  set frameRate($core.double v) {
+    $_setDouble(2, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasFrameRate() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFrameRate() => $_clearField(3);
+
+  /// Client info
+  @$pb.TagNumber(4)
+  $core.String get software => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set software($core.String v) {
+    $_setString(3, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasSoftware() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSoftware() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get version => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set version($core.String v) {
+    $_setString(4, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasVersion() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearVersion() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get encoder => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set encoder($core.String v) {
+    $_setString(5, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasEncoder() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearEncoder() => $_clearField(6);
+
+  /// Connection info
+  @$pb.TagNumber(7)
+  $core.String get remoteAddr => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set remoteAddr($core.String v) {
+    $_setString(6, v);
+  }
+
+  @$pb.TagNumber(7)
+  $core.bool hasRemoteAddr() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearRemoteAddr() => $_clearField(7);
 }
 
 class Device extends $pb.GeneratedMessage {
@@ -2159,7 +2327,7 @@ class Device extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearName() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get version => $_getSZ(1);
@@ -2171,7 +2339,7 @@ class Device extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasVersion() => $_has(1);
   @$pb.TagNumber(2)
-  void clearVersion() => clearField(2);
+  void clearVersion() => $_clearField(2);
 }
 
 class Call extends $pb.GeneratedMessage {
@@ -2265,7 +2433,7 @@ class Call extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearType() => clearField(1);
+  void clearType() => $_clearField(1);
 
   /// the call id
   @$pb.TagNumber(2)
@@ -2278,7 +2446,7 @@ class Call extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearId() => clearField(2);
+  void clearId() => $_clearField(2);
 
   /// the id of the user that created this call
   @$pb.TagNumber(3)
@@ -2291,7 +2459,7 @@ class Call extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasCreatedByUserId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearCreatedByUserId() => clearField(3);
+  void clearCreatedByUserId() => $_clearField(3);
 
   /// the id of the current host for this call
   @$pb.TagNumber(4)
@@ -2304,19 +2472,19 @@ class Call extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasHostUserId() => $_has(3);
   @$pb.TagNumber(4)
-  void clearHostUserId() => clearField(4);
+  void clearHostUserId() => $_clearField(4);
 
   @$pb.TagNumber(5)
   $1.Struct get custom => $_getN(4);
   @$pb.TagNumber(5)
   set custom($1.Struct v) {
-    setField(5, v);
+    $_setField(5, v);
   }
 
   @$pb.TagNumber(5)
   $core.bool hasCustom() => $_has(4);
   @$pb.TagNumber(5)
-  void clearCustom() => clearField(5);
+  void clearCustom() => $_clearField(5);
   @$pb.TagNumber(5)
   $1.Struct ensureCustom() => $_ensure(4);
 
@@ -2324,13 +2492,13 @@ class Call extends $pb.GeneratedMessage {
   $0.Timestamp get createdAt => $_getN(5);
   @$pb.TagNumber(6)
   set createdAt($0.Timestamp v) {
-    setField(6, v);
+    $_setField(6, v);
   }
 
   @$pb.TagNumber(6)
   $core.bool hasCreatedAt() => $_has(5);
   @$pb.TagNumber(6)
-  void clearCreatedAt() => clearField(6);
+  void clearCreatedAt() => $_clearField(6);
   @$pb.TagNumber(6)
   $0.Timestamp ensureCreatedAt() => $_ensure(5);
 
@@ -2338,13 +2506,13 @@ class Call extends $pb.GeneratedMessage {
   $0.Timestamp get updatedAt => $_getN(6);
   @$pb.TagNumber(7)
   set updatedAt($0.Timestamp v) {
-    setField(7, v);
+    $_setField(7, v);
   }
 
   @$pb.TagNumber(7)
   $core.bool hasUpdatedAt() => $_has(6);
   @$pb.TagNumber(7)
-  void clearUpdatedAt() => clearField(7);
+  void clearUpdatedAt() => $_clearField(7);
   @$pb.TagNumber(7)
   $0.Timestamp ensureUpdatedAt() => $_ensure(6);
 }
@@ -2418,7 +2586,7 @@ class CallGrants extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasCanPublishAudio() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCanPublishAudio() => clearField(1);
+  void clearCanPublishAudio() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.bool get canPublishVideo => $_getBF(1);
@@ -2430,7 +2598,7 @@ class CallGrants extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasCanPublishVideo() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCanPublishVideo() => clearField(2);
+  void clearCanPublishVideo() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.bool get canScreenshare => $_getBF(2);
@@ -2442,7 +2610,7 @@ class CallGrants extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasCanScreenshare() => $_has(2);
   @$pb.TagNumber(3)
-  void clearCanScreenshare() => clearField(3);
+  void clearCanScreenshare() => $_clearField(3);
 }
 
 class InputDevices extends $pb.GeneratedMessage {
@@ -2505,7 +2673,7 @@ class InputDevices extends $pb.GeneratedMessage {
   static InputDevices? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.String> get availableDevices => $_getList(0);
+  $pb.PbList<$core.String> get availableDevices => $_getList(0);
 
   @$pb.TagNumber(2)
   $core.String get currentDevice => $_getSZ(1);
@@ -2517,7 +2685,7 @@ class InputDevices extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasCurrentDevice() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCurrentDevice() => clearField(2);
+  void clearCurrentDevice() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.bool get isPermitted => $_getBF(2);
@@ -2529,7 +2697,7 @@ class InputDevices extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasIsPermitted() => $_has(2);
   @$pb.TagNumber(3)
-  void clearIsPermitted() => clearField(3);
+  void clearIsPermitted() => $_clearField(3);
 }
 
 class AndroidState extends $pb.GeneratedMessage {
@@ -2594,13 +2762,13 @@ class AndroidState extends $pb.GeneratedMessage {
   AndroidThermalState get thermalState => $_getN(0);
   @$pb.TagNumber(1)
   set thermalState(AndroidThermalState v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasThermalState() => $_has(0);
   @$pb.TagNumber(1)
-  void clearThermalState() => clearField(1);
+  void clearThermalState() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.bool get isPowerSaverMode => $_getBF(1);
@@ -2612,7 +2780,7 @@ class AndroidState extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasIsPowerSaverMode() => $_has(1);
   @$pb.TagNumber(2)
-  void clearIsPowerSaverMode() => clearField(2);
+  void clearIsPowerSaverMode() => $_clearField(2);
 }
 
 class AppleState extends $pb.GeneratedMessage {
@@ -2675,13 +2843,13 @@ class AppleState extends $pb.GeneratedMessage {
   AppleThermalState get thermalState => $_getN(0);
   @$pb.TagNumber(1)
   set thermalState(AppleThermalState v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasThermalState() => $_has(0);
   @$pb.TagNumber(1)
-  void clearThermalState() => clearField(1);
+  void clearThermalState() => $_clearField(1);
 
   /// https://developer.apple.com/documentation/foundation/processinfo/1617047-islowpowermodeenabled
   @$pb.TagNumber(2)
@@ -2694,7 +2862,7 @@ class AppleState extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasIsLowPowerModeEnabled() => $_has(1);
   @$pb.TagNumber(2)
-  void clearIsLowPowerModeEnabled() => clearField(2);
+  void clearIsLowPowerModeEnabled() => $_clearField(2);
 }
 
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');

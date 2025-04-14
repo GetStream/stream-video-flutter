@@ -2,7 +2,7 @@
 //  Generated code. Do not modify.
 //  source: video/sfu/event/events.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names, library_prefixes
@@ -16,6 +16,8 @@ import 'package:protobuf/protobuf.dart' as $pb;
 import '../models/models.pb.dart' as $0;
 import '../models/models.pbenum.dart' as $0;
 import '../signal_rpc/signal.pb.dart' as $1;
+
+export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 enum SfuEvent_EventPayload {
   subscriberOffer,
@@ -274,7 +276,7 @@ class SfuEvent extends $pb.GeneratedMessage {
 
   SfuEvent_EventPayload whichEventPayload() =>
       _SfuEvent_EventPayloadByTag[$_whichOneof(0)]!;
-  void clearEventPayload() => clearField($_whichOneof(0));
+  void clearEventPayload() => $_clearField($_whichOneof(0));
 
   /// SubscriberOffer sends the SDP offer for establishing the
   /// subscriber PeerConnection.
@@ -282,13 +284,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   SubscriberOffer get subscriberOffer => $_getN(0);
   @$pb.TagNumber(1)
   set subscriberOffer(SubscriberOffer v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasSubscriberOffer() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSubscriberOffer() => clearField(1);
+  void clearSubscriberOffer() => $_clearField(1);
   @$pb.TagNumber(1)
   SubscriberOffer ensureSubscriberOffer() => $_ensure(0);
 
@@ -298,13 +300,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   PublisherAnswer get publisherAnswer => $_getN(1);
   @$pb.TagNumber(2)
   set publisherAnswer(PublisherAnswer v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasPublisherAnswer() => $_has(1);
   @$pb.TagNumber(2)
-  void clearPublisherAnswer() => clearField(2);
+  void clearPublisherAnswer() => $_clearField(2);
   @$pb.TagNumber(2)
   PublisherAnswer ensurePublisherAnswer() => $_ensure(1);
 
@@ -315,13 +317,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ConnectionQualityChanged get connectionQualityChanged => $_getN(2);
   @$pb.TagNumber(3)
   set connectionQualityChanged(ConnectionQualityChanged v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasConnectionQualityChanged() => $_has(2);
   @$pb.TagNumber(3)
-  void clearConnectionQualityChanged() => clearField(3);
+  void clearConnectionQualityChanged() => $_clearField(3);
   @$pb.TagNumber(3)
   ConnectionQualityChanged ensureConnectionQualityChanged() => $_ensure(2);
 
@@ -331,13 +333,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   AudioLevelChanged get audioLevelChanged => $_getN(3);
   @$pb.TagNumber(4)
   set audioLevelChanged(AudioLevelChanged v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasAudioLevelChanged() => $_has(3);
   @$pb.TagNumber(4)
-  void clearAudioLevelChanged() => clearField(4);
+  void clearAudioLevelChanged() => $_clearField(4);
   @$pb.TagNumber(4)
   AudioLevelChanged ensureAudioLevelChanged() => $_ensure(3);
 
@@ -348,13 +350,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   $0.ICETrickle get iceTrickle => $_getN(4);
   @$pb.TagNumber(5)
   set iceTrickle($0.ICETrickle v) {
-    setField(5, v);
+    $_setField(5, v);
   }
 
   @$pb.TagNumber(5)
   $core.bool hasIceTrickle() => $_has(4);
   @$pb.TagNumber(5)
-  void clearIceTrickle() => clearField(5);
+  void clearIceTrickle() => $_clearField(5);
   @$pb.TagNumber(5)
   $0.ICETrickle ensureIceTrickle() => $_ensure(4);
 
@@ -365,13 +367,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ChangePublishQuality get changePublishQuality => $_getN(5);
   @$pb.TagNumber(6)
   set changePublishQuality(ChangePublishQuality v) {
-    setField(6, v);
+    $_setField(6, v);
   }
 
   @$pb.TagNumber(6)
   $core.bool hasChangePublishQuality() => $_has(5);
   @$pb.TagNumber(6)
-  void clearChangePublishQuality() => clearField(6);
+  void clearChangePublishQuality() => $_clearField(6);
   @$pb.TagNumber(6)
   ChangePublishQuality ensureChangePublishQuality() => $_ensure(5);
 
@@ -381,13 +383,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ParticipantJoined get participantJoined => $_getN(6);
   @$pb.TagNumber(10)
   set participantJoined(ParticipantJoined v) {
-    setField(10, v);
+    $_setField(10, v);
   }
 
   @$pb.TagNumber(10)
   $core.bool hasParticipantJoined() => $_has(6);
   @$pb.TagNumber(10)
-  void clearParticipantJoined() => clearField(10);
+  void clearParticipantJoined() => $_clearField(10);
   @$pb.TagNumber(10)
   ParticipantJoined ensureParticipantJoined() => $_ensure(6);
 
@@ -397,13 +399,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ParticipantLeft get participantLeft => $_getN(7);
   @$pb.TagNumber(11)
   set participantLeft(ParticipantLeft v) {
-    setField(11, v);
+    $_setField(11, v);
   }
 
   @$pb.TagNumber(11)
   $core.bool hasParticipantLeft() => $_has(7);
   @$pb.TagNumber(11)
-  void clearParticipantLeft() => clearField(11);
+  void clearParticipantLeft() => $_clearField(11);
   @$pb.TagNumber(11)
   ParticipantLeft ensureParticipantLeft() => $_ensure(7);
 
@@ -414,13 +416,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   DominantSpeakerChanged get dominantSpeakerChanged => $_getN(8);
   @$pb.TagNumber(12)
   set dominantSpeakerChanged(DominantSpeakerChanged v) {
-    setField(12, v);
+    $_setField(12, v);
   }
 
   @$pb.TagNumber(12)
   $core.bool hasDominantSpeakerChanged() => $_has(8);
   @$pb.TagNumber(12)
-  void clearDominantSpeakerChanged() => clearField(12);
+  void clearDominantSpeakerChanged() => $_clearField(12);
   @$pb.TagNumber(12)
   DominantSpeakerChanged ensureDominantSpeakerChanged() => $_ensure(8);
 
@@ -430,13 +432,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   JoinResponse get joinResponse => $_getN(9);
   @$pb.TagNumber(13)
   set joinResponse(JoinResponse v) {
-    setField(13, v);
+    $_setField(13, v);
   }
 
   @$pb.TagNumber(13)
   $core.bool hasJoinResponse() => $_has(9);
   @$pb.TagNumber(13)
-  void clearJoinResponse() => clearField(13);
+  void clearJoinResponse() => $_clearField(13);
   @$pb.TagNumber(13)
   JoinResponse ensureJoinResponse() => $_ensure(9);
 
@@ -446,13 +448,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   HealthCheckResponse get healthCheckResponse => $_getN(10);
   @$pb.TagNumber(14)
   set healthCheckResponse(HealthCheckResponse v) {
-    setField(14, v);
+    $_setField(14, v);
   }
 
   @$pb.TagNumber(14)
   $core.bool hasHealthCheckResponse() => $_has(10);
   @$pb.TagNumber(14)
-  void clearHealthCheckResponse() => clearField(14);
+  void clearHealthCheckResponse() => $_clearField(14);
   @$pb.TagNumber(14)
   HealthCheckResponse ensureHealthCheckResponse() => $_ensure(10);
 
@@ -462,13 +464,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   TrackPublished get trackPublished => $_getN(11);
   @$pb.TagNumber(16)
   set trackPublished(TrackPublished v) {
-    setField(16, v);
+    $_setField(16, v);
   }
 
   @$pb.TagNumber(16)
   $core.bool hasTrackPublished() => $_has(11);
   @$pb.TagNumber(16)
-  void clearTrackPublished() => clearField(16);
+  void clearTrackPublished() => $_clearField(16);
   @$pb.TagNumber(16)
   TrackPublished ensureTrackPublished() => $_ensure(11);
 
@@ -479,13 +481,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   TrackUnpublished get trackUnpublished => $_getN(12);
   @$pb.TagNumber(17)
   set trackUnpublished(TrackUnpublished v) {
-    setField(17, v);
+    $_setField(17, v);
   }
 
   @$pb.TagNumber(17)
   $core.bool hasTrackUnpublished() => $_has(12);
   @$pb.TagNumber(17)
-  void clearTrackUnpublished() => clearField(17);
+  void clearTrackUnpublished() => $_clearField(17);
   @$pb.TagNumber(17)
   TrackUnpublished ensureTrackUnpublished() => $_ensure(12);
 
@@ -496,13 +498,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   Error get error => $_getN(13);
   @$pb.TagNumber(18)
   set error(Error v) {
-    setField(18, v);
+    $_setField(18, v);
   }
 
   @$pb.TagNumber(18)
   $core.bool hasError() => $_has(13);
   @$pb.TagNumber(18)
-  void clearError() => clearField(18);
+  void clearError() => $_clearField(18);
   @$pb.TagNumber(18)
   Error ensureError() => $_ensure(13);
 
@@ -511,13 +513,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   CallGrantsUpdated get callGrantsUpdated => $_getN(14);
   @$pb.TagNumber(19)
   set callGrantsUpdated(CallGrantsUpdated v) {
-    setField(19, v);
+    $_setField(19, v);
   }
 
   @$pb.TagNumber(19)
   $core.bool hasCallGrantsUpdated() => $_has(14);
   @$pb.TagNumber(19)
-  void clearCallGrantsUpdated() => clearField(19);
+  void clearCallGrantsUpdated() => $_clearField(19);
   @$pb.TagNumber(19)
   CallGrantsUpdated ensureCallGrantsUpdated() => $_ensure(14);
 
@@ -527,13 +529,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   GoAway get goAway => $_getN(15);
   @$pb.TagNumber(20)
   set goAway(GoAway v) {
-    setField(20, v);
+    $_setField(20, v);
   }
 
   @$pb.TagNumber(20)
   $core.bool hasGoAway() => $_has(15);
   @$pb.TagNumber(20)
-  void clearGoAway() => clearField(20);
+  void clearGoAway() => $_clearField(20);
   @$pb.TagNumber(20)
   GoAway ensureGoAway() => $_ensure(15);
 
@@ -542,13 +544,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ICERestart get iceRestart => $_getN(16);
   @$pb.TagNumber(21)
   set iceRestart(ICERestart v) {
-    setField(21, v);
+    $_setField(21, v);
   }
 
   @$pb.TagNumber(21)
   $core.bool hasIceRestart() => $_has(16);
   @$pb.TagNumber(21)
-  void clearIceRestart() => clearField(21);
+  void clearIceRestart() => $_clearField(21);
   @$pb.TagNumber(21)
   ICERestart ensureIceRestart() => $_ensure(16);
 
@@ -557,13 +559,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   PinsChanged get pinsUpdated => $_getN(17);
   @$pb.TagNumber(22)
   set pinsUpdated(PinsChanged v) {
-    setField(22, v);
+    $_setField(22, v);
   }
 
   @$pb.TagNumber(22)
   $core.bool hasPinsUpdated() => $_has(17);
   @$pb.TagNumber(22)
-  void clearPinsUpdated() => clearField(22);
+  void clearPinsUpdated() => $_clearField(22);
   @$pb.TagNumber(22)
   PinsChanged ensurePinsUpdated() => $_ensure(17);
 
@@ -573,13 +575,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   CallEnded get callEnded => $_getN(18);
   @$pb.TagNumber(23)
   set callEnded(CallEnded v) {
-    setField(23, v);
+    $_setField(23, v);
   }
 
   @$pb.TagNumber(23)
   $core.bool hasCallEnded() => $_has(18);
   @$pb.TagNumber(23)
-  void clearCallEnded() => clearField(23);
+  void clearCallEnded() => $_clearField(23);
   @$pb.TagNumber(23)
   CallEnded ensureCallEnded() => $_ensure(18);
 
@@ -588,13 +590,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ParticipantUpdated get participantUpdated => $_getN(19);
   @$pb.TagNumber(24)
   set participantUpdated(ParticipantUpdated v) {
-    setField(24, v);
+    $_setField(24, v);
   }
 
   @$pb.TagNumber(24)
   $core.bool hasParticipantUpdated() => $_has(19);
   @$pb.TagNumber(24)
-  void clearParticipantUpdated() => clearField(24);
+  void clearParticipantUpdated() => $_clearField(24);
   @$pb.TagNumber(24)
   ParticipantUpdated ensureParticipantUpdated() => $_ensure(19);
 
@@ -603,13 +605,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ParticipantMigrationComplete get participantMigrationComplete => $_getN(20);
   @$pb.TagNumber(25)
   set participantMigrationComplete(ParticipantMigrationComplete v) {
-    setField(25, v);
+    $_setField(25, v);
   }
 
   @$pb.TagNumber(25)
   $core.bool hasParticipantMigrationComplete() => $_has(20);
   @$pb.TagNumber(25)
-  void clearParticipantMigrationComplete() => clearField(25);
+  void clearParticipantMigrationComplete() => $_clearField(25);
   @$pb.TagNumber(25)
   ParticipantMigrationComplete ensureParticipantMigrationComplete() =>
       $_ensure(20);
@@ -619,13 +621,13 @@ class SfuEvent extends $pb.GeneratedMessage {
   ChangePublishOptions get changePublishOptions => $_getN(21);
   @$pb.TagNumber(27)
   set changePublishOptions(ChangePublishOptions v) {
-    setField(27, v);
+    $_setField(27, v);
   }
 
   @$pb.TagNumber(27)
   $core.bool hasChangePublishOptions() => $_has(21);
   @$pb.TagNumber(27)
-  void clearChangePublishOptions() => clearField(27);
+  void clearChangePublishOptions() => $_clearField(27);
   @$pb.TagNumber(27)
   ChangePublishOptions ensureChangePublishOptions() => $_ensure(21);
 }
@@ -688,7 +690,7 @@ class ChangePublishOptions extends $pb.GeneratedMessage {
   static ChangePublishOptions? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$0.PublishOption> get publishOptions => $_getList(0);
+  $pb.PbList<$0.PublishOption> get publishOptions => $_getList(0);
 
   @$pb.TagNumber(2)
   $core.String get reason => $_getSZ(1);
@@ -700,7 +702,7 @@ class ChangePublishOptions extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasReason() => $_has(1);
   @$pb.TagNumber(2)
-  void clearReason() => clearField(2);
+  void clearReason() => $_clearField(2);
 }
 
 class ChangePublishOptionsComplete extends $pb.GeneratedMessage {
@@ -845,7 +847,7 @@ class PinsChanged extends $pb.GeneratedMessage {
   /// the list of pins in the call.
   /// Pins are ordered in descending order (most important first).
   @$pb.TagNumber(1)
-  $core.List<$0.Pin> get pins => $_getList(0);
+  $pb.PbList<$0.Pin> get pins => $_getList(0);
 }
 
 class Error extends $pb.GeneratedMessage {
@@ -910,13 +912,13 @@ class Error extends $pb.GeneratedMessage {
   $0.Error get error => $_getN(0);
   @$pb.TagNumber(4)
   set error($0.Error v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasError() => $_has(0);
   @$pb.TagNumber(4)
-  void clearError() => clearField(4);
+  void clearError() => $_clearField(4);
   @$pb.TagNumber(4)
   $0.Error ensureError() => $_ensure(0);
 
@@ -925,13 +927,13 @@ class Error extends $pb.GeneratedMessage {
   $0.WebsocketReconnectStrategy get reconnectStrategy => $_getN(1);
   @$pb.TagNumber(5)
   set reconnectStrategy($0.WebsocketReconnectStrategy v) {
-    setField(5, v);
+    $_setField(5, v);
   }
 
   @$pb.TagNumber(5)
   $core.bool hasReconnectStrategy() => $_has(1);
   @$pb.TagNumber(5)
-  void clearReconnectStrategy() => clearField(5);
+  void clearReconnectStrategy() => $_clearField(5);
 }
 
 class ICETrickle extends $pb.GeneratedMessage {
@@ -993,13 +995,13 @@ class ICETrickle extends $pb.GeneratedMessage {
   $0.PeerType get peerType => $_getN(0);
   @$pb.TagNumber(1)
   set peerType($0.PeerType v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasPeerType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearPeerType() => clearField(1);
+  void clearPeerType() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get iceCandidate => $_getSZ(1);
@@ -1011,7 +1013,7 @@ class ICETrickle extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasIceCandidate() => $_has(1);
   @$pb.TagNumber(2)
-  void clearIceCandidate() => clearField(2);
+  void clearIceCandidate() => $_clearField(2);
 }
 
 class ICERestart extends $pb.GeneratedMessage {
@@ -1068,13 +1070,13 @@ class ICERestart extends $pb.GeneratedMessage {
   $0.PeerType get peerType => $_getN(0);
   @$pb.TagNumber(1)
   set peerType($0.PeerType v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasPeerType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearPeerType() => clearField(1);
+  void clearPeerType() => $_clearField(1);
 }
 
 enum SfuRequest_RequestPayload {
@@ -1155,19 +1157,19 @@ class SfuRequest extends $pb.GeneratedMessage {
 
   SfuRequest_RequestPayload whichRequestPayload() =>
       _SfuRequest_RequestPayloadByTag[$_whichOneof(0)]!;
-  void clearRequestPayload() => clearField($_whichOneof(0));
+  void clearRequestPayload() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   JoinRequest get joinRequest => $_getN(0);
   @$pb.TagNumber(1)
   set joinRequest(JoinRequest v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasJoinRequest() => $_has(0);
   @$pb.TagNumber(1)
-  void clearJoinRequest() => clearField(1);
+  void clearJoinRequest() => $_clearField(1);
   @$pb.TagNumber(1)
   JoinRequest ensureJoinRequest() => $_ensure(0);
 
@@ -1175,13 +1177,13 @@ class SfuRequest extends $pb.GeneratedMessage {
   HealthCheckRequest get healthCheckRequest => $_getN(1);
   @$pb.TagNumber(2)
   set healthCheckRequest(HealthCheckRequest v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasHealthCheckRequest() => $_has(1);
   @$pb.TagNumber(2)
-  void clearHealthCheckRequest() => clearField(2);
+  void clearHealthCheckRequest() => $_clearField(2);
   @$pb.TagNumber(2)
   HealthCheckRequest ensureHealthCheckRequest() => $_ensure(1);
 
@@ -1189,13 +1191,13 @@ class SfuRequest extends $pb.GeneratedMessage {
   LeaveCallRequest get leaveCallRequest => $_getN(2);
   @$pb.TagNumber(3)
   set leaveCallRequest(LeaveCallRequest v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasLeaveCallRequest() => $_has(2);
   @$pb.TagNumber(3)
-  void clearLeaveCallRequest() => clearField(3);
+  void clearLeaveCallRequest() => $_clearField(3);
   @$pb.TagNumber(3)
   LeaveCallRequest ensureLeaveCallRequest() => $_ensure(2);
 }
@@ -1264,7 +1266,7 @@ class LeaveCallRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasSessionId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSessionId() => clearField(1);
+  void clearSessionId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get reason => $_getSZ(1);
@@ -1276,7 +1278,7 @@ class LeaveCallRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasReason() => $_has(1);
   @$pb.TagNumber(2)
-  void clearReason() => clearField(2);
+  void clearReason() => $_clearField(2);
 }
 
 class HealthCheckRequest extends $pb.GeneratedMessage {
@@ -1374,13 +1376,13 @@ class HealthCheckResponse extends $pb.GeneratedMessage {
   $0.ParticipantCount get participantCount => $_getN(0);
   @$pb.TagNumber(1)
   set participantCount($0.ParticipantCount v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasParticipantCount() => $_has(0);
   @$pb.TagNumber(1)
-  void clearParticipantCount() => clearField(1);
+  void clearParticipantCount() => $_clearField(1);
   @$pb.TagNumber(1)
   $0.ParticipantCount ensureParticipantCount() => $_ensure(0);
 }
@@ -1463,7 +1465,7 @@ class TrackPublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -1475,19 +1477,19 @@ class TrackPublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $0.TrackType get type => $_getN(2);
   @$pb.TagNumber(3)
   set type($0.TrackType v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
-  void clearType() => clearField(3);
+  void clearType() => $_clearField(3);
 
   /// Participant information here is included as an optimisation
   /// for large calls where broadcasting on every participant join
@@ -1498,13 +1500,13 @@ class TrackPublished extends $pb.GeneratedMessage {
   $0.Participant get participant => $_getN(3);
   @$pb.TagNumber(4)
   set participant($0.Participant v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasParticipant() => $_has(3);
   @$pb.TagNumber(4)
-  void clearParticipant() => clearField(4);
+  void clearParticipant() => $_clearField(4);
   @$pb.TagNumber(4)
   $0.Participant ensureParticipant() => $_ensure(3);
 }
@@ -1597,7 +1599,7 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -1609,31 +1611,31 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $0.TrackType get type => $_getN(2);
   @$pb.TagNumber(3)
   set type($0.TrackType v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
-  void clearType() => clearField(3);
+  void clearType() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $0.TrackUnpublishReason get cause => $_getN(3);
   @$pb.TagNumber(4)
   set cause($0.TrackUnpublishReason v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasCause() => $_has(3);
   @$pb.TagNumber(4)
-  void clearCause() => clearField(4);
+  void clearCause() => $_clearField(4);
 
   /// Participant information here is included as an optimisation
   /// for large calls where broadcasting on every participant join
@@ -1644,13 +1646,13 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   $0.Participant get participant => $_getN(4);
   @$pb.TagNumber(5)
   set participant($0.Participant v) {
-    setField(5, v);
+    $_setField(5, v);
   }
 
   @$pb.TagNumber(5)
   $core.bool hasParticipant() => $_has(4);
   @$pb.TagNumber(5)
-  void clearParticipant() => clearField(5);
+  void clearParticipant() => $_clearField(5);
   @$pb.TagNumber(5)
   $0.Participant ensureParticipant() => $_ensure(4);
 }
@@ -1767,7 +1769,7 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasToken() => $_has(0);
   @$pb.TagNumber(1)
-  void clearToken() => clearField(1);
+  void clearToken() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -1779,7 +1781,7 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 
   /// dumb SDP that allow us to extract subscriber's decode codecs
   @$pb.TagNumber(3)
@@ -1792,19 +1794,19 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasSubscriberSdp() => $_has(2);
   @$pb.TagNumber(3)
-  void clearSubscriberSdp() => clearField(3);
+  void clearSubscriberSdp() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $0.ClientDetails get clientDetails => $_getN(3);
   @$pb.TagNumber(4)
   set clientDetails($0.ClientDetails v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasClientDetails() => $_has(3);
   @$pb.TagNumber(4)
-  void clearClientDetails() => clearField(4);
+  void clearClientDetails() => $_clearField(4);
   @$pb.TagNumber(4)
   $0.ClientDetails ensureClientDetails() => $_ensure(3);
 
@@ -1815,7 +1817,7 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   set migration(Migration v) {
-    setField(5, v);
+    $_setField(5, v);
   }
 
   @$core.Deprecated('This field is deprecated.')
@@ -1823,7 +1825,7 @@ class JoinRequest extends $pb.GeneratedMessage {
   $core.bool hasMigration() => $_has(4);
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
-  void clearMigration() => clearField(5);
+  void clearMigration() => $_clearField(5);
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(5)
   Migration ensureMigration() => $_ensure(4);
@@ -1851,19 +1853,19 @@ class JoinRequest extends $pb.GeneratedMessage {
   $core.bool hasFastReconnect() => $_has(5);
   @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(6)
-  void clearFastReconnect() => clearField(6);
+  void clearFastReconnect() => $_clearField(6);
 
   @$pb.TagNumber(7)
   ReconnectDetails get reconnectDetails => $_getN(6);
   @$pb.TagNumber(7)
   set reconnectDetails(ReconnectDetails v) {
-    setField(7, v);
+    $_setField(7, v);
   }
 
   @$pb.TagNumber(7)
   $core.bool hasReconnectDetails() => $_has(6);
   @$pb.TagNumber(7)
-  void clearReconnectDetails() => clearField(7);
+  void clearReconnectDetails() => $_clearField(7);
   @$pb.TagNumber(7)
   ReconnectDetails ensureReconnectDetails() => $_ensure(6);
 
@@ -1877,13 +1879,13 @@ class JoinRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.bool hasPublisherSdp() => $_has(7);
   @$pb.TagNumber(8)
-  void clearPublisherSdp() => clearField(8);
+  void clearPublisherSdp() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $core.List<$0.PublishOption> get preferredPublishOptions => $_getList(8);
+  $pb.PbList<$0.PublishOption> get preferredPublishOptions => $_getList(8);
 
   @$pb.TagNumber(10)
-  $core.List<$0.SubscribeOption> get preferredSubscribeOptions => $_getList(9);
+  $pb.PbList<$0.SubscribeOption> get preferredSubscribeOptions => $_getList(9);
 }
 
 class ReconnectDetails extends $pb.GeneratedMessage {
@@ -1894,6 +1896,7 @@ class ReconnectDetails extends $pb.GeneratedMessage {
     $core.int? reconnectAttempt,
     $core.String? fromSfuId,
     $core.String? previousSessionId,
+    $core.String? reason,
   }) {
     final $result = create();
     if (strategy != null) {
@@ -1913,6 +1916,9 @@ class ReconnectDetails extends $pb.GeneratedMessage {
     }
     if (previousSessionId != null) {
       $result.previousSessionId = previousSessionId;
+    }
+    if (reason != null) {
+      $result.reason = reason;
     }
     return $result;
   }
@@ -1945,6 +1951,7 @@ class ReconnectDetails extends $pb.GeneratedMessage {
         5, _omitFieldNames ? '' : 'reconnectAttempt', $pb.PbFieldType.OU3)
     ..aOS(6, _omitFieldNames ? '' : 'fromSfuId')
     ..aOS(7, _omitFieldNames ? '' : 'previousSessionId')
+    ..aOS(8, _omitFieldNames ? '' : 'reason')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -1974,19 +1981,19 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   $0.WebsocketReconnectStrategy get strategy => $_getN(0);
   @$pb.TagNumber(1)
   set strategy($0.WebsocketReconnectStrategy v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasStrategy() => $_has(0);
   @$pb.TagNumber(1)
-  void clearStrategy() => clearField(1);
+  void clearStrategy() => $_clearField(1);
 
   @$pb.TagNumber(3)
-  $core.List<$0.TrackInfo> get announcedTracks => $_getList(1);
+  $pb.PbList<$0.TrackInfo> get announcedTracks => $_getList(1);
 
   @$pb.TagNumber(4)
-  $core.List<$1.TrackSubscriptionDetails> get subscriptions => $_getList(2);
+  $pb.PbList<$1.TrackSubscriptionDetails> get subscriptions => $_getList(2);
 
   @$pb.TagNumber(5)
   $core.int get reconnectAttempt => $_getIZ(3);
@@ -1998,7 +2005,7 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.bool hasReconnectAttempt() => $_has(3);
   @$pb.TagNumber(5)
-  void clearReconnectAttempt() => clearField(5);
+  void clearReconnectAttempt() => $_clearField(5);
 
   @$pb.TagNumber(6)
   $core.String get fromSfuId => $_getSZ(4);
@@ -2010,7 +2017,7 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.bool hasFromSfuId() => $_has(4);
   @$pb.TagNumber(6)
-  void clearFromSfuId() => clearField(6);
+  void clearFromSfuId() => $_clearField(6);
 
   /// only set in case of rejoin
   @$pb.TagNumber(7)
@@ -2023,7 +2030,20 @@ class ReconnectDetails extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.bool hasPreviousSessionId() => $_has(5);
   @$pb.TagNumber(7)
-  void clearPreviousSessionId() => clearField(7);
+  void clearPreviousSessionId() => $_clearField(7);
+
+  /// the reconnect reason
+  @$pb.TagNumber(8)
+  $core.String get reason => $_getSZ(6);
+  @$pb.TagNumber(8)
+  set reason($core.String v) {
+    $_setString(6, v);
+  }
+
+  @$pb.TagNumber(8)
+  $core.bool hasReason() => $_has(6);
+  @$pb.TagNumber(8)
+  void clearReason() => $_clearField(8);
 }
 
 class Migration extends $pb.GeneratedMessage {
@@ -2097,13 +2117,13 @@ class Migration extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasFromSfuId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearFromSfuId() => clearField(1);
+  void clearFromSfuId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$0.TrackInfo> get announcedTracks => $_getList(1);
+  $pb.PbList<$0.TrackInfo> get announcedTracks => $_getList(1);
 
   @$pb.TagNumber(3)
-  $core.List<$1.TrackSubscriptionDetails> get subscriptions => $_getList(2);
+  $pb.PbList<$1.TrackSubscriptionDetails> get subscriptions => $_getList(2);
 }
 
 class JoinResponse extends $pb.GeneratedMessage {
@@ -2178,13 +2198,13 @@ class JoinResponse extends $pb.GeneratedMessage {
   $0.CallState get callState => $_getN(0);
   @$pb.TagNumber(1)
   set callState($0.CallState v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasCallState() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallState() => clearField(1);
+  void clearCallState() => $_clearField(1);
   @$pb.TagNumber(1)
   $0.CallState ensureCallState() => $_ensure(0);
 
@@ -2198,7 +2218,7 @@ class JoinResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasReconnected() => $_has(1);
   @$pb.TagNumber(2)
-  void clearReconnected() => clearField(2);
+  void clearReconnected() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.int get fastReconnectDeadlineSeconds => $_getIZ(2);
@@ -2210,10 +2230,10 @@ class JoinResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasFastReconnectDeadlineSeconds() => $_has(2);
   @$pb.TagNumber(3)
-  void clearFastReconnectDeadlineSeconds() => clearField(3);
+  void clearFastReconnectDeadlineSeconds() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $core.List<$0.PublishOption> get publishOptions => $_getList(3);
+  $pb.PbList<$0.PublishOption> get publishOptions => $_getList(3);
 }
 
 /// ParticipantJoined is fired when a user joins a call
@@ -2282,19 +2302,19 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
+  void clearCallCid() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $0.Participant get participant => $_getN(1);
   @$pb.TagNumber(2)
   set participant($0.Participant v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasParticipant() => $_has(1);
   @$pb.TagNumber(2)
-  void clearParticipant() => clearField(2);
+  void clearParticipant() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Participant ensureParticipant() => $_ensure(1);
 }
@@ -2365,19 +2385,19 @@ class ParticipantLeft extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
+  void clearCallCid() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $0.Participant get participant => $_getN(1);
   @$pb.TagNumber(2)
   set participant($0.Participant v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasParticipant() => $_has(1);
   @$pb.TagNumber(2)
-  void clearParticipant() => clearField(2);
+  void clearParticipant() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Participant ensureParticipant() => $_ensure(1);
 }
@@ -2448,19 +2468,19 @@ class ParticipantUpdated extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
+  void clearCallCid() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $0.Participant get participant => $_getN(1);
   @$pb.TagNumber(2)
   set participant($0.Participant v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasParticipant() => $_has(1);
   @$pb.TagNumber(2)
-  void clearParticipant() => clearField(2);
+  void clearParticipant() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Participant ensureParticipant() => $_ensure(1);
 }
@@ -2530,7 +2550,7 @@ class SubscriberOffer extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasIceRestart() => $_has(0);
   @$pb.TagNumber(1)
-  void clearIceRestart() => clearField(1);
+  void clearIceRestart() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sdp => $_getSZ(1);
@@ -2542,7 +2562,7 @@ class SubscriberOffer extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSdp() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSdp() => clearField(2);
+  void clearSdp() => $_clearField(2);
 }
 
 class PublisherAnswer extends $pb.GeneratedMessage {
@@ -2604,7 +2624,7 @@ class PublisherAnswer extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasSdp() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSdp() => clearField(1);
+  void clearSdp() => $_clearField(1);
 }
 
 /// ConnectionQuality is sent to inform about connection quality changes
@@ -2663,7 +2683,7 @@ class ConnectionQualityChanged extends $pb.GeneratedMessage {
   static ConnectionQualityChanged? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<ConnectionQualityInfo> get connectionQualityUpdates =>
+  $pb.PbList<ConnectionQualityInfo> get connectionQualityUpdates =>
       $_getList(0);
 }
 
@@ -2742,7 +2762,7 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -2754,19 +2774,19 @@ class ConnectionQualityInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $0.ConnectionQuality get connectionQuality => $_getN(2);
   @$pb.TagNumber(3)
   set connectionQuality($0.ConnectionQuality v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasConnectionQuality() => $_has(2);
   @$pb.TagNumber(3)
-  void clearConnectionQuality() => clearField(3);
+  void clearConnectionQuality() => $_clearField(3);
 }
 
 /// DominantSpeakerChanged is sent by the SFU to notify when there is a new dominant speaker in the call
@@ -2836,7 +2856,7 @@ class DominantSpeakerChanged extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -2848,7 +2868,7 @@ class DominantSpeakerChanged extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 }
 
 class AudioLevel extends $pb.GeneratedMessage {
@@ -2923,7 +2943,7 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUserId() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get sessionId => $_getSZ(1);
@@ -2935,7 +2955,7 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSessionId() => clearField(2);
+  void clearSessionId() => $_clearField(2);
 
   /// 0.0 means complete silence, 1.0 loudest
   @$pb.TagNumber(3)
@@ -2948,7 +2968,7 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasLevel() => $_has(2);
   @$pb.TagNumber(3)
-  void clearLevel() => clearField(3);
+  void clearLevel() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.bool get isSpeaking => $_getBF(3);
@@ -2960,7 +2980,7 @@ class AudioLevel extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasIsSpeaking() => $_has(3);
   @$pb.TagNumber(4)
-  void clearIsSpeaking() => clearField(4);
+  void clearIsSpeaking() => $_clearField(4);
 }
 
 /// AudioLevelChanged is sent by the SFU to notify about audio levels by user
@@ -3016,7 +3036,7 @@ class AudioLevelChanged extends $pb.GeneratedMessage {
   static AudioLevelChanged? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<AudioLevel> get audioLevels => $_getList(0);
+  $pb.PbList<AudioLevel> get audioLevels => $_getList(0);
 }
 
 class AudioSender extends $pb.GeneratedMessage {
@@ -3086,13 +3106,13 @@ class AudioSender extends $pb.GeneratedMessage {
   $0.Codec get codec => $_getN(0);
   @$pb.TagNumber(2)
   set codec($0.Codec v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasCodec() => $_has(0);
   @$pb.TagNumber(2)
-  void clearCodec() => clearField(2);
+  void clearCodec() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Codec ensureCodec() => $_ensure(0);
 
@@ -3100,13 +3120,13 @@ class AudioSender extends $pb.GeneratedMessage {
   $0.TrackType get trackType => $_getN(1);
   @$pb.TagNumber(3)
   set trackType($0.TrackType v) {
-    setField(3, v);
+    $_setField(3, v);
   }
 
   @$pb.TagNumber(3)
   $core.bool hasTrackType() => $_has(1);
   @$pb.TagNumber(3)
-  void clearTrackType() => clearField(3);
+  void clearTrackType() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.int get publishOptionId => $_getIZ(2);
@@ -3118,7 +3138,7 @@ class AudioSender extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasPublishOptionId() => $_has(2);
   @$pb.TagNumber(4)
-  void clearPublishOptionId() => clearField(4);
+  void clearPublishOptionId() => $_clearField(4);
 }
 
 /// VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
@@ -3216,7 +3236,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearName() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.bool get active => $_getBF(1);
@@ -3228,7 +3248,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasActive() => $_has(1);
   @$pb.TagNumber(2)
-  void clearActive() => clearField(2);
+  void clearActive() => $_clearField(2);
 
   @$pb.TagNumber(3)
   $core.int get maxBitrate => $_getIZ(2);
@@ -3240,7 +3260,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.bool hasMaxBitrate() => $_has(2);
   @$pb.TagNumber(3)
-  void clearMaxBitrate() => clearField(3);
+  void clearMaxBitrate() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $core.double get scaleResolutionDownBy => $_getN(3);
@@ -3252,19 +3272,19 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool hasScaleResolutionDownBy() => $_has(3);
   @$pb.TagNumber(4)
-  void clearScaleResolutionDownBy() => clearField(4);
+  void clearScaleResolutionDownBy() => $_clearField(4);
 
   @$pb.TagNumber(6)
   $0.Codec get codec => $_getN(4);
   @$pb.TagNumber(6)
   set codec($0.Codec v) {
-    setField(6, v);
+    $_setField(6, v);
   }
 
   @$pb.TagNumber(6)
   $core.bool hasCodec() => $_has(4);
   @$pb.TagNumber(6)
-  void clearCodec() => clearField(6);
+  void clearCodec() => $_clearField(6);
   @$pb.TagNumber(6)
   $0.Codec ensureCodec() => $_ensure(4);
 
@@ -3278,7 +3298,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.bool hasMaxFramerate() => $_has(5);
   @$pb.TagNumber(7)
-  void clearMaxFramerate() => clearField(7);
+  void clearMaxFramerate() => $_clearField(7);
 
   @$pb.TagNumber(8)
   $core.String get scalabilityMode => $_getSZ(6);
@@ -3290,7 +3310,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   $core.bool hasScalabilityMode() => $_has(6);
   @$pb.TagNumber(8)
-  void clearScalabilityMode() => clearField(8);
+  void clearScalabilityMode() => $_clearField(8);
 }
 
 class VideoSender extends $pb.GeneratedMessage {
@@ -3367,30 +3387,30 @@ class VideoSender extends $pb.GeneratedMessage {
   $0.Codec get codec => $_getN(0);
   @$pb.TagNumber(2)
   set codec($0.Codec v) {
-    setField(2, v);
+    $_setField(2, v);
   }
 
   @$pb.TagNumber(2)
   $core.bool hasCodec() => $_has(0);
   @$pb.TagNumber(2)
-  void clearCodec() => clearField(2);
+  void clearCodec() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Codec ensureCodec() => $_ensure(0);
 
   @$pb.TagNumber(3)
-  $core.List<VideoLayerSetting> get layers => $_getList(1);
+  $pb.PbList<VideoLayerSetting> get layers => $_getList(1);
 
   @$pb.TagNumber(4)
   $0.TrackType get trackType => $_getN(2);
   @$pb.TagNumber(4)
   set trackType($0.TrackType v) {
-    setField(4, v);
+    $_setField(4, v);
   }
 
   @$pb.TagNumber(4)
   $core.bool hasTrackType() => $_has(2);
   @$pb.TagNumber(4)
-  void clearTrackType() => clearField(4);
+  void clearTrackType() => $_clearField(4);
 
   @$pb.TagNumber(5)
   $core.int get publishOptionId => $_getIZ(3);
@@ -3402,7 +3422,7 @@ class VideoSender extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.bool hasPublishOptionId() => $_has(3);
   @$pb.TagNumber(5)
-  void clearPublishOptionId() => clearField(5);
+  void clearPublishOptionId() => $_clearField(5);
 }
 
 /// sent to users when they need to change the quality of their video
@@ -3466,10 +3486,10 @@ class ChangePublishQuality extends $pb.GeneratedMessage {
   static ChangePublishQuality? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<AudioSender> get audioSenders => $_getList(0);
+  $pb.PbList<AudioSender> get audioSenders => $_getList(0);
 
   @$pb.TagNumber(2)
-  $core.List<VideoSender> get videoSenders => $_getList(1);
+  $pb.PbList<VideoSender> get videoSenders => $_getList(1);
 }
 
 ///  CallGrants is sent to users when there is a change in the call permissions
@@ -3547,13 +3567,13 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
   $0.CallGrants get currentGrants => $_getN(0);
   @$pb.TagNumber(1)
   set currentGrants($0.CallGrants v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasCurrentGrants() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCurrentGrants() => clearField(1);
+  void clearCurrentGrants() => $_clearField(1);
   @$pb.TagNumber(1)
   $0.CallGrants ensureCurrentGrants() => $_ensure(0);
 
@@ -3567,7 +3587,7 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
-  void clearMessage() => clearField(2);
+  void clearMessage() => $_clearField(2);
 }
 
 /// Go away is sent by the SFU to the client to signal to migrate away from the SFU.
@@ -3626,13 +3646,13 @@ class GoAway extends $pb.GeneratedMessage {
   $0.GoAwayReason get reason => $_getN(0);
   @$pb.TagNumber(1)
   set reason($0.GoAwayReason v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasReason() => $_has(0);
   @$pb.TagNumber(1)
-  void clearReason() => clearField(1);
+  void clearReason() => $_clearField(1);
 }
 
 /// CallEnded is sent by the SFU to the client to signal that the call has ended.
@@ -3692,13 +3712,13 @@ class CallEnded extends $pb.GeneratedMessage {
   $0.CallEndedReason get reason => $_getN(0);
   @$pb.TagNumber(1)
   set reason($0.CallEndedReason v) {
-    setField(1, v);
+    $_setField(1, v);
   }
 
   @$pb.TagNumber(1)
   $core.bool hasReason() => $_has(0);
   @$pb.TagNumber(1)
-  void clearReason() => clearField(1);
+  void clearReason() => $_clearField(1);
 }
 
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
