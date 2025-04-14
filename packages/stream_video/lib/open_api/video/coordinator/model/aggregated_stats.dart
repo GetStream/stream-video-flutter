@@ -13,12 +13,9 @@ part of openapi.api;
 class AggregatedStats {
   /// Returns a new [AggregatedStats] instance.
   AggregatedStats({
-    this.countrywiseAggregateStats = const {},
     this.publisherAggregateStats,
     this.turn,
   });
-
-  Map<String, CountrywiseAggregateStats> countrywiseAggregateStats;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -40,15 +37,12 @@ class AggregatedStats {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AggregatedStats &&
-          _deepEquality.equals(
-              other.countrywiseAggregateStats, countrywiseAggregateStats) &&
           other.publisherAggregateStats == publisherAggregateStats &&
           other.turn == turn;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (countrywiseAggregateStats.hashCode) +
       (publisherAggregateStats == null
           ? 0
           : publisherAggregateStats!.hashCode) +
@@ -56,11 +50,10 @@ class AggregatedStats {
 
   @override
   String toString() =>
-      'AggregatedStats[countrywiseAggregateStats=$countrywiseAggregateStats, publisherAggregateStats=$publisherAggregateStats, turn=$turn]';
+      'AggregatedStats[publisherAggregateStats=$publisherAggregateStats, turn=$turn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'countrywise_aggregate_stats'] = this.countrywiseAggregateStats;
     if (this.publisherAggregateStats != null) {
       json[r'publisher_aggregate_stats'] = this.publisherAggregateStats;
     } else {
@@ -95,8 +88,6 @@ class AggregatedStats {
       }());
 
       return AggregatedStats(
-        countrywiseAggregateStats: CountrywiseAggregateStats.mapFromJson(
-            json[r'countrywise_aggregate_stats']),
         publisherAggregateStats: PublisherAggregateStats.fromJson(
             json[r'publisher_aggregate_stats']),
         turn: TURNAggregatedStats.fromJson(json[r'turn']),

@@ -9,7 +9,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
-import '../open_api/video/coordinator/api.dart';
+import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';

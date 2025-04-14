@@ -656,7 +656,7 @@ class CallSession extends Disposable {
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     final offerSdp = event.sdp;
-    _logger.i(() => '[onSubscriberOffer] event: $event');
+    _logger.v(() => '[onSubscriberOffer] event: $event');
 
     final answerSdp = await rtcManager?.onSubscriberOffer(offerSdp);
     if (answerSdp == null) {

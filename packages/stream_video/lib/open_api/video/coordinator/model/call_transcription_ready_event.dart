@@ -16,6 +16,7 @@ class CallTranscriptionReadyEvent {
     required this.callCid,
     required this.callTranscription,
     required this.createdAt,
+    required this.egressId,
     this.type = 'call.transcription_ready',
   });
 
@@ -24,6 +25,8 @@ class CallTranscriptionReadyEvent {
   CallTranscription callTranscription;
 
   DateTime createdAt;
+
+  String egressId;
 
   /// The type of event: \"call.transcription_ready\" in this case
   String type;
@@ -35,6 +38,7 @@ class CallTranscriptionReadyEvent {
           other.callCid == callCid &&
           other.callTranscription == callTranscription &&
           other.createdAt == createdAt &&
+          other.egressId == egressId &&
           other.type == type;
 
   @override
@@ -43,17 +47,19 @@ class CallTranscriptionReadyEvent {
       (callCid.hashCode) +
       (callTranscription.hashCode) +
       (createdAt.hashCode) +
+      (egressId.hashCode) +
       (type.hashCode);
 
   @override
   String toString() =>
-      'CallTranscriptionReadyEvent[callCid=$callCid, callTranscription=$callTranscription, createdAt=$createdAt, type=$type]';
+      'CallTranscriptionReadyEvent[callCid=$callCid, callTranscription=$callTranscription, createdAt=$createdAt, egressId=$egressId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call_cid'] = this.callCid;
     json[r'call_transcription'] = this.callTranscription;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'egress_id'] = this.egressId;
     json[r'type'] = this.type;
     return json;
   }
@@ -83,6 +89,7 @@ class CallTranscriptionReadyEvent {
         callTranscription:
             CallTranscription.fromJson(json[r'call_transcription'])!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        egressId: mapValueOfType<String>(json, r'egress_id')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -143,6 +150,7 @@ class CallTranscriptionReadyEvent {
     'call_cid',
     'call_transcription',
     'created_at',
+    'egress_id',
     'type',
   };
 }

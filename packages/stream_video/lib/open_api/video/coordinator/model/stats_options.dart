@@ -13,26 +13,33 @@ part of openapi.api;
 class StatsOptions {
   /// Returns a new [StatsOptions] instance.
   StatsOptions({
+    required this.enableRtcStats,
     required this.reportingIntervalMs,
   });
+
+  bool enableRtcStats;
 
   int reportingIntervalMs;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StatsOptions && other.reportingIntervalMs == reportingIntervalMs;
+      other is StatsOptions &&
+          other.enableRtcStats == enableRtcStats &&
+          other.reportingIntervalMs == reportingIntervalMs;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (reportingIntervalMs.hashCode);
+      (enableRtcStats.hashCode) + (reportingIntervalMs.hashCode);
 
   @override
-  String toString() => 'StatsOptions[reportingIntervalMs=$reportingIntervalMs]';
+  String toString() =>
+      'StatsOptions[enableRtcStats=$enableRtcStats, reportingIntervalMs=$reportingIntervalMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    json[r'enable_rtc_stats'] = this.enableRtcStats;
     json[r'reporting_interval_ms'] = this.reportingIntervalMs;
     return json;
   }
@@ -58,6 +65,7 @@ class StatsOptions {
       }());
 
       return StatsOptions(
+        enableRtcStats: mapValueOfType<bool>(json, r'enable_rtc_stats')!,
         reportingIntervalMs:
             mapValueOfType<int>(json, r'reporting_interval_ms')!,
       );
@@ -116,6 +124,7 @@ class StatsOptions {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'enable_rtc_stats',
     'reporting_interval_ms',
   };
 }

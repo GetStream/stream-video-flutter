@@ -43,12 +43,15 @@ class OwnCapability {
   static const startBroadcastCall = OwnCapability._(r'start-broadcast-call');
   static const startClosedCaptionsCall =
       OwnCapability._(r'start-closed-captions-call');
+  static const startFrameRecordCall =
+      OwnCapability._(r'start-frame-record-call');
   static const startRecordCall = OwnCapability._(r'start-record-call');
   static const startTranscriptionCall =
       OwnCapability._(r'start-transcription-call');
   static const stopBroadcastCall = OwnCapability._(r'stop-broadcast-call');
   static const stopClosedCaptionsCall =
       OwnCapability._(r'stop-closed-captions-call');
+  static const stopFrameRecordCall = OwnCapability._(r'stop-frame-record-call');
   static const stopRecordCall = OwnCapability._(r'stop-record-call');
   static const stopTranscriptionCall =
       OwnCapability._(r'stop-transcription-call');
@@ -78,10 +81,12 @@ class OwnCapability {
     sendVideo,
     startBroadcastCall,
     startClosedCaptionsCall,
+    startFrameRecordCall,
     startRecordCall,
     startTranscriptionCall,
     stopBroadcastCall,
     stopClosedCaptionsCall,
+    stopFrameRecordCall,
     stopRecordCall,
     stopTranscriptionCall,
     updateCall,
@@ -167,6 +172,8 @@ class OwnCapabilityTypeTransformer {
           return OwnCapability.startBroadcastCall;
         case r'start-closed-captions-call':
           return OwnCapability.startClosedCaptionsCall;
+        case r'start-frame-record-call':
+          return OwnCapability.startFrameRecordCall;
         case r'start-record-call':
           return OwnCapability.startRecordCall;
         case r'start-transcription-call':
@@ -175,6 +182,8 @@ class OwnCapabilityTypeTransformer {
           return OwnCapability.stopBroadcastCall;
         case r'stop-closed-captions-call':
           return OwnCapability.stopClosedCaptionsCall;
+        case r'stop-frame-record-call':
+          return OwnCapability.stopFrameRecordCall;
         case r'stop-record-call':
           return OwnCapability.stopRecordCall;
         case r'stop-transcription-call':

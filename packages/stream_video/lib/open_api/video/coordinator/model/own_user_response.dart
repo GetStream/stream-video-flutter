@@ -25,10 +25,11 @@ class OwnUserResponse {
     this.lastActive,
     this.name,
     this.privacySettings,
-    this.pushNotifications,
+    this.pushPreferences,
     this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
+    this.teamsRole = const {},
     required this.updatedAt,
   });
 
@@ -98,7 +99,7 @@ class OwnUserResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PushNotificationSettingsResponse? pushNotifications;
+  PushPreferences? pushPreferences;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -111,6 +112,8 @@ class OwnUserResponse {
   String role;
 
   List<String> teams;
+
+  Map<String, String> teamsRole;
 
   DateTime updatedAt;
 
@@ -130,10 +133,11 @@ class OwnUserResponse {
           other.lastActive == lastActive &&
           other.name == name &&
           other.privacySettings == privacySettings &&
-          other.pushNotifications == pushNotifications &&
+          other.pushPreferences == pushPreferences &&
           other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
           other.role == role &&
           _deepEquality.equals(other.teams, teams) &&
+          _deepEquality.equals(other.teamsRole, teamsRole) &&
           other.updatedAt == updatedAt;
 
   @override
@@ -151,17 +155,18 @@ class OwnUserResponse {
       (lastActive == null ? 0 : lastActive!.hashCode) +
       (name == null ? 0 : name!.hashCode) +
       (privacySettings == null ? 0 : privacySettings!.hashCode) +
-      (pushNotifications == null ? 0 : pushNotifications!.hashCode) +
+      (pushPreferences == null ? 0 : pushPreferences!.hashCode) +
       (revokeTokensIssuedBefore == null
           ? 0
           : revokeTokensIssuedBefore!.hashCode) +
       (role.hashCode) +
       (teams.hashCode) +
+      (teamsRole.hashCode) +
       (updatedAt.hashCode);
 
   @override
   String toString() =>
-      'OwnUserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+      'OwnUserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, pushPreferences=$pushPreferences, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -201,10 +206,10 @@ class OwnUserResponse {
     } else {
       json[r'privacy_settings'] = null;
     }
-    if (this.pushNotifications != null) {
-      json[r'push_notifications'] = this.pushNotifications;
+    if (this.pushPreferences != null) {
+      json[r'push_preferences'] = this.pushPreferences;
     } else {
-      json[r'push_notifications'] = null;
+      json[r'push_preferences'] = null;
     }
     if (this.revokeTokensIssuedBefore != null) {
       json[r'revoke_tokens_issued_before'] =
@@ -214,6 +219,7 @@ class OwnUserResponse {
     }
     json[r'role'] = this.role;
     json[r'teams'] = this.teams;
+    json[r'teams_role'] = this.teamsRole;
     json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
@@ -255,8 +261,7 @@ class OwnUserResponse {
         lastActive: mapDateTime(json, r'last_active', r''),
         name: mapValueOfType<String>(json, r'name'),
         privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
-        pushNotifications: PushNotificationSettingsResponse.fromJson(
-            json[r'push_notifications']),
+        pushPreferences: PushPreferences.fromJson(json[r'push_preferences']),
         revokeTokensIssuedBefore:
             mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
@@ -265,6 +270,8 @@ class OwnUserResponse {
                 .cast<String>()
                 .toList(growable: false)
             : const [],
+        teamsRole:
+            mapCastOfType<String, String>(json, r'teams_role') ?? const {},
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }

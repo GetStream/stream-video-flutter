@@ -27,6 +27,7 @@ class CallRejectedEvent {
 
   DateTime createdAt;
 
+  /// Provides information about why the call was rejected. You can provide any value, but the Stream API and SDKs use these default values: rejected, cancel, timeout and busy
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated

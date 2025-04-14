@@ -173,7 +173,7 @@ class ProductvideoApi {
 
   /// Collect user feedback
   ///
-  ///
+  ///   Sends events: - call.user_feedback_submitted
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -183,20 +183,16 @@ class ProductvideoApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [String] session (required):
-  ///
   /// * [CollectUserFeedbackRequest] collectUserFeedbackRequest (required):
   Future<Response> collectUserFeedbackWithHttpInfo(
     String type,
     String id,
-    String session,
     CollectUserFeedbackRequest collectUserFeedbackRequest,
   ) async {
     // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/feedback/{session}'
+    final path = r'/video/call/{type}/{id}/feedback'
         .replaceAll('{type}', type)
-        .replaceAll('{id}', id)
-        .replaceAll('{session}', session);
+        .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = collectUserFeedbackRequest;
@@ -220,7 +216,7 @@ class ProductvideoApi {
 
   /// Collect user feedback
   ///
-  ///
+  ///   Sends events: - call.user_feedback_submitted
   ///
   /// Parameters:
   ///
@@ -228,19 +224,15 @@ class ProductvideoApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [String] session (required):
-  ///
   /// * [CollectUserFeedbackRequest] collectUserFeedbackRequest (required):
   Future<CollectUserFeedbackResponse?> collectUserFeedback(
     String type,
     String id,
-    String session,
     CollectUserFeedbackRequest collectUserFeedbackRequest,
   ) async {
     final response = await collectUserFeedbackWithHttpInfo(
       type,
       id,
-      session,
       collectUserFeedbackRequest,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
@@ -2266,6 +2258,88 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Start frame recording
+  ///
+  /// Starts frame by frame recording  Sends events: - call.frame_recording_started
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [StartFrameRecordingRequest] startFrameRecordingRequest (required):
+  ///   StartFrameRecordingRequest
+  Future<Response> startFrameRecordingWithHttpInfo(
+    String type,
+    String id,
+    StartFrameRecordingRequest startFrameRecordingRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/start_frame_recording'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = startFrameRecordingRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Start frame recording
+  ///
+  /// Starts frame by frame recording  Sends events: - call.frame_recording_started
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [StartFrameRecordingRequest] startFrameRecordingRequest (required):
+  ///   StartFrameRecordingRequest
+  Future<StartFrameRecordingResponse?> startFrameRecording(
+    String type,
+    String id,
+    StartFrameRecordingRequest startFrameRecordingRequest,
+  ) async {
+    final response = await startFrameRecordingWithHttpInfo(
+      type,
+      id,
+      startFrameRecordingRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartFrameRecordingResponse',
+      ) as StartFrameRecordingResponse;
+    }
+    return null;
+  }
+
   /// Start HLS broadcasting
   ///
   /// Starts HLS broadcasting
@@ -2732,6 +2806,79 @@ class ProductvideoApi {
         await _decodeBodyBytes(response),
         'StopClosedCaptionsResponse',
       ) as StopClosedCaptionsResponse;
+    }
+    return null;
+  }
+
+  /// Stop frame recording
+  ///
+  /// Stops frame recording  Sends events: - call.frame_recording_stopped
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<Response> stopFrameRecordingWithHttpInfo(
+    String type,
+    String id,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/stop_frame_recording'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Stop frame recording
+  ///
+  /// Stops frame recording  Sends events: - call.frame_recording_stopped
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<StopFrameRecordingResponse?> stopFrameRecording(
+    String type,
+    String id,
+  ) async {
+    final response = await stopFrameRecordingWithHttpInfo(
+      type,
+      id,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopFrameRecordingResponse',
+      ) as StopFrameRecordingResponse;
     }
     return null;
   }

@@ -13,11 +13,20 @@ part of openapi.api;
 class UserStats {
   /// Returns a new [UserStats] instance.
   UserStats({
+    this.feedback,
     required this.info,
     required this.minEventTs,
     this.rating,
     this.sessionStats = const [],
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? feedback;
 
   UserInfoResponse info;
 
@@ -37,6 +46,7 @@ class UserStats {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UserStats &&
+          other.feedback == feedback &&
           other.info == info &&
           other.minEventTs == minEventTs &&
           other.rating == rating &&
@@ -45,6 +55,7 @@ class UserStats {
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
+      (feedback == null ? 0 : feedback!.hashCode) +
       (info.hashCode) +
       (minEventTs.hashCode) +
       (rating == null ? 0 : rating!.hashCode) +
@@ -52,10 +63,15 @@ class UserStats {
 
   @override
   String toString() =>
-      'UserStats[info=$info, minEventTs=$minEventTs, rating=$rating, sessionStats=$sessionStats]';
+      'UserStats[feedback=$feedback, info=$info, minEventTs=$minEventTs, rating=$rating, sessionStats=$sessionStats]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.feedback != null) {
+      json[r'feedback'] = this.feedback;
+    } else {
+      json[r'feedback'] = null;
+    }
     json[r'info'] = this.info;
     json[r'min_event_ts'] = this.minEventTs;
     if (this.rating != null) {
@@ -88,6 +104,7 @@ class UserStats {
       }());
 
       return UserStats(
+        feedback: mapValueOfType<String>(json, r'feedback'),
         info: UserInfoResponse.fromJson(json[r'info'])!,
         minEventTs: mapValueOfType<int>(json, r'min_event_ts')!,
         rating: mapValueOfType<int>(json, r'rating'),

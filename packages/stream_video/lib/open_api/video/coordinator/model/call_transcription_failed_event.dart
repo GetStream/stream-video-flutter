@@ -15,12 +15,15 @@ class CallTranscriptionFailedEvent {
   CallTranscriptionFailedEvent({
     required this.callCid,
     required this.createdAt,
+    required this.egressId,
     this.type = 'call.transcription_failed',
   });
 
   String callCid;
 
   DateTime createdAt;
+
+  String egressId;
 
   /// The type of event: \"call.transcription_failed\" in this case
   String type;
@@ -31,21 +34,26 @@ class CallTranscriptionFailedEvent {
       other is CallTranscriptionFailedEvent &&
           other.callCid == callCid &&
           other.createdAt == createdAt &&
+          other.egressId == egressId &&
           other.type == type;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (callCid.hashCode) + (createdAt.hashCode) + (type.hashCode);
+      (callCid.hashCode) +
+      (createdAt.hashCode) +
+      (egressId.hashCode) +
+      (type.hashCode);
 
   @override
   String toString() =>
-      'CallTranscriptionFailedEvent[callCid=$callCid, createdAt=$createdAt, type=$type]';
+      'CallTranscriptionFailedEvent[callCid=$callCid, createdAt=$createdAt, egressId=$egressId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call_cid'] = this.callCid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'egress_id'] = this.egressId;
     json[r'type'] = this.type;
     return json;
   }
@@ -73,6 +81,7 @@ class CallTranscriptionFailedEvent {
       return CallTranscriptionFailedEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        egressId: mapValueOfType<String>(json, r'egress_id')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -132,6 +141,7 @@ class CallTranscriptionFailedEvent {
   static const requiredKeys = <String>{
     'call_cid',
     'created_at',
+    'egress_id',
     'type',
   };
 }

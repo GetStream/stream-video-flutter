@@ -10,30 +10,46 @@
 
 part of openapi.api;
 
-class UserEventPayload {
-  /// Returns a new [UserEventPayload] instance.
-  UserEventPayload({
-    this.blockedUserIds = const [],
-    required this.createdAt,
+class User {
+  /// Returns a new [User] instance.
+  User({
+    this.banExpires,
+    required this.banned,
+    this.createdAt,
     this.custom = const {},
     this.deactivatedAt,
     this.deletedAt,
     required this.id,
-    this.image,
     this.invisible,
-    required this.language,
+    this.language,
     this.lastActive,
-    this.name,
+    this.lastEngagedAt,
+    required this.online,
     this.privacySettings,
     this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
-    required this.updatedAt,
+    this.teamsRole = const {},
+    this.updatedAt,
   });
 
-  List<String> blockedUserIds;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? banExpires;
 
-  DateTime createdAt;
+  bool banned;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? createdAt;
 
   Map<String, Object> custom;
 
@@ -61,7 +77,7 @@ class UserEventPayload {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? image;
+  bool? invisible;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -69,9 +85,7 @@ class UserEventPayload {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  bool? invisible;
-
-  String language;
+  String? language;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -87,7 +101,9 @@ class UserEventPayload {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? name;
+  DateTime? lastEngagedAt;
+
+  bool online;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -95,7 +111,7 @@ class UserEventPayload {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Object? privacySettings;
+  PrivacySettings? privacySettings;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -109,59 +125,80 @@ class UserEventPayload {
 
   List<String> teams;
 
-  DateTime updatedAt;
+  Map<String, String> teamsRole;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? updatedAt;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserEventPayload &&
-          _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
+      other is User &&
+          other.banExpires == banExpires &&
+          other.banned == banned &&
           other.createdAt == createdAt &&
           _deepEquality.equals(other.custom, custom) &&
           other.deactivatedAt == deactivatedAt &&
           other.deletedAt == deletedAt &&
           other.id == id &&
-          other.image == image &&
           other.invisible == invisible &&
           other.language == language &&
           other.lastActive == lastActive &&
-          other.name == name &&
+          other.lastEngagedAt == lastEngagedAt &&
+          other.online == online &&
           other.privacySettings == privacySettings &&
           other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
           other.role == role &&
           _deepEquality.equals(other.teams, teams) &&
+          _deepEquality.equals(other.teamsRole, teamsRole) &&
           other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (blockedUserIds.hashCode) +
-      (createdAt.hashCode) +
+      (banExpires == null ? 0 : banExpires!.hashCode) +
+      (banned.hashCode) +
+      (createdAt == null ? 0 : createdAt!.hashCode) +
       (custom.hashCode) +
       (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
       (deletedAt == null ? 0 : deletedAt!.hashCode) +
       (id.hashCode) +
-      (image == null ? 0 : image!.hashCode) +
       (invisible == null ? 0 : invisible!.hashCode) +
-      (language.hashCode) +
+      (language == null ? 0 : language!.hashCode) +
       (lastActive == null ? 0 : lastActive!.hashCode) +
-      (name == null ? 0 : name!.hashCode) +
+      (lastEngagedAt == null ? 0 : lastEngagedAt!.hashCode) +
+      (online.hashCode) +
       (privacySettings == null ? 0 : privacySettings!.hashCode) +
       (revokeTokensIssuedBefore == null
           ? 0
           : revokeTokensIssuedBefore!.hashCode) +
       (role.hashCode) +
       (teams.hashCode) +
-      (updatedAt.hashCode);
+      (teamsRole.hashCode) +
+      (updatedAt == null ? 0 : updatedAt!.hashCode);
 
   @override
   String toString() =>
-      'UserEventPayload[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, name=$name, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+      'User[banExpires=$banExpires, banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, lastEngagedAt=$lastEngagedAt, online=$online, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'blocked_user_ids'] = this.blockedUserIds;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    if (this.banExpires != null) {
+      json[r'ban_expires'] = this.banExpires!.toUtc().toIso8601String();
+    } else {
+      json[r'ban_expires'] = null;
+    }
+    json[r'banned'] = this.banned;
+    if (this.createdAt != null) {
+      json[r'created_at'] = this.createdAt!.toUtc().toIso8601String();
+    } else {
+      json[r'created_at'] = null;
+    }
     json[r'custom'] = this.custom;
     if (this.deactivatedAt != null) {
       json[r'deactivated_at'] = this.deactivatedAt!.toUtc().toIso8601String();
@@ -174,27 +211,27 @@ class UserEventPayload {
       json[r'deleted_at'] = null;
     }
     json[r'id'] = this.id;
-    if (this.image != null) {
-      json[r'image'] = this.image;
-    } else {
-      json[r'image'] = null;
-    }
     if (this.invisible != null) {
       json[r'invisible'] = this.invisible;
     } else {
       json[r'invisible'] = null;
     }
-    json[r'language'] = this.language;
+    if (this.language != null) {
+      json[r'language'] = this.language;
+    } else {
+      json[r'language'] = null;
+    }
     if (this.lastActive != null) {
       json[r'last_active'] = this.lastActive!.toUtc().toIso8601String();
     } else {
       json[r'last_active'] = null;
     }
-    if (this.name != null) {
-      json[r'name'] = this.name;
+    if (this.lastEngagedAt != null) {
+      json[r'last_engaged_at'] = this.lastEngagedAt!.toUtc().toIso8601String();
     } else {
-      json[r'name'] = null;
+      json[r'last_engaged_at'] = null;
     }
+    json[r'online'] = this.online;
     if (this.privacySettings != null) {
       json[r'privacy_settings'] = this.privacySettings;
     } else {
@@ -208,14 +245,19 @@ class UserEventPayload {
     }
     json[r'role'] = this.role;
     json[r'teams'] = this.teams;
-    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+    json[r'teams_role'] = this.teamsRole;
+    if (this.updatedAt != null) {
+      json[r'updated_at'] = this.updatedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'updated_at'] = null;
+    }
     return json;
   }
 
-  /// Returns a new [UserEventPayload] instance and imports its values from
+  /// Returns a new [User] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static UserEventPayload? fromJson(dynamic value) {
+  static User? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -225,30 +267,27 @@ class UserEventPayload {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "UserEventPayload[$key]" is missing from JSON.');
+              'Required key "User[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "UserEventPayload[$key]" has a null value in JSON.');
+              'Required key "User[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return UserEventPayload(
-        blockedUserIds: json[r'blocked_user_ids'] is Iterable
-            ? (json[r'blocked_user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        createdAt: mapDateTime(json, r'created_at', r'')!,
+      return User(
+        banExpires: mapDateTime(json, r'ban_expires', r''),
+        banned: mapValueOfType<bool>(json, r'banned')!,
+        createdAt: mapDateTime(json, r'created_at', r''),
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
-        image: mapValueOfType<String>(json, r'image'),
         invisible: mapValueOfType<bool>(json, r'invisible'),
-        language: mapValueOfType<String>(json, r'language')!,
+        language: mapValueOfType<String>(json, r'language'),
         lastActive: mapDateTime(json, r'last_active', r''),
-        name: mapValueOfType<String>(json, r'name'),
-        privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
+        lastEngagedAt: mapDateTime(json, r'last_engaged_at', r''),
+        online: mapValueOfType<bool>(json, r'online')!,
+        privacySettings: PrivacySettings.fromJson(json[r'privacy_settings']),
         revokeTokensIssuedBefore:
             mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
@@ -257,20 +296,21 @@ class UserEventPayload {
                 .cast<String>()
                 .toList(growable: false)
             : const [],
-        updatedAt: mapDateTime(json, r'updated_at', r'')!,
+        teamsRole: mapCastOfType<String, String>(json, r'teams_role')!,
+        updatedAt: mapDateTime(json, r'updated_at', r''),
       );
     }
     return null;
   }
 
-  static List<UserEventPayload> listFromJson(
+  static List<User> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <UserEventPayload>[];
+    final result = <User>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = UserEventPayload.fromJson(row);
+        final value = User.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -279,12 +319,12 @@ class UserEventPayload {
     return result.toList(growable: growable);
   }
 
-  static Map<String, UserEventPayload> mapFromJson(dynamic json) {
-    final map = <String, UserEventPayload>{};
+  static Map<String, User> mapFromJson(dynamic json) {
+    final map = <String, User>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UserEventPayload.fromJson(entry.value);
+        final value = User.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -293,17 +333,17 @@ class UserEventPayload {
     return map;
   }
 
-  // maps a json object with a list of UserEventPayload-objects as value to a dart map
-  static Map<String, List<UserEventPayload>> mapListFromJson(
+  // maps a json object with a list of User-objects as value to a dart map
+  static Map<String, List<User>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<UserEventPayload>>{};
+    final map = <String, List<User>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserEventPayload.listFromJson(
+        map[entry.key] = User.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -314,13 +354,11 @@ class UserEventPayload {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'blocked_user_ids',
-    'created_at',
+    'banned',
     'custom',
     'id',
-    'language',
+    'online',
     'role',
-    'teams',
-    'updated_at',
+    'teams_role',
   };
 }

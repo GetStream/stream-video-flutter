@@ -232,7 +232,6 @@ abstract class CoordinatorClient {
   Future<Result<CallMetadata>> goLive({
     required StreamCallCid callCid,
     bool? startHls,
-    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
     bool? startClosedCaption,
@@ -262,6 +261,9 @@ abstract class CoordinatorClient {
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
     StreamLimitsSettings? limits,
+    StreamBroadcastingSettings? broadcasting,
+    StreamSessionSettings? session,
+    StreamFrameRecordingSettings? frameRecording,
   });
 
   Future<Result<GuestCreatedData>> loadGuest({

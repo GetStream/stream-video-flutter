@@ -18,7 +18,7 @@ class CollectUserFeedbackRequest {
     this.reason,
     required this.sdk,
     required this.sdkVersion,
-    required this.userSessionId,
+    this.userSessionId,
   });
 
   Map<String, Object> custom;
@@ -39,7 +39,13 @@ class CollectUserFeedbackRequest {
 
   String sdkVersion;
 
-  String userSessionId;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? userSessionId;
 
   @override
   bool operator ==(Object other) =>
@@ -60,7 +66,7 @@ class CollectUserFeedbackRequest {
       (reason == null ? 0 : reason!.hashCode) +
       (sdk.hashCode) +
       (sdkVersion.hashCode) +
-      (userSessionId.hashCode);
+      (userSessionId == null ? 0 : userSessionId!.hashCode);
 
   @override
   String toString() =>
@@ -77,7 +83,11 @@ class CollectUserFeedbackRequest {
     }
     json[r'sdk'] = this.sdk;
     json[r'sdk_version'] = this.sdkVersion;
-    json[r'user_session_id'] = this.userSessionId;
+    if (this.userSessionId != null) {
+      json[r'user_session_id'] = this.userSessionId;
+    } else {
+      json[r'user_session_id'] = null;
+    }
     return json;
   }
 
@@ -107,7 +117,7 @@ class CollectUserFeedbackRequest {
         reason: mapValueOfType<String>(json, r'reason'),
         sdk: mapValueOfType<String>(json, r'sdk')!,
         sdkVersion: mapValueOfType<String>(json, r'sdk_version')!,
-        userSessionId: mapValueOfType<String>(json, r'user_session_id')!,
+        userSessionId: mapValueOfType<String>(json, r'user_session_id'),
       );
     }
     return null;
@@ -167,6 +177,5 @@ class CollectUserFeedbackRequest {
     'rating',
     'sdk',
     'sdk_version',
-    'user_session_id',
   };
 }

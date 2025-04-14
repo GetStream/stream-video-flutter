@@ -469,18 +469,21 @@ class CoordinatorCallBroadcastingStartedEvent extends CoordinatorCallEvent {
     required this.callCid,
     required this.hlsPlaylistUrl,
     required this.createdAt,
+    required this.metadata,
   });
 
   @override
   final StreamCallCid callCid;
   final String hlsPlaylistUrl;
   final DateTime createdAt;
+  final CallMetadata metadata;
 
   @override
   List<Object?> get props => [
         ...super.props,
         hlsPlaylistUrl,
         createdAt,
+        metadata,
       ];
 }
 
@@ -749,6 +752,308 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
         speakerId,
         text,
         user,
+      ];
+}
+
+class CoordinatorCallLiveStartedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallLiveStartedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+      ];
+}
+
+class CoordinatorCallMemberAddedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallMemberAddedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.members,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final List<CallMember> members;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        members,
+        metadata,
+      ];
+}
+
+class CoordinatorCallMemberRemovedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallMemberRemovedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.metadata,
+    required this.removedMemberIds,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final List<String> removedMemberIds;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        removedMemberIds,
+      ];
+}
+
+class CoordinatorCallMemberUpdatedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallMemberUpdatedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.members,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final List<CallMember> members;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        members,
+        metadata,
+      ];
+}
+
+class CoordinatorCallMemberUpdatedPermissionEvent extends CoordinatorCallEvent {
+  const CoordinatorCallMemberUpdatedPermissionEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.capabilitiesByRole,
+    required this.updatedMembers,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final List<CallMember> updatedMembers;
+  final Map<String, List<String>> capabilitiesByRole;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        capabilitiesByRole,
+        updatedMembers,
+        metadata,
+      ];
+}
+
+class CoordinatorCallFrameRecordingStartedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallFrameRecordingStartedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.metadata,
+    required this.egressId,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final String egressId;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        egressId,
+      ];
+}
+
+class CoordinatorCallFrameRecordingStoppedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallFrameRecordingStoppedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.metadata,
+    required this.egressId,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final String egressId;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        egressId,
+      ];
+}
+
+class CoordinatorCallFrameRecordingFailedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallFrameRecordingFailedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.metadata,
+    required this.egressId,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final String egressId;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        egressId,
+      ];
+}
+
+class CoordinatorCallFrameRecordingReadyEvent extends CoordinatorCallEvent {
+  const CoordinatorCallFrameRecordingReadyEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.url,
+    required this.capturedAt,
+    required this.egressId,
+    required this.sessionId,
+    required this.trackType,
+    required this.usersInFrame,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final DateTime capturedAt;
+  final String url;
+  final String egressId;
+  final String sessionId;
+  final String trackType;
+  final Map<String, CallUser> usersInFrame;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        url,
+        capturedAt,
+        egressId,
+        sessionId,
+        trackType,
+        usersInFrame,
+      ];
+}
+
+class CoordinatorCallNotificationEvent extends CoordinatorCallEvent {
+  const CoordinatorCallNotificationEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.user,
+    required this.members,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final List<CallMember> members;
+  final CallUser user;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        user,
+        members,
+        metadata,
+      ];
+}
+
+class CoordinatorCallUserMutedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallUserMutedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.fromUserId,
+    required this.mutedUserIds,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String fromUserId;
+  final List<String> mutedUserIds;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        fromUserId,
+        mutedUserIds,
+      ];
+}
+
+class CoordinatorCallRecordingReadyEvent extends CoordinatorCallEvent {
+  const CoordinatorCallRecordingReadyEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.egressId,
+    required this.endTime,
+    required this.filename,
+    required this.sessionId,
+    required this.startTime,
+    required this.url,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String egressId;
+  final DateTime endTime;
+  final String filename;
+  final String sessionId;
+  final DateTime startTime;
+  final String url;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        egressId,
+        endTime,
+        filename,
+        sessionId,
+        startTime,
+        url,
       ];
 }
 

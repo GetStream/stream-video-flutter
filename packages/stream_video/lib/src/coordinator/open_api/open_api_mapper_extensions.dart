@@ -8,6 +8,7 @@ import '../models/coordinator_events.dart';
 import 'event/event_type.dart';
 import 'event/open_api_event.dart';
 import 'open_api_extensions.dart';
+import '../../../../open_api/video/coordinator/api.dart' as open;
 
 extension WebsocketEventMapperExt on OpenApiEvent {
   /// Returns [CoordinatorEvent].
@@ -186,6 +187,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           hlsPlaylistUrl: event.hlsPlaylistUrl,
           createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
         );
       case EventType.callBroadcastingStopped:
         final event = callBroadcastingStopped!;
@@ -200,25 +202,46 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: event.createdAt,
         );
       case EventType.callLiveStarted:
-        final event = callLiveStarted;
-        // TODO: Handle this case.
-        break;
+        final event = callLiveStarted!;
+        return CoordinatorCallLiveStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+        );
       case EventType.callMemberAdded:
-        final event = callMemberAdded;
-        // TODO: Handle this case.
-        break;
+        final event = callMemberAdded!;
+        return CoordinatorCallMemberAddedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          members: event.members.map((it) => it.toCallMember()).toList(),
+        );
       case EventType.callMemberRemoved:
-        final event = callMemberRemoved;
-        // TODO: Handle this case.
-        break;
+        final event = callMemberRemoved!;
+        final member = event.members.first;
+        return CoordinatorCallMemberRemovedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          removedMemberIds: event.members,
+        );
       case EventType.callMemberUpdated:
-        final event = callMemberUpdated;
-        // TODO: Handle this case.
-        break;
+        final event = callMemberUpdated!;
+        return CoordinatorCallMemberUpdatedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          members: event.members.map((it) => it.toCallMember()).toList(),
+        );
       case EventType.callMemberUpdatedPermission:
-        final event = callMemberUpdatedPermission;
-        // TODO: Handle this case.
-        break;
+        final event = callMemberUpdatedPermission!;
+        return CoordinatorCallMemberUpdatedPermissionEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          updatedMembers: event.members.map((it) => it.toCallMember()).toList(),
+          capabilitiesByRole: event.capabilitiesByRole,
+        );
       case EventType.callUserBlocked:
         final event = callUserBlocked!;
 
@@ -293,15 +316,72 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           text: event.closedCaption.text,
           user: event.closedCaption.user.toCallUser(),
         );
+      case EventType.callFrameRecordingStarted:
+        final event = callFrameRecordingStarted!;
+        return CoordinatorCallFrameRecordingStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          egressId: event.egressId,
+        );
+      case EventType.callFrameRecordingStopped:
+        final event = callFrameRecordingStopped!;
+        return CoordinatorCallFrameRecordingStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          egressId: event.egressId,
+        );
+      case EventType.callFrameRecordingFailed:
+        final event = callFrameRecordingFailed!;
+        return CoordinatorCallFrameRecordingFailedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          egressId: event.egressId,
+        );
+      case EventType.callFrameRecordingReady:
+        final event = callFrameRecordingFrameReady!;
+        return CoordinatorCallFrameRecordingReadyEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          url: event.url,
+          capturedAt: event.capturedAt,
+          egressId: event.egressId,
+          sessionId: event.sessionId,
+          trackType: event.trackType,
+          usersInFrame: event.users
+              .map((key, value) => MapEntry(key, value.toCallUser())),
+        );
       case EventType.callNotification:
-        // TODO: Handle event
-        break;
+        final event = callNotification!;
+        return CoordinatorCallNotificationEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          user: event.user.toCallUser(),
+          members: event.members.map((it) => it.toCallMember()).toList(),
+          metadata: event.call.toCallMetadata(),
+        );
       case EventType.callUserMuted:
-        // TODO: Handle event
-        break;
+        final event = callUserMuted!;
+        return CoordinatorCallUserMutedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          fromUserId: event.fromUserId,
+          mutedUserIds: event.mutedUserIds,
+        );
       case EventType.callRecordingReady:
-        // TODO: Handle event
-        break;
+        final event = callRecordingReady!;
+        return CoordinatorCallRecordingReadyEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          url: event.callRecording.url,
+          endTime: event.callRecording.endTime,
+          filename: event.callRecording.filename,
+          sessionId: event.callRecording.sessionId,
+          startTime: event.callRecording.startTime,
+          egressId: event.egressId,
+        );
       case EventType.custom:
         final event = custom!;
 

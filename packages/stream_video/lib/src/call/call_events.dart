@@ -381,6 +381,297 @@ class StreamCallEndedEvent extends StreamCallEvent {
       ];
 }
 
+/// Event that is triggered when a call goes live.
+class StreamCallLiveStartedEvent extends StreamCallEvent {
+  const StreamCallLiveStartedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.metadata,
+  });
+
+  final DateTime createdAt;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+      ];
+}
+
+/// Event that is triggered when members are added to a call.
+class StreamCallMemberAddedEvent extends StreamCallEvent {
+  const StreamCallMemberAddedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.members,
+    required this.metadata,
+  });
+
+  final DateTime createdAt;
+  final List<CallMember> members;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        members,
+        metadata,
+      ];
+}
+
+/// Event that is triggered when members are removed from a call.
+class StreamCallMemberRemovedEvent extends StreamCallEvent {
+  const StreamCallMemberRemovedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.metadata,
+    required this.removedMemberIds,
+  });
+
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final List<String> removedMemberIds;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        removedMemberIds,
+      ];
+}
+
+/// Event that is triggered when members are updated in a call.
+class StreamCallMemberUpdatedEvent extends StreamCallEvent {
+  const StreamCallMemberUpdatedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.members,
+    required this.metadata,
+  });
+
+  final DateTime createdAt;
+  final List<CallMember> members;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        members,
+        metadata,
+      ];
+}
+
+/// Event that is triggered when member permissions are updated in a call.
+class StreamCallMemberUpdatedPermissionEvent extends StreamCallEvent {
+  const StreamCallMemberUpdatedPermissionEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.updatedMembers,
+    required this.capabilitiesByRole,
+    required this.metadata,
+  });
+
+  final DateTime createdAt;
+  final List<CallMember> updatedMembers;
+  final Map<String, List<String>> capabilitiesByRole;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        updatedMembers,
+        capabilitiesByRole,
+        metadata,
+      ];
+}
+
+/// Event that is triggered when frame recording starts.
+class StreamCallFrameRecordingStartedEvent extends StreamCallEvent {
+  const StreamCallFrameRecordingStartedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.metadata,
+    required this.egressId,
+  });
+
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final String egressId;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        egressId,
+      ];
+}
+
+/// Event that is triggered when frame recording stops.
+class StreamCallFrameRecordingStoppedEvent extends StreamCallEvent {
+  const StreamCallFrameRecordingStoppedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.metadata,
+    required this.egressId,
+  });
+
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final String egressId;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        egressId,
+      ];
+}
+
+/// Event that is triggered when frame recording fails.
+class StreamCallFrameRecordingFailedEvent extends StreamCallEvent {
+  const StreamCallFrameRecordingFailedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.metadata,
+    required this.egressId,
+  });
+
+  final DateTime createdAt;
+  final CallMetadata metadata;
+  final String egressId;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+        egressId,
+      ];
+}
+
+/// Event that is triggered when a frame recording is ready.
+class StreamCallFrameRecordingReadyEvent extends StreamCallEvent {
+  const StreamCallFrameRecordingReadyEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.url,
+    required this.capturedAt,
+    required this.egressId,
+    required this.sessionId,
+    required this.trackType,
+    required this.usersInFrame,
+  });
+
+  final DateTime createdAt;
+  final String url;
+  final DateTime capturedAt;
+  final String egressId;
+  final String sessionId;
+  final String trackType;
+  final Map<String, CallUser> usersInFrame;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        url,
+        capturedAt,
+        egressId,
+        sessionId,
+        trackType,
+        usersInFrame,
+      ];
+}
+
+/// Event that is triggered for call notifications.
+class StreamCallNotificationEvent extends StreamCallEvent {
+  const StreamCallNotificationEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.user,
+    required this.members,
+    required this.metadata,
+  });
+
+  final DateTime createdAt;
+  final CallUser user;
+  final List<CallMember> members;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        user,
+        members,
+        metadata,
+      ];
+}
+
+/// Event that is triggered when users are muted.
+class StreamCallUserMutedEvent extends StreamCallEvent {
+  const StreamCallUserMutedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.fromUserId,
+    required this.mutedUserIds,
+  });
+
+  final DateTime createdAt;
+  final String fromUserId;
+  final List<String> mutedUserIds;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        fromUserId,
+        mutedUserIds,
+      ];
+}
+
+/// Event that is triggered when a recording is ready.
+class StreamCallRecordingReadyEvent extends StreamCallEvent {
+  const StreamCallRecordingReadyEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.egressId,
+    required this.endTime,
+    required this.filename,
+    required this.sessionId,
+    required this.startTime,
+    required this.url,
+  });
+
+  final DateTime createdAt;
+  final String egressId;
+  final DateTime endTime;
+  final String filename;
+  final String sessionId;
+  final DateTime startTime;
+  final String url;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        egressId,
+        endTime,
+        filename,
+        sessionId,
+        startTime,
+        url,
+      ];
+}
+
 /// Event that is triggered when the call is accepted.
 class StreamCallAcceptedEvent extends StreamCallEvent {
   const StreamCallAcceptedEvent(
@@ -1197,6 +1488,96 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           user: event.user,
           participant: event.participant,
           duration: event.duration,
+        ),
+      final CoordinatorCallLiveStartedEvent event => StreamCallLiveStartedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          metadata: event.metadata,
+        ),
+      final CoordinatorCallMemberAddedEvent event => StreamCallMemberAddedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          members: event.members,
+          metadata: event.metadata,
+        ),
+      final CoordinatorCallMemberRemovedEvent event =>
+        StreamCallMemberRemovedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          metadata: event.metadata,
+          removedMemberIds: event.removedMemberIds,
+        ),
+      final CoordinatorCallMemberUpdatedEvent event =>
+        StreamCallMemberUpdatedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          members: event.members,
+          metadata: event.metadata,
+        ),
+      final CoordinatorCallMemberUpdatedPermissionEvent event =>
+        StreamCallMemberUpdatedPermissionEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          updatedMembers: event.updatedMembers,
+          capabilitiesByRole: event.capabilitiesByRole,
+          metadata: event.metadata,
+        ),
+      final CoordinatorCallFrameRecordingStartedEvent event =>
+        StreamCallFrameRecordingStartedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          metadata: event.metadata,
+          egressId: event.egressId,
+        ),
+      final CoordinatorCallFrameRecordingStoppedEvent event =>
+        StreamCallFrameRecordingStoppedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          metadata: event.metadata,
+          egressId: event.egressId,
+        ),
+      final CoordinatorCallFrameRecordingFailedEvent event =>
+        StreamCallFrameRecordingFailedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          metadata: event.metadata,
+          egressId: event.egressId,
+        ),
+      final CoordinatorCallFrameRecordingReadyEvent event =>
+        StreamCallFrameRecordingReadyEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          url: event.url,
+          capturedAt: event.capturedAt,
+          egressId: event.egressId,
+          sessionId: event.sessionId,
+          trackType: event.trackType,
+          usersInFrame: event.usersInFrame,
+        ),
+      final CoordinatorCallNotificationEvent event =>
+        StreamCallNotificationEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          user: event.user,
+          members: event.members,
+          metadata: event.metadata,
+        ),
+      final CoordinatorCallUserMutedEvent event => StreamCallUserMutedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          fromUserId: event.fromUserId,
+          mutedUserIds: event.mutedUserIds,
+        ),
+      final CoordinatorCallRecordingReadyEvent event =>
+        StreamCallRecordingReadyEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          egressId: event.egressId,
+          endTime: event.endTime,
+          filename: event.filename,
+          sessionId: event.sessionId,
+          startTime: event.startTime,
+          url: event.url,
         ),
       // Ignore other events as they are internal to Coordinator logic
       _ => null,

@@ -14,26 +14,33 @@ class EgressHLSResponse {
   /// Returns a new [EgressHLSResponse] instance.
   EgressHLSResponse({
     required this.playlistUrl,
+    required this.status,
   });
 
   String playlistUrl;
 
+  String status;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is EgressHLSResponse && other.playlistUrl == playlistUrl;
+      other is EgressHLSResponse &&
+          other.playlistUrl == playlistUrl &&
+          other.status == status;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (playlistUrl.hashCode);
+      (playlistUrl.hashCode) + (status.hashCode);
 
   @override
-  String toString() => 'EgressHLSResponse[playlistUrl=$playlistUrl]';
+  String toString() =>
+      'EgressHLSResponse[playlistUrl=$playlistUrl, status=$status]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'playlist_url'] = this.playlistUrl;
+    json[r'status'] = this.status;
     return json;
   }
 
@@ -59,6 +66,7 @@ class EgressHLSResponse {
 
       return EgressHLSResponse(
         playlistUrl: mapValueOfType<String>(json, r'playlist_url')!,
+        status: mapValueOfType<String>(json, r'status')!,
       );
     }
     return null;
@@ -116,5 +124,6 @@ class EgressHLSResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'playlist_url',
+    'status',
   };
 }

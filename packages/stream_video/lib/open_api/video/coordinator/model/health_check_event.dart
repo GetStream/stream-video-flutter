@@ -16,6 +16,7 @@ class HealthCheckEvent {
     this.cid,
     required this.connectionId,
     required this.createdAt,
+    this.custom = const {},
     this.receivedAt,
     this.type = 'health.check',
   });
@@ -31,6 +32,8 @@ class HealthCheckEvent {
   String connectionId;
 
   DateTime createdAt;
+
+  Map<String, Object> custom;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -49,6 +52,7 @@ class HealthCheckEvent {
           other.cid == cid &&
           other.connectionId == connectionId &&
           other.createdAt == createdAt &&
+          _deepEquality.equals(other.custom, custom) &&
           other.receivedAt == receivedAt &&
           other.type == type;
 
@@ -58,12 +62,13 @@ class HealthCheckEvent {
       (cid == null ? 0 : cid!.hashCode) +
       (connectionId.hashCode) +
       (createdAt.hashCode) +
+      (custom.hashCode) +
       (receivedAt == null ? 0 : receivedAt!.hashCode) +
       (type.hashCode);
 
   @override
   String toString() =>
-      'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, receivedAt=$receivedAt, type=$type]';
+      'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -74,6 +79,7 @@ class HealthCheckEvent {
     }
     json[r'connection_id'] = this.connectionId;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'custom'] = this.custom;
     if (this.receivedAt != null) {
       json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
     } else {
@@ -107,6 +113,7 @@ class HealthCheckEvent {
         cid: mapValueOfType<String>(json, r'cid'),
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         receivedAt: mapDateTime(json, r'received_at', r''),
         type: mapValueOfType<String>(json, r'type')!,
       );
@@ -167,6 +174,7 @@ class HealthCheckEvent {
   static const requiredKeys = <String>{
     'connection_id',
     'created_at',
+    'custom',
     'type',
   };
 }

@@ -19,6 +19,7 @@ class GetCallStatsResponse {
     required this.callStatus,
     this.callTimeline,
     required this.duration,
+    required this.isTruncatedReport,
     this.jitter,
     this.latency,
     required this.maxFreezesDurationSeconds,
@@ -62,6 +63,8 @@ class GetCallStatsResponse {
   /// Duration of the request in milliseconds
   String duration;
 
+  bool isTruncatedReport;
+
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -104,6 +107,7 @@ class GetCallStatsResponse {
           other.callStatus == callStatus &&
           other.callTimeline == callTimeline &&
           other.duration == duration &&
+          other.isTruncatedReport == isTruncatedReport &&
           other.jitter == jitter &&
           other.latency == latency &&
           other.maxFreezesDurationSeconds == maxFreezesDurationSeconds &&
@@ -125,6 +129,7 @@ class GetCallStatsResponse {
       (callStatus.hashCode) +
       (callTimeline == null ? 0 : callTimeline!.hashCode) +
       (duration.hashCode) +
+      (isTruncatedReport.hashCode) +
       (jitter == null ? 0 : jitter!.hashCode) +
       (latency == null ? 0 : latency!.hashCode) +
       (maxFreezesDurationSeconds.hashCode) +
@@ -138,7 +143,7 @@ class GetCallStatsResponse {
 
   @override
   String toString() =>
-      'GetCallStatsResponse[aggregated=$aggregated, averageConnectionTime=$averageConnectionTime, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
+      'GetCallStatsResponse[aggregated=$aggregated, averageConnectionTime=$averageConnectionTime, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, isTruncatedReport=$isTruncatedReport, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -160,6 +165,7 @@ class GetCallStatsResponse {
       json[r'call_timeline'] = null;
     }
     json[r'duration'] = this.duration;
+    json[r'is_truncated_report'] = this.isTruncatedReport;
     if (this.jitter != null) {
       json[r'jitter'] = this.jitter;
     } else {
@@ -211,6 +217,7 @@ class GetCallStatsResponse {
         callStatus: mapValueOfType<String>(json, r'call_status')!,
         callTimeline: CallTimeline.fromJson(json[r'call_timeline']),
         duration: mapValueOfType<String>(json, r'duration')!,
+        isTruncatedReport: mapValueOfType<bool>(json, r'is_truncated_report')!,
         jitter: TimeStats.fromJson(json[r'jitter']),
         latency: TimeStats.fromJson(json[r'latency']),
         maxFreezesDurationSeconds:
@@ -283,6 +290,7 @@ class GetCallStatsResponse {
     'call_duration_seconds',
     'call_status',
     'duration',
+    'is_truncated_report',
     'max_freezes_duration_seconds',
     'max_participants',
     'max_total_quality_limitation_duration_seconds',

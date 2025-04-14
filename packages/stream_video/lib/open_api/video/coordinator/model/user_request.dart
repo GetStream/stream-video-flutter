@@ -22,11 +22,13 @@ class UserRequest {
     this.privacySettings,
   });
 
+  /// Custom user data
   Map<String, Object> custom;
 
   /// User ID
   String id;
 
+  /// User's profile image URL
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated

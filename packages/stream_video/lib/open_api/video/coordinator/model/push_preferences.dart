@@ -10,10 +10,11 @@
 
 part of openapi.api;
 
-class PushNotificationSettingsResponse {
-  /// Returns a new [PushNotificationSettingsResponse] instance.
-  PushNotificationSettingsResponse({
-    this.disabled,
+class PushPreferences {
+  /// Returns a new [PushPreferences] instance.
+  PushPreferences({
+    this.callLevel,
+    this.chatLevel,
     this.disabledUntil,
   });
 
@@ -23,7 +24,15 @@ class PushNotificationSettingsResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  bool? disabled;
+  String? callLevel;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? chatLevel;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -36,26 +45,33 @@ class PushNotificationSettingsResponse {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PushNotificationSettingsResponse &&
-          other.disabled == disabled &&
+      other is PushPreferences &&
+          other.callLevel == callLevel &&
+          other.chatLevel == chatLevel &&
           other.disabledUntil == disabledUntil;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (disabled == null ? 0 : disabled!.hashCode) +
+      (callLevel == null ? 0 : callLevel!.hashCode) +
+      (chatLevel == null ? 0 : chatLevel!.hashCode) +
       (disabledUntil == null ? 0 : disabledUntil!.hashCode);
 
   @override
   String toString() =>
-      'PushNotificationSettingsResponse[disabled=$disabled, disabledUntil=$disabledUntil]';
+      'PushPreferences[callLevel=$callLevel, chatLevel=$chatLevel, disabledUntil=$disabledUntil]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.disabled != null) {
-      json[r'disabled'] = this.disabled;
+    if (this.callLevel != null) {
+      json[r'call_level'] = this.callLevel;
     } else {
-      json[r'disabled'] = null;
+      json[r'call_level'] = null;
+    }
+    if (this.chatLevel != null) {
+      json[r'chat_level'] = this.chatLevel;
+    } else {
+      json[r'chat_level'] = null;
     }
     if (this.disabledUntil != null) {
       json[r'disabled_until'] = this.disabledUntil!.toUtc().toIso8601String();
@@ -65,10 +81,10 @@ class PushNotificationSettingsResponse {
     return json;
   }
 
-  /// Returns a new [PushNotificationSettingsResponse] instance and imports its values from
+  /// Returns a new [PushPreferences] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static PushNotificationSettingsResponse? fromJson(dynamic value) {
+  static PushPreferences? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -78,29 +94,30 @@ class PushNotificationSettingsResponse {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "PushNotificationSettingsResponse[$key]" is missing from JSON.');
+              'Required key "PushPreferences[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "PushNotificationSettingsResponse[$key]" has a null value in JSON.');
+              'Required key "PushPreferences[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return PushNotificationSettingsResponse(
-        disabled: mapValueOfType<bool>(json, r'disabled'),
+      return PushPreferences(
+        callLevel: mapValueOfType<String>(json, r'call_level'),
+        chatLevel: mapValueOfType<String>(json, r'chat_level'),
         disabledUntil: mapDateTime(json, r'disabled_until', r''),
       );
     }
     return null;
   }
 
-  static List<PushNotificationSettingsResponse> listFromJson(
+  static List<PushPreferences> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <PushNotificationSettingsResponse>[];
+    final result = <PushPreferences>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = PushNotificationSettingsResponse.fromJson(row);
+        final value = PushPreferences.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -109,13 +126,12 @@ class PushNotificationSettingsResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, PushNotificationSettingsResponse> mapFromJson(
-      dynamic json) {
-    final map = <String, PushNotificationSettingsResponse>{};
+  static Map<String, PushPreferences> mapFromJson(dynamic json) {
+    final map = <String, PushPreferences>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = PushNotificationSettingsResponse.fromJson(entry.value);
+        final value = PushPreferences.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -124,17 +140,17 @@ class PushNotificationSettingsResponse {
     return map;
   }
 
-  // maps a json object with a list of PushNotificationSettingsResponse-objects as value to a dart map
-  static Map<String, List<PushNotificationSettingsResponse>> mapListFromJson(
+  // maps a json object with a list of PushPreferences-objects as value to a dart map
+  static Map<String, List<PushPreferences>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<PushNotificationSettingsResponse>>{};
+    final map = <String, List<PushPreferences>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PushNotificationSettingsResponse.listFromJson(
+        map[entry.key] = PushPreferences.listFromJson(
           entry.value,
           growable: growable,
         );

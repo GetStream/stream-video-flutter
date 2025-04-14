@@ -30,6 +30,9 @@ enum CallPermission {
   stopClosedCaptionsCall('stop-closed-captions-call'),
   pinForEveryone('pin-for-everyone'),
   enableNoiseCancellation('enable-noise-cancellation'),
+  changeMaxDuration('change-max-duration'),
+  startFrameRecordCall('start-frame-record-call'),
+  stopFrameRecordCall('stop-frame-record-call'),
   unknown('unknown');
 
   const CallPermission(this.alias);

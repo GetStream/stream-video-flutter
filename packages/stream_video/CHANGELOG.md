@@ -1,3 +1,12 @@
+## Unreleased
+
+🐞 Fixed
+* Fixed user feedback collection endpoint
+
+✅ Added
+* Added `ring`, `audio`, `video`, `screenshare`, `session` and `frameRecordings` settings to `Call.getOrCreate()` method.
+* Added `session` and `frameRecordings` settings to `Call.update()` method.
+
 ## 0.9.1
 
 ✅ Added
