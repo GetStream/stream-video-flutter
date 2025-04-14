@@ -161,7 +161,7 @@ StreamVideo _initStreamVideo(
     user: user,
     tokenLoader: tokenLoader,
     options: StreamVideoOptions(
-      logPriority: Priority.verbose,
+      logPriority: Priority.debug,
       muteAudioWhenInBackground: false,
       muteVideoWhenInBackground: false,
       keepConnectionsAliveWhenInBackground: true,

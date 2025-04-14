@@ -228,7 +228,7 @@ class SfuWebSocket extends StreamWebSocket
   }
 
   void sendPing() {
-    _logger.d(() => '[sendPing] no args');
+    _logger.v(() => '[sendPing] no args');
     send(
       sfu_events.SfuRequest(
         healthCheckRequest: sfu_events.HealthCheckRequest(),
@@ -238,20 +238,20 @@ class SfuWebSocket extends StreamWebSocket
 
   @override
   void send(sfu_events.SfuRequest message) {
-    _logger.d(() => '[send] message: $message');
+    _logger.v(() => '[send] message: $message');
     super.send(message.writeToBuffer());
   }
 
   @override
   Future<void> onPongTimeout(Duration timeout) async {
-    _logger.d(() => '[onPongTimeout] timeout: $timeout');
+    _logger.v(() => '[onPongTimeout] timeout: $timeout');
 
     await disconnect();
   }
 
   @override
   void onPingRequested() {
-    _logger.d(() => '[onPingRequested] no args');
+    _logger.v(() => '[onPingRequested] no args');
     sendPing();
   }
 
