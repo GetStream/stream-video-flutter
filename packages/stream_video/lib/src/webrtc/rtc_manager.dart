@@ -443,7 +443,7 @@ class RtcManager extends Disposable {
   }
 
   RtcTrack? getTrack(String trackId) {
-    _logger.d(() => '[getTrack] trackId: $trackId');
+    _logger.v(() => '[getTrack] trackId: $trackId');
     return tracks[trackId];
   }
 
