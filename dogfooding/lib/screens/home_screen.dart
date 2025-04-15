@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/screens/qr_code_scanner.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/environment_switcher.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
@@ -389,11 +389,10 @@ class _JoinForm extends StatelessWidget {
         color: Colors.white,
         padding: EdgeInsets.zero,
         onPressed: () async {
-          var result = await BarcodeScanner.scan(
-            options: const ScanOptions(restrictFormat: [BarcodeFormat.qr]),
-          );
+          final result = await QrCodeScanner.scan(context);
+
           if (context.mounted) {
-            _handleJoinUrl(context, result.rawContent);
+            _handleJoinUrl(context, result);
           }
         },
       );
