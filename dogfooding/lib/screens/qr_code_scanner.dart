@@ -63,6 +63,7 @@ class _QrCodeScannerState extends State<QrCodeScanner> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: MobileScanner(
+        controller: controller,
         onDetect: _handleBarcode,
       ),
     );
