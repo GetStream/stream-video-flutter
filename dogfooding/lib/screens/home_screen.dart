@@ -4,9 +4,11 @@ import 'dart:math' as math;
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 // 🌎 Project imports:
+import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
+import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/screens/qr_code_scanner.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/environment_switcher.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
@@ -274,6 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 _JoinForm(
                   callIdController: _callIdController,
                   onJoinPressed: _getOrCreateCall,
+                  onLogoutPressed: _userAuthController.logout,
+                  currentEnvironment: _appPreferences.environment,
                 ),
                 const SizedBox(height: 24),
                 StreamButton.primary(
@@ -300,10 +304,14 @@ class _JoinForm extends StatelessWidget {
   const _JoinForm({
     required this.callIdController,
     required this.onJoinPressed,
+    required this.onLogoutPressed,
+    required this.currentEnvironment,
   });
 
   final TextEditingController callIdController;
   final VoidCallback onJoinPressed;
+  final VoidCallback onLogoutPressed;
+  final Environment currentEnvironment;
 
   @override
   Widget build(BuildContext context) {
@@ -337,21 +345,9 @@ class _JoinForm extends StatelessWidget {
                       const TextStyle(color: AppColorPalette.secondaryText),
                   hintText: 'Enter call id',
                   // suffix button to generate a random call id
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.refresh),
-                    color: Colors.white,
-                    padding: EdgeInsets.zero,
-                    onPressed: () {
-                      // generate a 10 character nanoId for call id
-                      final callId = generateAlphanumericString(10);
-                      callIdController.value = TextEditingValue(
-                        text: callId,
-                        selection: TextSelection.collapsed(
-                          offset: callId.length,
-                        ),
-                      );
-                    },
-                  ),
+                  suffixIcon: CurrentPlatform.isMobile
+                      ? _scanQRButton(context)
+                      : _refreshIconButton(),
                 ),
               ),
             ),
@@ -370,5 +366,102 @@ class _JoinForm extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _refreshIconButton() => IconButton(
+        icon: const Icon(Icons.refresh),
+        color: Colors.white,
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          // generate a 10 character nanoId for call id
+          final callId = generateAlphanumericString(10);
+          callIdController.value = TextEditingValue(
+            text: callId,
+            selection: TextSelection.collapsed(
+              offset: callId.length,
+            ),
+          );
+        },
+      );
+
+  Widget _scanQRButton(BuildContext context) => IconButton(
+        icon: const Icon(Icons.qr_code),
+        color: Colors.white,
+        padding: EdgeInsets.zero,
+        onPressed: () async {
+          final result = await QrCodeScanner.scan(context);
+
+          if (context.mounted) {
+            _handleJoinUrl(context, result);
+          }
+        },
+      );
+
+  Future<void> _handleJoinUrl(BuildContext context, String url) async {
+    Uri uri;
+    try {
+      uri = Uri.parse(url);
+    } on FormatException catch (_) {
+      return;
+    }
+
+    final Environment environment;
+    try {
+      environment = Environment.fromBaseUrl(uri.origin);
+    } on StateError catch (_) {
+      // no valid environment found
+      return;
+    }
+
+    if (environment != currentEnvironment) {
+      if (!kIsProd) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Invalid environment'),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              content: Text(
+                'To join this call you have to switch to "${environment.displayName}" environment',
+              ),
+              buttonPadding: const EdgeInsets.all(16),
+              actions: [
+                StreamButton.tertiary(
+                  label: 'Cancel',
+                  onPressed: Navigator.of(context).pop,
+                ),
+                const SizedBox(height: 8),
+                StreamButton.active(
+                  label: 'Logout',
+                  onPressed: onLogoutPressed,
+                ),
+              ],
+            );
+          },
+        );
+      }
+      return;
+    }
+
+    // Fetch the callId from the path components
+    // e.g https://getstream.io/join/path-call-id
+    final pathSegmentsLength = uri.pathSegments.length;
+    final callPathId = pathSegmentsLength >= 2 &&
+            uri.pathSegments[pathSegmentsLength - 2] == 'join'
+        ? uri.pathSegments.last
+        : null;
+
+    // Fetch the callId from the query parameters
+    // e.g https://getstream.io/video/demos?id=parameter-call-id
+    final callParameterId = uri.queryParameters['id'];
+
+    final callId = callPathId ?? callParameterId;
+
+    if (callId != null) {
+      callIdController.value = TextEditingValue(
+        text: callId,
+        selection: TextSelection.collapsed(offset: callId.length),
+      );
+    }
   }
 }

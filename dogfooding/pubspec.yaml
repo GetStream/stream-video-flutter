@@ -27,6 +27,7 @@ dependencies:
   google_fonts: ^5.1.0
   google_sign_in: ^6.2.1
   http: ^1.2.2
+  mobile_scanner: ^6.0.7
   package_info_plus: ^8.1.0
   path_provider: ^2.1.4
   permission_handler: ^11.3.1
