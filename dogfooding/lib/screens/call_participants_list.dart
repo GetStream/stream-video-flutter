@@ -43,12 +43,6 @@ class CallParticipantsList extends StatelessWidget {
             ),
             body: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ShareCallCard(
-                    callId: call.id,
-                  ),
-                ),
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -107,6 +101,9 @@ class CallParticipantsList extends StatelessWidget {
                     itemCount: participants.length,
                   ),
                 ),
+                ShareCallParticipantsCard(
+                  callId: call.id,
+                )
               ],
             ),
           );

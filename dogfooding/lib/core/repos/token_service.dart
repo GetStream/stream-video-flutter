@@ -2,80 +2,10 @@
 import 'dart:convert';
 
 // 📦 Package imports:
+import 'package:flutter_dogfooding/core/model/environment.dart';
 import 'package:http/http.dart' as http;
 
 import 'custom_environment_loader.dart';
-
-enum Environment {
-  pronto(
-    'Pronto',
-    'pronto',
-    'pronto.getstream.io',
-    aliases: ['stream-calls-dogfood'],
-    baseUrls: [
-      'https://pronto.getstream.io',
-      'https://stream-calls-dogfood.vercel.app'
-    ],
-  ),
-  prontoStaging(
-    'Pronto Staging',
-    'pronto',
-    'pronto-staging.getstream.io',
-    baseUrls: ['https://pronto-staging.getstream.io'],
-  ),
-  demo(
-    'Demo',
-    'demo',
-    'pronto.getstream.io',
-    aliases: [''],
-    baseUrls: ['https://getstream.io'],
-  ),
-  staging(
-    'Staging',
-    'staging',
-    'pronto.getstream.io',
-    baseUrls: ['https://staging.getstream.io'],
-  ),
-  custom(
-    'Custom',
-    'custom',
-    '',
-  );
-
-  final String displayName;
-  final String envName;
-  final String hostName;
-  final List<String> aliases;
-  final List<String> baseUrls;
-
-  const Environment(
-    this.displayName,
-    this.envName,
-    this.hostName, {
-    this.aliases = const [],
-    this.baseUrls = const [],
-  });
-
-  factory Environment.fromSubdomain(String subdomain) {
-    return Environment.values.firstWhere(
-      (env) => env.name == subdomain || env.aliases.contains(subdomain),
-      orElse: () => Environment.demo,
-    );
-  }
-
-  factory Environment.fromHost(String host) {
-    final hostParts = host.split('.');
-    final String envAlias = hostParts.length < 2 ? '' : hostParts[0];
-
-    return Environment.fromSubdomain(envAlias);
-  }
-
-  factory Environment.fromBaseUrl(String baseUrl) {
-    return Environment.values.firstWhere(
-      (env) => env.baseUrls.contains(baseUrl),
-    );
-  }
-}
 
 class TokenResponse {
   final String token;

@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/screens/qr_code_scanner.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
@@ -19,6 +18,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
 import '../app/user_auth_controller.dart';
+import '../core/model/environment.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';

@@ -213,7 +213,7 @@ class _CallScreenState extends State<CallScreen> {
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        child: ShareCallCard(callId: call.id),
+                        child: ShareCallWelcomeCard(callId: call.id),
                       )
                   ],
                 );

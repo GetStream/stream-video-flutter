@@ -2,11 +2,12 @@
 import 'dart:convert';
 
 // 📦 Package imports:
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/model/user_credentials.dart';
+
+import '../model/environment.dart';
 
 class AppPreferences {
   const AppPreferences({

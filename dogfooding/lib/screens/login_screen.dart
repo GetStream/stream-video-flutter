@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/user_auth_controller.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 
@@ -18,6 +17,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 // 🌎 Project imports:
+import '../core/model/environment.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';
