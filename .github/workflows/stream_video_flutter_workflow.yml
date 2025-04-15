@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - "packages/**"
+      - "dogfooding/**"
       - ".github/workflows/stream_video_flutter_workflow.yml"
     types:
       - opened
