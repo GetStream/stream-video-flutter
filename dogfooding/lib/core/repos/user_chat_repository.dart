@@ -2,7 +2,8 @@
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 // 🌎 Project imports:
-import 'package:flutter_dogfooding/utils/consts.dart';
+import '../../utils/consts.dart';
+import '../model/environment.dart';
 import 'token_service.dart';
 
 class UserChatRepository {

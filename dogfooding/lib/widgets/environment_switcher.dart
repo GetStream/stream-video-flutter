@@ -1,13 +1,13 @@
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 // 🌎 Project imports:
+import '../core/model/environment.dart';
 import '../di/injector.dart';
 
 class EnvironmentSwitcher extends StatefulWidget {

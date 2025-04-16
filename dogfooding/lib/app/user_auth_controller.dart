@@ -10,6 +10,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/model/user_credentials.dart';
 import 'package:flutter_dogfooding/core/repos/user_auth_repository.dart';
+import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 

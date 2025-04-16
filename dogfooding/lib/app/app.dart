@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 // 📦 Package imports:
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/di/injector.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_dogfooding/screens/splash_screen.dart';
 import 'package:flutter_dogfooding/utils/consts.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart'
     hide ConnectionState;
+import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../firebase_options.dart';
 import 'app_content.dart';
