@@ -9,6 +9,7 @@ import '../../../models/call_reaction.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
 import '../../call_events.dart';
+import '../../call_reject_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -35,10 +36,11 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return;
     }
 
-    final participant = state.callParticipants.firstWhereOrNull((participant) {
-      return participant.userId == event.acceptedByUserId;
+    final member = state.callMembers.firstWhereOrNull((member) {
+      return member.userId == event.acceptedByUserId;
     });
-    if (participant == null) {
+
+    if (member == null) {
       _logger.w(
         () =>
             '[coordinatorUpdateCallAccepted] rejected (accepted by non-Member)',
@@ -69,44 +71,49 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return;
     }
 
-    final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.rejectedByUserId;
-    });
+    final rejectedBy = event.metadata.session.rejectedBy;
 
-    if (participantIndex == -1) {
-      _logger.w(
-        () => '[coordinatorCallRejected] rejected '
-            '(by unknown user): ${event.rejectedByUserId}',
-      );
-      return;
-    }
+    if (state.createdByMe) {
+      final everyoneElseRejected = state.callMembers
+          .where((m) => m.userId != state.currentUserId)
+          .every((m) => rejectedBy.keys.contains(m.userId));
 
-    final callParticipants = [...state.callParticipants];
-    final removed = callParticipants.removeAt(participantIndex);
-
-    if (removed.userId == state.currentUserId ||
-        callParticipants.hasSingle(state.currentUserId)) {
-      state = state
-          .copyFromMetadata(
-            event.metadata,
-          )
-          .copyWith(
-            status: CallStatus.disconnected(
-              DisconnectReason.rejected(
-                byUserId: removed.userId,
-              ),
+      if (everyoneElseRejected) {
+        _logger.d(
+            () => '[coordinatorCallRejected] everyone rejected, disconnecting');
+        state = state.copyFromMetadata(event.metadata).copyWith(
+          status: CallStatus.disconnected(
+            DisconnectReason.rejected(
+              byUserId: event.rejectedByUserId,
+              reason: CallRejectReason.custom('ring: everyone rejected'),
             ),
-            sessionId: '',
-            callParticipants: callParticipants,
-          );
-    }
-    state = state
-        .copyFromMetadata(
-          event.metadata,
-        )
-        .copyWith(
-          callParticipants: callParticipants,
+          ),
+          sessionId: '',
+          callParticipants: const [],
         );
+        return;
+      }
+    } else {
+      if (rejectedBy.keys.contains(state.createdByUserId)) {
+        _logger.d(
+            () => '[coordinatorCallRejected] creator rejected, disconnecting');
+        state = state.copyFromMetadata(event.metadata).copyWith(
+          status: CallStatus.disconnected(
+            DisconnectReason.rejected(
+              byUserId: event.rejectedByUserId,
+              reason: CallRejectReason.custom('ring: creator rejected'),
+            ),
+          ),
+          sessionId: '',
+          callParticipants: const [],
+        );
+        return;
+      }
+    }
+
+    state = state.copyFromMetadata(
+      event.metadata,
+    );
   }
 
   void coordinatorCallEnded(

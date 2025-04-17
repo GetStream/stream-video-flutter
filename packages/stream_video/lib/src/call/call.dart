@@ -458,14 +458,6 @@ class Call {
         return _stateManager.coordinatorCallBroadcastingStopped(event);
       case StreamCallBroadcastingFailedEvent _:
         return _stateManager.coordinatorCallBroadcastingFailed(event);
-      case StreamCallRingingEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallMissedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallSessionEndedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallSessionStartedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallUpdatedEvent _:
         return _stateManager.callMetadataChanged(
           event.metadata,
@@ -493,6 +485,20 @@ class Call {
               event.participantsCountByRole.values.fold(0, (a, b) => a + b),
           anonymousCount: event.anonymousParticipantCount,
         );
+      case StreamCallRingingEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallMissedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallSessionEndedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallSessionStartedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallMemberAddedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallMemberRemovedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallMemberUpdatedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
       default:
         break;
     }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -89,8 +91,10 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
-    final users =
-        widget.callState.otherParticipants.map((e) => e.toUserInfo()).toList();
+    final users = widget.callState.callMembers
+        .where((m) => m.userId != widget.callState.currentUserId)
+        .map((e) => e.toUserInfo())
+        .toList();
 
     return CallBackground(
       participants: users,
