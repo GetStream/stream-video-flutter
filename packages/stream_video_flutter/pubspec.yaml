@@ -12,15 +12,15 @@ environment:
 
 dependencies:
   cached_network_image: ^3.4.1
-  collection: ^1.17.1
-  equatable: ^2.0.5
+  collection: ^1.19.1
+  equatable: ^2.0.7
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   intl: ">=0.18.1 <=0.21.0"
   ios_platform_images: ^0.2.4
-  permission_handler: ^11.3.1
+  permission_handler: ^12.0.0
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
   stream_video: ^0.9.1
