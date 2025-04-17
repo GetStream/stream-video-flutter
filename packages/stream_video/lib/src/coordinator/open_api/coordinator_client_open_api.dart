@@ -1286,6 +1286,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<CallMetadata>> updateCall({
     required StreamCallCid callCid,
     Map<String, Object> custom = const {},
+    DateTime? startsAt,
     StreamRingSettings? ring,
     StreamAudioSettings? audio,
     StreamVideoSettings? video,
@@ -1309,6 +1310,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         callCid.type.value,
         callCid.id,
         open.UpdateCallRequest(
+          startsAt: startsAt,
+          custom: custom,
           settingsOverride: open.CallSettingsRequest(
             ring: ring?.toOpenDto(),
             audio: audio?.toOpenDto(),
@@ -1323,7 +1326,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             session: session?.toOpenDto(),
             frameRecording: frameRecording?.toOpenDto(),
           ),
-          custom: custom,
         ),
       );
       if (result == null) {

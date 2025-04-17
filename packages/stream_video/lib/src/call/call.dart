@@ -932,6 +932,7 @@ class Call {
 
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
+    DateTime? startsAt,
     StreamRingSettings? ring,
     StreamAudioSettings? audio,
     StreamVideoSettings? video,
@@ -948,6 +949,7 @@ class Call {
     return _coordinatorClient.updateCall(
       callCid: callCid,
       custom: custom ?? {},
+      startsAt: startsAt,
       ring: ring,
       audio: audio,
       video: video,
@@ -1771,9 +1773,11 @@ class Call {
   /// - [notify]: If `true`, sends a standard push notification.
   /// - [video]: Marks the call as a video call if `true`; otherwise, audio-only.
   /// - [watch]:  If `true`, listens to coordinator events and updates call state accordingly.
-  /// - [membersLimit]: Sets the total number of members to return as part of the response.
+  /// - [members]:An optional list of `MemberRequest` objects to add to the call.
+  /// - [memberIds]: An optional list of member IDs to add to the call.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
+    List<MemberRequest> members = const [],
     bool ringing = false,
     bool video = false,
     bool watch = true,
@@ -1823,15 +1827,19 @@ class Call {
       frameRecording: frameRecording?.toOpenDto(),
     );
 
+    final aggregatedMembers = [
+      ...memberIds.map(
+        (id) => MemberRequest(
+          userId: id,
+        ),
+      ),
+      ...members,
+    ];
+
     final response = await _coordinatorClient.getOrCreateCall(
       callCid: callCid,
       ringing: ringing,
-      members: {...memberIds, _streamVideo.state.currentUser.id}.map((id) {
-        return MemberRequest(
-          userId: id,
-          role: 'admin',
-        );
-      }).toList(),
+      members: aggregatedMembers,
       team: team,
       notify: notify,
       video: video,
