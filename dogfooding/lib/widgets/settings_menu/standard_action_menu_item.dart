@@ -30,14 +30,15 @@ class StandardActionMenuItem extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const Spacer(),
           if (trailing != null) trailing!,
           const SizedBox(width: 8),
         ],

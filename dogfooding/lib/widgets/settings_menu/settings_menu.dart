@@ -128,8 +128,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
         widget.call.dynascaleManager.incomingVideoSettings);
 
     return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      Wrap(
+        alignment: WrapAlignment.spaceEvenly,
         children: StreamVideoTheme.of(context)
             .callControlsTheme
             .callReactions
