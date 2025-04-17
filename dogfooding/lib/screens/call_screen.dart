@@ -337,7 +337,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
             ? () => showChat(context)
             : null,
       ),
-      badgeCount: _unreadCount,
+      badgeCount: _unreadCount == 0 ? null : _unreadCount,
     );
   }
 
