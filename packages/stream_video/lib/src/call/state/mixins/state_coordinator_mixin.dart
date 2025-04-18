@@ -49,13 +49,20 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return;
     }
 
-    state = state
-        .copyFromMetadata(
-          event.metadata,
-        )
-        .copyWith(
-          status: CallStatus.outgoing(acceptedByCallee: true),
+    final members = state.callMembers.map((m) {
+      if (m.userId == event.acceptedByUserId) {
+        return m.copyWith(
+          callAcceptedAt: event.createdAt,
         );
+      } else {
+        return m;
+      }
+    }).toList();
+
+    state = state.copyWith(
+      status: CallStatus.outgoing(acceptedByCallee: true),
+      callMembers: members,
+    );
   }
 
   void coordinatorCallRejected(
@@ -73,6 +80,16 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     final rejectedBy = event.metadata.session.rejectedBy;
 
+    final members = state.callMembers.map((m) {
+      if (m.userId == event.rejectedByUserId) {
+        return m.copyWith(
+          callRejectedAt: event.createdAt,
+        );
+      } else {
+        return m;
+      }
+    }).toList();
+
     if (state.createdByMe) {
       final everyoneElseRejected = state.callMembers
           .where((m) => m.userId != state.currentUserId)
@@ -81,7 +98,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       if (everyoneElseRejected) {
         _logger.d(
             () => '[coordinatorCallRejected] everyone rejected, disconnecting');
-        state = state.copyFromMetadata(event.metadata).copyWith(
+        state = state.copyWith(
           status: CallStatus.disconnected(
             DisconnectReason.rejected(
               byUserId: event.rejectedByUserId,
@@ -90,6 +107,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           ),
           sessionId: '',
           callParticipants: const [],
+          callMembers: members,
         );
         return;
       }
@@ -97,7 +115,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       if (rejectedBy.keys.contains(state.createdByUserId)) {
         _logger.d(
             () => '[coordinatorCallRejected] creator rejected, disconnecting');
-        state = state.copyFromMetadata(event.metadata).copyWith(
+        state = state.copyWith(
           status: CallStatus.disconnected(
             DisconnectReason.rejected(
               byUserId: event.rejectedByUserId,
@@ -106,14 +124,13 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           ),
           sessionId: '',
           callParticipants: const [],
+          callMembers: members,
         );
         return;
       }
     }
 
-    state = state.copyFromMetadata(
-      event.metadata,
-    );
+    state = state.copyWith(callMembers: members);
   }
 
   void coordinatorCallEnded(

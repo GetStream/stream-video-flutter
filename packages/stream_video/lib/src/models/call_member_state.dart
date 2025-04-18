@@ -13,6 +13,8 @@ class CallMemberState with EquatableMixin {
     required this.name,
     required this.custom,
     this.image,
+    this.callRejectedAt,
+    this.callAcceptedAt,
   });
 
   final String userId;
@@ -21,8 +23,19 @@ class CallMemberState with EquatableMixin {
   final Map<String, Object?> custom;
   final String? image;
 
+  final DateTime? callRejectedAt;
+  final DateTime? callAcceptedAt;
+
   @override
-  List<Object?> get props => [userId, roles, name, custom];
+  List<Object?> get props => [
+        userId,
+        roles,
+        name,
+        custom,
+        image,
+        callRejectedAt,
+        callAcceptedAt,
+      ];
 
   UserInfo toUserInfo() => UserInfo(
         id: userId,
@@ -30,6 +43,26 @@ class CallMemberState with EquatableMixin {
         name: name,
         image: image,
       );
+
+  CallMemberState copyWith({
+    String? userId,
+    List<String>? roles,
+    String? name,
+    Map<String, Object?>? custom,
+    String? image,
+    DateTime? callRejectedAt,
+    DateTime? callAcceptedAt,
+  }) {
+    return CallMemberState(
+      userId: userId ?? this.userId,
+      roles: roles ?? this.roles,
+      name: name ?? this.name,
+      custom: custom ?? this.custom,
+      image: image ?? this.image,
+      callRejectedAt: callRejectedAt ?? this.callRejectedAt,
+      callAcceptedAt: callAcceptedAt ?? this.callAcceptedAt,
+    );
+  }
 }
 
 extension CallMemberStateMetadataX on CallMetadata {

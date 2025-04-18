@@ -158,6 +158,15 @@ class CallState extends Equatable {
 
   bool get createdByMe => createdByUserId == currentUserId;
 
+  List<CallMemberState> get ringingMembers {
+    return callMembers
+        .where((member) =>
+            member.callAcceptedAt == null &&
+            member.callRejectedAt == null &&
+            member.userId != currentUserId)
+        .toList();
+  }
+
   /// Returns a copy of this [CallState] with the given fields replaced
   /// with the new values.
   CallState copyWith({
