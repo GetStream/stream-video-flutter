@@ -3,6 +3,7 @@ import 'package:state_notifier/state_notifier.dart';
 
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_member_state.dart';
 import '../../../models/call_metadata.dart';
 import '../../../models/call_participant_state.dart';
 import '../../../models/call_reaction.dart';
@@ -448,6 +449,70 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       callParticipants: newParticipants,
+    );
+  }
+
+  void coordinatorCallMemberAdded(
+    StreamCallMemberAddedEvent event,
+  ) {
+    state = state.copyWith(
+      callMembers: [
+        ...state.callMembers,
+        ...event.members.map(
+          (member) {
+            final user = event.metadata.users.values.firstWhereOrNull((user) {
+              return user.id == member.userId;
+            });
+            return CallMemberState.fromCallMember(member, user);
+          },
+        ),
+      ],
+    );
+  }
+
+  void coordinatorCallMemberRemoved(
+    StreamCallMemberRemovedEvent event,
+  ) {
+    state = state.copyWith(
+      callMembers: state.callMembers
+          .where((member) => !event.removedMemberIds.contains(member.userId))
+          .toList(),
+    );
+  }
+
+  void coordinatorCallMemberUpdated(
+    StreamCallMemberUpdatedEvent event,
+  ) {
+    state = state.copyWith(
+      callMembers: state.callMembers.map((member) {
+        final updatedMember =
+            event.members.firstWhereOrNull((m) => m.userId == member.userId);
+        if (updatedMember != null) {
+          return member.copyWith(
+            roles: updatedMember.roles,
+            custom: updatedMember.custom,
+          );
+        } else {
+          return member;
+        }
+      }).toList(),
+    );
+  }
+
+  void coordinatorCallUserBlocked(StreamCallUserBlockedEvent event) {
+    state = state.copyWith(
+      blockedUserIds: [
+        ...state.blockedUserIds,
+        event.user.id,
+      ],
+    );
+  }
+
+  void coordinatorCallUserUnblocked(StreamCallUserUnblockedEvent event) {
+    state = state.copyWith(
+      blockedUserIds: state.blockedUserIds
+          .where((userId) => userId != event.user.id)
+          .toList(),
     );
   }
 }

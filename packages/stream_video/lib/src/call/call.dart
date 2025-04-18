@@ -485,6 +485,16 @@ class Call {
               event.participantsCountByRole.values.fold(0, (a, b) => a + b),
           anonymousCount: event.anonymousParticipantCount,
         );
+      case StreamCallMemberAddedEvent _:
+        return _stateManager.coordinatorCallMemberAdded(event);
+      case StreamCallMemberRemovedEvent _:
+        return _stateManager.coordinatorCallMemberRemoved(event);
+      case StreamCallMemberUpdatedEvent _:
+        return _stateManager.coordinatorCallMemberUpdated(event);
+      case StreamCallUserBlockedEvent _:
+        return _stateManager.coordinatorCallUserBlocked(event);
+      case StreamCallUserUnblockedEvent _:
+        return _stateManager.coordinatorCallUserUnblocked(event);
       case StreamCallRingingEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallMissedEvent _:
@@ -493,12 +503,7 @@ class Call {
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallSessionStartedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallMemberAddedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallMemberRemovedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallMemberUpdatedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
+
       default:
         break;
     }

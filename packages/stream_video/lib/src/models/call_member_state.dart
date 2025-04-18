@@ -17,6 +17,16 @@ class CallMemberState with EquatableMixin {
     this.callAcceptedAt,
   });
 
+  factory CallMemberState.fromCallMember(CallMember member, CallUser? user) {
+    return CallMemberState(
+      userId: member.userId,
+      roles: member.roles,
+      name: user?.name ?? member.userId,
+      custom: member.custom,
+      image: user?.image,
+    );
+  }
+
   final String userId;
   final List<String> roles;
   final String name;
