@@ -160,10 +160,12 @@ class CallState extends Equatable {
 
   List<CallMemberState> get ringingMembers {
     return callMembers
-        .where((member) =>
-            member.callAcceptedAt == null &&
-            member.callRejectedAt == null &&
-            member.userId != currentUserId)
+        .where(
+          (member) =>
+              member.callAcceptedAt == null &&
+              member.callRejectedAt == null &&
+              member.userId != currentUserId,
+        )
         .toList();
   }
 

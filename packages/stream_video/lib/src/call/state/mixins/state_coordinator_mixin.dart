@@ -98,7 +98,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
       if (everyoneElseRejected) {
         _logger.d(
-            () => '[coordinatorCallRejected] everyone rejected, disconnecting');
+          () => '[coordinatorCallRejected] everyone rejected, disconnecting',
+        );
         state = state.copyWith(
           status: CallStatus.disconnected(
             DisconnectReason.rejected(
@@ -115,7 +116,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     } else {
       if (rejectedBy.keys.contains(state.createdByUserId)) {
         _logger.d(
-            () => '[coordinatorCallRejected] creator rejected, disconnecting');
+          () => '[coordinatorCallRejected] creator rejected, disconnecting',
+        );
         state = state.copyWith(
           status: CallStatus.disconnected(
             DisconnectReason.rejected(
@@ -514,11 +516,5 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           .where((userId) => userId != event.user.id)
           .toList(),
     );
-  }
-}
-
-extension on List<CallParticipantState> {
-  bool hasSingle(String userId) {
-    return length == 1 && firstOrNull?.userId == userId;
   }
 }
