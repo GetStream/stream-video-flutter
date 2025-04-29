@@ -21,7 +21,7 @@ command:
       dart_webrtc: ^1.5.3
       device_info_plus: ">=10.1.2 <12.0.0"
       stream_chat_flutter: ^9.6.0
-      stream_webrtc_flutter: ^1.0.2
+      stream_webrtc_flutter: ^1.0.4
 
 scripts:
   postclean:
