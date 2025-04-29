@@ -22,16 +22,18 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final liveTheme = theme.livestreamTheme;
     final translations = context.translations;
 
     return Scaffold(
+      backgroundColor: theme.colorTheme.livestreamBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               translations.livestreamEndedStatus,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              style: liveTheme.liveEndedTextStyle,
             ),
             FutureBuilder(
               future: widget.call.listRecordings(),
@@ -54,9 +56,7 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
                           return ListTile(
                             title: Text(
                               recording.url,
-                              style: TextStyle(
-                                color: theme.colorTheme.textLowEmphasis,
-                              ),
+                              style: liveTheme.liveEndedRecordingsTextStyle,
                             ),
                             onTap: () {
                               widget.onRecordingTapped?.call(recording.url);

@@ -58,7 +58,6 @@ class StreamColorTheme {
     ),
     this.livestreamBackground = const Color(0xff000000),
     this.livestreamCallControlsColor = const Color(0xffffffff),
-    this.livestreamBadgeColor = const Color(0xff0066f5),
   });
 
   /// Initialise with dark theme
@@ -113,9 +112,8 @@ class StreamColorTheme {
       ],
       stops: [0, 1],
     ),
-    this.livestreamBackground = const Color(0x66000000),
+    this.livestreamBackground = const Color(0xff000000),
     this.livestreamCallControlsColor = const Color(0xffffffff),
-    this.livestreamBadgeColor = const Color(0xff0066f5),
   });
 
   /// Raw theme initialization
@@ -141,7 +139,6 @@ class StreamColorTheme {
     required this.bgGradient,
     required this.livestreamBackground,
     required this.livestreamCallControlsColor,
-    required this.livestreamBadgeColor,
   });
 
   ///
@@ -207,9 +204,6 @@ class StreamColorTheme {
   ///
   final Color livestreamCallControlsColor;
 
-  ///
-  final Color livestreamBadgeColor;
-
   /// Copy with theme
   StreamColorTheme copyWith({
     Color? textHighEmphasis,
@@ -233,7 +227,6 @@ class StreamColorTheme {
     Gradient? bgGradient,
     Color? livestreamBackground,
     Color? livestreamCallControlsColor,
-    Color? livestreamBadgeColor,
   }) {
     return StreamColorTheme.raw(
       textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
@@ -258,7 +251,6 @@ class StreamColorTheme {
       livestreamBackground: livestreamBackground ?? this.livestreamBackground,
       livestreamCallControlsColor:
           livestreamCallControlsColor ?? this.livestreamCallControlsColor,
-      livestreamBadgeColor: livestreamBadgeColor ?? this.livestreamBadgeColor,
     );
   }
 
@@ -287,7 +279,6 @@ class StreamColorTheme {
       modalShadow: other.modalShadow,
       livestreamBackground: other.livestreamBackground,
       livestreamCallControlsColor: other.livestreamCallControlsColor,
-      livestreamBadgeColor: other.livestreamBadgeColor,
     );
   }
 
@@ -318,11 +309,6 @@ class StreamColorTheme {
       livestreamCallControlsColor: Color.lerp(
         livestreamCallControlsColor,
         other.livestreamCallControlsColor,
-        t,
-      ),
-      livestreamBadgeColor: Color.lerp(
-        livestreamBadgeColor,
-        other.livestreamBadgeColor,
         t,
       ),
     );

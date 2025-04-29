@@ -98,7 +98,7 @@ class LivestreamInfo extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: colorTheme.livestreamBadgeColor,
+                  color: theme.liveButtonColor,
                 ),
                 child: Text(
                   callState.isBackstage

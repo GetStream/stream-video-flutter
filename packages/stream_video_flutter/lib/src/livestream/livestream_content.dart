@@ -91,6 +91,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
         final participant = streamingParticipants.first;
 
         bodyWidget = StreamCallParticipant(
+          backgroundColor: theme.colorTheme.livestreamBackground,
           key: ValueKey(participant.uniqueParticipantKey),
           call: call,
           participant: participant,

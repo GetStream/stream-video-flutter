@@ -89,12 +89,14 @@ class _LivestreamBackstageContentState
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final liveTheme = theme.livestreamTheme;
     final translations = context.translations;
 
     final participants = widget.callState.callParticipants;
     final startsAt = widget.callState.startsAt;
 
     return Scaffold(
+      backgroundColor: theme.colorTheme.livestreamBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -103,19 +105,13 @@ class _LivestreamBackstageContentState
               startsAt == null || _timeLeft <= Duration.zero
                   ? translations.livestreamBackstageStartingSoon
                   : translations.livestreamBackstageStartingIn,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
+              style: liveTheme.backstageTextStyle,
             ),
             if (startsAt != null && _timeLeft > Duration.zero) ...[
               const SizedBox(height: 12),
               Text(
                 _formatDuration(_timeLeft),
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: liveTheme.backstageCounterTextStyle,
               ),
             ],
             if (participants.isNotEmpty) ...[
@@ -123,10 +119,7 @@ class _LivestreamBackstageContentState
               Text(
                 translations
                     .livestreamBackstageParticipants(participants.length),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: theme.colorTheme.textLowEmphasis,
-                ),
+                style: liveTheme.backstageParticipantsTextStyle,
               ),
             ],
           ],
