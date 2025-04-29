@@ -7,6 +7,31 @@ allprojects {
 
 rootProject.buildDir = '../build'
 subprojects {
+    afterEvaluate {
+
+        if (project.plugins.hasPlugin("com.android.application")
+                || project.plugins.hasPlugin("com.android.library")) {
+
+            if (project.name == "photo_manager") {
+                // override version numbers if needed
+                project.android.compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+                project.android.kotlinOptions {
+                    jvmTarget = JavaVersion.VERSION_17
+                }
+                project.android {
+                    // add namespace if it is missing
+                    if (namespace == null) {
+                        namespace = project.group
+                    }
+                }
+            }
+        }
+    }
+}
+subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
