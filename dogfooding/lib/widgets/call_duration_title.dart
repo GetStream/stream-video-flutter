@@ -57,27 +57,28 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
     final videoTheme = StreamVideoTheme.of(context);
 
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            shieldCheck,
-            width: 20,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '${_duration.inMinutes.toString().padLeft(2, '0')}:${_duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
-            style: videoTheme.textTheme.title3.apply(
+        decoration: BoxDecoration(
+          color: videoTheme.callControlsTheme.optionBackgroundColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: RichText(
+          text: TextSpan(
+            text: _duration.inMinutes.toString().padLeft(2, '0'),
+            style: videoTheme.textTheme.bodyBold.copyWith(
               color: AppColorPalette.secondaryText,
             ),
+            children: <TextSpan>[
+              TextSpan(
+                text:
+                    ':${_duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColorPalette.primaryText,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

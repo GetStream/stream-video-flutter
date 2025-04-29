@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/utils/consts.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/audio_output_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/closed_captions_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/noise_cancellation_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu_item.dart';
@@ -48,7 +50,7 @@ class SettingsMenu extends StatefulWidget {
   final Call call;
   final void Function(CallReactionData)? onReactionSend;
   final void Function()? onStatsPressed;
-  final void Function(RtcMediaDevice)? onAudioOutputChange;
+  final void Function(RtcMediaDevice, {bool closeMenu})? onAudioOutputChange;
   final void Function(RtcMediaDevice)? onAudioInputChange;
 
   @override
@@ -62,6 +64,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
   late StreamVideoEffectsManager _videoEffectsManager;
 
   var _audioOutputs = <RtcMediaDevice>[];
+  RtcMediaDevice? get _audioOutputDevice =>
+      widget.call.state.value.audioOutputDevice;
   var _audioInputs = <RtcMediaDevice>[];
 
   bool showAudioOutputs = false;
@@ -92,6 +96,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
               (it) => it.kind == RtcMediaDeviceKind.audioInput,
             )
             .toList();
+
+        if (context.mounted) setState(() {}); // intentionally empty
       },
     );
   }
@@ -169,70 +175,80 @@ class _SettingsMenuState extends State<SettingsMenu> {
           widget.onReactionSend?.call(_raisedHandReaction);
         },
       ),
-      const SizedBox(height: 16),
-      StandardActionMenuItem(
-        icon: Icons.auto_graph,
-        label: 'Call stats',
-        onPressed: widget.onStatsPressed,
-      ),
-      const SizedBox(height: 16),
-      StandardActionMenuItem(
-        icon: Icons.headphones,
-        label: 'Choose audio output',
-        onPressed: () {
+      // TODO video filters
+      NoiseCancellationMenuItem(call: widget.call),
+
+      if (_audioOutputs.isDefaultMobileAudioOutput &&
+          _audioOutputDevice != null) ...[
+        ToggleAudioOutputMenuItem(
+          audioOutputDevice: _audioOutputDevice!,
+          audioOutputs: _audioOutputs,
+          onPressed: (device) => _setAudioOutput(device, closeMenu: false),
+        )
+      ] else
+        ChooseAudioOutputMenuItem(onPressed: () {
           setState(() {
             showAudioOutputs = true;
           });
-        },
-      ),
-      const SizedBox(height: 16),
-      StandardActionMenuItem(
-        icon: Icons.mic,
-        label: 'Choose audio input',
-        onPressed: () {
-          setState(() {
-            showAudioInputs = true;
-          });
-        },
-      ),
-      const SizedBox(height: 16),
-      StandardActionMenuItem(
-        icon: Icons.auto_awesome,
-        label: 'Set Background Effect',
-        onPressed: () {
-          setState(() {
-            showBackgroundEffects = true;
-          });
-        },
-      ),
+        }),
       ClosedCaptionsMenuItem(widget: widget),
-      NoiseCancellationMenuItem(call: widget.call),
       const SizedBox(height: 16),
       StandardActionMenuItem(
-        icon: Icons.high_quality_sharp,
-        label: 'Incoming video quality',
-        trailing: Text(
-          incomingVideoQuality.name,
-          style: TextStyle(
-            color: incomingVideoQuality != IncomingVideoQuality.auto
-                ? AppColorPalette.appGreen
-                : null,
-          ),
+        icon: Icons.auto_graph,
+        label: 'Stats',
+        onPressed: widget.onStatsPressed,
+      ),
+
+      if (!kIsProd) ...[
+        const SizedBox(height: 16),
+        const Text('Developer options'),
+        const SizedBox(height: 8),
+        StandardActionMenuItem(
+          icon: Icons.mic,
+          label: 'Choose audio input',
+          onPressed: () {
+            setState(() {
+              showAudioInputs = true;
+            });
+          },
         ),
-        onPressed: () {
-          setState(() {
-            showIncomingQuality = true;
-          });
-        },
-      ),
-      const SizedBox(height: 16),
-      StandardActionMenuItem(
-        icon: Icons.feedback,
-        label: 'Provide feedback',
-        onPressed: () {
-          showFeedbackDialog(context, call: widget.call);
-        },
-      ),
+        const SizedBox(height: 16),
+        StandardActionMenuItem(
+          icon: Icons.auto_awesome,
+          label: 'Set Background Effect',
+          onPressed: () {
+            setState(() {
+              showBackgroundEffects = true;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        StandardActionMenuItem(
+          icon: Icons.high_quality_sharp,
+          label: 'Incoming video quality',
+          trailing: Text(
+            incomingVideoQuality.name,
+            style: TextStyle(
+              color: incomingVideoQuality != IncomingVideoQuality.auto
+                  ? AppColorPalette.appGreen
+                  : null,
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              showIncomingQuality = true;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        StandardActionMenuItem(
+          icon: Icons.feedback,
+          label: 'Provide feedback',
+          onPressed: () {
+            showFeedbackDialog(context, call: widget.call);
+          },
+        ),
+      ],
     ];
   }
 
@@ -256,13 +272,11 @@ class _SettingsMenuState extends State<SettingsMenu> {
               return StandardActionMenuItem(
                 icon: Icons.multitrack_audio,
                 label: device.label,
-                color:
-                    widget.call.state.value.audioOutputDevice?.id == device.id
-                        ? AppColorPalette.appGreen
-                        : null,
+                color: _audioOutputDevice?.id == device.id
+                    ? AppColorPalette.appGreen
+                    : null,
                 onPressed: () {
-                  widget.call.setAudioOutputDevice(device);
-                  widget.onAudioOutputChange?.call(device);
+                  _setAudioOutput(device);
                 },
               );
             },
@@ -270,6 +284,11 @@ class _SettingsMenuState extends State<SettingsMenu> {
           .cast()
           .insertBetween(const SizedBox(height: 16)),
     ];
+  }
+
+  void _setAudioOutput(RtcMediaDevice device, {bool closeMenu = true}) {
+    widget.call.setAudioOutputDevice(device);
+    widget.onAudioOutputChange?.call(device, closeMenu: closeMenu);
   }
 
   List<Widget> _buildAudioInputsMenu() {
@@ -568,4 +587,11 @@ class _SettingsMenuState extends State<SettingsMenu> {
       return IncomingVideoQuality.auto;
     }
   }
+}
+
+extension on List<RtcMediaDevice> {
+  bool get isDefaultMobileAudioOutput =>
+      length == 2 &&
+      any((it) => it.id.toUpperCase() == deviceIdSpeaker.toUpperCase()) &&
+      any((it) => it.id.toUpperCase() == deviceIdEarpiece.toUpperCase());
 }
