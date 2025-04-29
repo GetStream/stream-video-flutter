@@ -52,6 +52,8 @@ jobs:
 
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
+        env:
+          MELOS_PACKAGES: stream_**,example
 
       # Only analyze lib/; non-client code doesn't need to work on
       # all supported legacy version.
