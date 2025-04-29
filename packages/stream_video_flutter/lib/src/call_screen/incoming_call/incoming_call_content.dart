@@ -90,7 +90,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
     final users =
-        widget.callState.otherParticipants.map((e) => e.toUserInfo()).toList();
+        widget.callState.ringingMembers.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
       participants: users,

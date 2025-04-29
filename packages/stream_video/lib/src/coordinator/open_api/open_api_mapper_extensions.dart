@@ -8,7 +8,6 @@ import '../models/coordinator_events.dart';
 import 'event/event_type.dart';
 import 'event/open_api_event.dart';
 import 'open_api_extensions.dart';
-import '../../../../open_api/video/coordinator/api.dart' as open;
 
 extension WebsocketEventMapperExt on OpenApiEvent {
   /// Returns [CoordinatorEvent].
@@ -396,6 +395,5 @@ extension WebsocketEventMapperExt on OpenApiEvent {
       case EventType.unknown:
         return const CoordinatorUnknownEvent();
     }
-    return const CoordinatorUnsupportedEvent();
   }
 }

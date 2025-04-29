@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'call/call_type.dart';
+import 'models/call_member_state.dart';
 import 'models/models.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
@@ -36,6 +37,7 @@ class CallState extends Equatable {
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
+      callMembers: List.unmodifiable(const []),
       capabilitiesByRole: const {},
       createdAt: null,
       updatedAt: null,
@@ -75,6 +77,7 @@ class CallState extends Equatable {
     required this.rtmpIngress,
     required this.ownCapabilities,
     required this.callParticipants,
+    required this.callMembers,
     required this.capabilitiesByRole,
     required this.videoInputDevice,
     required this.audioInputDevice,
@@ -118,6 +121,7 @@ class CallState extends Equatable {
   final RtcMediaDevice? audioOutputDevice;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
+  final List<CallMemberState> callMembers;
   final Map<String, List<String>> capabilitiesByRole;
   final DateTime? createdAt;
   final DateTime? startsAt;
@@ -152,6 +156,19 @@ class CallState extends Equatable {
     return callParticipants.where((element) => element.isSpeaking).toList();
   }
 
+  bool get createdByMe => createdByUserId == currentUserId;
+
+  List<CallMemberState> get ringingMembers {
+    return callMembers
+        .where(
+          (member) =>
+              member.callAcceptedAt == null &&
+              member.callRejectedAt == null &&
+              member.userId != currentUserId,
+        )
+        .toList();
+  }
+
   /// Returns a copy of this [CallState] with the given fields replaced
   /// with the new values.
   CallState copyWith({
@@ -176,6 +193,7 @@ class CallState extends Equatable {
     RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
+    List<CallMemberState>? callMembers,
     Map<String, List<String>>? capabilitiesByRole,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -216,6 +234,7 @@ class CallState extends Equatable {
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
+      callMembers: callMembers ?? this.callMembers,
       capabilitiesByRole: capabilitiesByRole ?? this.capabilitiesByRole,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -265,6 +284,7 @@ class CallState extends Equatable {
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
       capabilitiesByRole: capabilitiesByRole,
+      callMembers: metadata.toCallMembers(),
     );
   }
 
