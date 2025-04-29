@@ -17,7 +17,7 @@ Official Noise Cancellation Plugin for Stream Video.
   s.dependency 'Flutter'
   s.dependency 'stream_webrtc_flutter'
   s.dependency 'StreamVideoNoiseCancellation'
-  s.platform = :ios, '14.0'
+  s.platform = :ios, '16.0'
   s.static_framework = true
 
   # Flutter.framework does not contain a i386 slice.
