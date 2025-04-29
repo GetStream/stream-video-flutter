@@ -70,7 +70,7 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
 
                 return const SizedBox.shrink();
               },
-            )
+            ),
           ],
         ),
       ),
