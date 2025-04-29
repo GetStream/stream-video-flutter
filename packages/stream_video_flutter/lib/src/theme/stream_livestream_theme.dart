@@ -335,7 +335,9 @@ class StreamLivestreamThemeData with Diagnosticable {
       )
       ..add(
         DiagnosticsProperty<TextStyle>(
-            'backstageTextStyle', backstageTextStyle),
+          'backstageTextStyle',
+          backstageTextStyle,
+        ),
       )
       ..add(
         DiagnosticsProperty<TextStyle>(
@@ -351,7 +353,9 @@ class StreamLivestreamThemeData with Diagnosticable {
       )
       ..add(
         DiagnosticsProperty<TextStyle>(
-            'liveEndedTextStyle', liveEndedTextStyle),
+          'liveEndedTextStyle',
+          liveEndedTextStyle,
+        ),
       )
       ..add(
         DiagnosticsProperty<TextStyle>(
