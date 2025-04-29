@@ -180,8 +180,11 @@ class _CallScreenState extends State<CallScreen> {
                                   _moreMenuVisible = false;
                                 },
                               ),
-                              onAudioOutputChange: (_) =>
-                                  setState(() => _moreMenuVisible = false),
+                              onAudioOutputChange: (_, {closeMenu = true}) {
+                                if (closeMenu) {
+                                  setState(() => _moreMenuVisible = false);
+                                }
+                              },
                               onAudioInputChange: (_) =>
                                   setState(() => _moreMenuVisible = false),
                             ),

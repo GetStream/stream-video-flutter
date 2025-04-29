@@ -23,32 +23,34 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: videoTheme.callControlsTheme.optionBackgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.all(4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            shieldCheck,
-            width: 20,
-          ),
-          const SizedBox(width: 8),
-          StreamBuilder<Duration>(
-              stream: widget.call.callDurationStream,
-              builder: (context, snapshot) {
-                final duration = snapshot.data ?? Duration.zero;
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: StreamBuilder<Duration>(
+          stream: widget.call.callDurationStream,
+          builder: (context, snapshot) {
+            final duration = snapshot.data ?? Duration.zero;
 
-                return Text(
-                  '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
-                  style: videoTheme.textTheme.title3.apply(
-                    color: AppColorPalette.secondaryText,
+            return RichText(
+              text: TextSpan(
+                text: duration.inMinutes.toString().padLeft(2, '0'),
+                style: videoTheme.textTheme.bodyBold.copyWith(
+                  color: AppColorPalette.secondaryText,
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text:
+                        ':${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColorPalette.primaryText,
+                    ),
                   ),
-                );
-              }),
-        ],
-      ),
+                ],
+              ),
+            );
+          }),
     );
   }
 }
