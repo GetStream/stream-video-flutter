@@ -10,6 +10,7 @@ import '../call/stats/tracer.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../utils/result.dart';
+import 'sfu_extensions.dart';
 
 class SfuClient {
   SfuClient({
@@ -43,7 +44,7 @@ class SfuClient {
     sfu.SendAnswerRequest request,
   ) async {
     try {
-      _tracer.trace('SendAnswer', request.writeToJsonMap());
+      _tracer.trace('SendAnswer', request.toJson());
       final response = await _client.sendAnswer(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
@@ -56,7 +57,7 @@ class SfuClient {
     sfu_models.ICETrickle request,
   ) async {
     try {
-      _tracer.trace('SendIceCandidate', request.writeToJsonMap());
+      _tracer.trace('SendIceCandidate', request.toJson());
       final response = await _client.iceTrickle(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
@@ -69,7 +70,7 @@ class SfuClient {
     sfu.ICERestartRequest request,
   ) async {
     try {
-      _tracer.trace('RestartIce', request.writeToJsonMap());
+      _tracer.trace('RestartIce', request.toJson());
       final response = await _client.iceRestart(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
@@ -82,7 +83,7 @@ class SfuClient {
     sfu.SetPublisherRequest request,
   ) async {
     try {
-      _tracer.trace('SetPublisher', request.writeToJsonMap());
+      _tracer.trace('SetPublisher', request.toJson());
       _logger.v(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
       _logger.v(() => '[setPublisher] response: ${response.stringify()}');
@@ -97,7 +98,7 @@ class SfuClient {
     sfu.UpdateMuteStatesRequest request,
   ) async {
     try {
-      _tracer.trace('UpdateMuteState', request.writeToJsonMap());
+      _tracer.trace('UpdateMuteState', request.toJson());
       _logger.v(() => '[updateMuteState] request: $request');
       final response = await _client.updateMuteStates(
         _withAuthHeaders(),
@@ -115,7 +116,7 @@ class SfuClient {
     sfu.UpdateSubscriptionsRequest request,
   ) async {
     try {
-      _tracer.trace('UpdateSubscriptions', request.writeToJsonMap());
+      _tracer.trace('UpdateSubscriptions', request.toJson());
       _logger.v(() => '[updateSubscriptions] request: $request');
       final response = await _client.updateSubscriptions(
         _withAuthHeaders(),
@@ -133,7 +134,7 @@ class SfuClient {
     sfu.StartNoiseCancellationRequest request,
   ) async {
     try {
-      _tracer.trace('StartNoiseCancellation', request.writeToJsonMap());
+      _tracer.trace('StartNoiseCancellation', request.toJson());
       _logger.v(() => '[startNoiseCancellation] request: $request');
       final response = await _client.startNoiseCancellation(
         _withAuthHeaders(),
@@ -151,7 +152,7 @@ class SfuClient {
     sfu.StopNoiseCancellationRequest request,
   ) async {
     try {
-      _tracer.trace('StopNoiseCancellation', request.writeToJsonMap());
+      _tracer.trace('StopNoiseCancellation', request.toJson());
       _logger.v(() => '[stopNoiseCancellation] request: $request');
       final response = await _client.stopNoiseCancellation(
         _withAuthHeaders(),

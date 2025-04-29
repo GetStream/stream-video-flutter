@@ -4,6 +4,7 @@ import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../call/stats/tracer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../sfu/sfu_extensions.dart';
 import '../types/other.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
@@ -74,7 +75,7 @@ class StreamPeerConnectionFactory {
     );
 
     if (clientDetails != null) {
-      tracer.trace('clientDetails', clientDetails.writeToJson());
+      tracer.trace('clientDetails', clientDetails.toJson());
     }
 
     tracer.trace('create', configuration.toMap());

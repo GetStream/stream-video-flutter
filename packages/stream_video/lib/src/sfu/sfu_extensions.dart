@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
+import 'package:sdp_transform/sdp_transform.dart';
 
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
@@ -86,10 +89,155 @@ extension CodecX on sfu_models.Codec {
 
 extension SetPublisherRequestX on sfu.SetPublisherRequest {
   Map<String, dynamic> toJson() {
+    final parsedSdp = parse(sdp);
+
     return {
-      'sdp': sdp,
+      'sdp': parsedSdp,
       'session_id': sessionId,
       'tracks': tracks.map((track) => track.toJson()).toList(),
+    };
+  }
+}
+
+extension ClientDetailsX on sfu_models.ClientDetails {
+  Map<String, dynamic> toJson() {
+    return {
+      'sdk': sdk.toJson(),
+      'os': os.toJson(),
+      'browser': browser.toJson(),
+      'device': device.toJson(),
+    };
+  }
+}
+
+extension SdkX on sfu_models.Sdk {
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'major': major,
+      'minor': minor,
+      'patch': patch,
+    };
+  }
+}
+
+extension OSX on sfu_models.OS {
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'version': version,
+      'architecture': architecture,
+    };
+  }
+}
+
+extension BrowserX on sfu_models.Browser {
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'version': version,
+    };
+  }
+}
+
+extension DeviceX on sfu_models.Device {
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'version': version,
+    };
+  }
+}
+
+extension SendAnswerRequestX on sfu.SendAnswerRequest {
+  Map<String, dynamic> toJson() {
+    final parsedSdp = parse(sdp);
+    return {
+      'peer_type': peerType.toString(),
+      'sdp': parsedSdp,
+      'session_id': sessionId,
+    };
+  }
+}
+
+extension ICETrickleX on sfu_models.ICETrickle {
+  Map<String, dynamic> toJson() {
+    return {
+      'peer_type': peerType.toString(),
+      'ice_candidate': jsonDecode(iceCandidate),
+      'session_id': sessionId,
+    };
+  }
+}
+
+extension ICERestartRequestX on sfu.ICERestartRequest {
+  Map<String, dynamic> toJson() {
+    return {
+      'session_id': sessionId,
+      'peer_type': peerType.toString(),
+    };
+  }
+}
+
+extension UpdateMuteStatesRequestX on sfu.UpdateMuteStatesRequest {
+  Map<String, dynamic> toJson() {
+    return {
+      'session_id': sessionId,
+      'mute_states': muteStates.map((state) => state.toJson()).toList(),
+    };
+  }
+}
+
+extension TrackMuteStateX on sfu.TrackMuteState {
+  Map<String, dynamic> toJson() {
+    return {
+      'track_type': trackType.toString(),
+      'muted': muted,
+    };
+  }
+}
+
+extension UpdateSubscriptionsRequestX on sfu.UpdateSubscriptionsRequest {
+  Map<String, dynamic> toJson() {
+    return {
+      'session_id': sessionId,
+      'tracks': tracks.map((sub) => sub.toJson()).toList(),
+    };
+  }
+}
+
+extension TrackSubscriptionDetailsX on sfu.TrackSubscriptionDetails {
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'session_id': sessionId,
+      'track_type': trackType.toString(),
+      'dimension': dimension.toJson(),
+    };
+  }
+}
+
+extension VideoDimensionX on sfu_models.VideoDimension {
+  Map<String, dynamic> toJson() {
+    return {
+      'width': width,
+      'height': height,
+    };
+  }
+}
+
+extension StartNoiseCancellationRequestX on sfu.StartNoiseCancellationRequest {
+  Map<String, dynamic> toJson() {
+    return {
+      'session_id': sessionId,
+    };
+  }
+}
+
+extension StopNoiseCancellationRequestX on sfu.StopNoiseCancellationRequest {
+  Map<String, dynamic> toJson() {
+    return {
+      'session_id': sessionId,
     };
   }
 }

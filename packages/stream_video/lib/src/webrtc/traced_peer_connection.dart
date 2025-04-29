@@ -34,33 +34,33 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
     pc
       ..onRenegotiationNeeded = () {
-        tracer.trace('onrenegotiationneeded', null);
+        tracer.trace('onRenegotiationNeeded', null);
         originalNegotiationNeeded?.call();
       }
       ..onIceConnectionState = (state) {
-        tracer.trace('oniceconnectionstatechange', state.name);
+        tracer.trace('onIceConnectionStateChange', state.name);
         originalIceConnectionState?.call(state);
       }
       ..onIceCandidate = (candidate) {
-        tracer.trace('onicecandidate', candidate.toMap());
+        tracer.trace('onIceCandidate', candidate.toMap());
         originalIceCandidate?.call(candidate);
       }
       ..onTrack = (event) {
         final streams = event.streams.map((stream) => 'stream:${stream.id}');
         tracer.trace(
-            'ontrack', '${event.track.kind}:${event.track.id} $streams');
+            'onTrack', '${event.track.kind}:${event.track.id} $streams');
         originalOnTrack?.call(event);
       }
       ..onIceGatheringState = (state) {
-        tracer.trace('onicegatheringstatechange', state.name);
+        tracer.trace('onIceGatheringStateChange', state.name);
         originalIceGatheringState?.call(state);
       }
       ..onSignalingState = (state) {
-        tracer.trace('onsignalingstatechange', state.name);
+        tracer.trace('onSignalingStateChange', state.name);
         originalSignalingState?.call(state);
       }
       ..onConnectionState = (state) {
-        tracer.trace('onconnectionstatechange', state.name);
+        tracer.trace('onConnectionStateChange', state.name);
 
         if (state ==
                 rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected ||
@@ -73,7 +73,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         originalConnectionState?.call(state);
       }
       ..onDataChannel = (channel) {
-        tracer.trace('ondatachannel', [channel.id, channel.label]);
+        tracer.trace('onDataChannel', [channel.id, channel.label]);
         originalDataChannel?.call(channel);
       };
   }
@@ -92,8 +92,8 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     if (original == null) return {};
 
     return original
-        // .map(Map<String, dynamic>.from)
-        // .toList()
+        .map(Map<String, dynamic>.from)
+        .toList()
         .asMap()
         .map((_, map) => MapEntry(map['id'], map));
   }
