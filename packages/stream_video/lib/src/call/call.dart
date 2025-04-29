@@ -930,6 +930,22 @@ class Call {
     return Result.success(joined);
   }
 
+  /// Updates the configuration of the call.
+  ///
+  /// - [startsAt]: The date and time when the call is scheduled to start.
+  /// - [custom]: Custom metadata to be added to the call.
+  /// - [ring]: Ring settings for the call.
+  /// - [audio]: Audio settings for the call.
+  /// - [video]: Video settings for the call.
+  /// - [screenShare]: Screen share settings for the call.
+  /// - [recording]: Recording settings for the call.
+  /// - [transcription]: Transcription settings for the call.
+  /// - [backstage]: Backstage settings for the call.
+  /// - [geofencing]: Geofencing settings for the call.
+  /// - [limits]: Limits settings for the call.
+  /// - [broadcasting]: Broadcasting settings for the call.
+  /// - [session]: Session settings for the call.
+  /// - [frameRecording]: Frame recording settings for the call.
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
     DateTime? startsAt,
@@ -1775,6 +1791,19 @@ class Call {
   /// - [watch]:  If `true`, listens to coordinator events and updates call state accordingly.
   /// - [members]:An optional list of `MemberRequest` objects to add to the call.
   /// - [memberIds]: An optional list of member IDs to add to the call.
+  /// - [membersLimit]: Sets the total number of members to return as part of the response.
+  /// - [ring]: Ring settings for the call.
+  /// - [audio]: Audio settings for the call.
+  /// - [videoSettings]: Video settings for the call.
+  /// - [screenShare]: Screen share settings for the call.
+  /// - [recording]: Recording settings for the call.
+  /// - [transcription]: Transcription settings for the call.
+  /// - [backstage]: Backstage settings for the call.
+  /// - [geofencing]: Geofencing settings for the call.
+  /// - [limits]: Limits settings for the call.
+  /// - [broadcasting]: Broadcasting settings for the call.
+  /// - [session]: Session settings for the call.
+  /// - [frameRecording]: Frame recording settings for the call.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     List<MemberRequest> members = const [],
