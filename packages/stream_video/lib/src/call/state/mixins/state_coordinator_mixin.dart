@@ -3,12 +3,14 @@ import 'package:state_notifier/state_notifier.dart';
 
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_member_state.dart';
 import '../../../models/call_metadata.dart';
 import '../../../models/call_participant_state.dart';
 import '../../../models/call_reaction.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
 import '../../call_events.dart';
+import '../../call_reject_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -35,10 +37,11 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return;
     }
 
-    final participant = state.callParticipants.firstWhereOrNull((participant) {
-      return participant.userId == event.acceptedByUserId;
+    final member = state.callMembers.firstWhereOrNull((member) {
+      return member.userId == event.acceptedByUserId;
     });
-    if (participant == null) {
+
+    if (member == null) {
       _logger.w(
         () =>
             '[coordinatorUpdateCallAccepted] rejected (accepted by non-Member)',
@@ -47,13 +50,20 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return;
     }
 
-    state = state
-        .copyFromMetadata(
-          event.metadata,
-        )
-        .copyWith(
-          status: CallStatus.outgoing(acceptedByCallee: true),
+    final members = state.callMembers.map((m) {
+      if (m.userId == event.acceptedByUserId) {
+        return m.copyWith(
+          callAcceptedAt: event.createdAt,
         );
+      } else {
+        return m;
+      }
+    }).toList();
+
+    state = state.copyWith(
+      status: CallStatus.outgoing(acceptedByCallee: true),
+      callMembers: members,
+    );
   }
 
   void coordinatorCallRejected(
@@ -69,44 +79,61 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return;
     }
 
-    final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.rejectedByUserId;
-    });
+    final rejectedBy = event.metadata.session.rejectedBy;
 
-    if (participantIndex == -1) {
-      _logger.w(
-        () => '[coordinatorCallRejected] rejected '
-            '(by unknown user): ${event.rejectedByUserId}',
-      );
-      return;
-    }
-
-    final callParticipants = [...state.callParticipants];
-    final removed = callParticipants.removeAt(participantIndex);
-
-    if (removed.userId == state.currentUserId ||
-        callParticipants.hasSingle(state.currentUserId)) {
-      state = state
-          .copyFromMetadata(
-            event.metadata,
-          )
-          .copyWith(
-            status: CallStatus.disconnected(
-              DisconnectReason.rejected(
-                byUserId: removed.userId,
-              ),
-            ),
-            sessionId: '',
-            callParticipants: callParticipants,
-          );
-    }
-    state = state
-        .copyFromMetadata(
-          event.metadata,
-        )
-        .copyWith(
-          callParticipants: callParticipants,
+    final members = state.callMembers.map((m) {
+      if (m.userId == event.rejectedByUserId) {
+        return m.copyWith(
+          callRejectedAt: event.createdAt,
         );
+      } else {
+        return m;
+      }
+    }).toList();
+
+    if (state.createdByMe) {
+      final everyoneElseRejected = state.callMembers
+          .where((m) => m.userId != state.currentUserId)
+          .every((m) => rejectedBy.keys.contains(m.userId));
+
+      if (everyoneElseRejected) {
+        _logger.d(
+          () => '[coordinatorCallRejected] everyone rejected, disconnecting',
+        );
+        state = state.copyWith(
+          status: CallStatus.disconnected(
+            DisconnectReason.rejected(
+              byUserId: event.rejectedByUserId,
+              reason: CallRejectReason.custom('ring: everyone rejected'),
+            ),
+          ),
+          sessionId: '',
+          callParticipants: const [],
+          callMembers: members,
+        );
+        return;
+      }
+    } else {
+      if (rejectedBy.keys.contains(state.createdByUserId)) {
+        _logger.d(
+          () => '[coordinatorCallRejected] creator rejected, disconnecting',
+        );
+        state = state.copyWith(
+          status: CallStatus.disconnected(
+            DisconnectReason.rejected(
+              byUserId: event.rejectedByUserId,
+              reason: CallRejectReason.custom('ring: creator rejected'),
+            ),
+          ),
+          sessionId: '',
+          callParticipants: const [],
+          callMembers: members,
+        );
+        return;
+      }
+    }
+
+    state = state.copyWith(callMembers: members);
   }
 
   void coordinatorCallEnded(
@@ -426,10 +453,68 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       callParticipants: newParticipants,
     );
   }
-}
 
-extension on List<CallParticipantState> {
-  bool hasSingle(String userId) {
-    return length == 1 && firstOrNull?.userId == userId;
+  void coordinatorCallMemberAdded(
+    StreamCallMemberAddedEvent event,
+  ) {
+    state = state.copyWith(
+      callMembers: [
+        ...state.callMembers,
+        ...event.members.map(
+          (member) {
+            final user = event.metadata.users.values.firstWhereOrNull((user) {
+              return user.id == member.userId;
+            });
+            return CallMemberState.fromCallMember(member, user);
+          },
+        ),
+      ],
+    );
+  }
+
+  void coordinatorCallMemberRemoved(
+    StreamCallMemberRemovedEvent event,
+  ) {
+    state = state.copyWith(
+      callMembers: state.callMembers
+          .where((member) => !event.removedMemberIds.contains(member.userId))
+          .toList(),
+    );
+  }
+
+  void coordinatorCallMemberUpdated(
+    StreamCallMemberUpdatedEvent event,
+  ) {
+    state = state.copyWith(
+      callMembers: state.callMembers.map((member) {
+        final updatedMember =
+            event.members.firstWhereOrNull((m) => m.userId == member.userId);
+        if (updatedMember != null) {
+          return member.copyWith(
+            roles: updatedMember.roles,
+            custom: updatedMember.custom,
+          );
+        } else {
+          return member;
+        }
+      }).toList(),
+    );
+  }
+
+  void coordinatorCallUserBlocked(StreamCallUserBlockedEvent event) {
+    state = state.copyWith(
+      blockedUserIds: [
+        ...state.blockedUserIds,
+        event.user.id,
+      ],
+    );
+  }
+
+  void coordinatorCallUserUnblocked(StreamCallUserUnblockedEvent event) {
+    state = state.copyWith(
+      blockedUserIds: state.blockedUserIds
+          .where((userId) => userId != event.user.id)
+          .toList(),
+    );
   }
 }
