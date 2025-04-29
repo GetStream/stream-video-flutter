@@ -1,3 +1,6 @@
+import 'package:http/http.dart';
+
+import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
@@ -28,7 +31,9 @@ class RtcManagerFactory {
   final Map<String, dynamic> mediaConstraints;
 
   Future<RtcManager> makeRtcManager({
+    ClientDetails? clientDetails,
     String? publisherId,
+    int? sessionSequence,
     List<SfuPublishOptions> publishOptions = const [],
   }) async {
     _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
@@ -36,12 +41,16 @@ class RtcManagerFactory {
     final publisher = publisherId != null
         ? await pcFactory.makePublisher(
             configuration,
+            clientDetails,
+            sessionSequence?.toString(),
             mediaConstraints,
           )
         : null;
 
     final subscriber = await pcFactory.makeSubscriber(
       configuration,
+      clientDetails,
+      sessionSequence?.toString(),
       mediaConstraints,
     );
 

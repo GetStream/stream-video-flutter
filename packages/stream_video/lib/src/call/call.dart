@@ -59,9 +59,9 @@ import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
-import 'sfu_stats_reporter.dart';
 import 'state/call_state_notifier.dart';
-import 'stats_reporter.dart';
+import 'stats/sfu_stats_reporter.dart';
+import 'stats/stats_reporter.dart';
 
 typedef OnCallPermissionRequest = void Function(
   StreamCallPermissionRequestEvent,

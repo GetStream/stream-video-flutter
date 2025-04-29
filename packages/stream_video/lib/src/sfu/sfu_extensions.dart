@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart';
 
+import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../call_state.dart';
 import '../models/models.dart';
 import '../utils/string.dart';
@@ -35,5 +37,59 @@ extension SfuParticipantX on SfuParticipant {
       audioLevel: audioLevel,
       isDominantSpeaker: isDominantSpeaker,
     );
+  }
+}
+
+extension TrackInfoX on sfu_models.TrackInfo {
+  Map<String, dynamic> toJson() {
+    return {
+      'track_id': trackId,
+      'track_type': trackType.toString(),
+      'layers': layers.map((layer) => layer.toJson()).toList(),
+      'mid': mid,
+      'dtx': dtx,
+      'stereo': stereo,
+      'red': red,
+      'muted': muted,
+      'codec': codec.toJson(),
+      'publish_option_id': publishOptionId,
+    };
+  }
+}
+
+extension VideoLayerX on sfu_models.VideoLayer {
+  Map<String, dynamic> toJson() {
+    return {
+      'rid': rid,
+      'video_dimension': {
+        'width': videoDimension.width,
+        'height': videoDimension.height,
+      },
+      'bitrate': bitrate,
+      'fps': fps,
+      'quality': quality.toString(),
+    };
+  }
+}
+
+extension CodecX on sfu_models.Codec {
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'fmtp': fmtp,
+      'clock_rate': clockRate,
+      'encoding_parameters': encodingParameters,
+      'payload_type': payloadType,
+    };
+  }
+}
+
+extension SetPublisherRequestX on sfu.SetPublisherRequest {
+  Map<String, dynamic> toJson() {
+    return {
+      'sdp': sdp,
+      'session_id': sessionId,
+      'tracks': tracks.map((track) => track.toJson()).toList(),
+    };
   }
 }

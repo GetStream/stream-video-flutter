@@ -70,6 +70,7 @@ class CallSession extends Disposable {
   })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
+          sessionSeq: sessionSeq,
         ),
         sfuWS = SfuWebSocket(
           sessionSeq: sessionSeq,
@@ -325,7 +326,10 @@ class CallSession extends Disposable {
       _logger.v(() => '[start] sfu joined: $event');
 
       if (isAnonymousUser) {
-        rtcManager = await rtcManagerFactory.makeRtcManager()
+        rtcManager = await rtcManagerFactory.makeRtcManager(
+          clientDetails: _clientDetails,
+          sessionSequence: sessionSeq,
+        )
           ..onSubscriberIceCandidate = _onLocalIceCandidate
           ..onSubscriberIssue = onPeerConnectionIssue
           ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -342,6 +346,8 @@ class CallSession extends Disposable {
         rtcManager = await rtcManagerFactory.makeRtcManager(
           publisherId: localTrackId,
           publishOptions: event.publishOptions,
+          clientDetails: _clientDetails,
+          sessionSequence: sessionSeq,
         )
           ..onPublisherIceCandidate = _onLocalIceCandidate
           ..onSubscriberIceCandidate = _onLocalIceCandidate

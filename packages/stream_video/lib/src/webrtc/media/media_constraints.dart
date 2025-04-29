@@ -1,6 +1,7 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
 
+import '../../call/stats/tracer.dart';
 import '../../logger/stream_log.dart';
 import 'screen_share_constraints.dart';
 
@@ -31,22 +32,56 @@ abstract class MediaConstraints {
   MediaConstraints copyWith();
 }
 
+final mediaDevicesTracer = Tracer(null);
+
 extension MediaDevices on rtc_interface.MediaDevices {
-  Future<rtc.MediaStream> getMedia(MediaConstraints constraints) {
+  Future<rtc.MediaStream> getMedia(MediaConstraints constraints) async {
     final constraintsMap = constraints.toMap();
     streamLog.i(
       'SV:MediaDevices',
       () =>
           '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap',
     );
-    if (constraints is ScreenShareConstraints) {
-      return rtc.navigator.mediaDevices.getDisplayMedia(
-        constraintsMap,
-      );
-    } else {
-      return rtc.navigator.mediaDevices.getUserMedia(
-        constraintsMap,
-      );
+
+    late rtc.MediaStream stream;
+    late String tag;
+
+    try {
+      if (constraints is ScreenShareConstraints) {
+        tag = 'navigator.mediaDevices.getDisplayMedia';
+        mediaDevicesTracer.trace(tag, constraintsMap);
+
+        stream = await rtc.navigator.mediaDevices.getDisplayMedia(
+          constraintsMap,
+        );
+      } else {
+        tag = 'navigator.mediaDevices.getUserMedia';
+        mediaDevicesTracer.trace(tag, constraintsMap);
+
+        stream = await rtc.navigator.mediaDevices.getUserMedia(
+          constraintsMap,
+        );
+      }
+    } catch (e) {
+      mediaDevicesTracer.trace('${tag}OnFailure', e.toString());
+      rethrow;
     }
+
+    final straemDump = {
+      'id': stream.id,
+      'tracks': stream.getTracks().map((track) {
+        return {
+          'id': track.id,
+          'kind': track.kind,
+          'label': track.label,
+          'enabled': track.enabled,
+          'muted': track.muted,
+          // 'readyState': track.readyState,
+        };
+      }).toList(),
+    };
+
+    mediaDevicesTracer.trace('${tag}OnSuccess', straemDump);
+    return stream;
   }
 }
