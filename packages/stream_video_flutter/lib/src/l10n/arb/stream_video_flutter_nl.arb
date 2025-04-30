@@ -6,7 +6,7 @@
   "desktopScreenShareWindow": "Venster",
   "livestreamBackstageStartingSoon": "Livestream begint binnenkort",
   "livestreamBackstageStartingIn": "Livestream begint over:",
-  "livestreamBackstageParticipants": "{count, plural, zero{Nog geen deelnemer is} one{Eén deelnemer is} other{{count} deelnemers zijn}} vroeg aanwezig",
+  "livestreamBackstageParticipants": "{count, plural, zero{Nog geen deelnemers  zijn} one{Eén deelnemer is} other{{count} deelnemers zijn}} vroeg aanwezig",
   "livestreamEndedStatus": "De livestream is afgelopen.",
   "livestreamEndedWatchRecordings": "Bekijk de opnames:",
   "livestreamHostNotAvailable": "De video van de host is niet beschikbaar.",

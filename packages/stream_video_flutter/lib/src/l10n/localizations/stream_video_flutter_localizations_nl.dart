@@ -37,7 +37,7 @@ class StreamVideoFlutterLocalizationsNl
       locale: localeName,
       other: '$count deelnemers zijn',
       one: 'Eén deelnemer is',
-      zero: 'Nog geen deelnemer is',
+      zero: 'Nog geen deelnemers  zijn',
     );
     return '$_temp0 vroeg aanwezig';
   }

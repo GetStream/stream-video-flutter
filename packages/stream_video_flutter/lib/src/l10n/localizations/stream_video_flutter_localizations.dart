@@ -144,7 +144,7 @@ abstract class StreamVideoFlutterLocalizations {
   /// Label for livestream backstage showing participants count
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, zero{No participant has} one{One participant has} other{{count} participants have}} joined early'**
+  /// **'{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early'**
   String livestreamBackstageParticipants(num count);
 
   /// Label shown when the livestream has already ended.

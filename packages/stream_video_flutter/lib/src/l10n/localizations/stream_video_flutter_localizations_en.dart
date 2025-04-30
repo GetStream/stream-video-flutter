@@ -37,7 +37,7 @@ class StreamVideoFlutterLocalizationsEn
       locale: localeName,
       other: '$count participants have',
       one: 'One participant has',
-      zero: 'No participant has',
+      zero: 'No participants have',
     );
     return '$_temp0 joined early';
   }

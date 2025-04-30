@@ -27,7 +27,7 @@
   "@livestreamBackstageStartingIn": {
     "description": "Label for livestream backstage when live stream counter is shown"
   },
-  "livestreamBackstageParticipants": "{count, plural, zero{No participant has} one{One participant has} other{{count} participants have}} joined early",
+  "livestreamBackstageParticipants": "{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early",
   "@livestreamBackstageParticipants": {
     "description": "Label for livestream backstage showing participants count"
   },
