@@ -25,25 +25,32 @@ class StreamVideoFlutterLocalizationsNl
   String get desktopScreenShareWindow => 'Venster';
 
   @override
-  String get livestreamBackstageStartingSoon => 'Livestream will start soon';
+  String get livestreamBackstageStartingSoon => 'Livestream begint binnenkort';
 
   @override
-  String get livestreamBackstageStartingIn => 'Livestream will start in:';
+  String get livestreamBackstageStartingIn => 'Livestream begint over:';
 
   @override
-  String livestreamBackstageParticipants(Object count) {
-    return '$count paritipants have joined early';
+  String livestreamBackstageParticipants(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deelnemers zijn',
+      one: 'Eén deelnemer is',
+      zero: 'Nog geen deelnemer is',
+    );
+    return '$_temp0 vroeg aanwezig';
   }
 
   @override
-  String get livestreamEndedStatus => 'The livestream has ended.';
+  String get livestreamEndedStatus => 'De livestream is afgelopen.';
 
   @override
-  String get livestreamEndedWatchRecordings => 'Watch the recordings:';
+  String get livestreamEndedWatchRecordings => 'Bekijk de opnames:';
 
   @override
   String get livestreamHostNotAvailable =>
-      'The host\'s video is not available.';
+      'De video van de host is niet beschikbaar.';
 
   @override
   String get livestreamBackstage => 'Backstage';

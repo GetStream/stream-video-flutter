@@ -31,8 +31,15 @@ class StreamVideoFlutterLocalizationsEn
   String get livestreamBackstageStartingIn => 'Livestream will start in:';
 
   @override
-  String livestreamBackstageParticipants(Object count) {
-    return '$count paritipants have joined early';
+  String livestreamBackstageParticipants(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants have',
+      one: 'One participant has',
+      zero: 'No participant has',
+    );
+    return '$_temp0 joined early';
   }
 
   @override
