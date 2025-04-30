@@ -652,6 +652,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
   Future<Result<CallMetadata>> updateCall({
     required StreamCallCid callCid,
     Map<String, Object> custom = const {},
+    DateTime? startsAt,
     StreamRingSettings? ring,
     StreamAudioSettings? audio,
     StreamVideoSettings? video,
@@ -669,6 +670,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.updateCall(
         callCid: callCid,
         custom: custom,
+        startsAt: startsAt,
         ring: ring,
         audio: audio,
         video: video,
