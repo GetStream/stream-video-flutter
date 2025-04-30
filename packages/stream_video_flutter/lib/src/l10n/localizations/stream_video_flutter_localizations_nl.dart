@@ -5,7 +5,8 @@ import 'stream_video_flutter_localizations.dart';
 // ignore_for_file: type=lint
 
 /// The translations for Dutch Flemish (`nl`).
-class StreamVideoFlutterLocalizationsNl extends StreamVideoFlutterLocalizations {
+class StreamVideoFlutterLocalizationsNl
+    extends StreamVideoFlutterLocalizations {
   StreamVideoFlutterLocalizationsNl([String locale = 'nl']) : super(locale);
 
   @override
@@ -41,7 +42,8 @@ class StreamVideoFlutterLocalizationsNl extends StreamVideoFlutterLocalizations 
   String get livestreamEndedWatchRecordings => 'Watch the recordings:';
 
   @override
-  String get livestreamHostNotAvailable => 'The host\'s video is not available.';
+  String get livestreamHostNotAvailable =>
+      'The host\'s video is not available.';
 
   @override
   String get livestreamBackstage => 'Backstage';
