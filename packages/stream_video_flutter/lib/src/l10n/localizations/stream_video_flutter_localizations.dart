@@ -128,6 +128,54 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Window'**
   String get desktopScreenShareWindow;
+
+  /// Label for livestream backstage when live stream will soon start
+  ///
+  /// In en, this message translates to:
+  /// **'Livestream will start soon'**
+  String get livestreamBackstageStartingSoon;
+
+  /// Label for livestream backstage when live stream counter is shown
+  ///
+  /// In en, this message translates to:
+  /// **'Livestream will start in:'**
+  String get livestreamBackstageStartingIn;
+
+  /// Label for livestream backstage showing participants count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early'**
+  String livestreamBackstageParticipants(num count);
+
+  /// Label shown when the livestream has already ended.
+  ///
+  /// In en, this message translates to:
+  /// **'The livestream has ended.'**
+  String get livestreamEndedStatus;
+
+  /// Label shown when the livestream has already ended listing the recordings.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch the recordings:'**
+  String get livestreamEndedWatchRecordings;
+
+  /// Label shown when the host of the livestream is not available.
+  ///
+  /// In en, this message translates to:
+  /// **'The host\'s video is not available.'**
+  String get livestreamHostNotAvailable;
+
+  /// The badge text shown when the call mode is backstage
+  ///
+  /// In en, this message translates to:
+  /// **'Backstage'**
+  String get livestreamBackstage;
+
+  /// The badge text shown when the call mode is live
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get livestreamLive;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

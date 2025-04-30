@@ -56,7 +56,7 @@ class StreamColorTheme {
       opacity: 1,
       blur: 8,
     ),
-    this.livestreamBackground = const Color(0x66000000),
+    this.livestreamBackground = const Color(0xff000000),
     this.livestreamCallControlsColor = const Color(0xffffffff),
   });
 
@@ -112,7 +112,7 @@ class StreamColorTheme {
       ],
       stops: [0, 1],
     ),
-    this.livestreamBackground = const Color(0x66000000),
+    this.livestreamBackground = const Color(0xff000000),
     this.livestreamCallControlsColor = const Color(0xffffffff),
   });
 

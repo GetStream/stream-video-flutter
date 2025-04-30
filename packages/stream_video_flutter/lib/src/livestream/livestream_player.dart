@@ -4,6 +4,18 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
+typedef LivestreamEndedBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
+typedef LivestreamBackstageBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
 /// Creates a widget that allows a user to view a livestream.
 ///
 /// By default, the widget has call controls and other elements including:
@@ -27,7 +39,12 @@ class LivestreamPlayer extends StatefulWidget {
     this.muted = false,
     this.showParticipantCount = true,
     this.backButtonBuilder,
+    this.livestreamEndedBuilder,
+    this.livestreamBackstageBuilder,
     this.allowDiagnostics = false,
+    this.onCallDisconnected,
+    this.onRecordingTapped,
+    this.onFullscreenTapped,
   });
 
   /// The livestream call to display.
@@ -44,6 +61,21 @@ class LivestreamPlayer extends StatefulWidget {
   /// [WidgetBuilder] used to build an action button on the top left side of
   /// the screen.
   final WidgetBuilder? backButtonBuilder;
+
+  /// The builder used to create a custom widget when the livestream has ended.
+  final LivestreamEndedBuilder? livestreamEndedBuilder;
+
+  /// The builder used to create a custom widget when the livestream is in backstage mode.
+  final LivestreamBackstageBuilder? livestreamBackstageBuilder;
+
+  /// The action to perform when the call is disconnected. By default, it pops the current route.
+  final void Function(CallDisconnectedProperties)? onCallDisconnected;
+
+  /// The action to perform when the recording shown when livestream is ended is tapped.
+  final FutureOr<void> Function(String)? onRecordingTapped;
+
+  /// The action to perform when dfullscreen button is tapped.
+  final VoidCallback? onFullscreenTapped;
 
   /// Boolean to allow a user to double-tap a call to see diagnostic data.
   ///
@@ -68,17 +100,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Controls the visibility of diagnostic data.
   bool _isStatsVisible = false;
 
-  /// Stores the paused state of the stream.
-  bool _livestreamEnabled = true;
-
   /// Stores if the livestream is in cover or contain mode.
   bool _fullscreen = false;
-
-  /// Curved animation that stores the controller opacity.
-  late Animation<double> _controllerAnimation;
-
-  /// Animation controller for opacity animation.
-  late AnimationController _animationController;
 
   /// Timer for updating duration.
   late Timer _durationTimer;
@@ -92,20 +115,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     super.initState();
     _callStateSubscription = call.state.listen(_setState);
     _callState = call.state.value;
+
     _connect();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _controllerAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _animationController.forward();
 
     final now = DateTime.now();
     final currentTime = now.millisecondsSinceEpoch;
@@ -125,7 +136,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     _callStateSubscription = null;
     _durationTimer.cancel();
     _duration.dispose();
-    _animationController.dispose();
 
     super.dispose();
   }
@@ -135,23 +145,53 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     setState(() {
       _callState = callState;
     });
+
     if (callState.status.isDisconnected) {
-      _leave();
+      _callStateSubscription?.cancel();
+
+      if (widget.onCallDisconnected != null) {
+        final disconnectedStatus = callState.status as CallStatusDisconnected;
+        final disconnectedProperties = CallDisconnectedProperties(
+          reason: disconnectedStatus.reason,
+          call: call,
+        );
+
+        widget.onCallDisconnected?.call(disconnectedProperties);
+      } else {
+        _leave();
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isBackstage = _callState.isBackstage;
+    final hasEnded = _callState.endedAt != null;
+
+    if (hasEnded) {
+      return widget.livestreamEndedBuilder?.call(
+            context,
+            call,
+            _callState,
+          ) ??
+          LivestreamEndedContent(
+            call: call,
+            onRecordingTapped: widget.onRecordingTapped,
+          );
+    }
+
+    if (isBackstage) {
+      return widget.livestreamBackstageBuilder?.call(
+            context,
+            call,
+            _callState,
+          ) ??
+          LivestreamBackstageContent(
+            callState: _callState,
+          );
+    }
+
     return GestureDetector(
-      onTap: () {
-        if (!_animationController.isAnimating) {
-          if (_controllerAnimation.value == 1.0) {
-            _animationController.reverse();
-          } else {
-            _animationController.forward();
-          }
-        }
-      },
       onDoubleTap: () {
         if (widget.allowDiagnostics) {
           setState(() {
@@ -169,78 +209,28 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               displayDiagnostics: _isStatsVisible,
               videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
             ),
-            Visibility(
-              visible: _controllerAnimation.value != 0,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: AnimatedBuilder(
-                  animation: _controllerAnimation,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _controllerAnimation.value,
-                      child: child,
-                    );
-                  },
-                  child: LivestreamToggle(
-                    enabled: _livestreamEnabled,
-                    onStateChanged: () {
-                      final streamingParticipants = _callState.callParticipants
-                          .where((e) => e.isVideoEnabled)
-                          .toList();
-
-                      if (streamingParticipants.isEmpty) return;
-
-                      final livestreamingParticipant =
-                          streamingParticipants.first;
-
-                      livestreamingParticipant.publishedTracks
-                          .forEach((key, value) {
-                        final tracks = call
-                            .getTracks(livestreamingParticipant.trackIdPrefix);
-
-                        for (final e in tracks) {
-                          _livestreamEnabled ? e.disable() : e.enable();
-                        }
-                      });
-
-                      setState(() {
-                        _livestreamEnabled = !_livestreamEnabled;
-                      });
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ValueListenableBuilder<Duration>(
+                valueListenable: _duration,
+                builder: (context, duration, _) {
+                  return LivestreamInfo(
+                    call: call,
+                    callState: widget.call.state.value,
+                    fullscreen: _fullscreen,
+                    onFullscreenTapped: () {
+                      if (widget.onFullscreenTapped != null) {
+                        widget.onFullscreenTapped?.call();
+                      } else {
+                        setState(() {
+                          _fullscreen = !_fullscreen;
+                        });
+                      }
                     },
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: _controllerAnimation.value != 0,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: AnimatedBuilder(
-                  animation: _controllerAnimation,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _controllerAnimation.value,
-                      child: child,
-                    );
-                  },
-                  child: ValueListenableBuilder<Duration>(
-                    valueListenable: _duration,
-                    builder: (context, duration, _) {
-                      return LivestreamInfo(
-                        call: call,
-                        callState: widget.call.state.value,
-                        fullscreen: _fullscreen,
-                        onStateChanged: () {
-                          setState(() {
-                            _fullscreen = !_fullscreen;
-                          });
-                        },
-                        duration: duration,
-                        showParticipantCount: widget.showParticipantCount,
-                      );
-                    },
-                  ),
-                ),
+                    duration: duration,
+                    showParticipantCount: widget.showParticipantCount,
+                  );
+                },
               ),
             ),
           ],
@@ -257,6 +247,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
         camera: TrackOption.disabled(),
         microphone: TrackOption.disabled(),
       );
+
       final result = await call.join(connectOptions: connectOptions);
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {
