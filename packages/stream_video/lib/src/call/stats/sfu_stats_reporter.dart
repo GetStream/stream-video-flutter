@@ -150,6 +150,7 @@ class SfuStatsReporter {
     final publisherTrace = callSession.rtcManager?.publisher?.tracer.take();
     final mediaDevicesTrace = mediaDevicesTracer.take();
     final sfuClientTrace = callSession.sfuClient.getTrace();
+    final sessionTrace = callSession.getTrace();
 
     try {
       final request = sfu.SendStatsRequest(
@@ -176,6 +177,7 @@ class SfuStatsReporter {
           ...?publisherTrace?.snapshot,
           ...mediaDevicesTrace.snapshot,
           ...sfuClientTrace.snapshot,
+          ...sessionTrace.snapshot,
         ].toJsonString(),
         subscriberRtcStats: [...?subscriberTrace?.snapshot].toJsonString(),
       );
@@ -188,6 +190,7 @@ class SfuStatsReporter {
       publisherTrace?.rollback();
       mediaDevicesTrace.rollback();
       sfuClientTrace.rollback();
+      sessionTrace.rollback();
 
       rethrow;
     }

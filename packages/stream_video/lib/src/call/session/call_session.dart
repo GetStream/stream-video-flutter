@@ -27,6 +27,7 @@ import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
+import '../../sfu/sfu_extensions.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
@@ -44,6 +45,7 @@ import '../../webrtc/rtc_track/rtc_track.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/tracer.dart';
 import 'call_session_config.dart';
 import 'dynascale_manager.dart';
 
@@ -84,6 +86,9 @@ class CallSession extends Disposable {
           callCid: callCid,
           configuration: config.rtcConfig,
           sdpEditor: sdpEditor,
+        ),
+        _tracer = Tracer(
+          sessionSeq.toString(),
         ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }
@@ -107,6 +112,7 @@ class CallSession extends Disposable {
 
   final Lock _sfuEventsLock = Lock();
   final Lock _negotiationLock = Lock();
+  final Tracer _tracer;
 
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
@@ -123,6 +129,10 @@ class CallSession extends Disposable {
     onBuffered: updateViewportVisibilities,
     onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
   );
+
+  TraceSlice getTrace() {
+    return _tracer.take();
+  }
 
   Future<void> _ensureClientDetails() async {
     if (_clientDetails != null) return;
@@ -398,6 +408,11 @@ class CallSession extends Disposable {
     try {
       _logger.d(() => '[fastReconnect] no args');
 
+      final reconnectDetails =
+          await getReconnectDetails(SfuReconnectionStrategy.fast);
+
+      _tracer.trace('fastReconnect', reconnectDetails.toJson());
+
       final subscriberSdp =
           await RtcManager.getGenericSdp(rtc.TransceiverDirection.RecvOnly);
       final publisherSdp =
@@ -420,8 +435,7 @@ class CallSession extends Disposable {
             sessionId: sessionId,
             subscriberSdp: subscriberSdp,
             publisherSdp: publisherSdp,
-            reconnectDetails:
-                await getReconnectDetails(SfuReconnectionStrategy.fast),
+            reconnectDetails: reconnectDetails,
             preferredPublishOptions:
                 rtcManager?.publishOptions.map((o) => o.toDTO()),
           ),
@@ -464,6 +478,7 @@ class CallSession extends Disposable {
       return result;
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
+      _tracer.trace('fastReconnectOnFailure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -520,6 +535,10 @@ class CallSession extends Disposable {
     return [...?rtcManager?.getTracks(trackIdPrefix)];
   }
 
+  SfuTrackType? getTrackType(String trackId) {
+    return rtcManager?.getTrack(trackId)?.trackType;
+  }
+
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
 
@@ -535,9 +554,17 @@ class CallSession extends Disposable {
       } else if (event is SfuTrackUnpublishedEvent) {
         await _onTrackUnpublished(event);
       } else if (event is SfuChangePublishQualityEvent) {
+        _tracer.trace('publishQualityChanged', event.toJson());
         await _onPublishQualityChanged(event);
       } else if (event is SfuChangePublishOptionsEvent) {
+        _tracer.trace('publishOptionsChanged', event.toJson());
         await _onPublishOptionsChanged(event);
+      } else if (event is SfuGoAwayEvent) {
+        _tracer.trace('goAway', event.toJson());
+      } else if (event is SfuErrorEvent) {
+        _tracer.trace('error', event.toJson());
+      } else if (event is SfuCallEndedEvent) {
+        _tracer.trace('callEnded', event.toJson());
       }
 
       if (event is SfuJoinResponseEvent) {

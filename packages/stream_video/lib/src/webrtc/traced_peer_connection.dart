@@ -1,9 +1,18 @@
 import 'dart:async';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
+import 'package:collection/collection.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video.dart';
+import '../call/stats/performance_stats.dart';
 import '../call/stats/tracer.dart';
+import '../sfu/data/models/sfu_codec.dart';
+import 'model/stats/rtc_codec.dart';
+import 'model/stats/rtc_inbound_rtp_video_stream.dart';
+import 'model/stats/rtc_media_source.dart';
+import 'model/stats/rtc_outbound_rtp_video_stream.dart';
+import 'model/stats/rtc_stats.dart';
 import 'peer_connection.dart';
 
 class TracedStreamPeerConnection extends StreamPeerConnection {
@@ -20,6 +29,10 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
   final Tracer tracer;
   List<Map<String, dynamic>>? _previousStats;
+  List<RtcOutboundRtpVideoStream>? _previousOutboundRtpStats;
+  List<RtcInboundRtpVideoStream>? _previousInboundRtpStats;
+  List<PerformanceStats>? _previousPerformanceStats;
+  int iteration = 1;
 
   void _initTracking() {
     final originalIceGatheringState = pc.onIceGatheringState;
@@ -78,12 +91,200 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
       };
   }
 
+  List<PerformanceStats> getPerformanceStats(
+    List<RtcStats> rtcStats,
+    SfuTrackType? Function(String) trackIdToTrackType,
+  ) {
+    final performanceStat = type == StreamPeerType.subscriber
+        ? getDecodeStats(rtcStats, trackIdToTrackType)
+        : getEncodeStats(rtcStats, trackIdToTrackType);
+
+    _previousPerformanceStats = performanceStat;
+    iteration++;
+
+    return performanceStat;
+  }
+
+  List<PerformanceStats> getEncodeStats(
+    List<RtcStats> rtcStats,
+    SfuTrackType? Function(String) trackIdToTrackType,
+  ) {
+    final encodeStats = <PerformanceStats>[];
+
+    final outboundVideoRtpStats =
+        rtcStats.whereType<RtcOutboundRtpVideoStream>().toList();
+
+    for (final rtpStat in outboundVideoRtpStats) {
+      final codecId = rtpStat.codecId;
+      final framesSent = rtpStat.framesSent ?? 0;
+      final totalEncodeTime = rtpStat.totalEncodeTime ?? 0;
+      final framesPerSecond = rtpStat.framesPerSecond ?? 0;
+      final frameHeight = rtpStat.frameHeight ?? 0;
+      final frameWidth = rtpStat.frameWidth ?? 0;
+      final mediaSourceId = rtpStat.mediaSourceId;
+
+      if (_previousOutboundRtpStats!.none((stat) => stat.id == rtpStat.id)) {
+        continue;
+      }
+
+      final prevStat = _previousOutboundRtpStats!
+          .firstWhere((stat) => stat.id == rtpStat.id);
+
+      final deltaTotalEncodeTime =
+          totalEncodeTime - (prevStat.totalEncodeTime ?? 0);
+      final deltaFramesSent = framesSent - (prevStat.framesSent ?? 0);
+      final framesEncodeTime = deltaFramesSent > 0
+          ? (deltaTotalEncodeTime / deltaFramesSent) * 1000
+          : 0;
+
+      SfuTrackType trackType = SfuTrackType.video;
+      if (mediaSourceId != null) {
+        final mediaStats =
+            rtcStats.whereType<RtcMediaSource>().firstWhereOrNull(
+                  (stat) => stat.id == mediaSourceId,
+                );
+
+        if (mediaStats != null && mediaStats.trackIdentifier != null) {
+          trackType = trackIdToTrackType.call(mediaStats.trackIdentifier!) ??
+              SfuTrackType.video;
+        }
+      }
+
+      final lastPerformanceStats = _previousPerformanceStats?.firstWhereOrNull(
+        (s) => s.trackType == trackType,
+      );
+
+      final avgFrameTimeMs = lastPerformanceStats?.avgFrameTimeMs ?? 0;
+      final avgFps = lastPerformanceStats?.avgFps ?? framesPerSecond;
+
+      final codec = rtcStats
+          .whereType<RtcCodec>()
+          .firstWhereOrNull((stat) => stat.id == codecId);
+
+      encodeStats.add(
+        PerformanceStats(
+          trackType: trackType,
+          codec: _getCodecFromStats(codec),
+          avgFrameTimeMs:
+              average(avgFrameTimeMs, framesEncodeTime.toDouble(), iteration),
+          avgFps: average(avgFps, framesPerSecond, iteration),
+          videoDimension: VideoDimension(
+            width: frameWidth,
+            height: frameHeight,
+          ),
+        ),
+      );
+    }
+
+    _previousOutboundRtpStats = outboundVideoRtpStats;
+    return encodeStats;
+  }
+
+  List<PerformanceStats> getDecodeStats(
+    List<RtcStats> rtcStats,
+    SfuTrackType? Function(String) trackIdToTrackType,
+  ) {
+    int maxArea = 0;
+    RtcInboundRtpVideoStream? maxAreaStat;
+
+    final inboundVideoRtpStats =
+        rtcStats.whereType<RtcInboundRtpVideoStream>().toList();
+
+    for (final rtpStat in inboundVideoRtpStats) {
+      final kind = rtpStat.kind;
+      final frameWidth = rtpStat.frameWidth ?? 0;
+      final frameHeight = rtpStat.frameHeight ?? 0;
+      final area = frameWidth * frameHeight;
+
+      if (kind == 'video' && area > maxArea) {
+        maxArea = area;
+        maxAreaStat = rtpStat;
+      }
+    }
+
+    final prevStat = _previousInboundRtpStats
+        ?.firstWhereOrNull((stat) => stat.id == maxAreaStat?.id);
+
+    if (maxAreaStat == null ||
+        _previousInboundRtpStats == null ||
+        prevStat == null) {
+      _previousInboundRtpStats = inboundVideoRtpStats;
+      return [];
+    }
+
+    final framesDecoded = maxAreaStat.framesDecoded ?? 0;
+    final framesPerSecond = maxAreaStat.framesPerSecond ?? 0;
+    final totalDecodeTime = maxAreaStat.totalDecodeTime ?? 0;
+    final trackIdentifier = maxAreaStat.trackId;
+
+    final deltaTotalDecodeTime =
+        totalDecodeTime - (prevStat.totalDecodeTime ?? 0);
+    final deltaFramesDecoded = framesDecoded - (prevStat.framesDecoded ?? 0);
+
+    final framesDecodeTime = deltaFramesDecoded > 0
+        ? (deltaTotalDecodeTime / deltaFramesDecoded) * 1000
+        : 0;
+
+    SfuTrackType trackType = SfuTrackType.video;
+    if (trackIdentifier != null) {
+      trackType =
+          trackIdToTrackType.call(trackIdentifier) ?? SfuTrackType.video;
+    }
+
+    final lastPerformanceStats = _previousPerformanceStats?.firstWhereOrNull(
+      (s) => s.trackType == trackType,
+    );
+
+    final avgFrameTimeMs = lastPerformanceStats?.avgFrameTimeMs ?? 0;
+    final avgFps = lastPerformanceStats?.avgFps ?? framesPerSecond;
+
+    final codec = rtcStats
+        .whereType<RtcCodec>()
+        .firstWhereOrNull((stat) => stat.id == maxAreaStat?.codecId);
+
+    _previousInboundRtpStats = inboundVideoRtpStats;
+
+    return [
+      PerformanceStats(
+        trackType: trackType,
+        codec: _getCodecFromStats(codec),
+        avgFrameTimeMs:
+            average(avgFrameTimeMs, framesDecodeTime.toDouble(), iteration),
+        avgFps: average(avgFps, framesPerSecond, iteration),
+        videoDimension: VideoDimension(
+          width: maxAreaStat.frameWidth ?? 0,
+          height: maxAreaStat.frameHeight ?? 0,
+        ),
+      ),
+    ];
+  }
+
+  double average(
+    double currentAverage,
+    double currentValue,
+    int n,
+  ) {
+    return currentAverage + (currentValue - currentAverage) / n;
+  }
+
+  SfuCodec? _getCodecFromStats(RtcCodec? codec) {
+    if (codec == null) return null;
+
+    return SfuCodec(
+      payloadType: codec.payloadType ?? 0,
+      name: codec.mimeType?.split('/').last ?? codec.mimeType ?? 'unknown',
+      fmtpLine: codec.sdpFmtpLine ?? '',
+      clockRate: codec.clockRate ?? 0,
+      encodingParameters: '',
+    );
+  }
+
   Future<void> traceStats(
-    List<Map<String, dynamic>> newStats,
+    List<Map<String, dynamic>> newRtcStats,
   ) async {
-    final statsDiff = _deltaCompression(newStats, _previousStats);
+    final statsDiff = _diffCompression(newRtcStats, _previousStats);
     tracer.trace('getstats', statsDiff);
-    _previousStats = newStats;
+    _previousStats = newRtcStats;
   }
 
   Map<String, dynamic> _convertToMap(
@@ -98,7 +299,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         .map((_, map) => MapEntry(map['id'], map));
   }
 
-  Map<String, dynamic> _deltaCompression(
+  Map<String, dynamic> _diffCompression(
     List<Map<String, dynamic>> newStats,
     List<Map<String, dynamic>>? oldStats,
   ) {

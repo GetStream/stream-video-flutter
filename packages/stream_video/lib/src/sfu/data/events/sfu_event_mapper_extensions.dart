@@ -3,6 +3,7 @@ import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../webrtc/model/rtc_video_dimension.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
+import '../models/sfu_call_ended_reason.dart';
 import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
 import '../models/sfu_codec.dart';
@@ -171,6 +172,11 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuGoAwayEvent(
           goAwayReason: payload.reason.toDomain(),
         );
+      case sfu_events.SfuEvent_EventPayload.callEnded:
+        final payload = callEnded;
+        return SfuCallEndedEvent(
+          callEndedReason: payload.reason.toDomain(),
+        );
       case sfu_events.SfuEvent_EventPayload.participantUpdated:
         final payload = participantUpdated;
         return SfuParticipantUpdatedEvent(
@@ -260,6 +266,25 @@ extension SfuGoAwayReasonExtension on sfu_models.GoAwayReason {
         return SfuGoAwayReason.unspecified;
       default:
         throw StateError('unexpected go away reason: $this');
+    }
+  }
+}
+
+extension SfuCallEndedReasonExtension on sfu_models.CallEndedReason {
+  SfuCallEndedReason toDomain() {
+    switch (this) {
+      case sfu_models.CallEndedReason.CALL_ENDED_REASON_UNSPECIFIED:
+        return SfuCallEndedReason.unspecified;
+      case sfu_models.CallEndedReason.CALL_ENDED_REASON_ENDED:
+        return SfuCallEndedReason.ended;
+      case sfu_models.CallEndedReason.CALL_ENDED_REASON_LIVE_ENDED:
+        return SfuCallEndedReason.liveEnded;
+      case sfu_models.CallEndedReason.CALL_ENDED_REASON_KICKED:
+        return SfuCallEndedReason.kicked;
+      case sfu_models.CallEndedReason.CALL_ENDED_REASON_SESSION_ENDED:
+        return SfuCallEndedReason.sessionEnded;
+      default:
+        throw StateError('unexpected call ended reason: $this');
     }
   }
 }

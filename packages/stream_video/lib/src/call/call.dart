@@ -1069,6 +1069,8 @@ class Call {
         totalCount: sfuEvent.participantCount.total,
         anonymousCount: sfuEvent.participantCount.anonymous,
       );
+    } else if (sfuEvent is SfuCallEndedEvent) {
+      _stateManager.sfuCallEnded(sfuEvent);
     }
 
     if (sfuEvent is SfuSocketDisconnected) {
