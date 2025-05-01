@@ -18,7 +18,7 @@ Official Flutter Plugin for Stream Video..
   s.dependency 'stream_webrtc_flutter'
   s.dependency 'ios_platform_images'
   s.static_framework = true
-  s.platform = :ios, '16.0'
+  s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
