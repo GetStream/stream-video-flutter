@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-import '../call/stats/tracer.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';

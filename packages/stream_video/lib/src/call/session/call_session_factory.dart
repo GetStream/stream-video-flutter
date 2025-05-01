@@ -14,8 +14,6 @@ import 'call_session.dart';
 import 'call_session_config.dart';
 import 'dynascale_manager.dart';
 
-int _sessionSeq = 1;
-
 class CallSessionFactory {
   CallSessionFactory({
     required this.callCid,
@@ -29,6 +27,7 @@ class CallSessionFactory {
 
   Future<CallSession> makeCallSession({
     String? sessionId,
+    int sessionSeq = 0,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
@@ -56,7 +55,7 @@ class CallSessionFactory {
     _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
 
     return CallSession(
-      sessionSeq: _sessionSeq++,
+      sessionSeq: sessionSeq,
       callCid: callCid,
       sessionId: finalSessionId,
       config: sessionConfig,

@@ -18,6 +18,7 @@ class SfuClient {
     required String baseUrl,
     required this.sfuToken,
     required this.sessionSeq,
+    required this.sfuName,
     required StatsOptions statsOptions,
     String prefix = '',
     ClientHooks? hooks,
@@ -29,7 +30,7 @@ class SfuClient {
           interceptor: chainInterceptor(interceptors),
         ),
         _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
-        _tracer = Tracer(sessionSeq.toString())
+        _tracer = Tracer('$sessionSeq-$sfuName')
           ..setEnabled(statsOptions.enableRtcStats);
 
   final TaggedLogger _logger;
@@ -38,6 +39,7 @@ class SfuClient {
 
   final int sessionSeq;
   final String sfuToken;
+  final String sfuName;
 
   TraceSlice getTrace() {
     return _tracer.take();

@@ -8,16 +8,16 @@ import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../call_state.dart';
 import '../models/models.dart';
+import '../sfu/data/models/sfu_audio_sender.dart';
+import '../sfu/data/models/sfu_codec.dart';
+import '../sfu/data/models/sfu_error.dart';
+import '../sfu/data/models/sfu_publish_options.dart';
+import '../sfu/data/models/sfu_video_layer_setting.dart';
+import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/string.dart';
+import '../webrtc/model/rtc_video_dimension.dart';
 import 'data/events/sfu_events.dart';
 import 'data/models/sfu_participant.dart';
-import '../sfu/data/models/sfu_audio_sender.dart';
-import '../sfu/data/models/sfu_video_sender.dart';
-import '../sfu/data/models/sfu_publish_options.dart';
-import '../webrtc/model/rtc_video_dimension.dart';
-import '../sfu/data/models/sfu_codec.dart';
-import '../sfu/data/models/sfu_video_layer_setting.dart';
-import '../sfu/data/models/sfu_error.dart';
 
 extension SfuParticipantX on SfuParticipant {
   CallParticipantState toParticipantState(CallState state) {

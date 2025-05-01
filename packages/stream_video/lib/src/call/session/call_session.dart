@@ -74,6 +74,7 @@ class CallSession extends Disposable {
   })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
+          sfuName: config.sfuName,
           sessionSeq: sessionSeq,
           statsOptions: statsOptions,
         ),
@@ -91,7 +92,7 @@ class CallSession extends Disposable {
           sdpEditor: sdpEditor,
         ),
         _tracer = Tracer(
-          sessionSeq.toString(),
+          '$sessionSeq-${config.sfuName}',
         )..setEnabled(statsOptions.enableRtcStats) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }
@@ -368,6 +369,7 @@ class CallSession extends Disposable {
           clientDetails: _clientDetails,
           sessionSequence: sessionSeq,
           statsOptions: statsOptions,
+          callSessionConfig: config,
         )
           ..onPublisherIceCandidate = _onLocalIceCandidate
           ..onSubscriberIceCandidate = _onLocalIceCandidate

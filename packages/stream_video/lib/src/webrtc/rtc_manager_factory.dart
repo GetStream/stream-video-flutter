@@ -1,7 +1,6 @@
-import 'package:http/http.dart';
-
 import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart';
+import '../call/session/call_session_config.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
@@ -37,6 +36,7 @@ class RtcManagerFactory {
     int? sessionSequence,
     List<SfuPublishOptions> publishOptions = const [],
     StatsOptions? statsOptions,
+    CallSessionConfig? callSessionConfig,
   }) async {
     _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
 
@@ -47,6 +47,7 @@ class RtcManagerFactory {
             sessionSequence?.toString(),
             mediaConstraints,
             statsOptions,
+            callSessionConfig,
           )
         : null;
 
@@ -56,6 +57,7 @@ class RtcManagerFactory {
       sessionSequence?.toString(),
       mediaConstraints,
       statsOptions,
+      callSessionConfig,
     );
 
     return RtcManager(

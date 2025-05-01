@@ -703,7 +703,10 @@ class Call {
       final reconnectDetails =
           _reconnectStrategy == SfuReconnectionStrategy.unspecified
               ? null
-              : await _previousSession?.getReconnectDetails(_reconnectStrategy);
+              : await _previousSession?.getReconnectDetails(
+                  _reconnectStrategy,
+                  reconnectAttempts: _reconnectAttempts,
+                );
 
       if (!performingFastReconnect) {
         _logger.v(
@@ -715,6 +718,7 @@ class Call {
           // a new session_id is necessary for the REJOIN strategy.
           // we use the previous session_id if available
           sessionId: performingRejoin ? null : _previousSession?.sessionId,
+          sessionSeq: _reconnectAttempts,
           credentials: _credentials!,
           stateManager: _stateManager,
           dynascaleManager: dynascaleManager,
@@ -1086,10 +1090,12 @@ class Call {
         anonymousCount: sfuEvent.participantCount.anonymous,
       );
     } else if (sfuEvent is SfuCallEndedEvent) {
+      await _sfuStatsReporter?.sendSfuStats();
       _stateManager.sfuCallEnded(sfuEvent);
     }
 
     if (sfuEvent is SfuSocketDisconnected) {
+      await _sfuStatsReporter?.sendSfuStats();
       if (!StreamWebSocketCloseCode.isIntentionalClosure(
         sfuEvent.reason.closeCode,
       )) {
@@ -1147,7 +1153,7 @@ class Call {
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
       do {
-        if (strategy != SfuReconnectionStrategy.migrate) {
+        if (strategy != SfuReconnectionStrategy.fast) {
           _reconnectAttempts++;
         }
 

@@ -2,12 +2,12 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart';
+import '../call/session/call_session_config.dart';
 import '../call/stats/tracer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../sfu/sfu_extensions.dart';
 import '../types/other.dart';
-import 'peer_connection.dart';
 import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
 import 'traced_peer_connection.dart';
@@ -31,6 +31,7 @@ class StreamPeerConnectionFactory {
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
+    CallSessionConfig? callSessionConfig,
   ]) async {
     return makePeerConnection(
       type: StreamPeerType.subscriber,
@@ -39,6 +40,7 @@ class StreamPeerConnectionFactory {
       tracerIdPrefix: tracerIdPrefix,
       mediaConstraints: mediaConstraints,
       statsOptions: statsOptions,
+      callSessionConfig: callSessionConfig,
     );
   }
 
@@ -48,6 +50,7 @@ class StreamPeerConnectionFactory {
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
+    CallSessionConfig? callSessionConfig,
   ]) async {
     return makePeerConnection(
       type: StreamPeerType.publisher,
@@ -56,6 +59,7 @@ class StreamPeerConnectionFactory {
       tracerIdPrefix: tracerIdPrefix,
       mediaConstraints: mediaConstraints,
       statsOptions: statsOptions,
+      callSessionConfig: callSessionConfig,
     );
   }
 
@@ -66,6 +70,7 @@ class StreamPeerConnectionFactory {
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
+    CallSessionConfig? callSessionConfig,
   }) async {
     _logger.i(
       () => '[createPeerConnection] #$type; configuration: '
@@ -77,7 +82,7 @@ class StreamPeerConnectionFactory {
     );
 
     final tracer = Tracer(
-      "$tracerIdPrefix-${type == StreamPeerType.publisher ? 'pub' : 'sub'}",
+      "$tracerIdPrefix-${type == StreamPeerType.publisher ? 'pub' : 'sub'}-${callSessionConfig?.sfuName}",
     );
 
     tracer.setEnabled(statsOptions?.enableRtcStats ?? false);
@@ -86,7 +91,15 @@ class StreamPeerConnectionFactory {
       tracer.trace('clientDetails', clientDetails.toJson());
     }
 
-    tracer.trace('create', configuration.toMap());
+    tracer.trace(
+      'create',
+      configuration.toMap()
+        ..addAll(
+          {
+            'url': callSessionConfig?.sfuName,
+          },
+        ),
+    );
 
     return TracedStreamPeerConnection(
       sessionId: sessionId,
