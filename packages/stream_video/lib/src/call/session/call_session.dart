@@ -888,7 +888,7 @@ class CallSession extends Disposable {
     return rtcManager.setAudioOutputDevice(device: device);
   }
 
-  Future<Result<None>> setCameraEnabled(
+  Future<Result<RtcLocalTrack>> setCameraEnabled(
     bool enabled, {
     CameraConstraints? constraints,
   }) async {
@@ -901,10 +901,11 @@ class CallSession extends Disposable {
       enabled: enabled,
       constraints: constraints,
     );
-    return result.map((_) => none);
+
+    return result;
   }
 
-  Future<Result<None>> setMicrophoneEnabled(
+  Future<Result<RtcLocalTrack>> setMicrophoneEnabled(
     bool enabled, {
     AudioConstraints? constraints,
   }) async {
@@ -917,7 +918,7 @@ class CallSession extends Disposable {
       enabled: enabled,
       constraints: constraints,
     );
-    return result.map((_) => none);
+    return result;
   }
 
   Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {

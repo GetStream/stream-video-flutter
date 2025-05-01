@@ -24,12 +24,13 @@ class StatsReporter {
   Stream<({CallStats publisherStats, CallStats subscriberStats})> run({
     Duration interval = const Duration(seconds: 10),
   }) {
-    return Stream.periodic(interval, (_) => collectStats())
-        .asyncMap((event) async {
-      final stats = await event;
-      _processStats(stats);
-      return event;
-    });
+    return Stream.periodic(interval, (_) => collectStats()).asyncMap(
+      (event) async {
+        final stats = await event;
+        _processStats(stats);
+        return event;
+      },
+    );
   }
 
   Future<({CallStats publisherStats, CallStats subscriberStats})>

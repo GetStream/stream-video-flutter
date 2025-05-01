@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
@@ -269,6 +270,7 @@ class Call {
 
   final List<Timer> _reactionTimers = [];
   final Map<String, Timer> _captionsTimers = {};
+  final List<CancelableOperation<void>> _sfuStatsTimers = [];
 
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
@@ -1342,8 +1344,15 @@ class Call {
       await stopAudioProcessing();
     }
 
-    for (final timer in [..._reactionTimers, ..._captionsTimers.values]) {
+    for (final timer in [
+      ..._reactionTimers,
+      ..._captionsTimers.values,
+    ]) {
       timer.cancel();
+    }
+
+    for (final operation in _sfuStatsTimers) {
+      await operation.cancel();
     }
 
     _sfuStatsReporter?.stop();
@@ -2239,6 +2248,14 @@ class Call {
             Result.error('Session is null');
 
     if (result.isSuccess) {
+      _sfuStatsTimers.add(
+        Future<void>.delayed(const Duration(seconds: 3)).then((_) {
+          if (result.getDataOrNull()!.mediaTrack.enabled) {
+            _sfuStatsReporter?.sendSfuStats();
+          }
+        }).asCancelable(),
+      );
+
       // Set multitasking camera access for iOS
       final multitaskingResult = await setMultitaskingCameraAccessEnabled(
         enabled && !_streamVideo.muteVideoWhenInBackground,
@@ -2255,7 +2272,7 @@ class Call {
       );
     }
 
-    return result;
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setMicrophoneEnabled({
@@ -2273,6 +2290,14 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      _sfuStatsTimers.add(
+        Future<void>.delayed(const Duration(seconds: 3)).then((_) {
+          if (result.getDataOrNull()!.mediaTrack.enabled) {
+            _sfuStatsReporter?.sendSfuStats();
+          }
+        }).asCancelable(),
+      );
+
       await _streamVideo.pushNotificationManager
           ?.setCallMutedByCid(callCid.value, !enabled);
 
@@ -2289,7 +2314,7 @@ class Call {
       }
     }
 
-    return result;
+    return result.map((_) => none);
   }
 
   Future<bool> requestScreenSharePermission() {

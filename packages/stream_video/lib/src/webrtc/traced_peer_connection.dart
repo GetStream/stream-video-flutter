@@ -1,19 +1,22 @@
 import 'dart:async';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:collection/collection.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-import '../../stream_video.dart';
-import '../call/stats/performance_stats.dart';
+import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../call/stats/tracer.dart';
 import '../sfu/data/models/sfu_codec.dart';
+import '../sfu/data/models/sfu_model_mapper_extensions.dart';
+import '../sfu/data/models/sfu_track_type.dart';
+import '../utils/none.dart';
+import '../utils/result.dart';
 import 'model/stats/rtc_codec.dart';
 import 'model/stats/rtc_inbound_rtp_video_stream.dart';
 import 'model/stats/rtc_media_source.dart';
 import 'model/stats/rtc_outbound_rtp_video_stream.dart';
 import 'model/stats/rtc_stats.dart';
 import 'peer_connection.dart';
+import 'peer_type.dart';
 
 class TracedStreamPeerConnection extends StreamPeerConnection {
   TracedStreamPeerConnection({
@@ -96,8 +99,14 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     SfuTrackType? Function(String) trackIdToTrackType,
   ) {
     final performanceStat = type == StreamPeerType.subscriber
-        ? getDecodeStats(rtcStats, trackIdToTrackType)
-        : getEncodeStats(rtcStats, trackIdToTrackType);
+        ? getDecodeStats(
+            rtcStats,
+            (String id) => trackIdToTrackType(id)?.toDTO(),
+          )
+        : getEncodeStats(
+            rtcStats,
+            (String id) => trackIdToTrackType(id)?.toDTO(),
+          );
 
     _previousPerformanceStats = performanceStat;
     iteration++;
@@ -107,7 +116,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
   List<PerformanceStats> getEncodeStats(
     List<RtcStats> rtcStats,
-    SfuTrackType? Function(String) trackIdToTrackType,
+    TrackType? Function(String) trackIdToTrackType,
   ) {
     final encodeStats = <PerformanceStats>[];
 
@@ -123,7 +132,8 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
       final frameWidth = rtpStat.frameWidth ?? 0;
       final mediaSourceId = rtpStat.mediaSourceId;
 
-      if (_previousOutboundRtpStats!.none((stat) => stat.id == rtpStat.id)) {
+      if (_previousOutboundRtpStats == null ||
+          _previousOutboundRtpStats!.none((stat) => stat.id == rtpStat.id)) {
         continue;
       }
 
@@ -137,7 +147,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
           ? (deltaTotalEncodeTime / deltaFramesSent) * 1000
           : 0;
 
-      SfuTrackType trackType = SfuTrackType.video;
+      var trackType = TrackType.TRACK_TYPE_VIDEO;
       if (mediaSourceId != null) {
         final mediaStats =
             rtcStats.whereType<RtcMediaSource>().firstWhereOrNull(
@@ -146,7 +156,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
         if (mediaStats != null && mediaStats.trackIdentifier != null) {
           trackType = trackIdToTrackType.call(mediaStats.trackIdentifier!) ??
-              SfuTrackType.video;
+              TrackType.TRACK_TYPE_VIDEO;
         }
       }
 
@@ -164,7 +174,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
       encodeStats.add(
         PerformanceStats(
           trackType: trackType,
-          codec: _getCodecFromStats(codec),
+          codec: _getCodecFromStats(codec)?.toDTO(),
           avgFrameTimeMs:
               average(avgFrameTimeMs, framesEncodeTime.toDouble(), iteration),
           avgFps: average(avgFps, framesPerSecond, iteration),
@@ -182,9 +192,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
   List<PerformanceStats> getDecodeStats(
     List<RtcStats> rtcStats,
-    SfuTrackType? Function(String) trackIdToTrackType,
+    TrackType? Function(String) trackIdToTrackType,
   ) {
-    int maxArea = 0;
+    var maxArea = 0;
     RtcInboundRtpVideoStream? maxAreaStat;
 
     final inboundVideoRtpStats =
@@ -225,10 +235,10 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         ? (deltaTotalDecodeTime / deltaFramesDecoded) * 1000
         : 0;
 
-    SfuTrackType trackType = SfuTrackType.video;
+    var trackType = TrackType.TRACK_TYPE_VIDEO;
     if (trackIdentifier != null) {
-      trackType =
-          trackIdToTrackType.call(trackIdentifier) ?? SfuTrackType.video;
+      trackType = trackIdToTrackType.call(trackIdentifier) ??
+          TrackType.TRACK_TYPE_VIDEO;
     }
 
     final lastPerformanceStats = _previousPerformanceStats?.firstWhereOrNull(
@@ -247,7 +257,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     return [
       PerformanceStats(
         trackType: trackType,
-        codec: _getCodecFromStats(codec),
+        codec: _getCodecFromStats(codec)?.toDTO(),
         avgFrameTimeMs:
             average(avgFrameTimeMs, framesDecodeTime.toDouble(), iteration),
         avgFps: average(avgFps, framesPerSecond, iteration),
@@ -306,18 +316,19 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final newStatsLookup = _convertToMap(newStats);
     final oldStatsLookup = _convertToMap(oldStats);
 
-    // if (oldStats != null) {
-    //   for (final report in oldStats) {
-    //     if (report.containsKey('id')) {
-    //       oldStatsLookup[report['id']] = report;
-    //     }
-    //   }
-    // }
-
-    var latestTimestamp = double.negativeInfinity;
+    num latestTimestamp = double.negativeInfinity;
 
     for (final Map<String, dynamic> report in newStatsLookup.values) {
       final id = report.remove('id');
+
+      final ts = report['timestamp'];
+      if (ts is num) {
+        report['timestamp'] = ts / 1000;
+        if (ts < latestTimestamp) {
+          latestTimestamp = ts / 1000;
+        }
+      }
+
       if (id == null || !oldStatsLookup.containsKey(id)) continue;
 
       final oldReport = oldStatsLookup[id] as Map<String, dynamic>;
@@ -327,14 +338,8 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
           report.remove(entry.key);
         }
       }
-
-      final ts = report['timestamp'];
-      if (ts is num && ts > latestTimestamp) {
-        latestTimestamp = ts.toDouble();
-      }
     }
 
-    // Zero out the latest timestamp in the matching report(s)
     for (final Map<String, dynamic> report in newStatsLookup.values) {
       if (report['timestamp'] == latestTimestamp) {
         report['timestamp'] = 0;
@@ -344,9 +349,8 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     // Add top-level timestamp as a separate report (if needed)
     newStatsLookup.addAll(
       {
-        'timestamp': latestTimestamp == double.negativeInfinity
-            ? DateTime.now().millisecondsSinceEpoch
-            : latestTimestamp,
+        'timestamp':
+            latestTimestamp == double.negativeInfinity ? 0 : latestTimestamp,
       },
     );
 

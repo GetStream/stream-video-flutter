@@ -9,6 +9,7 @@ import 'package:thermal/thermal.dart';
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../../protobuf/video/sfu/models/models.pb.dart';
 import '../../extensions/thermal_status_ext.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
@@ -72,7 +73,11 @@ class SfuStatsReporter {
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
     _timer = Timer.periodic(interval, (_) {
-      sendSfuStats();
+      try {
+        sendSfuStats();
+      } catch (e) {
+        _logger.v(() => 'Failed to send SFU stats');
+      }
     });
   }
 
@@ -134,15 +139,27 @@ class SfuStatsReporter {
       );
     }
 
+    List<PerformanceStats>? encodeStats;
     if (publisherStatsBundle != null) {
       await callSession.rtcManager?.publisher?.traceStats(
         publisherStatsBundle.rawStats,
       );
+
+      encodeStats = callSession.rtcManager?.publisher?.getPerformanceStats(
+        publisherStatsBundle.rtcStats,
+        callSession.getTrackType,
+      );
     }
 
+    List<PerformanceStats>? decodeStats;
     if (subscriberStatsBundle != null) {
       await callSession.rtcManager?.subscriber.traceStats(
         subscriberStatsBundle.rawStats,
+      );
+
+      decodeStats = callSession.rtcManager?.subscriber.getPerformanceStats(
+        subscriberStatsBundle.rtcStats,
+        callSession.getTrackType,
       );
     }
 
@@ -173,13 +190,15 @@ class SfuStatsReporter {
           _ => null,
         },
         telemetry: _calculateTelemetry(connectionTimeMs, reconnectionStrategy),
-        publisherRtcStats: [
+        rtcStats: [
           ...?publisherTrace?.snapshot,
+          ...?subscriberTrace?.snapshot,
           ...mediaDevicesTrace.snapshot,
           ...sfuClientTrace.snapshot,
           ...sessionTrace.snapshot,
         ].toJsonString(),
-        subscriberRtcStats: [...?subscriberTrace?.snapshot].toJsonString(),
+        encodeStats: encodeStats,
+        decodeStats: decodeStats,
       );
 
       await callSession.sfuClient.sendStats(
