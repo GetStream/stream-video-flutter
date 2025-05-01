@@ -258,6 +258,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
   Future<void> _leave() async {
     _logger.d(() => '[leave] no args');
+    await call.leave();
     // play tone
     final bool popped;
     if (mounted) {
