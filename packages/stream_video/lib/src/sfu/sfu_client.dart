@@ -2,6 +2,7 @@ import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../globals.dart';
+import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
@@ -17,6 +18,7 @@ class SfuClient {
     required String baseUrl,
     required this.sfuToken,
     required this.sessionSeq,
+    required StatsOptions statsOptions,
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
@@ -27,7 +29,8 @@ class SfuClient {
           interceptor: chainInterceptor(interceptors),
         ),
         _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
-        _tracer = Tracer(sessionSeq.toString());
+        _tracer = Tracer(sessionSeq.toString())
+          ..setEnabled(statsOptions.enableRtcStats);
 
   final TaggedLogger _logger;
   final Tracer _tracer;
@@ -38,6 +41,10 @@ class SfuClient {
 
   TraceSlice getTrace() {
     return _tracer.take();
+  }
+
+  void setTraceEnabled(bool enabled) {
+    _tracer.setEnabled(enabled);
   }
 
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(
@@ -53,15 +60,15 @@ class SfuClient {
     }
   }
 
-  Future<Result<sfu.ICETrickleResponse>> sendIceCandidate(
+  Future<Result<sfu.ICETrickleResponse>> iceTrickle(
     sfu_models.ICETrickle request,
   ) async {
     try {
-      _tracer.trace('SendIceCandidate', request.toJson());
+      _tracer.trace('IceTrickle', request.toJson());
       final response = await _client.iceTrickle(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('SendIceCandidateOnFailure', e.toString());
+      _tracer.trace('IceTrickleOnFailure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }

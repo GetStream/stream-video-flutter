@@ -257,7 +257,7 @@ class Call {
   CallSession? _session;
   CallSession? _previousSession;
 
-  int? _statsReportingIntervalMs;
+  StatsOptions? _sfuStatsOptions;
   SfuStatsReporter? _sfuStatsReporter;
 
   int _reconnectAttempts = 0;
@@ -719,6 +719,7 @@ class Call {
           stateManager: _stateManager,
           dynascaleManager: dynascaleManager,
           networkMonitor: networkMonitor,
+          statsOptions: _sfuStatsOptions!,
           onPeerConnectionFailure: (pc) async {
             if (state.value.status is! CallStatusReconnecting) {
               await pc.pc.restartIce().onError((_, __) {
@@ -823,7 +824,7 @@ class Call {
     final prevState = _stateManager.callState;
 
     if (credentials == null ||
-        _statsReportingIntervalMs == null ||
+        _sfuStatsOptions == null ||
         _reconnectStrategy == SfuReconnectionStrategy.rejoin ||
         _reconnectStrategy == SfuReconnectionStrategy.migrate) {
       _logger.d(() => '[joinIfNeeded] joining');
@@ -840,7 +841,15 @@ class Call {
       return joinedResult.fold(
         success: (success) {
           _credentials = success.data.credentials;
-          _statsReportingIntervalMs = success.data.reportingIntervalMs;
+          _sfuStatsOptions = success.data.statsOptions;
+
+          _session?.rtcManager?.subscriber.tracer
+              .setEnabled(_sfuStatsOptions!.enableRtcStats);
+          _session?.rtcManager?.publisher?.tracer
+              .setEnabled(_sfuStatsOptions!.enableRtcStats);
+          mediaDevicesTracer.setEnabled(_sfuStatsOptions!.enableRtcStats);
+          _session?.sfuClient.setTraceEnabled(_sfuStatsOptions!.enableRtcStats);
+          _session?.setTraceEnabled(_sfuStatsOptions!.enableRtcStats);
 
           return Result.success(success.data.credentials);
         },
@@ -909,7 +918,7 @@ class Call {
       wasCreated: joinResult.data.wasCreated,
       metadata: joinResult.data.metadata,
       credentials: joinResult.data.credentials,
-      reportingIntervalMs: joinResult.data.reportingIntervalMs,
+      statsOptions: joinResult.data.statsOptions,
     );
 
     _stateManager.lifecycleCallJoined(
@@ -1030,11 +1039,16 @@ class Call {
       );
     }
 
-    if (_statsReportingIntervalMs != null) {
+    if (_sfuStatsOptions != null) {
       _sfuStatsReporter = SfuStatsReporter(
         callSession: session,
         stateManager: _stateManager,
-      )..run(interval: Duration(milliseconds: _statsReportingIntervalMs!));
+        statsOptions: _sfuStatsOptions!,
+      )..run(
+          interval: Duration(
+            milliseconds: _sfuStatsOptions!.reportingIntervalMs,
+          ),
+        );
     }
 
     return result.fold(

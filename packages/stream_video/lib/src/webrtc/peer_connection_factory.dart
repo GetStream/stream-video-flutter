@@ -1,5 +1,6 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../call/stats/tracer.dart';
 import '../logger/impl/tagged_logger.dart';
@@ -29,6 +30,7 @@ class StreamPeerConnectionFactory {
     ClientDetails? clientDetails, [
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
+    StatsOptions? statsOptions,
   ]) async {
     return makePeerConnection(
       type: StreamPeerType.subscriber,
@@ -36,6 +38,7 @@ class StreamPeerConnectionFactory {
       clientDetails: clientDetails,
       tracerIdPrefix: tracerIdPrefix,
       mediaConstraints: mediaConstraints,
+      statsOptions: statsOptions,
     );
   }
 
@@ -44,6 +47,7 @@ class StreamPeerConnectionFactory {
     ClientDetails? clientDetails, [
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
+    StatsOptions? statsOptions,
   ]) async {
     return makePeerConnection(
       type: StreamPeerType.publisher,
@@ -51,6 +55,7 @@ class StreamPeerConnectionFactory {
       clientDetails: clientDetails,
       tracerIdPrefix: tracerIdPrefix,
       mediaConstraints: mediaConstraints,
+      statsOptions: statsOptions,
     );
   }
 
@@ -60,6 +65,7 @@ class StreamPeerConnectionFactory {
     required ClientDetails? clientDetails,
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
+    StatsOptions? statsOptions,
   }) async {
     _logger.i(
       () => '[createPeerConnection] #$type; configuration: '
@@ -73,6 +79,8 @@ class StreamPeerConnectionFactory {
     final tracer = Tracer(
       "$tracerIdPrefix-${type == StreamPeerType.publisher ? 'pub' : 'sub'}",
     );
+
+    tracer.setEnabled(statsOptions?.enableRtcStats ?? false);
 
     if (clientDetails != null) {
       tracer.trace('clientDetails', clientDetails.toJson());

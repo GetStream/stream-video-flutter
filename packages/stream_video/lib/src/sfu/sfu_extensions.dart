@@ -390,3 +390,51 @@ extension SfuCallEndedEventJsonX on SfuCallEndedEvent {
     };
   }
 }
+
+extension SfuTrackPublishedEventJsonX on SfuTrackPublishedEvent {
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'session_id': sessionId,
+      'track_type': trackType.toString(),
+      'participant': {
+        'user_id': participant.userId,
+        'session_id': participant.sessionId,
+        'user_name': participant.userName,
+        'user_image': participant.userImage,
+        'track_lookup_prefix': participant.trackLookupPrefix,
+        'published_tracks': participant.publishedTracks
+            .map((track) => track.toString())
+            .toList(),
+        'is_speaking': participant.isSpeaking,
+        'is_dominant_speaker': participant.isDominantSpeaker,
+        'audio_level': participant.audioLevel,
+        'roles': participant.roles,
+      },
+    };
+  }
+}
+
+extension SfuTrackUnpublishedEventJsonX on SfuTrackUnpublishedEvent {
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'session_id': sessionId,
+      'track_type': trackType.toString(),
+      'participant': {
+        'user_id': participant.userId,
+        'session_id': participant.sessionId,
+        'user_name': participant.userName,
+        'user_image': participant.userImage,
+        'track_lookup_prefix': participant.trackLookupPrefix,
+        'published_tracks': participant.publishedTracks
+            .map((track) => track.toString())
+            .toList(),
+        'is_speaking': participant.isSpeaking,
+        'is_dominant_speaker': participant.isDominantSpeaker,
+        'audio_level': participant.audioLevel,
+        'roles': participant.roles,
+      },
+    };
+  }
+}

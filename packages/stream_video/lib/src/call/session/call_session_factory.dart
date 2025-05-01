@@ -1,6 +1,7 @@
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../open_api/video/coordinator/api.dart';
 import '../../core/utils.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -33,6 +34,7 @@ class CallSessionFactory {
     required DynascaleManager dynascaleManager,
     required OnPeerConnectionIssue onPeerConnectionFailure,
     required InternetConnection networkMonitor,
+    required StatsOptions statsOptions,
     ClientPublishOptions? clientPublishOptions,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
@@ -64,6 +66,7 @@ class CallSessionFactory {
       onPeerConnectionIssue: onPeerConnectionFailure,
       clientPublishOptions: clientPublishOptions,
       networkMonitor: networkMonitor,
+      statsOptions: statsOptions,
     );
   }
 

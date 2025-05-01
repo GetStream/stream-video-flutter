@@ -10,6 +10,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:system_info2/system_info2.dart';
 
 import '../../../globals.dart';
+import '../../../open_api/video/coordinator/api.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pbenum.dart';
@@ -67,12 +68,14 @@ class CallSession extends Disposable {
     required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
     required this.networkMonitor,
+    required this.statsOptions,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
   })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
           sessionSeq: sessionSeq,
+          statsOptions: statsOptions,
         ),
         sfuWS = SfuWebSocket(
           sessionSeq: sessionSeq,
@@ -89,7 +92,7 @@ class CallSession extends Disposable {
         ),
         _tracer = Tracer(
           sessionSeq.toString(),
-        ) {
+        )..setEnabled(statsOptions.enableRtcStats) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }
 
@@ -107,6 +110,7 @@ class CallSession extends Disposable {
   final OnPeerConnectionIssue onPeerConnectionIssue;
   final ClientPublishOptions? clientPublishOptions;
   final InternetConnection networkMonitor;
+  final StatsOptions statsOptions;
 
   final Duration joinResponseTimeout;
 
@@ -132,6 +136,10 @@ class CallSession extends Disposable {
 
   TraceSlice getTrace() {
     return _tracer.take();
+  }
+
+  void setTraceEnabled(bool enabled) {
+    _tracer.setEnabled(enabled);
   }
 
   Future<void> _ensureClientDetails() async {
@@ -339,6 +347,7 @@ class CallSession extends Disposable {
         rtcManager = await rtcManagerFactory.makeRtcManager(
           clientDetails: _clientDetails,
           sessionSequence: sessionSeq,
+          statsOptions: statsOptions,
         )
           ..onSubscriberIceCandidate = _onLocalIceCandidate
           ..onSubscriberIssue = onPeerConnectionIssue
@@ -358,6 +367,7 @@ class CallSession extends Disposable {
           publishOptions: event.publishOptions,
           clientDetails: _clientDetails,
           sessionSequence: sessionSeq,
+          statsOptions: statsOptions,
         )
           ..onPublisherIceCandidate = _onLocalIceCandidate
           ..onSubscriberIceCandidate = _onLocalIceCandidate
@@ -550,21 +560,23 @@ class CallSession extends Disposable {
       } else if (event is SfuParticipantLeftEvent) {
         await _onParticipantLeft(event);
       } else if (event is SfuTrackPublishedEvent) {
+        _tracer.trace('TrackPublished', event.toJson());
         await _onTrackPublished(event);
       } else if (event is SfuTrackUnpublishedEvent) {
+        _tracer.trace('TrackUnpublish', event.toJson());
         await _onTrackUnpublished(event);
       } else if (event is SfuChangePublishQualityEvent) {
-        _tracer.trace('publishQualityChanged', event.toJson());
+        _tracer.trace('PublishQualityChanged', event.toJson());
         await _onPublishQualityChanged(event);
       } else if (event is SfuChangePublishOptionsEvent) {
-        _tracer.trace('publishOptionsChanged', event.toJson());
+        _tracer.trace('PublishOptionsChanged', event.toJson());
         await _onPublishOptionsChanged(event);
       } else if (event is SfuGoAwayEvent) {
-        _tracer.trace('goAway', event.toJson());
+        _tracer.trace('GoAway', event.toJson());
       } else if (event is SfuErrorEvent) {
-        _tracer.trace('error', event.toJson());
+        _tracer.trace('Error', event.toJson());
       } else if (event is SfuCallEndedEvent) {
-        _tracer.trace('callEnded', event.toJson());
+        _tracer.trace('CallEnded', event.toJson());
       }
 
       if (event is SfuJoinResponseEvent) {
@@ -773,13 +785,14 @@ class CallSession extends Disposable {
         ? sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
         : sfu_models.PeerType.PEER_TYPE_SUBSCRIBER;
 
-    final result = sfuClient.sendIceCandidate(
+    final result = sfuClient.iceTrickle(
       sfu_models.ICETrickle(
         peerType: peerType,
         sessionId: sessionId,
         iceCandidate: encodedIceCandidate,
       ),
     );
+
     _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 

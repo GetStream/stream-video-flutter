@@ -4,10 +4,12 @@ import 'dart:developer';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:thermal/thermal.dart';
 
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../globals.dart';
+import '../../../open_api/video/coordinator/api.dart';
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pb.dart';
 import '../../extensions/thermal_status_ext.dart';
@@ -21,11 +23,13 @@ import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import 'trace_record.dart';
+import 'tracer.dart';
 
 class SfuStatsReporter {
   SfuStatsReporter({
     required this.callSession,
     required this.stateManager,
+    required this.statsOptions,
   }) {
     final thermalStatusAvailable =
         CurrentPlatform.isAndroid || CurrentPlatform.isIos;
@@ -58,6 +62,9 @@ class SfuStatsReporter {
 
   final CallSession callSession;
   final CallStateNotifier stateManager;
+  final StatsOptions statsOptions;
+
+  late final _sfuStatsLock = Lock();
 
   final _logger = taggedLogger(tag: 'SV:SfuStatsReporter');
 
@@ -85,134 +92,143 @@ class SfuStatsReporter {
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    final publisherStatsBundle =
-        await callSession.rtcManager?.publisher?.getStats();
-    final subscriberStatsBundle =
-        await callSession.rtcManager?.subscriber.getStats();
+    await _sfuStatsLock.synchronized(() async {
+      final publisherStatsBundle =
+          await callSession.rtcManager?.publisher?.getStats();
+      final subscriberStatsBundle =
+          await callSession.rtcManager?.subscriber.getStats();
 
-    if (publisherStatsBundle == null && subscriberStatsBundle == null) {
-      return;
-    }
-
-    final batterySaveModeAvailable = CurrentPlatform.isAndroid ||
-        CurrentPlatform.isIos ||
-        CurrentPlatform.isMacOS ||
-        CurrentPlatform.isWindows;
-
-    bool? lowPowerMode;
-    if (batterySaveModeAvailable) {
-      try {
-        lowPowerMode = await Battery().isInBatterySaveMode;
-      } on PlatformException {
-        _logger.d(() => 'Failed to get battery save mode from the device');
+      if (publisherStatsBundle == null && subscriberStatsBundle == null) {
+        return;
       }
-    }
 
-    sfu_models.AndroidState? androidState;
-    sfu_models.AppleState? appleState;
+      final batterySaveModeAvailable = CurrentPlatform.isAndroid ||
+          CurrentPlatform.isIos ||
+          CurrentPlatform.isMacOS ||
+          CurrentPlatform.isWindows;
 
-    final audioInputDevices = sfu_models.InputDevices(
-      availableDevices: _availableAudioInputs,
-      currentDevice: stateManager.callState.audioInputDevice?.label,
-      isPermitted: stateManager.callState.audioInputDevice != null &&
-          stateManager.callState.ownCapabilities
-              .contains(CallPermission.sendAudio),
-    );
+      bool? lowPowerMode;
+      if (batterySaveModeAvailable) {
+        try {
+          lowPowerMode = await Battery().isInBatterySaveMode;
+        } on PlatformException {
+          _logger.d(() => 'Failed to get battery save mode from the device');
+        }
+      }
 
-    final videoInputDevices = sfu_models.InputDevices(
-      availableDevices: _availableVideoInputs,
-      currentDevice: stateManager.callState.videoInputDevice?.label,
-      isPermitted: stateManager.callState.videoInputDevice != null &&
-          stateManager.callState.ownCapabilities
-              .contains(CallPermission.sendVideo),
-    );
+      sfu_models.AndroidState? androidState;
+      sfu_models.AppleState? appleState;
 
-    if (CurrentPlatform.isAndroid) {
-      androidState = sfu_models.AndroidState(
-        thermalState: _thermalStatus?.toAndroidThermalState(),
-        isPowerSaverMode: lowPowerMode,
-      );
-    } else if (CurrentPlatform.isIos) {
-      appleState = sfu_models.AppleState(
-        thermalState: _thermalStatus?.toAppleThermalState(),
-        isLowPowerModeEnabled: lowPowerMode,
-      );
-    }
-
-    List<PerformanceStats>? encodeStats;
-    if (publisherStatsBundle != null) {
-      await callSession.rtcManager?.publisher?.traceStats(
-        publisherStatsBundle.rawStats,
+      final audioInputDevices = sfu_models.InputDevices(
+        availableDevices: _availableAudioInputs,
+        currentDevice: stateManager.callState.audioInputDevice?.label,
+        isPermitted: stateManager.callState.audioInputDevice != null &&
+            stateManager.callState.ownCapabilities
+                .contains(CallPermission.sendAudio),
       );
 
-      encodeStats = callSession.rtcManager?.publisher?.getPerformanceStats(
-        publisherStatsBundle.rtcStats,
-        callSession.getTrackType,
-      );
-    }
-
-    List<PerformanceStats>? decodeStats;
-    if (subscriberStatsBundle != null) {
-      await callSession.rtcManager?.subscriber.traceStats(
-        subscriberStatsBundle.rawStats,
+      final videoInputDevices = sfu_models.InputDevices(
+        availableDevices: _availableVideoInputs,
+        currentDevice: stateManager.callState.videoInputDevice?.label,
+        isPermitted: stateManager.callState.videoInputDevice != null &&
+            stateManager.callState.ownCapabilities
+                .contains(CallPermission.sendVideo),
       );
 
-      decodeStats = callSession.rtcManager?.subscriber.getPerformanceStats(
-        subscriberStatsBundle.rtcStats,
-        callSession.getTrackType,
-      );
-    }
+      if (CurrentPlatform.isAndroid) {
+        androidState = sfu_models.AndroidState(
+          thermalState: _thermalStatus?.toAndroidThermalState(),
+          isPowerSaverMode: lowPowerMode,
+        );
+      } else if (CurrentPlatform.isIos) {
+        appleState = sfu_models.AppleState(
+          thermalState: _thermalStatus?.toAppleThermalState(),
+          isLowPowerModeEnabled: lowPowerMode,
+        );
+      }
 
-    final subscriberTrace = callSession.rtcManager?.subscriber.tracer.take();
-    final publisherTrace = callSession.rtcManager?.publisher?.tracer.take();
-    final mediaDevicesTrace = mediaDevicesTracer.take();
-    final sfuClientTrace = callSession.sfuClient.getTrace();
-    final sessionTrace = callSession.getTrace();
+      List<PerformanceStats>? encodeStats;
+      List<PerformanceStats>? decodeStats;
+      final traces = <TraceSlice>[];
 
-    try {
-      final request = sfu.SendStatsRequest(
-        sessionId: callSession.sessionId,
-        publisherStats: publisherStatsBundle == null
-            ? null
-            : jsonEncode(publisherStatsBundle.rawStats),
-        subscriberStats: subscriberStatsBundle == null
-            ? null
-            : jsonEncode(subscriberStatsBundle.rawStats),
-        sdkVersion: streamVideoVersion,
-        sdk: streamSdkName,
-        android: androidState,
-        apple: appleState,
-        audioDevices: audioInputDevices,
-        videoDevices: videoInputDevices,
-        webrtcVersion: switch (CurrentPlatform.type) {
-          PlatformType.android => androidWebRTCVersion,
-          PlatformType.ios => iosWebRTCVersion,
-          _ => null,
-        },
-        telemetry: _calculateTelemetry(connectionTimeMs, reconnectionStrategy),
-        rtcStats: [
-          ...?publisherTrace?.snapshot,
-          ...?subscriberTrace?.snapshot,
-          ...mediaDevicesTrace.snapshot,
-          ...sfuClientTrace.snapshot,
-          ...sessionTrace.snapshot,
-        ].toJsonString(),
-        encodeStats: encodeStats,
-        decodeStats: decodeStats,
-      );
+      if (statsOptions.enableRtcStats) {
+        if (publisherStatsBundle != null) {
+          await callSession.rtcManager?.publisher?.traceStats(
+            publisherStatsBundle.rawStats,
+          );
 
-      await callSession.sfuClient.sendStats(
-        request,
-      );
-    } catch (e) {
-      subscriberTrace?.rollback();
-      publisherTrace?.rollback();
-      mediaDevicesTrace.rollback();
-      sfuClientTrace.rollback();
-      sessionTrace.rollback();
+          encodeStats = callSession.rtcManager?.publisher?.getPerformanceStats(
+            publisherStatsBundle.rtcStats,
+            callSession.getTrackType,
+          );
+        }
 
-      rethrow;
-    }
+        if (subscriberStatsBundle != null) {
+          await callSession.rtcManager?.subscriber.traceStats(
+            subscriberStatsBundle.rawStats,
+          );
+
+          decodeStats = callSession.rtcManager?.subscriber.getPerformanceStats(
+            subscriberStatsBundle.rtcStats,
+            callSession.getTrackType,
+          );
+        }
+
+        final subscriberTrace =
+            callSession.rtcManager?.subscriber.tracer.take();
+        final publisherTrace = callSession.rtcManager?.publisher?.tracer.take();
+        final mediaDevicesTrace = mediaDevicesTracer.take();
+        final sfuClientTrace = callSession.sfuClient.getTrace();
+        final sessionTrace = callSession.getTrace();
+
+        traces.addAll([
+          if (subscriberTrace != null) subscriberTrace,
+          if (publisherTrace != null) publisherTrace,
+          mediaDevicesTrace,
+          sfuClientTrace,
+          sessionTrace,
+        ]);
+      }
+
+      try {
+        final request = sfu.SendStatsRequest(
+          sessionId: callSession.sessionId,
+          publisherStats: publisherStatsBundle == null
+              ? null
+              : jsonEncode(publisherStatsBundle.rawStats),
+          subscriberStats: subscriberStatsBundle == null
+              ? null
+              : jsonEncode(subscriberStatsBundle.rawStats),
+          sdkVersion: streamVideoVersion,
+          sdk: streamSdkName,
+          android: androidState,
+          apple: appleState,
+          audioDevices: audioInputDevices,
+          videoDevices: videoInputDevices,
+          webrtcVersion: switch (CurrentPlatform.type) {
+            PlatformType.android => androidWebRTCVersion,
+            PlatformType.ios => iosWebRTCVersion,
+            _ => null,
+          },
+          telemetry:
+              _calculateTelemetry(connectionTimeMs, reconnectionStrategy),
+          rtcStats:
+              [...traces.expand((trace) => trace.snapshot)].toJsonString(),
+          encodeStats: encodeStats,
+          decodeStats: decodeStats,
+        );
+
+        await callSession.sfuClient.sendStats(
+          request,
+        );
+      } catch (e) {
+        for (final trace in traces) {
+          trace.rollback();
+        }
+
+        rethrow;
+      }
+    });
   }
 
   sfu.Telemetry? _calculateTelemetry(
