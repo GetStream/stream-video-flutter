@@ -17,7 +17,7 @@ class StreamLivestreamThemeData with Diagnosticable {
       color: Colors.white,
     ),
     this.playPauseIconSize = 64.0,
-    this.liveButtonColor = Colors.blue,
+    this.liveButtonColor = const Color(0xff0066f5),
     this.backstageButtonColor = Colors.red,
     this.callStateButtonTextStyle = const TextStyle(
       color: Colors.white,
@@ -27,6 +27,29 @@ class StreamLivestreamThemeData with Diagnosticable {
     ),
     this.durationTextStyle = const TextStyle(
       color: Colors.white,
+    ),
+    this.backstageTextStyle = const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    this.backstageCounterTextStyle = const TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    this.backstageParticipantsTextStyle = const TextStyle(
+      fontSize: 16,
+      color: Colors.white54,
+    ),
+    this.liveEndedTextStyle = const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    this.liveEndedRecordingsTextStyle = const TextStyle(
+      fontSize: 16,
+      color: Colors.white54,
     ),
     this.participantIconTheme = const IconThemeData(
       color: Colors.white,
@@ -66,6 +89,21 @@ class StreamLivestreamThemeData with Diagnosticable {
   /// The [TextStyle] for the participant count
   final TextStyle participantCountTextStyle;
 
+  /// The [TextStyle] for the backstage text
+  final TextStyle backstageTextStyle;
+
+  /// The [TextStyle] for the backstage counter
+  final TextStyle backstageCounterTextStyle;
+
+  /// The [TextStyle] for the backstage participants text
+  final TextStyle backstageParticipantsTextStyle;
+
+  /// The [TextStyle] for the live ended text
+  final TextStyle liveEndedTextStyle;
+
+  /// The [TextStyle] for the live ended recordings text
+  final TextStyle liveEndedRecordingsTextStyle;
+
   /// The [TextStyle] for the duration count
   final TextStyle durationTextStyle;
 
@@ -95,6 +133,11 @@ class StreamLivestreamThemeData with Diagnosticable {
     TextStyle? callStateButtonTextStyle,
     TextStyle? participantCountTextStyle,
     TextStyle? durationTextStyle,
+    TextStyle? backstageTextStyle,
+    TextStyle? backstageCounterTextStyle,
+    TextStyle? backstageParticipantsTextStyle,
+    TextStyle? liveEndedTextStyle,
+    TextStyle? liveEndedRecordingsTextStyle,
     IconThemeData? participantIconTheme,
     IconThemeData? speakerEnabledIconTheme,
     IconThemeData? speakerDisabledIconTheme,
@@ -112,6 +155,14 @@ class StreamLivestreamThemeData with Diagnosticable {
       participantCountTextStyle:
           participantCountTextStyle ?? this.participantCountTextStyle,
       durationTextStyle: durationTextStyle ?? this.durationTextStyle,
+      backstageTextStyle: backstageTextStyle ?? this.backstageTextStyle,
+      backstageCounterTextStyle:
+          backstageCounterTextStyle ?? this.backstageCounterTextStyle,
+      backstageParticipantsTextStyle:
+          backstageParticipantsTextStyle ?? this.backstageParticipantsTextStyle,
+      liveEndedTextStyle: liveEndedTextStyle ?? this.liveEndedTextStyle,
+      liveEndedRecordingsTextStyle:
+          liveEndedRecordingsTextStyle ?? this.liveEndedRecordingsTextStyle,
       participantIconTheme: participantIconTheme ?? this.participantIconTheme,
       speakerEnabledIconTheme:
           speakerEnabledIconTheme ?? this.speakerEnabledIconTheme,
@@ -153,6 +204,31 @@ class StreamLivestreamThemeData with Diagnosticable {
         other.durationTextStyle,
         t,
       )!,
+      backstageTextStyle: TextStyle.lerp(
+        backstageTextStyle,
+        other.backstageTextStyle,
+        t,
+      )!,
+      backstageCounterTextStyle: TextStyle.lerp(
+        backstageCounterTextStyle,
+        other.backstageCounterTextStyle,
+        t,
+      )!,
+      backstageParticipantsTextStyle: TextStyle.lerp(
+        backstageParticipantsTextStyle,
+        other.backstageParticipantsTextStyle,
+        t,
+      )!,
+      liveEndedTextStyle: TextStyle.lerp(
+        liveEndedTextStyle,
+        other.liveEndedTextStyle,
+        t,
+      )!,
+      liveEndedRecordingsTextStyle: TextStyle.lerp(
+        liveEndedRecordingsTextStyle,
+        other.liveEndedRecordingsTextStyle,
+        t,
+      )!,
       participantIconTheme: IconThemeData.lerp(
         participantIconTheme,
         other.participantIconTheme,
@@ -191,6 +267,11 @@ class StreamLivestreamThemeData with Diagnosticable {
         callStateButtonTextStyle,
         participantCountTextStyle,
         durationTextStyle,
+        backstageTextStyle,
+        backstageCounterTextStyle,
+        backstageParticipantsTextStyle,
+        liveEndedTextStyle,
+        liveEndedRecordingsTextStyle,
         participantIconTheme,
         speakerEnabledIconTheme,
         speakerDisabledIconTheme,
@@ -215,6 +296,12 @@ class StreamLivestreamThemeData with Diagnosticable {
         other.callStateButtonTextStyle == callStateButtonTextStyle &&
         other.participantCountTextStyle == participantCountTextStyle &&
         other.durationTextStyle == durationTextStyle &&
+        other.backstageTextStyle == backstageTextStyle &&
+        other.backstageCounterTextStyle == backstageCounterTextStyle &&
+        other.backstageParticipantsTextStyle ==
+            backstageParticipantsTextStyle &&
+        other.liveEndedTextStyle == liveEndedTextStyle &&
+        other.liveEndedRecordingsTextStyle == liveEndedRecordingsTextStyle &&
         other.participantIconTheme == participantIconTheme &&
         other.speakerEnabledIconTheme == speakerEnabledIconTheme &&
         other.speakerDisabledIconTheme == speakerDisabledIconTheme &&
@@ -246,6 +333,36 @@ class StreamLivestreamThemeData with Diagnosticable {
       ..add(
         DiagnosticsProperty<TextStyle>('durationTextStyle', durationTextStyle),
       )
+      ..add(
+        DiagnosticsProperty<TextStyle>(
+          'backstageTextStyle',
+          backstageTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextStyle>(
+          'backstageCounterTextStyle',
+          backstageCounterTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextStyle>(
+          'backstageParticipantsTextStyle',
+          backstageParticipantsTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextStyle>(
+          'liveEndedTextStyle',
+          liveEndedTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextStyle>(
+          'liveEndedRecordingsTextStyle',
+          liveEndedRecordingsTextStyle,
+        ),
+      )
       ..add(DiagnosticsProperty('participantIconTheme', participantIconTheme))
       ..add(
         DiagnosticsProperty('speakerEnabledIconTheme', speakerEnabledIconTheme),
@@ -272,6 +389,11 @@ class StreamLivestreamThemeData with Diagnosticable {
       callStateButtonTextStyle: other.callStateButtonTextStyle,
       participantCountTextStyle: other.participantCountTextStyle,
       durationTextStyle: other.durationTextStyle,
+      backstageTextStyle: other.backstageTextStyle,
+      backstageCounterTextStyle: other.backstageCounterTextStyle,
+      backstageParticipantsTextStyle: other.backstageParticipantsTextStyle,
+      liveEndedTextStyle: other.liveEndedTextStyle,
+      liveEndedRecordingsTextStyle: other.liveEndedRecordingsTextStyle,
       participantIconTheme: other.participantIconTheme,
       speakerEnabledIconTheme: other.speakerEnabledIconTheme,
       speakerDisabledIconTheme: other.speakerDisabledIconTheme,

@@ -460,14 +460,6 @@ class Call {
         return _stateManager.coordinatorCallBroadcastingStopped(event);
       case StreamCallBroadcastingFailedEvent _:
         return _stateManager.coordinatorCallBroadcastingFailed(event);
-      case StreamCallRingingEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallMissedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallSessionEndedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallSessionStartedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallUpdatedEvent _:
         return _stateManager.callMetadataChanged(
           event.metadata,
@@ -495,6 +487,25 @@ class Call {
               event.participantsCountByRole.values.fold(0, (a, b) => a + b),
           anonymousCount: event.anonymousParticipantCount,
         );
+      case StreamCallMemberAddedEvent _:
+        return _stateManager.coordinatorCallMemberAdded(event);
+      case StreamCallMemberRemovedEvent _:
+        return _stateManager.coordinatorCallMemberRemoved(event);
+      case StreamCallMemberUpdatedEvent _:
+        return _stateManager.coordinatorCallMemberUpdated(event);
+      case StreamCallUserBlockedEvent _:
+        return _stateManager.coordinatorCallUserBlocked(event);
+      case StreamCallUserUnblockedEvent _:
+        return _stateManager.coordinatorCallUserUnblocked(event);
+      case StreamCallRingingEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallMissedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallSessionEndedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case StreamCallSessionStartedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+
       default:
         break;
     }
@@ -943,8 +954,25 @@ class Call {
     return Result.success(joined);
   }
 
+  /// Updates the configuration of the call.
+  ///
+  /// - [startsAt]: The date and time when the call is scheduled to start.
+  /// - [custom]: Custom metadata to be added to the call.
+  /// - [ring]: Ring settings for the call.
+  /// - [audio]: Audio settings for the call.
+  /// - [video]: Video settings for the call.
+  /// - [screenShare]: Screen share settings for the call.
+  /// - [recording]: Recording settings for the call.
+  /// - [transcription]: Transcription settings for the call.
+  /// - [backstage]: Backstage settings for the call.
+  /// - [geofencing]: Geofencing settings for the call.
+  /// - [limits]: Limits settings for the call.
+  /// - [broadcasting]: Broadcasting settings for the call.
+  /// - [session]: Session settings for the call.
+  /// - [frameRecording]: Frame recording settings for the call.
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
+    DateTime? startsAt,
     StreamRingSettings? ring,
     StreamAudioSettings? audio,
     StreamVideoSettings? video,
@@ -961,6 +989,7 @@ class Call {
     return _coordinatorClient.updateCall(
       callCid: callCid,
       custom: custom ?? {},
+      startsAt: startsAt,
       ring: ring,
       audio: audio,
       video: video,
@@ -1800,9 +1829,24 @@ class Call {
   /// - [notify]: If `true`, sends a standard push notification.
   /// - [video]: Marks the call as a video call if `true`; otherwise, audio-only.
   /// - [watch]:  If `true`, listens to coordinator events and updates call state accordingly.
+  /// - [members]:An optional list of `MemberRequest` objects to add to the call.
+  /// - [memberIds]: An optional list of member IDs to add to the call.
   /// - [membersLimit]: Sets the total number of members to return as part of the response.
+  /// - [ring]: Ring settings for the call.
+  /// - [audio]: Audio settings for the call.
+  /// - [videoSettings]: Video settings for the call.
+  /// - [screenShare]: Screen share settings for the call.
+  /// - [recording]: Recording settings for the call.
+  /// - [transcription]: Transcription settings for the call.
+  /// - [backstage]: Backstage settings for the call.
+  /// - [geofencing]: Geofencing settings for the call.
+  /// - [limits]: Limits settings for the call.
+  /// - [broadcasting]: Broadcasting settings for the call.
+  /// - [session]: Session settings for the call.
+  /// - [frameRecording]: Frame recording settings for the call.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
+    List<MemberRequest> members = const [],
     bool ringing = false,
     bool video = false,
     bool watch = true,
@@ -1852,15 +1896,19 @@ class Call {
       frameRecording: frameRecording?.toOpenDto(),
     );
 
+    final aggregatedMembers = [
+      ...memberIds.map(
+        (id) => MemberRequest(
+          userId: id,
+        ),
+      ),
+      ...members,
+    ];
+
     final response = await _coordinatorClient.getOrCreateCall(
       callCid: callCid,
       ringing: ringing,
-      members: {...memberIds, _streamVideo.state.currentUser.id}.map((id) {
-        return MemberRequest(
-          userId: id,
-          role: 'admin',
-        );
-      }).toList(),
+      members: aggregatedMembers,
       team: team,
       notify: notify,
       video: video,

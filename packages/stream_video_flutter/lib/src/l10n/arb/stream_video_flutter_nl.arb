@@ -3,5 +3,13 @@
   "desktopScreenShareChooseDialogShare": "Delen",
   "desktopScreenShareChooseDialogCancel": "Annuleren",
   "desktopScreenShareEntireScreen": "Volledig scherm",
-  "desktopScreenShareWindow": "Venster"
+  "desktopScreenShareWindow": "Venster",
+  "livestreamBackstageStartingSoon": "Livestream begint binnenkort",
+  "livestreamBackstageStartingIn": "Livestream begint over:",
+  "livestreamBackstageParticipants": "{count, plural, zero{Nog geen deelnemers  zijn} one{Eén deelnemer is} other{{count} deelnemers zijn}} vroeg aanwezig",
+  "livestreamEndedStatus": "De livestream is afgelopen.",
+  "livestreamEndedWatchRecordings": "Bekijk de opnames:",
+  "livestreamHostNotAvailable": "De video van de host is niet beschikbaar.",
+  "livestreamBackstage": "Backstage",
+  "livestreamLive": "Live"
 }

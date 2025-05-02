@@ -10,20 +10,21 @@ class BadgedCallOption extends StatelessWidget {
   });
 
   final CallControlOption callControlOption;
-  final int badgeCount;
+  final int? badgeCount;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         callControlOption,
-        Positioned(
-          top: 0,
-          right: 8,
-          child: Badge(
-            count: badgeCount,
-          ),
-        )
+        if (badgeCount != null)
+          Positioned(
+            top: 0,
+            right: 8,
+            child: Badge(
+              count: badgeCount!,
+            ),
+          )
       ],
     );
   }

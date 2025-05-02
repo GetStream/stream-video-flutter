@@ -18,5 +18,37 @@
   "desktopScreenShareWindow": "Window",
   "@desktopScreenShareWindow": {
     "description": "Tab to select a single window to share"
+  },
+  "livestreamBackstageStartingSoon": "Livestream will start soon",
+  "@livestreamBackstageStartingSoon": {
+    "description": "Label for livestream backstage when live stream will soon start"
+  },
+  "livestreamBackstageStartingIn": "Livestream will start in:",
+  "@livestreamBackstageStartingIn": {
+    "description": "Label for livestream backstage when live stream counter is shown"
+  },
+  "livestreamBackstageParticipants": "{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early",
+  "@livestreamBackstageParticipants": {
+    "description": "Label for livestream backstage showing participants count"
+  },
+  "livestreamEndedStatus": "The livestream has ended.",
+  "@livestreamEndedStatus": {
+    "description": "Label shown when the livestream has already ended."
+  },
+  "livestreamEndedWatchRecordings": "Watch the recordings:",
+  "@livestreamEndedWatchRecordings": {
+    "description": "Label shown when the livestream has already ended listing the recordings."
+  },
+  "livestreamHostNotAvailable": "The host's video is not available.",
+  "@livestreamHostNotAvailable": {
+    "description": "Label shown when the host of the livestream is not available."
+  },
+  "livestreamBackstage": "Backstage",
+  "@livestreamBackstage": {
+    "description": "The badge text shown when the call mode is backstage"
+  },
+  "livestreamLive": "Live",
+  "@livestreamLive": {
+    "description": "The badge text shown when the call mode is live"
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
+import '../l10n/localization_extension.dart';
 
 /// The video renderer widget associated with [LivestreamPlayer].
 ///
@@ -71,37 +72,34 @@ class _LivestreamContentState extends State<LivestreamContent> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final translations = context.translations;
 
     late Widget bodyWidget;
     if (callState.status.isConnected) {
-      if (callState.isBackstage) {
-        bodyWidget = const Center(
-          child: Text('Livestream is backstage'),
-        );
+      final streamingParticipants =
+          callState.callParticipants.where((e) => e.isVideoEnabled).toList();
+
+      bodyWidget = Center(
+        child: Text(
+          translations.livestreamHostNotAvailable,
+          style: theme.livestreamTheme.callStateButtonTextStyle,
+        ),
+      );
+
+      if (streamingParticipants.isEmpty) {
       } else {
-        final streamingParticipants =
-            callState.callParticipants.where((e) => e.isVideoEnabled).toList();
+        final participant = streamingParticipants.first;
 
-        bodyWidget = const Center(
-          child: Text('No livestreaming participants'),
+        bodyWidget = StreamCallParticipant(
+          backgroundColor: theme.colorTheme.livestreamBackground,
+          key: ValueKey(participant.uniqueParticipantKey),
+          call: call,
+          participant: participant,
+          showConnectionQualityIndicator: false,
+          showParticipantLabel: false,
+          showSpeakerBorder: false,
+          videoFit: videoFit,
         );
-
-        if (streamingParticipants.isEmpty) {
-        } else {
-          final participant = streamingParticipants.first;
-
-          bodyWidget = StreamCallParticipant(
-            // We use the sessionId as the key to avoid rebuilding the widget
-            // when the participant changes.
-            key: ValueKey(participant.uniqueParticipantKey),
-            call: call,
-            participant: participant,
-            showConnectionQualityIndicator: false,
-            showParticipantLabel: false,
-            showSpeakerBorder: false,
-            videoFit: videoFit,
-          );
-        }
       }
     } else {
       final isMigrating = callState.status.isMigrating;
@@ -114,7 +112,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
       bodyWidget = Center(
         child: Text(
           statusText,
-          style: theme.textTheme.title3,
+          style: theme.livestreamTheme.callStateButtonTextStyle,
         ),
       );
     }

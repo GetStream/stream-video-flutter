@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../l10n/localization_extension.dart';
 import '../theme/themes.dart';
 import 'livestream_speakerphone_option.dart';
 
@@ -15,7 +16,7 @@ class LivestreamInfo extends StatelessWidget {
   ///
   /// * [fullscreen] denotes if the video renderer is in cover or contain mode.
   ///
-  /// * [onStateChanged] notifies the implementing widget of a state change.
+  /// * [onFullscreenTapped] is a callback function that notifies when the fullscreen button is tapped.
   ///
   /// * [duration] denotes the current call duration.
   ///
@@ -25,7 +26,7 @@ class LivestreamInfo extends StatelessWidget {
     required this.call,
     required this.callState,
     required this.fullscreen,
-    required this.onStateChanged,
+    required this.onFullscreenTapped,
     required this.duration,
     required this.showParticipantCount,
   });
@@ -39,8 +40,8 @@ class LivestreamInfo extends StatelessWidget {
   /// Denotes if the video renderer is in cover or contain mode.
   final bool fullscreen;
 
-  /// Notifies the implementing widget of a requested state change.
-  final VoidCallback onStateChanged;
+  /// Callback function that notifies when the fullscreen button is tapped.
+  final VoidCallback onFullscreenTapped;
 
   /// The current duration of the call.
   final Duration duration;
@@ -55,6 +56,7 @@ class LivestreamInfo extends StatelessWidget {
     final streamVideoTheme = StreamVideoTheme.of(context);
     final theme = streamVideoTheme.livestreamTheme;
     final colorTheme = StreamVideoTheme.of(context).colorTheme;
+    final translations = context.translations;
 
     final participantIconTheme = IconThemeData(
       color: colorTheme.livestreamCallControlsColor,
@@ -88,7 +90,7 @@ class LivestreamInfo extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
+                  horizontal: 8,
                   vertical: 8,
                 ),
                 margin: const EdgeInsets.symmetric(
@@ -96,10 +98,12 @@ class LivestreamInfo extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.blue,
+                  color: theme.liveButtonColor,
                 ),
                 child: Text(
-                  callState.isBackstage ? 'Backstage' : 'Live',
+                  callState.isBackstage
+                      ? translations.livestreamBackstage
+                      : translations.livestreamLive,
                   style: theme.callStateButtonTextStyle,
                 ),
               ),
@@ -146,7 +150,7 @@ class LivestreamInfo extends StatelessWidget {
                 disabledSpeakerphoneIconTheme: speakerphoneDisabledIconTheme,
               ),
               IconButton(
-                onPressed: onStateChanged,
+                onPressed: onFullscreenTapped,
                 icon: AnimatedCrossFade(
                   firstChild: IconTheme(
                     data: contractIconTheme,
