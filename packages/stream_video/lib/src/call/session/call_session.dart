@@ -69,14 +69,15 @@ class CallSession extends Disposable {
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
+    required Tracer tracer,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
-  })  : sfuClient = SfuClient(
+  })  : _tracer = tracer,
+        sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
-          sfuName: config.sfuName,
           sessionSeq: sessionSeq,
-          statsOptions: statsOptions,
+          tracer: tracer,
         ),
         sfuWS = SfuWebSocket(
           sessionSeq: sessionSeq,
@@ -90,10 +91,7 @@ class CallSession extends Disposable {
           callCid: callCid,
           configuration: config.rtcConfig,
           sdpEditor: sdpEditor,
-        ),
-        _tracer = Tracer(
-          '$sessionSeq-${config.sfuName}',
-        )..setEnabled(statsOptions.enableRtcStats) {
+        ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }
 
@@ -112,12 +110,13 @@ class CallSession extends Disposable {
   final ClientPublishOptions? clientPublishOptions;
   final InternetConnection networkMonitor;
   final StatsOptions statsOptions;
+  final Tracer _tracer;
 
   final Duration joinResponseTimeout;
 
   final Lock _sfuEventsLock = Lock();
   final Lock _negotiationLock = Lock();
-  final Tracer _tracer;
+
   int zonedTracerSeq = 0;
 
   RtcManager? rtcManager;

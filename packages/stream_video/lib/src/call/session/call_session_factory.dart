@@ -10,6 +10,7 @@ import '../../models/call_credentials.dart';
 import '../../types/other.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/tracer.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 import 'dynascale_manager.dart';
@@ -52,7 +53,11 @@ class CallSessionFactory {
 
     final sfuName = sessionConfig.sfuName;
     final sfuUrl = sessionConfig.sfuUrl;
+
     _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
+
+    final tracer = Tracer('$sessionSeq-$sfuName')
+      ..setEnabled(statsOptions.enableRtcStats);
 
     return CallSession(
       sessionSeq: sessionSeq,
@@ -66,6 +71,7 @@ class CallSessionFactory {
       clientPublishOptions: clientPublishOptions,
       networkMonitor: networkMonitor,
       statsOptions: statsOptions,
+      tracer: tracer,
     );
   }
 

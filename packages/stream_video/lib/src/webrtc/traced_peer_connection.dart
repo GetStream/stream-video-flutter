@@ -37,8 +37,6 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
   List<double> frameTimesHistory = [];
   List<double> fpsHistory = [];
-  // List<PerformanceStats>? _previousPerformanceStats;
-  // int iteration = 1;
 
   void _initTracking() {
     final originalIceGatheringState = pc.onIceGatheringState;

@@ -175,13 +175,11 @@ class SfuStatsReporter {
         final subscriberTrace =
             callSession.rtcManager?.subscriber.tracer.take();
         final publisherTrace = callSession.rtcManager?.publisher?.tracer.take();
-        final sfuClientTrace = callSession.sfuClient.getTrace();
         final sessionTrace = callSession.getTrace();
 
         traces.addAll([
           if (subscriberTrace != null) subscriberTrace,
           if (publisherTrace != null) publisherTrace,
-          sfuClientTrace,
           sessionTrace,
         ]);
       }

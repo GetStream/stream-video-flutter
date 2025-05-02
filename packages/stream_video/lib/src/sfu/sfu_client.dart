@@ -2,7 +2,6 @@ import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
@@ -18,8 +17,7 @@ class SfuClient {
     required String baseUrl,
     required this.sfuToken,
     required this.sessionSeq,
-    required this.sfuName,
-    required StatsOptions statsOptions,
+    required Tracer tracer,
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
@@ -30,8 +28,7 @@ class SfuClient {
           interceptor: chainInterceptor(interceptors),
         ),
         _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
-        _tracer = Tracer('$sessionSeq-$sfuName')
-          ..setEnabled(statsOptions.enableRtcStats);
+        _tracer = tracer;
 
   final TaggedLogger _logger;
   final Tracer _tracer;
@@ -39,15 +36,6 @@ class SfuClient {
 
   final int sessionSeq;
   final String sfuToken;
-  final String sfuName;
-
-  TraceSlice getTrace() {
-    return _tracer.take();
-  }
-
-  void setTraceEnabled(bool enabled) {
-    _tracer.setEnabled(enabled);
-  }
 
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(
     sfu.SendAnswerRequest request,
