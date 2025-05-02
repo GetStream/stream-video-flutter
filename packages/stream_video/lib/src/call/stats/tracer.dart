@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'trace_record.dart';
 
 /// Represents a slice of trace records with the ability to rollback.
@@ -51,5 +53,27 @@ class Tracer {
 
   void dispose() {
     _buffer = [];
+  }
+}
+
+class TracerZone {
+  TracerZone._();
+
+  /// Runs [body] inside a Zone that carries [Tracer] optional [sequence].
+  static Future<T> run<T>(
+    Tracer tracer,
+    int? sequence,
+    Future<T> Function() body,
+  ) {
+    return runZoned(
+      body,
+      zoneValues: {#tracer: tracer, #sequence: sequence},
+    );
+  }
+
+  static (Tracer? tracer, int? sequence) get currentTracer {
+    final tracer = Zone.current[#tracer];
+    if (tracer is Tracer) return (tracer, Zone.current[#sequence] as int);
+    return (null, null);
   }
 }

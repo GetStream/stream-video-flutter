@@ -118,6 +118,7 @@ class CallSession extends Disposable {
   final Lock _sfuEventsLock = Lock();
   final Lock _negotiationLock = Lock();
   final Tracer _tracer;
+  int zonedTracerSeq = 0;
 
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
@@ -912,9 +913,15 @@ class CallSession extends Disposable {
       return Result.error('Unable to set camera, Call not connected');
     }
 
-    final result = await rtcManager.setCameraEnabled(
-      enabled: enabled,
-      constraints: constraints,
+    final result = TracerZone.run(
+      _tracer,
+      ++zonedTracerSeq,
+      () async {
+        return rtcManager.setCameraEnabled(
+          enabled: enabled,
+          constraints: constraints,
+        );
+      },
     );
 
     return result;
@@ -929,10 +936,17 @@ class CallSession extends Disposable {
       return Result.error('Unable to set microphone, Call not connected');
     }
 
-    final result = await rtcManager.setMicrophoneEnabled(
-      enabled: enabled,
-      constraints: constraints,
+    final result = TracerZone.run(
+      _tracer,
+      ++zonedTracerSeq,
+      () async {
+        return rtcManager.setMicrophoneEnabled(
+          enabled: enabled,
+          constraints: constraints,
+        );
+      },
     );
+
     return result;
   }
 

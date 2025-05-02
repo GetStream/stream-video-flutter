@@ -16,7 +16,6 @@ import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/models/sfu_error.dart';
-import '../../webrtc/media/media_constraints.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../session/call_session.dart';
@@ -176,14 +175,12 @@ class SfuStatsReporter {
         final subscriberTrace =
             callSession.rtcManager?.subscriber.tracer.take();
         final publisherTrace = callSession.rtcManager?.publisher?.tracer.take();
-        final mediaDevicesTrace = mediaDevicesTracer.take();
         final sfuClientTrace = callSession.sfuClient.getTrace();
         final sessionTrace = callSession.getTrace();
 
         traces.addAll([
           if (subscriberTrace != null) subscriberTrace,
           if (publisherTrace != null) publisherTrace,
-          mediaDevicesTrace,
           sfuClientTrace,
           sessionTrace,
         ]);

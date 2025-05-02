@@ -32,8 +32,6 @@ abstract class MediaConstraints {
   MediaConstraints copyWith();
 }
 
-final mediaDevicesTracer = Tracer(null)..setEnabled(false);
-
 extension MediaDevices on rtc_interface.MediaDevices {
   Future<rtc.MediaStream> getMedia(MediaConstraints constraints) async {
     final constraintsMap = constraints.toMap();
@@ -43,28 +41,29 @@ extension MediaDevices on rtc_interface.MediaDevices {
           '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap',
     );
 
+    final (tracer, sequence) = TracerZone.currentTracer;
+
     late rtc.MediaStream stream;
     late String tag;
-    int currentMark = 0;
 
     try {
       if (constraints is ScreenShareConstraints) {
         tag = 'navigator.mediaDevices.getDisplayMedia';
-        mediaDevicesTracer.trace('$tag.$currentMark', constraintsMap);
+        tracer?.trace('$tag.$sequence', constraintsMap);
 
         stream = await rtc.navigator.mediaDevices.getDisplayMedia(
           constraintsMap,
         );
       } else {
         tag = 'navigator.mediaDevices.getUserMedia';
-        mediaDevicesTracer.trace('$tag.$currentMark', constraintsMap);
+        tracer?.trace('$tag.$sequence', constraintsMap);
 
         stream = await rtc.navigator.mediaDevices.getUserMedia(
           constraintsMap,
         );
       }
     } catch (e) {
-      mediaDevicesTracer.trace('${tag}OnFailure.$currentMark', e.toString());
+      tracer?.trace('${tag}OnFailure.$sequence', e.toString());
       rethrow;
     }
 
@@ -82,7 +81,7 @@ extension MediaDevices on rtc_interface.MediaDevices {
       }).toList(),
     };
 
-    mediaDevicesTracer.trace('${tag}OnSuccess.$currentMark', straemDump);
+    tracer?.trace('${tag}OnSuccess.$sequence', straemDump);
     return stream;
   }
 }

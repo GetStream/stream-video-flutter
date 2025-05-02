@@ -851,7 +851,6 @@ class Call {
               .setEnabled(_sfuStatsOptions!.enableRtcStats);
           _session?.rtcManager?.publisher?.tracer
               .setEnabled(_sfuStatsOptions!.enableRtcStats);
-          mediaDevicesTracer.setEnabled(_sfuStatsOptions!.enableRtcStats);
           _session?.sfuClient.setTraceEnabled(_sfuStatsOptions!.enableRtcStats);
           _session?.setTraceEnabled(_sfuStatsOptions!.enableRtcStats);
 
