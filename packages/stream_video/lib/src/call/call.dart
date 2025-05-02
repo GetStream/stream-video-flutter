@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../globals.dart';
 import '../../open_api/video/coordinator/api.dart' hide User;
@@ -259,6 +260,7 @@ class Call {
 
   StatsOptions? _sfuStatsOptions;
   SfuStatsReporter? _sfuStatsReporter;
+  String? _unifiedSessionId;
 
   int _reconnectAttempts = 0;
   Duration _fastReconnectDeadline = Duration.zero;
@@ -1071,10 +1073,12 @@ class Call {
     }
 
     if (_sfuStatsOptions != null) {
+      _unifiedSessionId ??= _session?.sessionId;
       _sfuStatsReporter = SfuStatsReporter(
         callSession: session,
         stateManager: _stateManager,
         statsOptions: _sfuStatsOptions!,
+        unifiedSessionId: _unifiedSessionId,
       )..run(
           interval: Duration(
             milliseconds: _sfuStatsOptions!.reportingIntervalMs,

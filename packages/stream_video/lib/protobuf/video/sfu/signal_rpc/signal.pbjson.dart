@@ -233,6 +233,13 @@ const SendStatsRequest$json = {
       '6': '.stream.video.sfu.models.PerformanceStats',
       '10': 'decodeStats'
     },
+    {
+      '1': 'unified_session_id',
+      '3': 18,
+      '4': 1,
+      '5': 9,
+      '10': 'unifiedSessionId'
+    },
   ],
   '8': [
     {'1': 'device_state'},
@@ -257,7 +264,8 @@ final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
     'NoZXJSdGNTdGF0cxIbCglydGNfc3RhdHMYDyABKAlSCHJ0Y1N0YXRzEkwKDGVuY29kZV9zdGF0'
     'cxgQIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBlcmZvcm1hbmNlU3RhdHNSC2VuY2'
     '9kZVN0YXRzEkwKDGRlY29kZV9zdGF0cxgRIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxz'
-    'LlBlcmZvcm1hbmNlU3RhdHNSC2RlY29kZVN0YXRzQg4KDGRldmljZV9zdGF0ZQ==');
+    'LlBlcmZvcm1hbmNlU3RhdHNSC2RlY29kZVN0YXRzEiwKEnVuaWZpZWRfc2Vzc2lvbl9pZBgSIA'
+    'EoCVIQdW5pZmllZFNlc3Npb25JZEIOCgxkZXZpY2Vfc3RhdGU=');
 
 @$core.Deprecated('Use sendStatsResponseDescriptor instead')
 const SendStatsResponse$json = {

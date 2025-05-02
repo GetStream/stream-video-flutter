@@ -87,10 +87,6 @@ class StreamPeerConnectionFactory {
 
     tracer.setEnabled(statsOptions?.enableRtcStats ?? false);
 
-    if (clientDetails != null) {
-      tracer.trace('clientDetails', clientDetails.toJson());
-    }
-
     tracer.trace(
       'create',
       configuration.toMap()

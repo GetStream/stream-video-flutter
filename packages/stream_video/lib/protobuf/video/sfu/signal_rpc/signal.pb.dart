@@ -489,6 +489,7 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     $core.String? rtcStats,
     $core.Iterable<$0.PerformanceStats>? encodeStats,
     $core.Iterable<$0.PerformanceStats>? decodeStats,
+    $core.String? unifiedSessionId,
   }) {
     final $result = create();
     if (sessionId != null) {
@@ -544,6 +545,9 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     if (decodeStats != null) {
       $result.decodeStats.addAll(decodeStats);
     }
+    if (unifiedSessionId != null) {
+      $result.unifiedSessionId = unifiedSessionId;
+    }
     return $result;
   }
   SendStatsRequest._() : super();
@@ -593,6 +597,7 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     ..pc<$0.PerformanceStats>(
         17, _omitFieldNames ? '' : 'decodeStats', $pb.PbFieldType.PM,
         subBuilder: $0.PerformanceStats.create)
+    ..aOS(18, _omitFieldNames ? '' : 'unifiedSessionId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -829,6 +834,21 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   /// Decode stats for the subscriber
   @$pb.TagNumber(17)
   $pb.PbList<$0.PerformanceStats> get decodeStats => $_getList(16);
+
+  /// user_session id can change during reconnects, this helps us to
+  /// identify the user across reconnects and should remain consistent until the user explicitly
+  /// disconnects, is kicked or the call is ended.
+  @$pb.TagNumber(18)
+  $core.String get unifiedSessionId => $_getSZ(17);
+  @$pb.TagNumber(18)
+  set unifiedSessionId($core.String v) {
+    $_setString(17, v);
+  }
+
+  @$pb.TagNumber(18)
+  $core.bool hasUnifiedSessionId() => $_has(17);
+  @$pb.TagNumber(18)
+  void clearUnifiedSessionId() => $_clearField(18);
 }
 
 class SendStatsResponse extends $pb.GeneratedMessage {

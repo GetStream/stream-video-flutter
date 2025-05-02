@@ -322,18 +322,22 @@ class CallSession extends Disposable {
           ? null
           : clientPublishOptions?.getPreferredSubscriberOptions();
 
+      final joinRequest = sfu_events.JoinRequest(
+        clientDetails: _clientDetails,
+        token: config.sfuToken,
+        sessionId: sessionId,
+        subscriberSdp: subscriberSdp,
+        publisherSdp: publisherSdp,
+        reconnectDetails: reconnectDetails,
+        preferredPublishOptions: preferredPublishOptions,
+        preferredSubscribeOptions: preferredSubscribeOptions,
+      );
+
+      _tracer.trace('joinRequest', joinRequest.toJson());
+
       sfuWS.send(
         sfu_events.SfuRequest(
-          joinRequest: sfu_events.JoinRequest(
-            clientDetails: _clientDetails,
-            token: config.sfuToken,
-            sessionId: sessionId,
-            subscriberSdp: subscriberSdp,
-            publisherSdp: publisherSdp,
-            reconnectDetails: reconnectDetails,
-            preferredPublishOptions: preferredPublishOptions,
-            preferredSubscribeOptions: preferredSubscribeOptions,
-          ),
+          joinRequest: joinRequest,
         ),
       );
 

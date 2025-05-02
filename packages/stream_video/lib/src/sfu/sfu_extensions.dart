@@ -19,6 +19,18 @@ import '../webrtc/model/rtc_video_dimension.dart';
 import 'data/events/sfu_events.dart';
 import 'data/models/sfu_participant.dart';
 
+extension CodecX on sfu_models.Codec {
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'fmtp': fmtp,
+      'clock_rate': clockRate,
+      'encoding_parameters': encodingParameters,
+      'payload_type': payloadType,
+    };
+  }
+}
+
 extension SfuParticipantX on SfuParticipant {
   CallParticipantState toParticipantState(CallState state) {
     final isLocal =
@@ -80,18 +92,6 @@ extension VideoLayerX on sfu_models.VideoLayer {
       'bitrate': bitrate,
       'fps': fps,
       'quality': quality.toString(),
-    };
-  }
-}
-
-extension CodecX on sfu_models.Codec {
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'fmtp': fmtp,
-      'clock_rate': clockRate,
-      'encoding_parameters': encodingParameters,
-      'payload_type': payloadType,
     };
   }
 }
@@ -435,6 +435,51 @@ extension SfuTrackUnpublishedEventJsonX on SfuTrackUnpublishedEvent {
         'audio_level': participant.audioLevel,
         'roles': participant.roles,
       },
+    };
+  }
+}
+
+extension PublishOptionX on sfu_models.PublishOption {
+  Map<String, dynamic> toJson() {
+    return {
+      'track_type': trackType.toString(),
+      'codec': codec?.toJson(),
+      'bitrate': bitrate,
+      'fps': fps,
+      'max_spatial_layers': maxSpatialLayers,
+      'max_temporal_layers': maxTemporalLayers,
+      'video_dimension': videoDimension?.toJson(),
+      'id': id,
+    };
+  }
+}
+
+extension SubscribeOptionX on sfu_models.SubscribeOption {
+  Map<String, dynamic> toJson() {
+    return {
+      'track_type': trackType.toString(),
+      'codecs': codecs.map((codec) => codec.toJson()).toList(),
+    };
+  }
+}
+
+extension JoinRequestX on sfu_events.JoinRequest {
+  Map<String, dynamic> toJson() {
+    final subscriberSdpParsed =
+        subscriberSdp.isNotEmpty ? parse(subscriberSdp) : null;
+    final publisherSdpParsed =
+        publisherSdp.isNotEmpty ? parse(publisherSdp) : null;
+    return {
+      'token': token,
+      'session_id': sessionId,
+      'subscriber_sdp': subscriberSdpParsed,
+      'client_details': clientDetails?.toJson(),
+      'reconnect_details': reconnectDetails?.toJson(),
+      'publisher_sdp': publisherSdpParsed,
+      'preferred_publish_options':
+          preferredPublishOptions.map((option) => option.toJson()).toList(),
+      'preferred_subscribe_options':
+          preferredSubscribeOptions.map((option) => option.toJson()).toList(),
     };
   }
 }

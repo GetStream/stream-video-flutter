@@ -1002,6 +1002,7 @@ const PerformanceStats$json = {
       '6': '.stream.video.sfu.models.VideoDimension',
       '10': 'videoDimension'
     },
+    {'1': 'target_bitrate', '3': 6, '4': 1, '5': 5, '10': 'targetBitrate'},
   ],
 };
 
@@ -1012,4 +1013,4 @@ final $typed_data.Uint8List performanceStatsDescriptor = $convert.base64Decode(
     'aWRlby5zZnUubW9kZWxzLkNvZGVjUgVjb2RlYxIpChFhdmdfZnJhbWVfdGltZV9tcxgDIAEoAl'
     'IOYXZnRnJhbWVUaW1lTXMSFwoHYXZnX2ZwcxgEIAEoAlIGYXZnRnBzElAKD3ZpZGVvX2RpbWVu'
     'c2lvbhgFIAEoCzInLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvRGltZW5zaW9uUg52aW'
-    'Rlb0RpbWVuc2lvbg==');
+    'Rlb0RpbWVuc2lvbhIlCg50YXJnZXRfYml0cmF0ZRgGIAEoBVINdGFyZ2V0Qml0cmF0ZQ==');

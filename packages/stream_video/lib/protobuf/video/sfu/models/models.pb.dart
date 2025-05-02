@@ -2873,6 +2873,7 @@ class PerformanceStats extends $pb.GeneratedMessage {
     $core.double? avgFrameTimeMs,
     $core.double? avgFps,
     VideoDimension? videoDimension,
+    $core.int? targetBitrate,
   }) {
     final $result = create();
     if (trackType != null) {
@@ -2889,6 +2890,9 @@ class PerformanceStats extends $pb.GeneratedMessage {
     }
     if (videoDimension != null) {
       $result.videoDimension = videoDimension;
+    }
+    if (targetBitrate != null) {
+      $result.targetBitrate = targetBitrate;
     }
     return $result;
   }
@@ -2915,6 +2919,8 @@ class PerformanceStats extends $pb.GeneratedMessage {
     ..a<$core.double>(4, _omitFieldNames ? '' : 'avgFps', $pb.PbFieldType.OF)
     ..aOM<VideoDimension>(5, _omitFieldNames ? '' : 'videoDimension',
         subBuilder: VideoDimension.create)
+    ..a<$core.int>(
+        6, _omitFieldNames ? '' : 'targetBitrate', $pb.PbFieldType.O3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -3008,6 +3014,19 @@ class PerformanceStats extends $pb.GeneratedMessage {
   void clearVideoDimension() => $_clearField(5);
   @$pb.TagNumber(5)
   VideoDimension ensureVideoDimension() => $_ensure(4);
+
+  /// the target bitrate for the track, only for published tracks
+  @$pb.TagNumber(6)
+  $core.int get targetBitrate => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set targetBitrate($core.int v) {
+    $_setSignedInt32(5, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasTargetBitrate() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearTargetBitrate() => $_clearField(6);
 }
 
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');

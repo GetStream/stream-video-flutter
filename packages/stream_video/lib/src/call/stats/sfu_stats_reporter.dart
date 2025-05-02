@@ -28,6 +28,7 @@ class SfuStatsReporter {
     required this.callSession,
     required this.stateManager,
     required this.statsOptions,
+    this.unifiedSessionId,
   }) {
     final thermalStatusAvailable =
         CurrentPlatform.isAndroid || CurrentPlatform.isIos;
@@ -61,6 +62,7 @@ class SfuStatsReporter {
   final CallSession callSession;
   final CallStateNotifier stateManager;
   final StatsOptions statsOptions;
+  final String? unifiedSessionId;
 
   late final _sfuStatsLock = Lock();
 
@@ -210,6 +212,7 @@ class SfuStatsReporter {
               [...traces.expand((trace) => trace.snapshot)].toJsonString(),
           encodeStats: encodeStats,
           decodeStats: decodeStats,
+          unifiedSessionId: unifiedSessionId,
         );
 
         await callSession.sfuClient.sendStats(

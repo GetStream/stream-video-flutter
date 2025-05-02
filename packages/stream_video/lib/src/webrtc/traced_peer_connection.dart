@@ -141,6 +141,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
       final framesPerSecond = rtpStat.framesPerSecond ?? 0;
       final frameHeight = rtpStat.frameHeight ?? 0;
       final frameWidth = rtpStat.frameWidth ?? 0;
+      final targetBitrate = rtpStat.targetBitrate ?? 0;
       final mediaSourceId = rtpStat.mediaSourceId;
 
       if (_previousOutboundRtpStats == null ||
@@ -188,6 +189,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
           codec: _getCodecFromStats(codec)?.toDTO(),
           avgFrameTimeMs: avgFrameTimeMs,
           avgFps: avgFps,
+          targetBitrate: targetBitrate.round(),
           videoDimension: VideoDimension(
             width: frameWidth,
             height: frameHeight,
