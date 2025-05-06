@@ -312,6 +312,8 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.tooManyRequests;
       case sfu_models.ErrorCode.ERROR_CODE_UNAUTHENTICATED:
         return SfuErrorCode.unauthenticated;
+      case sfu_models.ErrorCode.ERROR_CODE_LIVE_ENDED:
+        return SfuErrorCode.liveEnded;
       default:
         throw StateError('unexpected error code: $this');
     }
