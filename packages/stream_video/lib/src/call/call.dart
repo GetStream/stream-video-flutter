@@ -1116,25 +1116,27 @@ class Call {
     }
     // error event
     else if (sfuEvent is SfuErrorEvent) {
-      switch (sfuEvent.error.reconnectStrategy) {
-        case SfuReconnectionStrategy.rejoin:
-        case SfuReconnectionStrategy.fast:
-        case SfuReconnectionStrategy.migrate:
-          _logger.w(
-            () =>
-                '[onSfuEvent] SFU error: ${sfuEvent.error}, reconnect strategy: ${sfuEvent.error.reconnectStrategy}',
-          );
-          await _reconnect(sfuEvent.error.reconnectStrategy);
-          break;
-        case SfuReconnectionStrategy.disconnect:
-          _logger.w(
-            () => '[onSfuEvent] SFU error: ${sfuEvent.error}, leaving call',
-          );
-          await leave();
-          break;
-        case SfuReconnectionStrategy.unspecified:
-          _logger.w(() => '[onSfuEvent] SFU error: ${sfuEvent.error}');
-          break;
+      if (sfuEvent.error.code != SfuErrorCode.liveEnded) {
+        switch (sfuEvent.error.reconnectStrategy) {
+          case SfuReconnectionStrategy.rejoin:
+          case SfuReconnectionStrategy.fast:
+          case SfuReconnectionStrategy.migrate:
+            _logger.w(
+              () =>
+                  '[onSfuEvent] SFU error: ${sfuEvent.error}, reconnect strategy: ${sfuEvent.error.reconnectStrategy}',
+            );
+            await _reconnect(sfuEvent.error.reconnectStrategy);
+            break;
+          case SfuReconnectionStrategy.disconnect:
+            _logger.w(
+              () => '[onSfuEvent] SFU error: ${sfuEvent.error}, leaving call',
+            );
+            await leave();
+            break;
+          case SfuReconnectionStrategy.unspecified:
+            _logger.w(() => '[onSfuEvent] SFU error: ${sfuEvent.error}');
+            break;
+        }
       }
     }
   }
