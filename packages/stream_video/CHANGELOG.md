@@ -1,10 +1,11 @@
-## Unreleased
+## 0.9.2
 
 🐞 Fixed
-* Fixed user feedback collection endpoint
+* Fixed issue with the user feedback collection endpoint.
 
 ✅ Added
 * Added `ring`, `audio`, `video`, `screenshare`, `session` and `frameRecordings` settings to `Call.getOrCreate()` method.
+* Added `members` list parameter to `Call.getOrCreate()` method to allow assigning roles when creating a call.
 * Added `session` and `frameRecordings` settings to `Call.update()` method.
 
 ## 0.9.1
