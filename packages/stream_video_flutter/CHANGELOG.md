@@ -1,3 +1,16 @@
+## 0.9.2
+
+🐞 Fixed
+* Fixed issue with the user feedback collection endpoint.
+
+✅ Added
+* Added `ring`, `audio`, `video`, `screenshare`, `session` and `frameRecordings` settings to `Call.getOrCreate()` method.
+* Added `members` list parameter to `Call.getOrCreate()` method to allow assigning roles when creating a call.
+* Added `session` and `frameRecordings` settings to `Call.update()` method.
+
+🔄 Updated
+* Updated `LivestreamPlayer` widget with a refreshed look and feel. Added `livestreamEndedBuilder` and `livestreamBackstageBuilder` for enhanced configuration options.
+
 ## 0.9.1
 
 ✅ Added
