@@ -93,6 +93,7 @@ class CallSession extends Disposable {
           sdpEditor: sdpEditor,
         ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
+    _observeNetworkStatus();
   }
 
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
@@ -122,6 +123,7 @@ class CallSession extends Disposable {
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
+  StreamSubscription<InternetStatus>? _networkStatusSubscription;
 
   Timer? _peerConnectionCheckTimer;
 
@@ -141,6 +143,12 @@ class CallSession extends Disposable {
 
   void setTraceEnabled(bool enabled) {
     _tracer.setEnabled(enabled);
+  }
+
+  void _observeNetworkStatus() {
+    _networkStatusSubscription = networkMonitor.onStatusChange.listen((status) {
+      _tracer.trace('network.changed', status.name);
+    });
   }
 
   Future<void> _ensureClientDetails() async {
@@ -491,10 +499,19 @@ class CallSession extends Disposable {
         await _onRemoteTrackReceived(rtcManager!.subscriber, track);
       }
 
+      if (result.isSuccess) {
+        _tracer.trace('fastReconnect.success', null);
+      } else {
+        _tracer.trace(
+          'fastReconnect.failure',
+          result.getErrorOrNull()?.toString(),
+        );
+      }
+
       return result;
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
-      _tracer.trace('fastReconnectOnFailure', e.toString());
+      _tracer.trace('fastReconnect.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -511,6 +528,7 @@ class CallSession extends Disposable {
     _logger.d(() => '[close] code: $code, closeReason: $closeReason');
 
     await _eventsSubscription?.cancel();
+    await _networkStatusSubscription?.cancel();
 
     await sfuWS.disconnect(
       code.value,
@@ -519,6 +537,7 @@ class CallSession extends Disposable {
 
     await rtcManager?.dispose();
     rtcManager = null;
+    _tracer.dispose();
     _peerConnectionCheckTimer?.cancel();
   }
 

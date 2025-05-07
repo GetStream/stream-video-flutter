@@ -63,7 +63,7 @@ extension MediaDevices on rtc_interface.MediaDevices {
         );
       }
     } catch (e) {
-      tracer?.trace('${tag}OnFailure.$sequence', e.toString());
+      tracer?.trace('$tag.failure.$sequence', e.toString());
       rethrow;
     }
 
@@ -81,7 +81,7 @@ extension MediaDevices on rtc_interface.MediaDevices {
       }).toList(),
     };
 
-    tracer?.trace('${tag}OnSuccess.$sequence', straemDump);
+    tracer?.trace('$tag.success.$sequence', straemDump);
     return stream;
   }
 }

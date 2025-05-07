@@ -56,8 +56,9 @@ class CallSessionFactory {
 
     _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
 
-    final tracer = Tracer('$sessionSeq-$sfuName')
-      ..setEnabled(statsOptions.enableRtcStats);
+    final tracer = Tracer('$sessionSeq')
+      ..setEnabled(statsOptions.enableRtcStats)
+      ..trace('create', {'url': sfuName});
 
     return CallSession(
       sessionSeq: sessionSeq,

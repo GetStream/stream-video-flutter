@@ -443,12 +443,12 @@ extension PublishOptionX on sfu_models.PublishOption {
   Map<String, dynamic> toJson() {
     return {
       'track_type': trackType.toString(),
-      'codec': codec?.toJson(),
+      'codec': codec.toJson(),
       'bitrate': bitrate,
       'fps': fps,
       'max_spatial_layers': maxSpatialLayers,
       'max_temporal_layers': maxTemporalLayers,
-      'video_dimension': videoDimension?.toJson(),
+      'video_dimension': videoDimension.toJson(),
       'id': id,
     };
   }
@@ -473,8 +473,8 @@ extension JoinRequestX on sfu_events.JoinRequest {
       'token': token,
       'session_id': sessionId,
       'subscriber_sdp': subscriberSdpParsed,
-      'client_details': clientDetails?.toJson(),
-      'reconnect_details': reconnectDetails?.toJson(),
+      'client_details': clientDetails.toJson(),
+      'reconnect_details': reconnectDetails.toJson(),
       'publisher_sdp': publisherSdpParsed,
       'preferred_publish_options':
           preferredPublishOptions.map((option) => option.toJson()).toList(),

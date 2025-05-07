@@ -377,9 +377,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final result = await super.createOffer(mediaConstraints);
 
     if (result.isSuccess) {
-      tracer.trace('createOfferSuccess', result.getDataOrNull()?.toMap());
+      tracer.trace('createOffer.success', result.getDataOrNull()?.toMap());
     } else {
-      tracer.trace('createOfferError', result.getErrorOrNull()?.toString());
+      tracer.trace('createOffer.error', result.getErrorOrNull()?.toString());
     }
 
     return result;
@@ -394,9 +394,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final result = await super.createAnswer(mediaConstraints);
 
     if (result.isSuccess) {
-      tracer.trace('createAnswerSuccess', result.getDataOrNull()?.toMap());
+      tracer.trace('createAnswer.success', result.getDataOrNull()?.toMap());
     } else {
-      tracer.trace('createAnswerError', result.getErrorOrNull()?.toString());
+      tracer.trace('createAnswer.error', result.getErrorOrNull()?.toString());
     }
 
     return result;
@@ -411,10 +411,10 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final result = await super.setRemoteDescription(sd);
 
     if (result.isSuccess) {
-      tracer.trace('setRemoteDescriptionSuccess', null);
+      tracer.trace('setRemoteDescription.success', null);
     } else {
       tracer.trace(
-        'setRemoteDescriptionError',
+        'setRemoteDescription.error',
         result.getErrorOrNull()?.toString(),
       );
     }
@@ -431,10 +431,10 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final result = await super.setLocalDescription(description);
 
     if (result.isSuccess) {
-      tracer.trace('setLocalDescriptionSuccess', null);
+      tracer.trace('setLocalDescription.success', null);
     } else {
       tracer.trace(
-        'setLocalDescriptionError',
+        'setLocalDescription.error',
         result.getErrorOrNull()?.toString(),
       );
     }
@@ -449,10 +449,10 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final result = await super.addIceCandidate(candidate);
 
     if (result.isSuccess) {
-      tracer.trace('addIceCandidateSuccess', null);
+      tracer.trace('addIceCandidate.success', null);
     } else {
       tracer.trace(
-        'addIceCandidateError',
+        'addIceCandidate.error',
         result.getErrorOrNull()?.toString(),
       );
     }

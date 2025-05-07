@@ -11,7 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../globals.dart';
 import '../../open_api/video/coordinator/api.dart' hide User;
@@ -1074,6 +1073,7 @@ class Call {
 
     if (_sfuStatsOptions != null) {
       _unifiedSessionId ??= _session?.sessionId;
+      await _sfuStatsReporter?.sendSfuStats();
       _sfuStatsReporter = SfuStatsReporter(
         callSession: session,
         stateManager: _stateManager,
@@ -1184,10 +1184,6 @@ class Call {
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
       do {
-        if (strategy != SfuReconnectionStrategy.fast) {
-          _reconnectAttempts++;
-        }
-
         _stateManager.lifecycleCallConnecting(
           attempt: _reconnectAttempts,
           strategy: strategy,
@@ -1206,6 +1202,8 @@ class Call {
             _stateManager.lifecycleCallReconnectingFailed();
             return;
           }
+
+          await _sfuStatsReporter?.sendSfuStats();
 
           switch (_reconnectStrategy) {
             case SfuReconnectionStrategy.unspecified:
@@ -1253,6 +1251,7 @@ class Call {
   }
 
   Future<void> _reconnectRejoin() async {
+    _reconnectAttempts++;
     _reconnectStrategy = SfuReconnectionStrategy.rejoin;
     await _join();
   }
@@ -1260,6 +1259,7 @@ class Call {
   Future<void> _reconnectMigrate() async {
     final migrateTimeStopwatch = Stopwatch()..start();
 
+    _reconnectAttempts++;
     _reconnectStrategy = SfuReconnectionStrategy.migrate;
     final joinResult = await _join();
 

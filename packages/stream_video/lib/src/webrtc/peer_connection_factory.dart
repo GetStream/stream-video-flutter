@@ -6,7 +6,6 @@ import '../call/session/call_session_config.dart';
 import '../call/stats/tracer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
-import '../sfu/sfu_extensions.dart';
 import '../types/other.dart';
 import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
@@ -82,7 +81,7 @@ class StreamPeerConnectionFactory {
     );
 
     final tracer = Tracer(
-      "$tracerIdPrefix-${type == StreamPeerType.publisher ? 'pub' : 'sub'}-${callSessionConfig?.sfuName}",
+      "$tracerIdPrefix-${type == StreamPeerType.publisher ? 'pub' : 'sub'}",
     );
 
     tracer.setEnabled(statsOptions?.enableRtcStats ?? false);

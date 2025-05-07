@@ -215,9 +215,15 @@ class SfuStatsReporter {
           unifiedSessionId: unifiedSessionId,
         );
 
-        await callSession.sfuClient.sendStats(
+        final result = await callSession.sfuClient.sendStats(
           request,
         );
+
+        if (result.isFailure) {
+          for (final trace in traces) {
+            trace.rollback();
+          }
+        }
       } catch (e) {
         for (final trace in traces) {
           trace.rollback();
