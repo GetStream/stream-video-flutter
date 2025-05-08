@@ -45,7 +45,7 @@ class SfuClient {
       final response = await _client.sendAnswer(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('SendAnswerOnFailure', e.toString());
+      _tracer.trace('SendAnswer.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -58,7 +58,7 @@ class SfuClient {
       final response = await _client.iceTrickle(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('IceTrickleOnFailure', e.toString());
+      _tracer.trace('IceTrickle.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -71,7 +71,7 @@ class SfuClient {
       final response = await _client.iceRestart(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('RestartIceOnFailure', e.toString());
+      _tracer.trace('RestartIce.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -86,7 +86,7 @@ class SfuClient {
       _logger.v(() => '[setPublisher] response: ${response.stringify()}');
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('SetPublisherOnFailure', e.toString());
+      _tracer.trace('SetPublisher.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -104,7 +104,7 @@ class SfuClient {
       _logger.v(() => '[updateMuteState] response: $response');
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('UpdateMuteStateOnFailure', e.toString());
+      _tracer.trace('UpdateMuteState.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -122,7 +122,7 @@ class SfuClient {
       _logger.v(() => '[updateSubscriptions] response: $response');
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('UpdateSubscriptionsOnFailure', e.toString());
+      _tracer.trace('UpdateSubscriptions.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -140,7 +140,7 @@ class SfuClient {
       _logger.v(() => '[startNoiseCancellation] response: $response');
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('StartNoiseCancellationOnFailure', e.toString());
+      _tracer.trace('StartNoiseCancellation.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -158,7 +158,7 @@ class SfuClient {
       _logger.v(() => '[stopNoiseCancellation] response: $response');
       return Result.success(response);
     } catch (e, stk) {
-      _tracer.trace('StopNoiseCancellationOnFailure', e.toString());
+      _tracer.trace('StopNoiseCancellation.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
