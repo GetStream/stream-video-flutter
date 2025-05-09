@@ -1,4 +1,5 @@
 import Foundation
+import stream_webrtc_flutter
 
 @available(iOS 15.0, *)
 final class BlurBackgroundVideoFrameProcessor: VideoFilter {
@@ -7,22 +8,23 @@ final class BlurBackgroundVideoFrameProcessor: VideoFilter {
     override public init(
         filter: @escaping (Input) -> CIImage
     ) { fatalError() }
-    
+
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
-    
-    private let blurParameters: [String : Float]
-    
+
+    private let blurParameters: [String: Float]
+
     init(blurIntensity: BlurIntensity = BlurIntensity.medium) {
         blurParameters = ["inputRadius": blurIntensity.rawValue]
-        
+
         super.init(
             filter: { input in input.originalImage }
         )
-        
+
         self.filter = { input in
             // https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/filter/ci/CIGaussianBlur
-            let backgroundImage = input.originalImage.applyingFilter("CIGaussianBlur", parameters: self.blurParameters)
-            
+            let backgroundImage = input.originalImage.applyingFilter(
+                "CIGaussianBlur", parameters: self.blurParameters)
+
             return self.backgroundImageFilterProcessor
                 .applyFilter(
                     input.originalPixelBuffer,
