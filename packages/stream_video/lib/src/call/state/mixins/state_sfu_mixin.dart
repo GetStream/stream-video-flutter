@@ -1,11 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
+import '../../../../stream_video.dart';
 import '../../../models/call_participant_pin.dart';
-import '../../../models/call_participant_state.dart';
-import '../../../models/call_track_state.dart';
 import '../../../sfu/data/events/sfu_events.dart';
 import '../../../sfu/data/models/sfu_pin.dart';
 import '../../../sfu/sfu_extensions.dart';
@@ -38,6 +35,19 @@ mixin StateSfuMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       callParticipants: participants,
+    );
+  }
+
+  void sfuCallEnded(
+    SfuCallEndedEvent event,
+  ) {
+    _logger.d(() => '[sfuCallEnded] ${state.sessionId}; event: $event');
+
+    state = state.copyWith(
+      status: CallStatus.disconnected(
+        DisconnectReason.ended(),
+      ),
+      callParticipants: const [],
     );
   }
 

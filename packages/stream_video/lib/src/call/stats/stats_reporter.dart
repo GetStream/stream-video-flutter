@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 
-import '../models/models.dart';
-import '../webrtc/model/stats/rtc_codec.dart';
-import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
-import '../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
-import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
-import '../webrtc/model/stats/rtc_printable_stats.dart';
-import '../webrtc/peer_type.dart';
-import '../webrtc/rtc_manager.dart';
-import 'state/call_state_notifier.dart';
+import '../../models/models.dart';
+import '../../webrtc/model/stats/rtc_codec.dart';
+import '../../webrtc/model/stats/rtc_ice_candidate_pair.dart';
+import '../../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
+import '../../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
+import '../../webrtc/model/stats/rtc_printable_stats.dart';
+import '../../webrtc/peer_type.dart';
+import '../../webrtc/rtc_manager.dart';
+import '../state/call_state_notifier.dart';
 
 class StatsReporter {
   StatsReporter({
@@ -24,12 +24,13 @@ class StatsReporter {
   Stream<({CallStats publisherStats, CallStats subscriberStats})> run({
     Duration interval = const Duration(seconds: 10),
   }) {
-    return Stream.periodic(interval, (_) => collectStats())
-        .asyncMap((event) async {
-      final stats = await event;
-      _processStats(stats);
-      return event;
-    });
+    return Stream.periodic(interval, (_) => collectStats()).asyncMap(
+      (event) async {
+        final stats = await event;
+        _processStats(stats);
+        return event;
+      },
+    );
   }
 
   Future<({CallStats publisherStats, CallStats subscriberStats})>

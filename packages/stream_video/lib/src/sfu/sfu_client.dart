@@ -6,48 +6,59 @@ import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
     as signal_twirp;
+import '../call/stats/tracer.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../utils/result.dart';
+import 'sfu_extensions.dart';
 
 class SfuClient {
   SfuClient({
     required String baseUrl,
     required this.sfuToken,
+    required this.sessionSeq,
+    required Tracer tracer,
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
-  }) : _client = signal_twirp.SignalServerProtobufClient(
+  })  : _client = signal_twirp.SignalServerProtobufClient(
           baseUrl,
           prefix,
           hooks: hooks,
           interceptor: chainInterceptor(interceptors),
-        );
+        ),
+        _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
+        _tracer = tracer;
 
-  final _logger = taggedLogger(tag: 'SV:SfuClient');
-
-  final String sfuToken;
-
+  final TaggedLogger _logger;
+  final Tracer _tracer;
   final signal_twirp.SignalServer _client;
+
+  final int sessionSeq;
+  final String sfuToken;
 
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(
     sfu.SendAnswerRequest request,
   ) async {
     try {
+      _tracer.trace('SendAnswer', request.toJson());
       final response = await _client.sendAnswer(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('SendAnswer.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
-  Future<Result<sfu.ICETrickleResponse>> sendIceCandidate(
+  Future<Result<sfu.ICETrickleResponse>> iceTrickle(
     sfu_models.ICETrickle request,
   ) async {
     try {
+      _tracer.trace('IceTrickle', request.toJson());
       final response = await _client.iceTrickle(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('IceTrickle.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -56,9 +67,11 @@ class SfuClient {
     sfu.ICERestartRequest request,
   ) async {
     try {
+      _tracer.trace('RestartIce', request.toJson());
       final response = await _client.iceRestart(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('RestartIce.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -67,11 +80,13 @@ class SfuClient {
     sfu.SetPublisherRequest request,
   ) async {
     try {
+      _tracer.trace('SetPublisher', request.toJson());
       _logger.v(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
       _logger.v(() => '[setPublisher] response: ${response.stringify()}');
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('SetPublisher.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -80,6 +95,7 @@ class SfuClient {
     sfu.UpdateMuteStatesRequest request,
   ) async {
     try {
+      _tracer.trace('UpdateMuteState', request.toJson());
       _logger.v(() => '[updateMuteState] request: $request');
       final response = await _client.updateMuteStates(
         _withAuthHeaders(),
@@ -88,6 +104,7 @@ class SfuClient {
       _logger.v(() => '[updateMuteState] response: $response');
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('UpdateMuteState.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -96,6 +113,7 @@ class SfuClient {
     sfu.UpdateSubscriptionsRequest request,
   ) async {
     try {
+      _tracer.trace('UpdateSubscriptions', request.toJson());
       _logger.v(() => '[updateSubscriptions] request: $request');
       final response = await _client.updateSubscriptions(
         _withAuthHeaders(),
@@ -104,6 +122,7 @@ class SfuClient {
       _logger.v(() => '[updateSubscriptions] response: $response');
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('UpdateSubscriptions.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -112,6 +131,7 @@ class SfuClient {
     sfu.StartNoiseCancellationRequest request,
   ) async {
     try {
+      _tracer.trace('StartNoiseCancellation', request.toJson());
       _logger.v(() => '[startNoiseCancellation] request: $request');
       final response = await _client.startNoiseCancellation(
         _withAuthHeaders(),
@@ -120,6 +140,7 @@ class SfuClient {
       _logger.v(() => '[startNoiseCancellation] response: $response');
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('StartNoiseCancellation.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -128,6 +149,7 @@ class SfuClient {
     sfu.StopNoiseCancellationRequest request,
   ) async {
     try {
+      _tracer.trace('StopNoiseCancellation', request.toJson());
       _logger.v(() => '[stopNoiseCancellation] request: $request');
       final response = await _client.stopNoiseCancellation(
         _withAuthHeaders(),
@@ -136,6 +158,7 @@ class SfuClient {
       _logger.v(() => '[stopNoiseCancellation] response: $response');
       return Result.success(response);
     } catch (e, stk) {
+      _tracer.trace('StopNoiseCancellation.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }

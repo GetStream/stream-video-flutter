@@ -629,7 +629,7 @@ http.Request createRequest(
   final req = http.Request("POST", url);
 
   // add headers from context
-  final headersFromCtx = twirp.retrieveHttpRequestHeaders(ctx) ?? {};
+  final headersFromCtx = twirp.retrieveHttpRequestHeaders(ctx);
   req.headers.addAll(headersFromCtx);
 
   // add required headers

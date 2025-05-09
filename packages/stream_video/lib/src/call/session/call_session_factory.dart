@@ -1,6 +1,7 @@
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../open_api/video/coordinator/api.dart';
 import '../../core/utils.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -9,11 +10,10 @@ import '../../models/call_credentials.dart';
 import '../../types/other.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/tracer.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 import 'dynascale_manager.dart';
-
-int _sessionSeq = 1;
 
 class CallSessionFactory {
   CallSessionFactory({
@@ -28,11 +28,13 @@ class CallSessionFactory {
 
   Future<CallSession> makeCallSession({
     String? sessionId,
+    int sessionSeq = 0,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
     required OnPeerConnectionIssue onPeerConnectionFailure,
     required InternetConnection networkMonitor,
+    required StatsOptions statsOptions,
     ClientPublishOptions? clientPublishOptions,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
@@ -51,10 +53,15 @@ class CallSessionFactory {
 
     final sfuName = sessionConfig.sfuName;
     final sfuUrl = sessionConfig.sfuUrl;
+
     _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
 
+    final tracer = Tracer('$sessionSeq')
+      ..setEnabled(statsOptions.enableRtcStats)
+      ..trace('create', {'url': sfuName});
+
     return CallSession(
-      sessionSeq: _sessionSeq++,
+      sessionSeq: sessionSeq,
       callCid: callCid,
       sessionId: finalSessionId,
       config: sessionConfig,
@@ -64,6 +71,8 @@ class CallSessionFactory {
       onPeerConnectionIssue: onPeerConnectionFailure,
       clientPublishOptions: clientPublishOptions,
       networkMonitor: networkMonitor,
+      statsOptions: statsOptions,
+      tracer: tracer,
     );
   }
 

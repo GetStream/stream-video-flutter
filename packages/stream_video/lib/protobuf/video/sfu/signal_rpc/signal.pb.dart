@@ -482,8 +482,14 @@ class SendStatsRequest extends $pb.GeneratedMessage {
     $0.AppleState? apple,
     Telemetry? telemetry,
     $0.RTMPIngress? rtmp,
+    @$core.Deprecated('This field is deprecated.')
     $core.String? subscriberRtcStats,
+    @$core.Deprecated('This field is deprecated.')
     $core.String? publisherRtcStats,
+    $core.String? rtcStats,
+    $core.Iterable<$0.PerformanceStats>? encodeStats,
+    $core.Iterable<$0.PerformanceStats>? decodeStats,
+    $core.String? unifiedSessionId,
   }) {
     final $result = create();
     if (sessionId != null) {
@@ -523,10 +529,24 @@ class SendStatsRequest extends $pb.GeneratedMessage {
       $result.rtmp = rtmp;
     }
     if (subscriberRtcStats != null) {
+      // ignore: deprecated_member_use_from_same_package
       $result.subscriberRtcStats = subscriberRtcStats;
     }
     if (publisherRtcStats != null) {
+      // ignore: deprecated_member_use_from_same_package
       $result.publisherRtcStats = publisherRtcStats;
+    }
+    if (rtcStats != null) {
+      $result.rtcStats = rtcStats;
+    }
+    if (encodeStats != null) {
+      $result.encodeStats.addAll(encodeStats);
+    }
+    if (decodeStats != null) {
+      $result.decodeStats.addAll(decodeStats);
+    }
+    if (unifiedSessionId != null) {
+      $result.unifiedSessionId = unifiedSessionId;
     }
     return $result;
   }
@@ -570,6 +590,14 @@ class SendStatsRequest extends $pb.GeneratedMessage {
         subBuilder: $0.RTMPIngress.create)
     ..aOS(13, _omitFieldNames ? '' : 'subscriberRtcStats')
     ..aOS(14, _omitFieldNames ? '' : 'publisherRtcStats')
+    ..aOS(15, _omitFieldNames ? '' : 'rtcStats')
+    ..pc<$0.PerformanceStats>(
+        16, _omitFieldNames ? '' : 'encodeStats', $pb.PbFieldType.PM,
+        subBuilder: $0.PerformanceStats.create)
+    ..pc<$0.PerformanceStats>(
+        17, _omitFieldNames ? '' : 'decodeStats', $pb.PbFieldType.PM,
+        subBuilder: $0.PerformanceStats.create)
+    ..aOS(18, _omitFieldNames ? '' : 'unifiedSessionId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -755,29 +783,72 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(12)
   $0.RTMPIngress ensureRtmp() => $_ensure(11);
 
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(13)
   $core.String get subscriberRtcStats => $_getSZ(12);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(13)
   set subscriberRtcStats($core.String v) {
     $_setString(12, v);
   }
 
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(13)
   $core.bool hasSubscriberRtcStats() => $_has(12);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(13)
   void clearSubscriberRtcStats() => $_clearField(13);
 
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(14)
   $core.String get publisherRtcStats => $_getSZ(13);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(14)
   set publisherRtcStats($core.String v) {
     $_setString(13, v);
   }
 
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(14)
   $core.bool hasPublisherRtcStats() => $_has(13);
+  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(14)
   void clearPublisherRtcStats() => $_clearField(14);
+
+  @$pb.TagNumber(15)
+  $core.String get rtcStats => $_getSZ(14);
+  @$pb.TagNumber(15)
+  set rtcStats($core.String v) {
+    $_setString(14, v);
+  }
+
+  @$pb.TagNumber(15)
+  $core.bool hasRtcStats() => $_has(14);
+  @$pb.TagNumber(15)
+  void clearRtcStats() => $_clearField(15);
+
+  /// Encode stats for the publisher
+  @$pb.TagNumber(16)
+  $pb.PbList<$0.PerformanceStats> get encodeStats => $_getList(15);
+
+  /// Decode stats for the subscriber
+  @$pb.TagNumber(17)
+  $pb.PbList<$0.PerformanceStats> get decodeStats => $_getList(16);
+
+  /// user_session id can change during reconnects, this helps us to
+  /// identify the user across reconnects and should remain consistent until the user explicitly
+  /// disconnects, is kicked or the call is ended.
+  @$pb.TagNumber(18)
+  $core.String get unifiedSessionId => $_getSZ(17);
+  @$pb.TagNumber(18)
+  set unifiedSessionId($core.String v) {
+    $_setString(17, v);
+  }
+
+  @$pb.TagNumber(18)
+  $core.bool hasUnifiedSessionId() => $_has(17);
+  @$pb.TagNumber(18)
+  void clearUnifiedSessionId() => $_clearField(18);
 }
 
 class SendStatsResponse extends $pb.GeneratedMessage {

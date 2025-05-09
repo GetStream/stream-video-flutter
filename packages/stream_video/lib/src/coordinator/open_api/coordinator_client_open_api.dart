@@ -557,7 +557,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           members: result.members.toCallMembers(),
           users: result.members.toCallUsers(),
           duration: result.duration,
-          reportingIntervalMs: result.statsOptions.reportingIntervalMs,
+          statsOptions: result.statsOptions,
           ownCapabilities: result.ownCapabilities
               .map(
                 (it) => CallPermission.fromAlias(it.value),

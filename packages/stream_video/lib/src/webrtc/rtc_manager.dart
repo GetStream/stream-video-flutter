@@ -30,6 +30,7 @@ import 'peer_type.dart';
 import 'rtc_media_device/rtc_media_device.dart';
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track.dart';
+import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
 
 /// {@template OnLocalTrackMuted}
@@ -69,8 +70,8 @@ class RtcManager extends Disposable {
   final String sessionId;
   final StreamCallCid callCid;
   final String? publisherId;
-  final StreamPeerConnection? publisher;
-  final StreamPeerConnection subscriber;
+  final TracedStreamPeerConnection? publisher;
+  final TracedStreamPeerConnection subscriber;
 
   final transceiversManager = TransceiverManager();
   List<SfuPublishOptions> publishOptions;

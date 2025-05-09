@@ -1,6 +1,7 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
 
+import '../../call/stats/tracer.dart';
 import '../../logger/stream_log.dart';
 import 'screen_share_constraints.dart';
 
@@ -32,21 +33,55 @@ abstract class MediaConstraints {
 }
 
 extension MediaDevices on rtc_interface.MediaDevices {
-  Future<rtc.MediaStream> getMedia(MediaConstraints constraints) {
+  Future<rtc.MediaStream> getMedia(MediaConstraints constraints) async {
     final constraintsMap = constraints.toMap();
     streamLog.i(
       'SV:MediaDevices',
       () =>
           '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap',
     );
-    if (constraints is ScreenShareConstraints) {
-      return rtc.navigator.mediaDevices.getDisplayMedia(
-        constraintsMap,
-      );
-    } else {
-      return rtc.navigator.mediaDevices.getUserMedia(
-        constraintsMap,
-      );
+
+    final (tracer, sequence) = TracerZone.currentTracer;
+
+    late rtc.MediaStream stream;
+    late String tag;
+
+    try {
+      if (constraints is ScreenShareConstraints) {
+        tag = 'navigator.mediaDevices.getDisplayMedia';
+        tracer?.trace('$tag.$sequence', constraintsMap);
+
+        stream = await rtc.navigator.mediaDevices.getDisplayMedia(
+          constraintsMap,
+        );
+      } else {
+        tag = 'navigator.mediaDevices.getUserMedia';
+        tracer?.trace('$tag.$sequence', constraintsMap);
+
+        stream = await rtc.navigator.mediaDevices.getUserMedia(
+          constraintsMap,
+        );
+      }
+    } catch (e) {
+      tracer?.trace('$tag.failure.$sequence', e.toString());
+      rethrow;
     }
+
+    final straemDump = {
+      'id': stream.id,
+      'tracks': stream.getTracks().map((track) {
+        return {
+          'id': track.id,
+          'kind': track.kind,
+          'label': track.label,
+          'enabled': track.enabled,
+          'muted': track.muted,
+          // 'readyState': track.readyState,
+        };
+      }).toList(),
+    };
+
+    tracer?.trace('$tag.success.$sequence', straemDump);
+    return stream;
   }
 }

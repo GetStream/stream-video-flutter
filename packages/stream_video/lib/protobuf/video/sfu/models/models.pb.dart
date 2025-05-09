@@ -2865,6 +2865,170 @@ class AppleState extends $pb.GeneratedMessage {
   void clearIsLowPowerModeEnabled() => $_clearField(2);
 }
 
+/// PerformanceStats represents the encoding/decoding statistics for a track.
+class PerformanceStats extends $pb.GeneratedMessage {
+  factory PerformanceStats({
+    TrackType? trackType,
+    Codec? codec,
+    $core.double? avgFrameTimeMs,
+    $core.double? avgFps,
+    VideoDimension? videoDimension,
+    $core.int? targetBitrate,
+  }) {
+    final $result = create();
+    if (trackType != null) {
+      $result.trackType = trackType;
+    }
+    if (codec != null) {
+      $result.codec = codec;
+    }
+    if (avgFrameTimeMs != null) {
+      $result.avgFrameTimeMs = avgFrameTimeMs;
+    }
+    if (avgFps != null) {
+      $result.avgFps = avgFps;
+    }
+    if (videoDimension != null) {
+      $result.videoDimension = videoDimension;
+    }
+    if (targetBitrate != null) {
+      $result.targetBitrate = targetBitrate;
+    }
+    return $result;
+  }
+  PerformanceStats._() : super();
+  factory PerformanceStats.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory PerformanceStats.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PerformanceStats',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..e<TrackType>(1, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
+        defaultOrMaker: TrackType.TRACK_TYPE_UNSPECIFIED,
+        valueOf: TrackType.valueOf,
+        enumValues: TrackType.values)
+    ..aOM<Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
+    ..a<$core.double>(
+        3, _omitFieldNames ? '' : 'avgFrameTimeMs', $pb.PbFieldType.OF)
+    ..a<$core.double>(4, _omitFieldNames ? '' : 'avgFps', $pb.PbFieldType.OF)
+    ..aOM<VideoDimension>(5, _omitFieldNames ? '' : 'videoDimension',
+        subBuilder: VideoDimension.create)
+    ..a<$core.int>(
+        6, _omitFieldNames ? '' : 'targetBitrate', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  PerformanceStats clone() => PerformanceStats()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  PerformanceStats copyWith(void Function(PerformanceStats) updates) =>
+      super.copyWith((message) => updates(message as PerformanceStats))
+          as PerformanceStats;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static PerformanceStats create() => PerformanceStats._();
+  PerformanceStats createEmptyInstance() => create();
+  static $pb.PbList<PerformanceStats> createRepeated() =>
+      $pb.PbList<PerformanceStats>();
+  @$core.pragma('dart2js:noInline')
+  static PerformanceStats getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PerformanceStats>(create);
+  static PerformanceStats? _defaultInstance;
+
+  /// the type of the track (e.g., video, audio, screen share)
+  @$pb.TagNumber(1)
+  TrackType get trackType => $_getN(0);
+  @$pb.TagNumber(1)
+  set trackType(TrackType v) {
+    $_setField(1, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasTrackType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTrackType() => $_clearField(1);
+
+  /// the codec used for the track
+  @$pb.TagNumber(2)
+  Codec get codec => $_getN(1);
+  @$pb.TagNumber(2)
+  set codec(Codec v) {
+    $_setField(2, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasCodec() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCodec() => $_clearField(2);
+  @$pb.TagNumber(2)
+  Codec ensureCodec() => $_ensure(1);
+
+  /// the average encode/decode time in ms
+  @$pb.TagNumber(3)
+  $core.double get avgFrameTimeMs => $_getN(2);
+  @$pb.TagNumber(3)
+  set avgFrameTimeMs($core.double v) {
+    $_setFloat(2, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasAvgFrameTimeMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAvgFrameTimeMs() => $_clearField(3);
+
+  /// the average fps for the track
+  @$pb.TagNumber(4)
+  $core.double get avgFps => $_getN(3);
+  @$pb.TagNumber(4)
+  set avgFps($core.double v) {
+    $_setFloat(3, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasAvgFps() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearAvgFps() => $_clearField(4);
+
+  /// the track dimensions
+  @$pb.TagNumber(5)
+  VideoDimension get videoDimension => $_getN(4);
+  @$pb.TagNumber(5)
+  set videoDimension(VideoDimension v) {
+    $_setField(5, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasVideoDimension() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearVideoDimension() => $_clearField(5);
+  @$pb.TagNumber(5)
+  VideoDimension ensureVideoDimension() => $_ensure(4);
+
+  /// the target bitrate for the track, only for published tracks
+  @$pb.TagNumber(6)
+  $core.int get targetBitrate => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set targetBitrate($core.int v) {
+    $_setSignedInt32(5, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasTargetBitrate() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearTargetBitrate() => $_clearField(6);
+}
+
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
 const _omitMessageNames =
     $core.bool.fromEnvironment('protobuf.omit_message_names');

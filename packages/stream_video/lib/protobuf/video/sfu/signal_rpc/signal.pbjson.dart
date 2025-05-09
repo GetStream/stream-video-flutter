@@ -205,14 +205,40 @@ const SendStatsRequest$json = {
       '3': 13,
       '4': 1,
       '5': 9,
-      '10': 'subscriberRtcStats'
+      '8': {'3': true},
+      '10': 'subscriberRtcStats',
     },
     {
       '1': 'publisher_rtc_stats',
       '3': 14,
       '4': 1,
       '5': 9,
-      '10': 'publisherRtcStats'
+      '8': {'3': true},
+      '10': 'publisherRtcStats',
+    },
+    {'1': 'rtc_stats', '3': 15, '4': 1, '5': 9, '10': 'rtcStats'},
+    {
+      '1': 'encode_stats',
+      '3': 16,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.PerformanceStats',
+      '10': 'encodeStats'
+    },
+    {
+      '1': 'decode_stats',
+      '3': 17,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.PerformanceStats',
+      '10': 'decodeStats'
+    },
+    {
+      '1': 'unified_session_id',
+      '3': 18,
+      '4': 1,
+      '5': 9,
+      '10': 'unifiedSessionId'
     },
   ],
   '8': [
@@ -233,9 +259,13 @@ final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
     'CgVhcHBsZRgKIAEoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkFwcGxlU3RhdGVIAFIFYX'
     'BwbGUSQAoJdGVsZW1ldHJ5GAsgASgLMiIuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVGVsZW1l'
     'dHJ5Ugl0ZWxlbWV0cnkSOAoEcnRtcBgMIAEoCzIkLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLl'
-    'JUTVBJbmdyZXNzUgRydG1wEjAKFHN1YnNjcmliZXJfcnRjX3N0YXRzGA0gASgJUhJzdWJzY3Jp'
-    'YmVyUnRjU3RhdHMSLgoTcHVibGlzaGVyX3J0Y19zdGF0cxgOIAEoCVIRcHVibGlzaGVyUnRjU3'
-    'RhdHNCDgoMZGV2aWNlX3N0YXRl');
+    'JUTVBJbmdyZXNzUgRydG1wEjQKFHN1YnNjcmliZXJfcnRjX3N0YXRzGA0gASgJQgIYAVISc3Vi'
+    'c2NyaWJlclJ0Y1N0YXRzEjIKE3B1Ymxpc2hlcl9ydGNfc3RhdHMYDiABKAlCAhgBUhFwdWJsaX'
+    'NoZXJSdGNTdGF0cxIbCglydGNfc3RhdHMYDyABKAlSCHJ0Y1N0YXRzEkwKDGVuY29kZV9zdGF0'
+    'cxgQIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBlcmZvcm1hbmNlU3RhdHNSC2VuY2'
+    '9kZVN0YXRzEkwKDGRlY29kZV9zdGF0cxgRIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxz'
+    'LlBlcmZvcm1hbmNlU3RhdHNSC2RlY29kZVN0YXRzEiwKEnVuaWZpZWRfc2Vzc2lvbl9pZBgSIA'
+    'EoCVIQdW5pZmllZFNlc3Npb25JZEIOCgxkZXZpY2Vfc3RhdGU=');
 
 @$core.Deprecated('Use sendStatsResponseDescriptor instead')
 const SendStatsResponse$json = {
@@ -658,6 +688,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.stream.video.sfu.signal.Telemetry': Telemetry$json,
   '.stream.video.sfu.signal.Reconnection': Reconnection$json,
   '.stream.video.sfu.models.RTMPIngress': $0.RTMPIngress$json,
+  '.stream.video.sfu.models.PerformanceStats': $0.PerformanceStats$json,
   '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
   '.stream.video.sfu.signal.StartNoiseCancellationRequest':
       StartNoiseCancellationRequest$json,

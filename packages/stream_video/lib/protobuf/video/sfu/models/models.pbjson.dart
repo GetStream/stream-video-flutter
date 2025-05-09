@@ -971,3 +971,46 @@ final $typed_data.Uint8List appleStateDescriptor = $convert.base64Decode(
     'CgpBcHBsZVN0YXRlEk8KDXRoZXJtYWxfc3RhdGUYASABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm'
     '1vZGVscy5BcHBsZVRoZXJtYWxTdGF0ZVIMdGhlcm1hbFN0YXRlEjgKGWlzX2xvd19wb3dlcl9t'
     'b2RlX2VuYWJsZWQYAiABKAhSFWlzTG93UG93ZXJNb2RlRW5hYmxlZA==');
+
+@$core.Deprecated('Use performanceStatsDescriptor instead')
+const PerformanceStats$json = {
+  '1': 'PerformanceStats',
+  '2': [
+    {
+      '1': 'track_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {
+      '1': 'codec',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.Codec',
+      '10': 'codec'
+    },
+    {'1': 'avg_frame_time_ms', '3': 3, '4': 1, '5': 2, '10': 'avgFrameTimeMs'},
+    {'1': 'avg_fps', '3': 4, '4': 1, '5': 2, '10': 'avgFps'},
+    {
+      '1': 'video_dimension',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.VideoDimension',
+      '10': 'videoDimension'
+    },
+    {'1': 'target_bitrate', '3': 6, '4': 1, '5': 5, '10': 'targetBitrate'},
+  ],
+};
+
+/// Descriptor for `PerformanceStats`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List performanceStatsDescriptor = $convert.base64Decode(
+    'ChBQZXJmb3JtYW5jZVN0YXRzEkEKCnRyYWNrX3R5cGUYASABKA4yIi5zdHJlYW0udmlkZW8uc2'
+    'Z1Lm1vZGVscy5UcmFja1R5cGVSCXRyYWNrVHlwZRI0CgVjb2RlYxgCIAEoCzIeLnN0cmVhbS52'
+    'aWRlby5zZnUubW9kZWxzLkNvZGVjUgVjb2RlYxIpChFhdmdfZnJhbWVfdGltZV9tcxgDIAEoAl'
+    'IOYXZnRnJhbWVUaW1lTXMSFwoHYXZnX2ZwcxgEIAEoAlIGYXZnRnBzElAKD3ZpZGVvX2RpbWVu'
+    'c2lvbhgFIAEoCzInLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvRGltZW5zaW9uUg52aW'
+    'Rlb0RpbWVuc2lvbhIlCg50YXJnZXRfYml0cmF0ZRgGIAEoBVINdGFyZ2V0Qml0cmF0ZQ==');

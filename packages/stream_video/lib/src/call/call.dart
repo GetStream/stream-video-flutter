@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
@@ -59,9 +60,9 @@ import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
-import 'sfu_stats_reporter.dart';
 import 'state/call_state_notifier.dart';
-import 'stats_reporter.dart';
+import 'stats/sfu_stats_reporter.dart';
+import 'stats/stats_reporter.dart';
 
 typedef OnCallPermissionRequest = void Function(
   StreamCallPermissionRequestEvent,
@@ -256,8 +257,9 @@ class Call {
   CallSession? _session;
   CallSession? _previousSession;
 
-  int? _statsReportingIntervalMs;
+  StatsOptions? _sfuStatsOptions;
   SfuStatsReporter? _sfuStatsReporter;
+  String? _unifiedSessionId;
 
   int _reconnectAttempts = 0;
   Duration _fastReconnectDeadline = Duration.zero;
@@ -269,6 +271,7 @@ class Call {
 
   final List<Timer> _reactionTimers = [];
   final Map<String, Timer> _captionsTimers = {};
+  final List<CancelableOperation<void>> _sfuStatsTimers = [];
 
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
@@ -712,7 +715,10 @@ class Call {
       final reconnectDetails =
           _reconnectStrategy == SfuReconnectionStrategy.unspecified
               ? null
-              : await _previousSession?.getReconnectDetails(_reconnectStrategy);
+              : await _previousSession?.getReconnectDetails(
+                  _reconnectStrategy,
+                  reconnectAttempts: _reconnectAttempts,
+                );
 
       if (!performingFastReconnect) {
         _logger.v(
@@ -724,10 +730,12 @@ class Call {
           // a new session_id is necessary for the REJOIN strategy.
           // we use the previous session_id if available
           sessionId: performingRejoin ? null : _previousSession?.sessionId,
+          sessionSeq: _reconnectAttempts,
           credentials: _credentials!,
           stateManager: _stateManager,
           dynascaleManager: dynascaleManager,
           networkMonitor: networkMonitor,
+          statsOptions: _sfuStatsOptions!,
           onPeerConnectionFailure: (pc) async {
             if (state.value.status is! CallStatusReconnecting) {
               await pc.pc.restartIce().onError((_, __) {
@@ -832,7 +840,7 @@ class Call {
     final prevState = _stateManager.callState;
 
     if (credentials == null ||
-        _statsReportingIntervalMs == null ||
+        _sfuStatsOptions == null ||
         _reconnectStrategy == SfuReconnectionStrategy.rejoin ||
         _reconnectStrategy == SfuReconnectionStrategy.migrate) {
       _logger.d(() => '[joinIfNeeded] joining');
@@ -849,7 +857,13 @@ class Call {
       return joinedResult.fold(
         success: (success) {
           _credentials = success.data.credentials;
-          _statsReportingIntervalMs = success.data.reportingIntervalMs;
+          _sfuStatsOptions = success.data.statsOptions;
+
+          _session?.rtcManager?.subscriber.tracer
+              .setEnabled(_sfuStatsOptions!.enableRtcStats);
+          _session?.rtcManager?.publisher?.tracer
+              .setEnabled(_sfuStatsOptions!.enableRtcStats);
+          _session?.setTraceEnabled(_sfuStatsOptions!.enableRtcStats);
 
           return Result.success(success.data.credentials);
         },
@@ -918,7 +932,7 @@ class Call {
       wasCreated: joinResult.data.wasCreated,
       metadata: joinResult.data.metadata,
       credentials: joinResult.data.credentials,
-      reportingIntervalMs: joinResult.data.reportingIntervalMs,
+      statsOptions: joinResult.data.statsOptions,
     );
 
     _stateManager.lifecycleCallJoined(
@@ -1057,11 +1071,19 @@ class Call {
       );
     }
 
-    if (_statsReportingIntervalMs != null) {
+    if (_sfuStatsOptions != null) {
+      _unifiedSessionId ??= _session?.sessionId;
+      await _sfuStatsReporter?.sendSfuStats();
       _sfuStatsReporter = SfuStatsReporter(
         callSession: session,
         stateManager: _stateManager,
-      )..run(interval: Duration(milliseconds: _statsReportingIntervalMs!));
+        statsOptions: _sfuStatsOptions!,
+        unifiedSessionId: _unifiedSessionId,
+      )..run(
+          interval: Duration(
+            milliseconds: _sfuStatsOptions!.reportingIntervalMs,
+          ),
+        );
     }
 
     return result.fold(
@@ -1098,9 +1120,13 @@ class Call {
         totalCount: sfuEvent.participantCount.total,
         anonymousCount: sfuEvent.participantCount.anonymous,
       );
+    } else if (sfuEvent is SfuCallEndedEvent) {
+      await _sfuStatsReporter?.sendSfuStats();
+      _stateManager.sfuCallEnded(sfuEvent);
     }
 
     if (sfuEvent is SfuSocketDisconnected) {
+      await _sfuStatsReporter?.sendSfuStats();
       if (!StreamWebSocketCloseCode.isIntentionalClosure(
         sfuEvent.reason.closeCode,
       )) {
@@ -1158,10 +1184,6 @@ class Call {
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
       do {
-        if (strategy != SfuReconnectionStrategy.migrate) {
-          _reconnectAttempts++;
-        }
-
         _stateManager.lifecycleCallConnecting(
           attempt: _reconnectAttempts,
           strategy: strategy,
@@ -1180,6 +1202,8 @@ class Call {
             _stateManager.lifecycleCallReconnectingFailed();
             return;
           }
+
+          await _sfuStatsReporter?.sendSfuStats();
 
           switch (_reconnectStrategy) {
             case SfuReconnectionStrategy.unspecified:
@@ -1227,6 +1251,7 @@ class Call {
   }
 
   Future<void> _reconnectRejoin() async {
+    _reconnectAttempts++;
     _reconnectStrategy = SfuReconnectionStrategy.rejoin;
     await _join();
   }
@@ -1234,6 +1259,7 @@ class Call {
   Future<void> _reconnectMigrate() async {
     final migrateTimeStopwatch = Stopwatch()..start();
 
+    _reconnectAttempts++;
     _reconnectStrategy = SfuReconnectionStrategy.migrate;
     final joinResult = await _join();
 
@@ -1369,8 +1395,15 @@ class Call {
       await stopAudioProcessing();
     }
 
-    for (final timer in [..._reactionTimers, ..._captionsTimers.values]) {
+    for (final timer in [
+      ..._reactionTimers,
+      ..._captionsTimers.values,
+    ]) {
       timer.cancel();
+    }
+
+    for (final operation in _sfuStatsTimers) {
+      await operation.cancel();
     }
 
     _sfuStatsReporter?.stop();
@@ -2285,6 +2318,14 @@ class Call {
             Result.error('Session is null');
 
     if (result.isSuccess) {
+      _sfuStatsTimers.add(
+        Future<void>.delayed(const Duration(seconds: 3)).then((_) {
+          if (result.getDataOrNull()!.mediaTrack.enabled) {
+            _sfuStatsReporter?.sendSfuStats();
+          }
+        }).asCancelable(),
+      );
+
       // Set multitasking camera access for iOS
       final multitaskingResult = await setMultitaskingCameraAccessEnabled(
         enabled && !_streamVideo.muteVideoWhenInBackground,
@@ -2301,7 +2342,7 @@ class Call {
       );
     }
 
-    return result;
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setMicrophoneEnabled({
@@ -2319,6 +2360,14 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      _sfuStatsTimers.add(
+        Future<void>.delayed(const Duration(seconds: 3)).then((_) {
+          if (result.getDataOrNull()!.mediaTrack.enabled) {
+            _sfuStatsReporter?.sendSfuStats();
+          }
+        }).asCancelable(),
+      );
+
       await _streamVideo.pushNotificationManager
           ?.setCallMutedByCid(callCid.value, !enabled);
 
@@ -2335,7 +2384,7 @@ class Call {
       }
     }
 
-    return result;
+    return result.map((_) => none);
   }
 
   Future<bool> requestScreenSharePermission() {
