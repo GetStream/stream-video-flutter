@@ -95,7 +95,7 @@ class StreamPeerConnection extends Disposable {
       final modifiedSdp = sdpEditor.edit(localOffer.sdp?.let(Sdp.localOffer));
       final modifiedOffer = localOffer.copyWith(sdp: modifiedSdp);
 
-      await pc.setLocalDescription(modifiedOffer);
+      await setLocalDescription(modifiedOffer);
       return Result.success(modifiedOffer);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -118,7 +118,7 @@ class StreamPeerConnection extends Disposable {
       _logger.v(
         () => '[createLocalAnswer] #$type; sdp:\n${modifiedAnswer.sdp}',
       );
-      await pc.setLocalDescription(modifiedAnswer);
+      await setLocalDescription(modifiedAnswer);
       return Result.success(modifiedAnswer);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -157,6 +157,18 @@ class StreamPeerConnection extends Disposable {
         await pc.addCandidate(candidate);
       }
       _pendingCandidates.clear();
+      return Result.success(result);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  //Sets the local description
+  Future<Result<void>> setLocalDescription(
+    rtc.RTCSessionDescription description,
+  ) async {
+    try {
+      final result = await pc.setLocalDescription(description);
       return Result.success(result);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -246,7 +258,11 @@ class StreamPeerConnection extends Disposable {
       ..onRemoveTrack = null
       ..onIceCandidate = null
       ..onIceConnectionState = null
-      ..onRenegotiationNeeded = null;
+      ..onRenegotiationNeeded = null
+      ..onIceGatheringState = null
+      ..onSignalingState = null
+      ..onConnectionState = null
+      ..onDataChannel = null;
   }
 
   void _onAddStream(rtc.MediaStream stream) {
@@ -297,6 +313,7 @@ class StreamPeerConnection extends Disposable {
 
   void _onRenegotiationNeeded() {
     _logger.v(() => '[onRenegotiationNeeded] no args');
+
     onRenegotiationNeeded?.call(this);
   }
 

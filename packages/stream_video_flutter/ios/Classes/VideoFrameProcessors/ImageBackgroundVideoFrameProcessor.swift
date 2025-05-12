@@ -3,8 +3,9 @@
 //
 
 import CoreImage
+import Flutter
 import Foundation
-import ios_platform_images
+import UIKit
 import stream_webrtc_flutter
 
 /// A video filter that applies a custom image as the background.
@@ -36,7 +37,7 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
         var bgUIImage: UIImage?
         // if let url = URL(string: backgroundImageUrl) {
         // check if its a local asset
-        bgUIImage = UIImage.flutterImageWithName(backgroundImageUrl)  //RCTImageFromLocalAssetURL(url)
+        bgUIImage = UIImage.flutterImage(named: backgroundImageUrl)  //RCTImageFromLocalAssetURL(url)
         if bgUIImage == nil {
             // if its not a local asset, then try to get it as a remote asset
             if let url = URL(string: backgroundImageUrl), let data = try? Data(contentsOf: url) {
@@ -105,5 +106,24 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
             )
             return cachedBackgroundImage
         }
+    }
+}
+
+extension UIImage {
+    static func flutterImage(named name: String) -> UIImage? {
+        let filename = (name as NSString).lastPathComponent
+        let path = (name as NSString).deletingLastPathComponent
+
+        let screenScale = Int(UIScreen.main.scale)
+        for scale in stride(from: screenScale, to: 1, by: -1) {
+            let assetPath = "\(path)/\(scale).0x/\(filename)"
+            let key = FlutterDartProject.lookupKey(forAsset: assetPath)
+            if let image = UIImage(named: key, in: Bundle.main, compatibleWith: nil) {
+                return image
+            }
+        }
+
+        let key = FlutterDartProject.lookupKey(forAsset: name)
+        return UIImage(named: key, in: Bundle.main, compatibleWith: nil)
     }
 }

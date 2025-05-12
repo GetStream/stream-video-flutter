@@ -91,7 +91,7 @@ class CallUpdatedEvent {
         // MANUAL_EDIT: capabilitiesFromJson
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
-            : capabilitiesFromJson(json['capabilities_by_role']) ?? const {},
+            : capabilitiesFromJson(json['capabilities_by_role']),
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
       );

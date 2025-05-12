@@ -6,6 +6,7 @@ import '../../../logger/stream_logger.dart';
 import '../../../webrtc/peer_type.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
+import '../models/sfu_call_ended_reason.dart';
 import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
 import '../models/sfu_connection_info.dart';
@@ -300,6 +301,17 @@ class SfuGoAwayEvent extends SfuSocketEvent {
 
   @override
   List<Object?> get props => [goAwayReason];
+}
+
+class SfuCallEndedEvent extends SfuSocketEvent {
+  const SfuCallEndedEvent({
+    required this.callEndedReason,
+  });
+
+  final SfuCallEndedReason callEndedReason;
+
+  @override
+  List<Object?> get props => [callEndedReason];
 }
 
 class SfuSocketDisconnected extends SfuSocketEvent {

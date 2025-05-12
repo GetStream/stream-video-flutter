@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../open_api/video/coordinator/api.dart';
 import 'call_cid.dart';
 import 'call_credentials.dart';
 import 'call_metadata.dart';
@@ -12,22 +13,22 @@ class CallJoinedData with EquatableMixin {
     required this.wasCreated,
     required this.metadata,
     required this.credentials,
-    required this.reportingIntervalMs,
+    required this.statsOptions,
   });
 
   final StreamCallCid callCid;
   final bool wasCreated;
   final CallMetadata metadata;
   final CallCredentials credentials;
-  final int reportingIntervalMs;
+  final StatsOptions statsOptions;
 
   @override
   List<Object?> get props =>
-      [callCid, wasCreated, metadata, credentials, reportingIntervalMs];
+      [callCid, wasCreated, metadata, credentials, statsOptions];
 
   @override
   String toString() {
     return 'CallJoined{callCid: $callCid, wasCreated: $wasCreated, '
-        'metadata: $metadata, credentials: $credentials, reportingIntervalMs: $reportingIntervalMs}';
+        'metadata: $metadata, credentials: $credentials, statsOptions: $statsOptions}';
   }
 }

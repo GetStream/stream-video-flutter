@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../../open_api/video/coordinator/api.dart';
 import '../../models/models.dart';
 
 @immutable
@@ -22,7 +23,7 @@ class CoordinatorJoined extends CoordinatorModel {
     required this.members,
     required this.users,
     required this.duration,
-    required this.reportingIntervalMs,
+    required this.statsOptions,
     required this.ownCapabilities,
   });
 
@@ -32,7 +33,7 @@ class CoordinatorJoined extends CoordinatorModel {
   final Map<String, CallMember> members;
   final Map<String, CallUser> users;
   final String duration;
-  final int reportingIntervalMs;
+  final StatsOptions statsOptions;
   final List<CallPermission> ownCapabilities;
 
   @override
@@ -43,6 +44,7 @@ class CoordinatorJoined extends CoordinatorModel {
         members,
         users,
         duration,
+        statsOptions,
       ];
 }
 
