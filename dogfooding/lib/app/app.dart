@@ -31,9 +31,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _appLoader ??= Future.wait([
-      _loadApp(context),
-    ]);
+    _appLoader ??= _loadApp(context);
   }
 
   @override
