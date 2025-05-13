@@ -33,8 +33,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     super.didChangeDependencies();
     _appLoader ??= Future.wait([
       _loadApp(context),
-      // Shows the splash screen for at least 3 seconds.
-      Future.delayed(const Duration(seconds: 3)),
     ]);
   }
 
