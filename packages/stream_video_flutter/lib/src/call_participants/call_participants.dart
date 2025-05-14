@@ -54,7 +54,7 @@ class StreamCallParticipants extends StatefulWidget {
   final Call call;
 
   /// The list of participants to display.
-  final Iterable<CallParticipantState> participants;
+  final List<CallParticipantState> participants;
 
   /// Used for filtering the call participants.
   final Filter<CallParticipantState> filter;
@@ -105,6 +105,8 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
   List<CallParticipantState> _participants = [];
   CallParticipantState? _screenShareParticipant;
 
+  List<String> _sortedParticipantKeys = [];
+
   @override
   void initState() {
     _recalculateParticipants();
@@ -125,6 +127,22 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
 
   void _recalculateParticipants() {
     final participants = [...widget.participants].where(widget.filter).toList();
+
+    for (final participant in participants) {
+      final index =
+          _sortedParticipantKeys.indexOf(participant.uniqueParticipantKey);
+      if (index == -1) {
+        _sortedParticipantKeys.add(participant.uniqueParticipantKey);
+      }
+    }
+
+    // First apply previous sorting on new participants list
+    participants.sort(
+      (a, b) => _sortedParticipantKeys
+          .indexOf(a.uniqueParticipantKey)
+          .compareTo(_sortedParticipantKeys.indexOf(b.uniqueParticipantKey)),
+    );
+
     mergeSort(participants, compare: widget.sort);
 
     final screenShareParticipant = participants.firstWhereOrNull(
@@ -137,6 +155,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
         return true;
       },
     );
+
+    _sortedParticipantKeys =
+        participants.map((e) => e.uniqueParticipantKey).toList();
 
     if (mounted) {
       setState(() {
