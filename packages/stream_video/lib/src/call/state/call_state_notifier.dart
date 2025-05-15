@@ -71,5 +71,6 @@ class CallStateNotifier extends StateNotifier<CallState>
     callStateStream.close();
     _durationTimer?.cancel();
     _durationTimer = null;
+    _durationTimerController.close();
   }
 }
