@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../exceptions/video_exception.dart';
@@ -366,6 +367,11 @@ extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
   bool compareScreenShareMode(MediaConstraints? constraints) {
     if (constraints is! ScreenShareConstraints) {
       return true;
+    }
+
+    // On web we always get a new media track and deviceId is `null`.
+    if (CurrentPlatform.isWeb) {
+      return false;
     }
 
     return mediaConstraints.useiOSBroadcastExtension ==
