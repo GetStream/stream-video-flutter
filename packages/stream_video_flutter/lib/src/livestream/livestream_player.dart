@@ -191,10 +191,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: StreamBuilder<int>(
-                stream: call.callDurationSecondsStream,
+              child: StreamBuilder<Duration>(
+                stream: call.callDurationStream,
                 builder: (context, snapshot) {
-                  final duration = Duration(seconds: snapshot.data ?? 0);
+                  final duration = snapshot.data ?? Duration.zero;
 
                   return LivestreamInfo(
                     call: call,

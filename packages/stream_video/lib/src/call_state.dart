@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -61,7 +59,7 @@ class CallState extends Equatable {
     );
   }
 
-  CallState._({
+  const CallState._({
     required this.preferences,
     required this.currentUserId,
     required this.callCid,

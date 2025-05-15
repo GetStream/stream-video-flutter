@@ -24,7 +24,7 @@ class CallStateNotifier extends StateNotifier<CallState>
   CallStateNotifier(CallState initialState) : super(initialState) {
     callStateStream =
         MutableStateEmitterImpl<CallState>(initialState, sync: true);
-    _durationTimerController = StreamController<int>.broadcast();
+    _durationTimerController = StreamController<Duration>.broadcast();
     _ensureStartDurationTimer();
   }
 
@@ -33,8 +33,10 @@ class CallStateNotifier extends StateNotifier<CallState>
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
 
-  Stream<int> get durationStream => _durationTimerController.stream.distinct();
-  late final StreamController<int> _durationTimerController;
+  Stream<Duration> get durationStream =>
+      _durationTimerController.stream.distinct();
+
+  late final StreamController<Duration> _durationTimerController;
   Timer? _durationTimer;
 
   @override
@@ -56,7 +58,7 @@ class CallStateNotifier extends StateNotifier<CallState>
       if (state.startedAt == null || state.endedAt != null) return;
 
       final duration = DateTime.now().difference(state.startedAt!);
-      _durationTimerController.add(duration.inSeconds);
+      _durationTimerController.add(duration);
     });
   }
 

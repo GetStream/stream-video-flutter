@@ -35,10 +35,10 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
             width: 20,
           ),
           const SizedBox(width: 8),
-          StreamBuilder<int>(
-              stream: widget.call.callDurationSecondsStream,
+          StreamBuilder<Duration>(
+              stream: widget.call.callDurationStream,
               builder: (context, snapshot) {
-                final duration = Duration(seconds: snapshot.data ?? 0);
+                final duration = snapshot.data ?? Duration.zero;
 
                 return Text(
                   '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',

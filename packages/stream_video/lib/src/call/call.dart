@@ -280,7 +280,7 @@ class Call {
       _streamVideo.state.activeCall.valueOrNull?.callCid == callCid;
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
-  Stream<int> get callDurationSecondsStream => _stateManager.durationStream;
+  Stream<Duration> get callDurationStream => _stateManager.durationStream;
 
   SharedEmitter<({CallStats publisherStats, CallStats subscriberStats})>
       get stats => _stats;
