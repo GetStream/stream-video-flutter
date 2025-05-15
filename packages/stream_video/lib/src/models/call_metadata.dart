@@ -143,6 +143,13 @@ class CallUser with EquatableMixin {
     this.deletedAt,
   });
 
+  factory CallUser.empty() => const CallUser(
+        id: '',
+        name: '',
+        roles: [],
+        image: '',
+      );
+
   final String id;
   final String name;
   final List<String> roles;

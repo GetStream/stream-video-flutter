@@ -77,7 +77,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       updatedAt: data.metadata.details.updatedAt,
       startsAt: data.metadata.details.startsAt,
       endedAt: data.metadata.details.endedAt,
-      createdByUserId: data.metadata.details.createdBy.id,
+      startedAt: data.metadata.session.startedAt ??
+          data.metadata.session.liveStartedAt,
+      createdByUser: data.metadata.details.createdBy,
       custom: data.metadata.details.custom,
       egress: data.metadata.details.egress,
       rtmpIngress: data.metadata.details.rtmpIngress,
