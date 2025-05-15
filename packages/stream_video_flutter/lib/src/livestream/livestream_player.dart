@@ -103,13 +103,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Stores if the livestream is in cover or contain mode.
   bool _fullscreen = false;
 
-  /// Timer for updating duration.
-  late Timer _durationTimer;
-
-  /// Current duration of call.
-  final ValueNotifier<Duration> _duration =
-      ValueNotifier<Duration>(Duration.zero);
-
   @override
   void initState() {
     super.initState();
@@ -117,25 +110,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     _callState = call.state.value;
 
     _connect();
-
-    final now = DateTime.now();
-    final currentTime = now.millisecondsSinceEpoch;
-    final startedAt = _callState.liveStartedAt?.millisecondsSinceEpoch ??
-        _callState.createdAt?.millisecondsSinceEpoch ??
-        now.millisecondsSinceEpoch;
-    _duration.value = Duration(milliseconds: currentTime - startedAt);
-
-    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _duration.value = _duration.value + const Duration(seconds: 1);
-    });
   }
 
   @override
   void dispose() {
     _callStateSubscription?.cancel();
     _callStateSubscription = null;
-    _durationTimer.cancel();
-    _duration.dispose();
 
     super.dispose();
   }
@@ -211,9 +191,11 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: ValueListenableBuilder<Duration>(
-                valueListenable: _duration,
-                builder: (context, duration, _) {
+              child: StreamBuilder<Duration>(
+                stream: call.callDurationStream,
+                builder: (context, snapshot) {
+                  final duration = snapshot.data ?? Duration.zero;
+
                   return LivestreamInfo(
                     call: call,
                     callState: widget.call.state.value,

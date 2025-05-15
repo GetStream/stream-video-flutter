@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../call_state.dart';
@@ -22,12 +24,20 @@ class CallStateNotifier extends StateNotifier<CallState>
   CallStateNotifier(CallState initialState) : super(initialState) {
     callStateStream =
         MutableStateEmitterImpl<CallState>(initialState, sync: true);
+    _durationTimerController = StreamController<Duration>.broadcast();
+    _setupDurationTimer();
   }
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
 
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
+
+  Stream<Duration> get durationStream =>
+      _durationTimerController.stream.distinct();
+
+  late final StreamController<Duration> _durationTimerController;
+  Timer? _durationTimer;
 
   @override
   set state(CallState value) {
@@ -37,6 +47,25 @@ class CallStateNotifier extends StateNotifier<CallState>
 
     super.state = value;
     callStateStream.value = value;
+
+    _setupDurationTimer();
+  }
+
+  void _setupDurationTimer() {
+    if (state.endedAt != null || state.liveEndedAt != null) {
+      _durationTimer?.cancel();
+      _durationTimer = null;
+      return;
+    }
+
+    if (state.startedAt == null || _durationTimer != null) return;
+
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (state.startedAt == null) return;
+
+      final duration = DateTime.now().difference(state.startedAt!);
+      _durationTimerController.add(duration);
+    });
   }
 
   void updateCallPreferences(CallPreferences preferences) {
@@ -48,5 +77,8 @@ class CallStateNotifier extends StateNotifier<CallState>
   void dispose() {
     super.dispose();
     callStateStream.close();
+    _durationTimer?.cancel();
+    _durationTimer = null;
+    _durationTimerController.close();
   }
 }

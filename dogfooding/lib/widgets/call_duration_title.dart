@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/utils/assets.dart';
@@ -19,39 +17,6 @@ class CallDurationTitle extends StatefulWidget {
 }
 
 class _CallDurationTitleState extends State<CallDurationTitle> {
-  late DateTime _startedAt;
-  Duration _duration = Duration.zero;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-
-    widget.call.get(watch: false).then((value) {
-      _startedAt = value.foldOrNull(
-              success: (callData) =>
-                  callData.data.metadata.session.startedAt ?? DateTime.now()) ??
-          DateTime.now();
-
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
-
-        setState(() {
-          _duration = DateTime.now().difference(_startedAt);
-        });
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final videoTheme = StreamVideoTheme.of(context);
@@ -70,12 +35,18 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
             width: 20,
           ),
           const SizedBox(width: 8),
-          Text(
-            '${_duration.inMinutes.toString().padLeft(2, '0')}:${_duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
-            style: videoTheme.textTheme.title3.apply(
-              color: AppColorPalette.secondaryText,
-            ),
-          ),
+          StreamBuilder<Duration>(
+              stream: widget.call.callDurationStream,
+              builder: (context, snapshot) {
+                final duration = snapshot.data ?? Duration.zero;
+
+                return Text(
+                  '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                  style: videoTheme.textTheme.title3.apply(
+                    color: AppColorPalette.secondaryText,
+                  ),
+                );
+              }),
         ],
       ),
     );

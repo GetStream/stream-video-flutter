@@ -834,7 +834,7 @@ class CallSession extends Disposable {
       if (offer is! Success<rtc.RTCSessionDescription>) return;
 
       final sdp = offer.data.sdp;
-      final tracksInfo = await rtcManager!.getAnnouncedTracks(sdp: sdp);
+      final tracksInfo = await rtcManager?.getAnnouncedTracks(sdp: sdp) ?? [];
 
       if (tracksInfo.isEmpty) {
         _logger

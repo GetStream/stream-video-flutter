@@ -1,3 +1,9 @@
+## Unreleased
+
+✅ Added
+* Added `callDurationSecondsStream` to the `Call` class, providing a Stream<int> that emits the current call duration in seconds.
+* Added `createdByUser` to the `CallState`
+
 ## 0.9.2
 
 🐞 Fixed
