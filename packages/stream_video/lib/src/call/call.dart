@@ -74,6 +74,7 @@ typedef SetActiveCall = Future<void> Function(Call?);
 typedef SetOutgoingCall = Future<void> Function(Call?);
 typedef GetActiveCall = Call? Function();
 typedef GetOutgoingCall = Call? Function();
+typedef PartialMapper<T> = T Function(CallState);
 
 const _idState = 1;
 const _idUserId = 2;
@@ -280,6 +281,10 @@ class Call {
       _streamVideo.state.activeCall.valueOrNull?.callCid == callCid;
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
+
+  Stream<T> observePartial<T>(PartialMapper<T> callback) {
+    return state.valueStream.distinct((a, b) => callback(a) != callback(b)).map(callback);
+  }
 
   SharedEmitter<({CallStats publisherStats, CallStats subscriberStats})>
       get stats => _stats;

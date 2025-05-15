@@ -9,7 +9,7 @@ class ToggleCameraOption extends StatelessWidget {
   const ToggleCameraOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    this.localParticipant,
     this.enabledCameraIcon = Icons.videocam_rounded,
     this.disabledCameraIcon = Icons.videocam_off_rounded,
     this.enabledCameraIconColor,
@@ -21,8 +21,8 @@ class ToggleCameraOption extends StatelessWidget {
   /// Represents a call.
   final Call call;
 
-  /// The current local participant.
-  final CallParticipantState localParticipant;
+  /// The current local participant. Uses `call.state.localParticipant` if not provided.
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.
   final IconData enabledCameraIcon;
@@ -44,16 +44,24 @@ class ToggleCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = localParticipant.isVideoEnabled;
+    final isLocalEnabled = localParticipant?.isVideoEnabled;
 
-    return CallControlOption(
-      icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
-      iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
-      backgroundColor: enabled
-          ? enabledCameraBackgroundColor
-          : disabledCameraBackgroundColor,
-      onPressed: () {
-        call.setCameraEnabled(enabled: !enabled);
+    return StreamBuilder<bool?>(
+      stream: call
+          .observePartial((state) => state.localParticipant?.isVideoEnabled),
+      builder: (context, snapshot) {
+        final enabled = isLocalEnabled ?? snapshot.data ?? false;
+
+        return CallControlOption(
+          icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
+          iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
+          backgroundColor: enabled
+              ? enabledCameraBackgroundColor
+              : disabledCameraBackgroundColor,
+          onPressed: () {
+            call.setCameraEnabled(enabled: !enabled);
+          },
+        );
       },
     );
   }
