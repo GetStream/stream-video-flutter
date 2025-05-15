@@ -25,7 +25,7 @@ class CallStateNotifier extends StateNotifier<CallState>
     callStateStream =
         MutableStateEmitterImpl<CallState>(initialState, sync: true);
     _durationTimerController = StreamController<Duration>.broadcast();
-    _ensureStartDurationTimer();
+    _setupDurationTimer();
   }
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
@@ -48,14 +48,20 @@ class CallStateNotifier extends StateNotifier<CallState>
     super.state = value;
     callStateStream.value = value;
 
-    _ensureStartDurationTimer();
+    _setupDurationTimer();
   }
 
-  void _ensureStartDurationTimer() {
+  void _setupDurationTimer() {
+    if (state.endedAt != null || state.liveEndedAt != null) {
+      _durationTimer?.cancel();
+      _durationTimer = null;
+      return;
+    }
+
     if (state.startedAt == null || _durationTimer != null) return;
 
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.startedAt == null || state.endedAt != null) return;
+      if (state.startedAt == null) return;
 
       final duration = DateTime.now().difference(state.startedAt!);
       _durationTimerController.add(duration);
