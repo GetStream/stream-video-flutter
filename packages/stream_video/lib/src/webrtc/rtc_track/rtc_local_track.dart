@@ -370,7 +370,7 @@ extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
     }
 
     // On web we always get a new media track and deviceId is `null`.
-    if (kIsWeb) {
+    if (CurrentPlatform.isWeb) {
       return false;
     }
 
