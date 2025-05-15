@@ -112,12 +112,12 @@ class _StreamDogFoodingAppContentState
     // i.e. the user is not logged in.
     if (!locator.isRegistered<StreamVideo>()) return;
 
+    // Observe call kit events.
+    _observeCallKitEvents();
     // Observes deep links.
     _observeDeepLinks();
     // Observe FCM messages.
     _observeFcmMessages();
-    // Observe call kit events.
-    _observeCallKitEvents();
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {
