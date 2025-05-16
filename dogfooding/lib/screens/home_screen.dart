@@ -203,8 +203,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
+    final isHorizontal = size.width > size.height || size.height < 600;
     final width = math.min(size.width, kMaxWidthRegularScreen);
     final name = currentUser!.name;
+
+    final logo = ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 220),
+      child: Hero(
+        tag: 'stream_logo',
+        child: Image.asset(
+          streamVideoIconAsset,
+          width: width * 0.6,
+        ),
+      ),
+    );
+
+    final appTitle = [
+      Text('Stream', style: theme.textTheme.headlineMedium),
+      Text(
+        '[Video Calling]',
+        style: theme.textTheme.headlineMedium?.apply(
+          color: AppColorPalette.appGreen,
+        ),
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -246,22 +268,23 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Hero(
-                  tag: 'stream_logo',
-                  child: Image.asset(
-                    streamVideoIconAsset,
-                    width: width * 0.6,
+                if (isHorizontal) ...[
+                  Row(
+                    children: [
+                      Expanded(child: logo),
+                      const SizedBox(width: 24),
+                      Column(
+                        children: appTitle,
+                      )
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text('Stream', style: theme.textTheme.headlineMedium),
-                Text(
-                  '[Video Calling]',
-                  style: theme.textTheme.headlineMedium?.apply(
-                    color: AppColorPalette.appGreen,
-                  ),
-                ),
-                const SizedBox(height: 48),
+                  const SizedBox(height: 12),
+                ] else ...[
+                  logo,
+                  const SizedBox(height: 24),
+                  ...appTitle,
+                  const SizedBox(height: 24),
+                ],
                 Text(
                   'Start a new call, join a meeting by\n'
                   'entering the call ID or by scanning\n'

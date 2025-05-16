@@ -16,7 +16,7 @@ class SettingsMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        constraints: const BoxConstraints.expand(height: 40),
+        constraints: const BoxConstraints(minHeight: 40),
         decoration: BoxDecoration(
           color: AppColorPalette.buttonSecondary,
           borderRadius: BorderRadius.circular(16),
