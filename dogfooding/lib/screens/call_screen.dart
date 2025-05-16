@@ -42,6 +42,7 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
+  late final _videoEffectsManager = StreamVideoEffectsManager(widget.call);
 
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
@@ -169,9 +170,10 @@ class _CallScreenState extends State<CallScreen> {
                         child: Align(
                           alignment: Alignment.bottomLeft,
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 500),
+                            constraints: const BoxConstraints(maxWidth: 500),
                             child: SettingsMenu(
                               call: call,
+                              videoEffectsManager: _videoEffectsManager,
                               onReactionSend: (_) =>
                                   setState(() => _moreMenuVisible = false),
                               onStatsPressed: () => setState(

@@ -5,6 +5,7 @@ import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/utils/consts.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/audio_output_menu_item.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu/background_filters_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/closed_captions_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/noise_cancellation_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu_item.dart';
@@ -40,6 +41,7 @@ enum IncomingVideoQuality {
 class SettingsMenu extends StatefulWidget {
   const SettingsMenu({
     required this.call,
+    required this.videoEffectsManager,
     this.onReactionSend,
     this.onStatsPressed,
     this.onAudioOutputChange,
@@ -48,6 +50,7 @@ class SettingsMenu extends StatefulWidget {
   });
 
   final Call call;
+  final StreamVideoEffectsManager videoEffectsManager;
   final void Function(CallReactionData)? onReactionSend;
   final void Function()? onStatsPressed;
   final void Function(RtcMediaDevice, {bool closeMenu})? onAudioOutputChange;
@@ -61,13 +64,15 @@ class _SettingsMenuState extends State<SettingsMenu> {
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
   final DogfoodingAppChannel _dogfoodingAppChannel = DogfoodingAppChannel();
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
-  late StreamVideoEffectsManager _videoEffectsManager;
+  StreamVideoEffectsManager get _videoEffectsManager =>
+      widget.videoEffectsManager;
 
   var _audioOutputs = <RtcMediaDevice>[];
   RtcMediaDevice? get _audioOutputDevice =>
       widget.call.state.value.audioOutputDevice;
   var _audioInputs = <RtcMediaDevice>[];
 
+  bool _backgroundEffectsSupported = false;
   bool showAudioOutputs = false;
   bool showAudioInputs = false;
   bool showIncomingQuality = false;
@@ -82,7 +87,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
   @override
   void initState() {
     super.initState();
-    _videoEffectsManager = StreamVideoEffectsManager(widget.call);
     _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen(
       (devices) {
         _audioOutputs = devices
@@ -100,6 +104,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
         if (context.mounted) setState(() {}); // intentionally empty
       },
     );
+    widget.videoEffectsManager.isSupported().then((value) {
+      if (context.mounted) setState(() => _backgroundEffectsSupported = value);
+    });
   }
 
   @override
@@ -175,9 +182,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
           widget.onReactionSend?.call(_raisedHandReaction);
         },
       ),
-      // TODO video filters
+      if (_backgroundEffectsSupported)
+        BackgroundFiltersMenuItem(videoEffectsManager: _videoEffectsManager),
       NoiseCancellationMenuItem(call: widget.call),
-
       if (_audioOutputs.isDefaultMobileAudioOutput &&
           _audioOutputDevice != null) ...[
         ToggleAudioOutputMenuItem(
@@ -198,7 +205,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
         label: 'Stats',
         onPressed: widget.onStatsPressed,
       ),
-
       if (!kIsProd) ...[
         const SizedBox(height: 16),
         const Text('Developer options'),

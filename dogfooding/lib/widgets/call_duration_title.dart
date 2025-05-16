@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/utils/assets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallDurationTitle extends StatefulWidget {
