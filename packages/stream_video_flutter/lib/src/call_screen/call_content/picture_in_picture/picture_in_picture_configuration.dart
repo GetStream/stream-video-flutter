@@ -4,7 +4,6 @@ import 'package:stream_video/stream_video.dart';
 typedef CallPictureInPictureBuilder = Widget Function(
   BuildContext context,
   Call call,
-  CallState callState,
 );
 
 /// Configuration for picture-in-picture mode.

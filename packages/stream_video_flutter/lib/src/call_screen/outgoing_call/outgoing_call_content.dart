@@ -8,7 +8,6 @@ import 'outgoing_call_controls.dart';
 
 typedef OutgoingCallBackground = Widget Function(
   Call call,
-  CallState callState,
   List<UserInfo> participants,
   Widget child,
 );
@@ -20,7 +19,6 @@ class StreamOutgoingCallContent extends StatefulWidget {
   const StreamOutgoingCallContent({
     super.key,
     required this.call,
-    required this.callState,
     this.onCancelCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
@@ -36,9 +34,6 @@ class StreamOutgoingCallContent extends StatefulWidget {
 
   /// Represents a call.
   final Call call;
-
-  /// Holds information about the call.
-  final CallState callState;
 
   /// The action to perform when the cancel call button is tapped.
   final VoidCallback? onCancelCallTap;
@@ -99,67 +94,72 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
-    final participants =
-        widget.callState.ringingMembers.map((e) => e.toUserInfo()).toList();
-
-    final child = Material(
-      color: Colors.transparent,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          widget.participantsAvatarBuilder?.call(
-                context,
-                widget.call,
-                widget.callState,
-                participants,
-              ) ??
-              ParticipantAvatars(
-                participants: participants,
-                singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-                multipleParticipantAvatarTheme: multipleParticipantAvatarTheme,
-              ),
-          widget.participantsDisplayNameBuilder?.call(
-                context,
-                widget.call,
-                widget.callState,
-                participants,
-              ) ??
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-                child: CallingParticipants(
-                  participants: participants,
-                  singleParticipantTextStyle: singleParticipantTextStyle,
-                  multipleParticipantTextStyle: multipleParticipantTextStyle,
-                ),
-              ),
-          Text(
-            'Calling…',
-            style: callingLabelTextStyle,
-          ),
-          const Spacer(),
-          OutgoingCallControls(
-            isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-            isCameraEnabled: connectOptions.camera.isEnabled,
-            onCancelCallTap: () => _onCancelCallTap(context),
-            onMicrophoneTap: () => _onMicrophoneTap(context),
-            onCameraTap: () => _onCameraTap(context),
-          ),
-        ],
+    return StreamBuilder<List<UserInfo>>(
+      stream: widget.call.listen(
+        (state) => state.ringingMembers.map((e) => e.toUserInfo()).toList(),
       ),
-    );
+      builder: (context, snapshot) {
+        final participants = snapshot.data ?? [];
 
-    return widget.callBackgroundBuilder?.call(
-          widget.call,
-          widget.callState,
-          participants,
-          child,
-        ) ??
-        CallBackground(
-          participants: participants,
-          child: child,
+        final child = Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              widget.participantsAvatarBuilder?.call(
+                    context,
+                    widget.call,
+                    participants,
+                  ) ??
+                  ParticipantAvatars(
+                    participants: participants,
+                    singleParticipantAvatarTheme: singleParticipantAvatarTheme,
+                    multipleParticipantAvatarTheme:
+                        multipleParticipantAvatarTheme,
+                  ),
+              widget.participantsDisplayNameBuilder?.call(
+                    context,
+                    widget.call,
+                    participants,
+                  ) ??
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 64, vertical: 32),
+                    child: CallingParticipants(
+                      participants: participants,
+                      singleParticipantTextStyle: singleParticipantTextStyle,
+                      multipleParticipantTextStyle:
+                          multipleParticipantTextStyle,
+                    ),
+                  ),
+              Text(
+                'Calling…',
+                style: callingLabelTextStyle,
+              ),
+              const Spacer(),
+              OutgoingCallControls(
+                isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+                isCameraEnabled: connectOptions.camera.isEnabled,
+                onCancelCallTap: () => _onCancelCallTap(context),
+                onMicrophoneTap: () => _onMicrophoneTap(context),
+                onCameraTap: () => _onCameraTap(context),
+              ),
+            ],
+          ),
         );
+
+        return widget.callBackgroundBuilder?.call(
+              widget.call,
+              participants,
+              child,
+            ) ??
+            CallBackground(
+              participants: participants,
+              child: child,
+            );
+      },
+    );
   }
 
   Future<void> _onCancelCallTap(BuildContext context) async {

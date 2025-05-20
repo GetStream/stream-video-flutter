@@ -132,17 +132,15 @@ class _CallScreenState extends State<CallScreen> {
           callContentBuilder: (
             BuildContext context,
             Call call,
-            CallState callState,
           ) {
             return StreamCallContent(
               call: call,
-              callState: callState,
               layoutMode: _currentLayoutMode,
               pictureInPictureConfiguration:
                   const PictureInPictureConfiguration(
                 enablePictureInPicture: true,
               ),
-              callParticipantsBuilder: (context, call, callState) {
+              callParticipantsBuilder: (context, call) {
                 return Stack(
                   children: [
                     Column(
@@ -150,7 +148,6 @@ class _CallScreenState extends State<CallScreen> {
                         Expanded(
                           child: StreamCallParticipants(
                             call: call,
-                            participants: callState.callParticipants,
                             layoutMode: _currentLayoutMode,
                           ),
                         ),
@@ -195,7 +192,7 @@ class _CallScreenState extends State<CallScreen> {
                   ],
                 );
               },
-              callAppBarBuilder: (context, call, callState) {
+              callAppBarBuilder: (context, call) {
                 return CallAppBar(
                   call: call,
                   leadingWidth: 120,
@@ -209,10 +206,7 @@ class _CallScreenState extends State<CallScreen> {
                         },
                       ),
                       if (call.state.valueOrNull?.localParticipant != null)
-                        FlipCameraOption(
-                          call: call,
-                          localParticipant: call.state.value.localParticipant!,
-                        ),
+                        FlipCameraOption(call: call),
                     ],
                   ),
                   title: CallDurationTitle(call: call),
@@ -221,9 +215,7 @@ class _CallScreenState extends State<CallScreen> {
               callControlsBuilder: (
                 BuildContext context,
                 Call call,
-                CallState callState,
               ) {
-                final localParticipant = callState.localParticipant!;
                 return Container(
                   padding: const EdgeInsets.only(
                     top: 16,
@@ -243,7 +235,6 @@ class _CallScreenState extends State<CallScreen> {
                           }),
                       ToggleScreenShareOption(
                         call: call,
-                        localParticipant: localParticipant,
                         screenShareConstraints: const ScreenShareConstraints(
                           useiOSBroadcastExtension: true,
                         ),
@@ -257,25 +248,31 @@ class _CallScreenState extends State<CallScreen> {
                       ),
                       ToggleMicrophoneOption(
                         call: call,
-                        localParticipant: localParticipant,
                         disabledMicrophoneBackgroundColor:
                             AppColorPalette.appRed,
                       ),
                       ToggleCameraOption(
                         call: call,
-                        localParticipant: localParticipant,
                         disabledCameraBackgroundColor: AppColorPalette.appRed,
                       ),
                       const Spacer(),
-                      BadgedCallOption(
-                        callControlOption: CallControlOption(
-                          icon: const Icon(Icons.people),
-                          onPressed: _channel != null //
-                              ? () => showParticipants(context)
-                              : null,
-                        ),
-                        badgeCount: callState.callParticipants.length,
-                      ),
+                      StreamBuilder<int>(
+                          stream: call
+                              .listen((state) => state.callParticipants.length),
+                          initialData: 0,
+                          builder: (context, snapshot) {
+                            final count = snapshot.data ?? 0;
+
+                            return BadgedCallOption(
+                              callControlOption: CallControlOption(
+                                icon: const Icon(Icons.people),
+                                onPressed: _channel != null //
+                                    ? () => showParticipants(context)
+                                    : null,
+                              ),
+                              badgeCount: count,
+                            );
+                          }),
                       _ShowChatButton(channel: _channel),
                     ]),
                   ),

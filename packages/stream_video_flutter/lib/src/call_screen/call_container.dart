@@ -8,28 +8,24 @@ import '../../stream_video_flutter.dart';
 typedef IncomingCallBuilder = Widget Function(
   BuildContext context,
   Call call,
-  CallState callState,
 );
 
 /// Builder used to create a custom outgoing call widget.
 typedef OutgoingCallBuilder = Widget Function(
   BuildContext context,
   Call call,
-  CallState callState,
 );
 
 /// Builder used to create a custom call content widget.
 typedef CallContentBuilder = Widget Function(
   BuildContext context,
   Call call,
-  CallState callState,
 );
 
 /// Builder used to create a custom widget for participants avatars.
 typedef ParticipantsAvatarBuilder = Widget Function(
   BuildContext context,
   Call call,
-  CallState callState,
   List<UserInfo> participants,
 );
 
@@ -37,7 +33,6 @@ typedef ParticipantsAvatarBuilder = Widget Function(
 typedef ParticipantsDisplayNameBuilder = Widget Function(
   BuildContext context,
   Call call,
-  CallState callState,
   List<UserInfo> participants,
 );
 
@@ -102,19 +97,19 @@ class StreamCallContainer extends StatefulWidget {
 
 class _StreamCallContainerState extends State<StreamCallContainer> {
   final _logger = taggedLogger(tag: 'SV:CallContainer');
-  StreamSubscription<CallState>? _callStateSubscription;
+  StreamSubscription<CallStatus>? _callStateSubscription;
 
   /// Represents a call.
   Call get call => widget.call;
 
   /// Holds information about the call.
-  late CallState _callState;
+  late CallStatus _callStatus;
 
   @override
   void initState() {
     super.initState();
-    _callStateSubscription = call.state.listen(_setState);
-    _callState = call.state.value;
+    _callStateSubscription = call.listen((state) => state.status).listen(_setState);
+    _callStatus = call.state.value.status;
     _connect();
   }
 
@@ -125,15 +120,15 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     super.dispose();
   }
 
-  void _setState(CallState callState) {
-    _logger.v(() => '[setState] callState.status: ${callState.status}');
+  void _setState(CallStatus callStatus) {
+    _logger.v(() => '[setState] callState.status: $callStatus');
     setState(() {
-      _callState = callState;
+      _callStatus = callStatus;
     });
-    if (callState.status.isDisconnected) {
+    if (callStatus.isDisconnected) {
       _callStateSubscription?.cancel();
       if (widget.onCallDisconnected != null) {
-        final disconnectedStatus = callState.status as CallStatusDisconnected;
+        final disconnectedStatus = callStatus as CallStatusDisconnected;
         final disconnectedProperties = CallDisconnectedProperties(
           reason: disconnectedStatus.reason,
           call: call,
@@ -147,29 +142,26 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final status = _callState.status;
+    final status = _callStatus;
     _logger.v(() => '[build] status: $status');
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
-      return widget.incomingCallBuilder?.call(context, call, _callState) ??
+      return widget.incomingCallBuilder?.call(context, call) ??
           StreamIncomingCallContent(
             call: call,
-            callState: _callState,
             onAcceptCallTap: widget.onAcceptCallTap,
             onDeclineCallTap: widget.onDeclineCallTap,
           );
     } else if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      return widget.outgoingCallBuilder?.call(context, call, _callState) ??
+      return widget.outgoingCallBuilder?.call(context, call) ??
           StreamOutgoingCallContent(
             call: call,
-            callState: _callState,
             onCancelCallTap: widget.onCancelCallTap,
           );
     } else {
-      return widget.callContentBuilder?.call(context, call, _callState) ??
+      return widget.callContentBuilder?.call(context, call) ??
           StreamCallContent(
             call: call,
-            callState: _callState,
             onBackPressed: widget.onBackPressed,
             onLeaveCallTap: widget.onLeaveCallTap,
             pictureInPictureConfiguration: widget.pictureInPictureConfiguration,

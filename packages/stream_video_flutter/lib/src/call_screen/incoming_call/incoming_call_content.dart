@@ -12,7 +12,6 @@ class StreamIncomingCallContent extends StatefulWidget {
   const StreamIncomingCallContent({
     super.key,
     required this.call,
-    required this.callState,
     this.onAcceptCallTap,
     this.onDeclineCallTap,
     this.onMicrophoneTap,
@@ -28,9 +27,6 @@ class StreamIncomingCallContent extends StatefulWidget {
 
   /// Represents a call.
   final Call call;
-
-  /// Holds information about the call.
-  final CallState callState;
 
   /// The action to perform when the accept call button is tapped.
   final VoidCallback? onAcceptCallTap;
@@ -89,61 +85,67 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
-    final users =
-        widget.callState.ringingMembers.map((e) => e.toUserInfo()).toList();
-
-    return CallBackground(
-      participants: users,
-      child: Material(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            widget.participantsAvatarBuilder?.call(
-                  context,
-                  widget.call,
-                  widget.callState,
-                  users,
-                ) ??
-                ParticipantAvatars(
-                  participants: users,
-                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-                  multipleParticipantAvatarTheme:
-                      multipleParticipantAvatarTheme,
-                ),
-            widget.participantsDisplayNameBuilder?.call(
-                  context,
-                  widget.call,
-                  widget.callState,
-                  users,
-                ) ??
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-                  child: CallingParticipants(
-                    participants: users,
-                    singleParticipantTextStyle: singleParticipantTextStyle,
-                    multipleParticipantTextStyle: multipleParticipantTextStyle,
-                  ),
-                ),
-            Text(
-              // TODO hardcoded text
-              'Incoming Call...',
-              style: callingLabelTextStyle,
-            ),
-            const Spacer(),
-            IncomingCallControls(
-              isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-              isCameraEnabled: connectOptions.camera.isEnabled,
-              onAcceptCallTap: _onAcceptCallTap,
-              onDeclineCallTap: () => _onDeclineCallTap(context),
-              onMicrophoneTap: () => _onMicrophoneTap(context),
-              onCameraTap: () => _onCameraTap(context),
-            ),
-          ],
-        ),
+    return StreamBuilder<List<UserInfo>>(
+      stream: widget.call.listen(
+        (state) => state.ringingMembers.map((e) => e.toUserInfo()).toList(),
       ),
+      builder: (context, snapshot) {
+        final users = snapshot.data ?? [];
+
+        return CallBackground(
+          participants: users,
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(),
+                widget.participantsAvatarBuilder?.call(
+                      context,
+                      widget.call,
+                      users,
+                    ) ??
+                    ParticipantAvatars(
+                      participants: users,
+                      singleParticipantAvatarTheme:
+                          singleParticipantAvatarTheme,
+                      multipleParticipantAvatarTheme:
+                          multipleParticipantAvatarTheme,
+                    ),
+                widget.participantsDisplayNameBuilder?.call(
+                      context,
+                      widget.call,
+                      users,
+                    ) ??
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 64, vertical: 32),
+                      child: CallingParticipants(
+                        participants: users,
+                        singleParticipantTextStyle: singleParticipantTextStyle,
+                        multipleParticipantTextStyle:
+                            multipleParticipantTextStyle,
+                      ),
+                    ),
+                Text(
+                  // TODO hardcoded text
+                  'Incoming Call...',
+                  style: callingLabelTextStyle,
+                ),
+                const Spacer(),
+                IncomingCallControls(
+                  isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+                  isCameraEnabled: connectOptions.camera.isEnabled,
+                  onAcceptCallTap: _onAcceptCallTap,
+                  onDeclineCallTap: () => _onDeclineCallTap(context),
+                  onMicrophoneTap: () => _onMicrophoneTap(context),
+                  onCameraTap: () => _onCameraTap(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

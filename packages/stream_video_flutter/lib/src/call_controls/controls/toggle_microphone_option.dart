@@ -9,7 +9,6 @@ class ToggleMicrophoneOption extends StatelessWidget {
   const ToggleMicrophoneOption({
     super.key,
     required this.call,
-    required this.localParticipant,
     this.enabledMicrophoneIcon = Icons.mic_rounded,
     this.disabledMicrophoneIcon = Icons.mic_off_rounded,
     this.enabledMicrophoneIconColor,
@@ -20,9 +19,6 @@ class ToggleMicrophoneOption extends StatelessWidget {
 
   /// Represents a call.
   final Call call;
-
-  /// The current local participant.
-  final CallParticipantState localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
   final IconData enabledMicrophoneIcon;
@@ -44,18 +40,27 @@ class ToggleMicrophoneOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = localParticipant.isAudioEnabled;
+    return StreamBuilder<bool>(
+      stream:
+          call.listen((call) => call.localParticipant?.isAudioEnabled ?? false),
+      initialData: false,
+      builder: (context, data) {
+        final enabled = data.data!;
 
-    return CallControlOption(
-      icon:
-          enabled ? Icon(enabledMicrophoneIcon) : Icon(disabledMicrophoneIcon),
-      iconColor:
-          enabled ? enabledMicrophoneIconColor : disabledMicrophoneIconColor,
-      backgroundColor: enabled
-          ? enabledMicrophoneBackgroundColor
-          : disabledMicrophoneBackgroundColor,
-      onPressed: () {
-        call.setMicrophoneEnabled(enabled: !enabled);
+        return CallControlOption(
+          icon: enabled
+              ? Icon(enabledMicrophoneIcon)
+              : Icon(disabledMicrophoneIcon),
+          iconColor: enabled
+              ? enabledMicrophoneIconColor
+              : disabledMicrophoneIconColor,
+          backgroundColor: enabled
+              ? enabledMicrophoneBackgroundColor
+              : disabledMicrophoneBackgroundColor,
+          onPressed: () {
+            call.setMicrophoneEnabled(enabled: !enabled);
+          },
+        );
       },
     );
   }

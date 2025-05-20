@@ -280,6 +280,18 @@ class Call {
       _streamVideo.state.activeCall.valueOrNull?.callCid == callCid;
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
+  Stream<T> listen<T>(T Function(CallState state) selector) {
+    return state.valueStream
+        .distinct((previous, current) {
+          final previousSelection = selector(previous);
+          final currentSelection = selector(current);
+          return identical(previousSelection, currentSelection) ||
+              previousSelection == currentSelection;
+        })
+        .map(selector)
+        .asBroadcastStream();
+  }
+
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
 
   SharedEmitter<({CallStats publisherStats, CallStats subscriberStats})>

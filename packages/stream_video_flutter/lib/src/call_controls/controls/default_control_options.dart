@@ -9,8 +9,8 @@ List<Widget> defaultCallControlOptions({
 }) {
   return [
     ToggleSpeakerphoneOption(call: call),
-    ToggleCameraOption(call: call, localParticipant: localParticipant),
-    ToggleMicrophoneOption(call: call, localParticipant: localParticipant),
-    FlipCameraOption(call: call, localParticipant: localParticipant),
+    ToggleCameraOption(call: call),
+    ToggleMicrophoneOption(call: call),
+    FlipCameraOption(call: call),
   ];
 }

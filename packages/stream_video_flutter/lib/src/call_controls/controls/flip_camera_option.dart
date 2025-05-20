@@ -7,16 +7,12 @@ class FlipCameraOption extends StatelessWidget {
   const FlipCameraOption({
     super.key,
     required this.call,
-    required this.localParticipant,
     this.frontCameraIcon = Icons.flip_camera_ios_rounded,
     this.backCameraIcon = Icons.flip_camera_ios_rounded,
   });
 
   /// Represents a call.
   final Call call;
-
-  /// The current local participant.
-  final CallParticipantState localParticipant;
 
   /// The icon that is shown when the front camera is active.
   final IconData frontCameraIcon;
@@ -27,18 +23,23 @@ class FlipCameraOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     CameraPosition? position;
-    final trackState = localParticipant.videoTrack;
-    if (trackState is LocalTrackState) {
-      position = trackState.cameraPosition;
-    }
+    return StreamBuilder<TrackState?>(
+      stream: call.listen((call) => call.localParticipant?.videoTrack),
+      builder: (context, data) {
+        final trackState = data.data;
+        if (trackState is LocalTrackState) {
+          position = trackState.cameraPosition;
+        }
 
-    return CallControlOption(
-      icon: position == CameraPosition.front
-          ? Icon(frontCameraIcon)
-          : Icon(backCameraIcon),
-      onPressed: trackState?.muted == false //
-          ? call.flipCamera
-          : () {},
+        return CallControlOption(
+          icon: position == CameraPosition.front
+              ? Icon(frontCameraIcon)
+              : Icon(backCameraIcon),
+          onPressed: trackState?.muted == false //
+              ? call.flipCamera
+              : () {},
+        );
+      },
     );
   }
 }
