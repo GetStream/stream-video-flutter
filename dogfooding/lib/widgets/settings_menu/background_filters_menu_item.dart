@@ -141,6 +141,7 @@ sealed class _FilterOption {
 }
 
 class _BlurFilterOption extends _FilterOption {
+  // ignore: unused_element_parameter
   const _BlurFilterOption([this.intensity = BlurIntensity.medium]);
   final BlurIntensity intensity;
 
