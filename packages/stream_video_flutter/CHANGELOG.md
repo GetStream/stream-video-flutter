@@ -1,3 +1,14 @@
+## 0.9.3
+
+✅ Added
+* Introduced `callDurationStream` to the `Call` class. A `Stream<Duration>` that emits the current call duration.
+* Added `createdByUser` property to the `CallState` for better tracking of the initiating user.
+* Added `livestreamControlsBuilder` parameter to `LivestreamPlayer` allowing customisation of controls panel.
+
+🐞 Fixed
+* Resolved an issue where participants’ tracks would briefly disappear ("blink") or change location when many participants are in the call.
+* Fixed a bug where subsequent screen sharing sessions did not end properly when terminated via the browser UI.
+
 ## 0.9.2
 
 🐞 Fixed

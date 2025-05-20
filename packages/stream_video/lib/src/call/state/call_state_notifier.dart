@@ -52,7 +52,7 @@ class CallStateNotifier extends StateNotifier<CallState>
   }
 
   void _setupDurationTimer() {
-    if (state.endedAt != null || state.liveEndedAt != null) {
+    if (state.liveEndedAt != null) {
       _durationTimer?.cancel();
       _durationTimer = null;
       return;
