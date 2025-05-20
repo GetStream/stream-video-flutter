@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -22,13 +23,22 @@ class StreamVideoEffectsManager {
   static Map<String, bool> isCustomEffectRegistered = <String, bool>{};
 
   final Call call;
+
+  /// List of previously applied video effects using this manager.
+  List<String>? get appliedVideoEffects => _appliedVideoEffects;
+
   final _logger = taggedLogger(tag: _tag);
+  List<String>? _appliedVideoEffects;
 
   /// Checks if the background effect is supported on the current device.
   Future<bool> isSupported() async {
-    return await StreamVideoFlutterPlatform.instance
-            .isBackgroundEffectSupported() ??
-        false;
+    try {
+      return await StreamVideoFlutterPlatform.instance
+              .isBackgroundEffectSupported() ??
+          false;
+    } on MissingPluginException catch (_) {
+      return false;
+    }
   }
 
   /// Applies a background blur filter to the local participant video stream.
@@ -86,6 +96,7 @@ class StreamVideoEffectsManager {
       trackId,
       names: names,
     );
+    _appliedVideoEffects = names;
   }
 
   /// Ensures that the blur effect processor is registered.
@@ -121,6 +132,7 @@ class StreamVideoEffectsManager {
       trackId,
       names: [],
     );
+    _appliedVideoEffects = [];
   }
 
   Future<String?> _getTrackId() async {

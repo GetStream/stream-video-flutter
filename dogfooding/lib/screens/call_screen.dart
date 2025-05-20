@@ -42,6 +42,7 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
+  late final _videoEffectsManager = StreamVideoEffectsManager(widget.call);
 
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
@@ -166,20 +167,30 @@ class _CallScreenState extends State<CallScreen> {
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        child: SettingsMenu(
-                          call: call,
-                          onReactionSend: (_) =>
-                              setState(() => _moreMenuVisible = false),
-                          onStatsPressed: () => setState(
-                            () {
-                              showStats(context);
-                              _moreMenuVisible = false;
-                            },
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 500),
+                            child: SettingsMenu(
+                              call: call,
+                              videoEffectsManager: _videoEffectsManager,
+                              onReactionSend: (_) =>
+                                  setState(() => _moreMenuVisible = false),
+                              onStatsPressed: () => setState(
+                                () {
+                                  showStats(context);
+                                  _moreMenuVisible = false;
+                                },
+                              ),
+                              onAudioOutputChange: (_, {closeMenu = true}) {
+                                if (closeMenu) {
+                                  setState(() => _moreMenuVisible = false);
+                                }
+                              },
+                              onAudioInputChange: (_) =>
+                                  setState(() => _moreMenuVisible = false),
+                            ),
                           ),
-                          onAudioOutputChange: (_) =>
-                              setState(() => _moreMenuVisible = false),
-                          onAudioInputChange: (_) =>
-                              setState(() => _moreMenuVisible = false),
                         ),
                       ),
                     ],
