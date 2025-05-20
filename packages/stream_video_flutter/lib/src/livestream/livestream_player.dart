@@ -16,6 +16,12 @@ typedef LivestreamBackstageBuilder = Widget Function(
   CallState callState,
 );
 
+typedef LivestreamControlsBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
 /// Creates a widget that allows a user to view a livestream.
 ///
 /// By default, the widget has call controls and other elements including:
@@ -26,8 +32,6 @@ class LivestreamPlayer extends StatefulWidget {
   ///
   /// * [call] is the livestream call intended to be viewed.
   ///
-  /// * [muted] defines if the call is muted by default.
-  ///
   /// * [showParticipantCount] defines if the call should show participant count.
   ///
   /// * [backButtonBuilder] allows you to build a back/close button for closing the livestream.
@@ -36,27 +40,31 @@ class LivestreamPlayer extends StatefulWidget {
   const LivestreamPlayer({
     super.key,
     required this.call,
-    this.muted = false,
     this.showParticipantCount = true,
     this.backButtonBuilder,
     this.livestreamEndedBuilder,
     this.livestreamBackstageBuilder,
+    this.livestreamControlsBuilder,
     this.allowDiagnostics = false,
     this.onCallDisconnected,
     this.onRecordingTapped,
     this.onFullscreenTapped,
+    this.startInFullscreenMode = false,
   });
 
   /// The livestream call to display.
   final Call call;
 
-  /// Stores if the call should be muted by default
-  final bool muted;
-
   /// Boolean to display participant count.
   ///
   /// Defaults to true.
   final bool showParticipantCount;
+
+  /// Determines whether the livestream should start in fullscreen mode.
+  /// When true, the video will expand to cover the entire available space.
+  /// When false, the video will be contained within its boundaries.
+  /// Defaults to false.
+  final bool startInFullscreenMode;
 
   /// [WidgetBuilder] used to build an action button on the top left side of
   /// the screen.
@@ -67,6 +75,10 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// The builder used to create a custom widget when the livestream is in backstage mode.
   final LivestreamBackstageBuilder? livestreamBackstageBuilder;
+
+  /// The builder used to create custom controls for the livestream player.
+  /// This allows customization of the control UI elements displayed during the livestream.
+  final LivestreamControlsBuilder? livestreamControlsBuilder;
 
   /// The action to perform when the call is disconnected. By default, it pops the current route.
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
@@ -108,6 +120,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     super.initState();
     _callStateSubscription = call.state.listen(_setState);
     _callState = call.state.value;
+    _fullscreen = widget.startInFullscreenMode;
 
     _connect();
   }
@@ -189,32 +202,33 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               displayDiagnostics: _isStatsVisible,
               videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: StreamBuilder<Duration>(
-                stream: call.callDurationStream,
-                builder: (context, snapshot) {
-                  final duration = snapshot.data ?? Duration.zero;
+            widget.livestreamControlsBuilder?.call(context, call, _callState) ??
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: StreamBuilder<Duration>(
+                    stream: call.callDurationStream,
+                    builder: (context, snapshot) {
+                      final duration = snapshot.data ?? Duration.zero;
 
-                  return LivestreamInfo(
-                    call: call,
-                    callState: widget.call.state.value,
-                    fullscreen: _fullscreen,
-                    onFullscreenTapped: () {
-                      if (widget.onFullscreenTapped != null) {
-                        widget.onFullscreenTapped?.call();
-                      } else {
-                        setState(() {
-                          _fullscreen = !_fullscreen;
-                        });
-                      }
+                      return LivestreamInfo(
+                        call: call,
+                        callState: widget.call.state.value,
+                        fullscreen: _fullscreen,
+                        onFullscreenTapped: () {
+                          if (widget.onFullscreenTapped != null) {
+                            widget.onFullscreenTapped?.call();
+                          } else {
+                            setState(() {
+                              _fullscreen = !_fullscreen;
+                            });
+                          }
+                        },
+                        duration: duration,
+                        showParticipantCount: widget.showParticipantCount,
+                      );
                     },
-                    duration: duration,
-                    showParticipantCount: widget.showParticipantCount,
-                  );
-                },
-              ),
-            ),
+                  ),
+                ),
           ],
         ),
       ),
