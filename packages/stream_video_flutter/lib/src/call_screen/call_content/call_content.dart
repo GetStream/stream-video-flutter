@@ -281,16 +281,15 @@ class _StreamCallContentState extends State<StreamCallContent>
             ),
         ],
       ),
-      bottomNavigationBar: StreamBuilder<CallParticipantState?>(
-        stream: call.listen((s) => s.localParticipant),
+      bottomNavigationBar: StreamBuilder<bool>(
+        stream: call.listen((s) => s.localParticipant != null),
         builder: (context, snapshot) {
-          final localParticipant = snapshot.data;
+          final hasLocalParticipant = snapshot.data ?? false;
 
-          return localParticipant != null
+          return hasLocalParticipant
               ? widget.callControlsBuilder?.call(context, call) ??
                   StreamCallControls.withDefaultOptions(
                     call: call,
-                    localParticipant: localParticipant,
                   )
               : const SizedBox.shrink();
         },
