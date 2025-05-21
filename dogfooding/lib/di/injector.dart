@@ -129,10 +129,13 @@ StreamLog _setupLogger() {
           'DogFoodingApp',
           () => '[send] logFile: $logFile(${logFile.existsSync()})',
         );
-        await Share.shareXFiles(
-          [XFile(logFile.path)],
-          subject: 'Share Logs',
-          text: 'Stream Flutter Dogfooding Logs',
+
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(logFile.path)],
+            subject: 'Share Logs',
+            text: 'Stream Flutter Dogfooding Logs',
+          ),
         );
       },
       console: consoleLogger,
