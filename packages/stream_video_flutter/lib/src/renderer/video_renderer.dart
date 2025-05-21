@@ -18,6 +18,7 @@ class StreamVideoRenderer extends StatefulWidget {
     this.placeholderBuilder = _defaultPlaceholderBuilder,
     this.videoFit = VideoFit.cover,
     this.onSizeChanged,
+    this.persistTrackIfNotVisible = false,
   });
 
   /// Represents a call.
@@ -37,6 +38,11 @@ class StreamVideoRenderer extends StatefulWidget {
 
   /// Called when the size of the widget changes.
   final ValueSetter<Size>? onSizeChanged;
+
+  /// If the track should be persisted when not visible. Otherwise it will be unnsubscribed.
+  /// This is useful for screen sharing, where the track should be persisted even when not visible.
+  /// Defaults to false.
+  final bool persistTrackIfNotVisible;
 
   @override
   State<StreamVideoRenderer> createState() => _StreamVideoRendererState();
@@ -187,7 +193,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
     // If the dimension hasn't changed, don't update the subscription.
     if (prevDim == newDim) return;
 
-    if (newDim.isEmpty) {
+    if (newDim.isEmpty && !widget.persistTrackIfNotVisible) {
       // Remove the video subscription of the track.
       widget.call.removeSubscription(
         userId: widget.participant.userId,
