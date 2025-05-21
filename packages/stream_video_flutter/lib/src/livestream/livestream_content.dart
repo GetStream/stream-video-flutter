@@ -6,15 +6,33 @@ import '../l10n/localization_extension.dart';
 
 typedef LivestreamHostsUnavailableBuilder = Widget Function(
   BuildContext context,
-  Call call,
+  LivestreamHostsUnavailableProperties properties,
 );
+
+class LivestreamHostsUnavailableProperties {
+  LivestreamHostsUnavailableProperties(
+    this.call,
+  );
+
+  final Call call;
+}
 
 typedef LivestreamNotConnectedBuilder = Widget Function(
   BuildContext context,
-  Call call,
-  bool isMigrating,
-  bool isReconnecting,
+  LivestreamNotConnectedProperties properties,
 );
+
+class LivestreamNotConnectedProperties {
+  LivestreamNotConnectedProperties(
+    this.call,
+    this.isMigrating,
+    this.isReconnecting,
+  );
+
+  final Call call;
+  final bool isMigrating;
+  final bool isReconnecting;
+}
 
 /// The video renderer widget associated with [LivestreamPlayer].
 ///
@@ -123,14 +141,16 @@ class _LivestreamContentState extends State<LivestreamContent> {
           callState.callParticipants.where((e) => e.isVideoEnabled).toList();
 
       if (streamingParticipants.isEmpty) {
-        bodyWidget =
-            widget.livestreamHostsUnavailableBuilder?.call(context, call) ??
-                Center(
-                  child: Text(
-                    translations.livestreamHostNotAvailable,
-                    style: theme.livestreamTheme.callStateButtonTextStyle,
-                  ),
-                );
+        bodyWidget = widget.livestreamHostsUnavailableBuilder?.call(
+              context,
+              LivestreamHostsUnavailableProperties(call),
+            ) ??
+            Center(
+              child: Text(
+                translations.livestreamHostNotAvailable,
+                style: theme.livestreamTheme.callStateButtonTextStyle,
+              ),
+            );
       } else {
         final participant = streamingParticipants.first;
 
@@ -156,8 +176,14 @@ class _LivestreamContentState extends State<LivestreamContent> {
               ? 'Reconnecting'
               : 'Connecting';
 
-      bodyWidget = widget.livestreamNotConnectedBuilder
-              ?.call(context, call, isMigrating, isReconnecting) ??
+      bodyWidget = widget.livestreamNotConnectedBuilder?.call(
+            context,
+            LivestreamNotConnectedProperties(
+              call,
+              isMigrating,
+              isReconnecting,
+            ),
+          ) ??
           Center(
             child: Text(
               statusText,
