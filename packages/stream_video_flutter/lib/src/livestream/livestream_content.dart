@@ -21,6 +21,12 @@ class LivestreamContent extends StatefulWidget {
   /// * [backButtonBuilder] allows you to build a back/close button for closing
   /// the livestream.
   ///
+  /// * [videoPlaceholderBuilder] allows you to build a video placeholder for the
+  /// video renderer. This is useful when the video is not available or
+  /// disconnected. By default, it uses the [StreamUserAvatar] widget
+  ///
+  /// * [videoRendererBuilder] allows you to build a custom video renderer
+  ///
   /// * [displayDiagnostics] displays call diagnostics when the widget is
   /// double-tapped.
   ///
@@ -31,6 +37,8 @@ class LivestreamContent extends StatefulWidget {
     required this.call,
     required this.callState,
     this.backButtonBuilder,
+    this.videoPlaceholderBuilder,
+    this.videoRendererBuilder,
     this.displayDiagnostics = false,
     this.videoFit = VideoFit.contain,
   });
@@ -44,6 +52,12 @@ class LivestreamContent extends StatefulWidget {
   /// [WidgetBuilder] used to build an action button on the top left side of
   /// the screen.
   final WidgetBuilder? backButtonBuilder;
+
+  /// The builder used to create a custom widget for the video placeholder.
+  final VideoPlaceholderBuilder? videoPlaceholderBuilder;
+
+  /// Builder function used to build a video renderer.
+  final VideoRendererBuilder? videoRendererBuilder;
 
   /// Boolean to allow a user to double-tap a call to see diagnostic data.
   ///
@@ -99,6 +113,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
           showParticipantLabel: false,
           showSpeakerBorder: false,
           videoFit: videoFit,
+          videoRendererBuilder: widget.videoRendererBuilder,
+          videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
         );
       }
     } else {
