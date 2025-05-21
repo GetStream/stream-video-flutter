@@ -113,7 +113,9 @@ class _ShareCardContent extends StatelessWidget {
             ),
             label: 'Share link with others',
             onPressed: () async {
-              await Share.share(callUrl);
+              await SharePlus.instance.share(
+                ShareParams(uri: Uri.parse(callUrl)),
+              );
             },
           ),
           const SizedBox(height: 16),

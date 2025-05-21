@@ -78,10 +78,13 @@ Future<void> _setupLogger() async {
           'Stream ExampleApp',
           () => '[send] logFile: $logFile(${logFile.existsSync()})',
         );
-        await Share.shareXFiles(
-          [XFile(logFile.path)],
-          subject: 'Share Logs',
-          text: 'Stream Flutter Example Logs',
+
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(logFile.path)],
+            subject: 'Share Logs',
+            text: 'Stream Flutter Example Logs',
+          ),
         );
       },
       console: consoleLogger,
