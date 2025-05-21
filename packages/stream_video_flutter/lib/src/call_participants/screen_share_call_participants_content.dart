@@ -131,7 +131,7 @@ class ScreenShareContent extends StatefulWidget {
 }
 
 class _ScreenShareContentState extends State<ScreenShareContent> {
-  double _currentScale = 1;
+  bool _isZoomed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -155,16 +155,19 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
             return InteractiveViewer(
               maxScale: 4,
               onInteractionUpdate: (details) {
-                setState(() {
-                  _currentScale = details.scale;
-                });
+                final isZoomed = details.scale > 1.0;
+                if (_isZoomed != isZoomed) {
+                  setState(() {
+                    _isZoomed = isZoomed;
+                  });
+                }
               },
               child: StreamVideoRenderer(
                 call: widget.call,
                 participant: widget.participant,
                 videoFit: VideoFit.contain,
                 videoTrackType: SfuTrackType.screenShare,
-                persistTrackIfNotVisible: _currentScale > 1.0,
+                persistTrackIfNotVisible: _isZoomed,
               ),
             );
           },
