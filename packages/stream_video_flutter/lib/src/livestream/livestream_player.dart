@@ -40,6 +40,12 @@ class LivestreamPlayer extends StatefulWidget {
   /// video renderer. This is useful when the video is not available or
   /// disconnected. By default, it uses the [StreamUserAvatar] widget
   ///
+  /// * [livestreamHostsUnavailableBuilder] allows you to build a custom widget when
+  /// a livestream is connected but no hosts have video enabled.
+  ///
+  /// * [livestreamNotConnectedBuilder] allows you to build a custom widget when
+  /// the livestream is not connected. Provides connection state information.
+  ///
   /// * [videoRendererBuilder] allows you to build a custom video renderer
   ///
   /// * [allowDiagnostics] displays call diagnostics when the widget is double-tapped.
@@ -53,6 +59,8 @@ class LivestreamPlayer extends StatefulWidget {
     this.livestreamControlsBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
+    this.livestreamHostsUnavailableBuilder,
+    this.livestreamNotConnectedBuilder,
     this.allowDiagnostics = false,
     this.onCallDisconnected,
     this.onRecordingTapped,
@@ -93,6 +101,15 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// Builder function used to build a video renderer.
   final VideoRendererBuilder? videoRendererBuilder;
+
+  /// Builder function used to create a custom widget when a livestream is connected
+  /// but no hosts have video enabled.
+  final LivestreamHostsUnavailableBuilder? livestreamHostsUnavailableBuilder;
+
+  /// Builder function used to create a custom widget when the livestream is not connected.
+  /// Provides connection state information (isMigrating, isReconnecting) that can be
+  /// used to show appropriate status messages.
+  final LivestreamNotConnectedBuilder? livestreamNotConnectedBuilder;
 
   /// The action to perform when the call is disconnected. By default, it pops the current route.
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
@@ -215,6 +232,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               backButtonBuilder: widget.backButtonBuilder,
               videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
               videoRendererBuilder: widget.videoRendererBuilder,
+              livestreamHostsUnavailableBuilder:
+                  widget.livestreamHostsUnavailableBuilder,
+              livestreamNotConnectedBuilder:
+                  widget.livestreamNotConnectedBuilder,
               displayDiagnostics: _isStatsVisible,
               videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
             ),

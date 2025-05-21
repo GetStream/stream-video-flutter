@@ -4,6 +4,18 @@ import '../../stream_video_flutter.dart';
 import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 import '../l10n/localization_extension.dart';
 
+typedef LivestreamHostsUnavailableBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+);
+
+typedef LivestreamNotConnectedBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  bool isMigrating,
+  bool isReconnecting,
+);
+
 /// The video renderer widget associated with [LivestreamPlayer].
 ///
 /// This widget also contains a diagnostic widget that can be used by
@@ -27,6 +39,12 @@ class LivestreamContent extends StatefulWidget {
   ///
   /// * [videoRendererBuilder] allows you to build a custom video renderer
   ///
+  /// * [livestreamHostsUnavailableBuilder] allows you to build a custom widget when
+  /// a livestream is connected but no hosts have video enabled.
+  ///
+  /// * [livestreamNotConnectedBuilder] allows you to build a custom widget when
+  /// the livestream is not connected. Provides connection state information.
+  ///
   /// * [displayDiagnostics] displays call diagnostics when the widget is
   /// double-tapped.
   ///
@@ -39,6 +57,8 @@ class LivestreamContent extends StatefulWidget {
     this.backButtonBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
+    this.livestreamHostsUnavailableBuilder,
+    this.livestreamNotConnectedBuilder,
     this.displayDiagnostics = false,
     this.videoFit = VideoFit.contain,
   });
@@ -58,6 +78,15 @@ class LivestreamContent extends StatefulWidget {
 
   /// Builder function used to build a video renderer.
   final VideoRendererBuilder? videoRendererBuilder;
+
+  /// Builder function used to create a custom widget when a livestream is connected
+  /// but no hosts have video enabled.
+  final LivestreamHostsUnavailableBuilder? livestreamHostsUnavailableBuilder;
+
+  /// Builder function used to create a custom widget when the livestream is not connected.
+  /// Provides connection state information (isMigrating, isReconnecting) that can be
+  /// used to show appropriate status messages.
+  final LivestreamNotConnectedBuilder? livestreamNotConnectedBuilder;
 
   /// Boolean to allow a user to double-tap a call to see diagnostic data.
   ///
@@ -93,14 +122,15 @@ class _LivestreamContentState extends State<LivestreamContent> {
       final streamingParticipants =
           callState.callParticipants.where((e) => e.isVideoEnabled).toList();
 
-      bodyWidget = Center(
-        child: Text(
-          translations.livestreamHostNotAvailable,
-          style: theme.livestreamTheme.callStateButtonTextStyle,
-        ),
-      );
-
       if (streamingParticipants.isEmpty) {
+        bodyWidget =
+            widget.livestreamHostsUnavailableBuilder?.call(context, call) ??
+                Center(
+                  child: Text(
+                    translations.livestreamHostNotAvailable,
+                    style: theme.livestreamTheme.callStateButtonTextStyle,
+                  ),
+                );
       } else {
         final participant = streamingParticipants.first;
 
@@ -125,12 +155,15 @@ class _LivestreamContentState extends State<LivestreamContent> {
           : isReconnecting
               ? 'Reconnecting'
               : 'Connecting';
-      bodyWidget = Center(
-        child: Text(
-          statusText,
-          style: theme.livestreamTheme.callStateButtonTextStyle,
-        ),
-      );
+
+      bodyWidget = widget.livestreamNotConnectedBuilder
+              ?.call(context, call, isMigrating, isReconnecting) ??
+          Center(
+            child: Text(
+              statusText,
+              style: theme.livestreamTheme.callStateButtonTextStyle,
+            ),
+          );
     }
 
     return Scaffold(
