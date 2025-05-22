@@ -24,10 +24,10 @@ typedef LivestreamNotConnectedBuilder = Widget Function(
 
 class LivestreamNotConnectedProperties {
   LivestreamNotConnectedProperties(
-    this.call,
-    this.isMigrating,
-    this.isReconnecting,
-  );
+    this.call, {
+    required this.isMigrating,
+    required this.isReconnecting,
+  });
 
   final Call call;
   final bool isMigrating;
@@ -180,8 +180,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
             context,
             LivestreamNotConnectedProperties(
               call,
-              isMigrating,
-              isReconnecting,
+              isMigrating: isMigrating,
+              isReconnecting: isReconnecting,
             ),
           ) ??
           Center(
