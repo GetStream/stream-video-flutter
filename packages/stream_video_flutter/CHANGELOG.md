@@ -1,3 +1,17 @@
+## 0.9.4
+
+🐞 Fixed
+* Resolved an issue where the screen share track would disappear when zoomed in.
+* Fixed screen sharing layout issues on wide screens.
+* Fixed `ScreenShareCallParticipantsContent` with Spotlight view on very wide windows.
+
+✅ Added
+* Introduced new builder parameters to `LivestreamPlayer` for enhanced customization:
+    - `videoRendererBuilder`: Build a custom video renderer.
+    - `videoPlaceholderBuilder`: Build a placeholder for the video renderer.
+    - `livestreamHostsUnavailableBuilder`: Customize the UI when a livestream is connected but no hosts have video enabled.
+    - `livestreamNotConnectedBuilder`: Customize the UI when the livestream is not connected.
+
 ## 0.9.3
 
 ✅ Added
