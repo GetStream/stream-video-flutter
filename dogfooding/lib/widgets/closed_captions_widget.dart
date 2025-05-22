@@ -12,10 +12,10 @@ class ClosedCaptionsWidget extends StatelessWidget {
 
   final Call call;
 
-  // The maximum number of captions to show.
+  /// The maximum number of captions to show.
   final int? maxCaptions;
 
-  // The height of the captions widget.
+  /// The height of the captions widget.
   final double? height;
 
   @override
