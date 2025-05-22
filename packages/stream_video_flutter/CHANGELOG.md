@@ -3,6 +3,7 @@
 🐞 Fixed
 * Resolved an issue where the screen share track would disappear when zoomed in.
 * Fixed screen sharing layout issues on wide screens.
+* Fixed `ScreenShareCallParticipantsContent` with Spotlight view on very wide windows.
 
 ✅ Added
 * Introduced new builder parameters to `LivestreamPlayer` for enhanced customization:
