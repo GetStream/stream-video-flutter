@@ -6,9 +6,17 @@ class ClosedCaptionsWidget extends StatelessWidget {
   const ClosedCaptionsWidget({
     super.key,
     required this.call,
+    this.maxCaptions = 2,
+    this.height = 80,
   });
 
   final Call call;
+
+  /// The maximum number of captions to show.
+  final int? maxCaptions;
+
+  /// The height of the captions widget.
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -16,12 +24,16 @@ class ClosedCaptionsWidget extends StatelessWidget {
       stream: call.closedCaptions,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final closedCaptions =
+          var closedCaptions =
               (snapshot.data as List<StreamClosedCaption>).reversed.toList();
+
+          if (maxCaptions != null && closedCaptions.length > maxCaptions!) {
+            closedCaptions = closedCaptions.sublist(0, maxCaptions!);
+          }
 
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            height: !call.state.value.isCaptioning ? 0 : 130,
+            height: !call.state.value.isCaptioning ? 0 : height,
             // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.5),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),

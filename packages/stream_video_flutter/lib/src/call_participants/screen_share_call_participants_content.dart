@@ -46,11 +46,19 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const aspectRatio = 16 / 9;
+
+    final windowSize = MediaQuery.sizeOf(context);
+    final isWideWindow = windowSize.width / windowSize.height > aspectRatio;
+
     return CallParticipantsSpotlightView(
       call: call,
       spotlight: screenSharingParticipant,
       participants: participants,
       participantBuilder: screenShareParticipantBuilder,
+      barAlignment: isWideWindow
+          ? ParticipantsBarAlignment.right
+          : ParticipantsBarAlignment.bottom,
       spotlightBuilder: (context, call, participant) {
         final screenShareContentBuilder = this.screenShareContentBuilder;
         if (screenShareContentBuilder != null) {
