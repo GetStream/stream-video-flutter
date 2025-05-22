@@ -34,7 +34,7 @@ platform :android do
       skip_upload_screenshots: true,
       skip_upload_images: true,
       skip_upload_changelogs: true,
-      release_status: is_prod ? "draft" : "completed"
+      release_status: "completed"
     )
   end
 end
