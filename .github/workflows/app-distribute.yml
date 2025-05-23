@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  release:
+    types: [published]
 
   workflow_dispatch:
     inputs:
@@ -48,7 +50,7 @@ jobs:
     name: Build and Distribute Dogfooding Ios
     runs-on: macos-15
     timeout-minutes: 60
-    if: ${{ github.event_name == 'push' || inputs.build_ios == true }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_ios == true }}
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.9.0
@@ -88,9 +90,11 @@ jobs:
       - name: Set build flavor to Env
         run: |
           if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
-          FLAVOR=${{ inputs.flavor }}
+            FLAVOR=${{ inputs.flavor }}
+          elif [[ ${{ github.event_name == 'release' }} == true ]]; then
+            FLAVOR=prod
           else
-          FLAVOR=beta
+            FLAVOR=beta
           fi
           echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
 
@@ -103,7 +107,7 @@ jobs:
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: ${{ github.event_name == 'push' || inputs.build_android == true }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_android == true }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -146,9 +150,11 @@ jobs:
       - name: Set build flavor to Env
         run: |
           if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
-          echo "FLAVOR=${{ inputs.flavor }}" >> $GITHUB_ENV
+            echo "FLAVOR=${{ inputs.flavor }}" >> $GITHUB_ENV
+          elif [[ ${{ github.event_name == 'release' }} == true ]]; then
+            echo "FLAVOR=prod" >> $GITHUB_ENV
           else
-          echo "FLAVOR=beta" >> $GITHUB_ENV
+            echo "FLAVOR=beta" >> $GITHUB_ENV
           fi
 
       - name: Build and Distribute
@@ -160,7 +166,7 @@ jobs:
     name: Build and Deploy Dogfooding Web
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ github.event_name == 'push' || inputs.build_web == true }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_web == true }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
