@@ -87,4 +87,8 @@ class RtcMediaDeviceNotifier {
   Future<Result<List<RtcMediaDevice>>> videoInputs() {
     return enumerateDevices(kind: RtcMediaDeviceKind.videoInput);
   }
+
+  Future<void> triggeriOSAudioRouteSelectionUI() {
+    return rtc.Helper.triggeriOSAudioRouteSelectionUI();
+  }
 }

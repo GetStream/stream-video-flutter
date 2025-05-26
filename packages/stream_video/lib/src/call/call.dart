@@ -1452,7 +1452,6 @@ class Call {
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    // Apply defaul audio output and input devices
     final mediaDevicesResult =
         await RtcMediaDeviceNotifier.instance.enumerateDevices();
 
@@ -1471,21 +1470,53 @@ class Call {
         .where((d) => d.kind == RtcMediaDeviceKind.videoInput)
         .toList();
 
-    var defaultAudioOutput = audioOutputs.firstWhereOrNull((device) {
-      if (settings.audio.defaultDevice ==
-          AudioSettingsRequestDefaultDeviceEnum.speaker) {
-        return device.id.equalsIgnoreCase(
-          AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+    /// Determines if the speaker should be enabled based on a priority hierarchy of
+    /// settings.
+    ///
+    /// The priority order is as follows:
+    /// 1. If video camera is set to be on by default, speaker is enabled
+    /// 2. If audio speaker is set to be on by default, speaker is enabled
+    /// 3. If the default audio device is set to speaker, speaker is enabled
+    final speakerOnWithSettingsPriority = settings.video.cameraDefaultOn ||
+        settings.audio.speakerDefaultOn ||
+        settings.audio.defaultDevice ==
+            AudioSettingsRequestDefaultDeviceEnum.speaker;
+
+    // Determine default audio output with priority:
+    // 1. External device (if available)
+    var defaultAudioOutput =
+        audioOutputs.firstWhereOrNull((device) => device.isExternal);
+
+    if (defaultAudioOutput == null) {
+      // 2. Speaker (if settings indicate it should be used)
+      if (speakerOnWithSettingsPriority) {
+        defaultAudioOutput = audioOutputs.firstWhereOrNull(
+          (device) => device.id.equalsIgnoreCase(
+            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+          ),
+        );
+      } else {
+        // 3. First non-speaker device
+        defaultAudioOutput = audioOutputs.firstWhereOrNull(
+          (device) => !device.id.equalsIgnoreCase(
+            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+          ),
         );
       }
+    }
 
-      return !device.id.equalsIgnoreCase(
-        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-      );
-    });
+    // Match the default audio input with the default audio output if possible
+    final defaultAudioInput = audioInputs
+            .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
+        audioInputs.firstOrNull;
 
-    if (defaultAudioOutput == null && audioOutputs.isNotEmpty) {
-      defaultAudioOutput = audioOutputs.first;
+    final defaultAudioOutputIsExternal =
+        defaultAudioOutput?.isExternal ?? false;
+
+    // iOS doesn't allow implicitly setting the default audio output,
+    // if external device is connected we trust the OS to set it as default.
+    if (defaultAudioOutputIsExternal && CurrentPlatform.isIos) {
+      defaultAudioOutput = null;
     }
 
     var defaultVideoInput = videoInputs.firstWhereOrNull(
@@ -1494,14 +1525,10 @@ class Call {
           .contains(settings.video.cameraFacing.value.toLowerCase()),
     );
 
+    // If it's not front or back then take one of the external cameras
     if (defaultVideoInput == null && videoInputs.length > 2) {
-      // If it's not front or back then take one of the external cameras
       defaultVideoInput = videoInputs.last;
     }
-
-    final defaultAudioInput = audioInputs
-            .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
-        audioInputs.firstOrNull;
 
     _connectOptions = connectOptions.copyWith(
       camera: TrackOption.fromSetting(
@@ -1517,7 +1544,8 @@ class Call {
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
           : FacingMode.environment,
-      speakerDefaultOn: settings.audio.speakerDefaultOn,
+      speakerDefaultOn:
+          !defaultAudioOutputIsExternal && speakerOnWithSettingsPriority,
       targetResolution: settings.video.targetResolution,
       screenShareTargetResolution: settings.screenShare.targetResolution,
     );
@@ -2379,10 +2407,6 @@ class Call {
       _connectOptions = _connectOptions.copyWith(
         microphone: enabled ? TrackOption.enabled() : TrackOption.disabled(),
       );
-
-      if (_connectOptions.audioOutputDevice != null) {
-        await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
-      }
     }
 
     return result.map((_) => none);
