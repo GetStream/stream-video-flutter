@@ -1505,11 +1505,6 @@ class Call {
       }
     }
 
-    // Match the default audio input with the default audio output if possible
-    final defaultAudioInput = audioInputs
-            .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
-        audioInputs.firstOrNull;
-
     final defaultAudioOutputIsExternal =
         defaultAudioOutput?.isExternal ?? false;
 
@@ -1518,6 +1513,10 @@ class Call {
     if (defaultAudioOutputIsExternal && CurrentPlatform.isIos) {
       defaultAudioOutput = null;
     }
+
+    // Match the default audio input with the default audio output if possible
+    final defaultAudioInput = audioInputs
+        .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label);
 
     var defaultVideoInput = videoInputs.firstWhereOrNull(
       (device) => device.label
