@@ -26,12 +26,15 @@ platform :android do
         
     build_appbundle(flavor: options[:flavor])
 
+    is_prod = options[:flavor] == 'prod'
+
     upload_to_play_store(
-      track: 'internal',
+      track: is_prod ? 'production' : 'internal',
       aab: "../build/app/outputs/bundle/#{options[:flavor]}Release/app-#{options[:flavor]}-release.aab",
       skip_upload_screenshots: true,
       skip_upload_images: true,
-      release_status: "draft"
+      skip_upload_changelogs: true,
+      release_status: "completed"
     )
   end
 end

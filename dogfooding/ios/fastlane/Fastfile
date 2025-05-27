@@ -68,12 +68,14 @@ platform :ios do
         flavor: options[:flavor]
     )
 
+    is_prod = options[:flavor] == 'prod'
+
     begin
       upload_to_testflight(
         api_key: appstore_api_key,
-        distribute_external: true,
-        notify_external_testers: true,
-        groups: ['Internal Testers', 'External Testers'],
+        distribute_external: is_prod,
+        notify_external_testers: false,
+        groups: is_prod ? ['Internal Testers', 'External Testers'] : ['Internal Testers'],
         changelog: 'Lots of amazing new features to test out!',
         reject_build_waiting_for_review: false,
         skip_waiting_for_build_processing: false,
