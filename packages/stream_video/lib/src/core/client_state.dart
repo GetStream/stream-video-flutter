@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import '../../stream_video.dart' show StreamVideoOptions, DisconnectReason;
+import '../../stream_video.dart' show DisconnectReason, StreamVideoOptions;
 import '../call/call.dart';
 import '../models/user.dart';
 import '../state_emitter.dart';
@@ -89,7 +89,7 @@ class MutableClientState implements ClientState {
   @override
   Future<void> removeActiveCall(Call call) async {
     activeCalls.value = [
-      ...activeCalls.value.where((it) => it.callCid != call.callCid)
+      ...activeCalls.value.where((it) => it.callCid != call.callCid),
     ];
   }
 

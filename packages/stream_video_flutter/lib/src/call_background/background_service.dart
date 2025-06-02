@@ -81,8 +81,10 @@ class StreamBackgroundService {
         return;
       }
 
-      _instance._logger.d(() =>
-          '[onButtonClick] btn: $btn, callCid: $callCid, serviceType: $serviceType');
+      _instance._logger.d(
+        () =>
+            '[onButtonClick] btn: $btn, callCid: $callCid, serviceType: $serviceType',
+      );
 
       if (btn == _btnCancel) {
         if (onButtonClick != null) {
@@ -145,8 +147,9 @@ class StreamBackgroundService {
       // If there are no current calls, but some are still managed (e.g. due to race condition or error)
       // This ensures cleanup if the currentCalls list becomes empty.
       if (currentCalls.isEmpty && _instance._managedCalls.isNotEmpty) {
-        _instance._logger.i(() =>
-            'All calls ended, ensuring all managed services are stopped.');
+        _instance._logger.i(
+          () => 'All calls ended, ensuring all managed services are stopped.',
+        );
         final cidsToStop = _instance._managedCalls.keys.toList();
         for (final cid in cidsToStop) {
           await _instance._stopManagingCall(cid);
@@ -208,7 +211,8 @@ class StreamBackgroundService {
               ServiceType.call,
             );
             _logger.v(
-                () => '[$callCid] call service update result: $updateResult');
+              () => '[$callCid] call service update result: $updateResult',
+            );
           } catch (e, stk) {
             _logger.e(() => '[$callCid] call service update failed: $e; $stk');
           }
