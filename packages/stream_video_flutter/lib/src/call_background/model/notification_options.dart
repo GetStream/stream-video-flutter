@@ -23,7 +23,11 @@ class NotificationOptions with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props => [content, avatar, useCustomLayout];
+  List<Object?> get props => [
+        content,
+        avatar,
+        useCustomLayout,
+      ];
 }
 
 class NotificationContent with EquatableMixin {

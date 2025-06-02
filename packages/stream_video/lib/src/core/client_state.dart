@@ -1,3 +1,6 @@
+import 'package:collection/collection.dart';
+
+import '../../stream_video.dart' show StreamVideoOptions, DisconnectReason;
 import '../call/call.dart';
 import '../models/user.dart';
 import '../state_emitter.dart';
@@ -17,7 +20,7 @@ abstract class ClientState {
   StateEmitter<ConnectionState> get connection;
 
   /// Sets when a call being joined.
-  StateEmitter<Call?> get activeCall;
+  StateEmitter<List<Call>> get activeCalls;
 
   /// Emits when a call was created by another user with ringing set as True.
   StateEmitter<Call?> get incomingCall;
@@ -26,24 +29,28 @@ abstract class ClientState {
   StateEmitter<Call?> get outgoingCall;
 
   Future<void> setOutgoingCall(Call? call);
-  Future<void> setActiveCall(Call? call);
+
+  Future<void> setActiveCall(Call call);
+  Future<void> removeActiveCall(Call call);
 }
 
 class MutableClientState implements ClientState {
-  MutableClientState(User user)
+  MutableClientState(User user, this.options)
       : user = MutableStateEmitterImpl(user),
-        activeCall = MutableStateEmitterImpl(null),
+        activeCalls = MutableStateEmitterImpl([]),
         incomingCall = MutableStateEmitterImpl(null),
         outgoingCall = MutableStateEmitterImpl(null),
         connection = MutableStateEmitterImpl(
           ConnectionState.disconnected(user.id),
         );
 
+  final StreamVideoOptions options;
+
   @override
   final MutableStateEmitter<User> user;
 
   @override
-  final MutableStateEmitter<Call?> activeCall;
+  final MutableStateEmitter<List<Call>> activeCalls;
 
   @override
   final MutableStateEmitter<Call?> incomingCall;
@@ -58,22 +65,32 @@ class MutableClientState implements ClientState {
   User get currentUser => user.value;
 
   Future<void> clear() async {
-    activeCall.value = null;
+    activeCalls.value = [];
     outgoingCall.value = null;
     connection.value = ConnectionState.disconnected(user.value.id);
   }
 
-  Call? getActiveCall() => activeCall.valueOrNull;
+  List<Call>? getActiveCalls() => activeCalls.valueOrNull;
   Call? getOutgoingCall() => outgoingCall.valueOrNull;
 
   @override
-  Future<void> setActiveCall(Call? call) async {
-    final currentlyActiveCall = activeCall.valueOrNull;
-    if (currentlyActiveCall != null && call != null) {
-      await currentlyActiveCall.leave();
+  Future<void> setActiveCall(Call call) async {
+    if (!options.allowMultipleActiveCalls) {
+      final currentlyActiveCall = activeCalls.value.firstOrNull;
+      if (currentlyActiveCall != null) {
+        await currentlyActiveCall.leave(reason: DisconnectReason.replaced());
+        activeCalls.value = [];
+      }
     }
 
-    activeCall.value = call;
+    activeCalls.value = [...activeCalls.value, call];
+  }
+
+  @override
+  Future<void> removeActiveCall(Call call) async {
+    activeCalls.value = [
+      ...activeCalls.value.where((it) => it.callCid != call.callCid)
+    ];
   }
 
   @override

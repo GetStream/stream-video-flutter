@@ -41,18 +41,20 @@ mixin StreamVideoFlutterBackground {
     );
   }
 
-  static Future<bool> stopService(ServiceType type) async {
+  static Future<bool> stopService(ServiceType type, String callCid) async {
     if (!isAndroid) {
       return false;
     }
-    return StreamVideoFlutterPlatform.instance.stopBackgroundService(type);
+    return StreamVideoFlutterPlatform.instance
+        .stopBackgroundService(type, callCid);
   }
 
-  static Future<bool> isServiceRunning(ServiceType type) async {
+  static Future<bool> isServiceRunning(ServiceType type, String callCid) async {
     if (!isAndroid) {
       return false;
     }
-    return StreamVideoFlutterPlatform.instance.isBackgroundServiceRunning(type);
+    return StreamVideoFlutterPlatform.instance
+        .isBackgroundServiceRunning(type, callCid);
   }
 
   static Future<void> setPictureInPictureEnabled({required bool enable}) async {

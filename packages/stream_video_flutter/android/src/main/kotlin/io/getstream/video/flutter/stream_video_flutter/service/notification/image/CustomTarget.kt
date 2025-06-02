@@ -13,7 +13,7 @@ import io.getstream.video.flutter.stream_video_flutter.service.notification.Iden
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationLayout
 
 class CustomTarget(
-    private val getNotificationId: () -> Int,
+    private val notificationId: Int,
     private val onUpdate: (IdentifiedNotification) -> Unit,
 ) : Target, Function3<NotificationCompat.Builder, NotificationLayout, NotificationLayout, CustomTarget> {
 
@@ -30,7 +30,7 @@ class CustomTarget(
         notificationLargeLayout?.setAvatar(icon)
         notificationSmallLayout?.setAvatar(icon)
 
-        val notification = IdentifiedNotification(getNotificationId(), builder.build())
+        val notification = IdentifiedNotification(notificationId, builder.build())
         logger.v { "[onBitmapLoaded] notification: $notification" }
         onUpdate(notification)
     }

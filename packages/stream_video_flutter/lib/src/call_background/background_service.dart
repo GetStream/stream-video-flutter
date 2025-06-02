@@ -21,6 +21,14 @@ typedef OnButtonClick = Future<void> Function(Call, ButtonType, ServiceType);
 typedef OnNotificationClick = Future<void> Function(Call);
 typedef OnUiLayerDestroyed = Future<void> Function(Call);
 
+// Context to hold data for each managed call service
+class _CallServiceContext {
+  _CallServiceContext({required this.call, this.stateSubscription});
+
+  final Call call;
+  StreamSubscription<CallState>? stateSubscription;
+}
+
 class StreamBackgroundService {
   factory StreamBackgroundService() {
     return _instance;
@@ -30,7 +38,12 @@ class StreamBackgroundService {
 
   static final StreamBackgroundService _instance = StreamBackgroundService._();
 
-  static StreamSubscription<Call?>? _activeCalSubscription;
+  static StreamSubscription<List<Call>>? _activeCalSubscription;
+
+  // Map to store context for each managed call
+  final Map<String, _CallServiceContext> _managedCalls = {};
+  final _logger = taggedLogger(tag: _tag);
+  NotificationOptionsBuilder? _screenShareNotificationOptionsBuilder;
 
   static void init(
     StreamVideo streamVideo, {
@@ -45,237 +58,260 @@ class StreamBackgroundService {
     _instance._screenShareNotificationOptionsBuilder =
         screenShareNotificationOptionsBuilder;
 
-    _activeCalSubscription?.cancel();
-    _activeCalSubscription = streamVideo.listenActiveCall((call) async {
-      await _instance.onActiveCall(
-        call: call,
-        optionsBuilder: callNotificationOptionsBuilder,
-        onNotificationClick: onNotificationClick,
-        onButtonClick: onButtonClick,
-        onUiLayerDestroyed: onPlatformUiLayerDestroyed,
-      );
+    // Global event handlers that will use the incoming callCid to find the correct Call object
+    StreamVideoFlutterBackground.setOnNotificationContentClick(
+        (String callCid) async {
+      final context = _instance._managedCalls[callCid];
+      if (context == null) {
+        _instance._logger
+            .w(() => '[onContentClick] no context for callCid: $callCid');
+        return;
+      }
+
+      _instance._logger.d(() => '[onContentClick] callCid: $callCid');
+      await onNotificationClick?.call(context.call);
     });
-  }
 
-  final _logger = taggedLogger(tag: _tag);
-
-  StreamSubscription<CallState>? _subscription;
-  NotificationOptionsBuilder? _screenShareNotificationOptionsBuilder;
-
-  Future<void> startScreenSharingNotificationService(Call call) async {
-    await StreamVideoFlutterBackground.startService(
-      NotificationPayload(
-        callCid: call.callCid.value,
-        options: (_screenShareNotificationOptionsBuilder ??
-                _screenShareDefaultOptions)
-            .call(call),
-      ),
-      ServiceType.screenSharing,
-    );
-  }
-
-  Future<void> stopScreenSharingNotificationService() async {
-    await StreamVideoFlutterBackground.stopService(
-      ServiceType.screenSharing,
-    );
-  }
-
-  Future<void> onActiveCall({
-    Call? call,
-    NotificationOptionsBuilder optionsBuilder = _callDefaultOptions,
-    OnNotificationClick? onNotificationClick,
-    OnButtonClick? onButtonClick,
-    OnUiLayerDestroyed? onUiLayerDestroyed,
-  }) async {
-    try {
-      _logger.d(() => '[onActiveCall] activeCall: $call');
-      if (call != null) {
-        await _onConnected(
-          call: call,
-          optionsBuilder: optionsBuilder,
-          onNotificationClick: onNotificationClick,
-          onButtonClick: onButtonClick,
-          onUiLayerDestroyed: onUiLayerDestroyed,
-        );
-      } else {
-        await _onDisconnected();
-      }
-    } catch (e, stk) {
-      _logger.e(() => '[onActiveCall] failed: $e, stk: $stk');
-    }
-  }
-
-  Future<void> _onConnected({
-    required Call call,
-    required NotificationOptionsBuilder optionsBuilder,
-    OnNotificationClick? onNotificationClick,
-    OnButtonClick? onButtonClick,
-    OnUiLayerDestroyed? onUiLayerDestroyed,
-  }) async {
-    try {
-      if (!await Permission.microphone.isGranted) {
-        _logger.d(
-          () =>
-              '[onConnected] cannot start the service, microphone permission is not granted',
-        );
+    StreamVideoFlutterBackground.setOnNotificationButtonClick(
+        (String btn, String callCid, ServiceType serviceType) async {
+      final context = _instance._managedCalls[callCid];
+      if (context == null) {
+        _instance._logger
+            .w(() => '[onButtonClick] no context for callCid: $callCid');
         return;
       }
 
-      final result = await StreamVideoFlutterBackground.startService(
-        NotificationPayload(
-          callCid: call.callCid.value,
-          options: optionsBuilder.call(call),
-        ),
-        ServiceType.call,
-      );
+      _instance._logger.d(() =>
+          '[onButtonClick] btn: $btn, callCid: $callCid, serviceType: $serviceType');
 
-      _logger.d(() => '[onConnected] call service start result: $result');
-      if (result) {
-        StreamVideoFlutterBackground.setOnNotificationContentClick(
-          _buildOnContentClick(call, onNotificationClick),
-        );
-        StreamVideoFlutterBackground.setOnNotificationButtonClick(
-          _buildOnButtonClick(call, onButtonClick),
-        );
-        StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(
-          _buildOnUiLayerDestroyed(call, onUiLayerDestroyed),
-        );
-        _subscription = _listenState(call, optionsBuilder);
-      }
-    } catch (e, stk) {
-      _logger.e(() => '[onConnected] service start failed: $e, stk: $stk');
-    }
-  }
-
-  Future<void> _onDisconnected() async {
-    try {
-      StreamVideoFlutterBackground.setOnNotificationContentClick(null);
-      StreamVideoFlutterBackground.setOnNotificationButtonClick(null);
-      StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(null);
-      await _subscription?.cancel();
-
-      final callResult =
-          await StreamVideoFlutterBackground.stopService(ServiceType.call);
-
-      final sharingResult = await StreamVideoFlutterBackground.stopService(
-        ServiceType.screenSharing,
-      );
-      _logger.d(
-        () =>
-            '[onDisconnected] call service stop result: $callResult, screen sharing service stop result: $sharingResult',
-      );
-    } catch (e, stk) {
-      _logger
-          .e(() => '[onDisconnected] call service stop failed: $e, stk: $stk');
-    }
-  }
-
-  OnNotificationButtonClick _buildOnButtonClick(
-    Call call,
-    OnButtonClick? onButtonClick,
-  ) {
-    return (btn, callCid, serviceType) async {
-      _logger.d(
-        () =>
-            '[onButtonClick] btn: $btn, callCid: $callCid, serviceType: $serviceType',
-      );
-      final expected = call.callCid.value;
-      if (call.callCid.value != callCid) {
-        _logger.w(() => '[onButtonClick] rejected (expectedCid: $expected)');
-        return;
-      }
       if (btn == _btnCancel) {
         if (onButtonClick != null) {
-          await onButtonClick.call(call, ButtonType.cancel, serviceType);
+          await onButtonClick.call(
+            context.call,
+            ButtonType.cancel,
+            serviceType,
+          );
         } else {
+          // Default cancel behavior
           if (serviceType == ServiceType.call) {
-            await call.reject(reason: CallRejectReason.cancel());
+            await context.call.reject(reason: CallRejectReason.cancel());
           } else if (serviceType == ServiceType.screenSharing) {
-            await StreamVideoFlutterBackground.stopService(
-              ServiceType.screenSharing,
-            );
-            await call.setScreenShareEnabled(enabled: false);
+            await _instance.stopScreenSharingNotificationService(callCid);
+            await context.call.setScreenShareEnabled(enabled: false);
           }
         }
       }
-    };
-  }
+    });
 
-  OnNotificationContentClick _buildOnContentClick(
-    Call call,
-    OnNotificationClick? onNotificationClick,
-  ) {
-    return (callCid) async {
-      _logger.d(() => '[onContentClick] callCid: $callCid');
-      final expected = call.callCid.value;
-      if (expected != callCid) {
-        _logger.w(() => '[onContentClick] rejected (expectedCid: $expected)');
-        return;
-      }
-      await onNotificationClick?.call(call);
-    };
-  }
-
-  OnPlatformUiLayerDestroyed _buildOnUiLayerDestroyed(
-    Call call,
-    OnUiLayerDestroyed? onUiLayerDestroyed,
-  ) {
-    return (callCid) async {
-      _logger.d(() => '[onUiLayerDestroyed] callCid: $callCid');
-      final expected = call.callCid.value;
-      if (expected != callCid) {
-        _logger
-            .w(() => '[onUiLayerDestroyed] rejected (expectedCid: $expected)');
-        return;
-      }
-      await onUiLayerDestroyed?.call(call);
-    };
-  }
-
-  StreamSubscription<CallState> _listenState(
-    Call call,
-    NotificationOptionsBuilder optionsBuilder,
-  ) {
-    return call.state.listen((value) async {
-      _logger.v(() => '[listenState] call service update, state: $value');
-
-      if (value.status is CallStatusDisconnected) {
+    StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(
+        (String callCid) async {
+      final context = _instance._managedCalls[callCid];
+      if (context == null) {
+        _instance._logger
+            .w(() => '[onUiLayerDestroyed] no context for callCid: $callCid');
         return;
       }
 
-      try {
-        final result = await StreamVideoFlutterBackground.updateService(
-          NotificationPayload(
-            callCid: call.callCid.value,
-            options: optionsBuilder.call(call),
-          ),
-          ServiceType.call,
-        );
-        _logger.v(() => '[listenState] call service update result: $result');
-      } catch (e, stk) {
-        _logger.e(() => '[listenState] call service update failed: $e; $stk');
+      _instance._logger.d(() => '[onUiLayerDestroyed] callCid: $callCid');
+      await onPlatformUiLayerDestroyed?.call(context.call);
+    });
+
+    _activeCalSubscription?.cancel();
+    _activeCalSubscription =
+        streamVideo.listenActiveCalls((List<Call> currentCalls) async {
+      final currentCallCids = currentCalls.map((c) => c.callCid.value).toSet();
+      final managedCallCids = _instance._managedCalls.keys.toSet();
+
+      // Stop services for calls that are no longer active
+      final cidsToRemove = managedCallCids.difference(currentCallCids);
+      for (final cidToRemove in cidsToRemove) {
+        await _instance._stopManagingCall(cidToRemove);
+      }
+
+      // Start or update services for current calls
+      for (final call in currentCalls) {
+        final callCid = call.callCid.value;
+        if (managedCallCids.contains(callCid)) {
+          // Call is already managed. Updates are handled by its state listener.
+        } else {
+          // New call, start managing it
+          await _instance._startManagingCall(
+            call,
+            callNotificationOptionsBuilder,
+          );
+        }
+      }
+
+      // If there are no current calls, but some are still managed (e.g. due to race condition or error)
+      // This ensures cleanup if the currentCalls list becomes empty.
+      if (currentCalls.isEmpty && _instance._managedCalls.isNotEmpty) {
+        _instance._logger.i(() =>
+            'All calls ended, ensuring all managed services are stopped.');
+        final cidsToStop = _instance._managedCalls.keys.toList();
+        for (final cid in cidsToStop) {
+          await _instance._stopManagingCall(cid);
+        }
       }
     });
+  }
+
+  Future<void> _startManagingCall(
+    Call call,
+    NotificationOptionsBuilder optionsBuilder,
+  ) async {
+    final callCid = call.callCid.value;
+
+    _logger.d(() => '[$callCid] Starting management.');
+    try {
+      // TODO: Why do we need to check this?
+      final micPermissionGranted = await Permission.microphone.isGranted;
+      if (!micPermissionGranted) {
+        _logger.d(
+          () =>
+              '[$callCid] cannot start service, microphone permission not granted',
+        );
+        return;
+      }
+
+      final options = optionsBuilder.call(call);
+      final payload = NotificationPayload(
+        callCid: callCid,
+        options: options,
+      );
+
+      final result = await StreamVideoFlutterBackground.startService(
+        payload,
+        ServiceType.call,
+      );
+
+      _logger.d(() => '[$callCid] call service start result: $result');
+
+      if (result) {
+        // ignore: cancel_subscriptions
+        final stateSubscription = call.state.listen((CallState value) async {
+          _logger.v(() => '[$callCid] state update: ${value.status}');
+
+          if (value.status is CallStatusDisconnected) {
+            return;
+          }
+
+          try {
+            final updateOptions = optionsBuilder.call(call);
+
+            // TODO: That is a lot of service updates. We should only update the service if the options have changed.
+            final updateResult =
+                await StreamVideoFlutterBackground.updateService(
+              NotificationPayload(
+                callCid: callCid,
+                options: updateOptions,
+              ),
+              ServiceType.call,
+            );
+            _logger.v(
+                () => '[$callCid] call service update result: $updateResult');
+          } catch (e, stk) {
+            _logger.e(() => '[$callCid] call service update failed: $e; $stk');
+          }
+        });
+
+        _managedCalls[callCid] = _CallServiceContext(
+          call: call,
+          stateSubscription: stateSubscription,
+        );
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[$callCid] _startManagingCall failed: $e, stk: $stk');
+    }
+  }
+
+  Future<void> _stopManagingCall(String callCid) async {
+    _logger.d(() => '[$callCid] Stopping management.');
+    final context = _managedCalls.remove(callCid);
+    if (context == null) {
+      _logger.w(() => '[$callCid] was not in managed calls map during stop.');
+      return;
+    }
+
+    try {
+      await context.stateSubscription?.cancel();
+
+      final callResult = await StreamVideoFlutterBackground.stopService(
+        ServiceType.call,
+        callCid,
+      );
+
+      _logger.d(() => '[$callCid] call service stop result: $callResult');
+
+      // If a call ends, we might also want to stop its associated screen share service.
+      final screenShareStopResult =
+          await StreamVideoFlutterBackground.stopService(
+        ServiceType.screenSharing,
+        callCid,
+      );
+
+      _logger.d(
+        () =>
+            '[$callCid] screen sharing service stop attempt result: $screenShareStopResult (attempted as part of call cleanup)',
+      );
+    } catch (e, stk) {
+      _logger.e(() => '[$callCid] _stopManagingCall failed: $e, stk: $stk');
+    }
+  }
+
+  // Screen sharing methods
+  Future<void> startScreenSharingNotificationService(Call call) async {
+    final callCid = call.callCid.value;
+
+    _logger.d(() => '[$callCid] Starting screen sharing service.');
+
+    final options =
+        (_screenShareNotificationOptionsBuilder ?? _screenShareDefaultOptions)
+            .call(call);
+
+    final payload = NotificationPayload(
+      callCid: callCid,
+      options: options,
+    );
+
+    await StreamVideoFlutterBackground.startService(
+      payload,
+      ServiceType.screenSharing,
+    );
+  }
+
+  Future<void> stopScreenSharingNotificationService(String callCid) async {
+    _logger.d(() => '[$callCid] Stopping screen sharing service.');
+
+    await StreamVideoFlutterBackground.stopService(
+      ServiceType.screenSharing,
+      callCid,
+    );
   }
 }
 
 NotificationOptions _callDefaultOptions(Call call) {
-  final users = call.state.valueOrNull?.callParticipants
-          .map((it) => it.userId)
-          .join(', ') ??
-      '';
-  return NotificationOptions(
-    content: NotificationContent(
-      title: 'Call in progress',
-      text: '${call.callCid.id}: $users',
-    ),
+  final participants = call.state.valueOrNull?.callParticipants ?? [];
+  final participantUserIds = participants.map((p) => p.userId).join(', ');
+
+  final notificationContent = NotificationContent(
+    title: 'Call in progress (${call.callCid.id})',
+    text: participantUserIds.isNotEmpty ? participantUserIds : 'Connecting...',
   );
+
+  final options = NotificationOptions(
+    content: notificationContent,
+  );
+
+  return options;
 }
 
 NotificationOptions _screenShareDefaultOptions(Call call) {
-  return const NotificationOptions(
+  final options = NotificationOptions(
     content: NotificationContent(
-      title: 'You are screen sharing',
+      title: 'You are screen sharing (${call.callCid.id})',
+      text: 'Tap to return to the call.',
     ),
   );
+
+  return options;
 }

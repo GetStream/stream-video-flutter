@@ -27,6 +27,10 @@ abstract class DisconnectReason extends Equatable {
     return DisconnectReasonEnded();
   }
 
+  factory DisconnectReason.replaced() {
+    return DisconnectReasonReplaced();
+  }
+
   factory DisconnectReason.lastParticipantLeft() {
     return DisconnectReasonLastParticipantLeft();
   }
@@ -109,6 +113,22 @@ class DisconnectReasonEnded extends DisconnectReason {
   @override
   String toString() {
     return 'Ended';
+  }
+}
+
+class DisconnectReasonReplaced extends DisconnectReason {
+  factory DisconnectReasonReplaced() {
+    return _instance;
+  }
+
+  const DisconnectReasonReplaced._internal();
+
+  static const DisconnectReasonReplaced _instance =
+      DisconnectReasonReplaced._internal();
+
+  @override
+  String toString() {
+    return 'Replaced';
   }
 }
 

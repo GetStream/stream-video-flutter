@@ -1,9 +1,13 @@
 package io.getstream.video.flutter.stream_video_flutter.service.notification
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class NotificationPayload(
     val callCid: String = "",
     val options: NotificationOptions? = null,
-) {
+) : Parcelable {
     companion object {
         private const val CALL_CID = "call_cid"
         private const val OPTIONS = "options"
@@ -20,11 +24,12 @@ data class NotificationPayload(
     }
 }
 
+@Parcelize
 data class NotificationOptions(
     val content: NotificationContent? = null,
     val avatar: NotificationAvatar? = null,
     val useCustomLayout: Boolean = false,
-) {
+) : Parcelable {
     companion object {
         private const val CONTENT = "content"
         private const val AVATAR = "avatar"
@@ -52,10 +57,11 @@ data class NotificationOptions(
     }
 }
 
+@Parcelize
 data class NotificationContent(
     val title: String? = null,
     val text: String? = null,
-) {
+) : Parcelable {
     companion object {
         private const val TITLE = "title"
         private const val TEXT = "text"
@@ -73,10 +79,11 @@ data class NotificationContent(
     }
 }
 
+@Parcelize
 data class NotificationAvatar(
     val url: String? = null,
     val httpHeaders: Map<String, String> = emptyMap(),
-) {
+) : Parcelable {
     companion object {
         const val URL = "url"
         const val HTTP_HEADERS = "http_headers"
