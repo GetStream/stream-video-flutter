@@ -494,7 +494,12 @@ class Call {
       case StreamCallMemberRemovedEvent _:
         return _stateManager.coordinatorCallMemberRemoved(event);
       case StreamCallMemberUpdatedEvent _:
-        return _stateManager.coordinatorCallMemberUpdated(event);
+        return _stateManager.coordinatorCallMemberUpdated(event.members);
+      case StreamCallMemberUpdatedPermissionEvent _:
+        return _stateManager.coordinatorCallMemberUpdated(
+          event.updatedMembers,
+          capabilitiesByRole: event.capabilitiesByRole,
+        );
       case StreamCallUserBlockedEvent _:
         return _stateManager.coordinatorCallUserBlocked(event);
       case StreamCallUserUnblockedEvent _:
