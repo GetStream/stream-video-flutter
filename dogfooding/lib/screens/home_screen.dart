@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
           case ServiceType.screenSharing:
             StreamVideoFlutterBackground.stopService(
               ServiceType.screenSharing,
-              call.callCid.value,
+              callCid: call.callCid.value,
             );
             call.setScreenShareEnabled(enabled: false);
         }

@@ -14,8 +14,8 @@ enum class ServiceType {
 interface ServiceManager {
     fun start(callCid: String, payload: NotificationPayload, type: ServiceType = ServiceType.call): Boolean
     fun update(callCid: String, payload: NotificationPayload, type: ServiceType = ServiceType.call): Boolean
-    fun stop(callCid: String, type: ServiceType = ServiceType.call): Boolean
-    fun isRunning(callCid: String, type: ServiceType): Boolean
+    fun stop(callCid: String?, type: ServiceType = ServiceType.call): Boolean
+    fun isRunning(callCid: String?, type: ServiceType): Boolean
 }
 
 class ServiceManagerImpl(
@@ -23,7 +23,7 @@ class ServiceManagerImpl(
 ): ServiceManager {
 
     private val logger by taggedLogger(tag = "StreamServiceManager")
-    private val activeServices = mutableMapOf<String, ServiceType>() // Key: callCid, Value: ServiceType
+    private val activeServices = mutableMapOf<String, ServiceType>()
 
     /**
      * Start the foreground service.
@@ -78,6 +78,7 @@ class ServiceManagerImpl(
                 ServiceType.call -> Intent(appContext, StreamCallService::class.java).apply {
                     action = intentAction
                     putExtra("callCid", callCid)
+                    putExtra("type", type.name)
                     putExtra("notificationPayload", payload)
                 }
                 ServiceType.screenSharing -> Intent(appContext, StreamScreenShareService::class.java).apply {
@@ -99,13 +100,35 @@ class ServiceManagerImpl(
     /**
      * Stop the foreground service.
      */
-    override fun stop(callCid: String, type: ServiceType): Boolean {
+    override fun stop(callCid: String?, type: ServiceType): Boolean {
         logger.d { "[stop] callCid: $callCid, type: $type" }
-        val serviceKey = "$callCid-$type"
+        
+        val actualCallCid = if (callCid != null) {
+            callCid
+        } else {
+            // Find services of the specified type
+            val servicesOfType = activeServices.filter { it.value == type }
+            when (servicesOfType.size) {
+                0 -> {
+                    logger.w { "[stop] No services of type $type are running. Cannot stop." }
+                    return false
+                }
+                1 -> {
+                    // Extract callCid from the service key (format: "callCid-type")
+                    val serviceKey = servicesOfType.keys.first()
+                    serviceKey.substringBeforeLast("-$type")
+                }
+                else -> {
+                    throw IllegalStateException("Multiple services of type $type are running. CallCid is required to specify which one to stop.")
+                }
+            }
+        }
+        
+        val serviceKey = "$actualCallCid-$type"
 
         val wasActive = activeServices.remove(serviceKey)
         if (wasActive == null) {
-            logger.w { "[stop] Service for callCid: $callCid, type: $type was not in activeServices map. Still sending stop command." }
+            logger.w { "[stop] Service for callCid: $actualCallCid, type: $type was not in activeServices map. Still sending stop command." }
         }
 
         try {
@@ -118,22 +141,43 @@ class ServiceManagerImpl(
                 ServiceType.screenSharing -> Intent(appContext, StreamScreenShareService::class.java)
             }.apply {
                 action = intentAction
-                putExtra("callCid", callCid)
+                putExtra("callCid", actualCallCid)
             }
 
             appContext.startService(nIntent)
 
         } catch (e: Exception) {
-            logger.e(e) { "[stop] Failed to send stop command for callCid: $callCid, type: $type. It was removed from activeServices map." }
+            logger.e(e) { "[stop] Failed to send stop command for callCid: $actualCallCid, type: $type. It was removed from activeServices map." }
             return false
         }
         return true
     }
 
-    override fun isRunning(callCid: String, type: ServiceType): Boolean {
-        val serviceKey = "$callCid-$type"
+    override fun isRunning(callCid: String?, type: ServiceType): Boolean {
+        val actualCallCid = if (callCid != null) {
+            callCid
+        } else {
+            // Find services of the specified type
+            val servicesOfType = activeServices.filter { it.value == type }
+            when (servicesOfType.size) {
+                0 -> {
+                    logger.d { "[isRunning] No services of type $type are running. Result: false" }
+                    return false
+                }
+                1 -> {
+                    // Extract callCid from the service key (format: "callCid-type")
+                    val serviceKey = servicesOfType.keys.first()
+                    serviceKey.substringBeforeLast("-$type")
+                }
+                else -> {
+                    throw IllegalStateException("Multiple services of type $type are running. CallCid is required to specify which one to check.")
+                }
+            }
+        }
+        
+        val serviceKey = "$actualCallCid-$type"
         val running = activeServices.containsKey(serviceKey)
-        logger.d { "[isRunning] callCid: $callCid, type: $type. Result: $running" }
+        logger.d { "[isRunning] callCid: $actualCallCid, type: $type. Result: $running" }
         return running
     }
 }

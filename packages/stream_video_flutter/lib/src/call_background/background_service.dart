@@ -59,25 +59,29 @@ class StreamBackgroundService {
         screenShareNotificationOptionsBuilder;
 
     // Global event handlers that will use the incoming callCid to find the correct Call object
-    StreamVideoFlutterBackground.setOnNotificationContentClick(
-        (String callCid) async {
-      final context = _instance._managedCalls[callCid];
-      if (context == null) {
+    StreamVideoFlutterBackground.setOnNotificationContentClick((
+      String callCid,
+    ) async {
+      final callContext = _instance._managedCalls[callCid];
+      if (callContext == null) {
         _instance._logger
-            .w(() => '[onContentClick] no context for callCid: $callCid');
+            .w(() => '[onContentClick] no managed call for callCid: $callCid');
         return;
       }
 
       _instance._logger.d(() => '[onContentClick] callCid: $callCid');
-      await onNotificationClick?.call(context.call);
+      await onNotificationClick?.call(callContext.call);
     });
 
-    StreamVideoFlutterBackground.setOnNotificationButtonClick(
-        (String btn, String callCid, ServiceType serviceType) async {
-      final context = _instance._managedCalls[callCid];
-      if (context == null) {
+    StreamVideoFlutterBackground.setOnNotificationButtonClick((
+      String btn,
+      String callCid,
+      ServiceType serviceType,
+    ) async {
+      final callContext = _instance._managedCalls[callCid];
+      if (callContext == null) {
         _instance._logger
-            .w(() => '[onButtonClick] no context for callCid: $callCid');
+            .w(() => '[onButtonClick] no managed call for callCid: $callCid');
         return;
       }
 
@@ -89,17 +93,17 @@ class StreamBackgroundService {
       if (btn == _btnCancel) {
         if (onButtonClick != null) {
           await onButtonClick.call(
-            context.call,
+            callContext.call,
             ButtonType.cancel,
             serviceType,
           );
         } else {
           // Default cancel behavior
           if (serviceType == ServiceType.call) {
-            await context.call.reject(reason: CallRejectReason.cancel());
+            await callContext.call.reject(reason: CallRejectReason.cancel());
           } else if (serviceType == ServiceType.screenSharing) {
             await _instance.stopScreenSharingNotificationService(callCid);
-            await context.call.setScreenShareEnabled(enabled: false);
+            await callContext.call.setScreenShareEnabled(enabled: false);
           }
         }
       }
@@ -109,8 +113,8 @@ class StreamBackgroundService {
         (String callCid) async {
       final context = _instance._managedCalls[callCid];
       if (context == null) {
-        _instance._logger
-            .w(() => '[onUiLayerDestroyed] no context for callCid: $callCid');
+        _instance._logger.w(
+            () => '[onUiLayerDestroyed] no managed call for callCid: $callCid');
         return;
       }
 
@@ -241,7 +245,7 @@ class StreamBackgroundService {
 
       final callResult = await StreamVideoFlutterBackground.stopService(
         ServiceType.call,
-        callCid,
+        callCid: callCid,
       );
 
       _logger.d(() => '[$callCid] call service stop result: $callResult');
@@ -250,7 +254,7 @@ class StreamBackgroundService {
       final screenShareStopResult =
           await StreamVideoFlutterBackground.stopService(
         ServiceType.screenSharing,
-        callCid,
+        callCid: callCid,
       );
 
       _logger.d(
@@ -288,7 +292,7 @@ class StreamBackgroundService {
 
     await StreamVideoFlutterBackground.stopService(
       ServiceType.screenSharing,
-      callCid,
+      callCid: callCid,
     );
   }
 }

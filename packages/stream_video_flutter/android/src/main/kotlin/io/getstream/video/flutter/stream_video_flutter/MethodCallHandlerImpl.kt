@@ -115,24 +115,27 @@ class MethodCallHandlerImpl(
                 PictureInPictureHelper.disablePictureInPicture(activity!!)
             }
             "isBackgroundServiceRunning" -> {
-                val statusString = call.argument<String>("type")
-                val serviceType = ServiceType.valueOf(statusString ?: "call")
+                val typeString = call.argument<String>("type")
+                val serviceType = ServiceType.valueOf(typeString ?: "call")
                 val callCid = call.argument<String>("callCid")
-                
-                if (callCid == null) {
-                    result.error("isBackgroundServiceRunning", "callCid is required", null)
-                    return
+
+                try {
+                    val isRunning = serviceManager.isRunning(callCid, serviceType)
+
+                    logger.d { "[onMethodCall] #isServiceRunning(cid: $callCid, type: $serviceType); isRunning: $isRunning" }
+                    result.success(isRunning)
+                } catch (e: IllegalStateException) {
+                    logger.e(e) { "[onMethodCall] #isServiceRunning(cid: $callCid, type: $serviceType); failed: $e" }
+                    result.error("isBackgroundServiceRunning", e.message, null)
+                } catch (e: Exception) {
+                    logger.e(e) { "[onMethodCall] #isServiceRunning(cid: $callCid, type: $serviceType); unexpected error: $e" }
+                    result.error("isBackgroundServiceRunning", e.toString(), null)
                 }
-
-                val isRunning = serviceManager.isRunning(callCid, serviceType)
-
-                logger.d { "[onMethodCall] #isServiceRunning(cid: $callCid, type: $serviceType); isRunning: $isRunning" }
-                result.success(isRunning)
             }
 
             "startBackgroundService" -> {
-                val statusString = call.argument<String>("type")
-                val serviceType = ServiceType.valueOf(statusString ?: "call")
+                val typeString = call.argument<String>("type")
+                val serviceType = ServiceType.valueOf(typeString ?: "call")
                 
                 val activity = getActivity()
                 if (activity == null) {
@@ -181,8 +184,8 @@ class MethodCallHandlerImpl(
             }
 
             "updateBackgroundService" -> {
-                val statusString = call.argument<String>("type")
-                val serviceType = ServiceType.valueOf(statusString ?: "call")
+                val typeString = call.argument<String>("type")
+                val serviceType = ServiceType.valueOf(typeString ?: "call")
                 
                 try {
                     val notificationPayload = call.extractNotificationPayload()
@@ -206,19 +209,17 @@ class MethodCallHandlerImpl(
             }
 
             "stopBackgroundService" -> {
-                val statusString = call.argument<String>("type")
-                val serviceType = ServiceType.valueOf(statusString ?: "call")
+                val typeString = call.argument<String>("type")
+                val serviceType = ServiceType.valueOf(typeString ?: "call")
                 val callCid = call.argument<String>("callCid")
-                
-                if (callCid == null) {
-                    result.error("stopBackgroundService", "callCid is required", null)
-                    return
-                }
 
                 val activity = getActivity()
                 try {
                     val stopResult = serviceManager.stop(callCid, serviceType)
                     result.success(stopResult)
+                } catch (e: IllegalStateException) {
+                    logger.e(e) { "[onMethodCall] #stopService(cid: $callCid, type: $serviceType); failed: $e" }
+                    result.error("stopBackgroundService", e.message, null)
                 } catch (e: Throwable) {
                     logger.e(e) { "[onMethodCall] #stopService(cid: $callCid, type: $serviceType); failed: $e" }
                     result.error("stopService", e.toString(), null)

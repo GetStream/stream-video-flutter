@@ -244,6 +244,12 @@ class StreamVideo extends Disposable {
   final _logger = taggedLogger(tag: _tag);
 
   final StreamVideoOptions _options;
+
+  @Deprecated('Use options.muteVideoWhenInBackground instead')
+  bool get muteVideoWhenInBackground => _options.muteVideoWhenInBackground;
+  @Deprecated('Use options.muteAudioWhenInBackground instead')
+  bool get muteAudioWhenInBackground => _options.muteAudioWhenInBackground;
+
   final MutableClientState _state;
 
   StreamVideoOptions get options => _options;
@@ -521,6 +527,18 @@ class StreamVideo extends Disposable {
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
     }
+  }
+
+  StreamSubscription<Call?> listenActiveCall(
+    void Function(Call? value)? onActiveCall,
+  ) {
+    if (_options.allowMultipleActiveCalls) {
+      throw Exception(
+        'Multiple active calls are enabled, use listenActiveCalls instead',
+      );
+    }
+
+    return _state.activeCall.listen(onActiveCall);
   }
 
   StreamSubscription<List<Call>> listenActiveCalls(

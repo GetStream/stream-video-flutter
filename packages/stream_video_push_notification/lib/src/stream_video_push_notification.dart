@@ -76,7 +76,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       _idActiveCall,
       streamVideo.state.activeCalls.listen((calls) async {
         _logger.d(() =>
-            '[activeCall] Active calls changed to ${calls.map((c) => c.callCid).join()}');
+            '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]');
 
         for (final previousCall in currentActiveCalls) {
           if (!calls.any((c) => c.callCid == previousCall.callCid)) {

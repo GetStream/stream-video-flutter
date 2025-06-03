@@ -19,8 +19,12 @@ abstract class ClientState {
   /// Emits StreamVideo connection changes.
   StateEmitter<ConnectionState> get connection;
 
-  /// Sets when a call being joined.
+  /// Emits a list of active calls.
   StateEmitter<List<Call>> get activeCalls;
+
+  /// Emits an active call.
+  /// Will only emit if options.allowMultipleActiveCalls is set to false, use activeCalls otherwise.
+  StateEmitter<Call?> get activeCall;
 
   /// Emits when a call was created by another user with ringing set as True.
   StateEmitter<Call?> get incomingCall;
@@ -38,6 +42,7 @@ class MutableClientState implements ClientState {
   MutableClientState(User user, this.options)
       : user = MutableStateEmitterImpl(user),
         activeCalls = MutableStateEmitterImpl([]),
+        activeCall = MutableStateEmitterImpl(null),
         incomingCall = MutableStateEmitterImpl(null),
         outgoingCall = MutableStateEmitterImpl(null),
         connection = MutableStateEmitterImpl(
@@ -51,6 +56,9 @@ class MutableClientState implements ClientState {
 
   @override
   final MutableStateEmitter<List<Call>> activeCalls;
+
+  @override
+  final MutableStateEmitter<Call?> activeCall;
 
   @override
   final MutableStateEmitter<Call?> incomingCall;
@@ -70,24 +78,46 @@ class MutableClientState implements ClientState {
     connection.value = ConnectionState.disconnected(user.value.id);
   }
 
-  List<Call>? getActiveCalls() => activeCalls.valueOrNull;
+  Call? getActiveCall() {
+    if (options.allowMultipleActiveCalls) {
+      throw Exception(
+        'Multiple active calls are enabled, use getActiveCalls() instead',
+      );
+    }
+
+    return activeCalls.value.firstOrNull;
+  }
+
+  List<Call> getActiveCalls() => activeCalls.value;
   Call? getOutgoingCall() => outgoingCall.valueOrNull;
 
   @override
-  Future<void> setActiveCall(Call call) async {
+  Future<void> setActiveCall(Call? call) async {
     if (!options.allowMultipleActiveCalls) {
       final currentlyActiveCall = activeCalls.value.firstOrNull;
       if (currentlyActiveCall != null) {
         await currentlyActiveCall.leave(reason: DisconnectReason.replaced());
-        activeCalls.value = [];
       }
+
+      activeCall.value = call;
     }
 
-    activeCalls.value = [...activeCalls.value, call];
+    if (call == null) {
+      activeCalls.value = [];
+    } else if (!options.allowMultipleActiveCalls) {
+      activeCalls.value = [call];
+    } else {
+      activeCalls.value = [...activeCalls.value, call];
+    }
   }
 
   @override
   Future<void> removeActiveCall(Call call) async {
+    if (!options.allowMultipleActiveCalls &&
+        activeCall.value?.callCid == call.callCid) {
+      activeCall.value = null;
+    }
+
     activeCalls.value = [
       ...activeCalls.value.where((it) => it.callCid != call.callCid),
     ];
