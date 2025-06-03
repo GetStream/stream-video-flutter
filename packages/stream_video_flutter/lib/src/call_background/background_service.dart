@@ -114,7 +114,8 @@ class StreamBackgroundService {
       final context = _instance._managedCalls[callCid];
       if (context == null) {
         _instance._logger.w(
-            () => '[onUiLayerDestroyed] no managed call for callCid: $callCid');
+          () => '[onUiLayerDestroyed] no managed call for callCid: $callCid',
+        );
         return;
       }
 
