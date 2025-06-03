@@ -47,6 +47,7 @@ class SettingsMenu extends StatefulWidget {
     this.onStatsPressed,
     this.onAudioOutputChange,
     this.onAudioInputChange,
+    this.onVideoInputChange,
     super.key,
   });
 
@@ -56,6 +57,7 @@ class SettingsMenu extends StatefulWidget {
   final void Function()? onStatsPressed;
   final void Function(RtcMediaDevice, {bool closeMenu})? onAudioOutputChange;
   final void Function(RtcMediaDevice)? onAudioInputChange;
+  final void Function(RtcMediaDevice)? onVideoInputChange;
 
   @override
   State<SettingsMenu> createState() => _SettingsMenuState();
@@ -72,16 +74,19 @@ class _SettingsMenuState extends State<SettingsMenu> {
   RtcMediaDevice? get _audioOutputDevice =>
       widget.call.state.value.audioOutputDevice;
   var _audioInputs = <RtcMediaDevice>[];
+  var _videoInputs = <RtcMediaDevice>[];
 
   bool _backgroundEffectsSupported = false;
   bool showAudioOutputs = false;
   bool showAudioInputs = false;
+  bool showVideoInputs = false;
   bool showIncomingQuality = false;
   bool showBackgroundEffects = false;
 
   bool get showMainSettings =>
       !showAudioOutputs &&
       !showAudioInputs &&
+      !showVideoInputs &&
       !showIncomingQuality &&
       !showBackgroundEffects;
 
@@ -99,6 +104,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
         _audioInputs = devices
             .where(
               (it) => it.kind == RtcMediaDeviceKind.audioInput,
+            )
+            .toList();
+
+        _videoInputs = devices
+            .where(
+              (it) => it.kind == RtcMediaDeviceKind.videoInput,
             )
             .toList();
 
@@ -131,6 +142,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         if (showMainSettings) ..._buildMenuItems(),
         if (showAudioOutputs) ..._buildAudioOutputsMenu(),
         if (showAudioInputs) ..._buildAudioInputsMenu(),
+        if (showVideoInputs) ..._buildVideoInputsMenu(),
         if (showIncomingQuality) ..._buildIncomingQualityMenu(),
         if (showBackgroundEffects) ..._buildBackgroundFiltersMenu(),
       ]),
@@ -221,6 +233,16 @@ class _SettingsMenuState extends State<SettingsMenu> {
           onPressed: () {
             setState(() {
               showAudioInputs = true;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        StandardActionMenuItem(
+          icon: Icons.camera_alt,
+          label: 'Choose video input',
+          onPressed: () {
+            setState(() {
+              showVideoInputs = true;
             });
           },
         ),
@@ -329,6 +351,41 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 onPressed: () {
                   widget.call.setAudioInputDevice(device);
                   widget.onAudioInputChange?.call(device);
+                },
+              );
+            },
+          )
+          .cast()
+          .insertBetween(const SizedBox(height: 16)),
+    ];
+  }
+
+  List<Widget> _buildVideoInputsMenu() {
+    return [
+      GestureDetector(
+        onTap: () {
+          setState(() {
+            showVideoInputs = false;
+          });
+        },
+        child: const Align(
+          alignment: Alignment.centerLeft,
+          child: Icon(Icons.arrow_back, size: 24),
+        ),
+      ),
+      const SizedBox(height: 16),
+      ..._videoInputs
+          .map(
+            (device) {
+              return StandardActionMenuItem(
+                icon: Icons.camera_alt,
+                label: device.label,
+                color: widget.call.state.value.videoInputDevice?.id == device.id
+                    ? AppColorPalette.appGreen
+                    : null,
+                onPressed: () {
+                  widget.call.setVideoInputDevice(device);
+                  widget.onVideoInputChange?.call(device);
                 },
               );
             },
