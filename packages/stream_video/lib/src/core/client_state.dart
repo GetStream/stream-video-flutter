@@ -100,13 +100,8 @@ class MutableClientState implements ClientState {
       }
 
       activeCall.value = call;
-    }
-
-    if (call == null) {
-      activeCalls.value = [];
-    } else if (!options.allowMultipleActiveCalls) {
-      activeCalls.value = [call];
-    } else {
+      activeCalls.value = call == null ? [] : [call];
+    } else if (call != null) {
       activeCalls.value = [...activeCalls.value, call];
     }
   }
