@@ -14,6 +14,8 @@ class MockCall extends Mock implements Call {}
 
 void main() {
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     // Register fallback values for types used with any() matchers
     registerFallbackValue(
       StreamCallCid.from(
