@@ -163,6 +163,13 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   void coordinatorCallPermissionsUpdated(
     StreamCallPermissionsUpdatedEvent event,
   ) {
+    if (event.user.id != state.currentUserId) {
+      _logger.i(
+        () => '[coordinatorCallPermissionsUpdated] rejected (not current user)',
+      );
+      return;
+    }
+
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(
@@ -483,12 +490,13 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   }
 
   void coordinatorCallMemberUpdated(
-    StreamCallMemberUpdatedEvent event,
-  ) {
+    List<CallMember> members, {
+    Map<String, List<String>>? capabilitiesByRole,
+  }) {
     state = state.copyWith(
       callMembers: state.callMembers.map((member) {
         final updatedMember =
-            event.members.firstWhereOrNull((m) => m.userId == member.userId);
+            members.firstWhereOrNull((m) => m.userId == member.userId);
         if (updatedMember != null) {
           return member.copyWith(
             roles: updatedMember.roles,
@@ -498,6 +506,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           return member;
         }
       }).toList(),
+      capabilitiesByRole: capabilitiesByRole,
     );
   }
 
