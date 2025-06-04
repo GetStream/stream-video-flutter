@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, avoid_implementing_value_types
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
@@ -62,8 +62,11 @@ void main() {
 }
 
 class _CallContentExample extends StatelessWidget {
-  const _CallContentExample(this.mockCall, this.mockCallState,
-      {this.extendBody = false});
+  const _CallContentExample(
+    this.mockCall,
+    this.mockCallState, {
+    this.extendBody = false,
+  });
 
   final MockCall mockCall;
   final MockCallState mockCallState;

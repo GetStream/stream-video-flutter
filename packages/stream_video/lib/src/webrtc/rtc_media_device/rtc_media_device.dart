@@ -78,9 +78,9 @@ class RtcMediaDevice with EquatableMixin {
               type.toLowerCase(),
             ),
       );
+    } else {
+      return groupId!.toLowerCase().contains('bluetooth');
     }
-
-    return false;
   }
 
   bool get isSpeaker => id.toLowerCase() == 'speaker';

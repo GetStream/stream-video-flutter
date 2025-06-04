@@ -1,38 +1,16 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../test_helpers.dart';
+
 class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
 class MockCall extends Mock implements Call {}
-
-// Helper function to create CallDetails for testing
-CallDetails _createTestCallDetails({
-  required String createdByUserId,
-  String createdByName = 'Test User',
-}) {
-  return CallDetails(
-    createdBy: CallUser(
-      id: createdByUserId,
-      name: createdByName,
-      roles: const [],
-      image: '',
-    ),
-    team: '',
-    ownCapabilities: const [],
-    blockedUserIds: const [],
-    broadcasting: false,
-    recording: false,
-    backstage: false,
-    transcribing: false,
-    captioning: false,
-    egress: const CallEgress(),
-    custom: const {},
-    rtmpIngress: '',
-  );
-}
 
 void main() {
   setUpAll(() {
@@ -153,7 +131,9 @@ void main() {
         final mockActiveCall = MockCall();
         when(() => mockActiveCall.callCid).thenReturn(
           StreamCallCid.from(
-              id: 'active-call', type: StreamCallType.defaultType()),
+            id: 'active-call',
+            type: StreamCallType.defaultType(),
+          ),
         );
         when(() => mockActiveCall.leave(reason: any(named: 'reason')))
             .thenAnswer((_) async => const Result.success(none));
@@ -169,7 +149,7 @@ void main() {
 
         final ringingCallMetadata = CallMetadata(
           cid: ringingCallCid,
-          details: _createTestCallDetails(createdByUserId: 'other-user'),
+          details: createTestCallDetails(createdByUserId: 'other-user'),
           settings: const CallSettings(),
           session: const CallSessionData(),
           users: const {},
@@ -290,7 +270,9 @@ void main() {
         final mockActiveCall = MockCall();
         when(() => mockActiveCall.callCid).thenReturn(
           StreamCallCid.from(
-              id: 'active-call', type: StreamCallType.defaultType()),
+            id: 'active-call',
+            type: StreamCallType.defaultType(),
+          ),
         );
         when(() => mockActiveCall.leave(reason: any(named: 'reason')))
             .thenAnswer((_) async => const Result.success(none));
@@ -306,7 +288,7 @@ void main() {
 
         final ringingCallMetadata = CallMetadata(
           cid: ringingCallCid,
-          details: _createTestCallDetails(createdByUserId: 'other-user'),
+          details: createTestCallDetails(createdByUserId: 'other-user'),
           settings: const CallSettings(),
           session: const CallSessionData(),
           users: const {},
