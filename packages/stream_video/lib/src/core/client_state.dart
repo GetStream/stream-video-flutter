@@ -1,3 +1,6 @@
+import 'package:collection/collection.dart';
+
+import '../../stream_video.dart' show DisconnectReason, StreamVideoOptions;
 import '../call/call.dart';
 import '../models/user.dart';
 import '../state_emitter.dart';
@@ -16,7 +19,11 @@ abstract class ClientState {
   /// Emits StreamVideo connection changes.
   StateEmitter<ConnectionState> get connection;
 
-  /// Sets when a call being joined.
+  /// Emits a list of active calls.
+  StateEmitter<List<Call>> get activeCalls;
+
+  /// Emits an active call.
+  /// Will only emit if options.allowMultipleActiveCalls is set to false, use activeCalls otherwise.
   StateEmitter<Call?> get activeCall;
 
   /// Emits when a call was created by another user with ringing set as True.
@@ -25,13 +32,23 @@ abstract class ClientState {
   /// Emits when a call was created by current user with ringing set as True.
   StateEmitter<Call?> get outgoingCall;
 
+  /// Sets the call as a current outgoing call.
   Future<void> setOutgoingCall(Call? call);
+
+  /// Set the active call. Will end the currently active call if `options.allowMultipleActiveCalls` is `false.
+  /// When `allowMultipleActiveCalls` is `true` calling this with `call: null` will have no effect.
+  /// Otherwise the call is added to the list of active calls.
   Future<void> setActiveCall(Call? call);
+
+  /// Removes the call from the list of active calls.
+  /// It won't `leave` the call, just removes it from the list.
+  Future<void> removeActiveCall(Call call);
 }
 
 class MutableClientState implements ClientState {
-  MutableClientState(User user)
+  MutableClientState(User user, this.options)
       : user = MutableStateEmitterImpl(user),
+        activeCalls = MutableStateEmitterImpl([]),
         activeCall = MutableStateEmitterImpl(null),
         incomingCall = MutableStateEmitterImpl(null),
         outgoingCall = MutableStateEmitterImpl(null),
@@ -39,8 +56,13 @@ class MutableClientState implements ClientState {
           ConnectionState.disconnected(user.id),
         );
 
+  final StreamVideoOptions options;
+
   @override
   final MutableStateEmitter<User> user;
+
+  @override
+  final MutableStateEmitter<List<Call>> activeCalls;
 
   @override
   final MutableStateEmitter<Call?> activeCall;
@@ -58,22 +80,49 @@ class MutableClientState implements ClientState {
   User get currentUser => user.value;
 
   Future<void> clear() async {
-    activeCall.value = null;
+    activeCalls.value = [];
     outgoingCall.value = null;
     connection.value = ConnectionState.disconnected(user.value.id);
   }
 
-  Call? getActiveCall() => activeCall.valueOrNull;
+  Call? getActiveCall() {
+    if (options.allowMultipleActiveCalls) {
+      throw Exception(
+        'Multiple active calls are enabled, use getActiveCalls instead',
+      );
+    }
+
+    return activeCalls.value.firstOrNull;
+  }
+
+  List<Call> getActiveCalls() => activeCalls.value;
   Call? getOutgoingCall() => outgoingCall.valueOrNull;
 
   @override
   Future<void> setActiveCall(Call? call) async {
-    final currentlyActiveCall = activeCall.valueOrNull;
-    if (currentlyActiveCall != null && call != null) {
-      await currentlyActiveCall.leave();
+    if (!options.allowMultipleActiveCalls) {
+      final currentlyActiveCall = activeCalls.value.firstOrNull;
+      if (currentlyActiveCall != null) {
+        await currentlyActiveCall.leave(reason: DisconnectReason.replaced());
+      }
+
+      activeCall.value = call;
+      activeCalls.value = call == null ? [] : [call];
+    } else if (call != null) {
+      activeCalls.value = [...activeCalls.value, call];
+    }
+  }
+
+  @override
+  Future<void> removeActiveCall(Call call) async {
+    if (!options.allowMultipleActiveCalls &&
+        activeCall.value?.callCid == call.callCid) {
+      activeCall.value = null;
     }
 
-    activeCall.value = call;
+    activeCalls.value = [
+      ...activeCalls.value.where((it) => it.callCid != call.callCid),
+    ];
   }
 
   @override

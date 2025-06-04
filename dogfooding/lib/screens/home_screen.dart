@@ -59,7 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
           case ServiceType.call:
             call.reject(reason: CallRejectReason.cancel());
           case ServiceType.screenSharing:
-            StreamVideoFlutterBackground.stopService(ServiceType.screenSharing);
+            StreamVideoFlutterBackground.stopService(
+              ServiceType.screenSharing,
+              callCid: call.callCid.value,
+            );
             call.setScreenShareEnabled(enabled: false);
         }
       },

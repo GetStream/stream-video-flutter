@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart' as async;
+import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
@@ -142,7 +143,7 @@ class StreamVideo extends Disposable {
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
   })  : _options = options,
-        _state = MutableClientState(user) {
+        _state = MutableClientState(user, options) {
     _networkMonitor =
         _options.networkMonitorSettings.internetConnectionInstance ??
             InternetConnection.createInstance(
@@ -243,10 +244,15 @@ class StreamVideo extends Disposable {
   final _logger = taggedLogger(tag: _tag);
 
   final StreamVideoOptions _options;
+
+  @Deprecated('Use options.muteVideoWhenInBackground instead')
+  bool get muteVideoWhenInBackground => _options.muteVideoWhenInBackground;
+  @Deprecated('Use options.muteAudioWhenInBackground instead')
+  bool get muteAudioWhenInBackground => _options.muteAudioWhenInBackground;
+
   final MutableClientState _state;
 
-  bool get muteVideoWhenInBackground => _options.muteVideoWhenInBackground;
-  bool get muteAudioWhenInBackground => _options.muteAudioWhenInBackground;
+  StreamVideoOptions get options => _options;
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
@@ -255,8 +261,8 @@ class StreamVideo extends Disposable {
   late final InternetConnection _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
 
-  bool _mutedCameraByStateChange = false;
-  bool _mutedAudioByStateChange = false;
+  final Map<String, bool> _mutedCameraByStateChange = {};
+  final Map<String, bool> _mutedAudioByStateChange = {};
 
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.info;
@@ -268,7 +274,17 @@ class StreamVideo extends Disposable {
   ClientState get state => _state;
 
   /// Returns the active call if exists.
-  Call? get activeCall => _state.activeCall.valueOrNull;
+  List<Call> get activeCalls => _state.activeCalls.value;
+
+  Call? get activeCall {
+    if (_options.allowMultipleActiveCalls) {
+      throw Exception(
+        'Multiple active calls are enabled, use activeCalls instead',
+      );
+    }
+
+    return _state.activeCalls.value.singleOrNull;
+  }
 
   /// You can subscribe to WebSocket events provided by the API.
   /// Please note that subscribing to WebSocket events is an advanced use-case,
@@ -455,31 +471,33 @@ class StreamVideo extends Disposable {
   Future<void> _onAppState(LifecycleState state) async {
     _logger.d(() => '[onAppState] state: $state');
     try {
-      final activeCallCid = _state.activeCall.valueOrNull?.callCid;
+      final activeCalls = _state.activeCalls.value;
 
       if (state.isPaused) {
         // Handle app paused state
-        if (activeCallCid == null &&
+        if (activeCalls.isEmpty &&
             !_options.keepConnectionsAliveWhenInBackground) {
           _logger.i(() => '[onAppState] close connection');
           _subscriptions.cancel(_idEvents);
           await _client.closeConnection();
-        } else if (activeCallCid != null) {
-          final callState = activeCall?.state.value;
-          final isVideoEnabled =
-              callState?.localParticipant?.isVideoEnabled ?? false;
-          final isAudioEnabled =
-              callState?.localParticipant?.isAudioEnabled ?? false;
+        } else if (activeCalls.isNotEmpty) {
+          for (final activeCall in activeCalls) {
+            final callState = activeCall.state.value;
+            final isVideoEnabled =
+                callState.localParticipant?.isVideoEnabled ?? false;
+            final isAudioEnabled =
+                callState.localParticipant?.isAudioEnabled ?? false;
 
-          if (_options.muteVideoWhenInBackground && isVideoEnabled) {
-            await activeCall?.setCameraEnabled(enabled: false);
-            _mutedCameraByStateChange = true;
-            _logger.v(() => 'Muted camera track since app was paused.');
-          }
-          if (_options.muteAudioWhenInBackground && isAudioEnabled) {
-            await activeCall?.setMicrophoneEnabled(enabled: false);
-            _mutedAudioByStateChange = true;
-            _logger.v(() => 'Muted audio track since app was paused.');
+            if (_options.muteVideoWhenInBackground && isVideoEnabled) {
+              await activeCall.setCameraEnabled(enabled: false);
+              _mutedCameraByStateChange[activeCall.callCid.value] = true;
+              _logger.v(() => 'Muted camera track since app was paused.');
+            }
+            if (_options.muteAudioWhenInBackground && isAudioEnabled) {
+              await activeCall.setMicrophoneEnabled(enabled: false);
+              _mutedAudioByStateChange[activeCall.callCid.value] = true;
+              _logger.v(() => 'Muted audio track since app was paused.');
+            }
           }
         }
       } else if (state.isResumed) {
@@ -487,15 +505,23 @@ class StreamVideo extends Disposable {
         _logger.i(() => '[onAppState] open connection');
         await _client.openConnection();
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
-        if (_mutedCameraByStateChange) {
-          await activeCall?.setCameraEnabled(enabled: true);
-          _mutedCameraByStateChange = false;
-          _logger.v(() => 'Unmuted camera track since app was unpaused.');
-        }
-        if (_mutedAudioByStateChange) {
-          await activeCall?.setMicrophoneEnabled(enabled: true);
-          _mutedAudioByStateChange = false;
-          _logger.v(() => 'Unmuted audio track since app was unpaused.');
+
+        for (final activeCall in activeCalls) {
+          final wasCameraMuted =
+              _mutedCameraByStateChange[activeCall.callCid.value] ?? false;
+          if (wasCameraMuted) {
+            await activeCall.setCameraEnabled(enabled: true);
+            _mutedCameraByStateChange[activeCall.callCid.value] = false;
+            _logger.v(() => 'Unmuted camera track since app was unpaused.');
+          }
+
+          final wasAudioMuted =
+              _mutedAudioByStateChange[activeCall.callCid.value] ?? false;
+          if (wasAudioMuted) {
+            await activeCall.setMicrophoneEnabled(enabled: true);
+            _mutedAudioByStateChange[activeCall.callCid.value] = false;
+            _logger.v(() => 'Unmuted audio track since app was unpaused.');
+          }
         }
       }
     } catch (e) {
@@ -506,7 +532,19 @@ class StreamVideo extends Disposable {
   StreamSubscription<Call?> listenActiveCall(
     void Function(Call? value)? onActiveCall,
   ) {
+    if (_options.allowMultipleActiveCalls) {
+      throw Exception(
+        'Multiple active calls are enabled, use listenActiveCalls instead',
+      );
+    }
+
     return _state.activeCall.listen(onActiveCall);
+  }
+
+  StreamSubscription<List<Call>> listenActiveCalls(
+    void Function(List<Call> value)? onActiveCalls,
+  ) {
+    return _state.activeCalls.listen(onActiveCalls);
   }
 
   Call makeCall({
@@ -775,7 +813,9 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    final activeCall = this.activeCall;
+    final activeCall = activeCalls.firstWhereOrNull(
+      (call) => call.callCid.value == cid,
+    );
     final incomingCall = _state.incomingCall.valueOrNull;
 
     if (activeCall?.callCid.value == cid) {
@@ -1114,6 +1154,7 @@ class StreamVideoOptions {
     this.includeUserDetailsForAutoConnect = true,
     this.keepConnectionsAliveWhenInBackground = false,
     this.networkMonitorSettings = const NetworkMonitorSettings(),
+    this.allowMultipleActiveCalls = false,
   });
 
   final String coordinatorRpcUrl;
@@ -1137,6 +1178,7 @@ class StreamVideoOptions {
   final bool autoConnect;
   final bool includeUserDetailsForAutoConnect;
   final bool keepConnectionsAliveWhenInBackground;
+  final bool allowMultipleActiveCalls;
 
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;

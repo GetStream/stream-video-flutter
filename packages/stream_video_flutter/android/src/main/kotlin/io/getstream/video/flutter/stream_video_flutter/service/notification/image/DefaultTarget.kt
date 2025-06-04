@@ -9,7 +9,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.service.notification.IdentifiedNotification
 
 class DefaultTarget(
-    private val getNotificationId: () -> Int,
+    private val notificationId: Int,
     private val onUpdate: (IdentifiedNotification) -> Unit,
 ) : Target, Function1<NotificationCompat.Builder, DefaultTarget> {
 
@@ -22,7 +22,7 @@ class DefaultTarget(
         val builder = builder ?: return
         val icon = bitmap ?: return
         builder.setLargeIcon(icon)
-        val notification = IdentifiedNotification(getNotificationId(), builder.build())
+        val notification = IdentifiedNotification(notificationId, builder.build())
         logger.v { "[onBitmapLoaded] notification: $notification" }
         onUpdate(notification)
     }
