@@ -34,6 +34,7 @@ enum SfuErrorCode {
   participantNotFound,
   participantMediaTransportFailure,
   callNotFound,
+  liveEnded,
   requestValidationFailed,
   unauthenticated,
   permissionDenied,
