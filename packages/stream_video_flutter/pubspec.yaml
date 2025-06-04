@@ -27,6 +27,7 @@ dependencies:
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
+  alchemist: '>=0.11.0 <0.13.0'
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0
