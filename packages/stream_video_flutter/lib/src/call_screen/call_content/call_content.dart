@@ -41,6 +41,7 @@ class StreamCallContent extends StatefulWidget {
     this.callParticipantsBuilder,
     this.callControlsBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
+    this.extendBody = false,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
 
@@ -67,6 +68,12 @@ class StreamCallContent extends StatefulWidget {
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// If true participants view will be shown all the way to the bottom of the scaffold,
+  /// meaning that the call controls for the local participants will be on top of the camera view.
+  ///
+  /// See also [Scaffold.extendBody].
+  final bool extendBody;
 
   /// Configuration for picture-in-picture mode.
   final PictureInPictureConfiguration pictureInPictureConfiguration;
@@ -256,6 +263,7 @@ class _StreamCallContentState extends State<StreamCallContent>
             ),
         ],
       ),
+      extendBody: widget.extendBody,
       bottomNavigationBar: localParticipant != null
           ? widget.callControlsBuilder?.call(context, call, callState) ??
               StreamCallControls.withDefaultOptions(

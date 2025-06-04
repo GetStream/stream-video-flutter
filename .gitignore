@@ -137,3 +137,8 @@ env.g.dart
 /.fvm/version
 /.fvm/versions/3.16.0
 /.fvmrc
+
+# Non-CI golden files and failures
+**/test/**/goldens/**/*.*
+**/test/**/failures/**/*.*
+!**/test/**/goldens/ci/*.*
