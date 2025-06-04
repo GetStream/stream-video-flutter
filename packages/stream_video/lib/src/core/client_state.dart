@@ -34,7 +34,7 @@ abstract class ClientState {
 
   Future<void> setOutgoingCall(Call? call);
 
-  Future<void> setActiveCall(Call call);
+  Future<void> setActiveCall(Call? call);
   Future<void> removeActiveCall(Call call);
 }
 
@@ -81,7 +81,7 @@ class MutableClientState implements ClientState {
   Call? getActiveCall() {
     if (options.allowMultipleActiveCalls) {
       throw Exception(
-        'Multiple active calls are enabled, use getActiveCalls() instead',
+        'Multiple active calls are enabled, use getActiveCalls instead',
       );
     }
 
