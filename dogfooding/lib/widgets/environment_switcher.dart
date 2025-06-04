@@ -85,6 +85,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
             },
             menuChildren: [
               ...Environment.values
+                  .where((e) => e != Environment.livestream)
                   .map(
                     (env) => MenuItemButton(
                       onPressed: () async {
