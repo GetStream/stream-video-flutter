@@ -28,6 +28,12 @@ enum Environment {
     'pronto.getstream.io',
     baseUrls: ['https://staging.getstream.io'],
   ),
+  livestream(
+    'Livestream',
+    'demo',
+    'pronto.getstream.io',
+    baseUrls: ['https://livestream-react-demo.vercel.app'],
+  ),
   custom(
     'Custom',
     'custom',
@@ -68,14 +74,16 @@ enum Environment {
     );
   }
 
-  String? getJoinUrl({required String callId, String callType = 'default'}) {
+  String? getJoinUrl({required String callId, String? callType}) {
     switch (this) {
       case Environment.pronto:
       case Environment.prontoStaging:
       case Environment.staging:
-        return '${baseUrls.first}/join/$callId?type=$callType';
+        return '${baseUrls.first}/join/$callId?type=${callType ?? 'default'}';
       case Environment.demo:
-        return '${baseUrls.first}/video/demos/join/$callId?type=$callType';
+        return '${baseUrls.first}/video/demos/join/$callId?type=${callType ?? 'default'}';
+      case Environment.livestream:
+        return '${baseUrls.first}/?id=$callId&type=${callType ?? 'livestream'}';
       case Environment.custom:
         return null;
     }

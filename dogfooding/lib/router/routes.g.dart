@@ -10,6 +10,7 @@ List<RouteBase> get $appRoutes => [
       $homeRoute,
       $loginRoute,
       $lobbyRoute,
+      $livestreamRoute,
       $callRoute,
       $callParticipantsRoute,
       $callStatsRoute,
@@ -74,6 +75,33 @@ extension $LobbyRouteExtension on LobbyRoute {
 
   String get location => GoRouteData.$location(
         '/lobby',
+      );
+
+  void go(BuildContext context) => context.go(location, extra: $extra);
+
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: $extra);
+
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
+}
+
+RouteBase get $livestreamRoute => GoRouteData.$route(
+      path: '/livestream',
+      name: 'livestream',
+      factory: $LivestreamRouteExtension._fromState,
+    );
+
+extension $LivestreamRouteExtension on LivestreamRoute {
+  static LivestreamRoute _fromState(GoRouterState state) => LivestreamRoute(
+        $extra: state.extra as String,
+      );
+
+  String get location => GoRouteData.$location(
+        '/livestream',
       );
 
   void go(BuildContext context) => context.go(location, extra: $extra);

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/screens/call_participants_list.dart';
 import 'package:flutter_dogfooding/screens/call_stats_screen.dart';
+import 'package:flutter_dogfooding/screens/livestream_demo_screen.dart';
 
 // 📦 Package imports:
 import 'package:go_router/go_router.dart';
@@ -54,6 +55,19 @@ class LobbyRoute extends GoRouteData {
         ).replace(context);
       },
     );
+  }
+}
+
+@immutable
+@TypedGoRoute<LivestreamRoute>(path: '/livestream', name: 'livestream')
+class LivestreamRoute extends GoRouteData {
+  const LivestreamRoute({required this.$extra});
+
+  final String $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return LivestreamDemoScreen(callId: $extra);
   }
 }
 

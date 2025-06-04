@@ -1,5 +1,6 @@
 // 🎯 Dart imports:
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 // 🐦 Flutter imports:
@@ -436,6 +437,16 @@ class _JoinForm extends StatelessWidget {
       environment = Environment.fromBaseUrl(uri.origin);
     } on StateError catch (_) {
       // no valid environment found
+      return;
+    }
+
+    if (environment == Environment.livestream) {
+      // TODO: handle livestream join
+      // Example: https://livestream-react-demo.vercel.app/?id=6G9bxsMaFbMiGvLWWP85d&type=livestream
+      final callId = uri.queryParameters['id'];
+      if (callId != null) {
+        LivestreamRoute($extra: callId).push(context);
+      }
       return;
     }
 
