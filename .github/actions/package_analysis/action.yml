@@ -24,10 +24,12 @@ runs:
       shell: bash
       run: cd packages/stream_video_flutter/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
 
+    # No tests yet in this package.
     - name: "Stream Video Push Notification Analyze"
       shell: bash
-      run: cd packages/stream_video_push_notification/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
+      run: cd packages/stream_video_push_notification/lib && dart analyze --no-fatal-warnings . # && cd .. && flutter test --exclude-tags golden
 
+    # No tests yet in this package.
     - name: "Stream Video Flutter Screen Sharing Analyze"
       shell: bash
-      run: cd packages/stream_video_screen_sharing/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
+      run: cd packages/stream_video_screen_sharing/lib && dart analyze --no-fatal-warnings . # && cd .. && flutter test --exclude-tags golden
