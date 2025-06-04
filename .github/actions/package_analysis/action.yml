@@ -17,13 +17,17 @@ runs:
     # all supported legacy version.
     # TODO: Treat info and warning as error once all packages solve their issues.
     - name: "Stream Video Analyze"
+      shell: bash
       run: cd packages/stream_video/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
 
     - name: "Stream Video Flutter Analyze"
+      shell: bash
       run: cd packages/stream_video_flutter/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
 
     - name: "Stream Video Push Notification Analyze"
+      shell: bash
       run: cd packages/stream_video_push_notification/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
 
     - name: "Stream Video Flutter Screen Sharing Analyze"
+      shell: bash
       run: cd packages/stream_video_screen_sharing/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
