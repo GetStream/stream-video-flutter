@@ -60,7 +60,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
     }
 
     _streamVideo = streamVideo;
-    
+
     result.fold(success: (data) {
       _call = call;
       if (mounted) {
