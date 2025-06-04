@@ -136,8 +136,6 @@ Future<void> showNotification(
   );
 }
 
-const _tag = 'MyApp';
-
 class MyApp extends StatefulWidget {
   const MyApp({
     super.key,
@@ -182,12 +180,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    Call? activeCall;
-    if (StreamVideo.isInitialized()) {
-      activeCall = StreamVideo.instance.activeCall;
-    }
-    streamLog.i(_tag, () => '[build] activeCall: $activeCall');
-
     final darkAppTheme = StreamVideoTheme.dark();
     final lightAppTheme = StreamVideoTheme.light();
 

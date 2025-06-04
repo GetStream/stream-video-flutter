@@ -91,7 +91,7 @@ class ToggleScreenShareOption extends StatelessWidget {
                 .startScreenSharingNotificationService(call);
           } else {
             await StreamBackgroundService()
-                .stopScreenSharingNotificationService();
+                .stopScreenSharingNotificationService(call.callCid.value);
           }
         }
 
@@ -102,7 +102,7 @@ class ToggleScreenShareOption extends StatelessWidget {
 
         if (CurrentPlatform.isAndroid && result.isFailure) {
           await StreamBackgroundService()
-              .stopScreenSharingNotificationService();
+              .stopScreenSharingNotificationService(call.callCid.value);
         }
       },
     );

@@ -48,7 +48,8 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
     required NotificationPayload payload,
     required ServiceType type,
   }) async {
-    if (await isBackgroundServiceRunning(type) == false) {
+    if (await isBackgroundServiceRunning(type, callCid: payload.callCid) ==
+        false) {
       return await methodChannel.invokeMethod(
         'startBackgroundService',
         {
@@ -65,7 +66,8 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
     required NotificationPayload payload,
     required ServiceType type,
   }) async {
-    if (await isBackgroundServiceRunning(type) == true) {
+    if (await isBackgroundServiceRunning(type, callCid: payload.callCid) ==
+        true) {
       return await methodChannel.invokeMethod(
         'updateBackgroundService',
         {
@@ -79,13 +81,15 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
 
   @override
   Future<bool> stopBackgroundService(
-    ServiceType type,
-  ) async {
-    if (await isBackgroundServiceRunning(type) == true) {
+    ServiceType type, {
+    String? callCid,
+  }) async {
+    if (await isBackgroundServiceRunning(type, callCid: callCid) == true) {
       return await methodChannel.invokeMethod(
         'stopBackgroundService',
         {
           'type': type.name,
+          if (callCid != null) 'callCid': callCid,
         },
       );
     }
@@ -94,12 +98,14 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
 
   @override
   Future<bool> isBackgroundServiceRunning(
-    ServiceType type,
-  ) async {
+    ServiceType type, {
+    String? callCid,
+  }) async {
     return await methodChannel.invokeMethod(
       'isBackgroundServiceRunning',
       {
         'type': type.name,
+        if (callCid != null) 'callCid': callCid,
       },
     );
   }

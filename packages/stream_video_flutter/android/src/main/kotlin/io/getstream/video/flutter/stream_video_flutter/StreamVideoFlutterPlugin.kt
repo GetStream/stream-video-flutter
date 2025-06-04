@@ -111,13 +111,8 @@ class StreamVideoFlutterPlugin: FlutterPlugin, ActivityAware, PluginRegistry.New
   }
 
   private fun onPlatformUiLayerDestroyed() {
-    val callCid = StreamCallService.notificationPayload.callCid
-    if (callCid.isBlank()) {
-      logger.w { "[onPlatformUiLayerDestroyed] rejected (callCid is blank)" }
-      return
-    }
     logger.d { "[onPlatformUiLayerDestroyed] no args" }
-    channel?.invokeMethod("onPlatformUiLayerDestroyed", callCid)
+    channel?.invokeMethod("onPlatformUiLayerDestroyed", "")
   }
 
   private fun handleIntent(intent: Intent?): Boolean {
@@ -125,13 +120,15 @@ class StreamVideoFlutterPlugin: FlutterPlugin, ActivityAware, PluginRegistry.New
       logger.w { "[handleIntent] rejected (invalid action): $intent" }
       return false
     }
-    val callCid = StreamCallService.notificationPayload.callCid
-    if (callCid.isBlank()) {
-      logger.w { "[handleIntent] rejected (callCid is blank)" }
+    
+    val callCid = intent.getStringExtra("callCid")
+    if (callCid.isNullOrBlank()) {
+      logger.w { "[handleIntent] rejected (callCid is blank or missing from intent)" }
       return false
     }
+    
     logger.d { "[handleIntent] intent: $intent" }
-              channel?.invokeMethod("onBackgroundNotificationContentClick", callCid)
+    channel?.invokeMethod("onBackgroundNotificationContentClick", callCid)
     return true
   }
 

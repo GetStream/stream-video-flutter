@@ -276,8 +276,8 @@ class Call {
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
   StreamCallType get type => state.value.callType;
-  bool get isActiveCall =>
-      _streamVideo.state.activeCall.valueOrNull?.callCid == callCid;
+  bool get isActiveCall => _streamVideo.state.activeCalls.value
+      .any((call) => call.callCid == callCid);
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
@@ -541,11 +541,13 @@ class Call {
       await _streamVideo.state.setOutgoingCall(null);
     }
 
-    final activeCall = _streamVideo.state.activeCall.valueOrNull;
-    if (activeCall != null && activeCall.callCid != callCid) {
-      _logger.i(() => '[accept] canceling another active call: $activeCall');
-      await activeCall.leave(reason: DisconnectReason.ended());
-      await _streamVideo.state.setActiveCall(null);
+    if (!_streamVideo.options.allowMultipleActiveCalls) {
+      final activeCall = _streamVideo.activeCall;
+      if (activeCall != null && activeCall.callCid != callCid) {
+        _logger.i(() => '[accept] canceling another active call: $activeCall');
+        await activeCall.leave(reason: DisconnectReason.replaced());
+        await _streamVideo.state.removeActiveCall(activeCall);
+      }
     }
 
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
@@ -614,7 +616,8 @@ class Call {
       return const Result.success(none);
     }
 
-    if (_streamVideo.state.activeCall.valueOrNull?.callCid == callCid) {
+    if (_streamVideo.state.activeCalls.value
+        .any((call) => call.callCid == callCid)) {
       _logger.w(
         () => '[join] rejected (a call with the same cid is in progress)',
       );
@@ -1419,9 +1422,7 @@ class Call {
     await _session?.dispose();
     await dynascaleManager.dispose();
 
-    if (_streamVideo.state.activeCall.valueOrNull?.callCid == callCid) {
-      await _streamVideo.state.setActiveCall(null);
-    }
+    await _streamVideo.state.removeActiveCall(this);
 
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
@@ -2334,7 +2335,7 @@ class Call {
 
       // Set multitasking camera access for iOS
       final multitaskingResult = await setMultitaskingCameraAccessEnabled(
-        enabled && !_streamVideo.muteVideoWhenInBackground,
+        enabled && !_streamVideo.options.muteVideoWhenInBackground,
       );
 
       _stateManager.participantSetCameraEnabled(

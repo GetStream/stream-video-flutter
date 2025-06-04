@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
@@ -73,15 +74,19 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
     _subscriptions.add(
       _idActiveCall,
-      streamVideo.state.activeCall.listen((call) async {
-        _logger.d(() => '[activeCall] Active call changed to ${call?.callCid}');
-        if (activeCall != null && activeCall!.callCid != call?.callCid) {
-          _logger.d(() =>
-              '[activeCall] Stopping previous call: ${activeCall!.callCid}');
-          await endCallByCid(activeCall!.callCid.value);
+      streamVideo.state.activeCalls.listen((calls) async {
+        _logger.d(() =>
+            '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]');
+
+        for (final previousCall in currentActiveCalls) {
+          if (!calls.any((c) => c.callCid == previousCall.callCid)) {
+            _logger.d(() =>
+                '[activeCall] Stopping previous call: ${previousCall.callCid}');
+            await endCallByCid(previousCall.callCid.value);
+          }
         }
 
-        activeCall = call;
+        currentActiveCalls = calls;
       }),
     );
 
@@ -142,9 +147,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
                 '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}');
             if (event.acceptedByUserId != streamVideo.currentUser.id) return;
 
+            final activeCall = streamVideo.activeCalls
+                .firstWhereOrNull((call) => call.callCid == event.callCid);
+
             // End the CallKit call on this device if the call was accepted on another device
-            if (streamVideo.activeCall?.state.value.status
-                is! CallStatusActive) {
+            if (activeCall?.state.value.status is! CallStatusActive) {
               _logger.v(() =>
                   '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}');
               await endCallByCid(event.callCid.toString());
@@ -180,7 +187,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             {
               _logger.d(() =>
                   '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}');
-              final call = activeCall;
+              final call = currentActiveCalls
+                  .firstWhereOrNull((c) => c.state.value.isRingingFlow);
               if (call != null) {
                 call.setMicrophoneEnabled(enabled: !event.isMuted);
               } else {
@@ -220,7 +228,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   final Subscriptions _subscriptions = Subscriptions();
 
-  Call? activeCall;
+  List<Call> currentActiveCalls = [];
 
   @override
   void registerDevice() {

@@ -41,6 +41,7 @@ internal fun Intent.setNotificationAction(
 ): Intent {
     setPackage(packageName)
     putExtra(KEY_CID, action.callCid)
+    putExtra(KEY_TYPE, action.serviceType.name)
     this.action = when (action) {
         is NotificationAction.Accept -> "$packageName.${NotificationAction.Accept.SUFFIX}"
         is NotificationAction.Reject -> "$packageName.${NotificationAction.Reject.SUFFIX}"

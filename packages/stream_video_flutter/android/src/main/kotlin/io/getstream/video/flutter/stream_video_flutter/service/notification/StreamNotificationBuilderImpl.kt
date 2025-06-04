@@ -48,7 +48,7 @@ internal class StreamNotificationBuilderImpl(
     private val context: Context,
     private val scope: CoroutineScope,
     private val type: ServiceType,
-    private val getNotificationId: () -> Int,
+    private val generateNotificationId: (String) -> Int,
     private val onUpdate: (IdentifiedNotification) -> Unit,
 ) : StreamNotificationBuilder {
 
@@ -60,10 +60,6 @@ internal class StreamNotificationBuilderImpl(
         )
     }
 
-    private val defaultTarget = DefaultTarget(getNotificationId, onUpdate)
-
-    private val customTarget = CustomTarget(getNotificationId, onUpdate)
-
     init {
         initNotificationChannel()
     }
@@ -72,31 +68,37 @@ internal class StreamNotificationBuilderImpl(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = getDefaultNotificationChannel(context)
             context.notificationManager.createNotificationChannel(notificationChannel())
-        }
+        } 
     }
 
     override fun build(payload: NotificationPayload): IdentifiedNotification {
-        val notificationId = getNotificationId()
+        val notificationId = generateNotificationId(payload.callCid)
+        val intent = Intent("${context.packageName}.${IdentifiedNotification.ACTION_CALL_SUFFIX}").apply {
+            putExtra("callCid", payload.callCid)
+        }
+        
         val builder = getNotificationBuilder(
             payload = payload,
-            intent = Intent("${context.packageName}.${IdentifiedNotification.ACTION_CALL_SUFFIX}")
+            intent = intent
         )
-
-        return IdentifiedNotification(notificationId, builder.build())
+        
+        val notification = builder.build()
+        val identifiedNotification = IdentifiedNotification(notificationId, notification)
+        
+        return identifiedNotification
     }
 
     private fun getNotificationBuilder(
         payload: NotificationPayload,
         intent: Intent,
     ): NotificationCompat.Builder {
-
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
 
-        val contentIntent =  if(type == ServiceType.call) {
+        val contentIntent = if(type == ServiceType.call) {
             PendingIntent.getActivity(
                     context,
                     0,
@@ -112,7 +114,9 @@ internal class StreamNotificationBuilderImpl(
             )
         }
 
-        return NotificationCompat.Builder(context, getNotificationChannelId()).apply {
+        val channelId = getNotificationChannelId()
+
+        return NotificationCompat.Builder(context, channelId).apply {
             if (payload.options?.useCustomLayout == true) {
                 enrichCustom(payload, contentIntent)
             } else {
@@ -127,7 +131,7 @@ internal class StreamNotificationBuilderImpl(
     ) {
         val contentTitle = payload.options?.content?.title ?: context.applicationName
         val contentText = payload.options?.content?.text
-
+        
         if(type == ServiceType.call) {
             setSmallIcon(R.drawable.stream_video_ic_call)
         } else {
@@ -147,8 +151,13 @@ internal class StreamNotificationBuilderImpl(
         }
 
         priority = NotificationCompat.PRIORITY_MAX
+        
+        val notificationId = generateNotificationId(payload.callCid)
 
-        addAction(actionBuilder.createCancelAction(getNotificationId(), payload.callCid, type))
+        val cancelAction = actionBuilder.createCancelAction(notificationId, payload.callCid, type)
+        addAction(cancelAction)
+
+        val defaultTarget = DefaultTarget(notificationId, onUpdate)
 
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
@@ -158,8 +167,7 @@ internal class StreamNotificationBuilderImpl(
                 .load(avatarUrl)
                 .transform(CircleTransform())
                 .into(defaultTarget(builder = this))
-        }
-
+        } 
     }
 
     private fun NotificationCompat.Builder.enrichCustom(
@@ -180,13 +188,14 @@ internal class StreamNotificationBuilderImpl(
         setSound(null)
 
         priority = NotificationCompat.PRIORITY_MAX
-
+        
+        val useSmallEx = useSmallExLayout()
         val notificationLargeLayout = NotificationLayout(
             context, R.layout.stream_notification_large,
         ).setPayload(payload)
 
         val notificationSmallLayout = NotificationLayout(
-            context, when (useSmallExLayout()) {
+            context, when (useSmallEx) {
                 true -> R.layout.stream_notification_small_ex
                 else -> R.layout.stream_notification_small
             }
@@ -196,6 +205,9 @@ internal class StreamNotificationBuilderImpl(
         setCustomContentView(notificationSmallLayout)
         setCustomBigContentView(notificationLargeLayout)
         setCustomHeadsUpContentView(notificationSmallLayout)
+
+        val notificationId = generateNotificationId(payload.callCid)
+        val customTarget = CustomTarget(notificationId, onUpdate)
 
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
@@ -211,23 +223,28 @@ internal class StreamNotificationBuilderImpl(
                         notificationSmallLayout = notificationSmallLayout
                     )
                 )
-        }
+        } 
     }
 
     private fun getNotificationChannelId(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getDefaultNotificationChannel(context)().id
         } else {
             ""
         }
+
+        return channelId
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getDefaultNotificationChannel(context: Context): (() -> NotificationChannel) {
         return {
+            val channelId = context.getString(R.string.stream_call_notification_channel_id)
+            val channelName = context.getString(R.string.stream_call_notification_channel_name)
+            
             val channel = NotificationChannel(
-                context.getString(R.string.stream_call_notification_channel_id),
-                context.getString(R.string.stream_call_notification_channel_name),
+                channelId,
+                channelName,
                 NotificationManager.IMPORTANCE_HIGH
             )
 
@@ -239,17 +256,20 @@ internal class StreamNotificationBuilderImpl(
     private fun NotificationLayout.setPayload(payload: NotificationPayload): NotificationLayout {
         val contentTitle = payload.options?.content?.title ?: context.applicationName
         val contentText = payload.options?.content?.text
+        
         setContentTitle(contentTitle)
         setContentText(contentText)
 
-        val cancelAction = actionBuilder.createCancelAction(getNotificationId(), payload.callCid, type)
-        cancelAction.actionIntent
+        val notificationId = generateNotificationId(payload.callCid)
+        val cancelAction = actionBuilder.createCancelAction(notificationId, payload.callCid, type)
 
         setCancelButton(cancelAction.title)
         setOnClickPendingIntent(
             R.id.cancelLayout,
             cancelAction.actionIntent
         )
+
+        val customTarget = CustomTarget(notificationId, onUpdate)
 
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
@@ -258,6 +278,7 @@ internal class StreamNotificationBuilderImpl(
                 .transform(CircleTransform())
                 .into(customTarget)
         }
+
         return this
     }
 
