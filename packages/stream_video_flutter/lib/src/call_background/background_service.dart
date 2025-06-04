@@ -64,12 +64,13 @@ class StreamBackgroundService {
     ) async {
       final callContext = _instance._managedCalls[callCid];
       if (callContext == null) {
-        _instance._logger
-            .w(() => '[onContentClick] no managed call for callCid: $callCid');
+        _instance._logger.w(() =>
+            '<$callCid> [onNotificationContentClick] no managed call for callCid');
         return;
       }
 
-      _instance._logger.d(() => '[onContentClick] callCid: $callCid');
+      _instance._logger
+          .d(() => '<$callCid> [onNotificationContentClick] handling click');
       await onNotificationClick?.call(callContext.call);
     });
 
@@ -80,14 +81,14 @@ class StreamBackgroundService {
     ) async {
       final callContext = _instance._managedCalls[callCid];
       if (callContext == null) {
-        _instance._logger
-            .w(() => '[onButtonClick] no managed call for callCid: $callCid');
+        _instance._logger.w(() =>
+            '<$callCid> [onNotificationButtonClick] no managed call for callCid');
         return;
       }
 
       _instance._logger.d(
         () =>
-            '[onButtonClick] btn: $btn, callCid: $callCid, serviceType: $serviceType',
+            '<$callCid> [onNotificationButtonClick] btn: $btn, serviceType: $serviceType',
       );
 
       if (btn == _btnCancel) {
@@ -114,12 +115,14 @@ class StreamBackgroundService {
       final context = _instance._managedCalls[callCid];
       if (context == null) {
         _instance._logger.w(
-          () => '[onUiLayerDestroyed] no managed call for callCid: $callCid',
+          () =>
+              '<$callCid> [onPlatformUiLayerDestroyed] no managed call for callCid',
         );
         return;
       }
 
-      _instance._logger.d(() => '[onUiLayerDestroyed] callCid: $callCid');
+      _instance._logger.d(() =>
+          '<$callCid> [onPlatformUiLayerDestroyed] handling UI layer destroyed');
       await onPlatformUiLayerDestroyed?.call(context.call);
     });
 
@@ -153,7 +156,8 @@ class StreamBackgroundService {
       // This ensures cleanup if the currentCalls list becomes empty.
       if (currentCalls.isEmpty && _instance._managedCalls.isNotEmpty) {
         _instance._logger.i(
-          () => 'All calls ended, ensuring all managed services are stopped.',
+          () =>
+              '[listenActiveCalls] All calls ended, ensuring all managed services are stopped.',
         );
         final cidsToStop = _instance._managedCalls.keys.toList();
         for (final cid in cidsToStop) {
@@ -169,14 +173,14 @@ class StreamBackgroundService {
   ) async {
     final callCid = call.callCid.value;
 
-    _logger.d(() => '[$callCid] Starting management.');
+    _logger.d(() => '<$callCid> [_startManagingCall] Starting management.');
     try {
       // TODO: Why do we need to check this?
       final micPermissionGranted = await Permission.microphone.isGranted;
       if (!micPermissionGranted) {
         _logger.d(
           () =>
-              '[$callCid] cannot start service, microphone permission not granted',
+              '<$callCid> [_startManagingCall] cannot start service, microphone permission not granted',
         );
         return;
       }
@@ -192,12 +196,14 @@ class StreamBackgroundService {
         ServiceType.call,
       );
 
-      _logger.d(() => '[$callCid] call service start result: $result');
+      _logger.d(() =>
+          '<$callCid> [_startManagingCall] call service start result: $result');
 
       if (result) {
         // ignore: cancel_subscriptions
         final stateSubscription = call.state.listen((CallState value) async {
-          _logger.v(() => '[$callCid] state update: ${value.status}');
+          _logger.v(() =>
+              '<$callCid> [_startManagingCall] state update: ${value.status}');
 
           if (value.status is CallStatusDisconnected) {
             return;
@@ -216,10 +222,12 @@ class StreamBackgroundService {
               ServiceType.call,
             );
             _logger.v(
-              () => '[$callCid] call service update result: $updateResult',
+              () =>
+                  '<$callCid> [_startManagingCall] call service update result: $updateResult',
             );
           } catch (e, stk) {
-            _logger.e(() => '[$callCid] call service update failed: $e; $stk');
+            _logger.e(() =>
+                '<$callCid> [_startManagingCall] call service update failed: $e; $stk');
           }
         });
 
@@ -229,15 +237,16 @@ class StreamBackgroundService {
         );
       }
     } catch (e, stk) {
-      _logger.e(() => '[$callCid] _startManagingCall failed: $e, stk: $stk');
+      _logger.e(() => '<$callCid> [_startManagingCall] failed: $e, stk: $stk');
     }
   }
 
   Future<void> _stopManagingCall(String callCid) async {
-    _logger.d(() => '[$callCid] Stopping management.');
+    _logger.d(() => '<$callCid> [_stopManagingCall] Stopping management.');
     final context = _managedCalls.remove(callCid);
     if (context == null) {
-      _logger.w(() => '[$callCid] was not in managed calls map during stop.');
+      _logger.w(() =>
+          '<$callCid> [_stopManagingCall] was not in managed calls map during stop.');
       return;
     }
 
@@ -249,7 +258,8 @@ class StreamBackgroundService {
         callCid: callCid,
       );
 
-      _logger.d(() => '[$callCid] call service stop result: $callResult');
+      _logger.d(() =>
+          '<$callCid> [_stopManagingCall] call service stop result: $callResult');
 
       // If a call ends, we might also want to stop its associated screen share service.
       final screenShareStopResult =
@@ -260,10 +270,10 @@ class StreamBackgroundService {
 
       _logger.d(
         () =>
-            '[$callCid] screen sharing service stop attempt result: $screenShareStopResult (attempted as part of call cleanup)',
+            '<$callCid> [_stopManagingCall] screen sharing service stop attempt result: $screenShareStopResult (attempted as part of call cleanup)',
       );
     } catch (e, stk) {
-      _logger.e(() => '[$callCid] _stopManagingCall failed: $e, stk: $stk');
+      _logger.e(() => '<$callCid> [_stopManagingCall] failed: $e, stk: $stk');
     }
   }
 
@@ -271,7 +281,8 @@ class StreamBackgroundService {
   Future<void> startScreenSharingNotificationService(Call call) async {
     final callCid = call.callCid.value;
 
-    _logger.d(() => '[$callCid] Starting screen sharing service.');
+    _logger.d(() =>
+        '<$callCid> [startScreenSharingNotificationService] Starting screen sharing service.');
 
     final options =
         (_screenShareNotificationOptionsBuilder ?? _screenShareDefaultOptions)
@@ -289,7 +300,8 @@ class StreamBackgroundService {
   }
 
   Future<void> stopScreenSharingNotificationService(String callCid) async {
-    _logger.d(() => '[$callCid] Stopping screen sharing service.');
+    _logger.d(() =>
+        '<$callCid> [stopScreenSharingNotificationService] Stopping screen sharing service.');
 
     await StreamVideoFlutterBackground.stopService(
       ServiceType.screenSharing,
@@ -315,12 +327,10 @@ NotificationOptions _callDefaultOptions(Call call) {
 }
 
 NotificationOptions _screenShareDefaultOptions(Call call) {
-  final options = NotificationOptions(
+  return NotificationOptions(
     content: NotificationContent(
       title: 'You are screen sharing (${call.callCid.id})',
       text: 'Tap to return to the call.',
     ),
   );
-
-  return options;
 }

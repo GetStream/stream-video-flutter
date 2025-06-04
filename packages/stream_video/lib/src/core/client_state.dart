@@ -32,9 +32,16 @@ abstract class ClientState {
   /// Emits when a call was created by current user with ringing set as True.
   StateEmitter<Call?> get outgoingCall;
 
+  /// Sets the call as a current outgoing call.
   Future<void> setOutgoingCall(Call? call);
 
+  /// Set the active call. Will end the currently active call if `options.allowMultipleActiveCalls` is `false.
+  /// When `allowMultipleActiveCalls` is `true` calling this with `call: null` will have no effect.
+  /// Otherwise the call is added to the list of active calls.
   Future<void> setActiveCall(Call? call);
+
+  /// Removes the call from the list of active calls.
+  /// It won't `leave` the call, just removes it from the list.
   Future<void> removeActiveCall(Call call);
 }
 
