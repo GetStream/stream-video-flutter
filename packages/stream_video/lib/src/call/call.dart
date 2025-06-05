@@ -101,6 +101,7 @@ class Call {
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
   }) {
     streamLog.i(_tag, () => '<factory> callCid: $callCid');
     return Call._internal(
@@ -111,6 +112,7 @@ class Call {
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
+      rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
     );
   }
 
@@ -125,6 +127,7 @@ class Call {
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
     return Call._internal(
@@ -135,6 +138,7 @@ class Call {
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
+      rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
     ).also(
       (it) => it._stateManager.updateFromCallCreatedData(
         data,
@@ -154,6 +158,7 @@ class Call {
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
     return Call._internal(
@@ -164,6 +169,7 @@ class Call {
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
+      rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
     ).also((it) => it._stateManager.lifecycleCallRinging(data));
   }
 
@@ -176,6 +182,7 @@ class Call {
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
     CallCredentials? credentials,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
   }) {
     final finalCallPreferences = preferences ?? DefaultCallPreferences();
     final finalRetryPolicy = retryPolicy ?? const RetryPolicy();
@@ -204,6 +211,8 @@ class Call {
       retryPolicy: finalRetryPolicy,
       sdpPolicy: finalSdpPolicy,
       permissionManager: permissionManager,
+      rtcMediaDeviceNotifier:
+          rtcMediaDeviceNotifier ?? RtcMediaDeviceNotifier.instance,
     );
   }
 
@@ -215,6 +224,7 @@ class Call {
     required this.networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
+    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.callState.callCid,
@@ -228,6 +238,7 @@ class Call {
         _streamVideo = streamVideo,
         _retryPolicy = retryPolicy,
         _credentials = credentials,
+        _rtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
         dynascaleManager = DynascaleManager(stateManager: stateManager) {
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
 
@@ -252,6 +263,7 @@ class Call {
   final PermissionsManager _permissionsManager;
   final DynascaleManager dynascaleManager;
   final InternetConnection networkMonitor;
+  final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
 
   CallCredentials? _credentials;
   CallSession? _session;
@@ -1458,9 +1470,7 @@ class Call {
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    // Apply defaul audio output and input devices
-    final mediaDevicesResult =
-        await RtcMediaDeviceNotifier.instance.enumerateDevices();
+    final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices();
 
     final mediaDevices = mediaDevicesResult.fold(
       success: (success) => success.data,
@@ -1477,22 +1487,53 @@ class Call {
         .where((d) => d.kind == RtcMediaDeviceKind.videoInput)
         .toList();
 
-    var defaultAudioOutput = audioOutputs.firstWhereOrNull((device) {
-      if (settings.audio.defaultDevice ==
-          AudioSettingsRequestDefaultDeviceEnum.speaker) {
-        return device.id.equalsIgnoreCase(
-          AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+    /// Determines if the speaker should be enabled based on a priority hierarchy of
+    /// settings.
+    ///
+    /// The priority order is as follows:
+    /// 1. If video camera is set to be on by default, speaker is enabled
+    /// 2. If audio speaker is set to be on by default, speaker is enabled
+    /// 3. If the default audio device is set to speaker, speaker is enabled
+    final speakerOnWithSettingsPriority = settings.video.cameraDefaultOn ||
+        settings.audio.speakerDefaultOn ||
+        settings.audio.defaultDevice ==
+            AudioSettingsRequestDefaultDeviceEnum.speaker;
+
+    // Determine default audio output with priority:
+    // 1. External device (if available)
+    var defaultAudioOutput =
+        audioOutputs.firstWhereOrNull((device) => device.isExternal);
+
+    if (defaultAudioOutput == null) {
+      // 2. Speaker (if settings indicate it should be used)
+      if (speakerOnWithSettingsPriority) {
+        defaultAudioOutput = audioOutputs.firstWhereOrNull(
+          (device) => device.id.equalsIgnoreCase(
+            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+          ),
+        );
+      } else {
+        // 3. First non-speaker device
+        defaultAudioOutput = audioOutputs.firstWhereOrNull(
+          (device) => !device.id.equalsIgnoreCase(
+            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+          ),
         );
       }
-
-      return !device.id.equalsIgnoreCase(
-        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-      );
-    });
-
-    if (defaultAudioOutput == null && audioOutputs.isNotEmpty) {
-      defaultAudioOutput = audioOutputs.first;
     }
+
+    final defaultAudioOutputIsExternal =
+        defaultAudioOutput?.isExternal ?? false;
+
+    // iOS doesn't allow implicitly setting the default audio output,
+    // if external device is connected we trust the OS to set it as default.
+    if (defaultAudioOutputIsExternal && CurrentPlatform.isIos) {
+      defaultAudioOutput = null;
+    }
+
+    // Match the default audio input with the default audio output if possible
+    final defaultAudioInput = audioInputs
+        .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label);
 
     var defaultVideoInput = videoInputs.firstWhereOrNull(
       (device) => device.label
@@ -1500,14 +1541,10 @@ class Call {
           .contains(settings.video.cameraFacing.value.toLowerCase()),
     );
 
+    // If it's not front or back then take one of the external cameras
     if (defaultVideoInput == null && videoInputs.length > 2) {
-      // If it's not front or back then take one of the external cameras
       defaultVideoInput = videoInputs.last;
     }
-
-    final defaultAudioInput = audioInputs
-            .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
-        audioInputs.firstOrNull;
 
     _connectOptions = connectOptions.copyWith(
       camera: TrackOption.fromSetting(
@@ -1523,7 +1560,8 @@ class Call {
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
           : FacingMode.environment,
-      speakerDefaultOn: settings.audio.speakerDefaultOn,
+      speakerDefaultOn:
+          !defaultAudioOutputIsExternal && speakerOnWithSettingsPriority,
       targetResolution: settings.video.targetResolution,
       screenShareTargetResolution: settings.screenShare.targetResolution,
     );
@@ -2203,7 +2241,7 @@ class Call {
     await result.fold(
       success: (success) async {
         final mediaDevicesResult =
-            await RtcMediaDeviceNotifier.instance.enumerateDevices();
+            await _rtcMediaDeviceNotifier.enumerateDevices();
 
         final mediaDevices = mediaDevicesResult.fold(
           success: (success) => success.data,
@@ -2385,10 +2423,6 @@ class Call {
       _connectOptions = _connectOptions.copyWith(
         microphone: enabled ? TrackOption.enabled() : TrackOption.disabled(),
       );
-
-      if (_connectOptions.audioOutputDevice != null) {
-        await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
-      }
     }
 
     return result.map((_) => none);

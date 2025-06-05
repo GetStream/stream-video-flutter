@@ -10,7 +10,8 @@ import 'package:flutter_dogfooding/widgets/settings_menu/closed_captions_menu_it
 import 'package:flutter_dogfooding/widgets/settings_menu/noise_cancellation_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu_item.dart';
 import 'package:flutter_dogfooding/widgets/settings_menu/standard_action_menu_item.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide CurrentPlatform;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../utils/feedback_dialog.dart';
@@ -206,6 +207,11 @@ class _SettingsMenuState extends State<SettingsMenu> {
         )
       ] else
         ChooseAudioOutputMenuItem(onPressed: () {
+          if (CurrentPlatform.isIos) {
+            _deviceNotifier.triggeriOSAudioRouteSelectionUI();
+            return;
+          }
+
           setState(() {
             showAudioOutputs = true;
           });
