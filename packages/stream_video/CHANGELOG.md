@@ -1,3 +1,12 @@
+## 0.9.5
+
+✅ Added
+* Introduced `allowMultipleActiveCalls` option in `StreamVideoOptions` enabling support for concurrent active calls. See the [documentation](https://getstream.io/video/docs/flutter/ui-cookbook/multiple-simultaneous-calls-support/) for details.
+
+🐞 Fixed
+* Enhanced permission update handling to only process events targeting the current user.
+* Improved audio output device selection to prioritize external audio devices during call connection.
+
 ## 0.9.4
 
 * Sync version with `stream_video_flutter` 0.9.4

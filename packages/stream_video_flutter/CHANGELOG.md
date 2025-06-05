@@ -1,3 +1,13 @@
+## 0.9.5
+
+✅ Added
+* Introduced `extendBody` parameter in `StreamCallContent` that extends the participants view to the bottom edge of the scaffold when enabled.
+* Introduced `allowMultipleActiveCalls` option in `StreamVideoOptions` enabling support for concurrent active calls. See the [documentation](https://getstream.io/video/docs/flutter/ui-cookbook/multiple-simultaneous-calls-support/) for details.
+
+🐞 Fixed
+* Enhanced permission update handling to only process events targeting the current user.
+* Improved audio output device selection to prioritize external audio devices during call connection.
+
 ## 0.9.4
 
 🐞 Fixed

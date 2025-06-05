@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'stream_video_flutter'
-  s.version          = '0.9.4'
+  s.version          = '0.9.5'
   s.summary          = 'Official Flutter Plugin for Stream Video.'
   s.description      = <<-DESC
 Official Flutter Plugin for Stream Video..
