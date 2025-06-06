@@ -48,7 +48,7 @@ class FlipCameraOption extends StatelessWidget {
     return CallStreamBuilder(
       call: call,
       selector: (state) => state.localParticipant?.videoTrack,
-      builder: builder,
+      builder: (_, trackState) => builder(trackState),
     );
   }
 }

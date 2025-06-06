@@ -41,6 +41,7 @@ class StreamCallParticipants extends StatefulWidget {
   StreamCallParticipants({
     super.key,
     required this.call,
+    @Deprecated('Recommend not to use this parameter anymore.')
     this.participants,
     this.filter = _defaultFilter,
     Sort<CallParticipantState>? sort,

@@ -200,7 +200,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       call: widget.call,
       selector: (state) =>
           state.ringingMembers.map((e) => e.toUserInfo()).toList(),
-      builder: builder,
+      builder: (_, members) => builder(members),
     );
   }
 

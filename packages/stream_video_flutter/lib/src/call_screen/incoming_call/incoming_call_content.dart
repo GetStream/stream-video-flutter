@@ -175,7 +175,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       call: widget.call,
       selector: (state) =>
           state.ringingMembers.map((e) => e.toUserInfo()).toList(),
-      builder: builder,
+      builder: (_, members) => builder(members),
     );
   }
 

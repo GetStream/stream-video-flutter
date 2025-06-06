@@ -17,14 +17,14 @@ class CallStreamBuilder<T> extends StatelessWidget {
 
   final Call call;
   final CallStateSelector<T> selector;
-  final Widget Function(T data) builder;
+  final Widget Function(BuildContext context, T data) builder;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: call.partialState(selector),
       initialData: selector(call.state.value),
-      builder: (context, snapshot) => builder(snapshot.data as T),
+      builder: (context, snapshot) => builder(context, snapshot.data as T),
     );
   }
 }

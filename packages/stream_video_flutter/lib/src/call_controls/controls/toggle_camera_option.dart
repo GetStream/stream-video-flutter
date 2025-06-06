@@ -9,7 +9,7 @@ class ToggleCameraOption extends StatelessWidget {
   const ToggleCameraOption({
     super.key,
     required this.call,
-    this.localParticipant,
+    @Deprecated('Should not be used anymore.') this.localParticipant,
     this.enabledCameraIcon = Icons.videocam_rounded,
     this.disabledCameraIcon = Icons.videocam_off_rounded,
     this.enabledCameraIconColor,
@@ -22,6 +22,7 @@ class ToggleCameraOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
+  @Deprecated('Should not be used anymore.')
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.
@@ -57,13 +58,13 @@ class ToggleCameraOption extends StatelessWidget {
       );
     }
 
-    if(localParticipant != null) {
+    if (localParticipant != null) {
       return builder(localParticipant!.isVideoEnabled);
     }
     return CallStreamBuilder(
       call: call,
       selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
-      builder: builder,
+      builder: (_, enabled) => builder(enabled),
     );
   }
 }

@@ -9,7 +9,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
   const ToggleMicrophoneOption({
     super.key,
     required this.call,
-    this.localParticipant,
+    @Deprecated('Should not be used anymore.') this.localParticipant,
     this.enabledMicrophoneIcon = Icons.mic_rounded,
     this.disabledMicrophoneIcon = Icons.mic_off_rounded,
     this.enabledMicrophoneIconColor,
@@ -22,6 +22,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
+  @Deprecated('Should not be used anymore.')
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
@@ -66,7 +67,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
     return CallStreamBuilder(
       call: call,
       selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
-      builder: builder,
+      builder: (_, enabled) => builder(enabled),
     );
   }
 }

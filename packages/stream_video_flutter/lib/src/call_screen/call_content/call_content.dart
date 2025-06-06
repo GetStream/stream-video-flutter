@@ -38,7 +38,7 @@ class StreamCallContent extends StatefulWidget {
   const StreamCallContent({
     super.key,
     required this.call,
-    this.callState,
+    @Deprecated('Should not be used anymore.') this.callState,
     this.onBackPressed,
     this.onLeaveCallTap,
     @Deprecated('Use callAppBarWidgetBuilder instead.') this.callAppBarBuilder,
@@ -58,6 +58,7 @@ class StreamCallContent extends StatefulWidget {
   final Call call;
 
   /// Holds information about the call.
+  @Deprecated('Should not be used anymore.')
   final CallState? callState;
 
   /// The action to perform when the back button is pressed.
@@ -341,7 +342,7 @@ class _StreamCallContentState extends State<StreamCallContent>
       bottomNavigationBar: CallStreamBuilder(
         call: call,
         selector: (state) => state.localParticipant,
-        builder: (localParticipant) => localParticipant != null
+        builder: (_, localParticipant) => localParticipant != null
             ? widget.callControlsWidgetBuilder?.call(context, call) ??
                 widget.callControlsBuilder
                     ?.call(context, call, _callState ?? call.state.value) ??
