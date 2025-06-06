@@ -33,6 +33,18 @@ class CallStateNotifier extends StateNotifier<CallState>
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
 
+  Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
+    return callStateStream.valueStream
+        .distinct((previous, current) {
+          final previousSelection = selector(previous);
+          final currentSelection = selector(current);
+          return identical(previousSelection, currentSelection) ||
+              previousSelection == currentSelection;
+        })
+        .map(selector)
+        .asBroadcastStream();
+  }
+
   Stream<Duration> get durationStream =>
       _durationTimerController.stream.distinct();
 

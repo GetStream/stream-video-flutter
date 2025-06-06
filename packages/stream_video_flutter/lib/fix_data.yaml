@@ -1,0 +1,194 @@
+# Docs on data driven fixes: https://github.com/flutter/flutter/blob/master/docs/contributing/Data-driven-Fixes.md
+
+version: 1
+transforms:
+#region Partial state updates
+
+  #region StreamCallContainer
+  - title: 'replace callContentBuilder with callContentWidgetBuilder in StreamCallContainer'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContainer'
+    oneOf:
+      - if: "callContentWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'callContentBuilder'
+            newName: 'callContentWidgetBuilder'
+      - if: "callContentWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'callContentBuilder'
+    variables:
+      callContentWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[callContentWidgetBuilder]'
+  - title: 'replace incomingCallBuilder with incomingCallWidgetBuilder in StreamCallContainer'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContainer'
+    oneOf:
+      - if: "incomingCallWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'incomingCallBuilder'
+            newName: 'incomingCallWidgetBuilder'
+      - if: "incomingCallWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'incomingCallBuilder'
+    variables:
+      incomingCallWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[incomingCallWidgetBuilder]'
+  - title: 'replace outgoingCallBuilder with outgoingCallWidgetBuilder in StreamCallContainer'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContainer'
+    oneOf:
+      - if: "outgoingCallWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'outgoingCallBuilder'
+            newName: 'outgoingCallWidgetBuilder'
+      - if: "outgoingCallWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'outgoingCallBuilder'
+    variables:
+      outgoingCallWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[outgoingCallWidgetBuilder]'
+  #endregion StreamCallContainer
+
+  #region StreamCallContent
+  - title: 'remove callState from StreamCallContent'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContent'
+    changes:
+      - kind: 'removeParameter'
+        name: 'callState'
+
+  - title: 'replace callAppBarBuilder with callAppBarWidgetBuilder in StreamCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContent'
+    oneOf:
+      - if: "callAppBarWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'callAppBarBuilder'
+            newName: 'callAppBarWidgetBuilder'
+      - if: "callAppBarWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'callAppBarBuilder'
+    variables:
+      callAppBarWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[callAppBarWidgetBuilder]'
+
+  - title: 'replace callParticipantsBuilder with callParticipantsWidgetBuilder in StreamCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContent'
+    oneOf:
+      - if: "callParticipantsWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'callParticipantsBuilder'
+            newName: 'callParticipantsWidgetBuilder'
+      - if: "callParticipantsWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'callParticipantsBuilder'
+    variables:
+      callParticipantsWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[callParticipantsWidgetBuilder]'
+
+  - title: 'replace callControlsBuilder with callControlsWidgetBuilder in StreamCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallContent'
+    oneOf:
+      - if: "callControlsWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'callControlsBuilder'
+            newName: 'callControlsWidgetBuilder'
+      - if: "callControlsWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'callControlsBuilder'
+    variables:
+      callControlsWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[callControlsWidgetBuilder]'
+  #endregion StreamCallContent
+
+  #region StreamCallParticipants
+  - title: 'remove participants from StreamCallParticipants'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamCallParticipants'
+    changes:
+      - kind: 'removeParameter'
+        name: 'participants'
+  #endregion StreamCallParticipants
+
+  #region StreamCallControls
+  - title: 'remove localParticipant from ToggleScreenShareOption'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'ToggleScreenShareOption'
+    changes:
+      - kind: 'removeParameter'
+        name: 'localParticipant'
+
+  - title: 'remove localParticipant from ToggleMicrophoneOption'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'ToggleMicrophoneOption'
+    changes:
+      - kind: 'removeParameter'
+        name: 'localParticipant'
+
+  - title: 'remove localParticipant from ToggleCameraOption'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'ToggleCameraOption'
+    changes:
+      - kind: 'removeParameter'
+        name: 'localParticipant'
+  #endregion StreamCallControls
+#endregion

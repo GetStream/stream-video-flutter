@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values, avoid_implementing_value_types
+// ignore_for_file: avoid_redundant_argument_values, avoid_implementing_value_types, deprecated_member_use_from_same_package
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
