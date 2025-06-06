@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../call_container.dart';
+
 typedef CallPictureInPictureBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -31,11 +33,17 @@ class PictureInPictureConfiguration {
 
 class AndroidPictureInPictureConfiguration {
   const AndroidPictureInPictureConfiguration({
+    @Deprecated('Use callPictureInPictureWidgetBuilder instead.')
     this.callPictureInPictureBuilder,
+    this.callPictureInPictureWidgetBuilder,
   });
 
   /// Builder used to create a custom picture in picture mode. (available only on Android)
+  @Deprecated('Use callPictureInPictureWidgetBuilder instead.')
   final CallPictureInPictureBuilder? callPictureInPictureBuilder;
+
+  /// Builder used to create a custom picture in picture mode. (available only on Android)
+  final CallWidgetBuilder? callPictureInPictureWidgetBuilder;
 }
 
 /// Configuration options for enabling Picture-in-Picture (PiP) mode on iOS.

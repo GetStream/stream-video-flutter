@@ -21,7 +21,7 @@ class StreamCallControls extends StatelessWidget {
   /// Builds a call controls bar with the default set of call control options.
   factory StreamCallControls.withDefaultOptions({
     required Call call,
-    required CallParticipantState localParticipant,
+    CallParticipantState? localParticipant,
     Color? backgroundColor,
     double? elevation,
     double? spacing,

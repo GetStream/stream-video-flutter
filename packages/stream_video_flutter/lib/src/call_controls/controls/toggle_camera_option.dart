@@ -9,7 +9,7 @@ class ToggleCameraOption extends StatelessWidget {
   const ToggleCameraOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    this.localParticipant,
     this.enabledCameraIcon = Icons.videocam_rounded,
     this.disabledCameraIcon = Icons.videocam_off_rounded,
     this.enabledCameraIconColor,
@@ -22,7 +22,7 @@ class ToggleCameraOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.
   final IconData enabledCameraIcon;
@@ -44,17 +44,26 @@ class ToggleCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = localParticipant.isVideoEnabled;
+    Widget builder(bool enabled) {
+      return CallControlOption(
+        icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
+        iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
+        backgroundColor: enabled
+            ? enabledCameraBackgroundColor
+            : disabledCameraBackgroundColor,
+        onPressed: () {
+          call.setCameraEnabled(enabled: !enabled);
+        },
+      );
+    }
 
-    return CallControlOption(
-      icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
-      iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
-      backgroundColor: enabled
-          ? enabledCameraBackgroundColor
-          : disabledCameraBackgroundColor,
-      onPressed: () {
-        call.setCameraEnabled(enabled: !enabled);
-      },
+    if(localParticipant != null) {
+      return builder(localParticipant!.isVideoEnabled);
+    }
+    return CallStreamBuilder(
+      call: call,
+      selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
+      builder: builder,
     );
   }
 }

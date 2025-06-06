@@ -9,7 +9,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
   const ToggleMicrophoneOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    this.localParticipant,
     this.enabledMicrophoneIcon = Icons.mic_rounded,
     this.disabledMicrophoneIcon = Icons.mic_off_rounded,
     this.enabledMicrophoneIconColor,
@@ -22,7 +22,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
   final IconData enabledMicrophoneIcon;
@@ -44,19 +44,29 @@ class ToggleMicrophoneOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = localParticipant.isAudioEnabled;
+    Widget builder(bool enabled) {
+      return CallControlOption(
+        icon: enabled
+            ? Icon(enabledMicrophoneIcon)
+            : Icon(disabledMicrophoneIcon),
+        iconColor:
+            enabled ? enabledMicrophoneIconColor : disabledMicrophoneIconColor,
+        backgroundColor: enabled
+            ? enabledMicrophoneBackgroundColor
+            : disabledMicrophoneBackgroundColor,
+        onPressed: () {
+          call.setMicrophoneEnabled(enabled: !enabled);
+        },
+      );
+    }
 
-    return CallControlOption(
-      icon:
-          enabled ? Icon(enabledMicrophoneIcon) : Icon(disabledMicrophoneIcon),
-      iconColor:
-          enabled ? enabledMicrophoneIconColor : disabledMicrophoneIconColor,
-      backgroundColor: enabled
-          ? enabledMicrophoneBackgroundColor
-          : disabledMicrophoneBackgroundColor,
-      onPressed: () {
-        call.setMicrophoneEnabled(enabled: !enabled);
-      },
+    if (localParticipant != null) {
+      return builder(localParticipant!.isAudioEnabled);
+    }
+    return CallStreamBuilder(
+      call: call,
+      selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
+      builder: builder,
     );
   }
 }

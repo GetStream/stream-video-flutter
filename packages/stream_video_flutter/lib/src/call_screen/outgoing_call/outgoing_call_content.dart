@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -20,7 +22,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
   const StreamOutgoingCallContent({
     super.key,
     required this.call,
-    required this.callState,
+    this.callState,
     this.onCancelCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
@@ -29,16 +31,22 @@ class StreamOutgoingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
+    @Deprecated('Use callBackgroundWidgetBuilder instead.')
     this.callBackgroundBuilder,
+    this.callBackgroundWidgetBuilder,
+    @Deprecated('Use participantsAvatarWidgetBuilder instead.')
     this.participantsAvatarBuilder,
+    this.participantsAvatarWidgetBuilder,
+    @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
     this.participantsDisplayNameBuilder,
+    this.participantsDisplayNameWidgetBuilder,
   });
 
   /// Represents a call.
   final Call call;
 
   /// Holds information about the call.
-  final CallState callState;
+  final CallState? callState;
 
   /// The action to perform when the cancel call button is tapped.
   final VoidCallback? onCancelCallTap;
@@ -65,15 +73,24 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final TextStyle? callingLabelTextStyle;
 
   /// Builder used to create a custom widget for participants avatars.
+  @Deprecated('Use participantsAvatarWidgetBuilder instead.')
   final ParticipantsAvatarBuilder? participantsAvatarBuilder;
 
+  final CallWidgetBuilder? participantsAvatarWidgetBuilder;
+
   /// Builder used to create a custom widget for participants display names.
+  @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
+
+  final CallWidgetBuilder? participantsDisplayNameWidgetBuilder;
 
   /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
   /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
+  @Deprecated('Use callBackgroundWidgetBuilder instead.')
   final OutgoingCallBackground? callBackgroundBuilder;
+
+  final CallWidgetBuilder? callBackgroundWidgetBuilder;
 
   @override
   State<StreamOutgoingCallContent> createState() =>
@@ -99,67 +116,92 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
-    final participants =
-        widget.callState.ringingMembers.map((e) => e.toUserInfo()).toList();
-
-    final child = Material(
-      color: Colors.transparent,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          widget.participantsAvatarBuilder?.call(
-                context,
-                widget.call,
-                widget.callState,
-                participants,
-              ) ??
-              ParticipantAvatars(
-                participants: participants,
-                singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-                multipleParticipantAvatarTheme: multipleParticipantAvatarTheme,
-              ),
-          widget.participantsDisplayNameBuilder?.call(
-                context,
-                widget.call,
-                widget.callState,
-                participants,
-              ) ??
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-                child: CallingParticipants(
+    Widget builder(List<UserInfo> participants) {
+      final child = Material(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            widget.participantsAvatarWidgetBuilder?.call(
+                  context,
+                  widget.call,
+                ) ??
+                widget.participantsAvatarBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState ?? widget.call.state.value,
+                  participants,
+                ) ??
+                ParticipantAvatars(
                   participants: participants,
-                  singleParticipantTextStyle: singleParticipantTextStyle,
-                  multipleParticipantTextStyle: multipleParticipantTextStyle,
+                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
+                  multipleParticipantAvatarTheme:
+                      multipleParticipantAvatarTheme,
                 ),
-              ),
-          Text(
-            'Calling…',
-            style: callingLabelTextStyle,
-          ),
-          const Spacer(),
-          OutgoingCallControls(
-            isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-            isCameraEnabled: connectOptions.camera.isEnabled,
-            onCancelCallTap: () => _onCancelCallTap(context),
-            onMicrophoneTap: () => _onMicrophoneTap(context),
-            onCameraTap: () => _onCameraTap(context),
-          ),
-        ],
-      ),
-    );
+            widget.participantsDisplayNameWidgetBuilder?.call(
+                  context,
+                  widget.call,
+                ) ??
+                widget.participantsDisplayNameBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState ?? widget.call.state.value,
+                  participants,
+                ) ??
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
+                  child: CallingParticipants(
+                    participants: participants,
+                    singleParticipantTextStyle: singleParticipantTextStyle,
+                    multipleParticipantTextStyle: multipleParticipantTextStyle,
+                  ),
+                ),
+            Text(
+              'Calling…',
+              style: callingLabelTextStyle,
+            ),
+            const Spacer(),
+            OutgoingCallControls(
+              isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+              isCameraEnabled: connectOptions.camera.isEnabled,
+              onCancelCallTap: () => _onCancelCallTap(context),
+              onMicrophoneTap: () => _onMicrophoneTap(context),
+              onCameraTap: () => _onCameraTap(context),
+            ),
+          ],
+        ),
+      );
 
-    return widget.callBackgroundBuilder?.call(
-          widget.call,
-          widget.callState,
-          participants,
-          child,
-        ) ??
-        CallBackground(
-          participants: participants,
-          child: child,
-        );
+      return widget.callBackgroundWidgetBuilder?.call(
+            context,
+            widget.call,
+          ) ??
+          widget.callBackgroundBuilder?.call(
+            widget.call,
+            widget.callState ?? widget.call.state.value,
+            participants,
+            child,
+          ) ??
+          CallBackground(
+            participants: participants,
+            child: child,
+          );
+    }
+
+    if (widget.callState != null) {
+      return builder(
+        widget.callState!.ringingMembers.map((e) => e.toUserInfo()).toList(),
+      );
+    }
+
+    return CallStreamBuilder(
+      call: widget.call,
+      selector: (state) =>
+          state.ringingMembers.map((e) => e.toUserInfo()).toList(),
+      builder: builder,
+    );
   }
 
   Future<void> _onCancelCallTap(BuildContext context) async {
