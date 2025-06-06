@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -57,6 +59,7 @@ class StreamCallParticipants extends StatefulWidget {
   final Call call;
 
   /// The list of participants to display.
+  @Deprecated('Should not be used anymore.')
   final List<CallParticipantState>? participants;
 
   /// Used for filtering the call participants.

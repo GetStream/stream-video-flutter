@@ -58,7 +58,7 @@ class ToggleScreenShareOption extends StatelessWidget {
   Widget build(BuildContext context) {
     var screenShareConstraints = this.screenShareConstraints;
 
-    Widget builder(enabled) => CallControlOption(
+    Widget builder(bool enabled) => CallControlOption(
           icon: enabled
               ? Icon(enabledScreenShareIcon)
               : Icon(disabledScreenShareIcon),

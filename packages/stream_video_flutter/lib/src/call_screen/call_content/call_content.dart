@@ -38,7 +38,13 @@ class StreamCallContent extends StatefulWidget {
   const StreamCallContent({
     super.key,
     required this.call,
-    @Deprecated('Should not be used anymore.') this.callState,
+    @Deprecated(
+      """
+It's no longer recommended to provide `callState`.
+The widget can listen to more focussed partial state updates itself from the `call` object.
+""",
+    )
+    this.callState,
     this.onBackPressed,
     this.onLeaveCallTap,
     @Deprecated('Use callAppBarWidgetBuilder instead.') this.callAppBarBuilder,
@@ -58,7 +64,12 @@ class StreamCallContent extends StatefulWidget {
   final Call call;
 
   /// Holds information about the call.
-  @Deprecated('Should not be used anymore.')
+  @Deprecated(
+    """
+It's no longer recommended to provide `callState`.
+The widget can listen to more focussed partial state updates itself from the `call` object.
+""",
+  )
   final CallState? callState;
 
   /// The action to perform when the back button is pressed.
@@ -199,7 +210,8 @@ class _StreamCallContentState extends State<StreamCallContent>
   }
 
   void _updateCallState(
-      ({CallStatus status, bool isScreenShareEnabled}) callState) {
+    ({CallStatus status, bool isScreenShareEnabled}) callState,
+  ) {
     // Disable PiP when screen sharing is enabled
     if (callState.isScreenShareEnabled != _isScreenShareEnabled) {
       if (widget.pictureInPictureConfiguration

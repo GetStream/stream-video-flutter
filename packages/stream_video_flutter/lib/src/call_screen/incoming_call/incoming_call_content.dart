@@ -138,7 +138,9 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
                     ) ??
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 64, vertical: 32),
+                        horizontal: 64,
+                        vertical: 32,
+                      ),
                       child: CallingParticipants(
                         participants: users,
                         singleParticipantTextStyle: singleParticipantTextStyle,
