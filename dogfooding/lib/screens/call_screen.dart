@@ -130,20 +130,18 @@ class _CallScreenState extends State<CallScreen> {
               showFeedbackDialog(context, call: widget.call);
             }
           },
-          callContentBuilder: (
+          callContentWidgetBuilder: (
             BuildContext context,
             Call call,
-            CallState callState,
           ) {
             return StreamCallContent(
               call: call,
-              callState: callState,
               layoutMode: _currentLayoutMode,
               pictureInPictureConfiguration:
                   const PictureInPictureConfiguration(
                 enablePictureInPicture: true,
               ),
-              callParticipantsBuilder: (context, call, callState) {
+              callParticipantsWidgetBuilder: (context, call) {
                 return Stack(
                   children: [
                     Column(
@@ -151,7 +149,6 @@ class _CallScreenState extends State<CallScreen> {
                         Expanded(
                           child: StreamCallParticipants(
                             call: call,
-                            participants: callState.callParticipants,
                             layoutMode: _currentLayoutMode,
                           ),
                         ),
@@ -194,19 +191,23 @@ class _CallScreenState extends State<CallScreen> {
                         ),
                       ),
                     ],
-                    if (!_moreMenuVisible &&
-                        (call.state.valueOrNull?.otherParticipants.isEmpty ??
-                            false))
+                    if (!_moreMenuVisible)
                       Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        child: ShareCallWelcomeCard(callId: call.id),
+                        child: CallStreamBuilder(
+                          call: call,
+                          selector: (state) => state.otherParticipants.isEmpty,
+                          builder: (context, isEmpty) => isEmpty
+                              ? ShareCallWelcomeCard(callId: call.id)
+                              : const SizedBox.shrink(),
+                        ),
                       )
                   ],
                 );
               },
-              callAppBarBuilder: (context, call, callState) {
+              callAppBarWidgetBuilder: (context, call) {
                 return CallAppBar(
                   call: call,
                   leadingWidth: 120,
@@ -219,22 +220,25 @@ class _CallScreenState extends State<CallScreen> {
                           });
                         },
                       ),
-                      if (call.state.valueOrNull?.localParticipant != null)
-                        FlipCameraOption(
-                          call: call,
-                          localParticipant: call.state.value.localParticipant!,
-                        ),
+                      CallStreamBuilder(
+                        call: call,
+                        selector: (state) => state.localParticipant != null,
+                        builder: (context, hasLocalParticipant) =>
+                            hasLocalParticipant
+                                ? FlipCameraOption(
+                                    call: call,
+                                  )
+                                : const SizedBox.shrink(),
+                      ),
                     ],
                   ),
                   title: CallDurationTitle(call: call),
                 );
               },
-              callControlsBuilder: (
+              callControlsWidgetBuilder: (
                 BuildContext context,
                 Call call,
-                CallState callState,
               ) {
-                final localParticipant = callState.localParticipant!;
                 return Container(
                   padding: const EdgeInsets.only(
                     top: 16,
@@ -254,7 +258,6 @@ class _CallScreenState extends State<CallScreen> {
                           }),
                       ToggleScreenShareOption(
                         call: call,
-                        localParticipant: localParticipant,
                         screenShareConstraints: const ScreenShareConstraints(
                           useiOSBroadcastExtension: true,
                         ),
@@ -268,24 +271,28 @@ class _CallScreenState extends State<CallScreen> {
                       ),
                       ToggleMicrophoneOption(
                         call: call,
-                        localParticipant: localParticipant,
                         disabledMicrophoneBackgroundColor:
                             AppColorPalette.appRed,
                       ),
                       ToggleCameraOption(
                         call: call,
-                        localParticipant: localParticipant,
                         disabledCameraBackgroundColor: AppColorPalette.appRed,
                       ),
                       const Spacer(),
-                      BadgedCallOption(
-                        callControlOption: CallControlOption(
-                          icon: const Icon(Icons.people),
-                          onPressed: _channel != null //
-                              ? () => showParticipants(context)
-                              : null,
-                        ),
-                        badgeCount: callState.callParticipants.length,
+                      CallStreamBuilder(
+                        call: call,
+                        selector: (state) => state.callParticipants.length,
+                        builder: (context, length) {
+                          return BadgedCallOption(
+                            callControlOption: CallControlOption(
+                              icon: const Icon(Icons.people),
+                              onPressed: _channel != null //
+                                  ? () => showParticipants(context)
+                                  : null,
+                            ),
+                            badgeCount: length,
+                          );
+                        },
                       ),
                       _ShowChatButton(channel: _channel),
                     ]),
