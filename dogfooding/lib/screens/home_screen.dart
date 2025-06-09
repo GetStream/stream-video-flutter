@@ -49,6 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Permission.microphone,
       ].request();
 
+      if (CurrentPlatform.isAndroid) {
+        Permission.phone.request();
+      }
+
       StreamVideoPushNotificationManager.ensureFullScreenIntentPermission();
     }
 

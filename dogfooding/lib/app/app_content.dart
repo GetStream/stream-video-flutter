@@ -13,6 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
@@ -105,6 +106,7 @@ class _StreamDogFoodingAppContentState
     });
 
     _tryConsumingIncomingCallFromTerminatedState();
+    _handleMobileAudioInterruptions();
   }
 
   void initPushNotificationManagerIfAvailable() {
@@ -118,6 +120,19 @@ class _StreamDogFoodingAppContentState
     _observeDeepLinks();
     // Observe FCM messages.
     _observeFcmMessages();
+  }
+
+  void _handleMobileAudioInterruptions() {
+    if (!CurrentPlatform.isMobile) return;
+
+    RtcMediaDeviceNotifier.instance.handleCallInterruptionCallbacks(
+      onInterruptionBegin: () {
+        StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: false);
+      },
+      onInterruptionEnd: () {
+        StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
+      },
+    );
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {
