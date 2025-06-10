@@ -86,6 +86,7 @@ class _StreamDogFoodingAppContentState
   late final _router = initRouter(_userAuthController);
 
   final _compositeSubscription = CompositeSubscription();
+  bool? _microphoneEnabledBeforeInterruption;
 
   @override
   void initState() {
@@ -121,8 +122,6 @@ class _StreamDogFoodingAppContentState
     _observeFcmMessages();
   }
 
-  bool? _microphoneEnabledBeforeInterruption;
-  
   void _handleMobileAudioInterruptions() {
     if (!CurrentPlatform.isMobile) return;
 
@@ -130,10 +129,11 @@ class _StreamDogFoodingAppContentState
       onInterruptionStart: () {
         final call = StreamVideo.instance.activeCall;
         call?.setMicrophoneEnabled(enabled: false);
-        _microphoneEnabledBeforeInterruption = call?.state.localParticipant?.isAudioEnabled;
+        _microphoneEnabledBeforeInterruption =
+            call?.state.value.localParticipant?.isAudioEnabled;
       },
       onInterruptionEnd: () {
-        if(_microphoneEnabledBeforeInterruption == true){
+        if (_microphoneEnabledBeforeInterruption == true) {
           StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
         }
         _microphoneEnabledBeforeInterruption = null;
