@@ -121,15 +121,22 @@ class _StreamDogFoodingAppContentState
     _observeFcmMessages();
   }
 
+  bool? _microphoneEnabledBeforeInterruption;
+  
   void _handleMobileAudioInterruptions() {
     if (!CurrentPlatform.isMobile) return;
 
     RtcMediaDeviceNotifier.instance.handleCallInterruptionCallbacks(
       onInterruptionStart: () {
-        StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: false);
+        final call = StreamVideo.instance.activeCall;
+        call?.setMicrophoneEnabled(enabled: false);
+        _microphoneEnabledBeforeInterruption = call?.state.localParticipant?.isAudioEnabled;
       },
       onInterruptionEnd: () {
-        StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
+        if(_microphoneEnabledBeforeInterruption == true){
+          StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
+        }
+        _microphoneEnabledBeforeInterruption = null;
       },
     );
   }
