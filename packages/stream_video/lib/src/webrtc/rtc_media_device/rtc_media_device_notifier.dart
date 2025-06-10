@@ -29,7 +29,7 @@ class RtcMediaDeviceNotifier {
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
 
   /// Allows to handle call interruption callbacks.
-  /// [onInterruptionBegin] is called when the call interruption begins.
+  /// [onInterruptionStart] is called when the call interruption begins.
   /// [onInterruptionEnd] is called when the call interruption ends.
   /// [androidInterruptionSource] specifies the source of the interruption on Android.
   ///
@@ -53,13 +53,13 @@ class RtcMediaDeviceNotifier {
   /// For more details on handling call interruptions, refer to the
   /// [Stream Video documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/).
   Future<void> handleCallInterruptionCallbacks({
-    void Function()? onInterruptionBegin,
+    void Function()? onInterruptionStart,
     void Function()? onInterruptionEnd,
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
   }) {
     return rtc.handleCallInterruptionCallbacks(
-      onInterruptionBegin,
+      onInterruptionStart,
       onInterruptionEnd,
       androidInterruptionSource: androidInterruptionSource,
     );
