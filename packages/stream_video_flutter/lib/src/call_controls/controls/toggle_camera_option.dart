@@ -25,7 +25,7 @@ class ToggleCameraOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  @Deprecated('Should not be used anymore.')
+  @Deprecated(PartialStateDeprecationMessage.localParticipant)
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.

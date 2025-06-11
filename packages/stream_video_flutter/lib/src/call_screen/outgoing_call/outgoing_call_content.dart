@@ -80,7 +80,8 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final ParticipantsAvatarBuilder? participantsAvatarBuilder;
 
   /// Builder used to create a custom widget for participants avatars.
-  final CallWidgetBuilder? participantsAvatarWidgetBuilder;
+  final CallWidgetBuilderWithData<ParticipantsData>?
+      participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
   ///
@@ -89,7 +90,8 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
   /// Builder used to create a custom widget for participants display names.
-  final CallWidgetBuilder? participantsDisplayNameWidgetBuilder;
+  final CallWidgetBuilderWithData<ParticipantsData>?
+      participantsDisplayNameWidgetBuilder;
 
   /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
@@ -102,7 +104,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
   /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
   /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
-  final CallWidgetBuilder? callBackgroundWidgetBuilder;
+  final CallWidgetChildBuilder? callBackgroundWidgetBuilder;
 
   @override
   State<StreamOutgoingCallContent> createState() =>
@@ -138,6 +140,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
             widget.participantsAvatarWidgetBuilder?.call(
                   context,
                   widget.call,
+                  ParticipantsData(participants: participants),
                 ) ??
                 widget.participantsAvatarBuilder?.call(
                   context,
@@ -154,6 +157,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
             widget.participantsDisplayNameWidgetBuilder?.call(
                   context,
                   widget.call,
+                  ParticipantsData(participants: participants),
                 ) ??
                 widget.participantsDisplayNameBuilder?.call(
                   context,
@@ -189,6 +193,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       return widget.callBackgroundWidgetBuilder?.call(
             context,
             widget.call,
+            child,
           ) ??
           widget.callBackgroundBuilder?.call(
             widget.call,

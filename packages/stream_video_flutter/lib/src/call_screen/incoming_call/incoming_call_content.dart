@@ -72,7 +72,9 @@ class StreamIncomingCallContent extends StatefulWidget {
   @Deprecated('Use participantsAvatarWidgetBuilder instead.')
   final ParticipantsAvatarBuilder? participantsAvatarBuilder;
 
-  final CallWidgetBuilder? participantsAvatarWidgetBuilder;
+  /// Builder used to create a custom widget for participants avatars.
+  final CallWidgetBuilderWithData<ParticipantsData>?
+      participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
   ///
@@ -80,7 +82,9 @@ class StreamIncomingCallContent extends StatefulWidget {
   @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
-  final CallWidgetBuilder? participantsDisplayNameWidgetBuilder;
+  /// Builder used to create a custom widget for participants display names.
+  final CallWidgetBuilderWithData<ParticipantsData>?
+      participantsDisplayNameWidgetBuilder;
 
   @override
   State<StreamIncomingCallContent> createState() =>
@@ -117,6 +121,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
                 widget.participantsAvatarWidgetBuilder?.call(
                       context,
                       widget.call,
+                      ParticipantsData(participants: users),
                     ) ??
                     widget.participantsAvatarBuilder?.call(
                       context,
@@ -134,6 +139,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
                 widget.participantsDisplayNameWidgetBuilder?.call(
                       context,
                       widget.call,
+                      ParticipantsData(participants: users),
                     ) ??
                     widget.participantsDisplayNameBuilder?.call(
                       context,
