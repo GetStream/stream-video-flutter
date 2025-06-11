@@ -33,6 +33,10 @@ typedef CallWidgetBuilder = Widget Function(
   Call call,
 );
 
+/// Builder for parts of the call screen that need a regular Widget.
+/// The function also contains a data object that can be used to build the widget.
+///
+/// To prevent breaking changes we only add properties to the data object, but not to the function itself.
 typedef CallWidgetBuilderWithData<T extends CallbackData> = Widget Function(
   BuildContext context,
   Call call,
