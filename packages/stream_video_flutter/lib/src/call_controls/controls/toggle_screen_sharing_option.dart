@@ -59,7 +59,7 @@ class ToggleScreenShareOption extends StatelessWidget {
   Widget build(BuildContext context) {
     var screenShareConstraints = this.screenShareConstraints;
 
-    Widget builder(bool enabled) => CallControlOption(
+    Widget buildContent(bool enabled) => CallControlOption(
           icon: enabled
               ? Icon(enabledScreenShareIcon)
               : Icon(disabledScreenShareIcon),
@@ -113,14 +113,14 @@ class ToggleScreenShareOption extends StatelessWidget {
         );
 
     if (localParticipant != null) {
-      return builder(localParticipant!.isScreenShareEnabled);
+      return buildContent(localParticipant!.isScreenShareEnabled);
     }
 
     return PartialCallStateBuilder(
       call: call,
       selector: (state) => state.localParticipant,
       builder: (_, participant) =>
-          builder(participant?.isScreenShareEnabled ?? false),
+          buildContent(participant?.isScreenShareEnabled ?? false),
     );
   }
 }

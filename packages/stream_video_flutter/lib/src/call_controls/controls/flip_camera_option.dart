@@ -30,7 +30,7 @@ class FlipCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget builder(TrackState? trackState) {
+    Widget buildContent(TrackState? trackState) {
       CameraPosition? position;
       if (trackState is LocalTrackState) {
         position = trackState.cameraPosition;
@@ -47,12 +47,12 @@ class FlipCameraOption extends StatelessWidget {
     }
 
     if (localParticipant != null) {
-      return builder(localParticipant!.videoTrack);
+      return buildContent(localParticipant!.videoTrack);
     }
     return PartialCallStateBuilder(
       call: call,
       selector: (state) => state.localParticipant?.videoTrack,
-      builder: (_, trackState) => builder(trackState),
+      builder: (_, trackState) => buildContent(trackState),
     );
   }
 }

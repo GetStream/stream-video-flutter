@@ -48,7 +48,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget builder(bool enabled) {
+    Widget buildContent(bool enabled) {
       return CallControlOption(
         icon: enabled
             ? Icon(enabledMicrophoneIcon)
@@ -65,12 +65,12 @@ class ToggleMicrophoneOption extends StatelessWidget {
     }
 
     if (localParticipant != null) {
-      return builder(localParticipant!.isAudioEnabled);
+      return buildContent(localParticipant!.isAudioEnabled);
     }
     return PartialCallStateBuilder(
       call: call,
       selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
-      builder: (_, enabled) => builder(enabled),
+      builder: (_, enabled) => buildContent(enabled),
     );
   }
 }

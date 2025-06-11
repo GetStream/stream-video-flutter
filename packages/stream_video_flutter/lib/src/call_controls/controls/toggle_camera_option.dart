@@ -48,7 +48,7 @@ class ToggleCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget builder(bool enabled) {
+    Widget buildContent(bool enabled) {
       return CallControlOption(
         icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
         iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
@@ -62,12 +62,12 @@ class ToggleCameraOption extends StatelessWidget {
     }
 
     if (localParticipant != null) {
-      return builder(localParticipant!.isVideoEnabled);
+      return buildContent(localParticipant!.isVideoEnabled);
     }
     return PartialCallStateBuilder(
       call: call,
       selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
-      builder: (_, enabled) => builder(enabled),
+      builder: (_, enabled) => buildContent(enabled),
     );
   }
 }

@@ -130,7 +130,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
-    Widget builder(List<UserInfo> participants) {
+    Widget buildContent(List<UserInfo> participants) {
       final child = Material(
         color: Colors.transparent,
         child: Column(
@@ -208,7 +208,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     }
 
     if (widget.callState != null) {
-      return builder(
+      return buildContent(
         widget.callState!.ringingMembers.map((e) => e.toUserInfo()).toList(),
       );
     }
@@ -217,7 +217,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       call: widget.call,
       selector: (state) =>
           state.ringingMembers.map((e) => e.toUserInfo()).toList(),
-      builder: (_, members) => builder(members),
+      builder: (_, members) => buildContent(members),
     );
   }
 
