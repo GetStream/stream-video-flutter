@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
-import '../../call_container.dart';
+import '../../../../stream_video_flutter.dart';
 
 typedef CallPictureInPictureBuilder = Widget Function(
   BuildContext context,
@@ -39,6 +38,8 @@ class AndroidPictureInPictureConfiguration {
   });
 
   /// Builder used to create a custom picture in picture mode. (available only on Android)
+  ///
+  /// Recommend to use [callPictureInPictureWidgetBuilder] and listen to the partialState of the call.
   @Deprecated('Use callPictureInPictureWidgetBuilder instead.')
   final CallPictureInPictureBuilder? callPictureInPictureBuilder;
 

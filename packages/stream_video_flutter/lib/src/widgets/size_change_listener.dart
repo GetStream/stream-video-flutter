@@ -56,3 +56,15 @@ class _RenderSizeChangedWithCallback extends RenderProxyBox {
     _oldSize = size;
   }
 }
+
+abstract class PartialStateDeprecationMessage {
+  static const localParticipant = '''
+No longer needed to provide localParticipant. 
+If provided the local participant will be used, otherwise the localparticipant of the call will be used.
+''';
+
+  static const participants = '''
+No longer needed to provide participants. 
+If provided the participants will be used, otherwise the participants of the call will be used.
+''';
+}

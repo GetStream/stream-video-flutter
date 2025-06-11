@@ -10,6 +10,9 @@ import '../../../stream_video_flutter_background.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
+///
+/// Replaced by the simplified [CallPreferredSizeWidgetBuilder].
+@Deprecated('Use CallPreferredSizeWidgetBuilder instead.')
 typedef CallAppBarBuilder = PreferredSizeWidget? Function(
   BuildContext context,
   Call call,
@@ -17,6 +20,9 @@ typedef CallAppBarBuilder = PreferredSizeWidget? Function(
 );
 
 /// Builder used to create a custom call participants widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef CallParticipantsBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -24,6 +30,9 @@ typedef CallParticipantsBuilder = Widget Function(
 );
 
 /// Builder used to create a custom call controls widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef CallControlsBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -83,7 +92,7 @@ The widget can listen to more focussed partial state updates itself from the `ca
   final CallAppBarBuilder? callAppBarBuilder;
 
   /// Builder used to create a custom call app bar.
-  final CallPreferredSizeBuilder? callAppBarWidgetBuilder;
+  final CallPreferredSizeWidgetBuilder? callAppBarWidgetBuilder;
 
   /// Builder used to create a custom participants grid.
   @Deprecated('Use callParticipantsWidgetBuilder instead.')
@@ -351,14 +360,16 @@ class _StreamCallContentState extends State<StreamCallContent>
         ],
       ),
       extendBody: widget.extendBody,
-      bottomNavigationBar: CallStreamBuilder(
+      bottomNavigationBar: PartialCallStateBuilder(
         call: call,
         selector: (state) => state.localParticipant,
         builder: (_, localParticipant) => localParticipant != null
             ? widget.callControlsWidgetBuilder?.call(context, call) ??
                 widget.callControlsBuilder
                     ?.call(context, call, _callState ?? call.state.value) ??
-                StreamCallControls.withDefaultOptions(call: call)
+                StreamCallControls.withDefaultOptions(
+                  call: call,
+                )
             : const SizedBox.shrink(),
       ),
     );

@@ -6,43 +6,10 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-// TODO move to separate file
-class CallStreamBuilder<T> extends StatelessWidget {
-  const CallStreamBuilder({
-    required this.call,
-    required this.selector,
-    required this.builder,
-    super.key,
-  });
-
-  final Call call;
-  final CallStateSelector<T> selector;
-  final Widget Function(BuildContext context, T data) builder;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: call.partialState(selector),
-      initialData: selector(call.state.value),
-      builder: (context, snapshot) => builder(context, snapshot.data as T),
-    );
-  }
-}
-
-typedef CallWidgetBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-);
-
-/// Builder used to create a custom call app bar.
-typedef CallPreferredSizeBuilder = PreferredSizeWidget? Function(
-  BuildContext context,
-  Call call,
-);
-
-// TODO deprecate old typedefs
-
 /// Builder used to create a custom incoming call widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef IncomingCallBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -50,6 +17,9 @@ typedef IncomingCallBuilder = Widget Function(
 );
 
 /// Builder used to create a custom outgoing call widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef OutgoingCallBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -57,6 +27,9 @@ typedef OutgoingCallBuilder = Widget Function(
 );
 
 /// Builder used to create a custom call content widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef CallContentBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -64,6 +37,9 @@ typedef CallContentBuilder = Widget Function(
 );
 
 /// Builder used to create a custom widget for participants avatars.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef ParticipantsAvatarBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -72,6 +48,9 @@ typedef ParticipantsAvatarBuilder = Widget Function(
 );
 
 /// Builder used to create a custom widget for participants display names.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef ParticipantsDisplayNameBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -129,6 +108,10 @@ class StreamCallContainer extends StatefulWidget {
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
   /// Builder used to create a custom incoming call widget.
+  /// 
+  /// If [incomingCallBuilder] is provided, the whole [StreamCallContainer] widget will 
+  /// rebuild on every call state change.
+  /// Recommend to use [incomingCallWidgetBuilder] which is not rebuild on every state change.
   @Deprecated('Use [incomingCallWidgetBuilder] instead.')
   final IncomingCallBuilder? incomingCallBuilder;
 
@@ -136,6 +119,10 @@ class StreamCallContainer extends StatefulWidget {
   final CallWidgetBuilder? incomingCallWidgetBuilder;
 
   /// Builder used to create a custom outgoing call widget.
+  /// 
+  /// If [outgoingCallBuilder] is provided, the whole [StreamCallContainer] widget will 
+  /// rebuild on every call state change.
+  /// Recommend to use [outgoingCallWidgetBuilder] which is not rebuild on every state change.
   @Deprecated('Use [outgoingCallWidgetBuilder] instead.')
   final OutgoingCallBuilder? outgoingCallBuilder;
 
@@ -143,6 +130,10 @@ class StreamCallContainer extends StatefulWidget {
   final CallWidgetBuilder? outgoingCallWidgetBuilder;
 
   /// Builder used to create a custom call content widget.
+  /// 
+  /// If [callContentBuilder] is provided, the whole [StreamCallContainer] widget will 
+  /// rebuild on every call state change.
+  /// Recommend to use [callContentWidgetBuilder] which is not rebuild on every state change.
   @Deprecated('Use [callContentWidgetBuilder] instead.')
   final CallContentBuilder? callContentBuilder;
 

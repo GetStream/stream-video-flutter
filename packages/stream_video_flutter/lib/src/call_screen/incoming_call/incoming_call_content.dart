@@ -66,12 +66,16 @@ class StreamIncomingCallContent extends StatefulWidget {
   final TextStyle? callingLabelTextStyle;
 
   /// Builder used to create a custom widget for participants avatars.
+  ///
+  /// Recommend to use [participantsAvatarWidgetBuilder] and listen to the partialState of the call.
   @Deprecated('Use participantsAvatarWidgetBuilder instead.')
   final ParticipantsAvatarBuilder? participantsAvatarBuilder;
 
   final CallWidgetBuilder? participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
+  ///
+  /// Recommend to use [participantsDisplayNameWidgetBuilder] and listen to the partialState of the call.
   @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
@@ -173,7 +177,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       );
     }
 
-    return CallStreamBuilder(
+    return PartialCallStateBuilder(
       call: widget.call,
       selector: (state) =>
           state.ringingMembers.map((e) => e.toUserInfo()).toList(),

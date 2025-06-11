@@ -73,23 +73,34 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final TextStyle? callingLabelTextStyle;
 
   /// Builder used to create a custom widget for participants avatars.
+  ///
+  /// Recommend to use [participantsAvatarWidgetBuilder] and listen to the partialState of the call.
   @Deprecated('Use participantsAvatarWidgetBuilder instead.')
   final ParticipantsAvatarBuilder? participantsAvatarBuilder;
 
+  /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilder? participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
+  ///
+  /// Recommend to use [participantsDisplayNameWidgetBuilder] and listen to the partialState of the call.
   @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
+  /// Builder used to create a custom widget for participants display names.
   final CallWidgetBuilder? participantsDisplayNameWidgetBuilder;
 
   /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
   /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
+  ///
+  /// Recommend to use [callBackgroundWidgetBuilder] and listen to the partialState of the call.
   @Deprecated('Use callBackgroundWidgetBuilder instead.')
   final OutgoingCallBackground? callBackgroundBuilder;
 
+  /// A widget that is placed behind the outgoing call UI instead of the Stream default
+  ///
+  /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
   final CallWidgetBuilder? callBackgroundWidgetBuilder;
 
   @override
@@ -196,7 +207,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       );
     }
 
-    return CallStreamBuilder(
+    return PartialCallStateBuilder(
       call: widget.call,
       selector: (state) =>
           state.ringingMembers.map((e) => e.toUserInfo()).toList(),

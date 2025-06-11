@@ -160,7 +160,161 @@ transforms:
         name: 'participants'
   #endregion StreamCallParticipants
 
+  #region StreamIncomingCallContent
+  - title: 'remove callState from StreamIncomingCallContent'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamIncomingCallContent'
+    changes:
+      - kind: 'removeParameter'
+        name: 'callState'
+
+  - title: 'replace participantsAvatarBuilder with participantsAvatarWidgetBuilder in StreamIncomingCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamIncomingCallContent'
+    oneOf:
+      - if: "participantsAvatarWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'participantsAvatarBuilder'
+            newName: 'participantsAvatarWidgetBuilder'
+      - if: "participantsAvatarWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'participantsAvatarBuilder'
+    variables:
+      participantsAvatarWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[participantsAvatarWidgetBuilder]'
+
+  - title: 'replace participantsDisplayNameBuilder with participantsDisplayNameWidgetBuilder in StreamIncomingCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamIncomingCallContent'
+    oneOf:
+      - if: "participantsDisplayNameWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'participantsDisplayNameBuilder'
+            newName: 'participantsDisplayNameWidgetBuilder'
+      - if: "participantsDisplayNameWidgetBuilder != ''"  
+        changes:
+          - kind: 'removeParameter'
+            name: 'participantsDisplayNameBuilder'
+    variables:
+      participantsDisplayNameWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[participantsDisplayNameWidgetBuilder]'
+  #endregion StreamIncomingCallContent
+
+  #region StreamOutgoingCallContent
+  - title: 'remove callState from StreamOutgoingCallContent'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamOutgoingCallContent'
+    changes:
+      - kind: 'removeParameter'
+        name: 'callState'
+  
+  - title: 'replace callBackgroundBuilder with callBackgroundWidgetBuilder in StreamOutgoingCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamOutgoingCallContent'
+    oneOf:
+      - if: "callBackgroundWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'callBackgroundBuilder'
+            newName: 'callBackgroundWidgetBuilder'
+      - if: "callBackgroundWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'callBackgroundBuilder'
+    variables:
+      callBackgroundWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[callBackgroundWidgetBuilder]'
+
+  - title: 'replace participantsAvatarBuilder with participantsAvatarWidgetBuilder in StreamOutgoingCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamOutgoingCallContent'  
+    oneOf:
+      - if: "participantsAvatarWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'participantsAvatarBuilder'
+            newName: 'participantsAvatarWidgetBuilder'  
+      - if: "participantsAvatarWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'participantsAvatarBuilder'
+    variables:
+      participantsAvatarWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[participantsAvatarWidgetBuilder]'
+
+  - title: 'replace participantsDisplayNameBuilder with participantsDisplayNameWidgetBuilder in StreamOutgoingCallContent'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'StreamOutgoingCallContent'
+    oneOf:
+      - if: "participantsDisplayNameWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'participantsDisplayNameBuilder'
+            newName: 'participantsDisplayNameWidgetBuilder'
+      - if: "participantsDisplayNameWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'participantsDisplayNameBuilder'
+    variables:
+      participantsDisplayNameWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[participantsDisplayNameWidgetBuilder]'
+  #endregion StreamOutgoingCallContent
+
   #region StreamCallControls
+  - title: 'remove localParticipant from StreamCallControls.withDefaultOptions'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: 'withDefaultOptions'
+      inClass: 'StreamCallControls'
+    changes:
+      - kind: 'removeParameter'
+        name: 'localParticipant'
+
+  - title: 'remove localParticipant from FlipCameraOption'
+    date: '2025-06-06'
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'FlipCameraOption'
+    changes:
+      - kind: 'removeParameter'
+        name: 'localParticipant'
+
   - title: 'remove localParticipant from ToggleScreenShareOption'
     date: '2025-06-06'
     element:
@@ -191,4 +345,28 @@ transforms:
       - kind: 'removeParameter'
         name: 'localParticipant'
   #endregion StreamCallControls
+
+  #region PictureInPictureConfiguration
+  - title: 'replace callPictureInPictureBuilder with callPictureInPictureWidgetBuilder in AndroidPictureInPictureConfiguration'
+    date: '2025-06-06'
+    bulkApply: false
+    element:
+      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
+      constructor: ''
+      inClass: 'AndroidPictureInPictureConfiguration'
+    oneOf:
+      - if: "callPictureInPictureWidgetBuilder == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'callPictureInPictureBuilder'
+            newName: 'callPictureInPictureWidgetBuilder'
+      - if: "callPictureInPictureWidgetBuilder != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'callPictureInPictureBuilder'
+    variables:
+      callPictureInPictureWidgetBuilder:
+        kind: 'fragment'
+        value: 'arguments[callPictureInPictureWidgetBuilder]'
+  #endregion PictureInPictureConfiguration
 #endregion

@@ -43,8 +43,7 @@ class StreamCallParticipants extends StatefulWidget {
   StreamCallParticipants({
     super.key,
     required this.call,
-    @Deprecated('Recommend not to use this parameter anymore.')
-    this.participants,
+    @Deprecated(PartialStateDeprecationMessage.participants) this.participants,
     this.filter = _defaultFilter,
     Sort<CallParticipantState>? sort,
     this.enableLocalVideo,
@@ -59,7 +58,7 @@ class StreamCallParticipants extends StatefulWidget {
   final Call call;
 
   /// The list of participants to display.
-  @Deprecated('Should not be used anymore.')
+  @Deprecated(PartialStateDeprecationMessage.participants)
   final List<CallParticipantState>? participants;
 
   /// Used for filtering the call participants.

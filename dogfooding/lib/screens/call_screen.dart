@@ -196,7 +196,7 @@ class _CallScreenState extends State<CallScreen> {
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        child: CallStreamBuilder(
+                        child: PartialCallStateBuilder(
                           call: call,
                           selector: (state) => state.otherParticipants.isEmpty,
                           builder: (context, isEmpty) => isEmpty
@@ -220,7 +220,7 @@ class _CallScreenState extends State<CallScreen> {
                           });
                         },
                       ),
-                      CallStreamBuilder(
+                      PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.localParticipant != null,
                         builder: (context, hasLocalParticipant) =>
@@ -279,7 +279,7 @@ class _CallScreenState extends State<CallScreen> {
                         disabledCameraBackgroundColor: AppColorPalette.appRed,
                       ),
                       const Spacer(),
-                      CallStreamBuilder(
+                      PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.callParticipants.length,
                         builder: (context, length) {

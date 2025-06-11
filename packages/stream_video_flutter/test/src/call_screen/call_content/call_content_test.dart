@@ -13,16 +13,31 @@ void main() {
     late MockCall mockCall;
     late MockCallState mockCallState;
     late MockCallParticipantState mockLocalParticipant;
+    late MockStateEmitter<CallState> mockCallStateEmitter;
 
     setUp(() {
       mockCall = MockCall();
       mockCallState = MockCallState();
       mockLocalParticipant = MockCallParticipantState();
+      mockCallStateEmitter = MockStateEmitter<CallState>();
+
+      when(() => mockCallStateEmitter.value).thenReturn(mockCallState);
+      when(() => mockCall.state).thenReturn(mockCallStateEmitter);
+      when(() => mockCall.partialState<CallParticipantState?>(any()))
+          .thenAnswer((invocation) {
+        final CallStateSelector<CallParticipantState?> selector =
+            invocation.positionalArguments[0];
+        final filtered = selector(mockCallState);
+        return Stream.value(filtered);
+      });
 
       when(() => mockCallState.localParticipant)
           .thenReturn(mockLocalParticipant);
       when(() => mockCallState.status).thenReturn(CallStatus.connected());
       when(() => mockCallState.callParticipants).thenReturn([]);
+
+      when(() => mockLocalParticipant.isScreenShareEnabled).thenReturn(false);
+      when(() => mockLocalParticipant.isAudioEnabled).thenReturn(true);
     });
 
     goldenTest(
@@ -113,3 +128,5 @@ class MockCall extends Mock implements Call {}
 class MockCallState extends Mock implements CallState {}
 
 class MockCallParticipantState extends Mock implements CallParticipantState {}
+
+class MockStateEmitter<T> extends Mock implements StateEmitter<T> {}
