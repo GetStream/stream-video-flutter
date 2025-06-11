@@ -22,7 +22,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
   const StreamOutgoingCallContent({
     super.key,
     required this.call,
-    this.callState,
+    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.onCancelCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
@@ -46,6 +46,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final Call call;
 
   /// Holds information about the call.
+  @Deprecated(PartialStateDeprecationMessage.callState)
   final CallState? callState;
 
   /// The action to perform when the cancel call button is tapped.

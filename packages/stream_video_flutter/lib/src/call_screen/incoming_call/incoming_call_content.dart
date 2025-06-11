@@ -14,7 +14,7 @@ class StreamIncomingCallContent extends StatefulWidget {
   const StreamIncomingCallContent({
     super.key,
     required this.call,
-    this.callState,
+    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.onAcceptCallTap,
     this.onDeclineCallTap,
     this.onMicrophoneTap,
@@ -36,6 +36,7 @@ class StreamIncomingCallContent extends StatefulWidget {
   final Call call;
 
   /// Holds information about the call.
+  @Deprecated(PartialStateDeprecationMessage.callState)
   final CallState? callState;
 
   /// The action to perform when the accept call button is tapped.

@@ -108,8 +108,8 @@ class StreamCallContainer extends StatefulWidget {
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
   /// Builder used to create a custom incoming call widget.
-  /// 
-  /// If [incomingCallBuilder] is provided, the whole [StreamCallContainer] widget will 
+  ///
+  /// If [incomingCallBuilder] is provided, the whole [StreamCallContainer] widget will
   /// rebuild on every call state change.
   /// Recommend to use [incomingCallWidgetBuilder] which is not rebuild on every state change.
   @Deprecated('Use [incomingCallWidgetBuilder] instead.')
@@ -119,8 +119,8 @@ class StreamCallContainer extends StatefulWidget {
   final CallWidgetBuilder? incomingCallWidgetBuilder;
 
   /// Builder used to create a custom outgoing call widget.
-  /// 
-  /// If [outgoingCallBuilder] is provided, the whole [StreamCallContainer] widget will 
+  ///
+  /// If [outgoingCallBuilder] is provided, the whole [StreamCallContainer] widget will
   /// rebuild on every call state change.
   /// Recommend to use [outgoingCallWidgetBuilder] which is not rebuild on every state change.
   @Deprecated('Use [outgoingCallWidgetBuilder] instead.')
@@ -130,8 +130,8 @@ class StreamCallContainer extends StatefulWidget {
   final CallWidgetBuilder? outgoingCallWidgetBuilder;
 
   /// Builder used to create a custom call content widget.
-  /// 
-  /// If [callContentBuilder] is provided, the whole [StreamCallContainer] widget will 
+  ///
+  /// If [callContentBuilder] is provided, the whole [StreamCallContainer] widget will
   /// rebuild on every call state change.
   /// Recommend to use [callContentWidgetBuilder] which is not rebuild on every state change.
   @Deprecated('Use [callContentWidgetBuilder] instead.')

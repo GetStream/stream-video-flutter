@@ -1,5 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values, avoid_implementing_value_types, deprecated_member_use_from_same_package
-
+// ignore_for_file: avoid_redundant_argument_values, deprecated_member_use_from_same_package
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../../test_utils/test_wrapper.dart';
+import '../../mocks.dart';
 
 void main() {
   group('StreamCallContent', () {
@@ -122,11 +122,3 @@ class _CallContentExample extends StatelessWidget {
     );
   }
 }
-
-class MockCall extends Mock implements Call {}
-
-class MockCallState extends Mock implements CallState {}
-
-class MockCallParticipantState extends Mock implements CallParticipantState {}
-
-class MockStateEmitter<T> extends Mock implements StateEmitter<T> {}

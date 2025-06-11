@@ -67,4 +67,9 @@ If provided the local participant will be used, otherwise the localparticipant o
 No longer needed to provide participants. 
 If provided the participants will be used, otherwise the participants of the call will be used.
 ''';
+
+  static const callState = '''
+It's no longer recommended to provide `callState`.
+The widget can listen to more focussed partial state updates itself from the `call` object.
+''';
 }

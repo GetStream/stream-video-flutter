@@ -47,13 +47,7 @@ class StreamCallContent extends StatefulWidget {
   const StreamCallContent({
     super.key,
     required this.call,
-    @Deprecated(
-      """
-It's no longer recommended to provide `callState`.
-The widget can listen to more focussed partial state updates itself from the `call` object.
-""",
-    )
-    this.callState,
+    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.onBackPressed,
     this.onLeaveCallTap,
     @Deprecated('Use callAppBarWidgetBuilder instead.') this.callAppBarBuilder,
