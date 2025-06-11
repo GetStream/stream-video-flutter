@@ -1,0 +1,35 @@
+name: Package Analysis
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Install Tools"
+      shell: bash
+      run: flutter pub global activate melos
+
+    - name: "Bootstrap Workspace"
+      shell: bash
+      run: melos bootstrap --verbose
+      env:
+        MELOS_PACKAGES: stream_**,example
+
+    # Only analyze lib/; non-client code doesn't need to work on
+    # all supported legacy version.
+    # TODO: Treat info and warning as error once all packages solve their issues.
+    - name: "Stream Video Analyze"
+      shell: bash
+      run: cd packages/stream_video/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
+
+    - name: "Stream Video Flutter Analyze"
+      shell: bash
+      run: cd packages/stream_video_flutter/lib && dart analyze --no-fatal-warnings . && cd .. && flutter test --exclude-tags golden
+
+    # No tests yet in this package.
+    - name: "Stream Video Push Notification Analyze"
+      shell: bash
+      run: cd packages/stream_video_push_notification/lib && dart analyze --no-fatal-warnings . # && cd .. && flutter test --exclude-tags golden
+
+    # No tests yet in this package.
+    - name: "Stream Video Flutter Screen Sharing Analyze"
+      shell: bash
+      run: cd packages/stream_video_screen_sharing/lib && dart analyze --no-fatal-warnings . # && cd .. && flutter test --exclude-tags golden
