@@ -35,13 +35,9 @@ class CallStateNotifier extends StateNotifier<CallState>
 
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
     return callStateStream.valueStream
-        .distinct((previous, current) {
-          final previousSelection = selector(previous);
-          final currentSelection = selector(current);
-          return identical(previousSelection, currentSelection) ||
-              previousSelection == currentSelection;
-        })
         .map(selector)
+        .distinct((previous, current) =>
+            identical(previous, current) || previous == current)
         .asBroadcastStream();
   }
 
