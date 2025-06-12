@@ -55,8 +55,8 @@ final class StreamAVPictureInPictureVideoCallViewController:
         get { contentView.track }
         set {
             contentView.track = newValue
-            // Ensure video content view is visible when track is set
-            contentView.isHidden = false
+            contentView.isHidden = (newValue == nil)
+
             // Bring video content to front when new track is set, then overlay on top
             view.bringSubviewToFront(contentView)
             if let overlayController = overlayHostingController {

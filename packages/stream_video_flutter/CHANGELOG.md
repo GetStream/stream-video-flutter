@@ -1,5 +1,9 @@
 ## Unreleased
 * Added `handleCallInterruptionCallbacks` method to `RtcMediaDeviceNotifier` that provides an option to handle system audio interruption like incoming calls, or other media playing
+* Improved the Picture-in-Picture (PiP) implementation for video calls
+    * (iOS) Shows participant avatar instead of black screen when video track is disabled.
+    * (iOS) Added overlay with participant name, microphone indicator and connection qualit indicator.
+    * (iOS/Android) Added `sort` in `PictureInPictureConfiguration` that enables customization of PiP participant selection.
 
 ## 0.9.5
 

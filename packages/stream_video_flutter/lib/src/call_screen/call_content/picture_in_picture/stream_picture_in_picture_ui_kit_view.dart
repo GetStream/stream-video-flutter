@@ -67,17 +67,18 @@ class _StreamPictureInPictureUiKitViewState
         ? widget.call.state.value.callParticipants
         : widget.call.state.value.otherParticipants;
 
+    final sorted = List<CallParticipantState>.from(participants);
     mergeSort(
-      participants,
+      sorted,
       compare: widget.participantSort ?? CallParticipantSortingPresets.speaker,
     );
 
-    if (participants.isNotEmpty) {
-      final participant = participants.first;
+    if (sorted.isNotEmpty) {
+      final participant = sorted.first;
 
       final videoTrack = widget.call.getTrack(
-        participants.first.trackIdPrefix,
-        participants.first.isScreenShareEnabled
+        participant.trackIdPrefix,
+        participant.isScreenShareEnabled
             ? SfuTrackType.screenShare
             : SfuTrackType.video,
       );
