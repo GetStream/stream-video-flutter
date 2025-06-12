@@ -1,3 +1,6 @@
+## Unreleased
+* Added `handleCallInterruptionCallbacks` method to `RtcMediaDeviceNotifier` that provides an option to handle system audio interruption like incoming calls, or other media playing
+
 ## 0.9.5
 
 ✅ Added
