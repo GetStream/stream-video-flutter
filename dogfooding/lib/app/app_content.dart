@@ -86,6 +86,7 @@ class _StreamDogFoodingAppContentState
   late final _router = initRouter(_userAuthController);
 
   final _compositeSubscription = CompositeSubscription();
+  bool? _microphoneEnabledBeforeInterruption;
 
   @override
   void initState() {
@@ -105,6 +106,7 @@ class _StreamDogFoodingAppContentState
     });
 
     _tryConsumingIncomingCallFromTerminatedState();
+    _handleMobileAudioInterruptions();
   }
 
   void initPushNotificationManagerIfAvailable() {
@@ -118,6 +120,26 @@ class _StreamDogFoodingAppContentState
     _observeDeepLinks();
     // Observe FCM messages.
     _observeFcmMessages();
+  }
+
+  void _handleMobileAudioInterruptions() {
+    if (!CurrentPlatform.isMobile) return;
+
+    RtcMediaDeviceNotifier.instance.handleCallInterruptionCallbacks(
+      onInterruptionStart: () {
+        final call = StreamVideo.instance.activeCall;
+        _microphoneEnabledBeforeInterruption =
+            call?.state.value.localParticipant?.isAudioEnabled;
+
+        call?.setMicrophoneEnabled(enabled: false);
+      },
+      onInterruptionEnd: () {
+        if (_microphoneEnabledBeforeInterruption == true) {
+          StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
+        }
+        _microphoneEnabledBeforeInterruption = null;
+      },
+    );
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {
