@@ -512,6 +512,11 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
   void coordinatorCallUserBlocked(StreamCallUserBlockedEvent event) {
     state = state.copyWith(
+      status: event.user.id == state.currentUserId
+          ? CallStatus.disconnected(
+              const DisconnectReason.blocked(),
+            )
+          : null,
       blockedUserIds: [
         ...state.blockedUserIds,
         event.user.id,
