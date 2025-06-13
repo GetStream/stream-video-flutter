@@ -29,6 +29,7 @@ class CallState extends Equatable {
       isCaptioning: false,
       isBackstage: false,
       isAudioProcessing: false,
+      isSpeakingWhileMuted: false,
       settings: const CallSettings(),
       egress: const CallEgress(),
       rtmpIngress: '',
@@ -73,6 +74,7 @@ class CallState extends Equatable {
     required this.isCaptioning,
     required this.isBackstage,
     required this.isAudioProcessing,
+    required this.isSpeakingWhileMuted,
     required this.settings,
     required this.egress,
     required this.rtmpIngress,
@@ -118,6 +120,7 @@ class CallState extends Equatable {
   final bool isCaptioning;
   final bool isBackstage;
   final bool isAudioProcessing;
+  final bool isSpeakingWhileMuted;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
   final RtcMediaDevice? audioOutputDevice;
@@ -174,6 +177,8 @@ class CallState extends Equatable {
         .toList();
   }
 
+  static bool wasSetToFalse = false;
+
   /// Returns a copy of this [CallState] with the given fields replaced
   /// with the new values.
   CallState copyWith({
@@ -190,6 +195,7 @@ class CallState extends Equatable {
     bool? isCaptioning,
     bool? isBackstage,
     bool? isAudioProcessing,
+    bool? isSpeakingWhileMuted,
     CallSettings? settings,
     CallEgress? egress,
     String? rtmpIngress,
@@ -218,6 +224,18 @@ class CallState extends Equatable {
     bool? iOSMultitaskingCameraAccessEnabled,
     Map<String, Object>? custom,
   }) {
+    if (wasSetToFalse && this.isSpeakingWhileMuted == true) {
+      print(
+          'SpeechRecognition test wasSetToFalse async error/n${StackTrace.current}');
+      wasSetToFalse = false;
+    }
+    if (isSpeakingWhileMuted != null) {
+      print(
+        'SpeechRecognition test isSpeakingWhileMuted: $isSpeakingWhileMuted',
+      );
+      wasSetToFalse = !isSpeakingWhileMuted;
+    }
+
     return CallState._(
       preferences: preferences ?? this.preferences,
       currentUserId: currentUserId ?? this.currentUserId,
@@ -232,6 +250,7 @@ class CallState extends Equatable {
       isCaptioning: isCaptioning ?? this.isCaptioning,
       isBackstage: isBackstage ?? this.isBackstage,
       isAudioProcessing: isAudioProcessing ?? this.isAudioProcessing,
+      isSpeakingWhileMuted: isSpeakingWhileMuted ?? this.isSpeakingWhileMuted,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
       rtmpIngress: rtmpIngress ?? this.rtmpIngress,

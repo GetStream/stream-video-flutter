@@ -43,6 +43,7 @@ class CallScreen extends StatefulWidget {
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
   late final _videoEffectsManager = StreamVideoEffectsManager(widget.call);
+  late StreamSubscription<bool> _speechSubscription;
 
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
@@ -52,12 +53,29 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     _connectChatChannel();
+    _speechSubscription = widget.call.state
+        .asStream()
+        .map((state) => state.isSpeakingWhileMuted)
+        .distinct()
+        .listen((isSpeaking) {
+      print('SpeechRecognition test callScreen: isSpeaking: $isSpeaking');
+
+      final context = this.context;
+      if (isSpeaking && context.mounted) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          const SnackBar(
+            content: Text('You are speaking while muted'),
+          ),
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
     widget.call.leave();
     _userChatRepo.disconnectUser();
+    _speechSubscription.cancel();
     super.dispose();
   }
 
