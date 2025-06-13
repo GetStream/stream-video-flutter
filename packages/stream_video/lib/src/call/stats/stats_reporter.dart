@@ -59,7 +59,7 @@ class StatsReporter {
   void _processStats(
     ({CallStats publisherStats, CallStats subscriberStats}) stats,
   ) {
-    final state = stateManager.callState;
+    final state = stateManager.state;
 
     var publisherStats = state.publisherStats ?? PeerConnectionStats.empty();
     var subscriberStats = state.subscriberStats ?? PeerConnectionStats.empty();
