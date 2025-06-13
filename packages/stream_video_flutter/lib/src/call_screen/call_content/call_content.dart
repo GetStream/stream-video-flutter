@@ -200,10 +200,6 @@ class _StreamCallContentState extends State<StreamCallContent>
                 configuration:
                     widget.pictureInPictureConfiguration.iOSPiPConfiguration,
                 participantSort: widget.pictureInPictureConfiguration.sort,
-                includeLocalParticipantVideo: widget
-                    .pictureInPictureConfiguration
-                    .iOSPiPConfiguration
-                    .includeLocalParticipantVideo,
               ),
             ),
           widget.callParticipantsBuilder?.call(

@@ -40,12 +40,10 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
     super.key,
     required this.call,
     required this.configuration,
-    this.includeLocalParticipantVideo = true,
     this.participantSort,
   });
 
   final Call call;
-  final bool includeLocalParticipantVideo;
   final Comparator<CallParticipantState>? participantSort;
   final IOSPictureInPictureConfiguration configuration;
 
@@ -121,7 +119,7 @@ class _StreamPictureInPictureUiKitViewState
         (callState) {
           _handleCallState(
             callState,
-            widget.includeLocalParticipantVideo &&
+            widget.configuration.includeLocalParticipantVideo &&
                 widget.call.state.value.iOSMultitaskingCameraAccessEnabled,
           );
         },
