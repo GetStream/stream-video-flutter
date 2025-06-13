@@ -64,8 +64,8 @@ class _StreamPictureInPictureUiKitViewState
     bool includeLocalParticipantVideo,
   ) async {
     final participants = includeLocalParticipantVideo
-        ? widget.call.state.value.callParticipants
-        : widget.call.state.value.otherParticipants;
+        ? callState.callParticipants
+        : callState.otherParticipants;
 
     final sorted = List<CallParticipantState>.from(participants);
     mergeSort(
