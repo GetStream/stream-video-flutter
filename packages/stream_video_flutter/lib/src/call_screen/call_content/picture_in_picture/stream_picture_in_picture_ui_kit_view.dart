@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
+
+import 'picture_in_picture_configuration.dart';
 
 /// A widget that handles the picture-in-picture mode on iOS.
 /// If you are implementing custom call content widget and want to include PiP support
@@ -36,11 +39,13 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
   const StreamPictureInPictureUiKitView({
     super.key,
     required this.call,
-    this.includeLocalParticipantVideo = true,
+    required this.configuration,
+    this.participantSort,
   });
 
   final Call call;
-  final bool includeLocalParticipantVideo;
+  final Comparator<CallParticipantState>? participantSort;
+  final IOSPictureInPictureConfiguration configuration;
 
   @override
   State<StreamPictureInPictureUiKitView> createState() =>
@@ -49,41 +54,59 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
 
 class _StreamPictureInPictureUiKitViewState
     extends State<StreamPictureInPictureUiKitView> with WidgetsBindingObserver {
-  static const _idCallEvents = 1;
   static const _idCallState = 2;
 
-  final platformMethodChannel = const MethodChannel('stream_video_flutter_pip');
+  static const MethodChannel _channel =
+      MethodChannel('stream_video_flutter_pip');
 
   final Subscriptions _subscriptions = Subscriptions();
 
-  void _handleCallEvent(
-    StreamCallEvent event,
+  Future<void> _handleCallState(
+    CallState callState,
     bool includeLocalParticipantVideo,
-  ) {
+  ) async {
     final participants = includeLocalParticipantVideo
-        ? widget.call.state.value.callParticipants
-        : widget.call.state.value.otherParticipants;
+        ? callState.callParticipants
+        : callState.otherParticipants;
 
-    mergeSort(participants, compare: CallParticipantSortingPresets.speaker);
+    final sorted = List<CallParticipantState>.from(participants);
+    mergeSort(
+      sorted,
+      compare: widget.participantSort ?? CallParticipantSortingPresets.speaker,
+    );
 
-    if (participants.isNotEmpty) {
+    if (sorted.isNotEmpty) {
+      final participant = sorted.first;
+
       final videoTrack = widget.call.getTrack(
-        participants.first.trackIdPrefix,
-        participants.first.isScreenShareEnabled
+        participant.trackIdPrefix,
+        participant.isScreenShareEnabled
             ? SfuTrackType.screenShare
             : SfuTrackType.video,
       );
 
-      platformMethodChannel.invokeMethod(
-        'setTrack',
+      await _channel.invokeMethod(
+        'updateParticipant',
         {
           'trackId': videoTrack?.mediaTrack.id,
+          'name':
+              participant.name.isEmpty ? participant.userId : participant.name,
+          'imageUrl': participant.image,
+          'isAudioEnabled': participant.isAudioEnabled,
+          'isVideoEnabled':
+              participant.isVideoEnabled || participant.isScreenShareEnabled,
+          'connectionQuality': participant.connectionQuality.name,
+          'showParticipantName': widget.configuration.showParticipantName,
+          'showMicrophoneIndicator':
+              widget.configuration.showMicrophoneIndicator,
+          'showConnectionQualityIndicator':
+              widget.configuration.showConnectionQualityIndicator,
         },
       );
     }
 
-    if (event is StreamCallEndedEvent) {
-      platformMethodChannel.invokeMethod(
+    if (callState.status is CallStatusDisconnected) {
+      await _channel.invokeMethod(
         'callEnded',
       );
     }
@@ -91,25 +114,14 @@ class _StreamPictureInPictureUiKitViewState
 
   void _subscribeToCallEvents() {
     _subscriptions.add(
-      _idCallEvents,
-      widget.call.callEvents.listen((event) {
-        _handleCallEvent(
-          event,
-          widget.includeLocalParticipantVideo &&
-              widget.call.state.value.iOSMultitaskingCameraAccessEnabled,
-        );
-      }),
-    );
-
-    _subscriptions.add(
       _idCallState,
       widget.call.state.listen(
         (callState) {
-          if (callState.status is CallStatusDisconnected) {
-            platformMethodChannel.invokeMethod(
-              'callEnded',
-            );
-          }
+          _handleCallState(
+            callState,
+            widget.configuration.includeLocalParticipantVideo &&
+                widget.call.state.value.iOSMultitaskingCameraAccessEnabled,
+          );
         },
       ),
     );

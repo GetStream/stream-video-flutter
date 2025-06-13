@@ -123,6 +123,36 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     ) {
     }
 
+    // MARK: - Public API
+
+    /// Updates participant information and refreshes overlay
+    /// - Note: Only available on iOS 15.0+. Earlier versions will ignore this call.
+    public func updateParticipant(
+        name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool,
+        showParticipantName: Bool = true, showMicrophoneIndicator: Bool = true,
+        showConnectionQualityIndicator: Bool = true
+    ) {
+        guard #available(iOS 15.0, *) else { return }
+
+        guard
+            let contentViewController = contentViewController
+                as? StreamAVPictureInPictureVideoCallViewController
+        else {
+            return
+        }
+
+        contentViewController.updateParticipantOverlay(
+            name: name,
+            imageUrl: imageUrl,
+            connectionQuality: connectionQuality,
+            isMuted: isMuted,
+            hasVideo: hasVideo,
+            showParticipantName: showParticipantName,
+            showMicrophoneIndicator: showMicrophoneIndicator,
+            showConnectionQualityIndicator: showConnectionQualityIndicator
+        )
+    }
+
     // MARK: - Private helpers
 
     private func didUpdate(_ track: RTCVideoTrack?) {

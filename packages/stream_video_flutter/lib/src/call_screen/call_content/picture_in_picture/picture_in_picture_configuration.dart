@@ -12,6 +12,7 @@ class PictureInPictureConfiguration {
   const PictureInPictureConfiguration({
     this.enablePictureInPicture = false,
     this.disablePictureInPictureWhenScreenSharing = true,
+    this.sort,
     this.androidPiPConfiguration = const AndroidPictureInPictureConfiguration(),
     this.iOSPiPConfiguration = const IOSPictureInPictureConfiguration(),
   });
@@ -21,6 +22,11 @@ class PictureInPictureConfiguration {
 
   /// Whether to disable picture-in-picture mode during screen sharing on the device.
   final bool disablePictureInPictureWhenScreenSharing;
+
+  /// Sorting function for participants in picture-in-picture mode.
+  /// The first participant will be displayed in the PiP view.
+  /// If not provided, the default sorting prioritising speaker / screen sharer will be used.
+  final Comparator<CallParticipantState>? sort;
 
   /// Configuration for picture-in-picture mode on Android.
   final AndroidPictureInPictureConfiguration androidPiPConfiguration;
@@ -51,7 +57,13 @@ class AndroidPictureInPictureConfiguration {
 class IOSPictureInPictureConfiguration {
   const IOSPictureInPictureConfiguration({
     this.includeLocalParticipantVideo = true,
+    this.showParticipantName = true,
+    this.showMicrophoneIndicator = true,
+    this.showConnectionQualityIndicator = true,
   });
 
   final bool includeLocalParticipantVideo;
+  final bool showParticipantName;
+  final bool showMicrophoneIndicator;
+  final bool showConnectionQualityIndicator;
 }
