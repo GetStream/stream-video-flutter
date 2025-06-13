@@ -128,7 +128,9 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     /// Updates participant information and refreshes overlay
     /// - Note: Only available on iOS 15.0+. Earlier versions will ignore this call.
     public func updateParticipant(
-        name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool
+        name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool,
+        showParticipantName: Bool = true, showMicrophoneIndicator: Bool = true,
+        showConnectionQualityIndicator: Bool = true
     ) {
         guard #available(iOS 15.0, *) else { return }
 
@@ -144,7 +146,10 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
             imageUrl: imageUrl,
             connectionQuality: connectionQuality,
             isMuted: isMuted,
-            hasVideo: hasVideo
+            hasVideo: hasVideo,
+            showParticipantName: showParticipantName,
+            showMicrophoneIndicator: showMicrophoneIndicator,
+            showConnectionQualityIndicator: showConnectionQualityIndicator
         )
     }
 

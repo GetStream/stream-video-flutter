@@ -30,6 +30,12 @@ protocol StreamAVPictureInPictureViewControlling: AnyObject {
     /// Updates overlay with participant information
     func updateParticipantOverlay(
         name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool)
+
+    /// Updates overlay with participant information and configuration options
+    func updateParticipantOverlay(
+        name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool,
+        showParticipantName: Bool, showMicrophoneIndicator: Bool,
+        showConnectionQualityIndicator: Bool)
 }
 
 @available(iOS 15.0, *)
@@ -134,6 +140,19 @@ final class StreamAVPictureInPictureVideoCallViewController:
     func updateParticipantOverlay(
         name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool
     ) {
+        updateParticipantOverlay(
+            name: name, imageUrl: imageUrl, connectionQuality: connectionQuality,
+            isMuted: isMuted, hasVideo: hasVideo,
+            showParticipantName: true, showMicrophoneIndicator: true,
+            showConnectionQualityIndicator: true
+        )
+    }
+
+    func updateParticipantOverlay(
+        name: String?, imageUrl: String?, connectionQuality: String, isMuted: Bool, hasVideo: Bool,
+        showParticipantName: Bool, showMicrophoneIndicator: Bool,
+        showConnectionQualityIndicator: Bool
+    ) {
         let participantName = name ?? ""
 
         let needsUpdate =
@@ -148,7 +167,10 @@ final class StreamAVPictureInPictureVideoCallViewController:
                     imageUrl: imageUrl,
                     connectionQuality: connectionQuality,
                     isMuted: isMuted,
-                    hasVideo: hasVideo
+                    hasVideo: hasVideo,
+                    showParticipantName: showParticipantName,
+                    showMicrophoneIndicator: showMicrophoneIndicator,
+                    showConnectionQualityIndicator: showConnectionQualityIndicator
                 )
             }
             currentName = participantName
@@ -171,7 +193,10 @@ final class StreamAVPictureInPictureVideoCallViewController:
                         imageUrl: imageUrl,
                         connectionQuality: connectionQuality,
                         isMuted: isMuted,
-                        hasVideo: hasVideo
+                        hasVideo: hasVideo,
+                        showParticipantName: showParticipantName,
+                        showMicrophoneIndicator: showMicrophoneIndicator,
+                        showConnectionQualityIndicator: showConnectionQualityIndicator
                     )
                 )
                 controller.rootView = updatedView
@@ -207,6 +232,9 @@ struct PictureInPictureOverlayView: View {
     let connectionQuality: String
     let isMuted: Bool
     let hasVideo: Bool
+    let showParticipantName: Bool
+    let showMicrophoneIndicator: Bool
+    let showConnectionQualityIndicator: Bool
 
     var body: some View {
         ZStack {
@@ -239,25 +267,31 @@ struct PictureInPictureOverlayView: View {
                 Spacer()
                 HStack {
                     HStack(spacing: 4) {
-                        Text(name)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(1)
-                            .font(Font.caption)
-                            .minimumScaleFactor(0.7)
+                        if showParticipantName {
+                            Text(name)
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(1)
+                                .font(Font.caption)
+                                .minimumScaleFactor(0.7)
+                        }
 
-                        SoundIndicator(isMuted: isMuted)
+                        if showMicrophoneIndicator {
+                            SoundIndicator(isMuted: isMuted)
+                        }
                     }
-                    .padding(.all, 2)
                     .padding(.horizontal, 4)
                     .frame(height: 28)
+                    .padding(4)
                     .background(Color.black.opacity(0.6))
                     .cornerRadius(8)
 
                     Spacer()
 
                     // Connection quality indicator on the right
-                    ConnectionQualityIndicator(connectionQuality: connectionQuality)
+                    if showConnectionQualityIndicator {
+                        ConnectionQualityIndicator(connectionQuality: connectionQuality)
+                    }
                 }
             }
             // .padding(8)

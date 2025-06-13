@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 
+import 'picture_in_picture_configuration.dart';
+
 /// A widget that handles the picture-in-picture mode on iOS.
 /// If you are implementing custom call content widget and want to include PiP support
 /// add this widget to your widget tree.
@@ -37,6 +39,7 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
   const StreamPictureInPictureUiKitView({
     super.key,
     required this.call,
+    required this.configuration,
     this.includeLocalParticipantVideo = true,
     this.participantSort,
   });
@@ -44,6 +47,7 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
   final Call call;
   final bool includeLocalParticipantVideo;
   final Comparator<CallParticipantState>? participantSort;
+  final IOSPictureInPictureConfiguration configuration;
 
   @override
   State<StreamPictureInPictureUiKitView> createState() =>
@@ -94,6 +98,11 @@ class _StreamPictureInPictureUiKitViewState
           'isVideoEnabled':
               participant.isVideoEnabled || participant.isScreenShareEnabled,
           'connectionQuality': participant.connectionQuality.name,
+          'showParticipantName': widget.configuration.showParticipantName,
+          'showMicrophoneIndicator':
+              widget.configuration.showMicrophoneIndicator,
+          'showConnectionQualityIndicator':
+              widget.configuration.showConnectionQualityIndicator,
         },
       );
     }

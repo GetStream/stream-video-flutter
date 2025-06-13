@@ -127,6 +127,11 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
             let isAudioEnabled = argumentsDictionary?["isAudioEnabled"] as? Bool ?? false
             let isVideoEnabled = argumentsDictionary?["isVideoEnabled"] as? Bool ?? false
             let connectionQuality = argumentsDictionary?["connectionQuality"] as? String
+            let showParticipantName = argumentsDictionary?["showParticipantName"] as? Bool ?? true
+            let showMicrophoneIndicator =
+                argumentsDictionary?["showMicrophoneIndicator"] as? Bool ?? true
+            let showConnectionQualityIndicator =
+                argumentsDictionary?["showConnectionQualityIndicator"] as? Bool ?? true
 
             DispatchQueue.main.async {
                 if let unwrappedTrackId = trackId {
@@ -143,6 +148,9 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
                     connectionQuality: connectionQuality ?? "",
                     isMuted: !isAudioEnabled,
                     hasVideo: isVideoEnabled,
+                    showParticipantName: showParticipantName,
+                    showMicrophoneIndicator: showMicrophoneIndicator,
+                    showConnectionQualityIndicator: showConnectionQualityIndicator
                 )
             }
             result(nil)

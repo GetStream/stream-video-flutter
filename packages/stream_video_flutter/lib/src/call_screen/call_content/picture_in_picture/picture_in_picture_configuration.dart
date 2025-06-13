@@ -57,7 +57,13 @@ class AndroidPictureInPictureConfiguration {
 class IOSPictureInPictureConfiguration {
   const IOSPictureInPictureConfiguration({
     this.includeLocalParticipantVideo = true,
+    this.showParticipantName = true,
+    this.showMicrophoneIndicator = true,
+    this.showConnectionQualityIndicator = true,
   });
 
   final bool includeLocalParticipantVideo;
+  final bool showParticipantName;
+  final bool showMicrophoneIndicator;
+  final bool showConnectionQualityIndicator;
 }
