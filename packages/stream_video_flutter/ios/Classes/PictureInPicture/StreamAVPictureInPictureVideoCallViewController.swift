@@ -243,24 +243,23 @@ struct PictureInPictureOverlayView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
-            if !hasVideo && imageUrl != nil && !imageUrl!.isEmpty {
-                AsyncImage(url: URL(string: imageUrl!)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle()
-                        .fill(Color.blue.opacity(0.8))
-                        .frame(width: 80, height: 80)
-                        .overlay(
-                            Text(getInitials(from: name))
-                                .foregroundColor(.white)
-                                .font(.title2)
-                                .fontWeight(.medium)
-                        )
+            if !hasVideo {
+                if let urlString = imageUrl,
+                    !urlString.isEmpty,
+                    let url = URL(string: urlString)
+                {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        avatarPlaceholder
+                    }
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                } else {
+                    avatarPlaceholder
                 }
-                .frame(width: 80, height: 80)
-                .clipShape(Circle())
             }
 
             VStack {
@@ -296,6 +295,19 @@ struct PictureInPictureOverlayView: View {
             }
             // .padding(8)
         }
+    }
+
+    @ViewBuilder
+    var avatarPlaceholder: some View {
+        Circle()
+            .fill(Color.blue.opacity(0.8))
+            .frame(width: 80, height: 80)
+            .overlay(
+                Text(getInitials(from: name))
+                    .foregroundColor(.white)
+                    .font(.title2)
+                    .fontWeight(.medium)
+            )
     }
 
     private func getInitials(from name: String) -> String {
