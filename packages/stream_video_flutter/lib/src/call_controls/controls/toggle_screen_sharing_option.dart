@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -8,7 +10,8 @@ class ToggleScreenShareOption extends StatelessWidget {
   const ToggleScreenShareOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    @Deprecated(PartialStateDeprecationMessage.localParticipant)
+    this.localParticipant,
     this.enabledScreenShareIcon = Icons.screen_share,
     this.disabledScreenShareIcon = Icons.stop_screen_share,
     this.screenShareConstraints,
@@ -24,7 +27,8 @@ class ToggleScreenShareOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  @Deprecated(PartialStateDeprecationMessage.localParticipant)
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the screen sharing is enabled.
   final IconData enabledScreenShareIcon;
@@ -53,58 +57,70 @@ class ToggleScreenShareOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = localParticipant.isScreenShareEnabled;
     var screenShareConstraints = this.screenShareConstraints;
 
-    return CallControlOption(
-      icon: enabled
-          ? Icon(enabledScreenShareIcon)
-          : Icon(disabledScreenShareIcon),
-      iconColor:
-          enabled ? enabledScreenShareIconColor : disabledScreenShareIconColor,
-      backgroundColor: enabled
-          ? enabledScreenShareBackgroundColor
-          : disabledScreenShareBackgroundColor,
-      onPressed: () async {
-        final toggledEnabled = !enabled;
+    Widget buildContent(bool enabled) => CallControlOption(
+          icon: enabled
+              ? Icon(enabledScreenShareIcon)
+              : Icon(disabledScreenShareIcon),
+          iconColor: enabled
+              ? enabledScreenShareIconColor
+              : disabledScreenShareIconColor,
+          backgroundColor: enabled
+              ? enabledScreenShareBackgroundColor
+              : disabledScreenShareBackgroundColor,
+          onPressed: () async {
+            final toggledEnabled = !enabled;
 
-        if (CurrentPlatform.isDesktop && toggledEnabled) {
-          final source = await (desktopScreenSelectorBuilder?.call(context) ??
-              showDefaultScreenSelectionDialog(context));
+            if (CurrentPlatform.isDesktop && toggledEnabled) {
+              final source =
+                  await (desktopScreenSelectorBuilder?.call(context) ??
+                      showDefaultScreenSelectionDialog(context));
 
-          if (source != null) {
-            screenShareConstraints =
-                (screenShareConstraints ?? const ScreenShareConstraints())
-                    .copyWith(deviceId: source.id);
-          } else {
-            return;
-          }
-        }
-
-        if (CurrentPlatform.isAndroid) {
-          if (toggledEnabled) {
-            if (!await call.requestScreenSharePermission()) {
-              return;
+              if (source != null) {
+                screenShareConstraints =
+                    (screenShareConstraints ?? const ScreenShareConstraints())
+                        .copyWith(deviceId: source.id);
+              } else {
+                return;
+              }
             }
 
-            await StreamBackgroundService()
-                .startScreenSharingNotificationService(call);
-          } else {
-            await StreamBackgroundService()
-                .stopScreenSharingNotificationService(call.callCid.value);
-          }
-        }
+            if (CurrentPlatform.isAndroid) {
+              if (toggledEnabled) {
+                if (!await call.requestScreenSharePermission()) {
+                  return;
+                }
 
-        final result = await call.setScreenShareEnabled(
-          enabled: toggledEnabled,
-          constraints: screenShareConstraints,
+                await StreamBackgroundService()
+                    .startScreenSharingNotificationService(call);
+              } else {
+                await StreamBackgroundService()
+                    .stopScreenSharingNotificationService(call.callCid.value);
+              }
+            }
+
+            final result = await call.setScreenShareEnabled(
+              enabled: toggledEnabled,
+              constraints: screenShareConstraints,
+            );
+
+            if (CurrentPlatform.isAndroid && result.isFailure) {
+              await StreamBackgroundService()
+                  .stopScreenSharingNotificationService(call.callCid.value);
+            }
+          },
         );
 
-        if (CurrentPlatform.isAndroid && result.isFailure) {
-          await StreamBackgroundService()
-              .stopScreenSharingNotificationService(call.callCid.value);
-        }
-      },
+    if (localParticipant != null) {
+      return buildContent(localParticipant!.isScreenShareEnabled);
+    }
+
+    return PartialCallStateBuilder(
+      call: call,
+      selector: (state) => state.localParticipant,
+      builder: (_, participant) =>
+          buildContent(participant?.isScreenShareEnabled ?? false),
     );
   }
 }

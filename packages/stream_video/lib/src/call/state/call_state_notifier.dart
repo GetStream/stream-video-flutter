@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../call_state.dart';
@@ -32,6 +33,20 @@ class CallStateNotifier extends StateNotifier<CallState>
 
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
+
+  Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
+    return callStateStream.valueStream
+        .map(selector)
+        .distinct(
+          (previous, current) =>
+              identical(previous, current) ||
+              previous == current ||
+              (previous is List &&
+                  current is List &&
+                  const ListEquality<dynamic>().equals(previous, current)),
+        )
+        .asBroadcastStream();
+  }
 
   Stream<Duration> get durationStream =>
       _durationTimerController.stream.distinct();
