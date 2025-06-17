@@ -1,0 +1,25 @@
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../test/src/mocks.dart';
+
+void main() {
+  StreamCallControls.withDefaultOptions(
+    call: MockCall(),
+  );
+
+  FlipCameraOption(
+    call: MockCall(),
+  );
+
+  ToggleScreenShareOption(
+    call: MockCall(),
+  );
+
+  ToggleMicrophoneOption(
+    call: MockCall(),
+  );
+
+  ToggleCameraOption(
+    call: MockCall(),
+  );
+}

@@ -1,5 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values, avoid_implementing_value_types
-
+// ignore_for_file: avoid_redundant_argument_values, deprecated_member_use_from_same_package
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,22 +6,38 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../../test_utils/test_wrapper.dart';
+import '../../mocks.dart';
 
 void main() {
   group('StreamCallContent', () {
     late MockCall mockCall;
     late MockCallState mockCallState;
     late MockCallParticipantState mockLocalParticipant;
+    late MockStateEmitter<CallState> mockCallStateEmitter;
 
     setUp(() {
       mockCall = MockCall();
       mockCallState = MockCallState();
       mockLocalParticipant = MockCallParticipantState();
+      mockCallStateEmitter = MockStateEmitter<CallState>();
+
+      when(() => mockCallStateEmitter.value).thenReturn(mockCallState);
+      when(() => mockCall.state).thenReturn(mockCallStateEmitter);
+      when(() => mockCall.partialState<CallParticipantState?>(any()))
+          .thenAnswer((invocation) {
+        final CallStateSelector<CallParticipantState?> selector =
+            invocation.positionalArguments[0];
+        final filtered = selector(mockCallState);
+        return Stream.value(filtered);
+      });
 
       when(() => mockCallState.localParticipant)
           .thenReturn(mockLocalParticipant);
       when(() => mockCallState.status).thenReturn(CallStatus.connected());
       when(() => mockCallState.callParticipants).thenReturn([]);
+
+      when(() => mockLocalParticipant.isScreenShareEnabled).thenReturn(false);
+      when(() => mockLocalParticipant.isAudioEnabled).thenReturn(true);
     });
 
     goldenTest(
@@ -107,9 +122,3 @@ class _CallContentExample extends StatelessWidget {
     );
   }
 }
-
-class MockCall extends Mock implements Call {}
-
-class MockCallState extends Mock implements CallState {}
-
-class MockCallParticipantState extends Mock implements CallParticipantState {}

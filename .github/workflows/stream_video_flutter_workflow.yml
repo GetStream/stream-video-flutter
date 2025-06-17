@@ -72,6 +72,8 @@ jobs:
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           files: packages/*/coverage/lcov.info
+      - name: "Test dart fixes"
+        run: melos run test:fixes
 
   build:
     timeout-minutes: 30

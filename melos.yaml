@@ -121,6 +121,13 @@ scripts:
       flutter: true
       dirExists: test
 
+  test:fixes:
+    run: melos exec -c 4 --fail-fast -- "cd test_fixes && dart fix --compare-to-golden"
+    description: Verify dart fixes for a specific package in this project.
+    packageFilters:
+      flutter: true
+      dirExists: test_fixes
+
   update:goldens:
     run: melos exec -c 1 --depends-on="alchemist" -- "flutter test --tags golden --update-goldens"
     description: Update golden files for all packages in this project.
