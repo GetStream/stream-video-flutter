@@ -1,88 +1,86 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
-
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'dart:math' as math;
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../../stream_video.dart';
 import '../webrtc/model/stats/rtc_audio_source.dart';
 import '../webrtc/model/stats/rtc_stats_mapper.dart';
 
-typedef SoundStateChangedCallback = void Function(bool isSpeaking);
-final _logger = taggedLogger(tag: 'SV:SpeechRecognition');
+typedef SoundStateChangedCallback = void Function(
+  bool isSpeaking,
+  double audioLevel,
+);
 
-class SpeechRecognition {
-  SpeechRecognition();
-
-  Future<void> _init() async {
-    _pc1 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
-    _pc2 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
-    _isInitialized = true;
+class AudioRecognition {
+  AudioRecognition() {
+    _init();
   }
+
+  Completer<void>? _initCompleter;
 
   late RTCPeerConnection _pc1;
   late RTCPeerConnection _pc2;
   MediaStream? _audioStream;
-
-  bool _isInitialized = false;
 
   VoidCallback? _disposeTimers;
 
   Future<void> start({
     required SoundStateChangedCallback onSoundStateChanged,
   }) async {
-    if (!_isInitialized) await _init();
-    try {
-      if (_disposeTimers != null) {
-        _logger.w(
-          () =>
-              'Started speech recognition while already running. Stopping previous instance.',
-        );
-        await stop();
-      }
+    if (_initCompleter case final completer?) await completer.future;
 
-      final audioStream = await rtc.navigator.mediaDevices.getUserMedia(
-        const AudioConstraints().toMap(),
-      );
-      _audioStream = audioStream;
-
-      _pc1.onIceCandidate = _pc2.addCandidate;
-      _pc2.onIceCandidate = _pc1.addCandidate;
-
-// we might need to set the volume to 0
-      // _pc2.onTrack = (event) {
-      //   event.streams[0].getAudioTracks().forEach((track) {
-      //     track.enabled = false;
-      //   });
-      // };
-
-      audioStream.getAudioTracks().forEach((track) {
-        _pc1.addTrack(track, audioStream);
-      });
-
-      final offer = await _pc1.createOffer();
-      await _pc2.setRemoteDescription(offer);
-      await _pc1.setLocalDescription(offer);
-
-      final answer = await _pc2.createAnswer();
-      await _pc1.setRemoteDescription(answer);
-      await _pc2.setLocalDescription(answer);
-
-      _disposeTimers = _startListening(onSoundStateChanged);
-    } catch (e, trace) {
-      print('SpeechRecognition test start error: $e\n$trace');
-    }
+    _disposeTimers = _startListening(onSoundStateChanged);
   }
 
   Future<void> stop() async {
-    _isInitialized = false;
     _disposeTimers?.call();
     _disposeTimers = null;
+  }
+
+  Future<void> dispose() async {
+    await stop();
     await Future.wait([_pc1.close(), _pc2.close()]);
     await _cleanupAudioStream();
+  }
+
+  Future<void> _init() async {
+    _initCompleter = Completer<void>();
+    _pc1 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
+    _pc2 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
+
+    final audioStream = await rtc.navigator.mediaDevices.getUserMedia(
+      const AudioConstraints().toMap(),
+    );
+    _audioStream = audioStream;
+
+    _pc1.onIceCandidate = _pc2.addCandidate;
+    _pc2.onIceCandidate = _pc1.addCandidate;
+
+    // we might need to set the volume to 0
+    // _pc2.onTrack = (event) {
+    //   event.streams[0].getAudioTracks().forEach((track) {
+    //     track.enabled = false;
+    //   });
+    // };
+
+    audioStream.getAudioTracks().forEach((track) {
+      _pc1.addTrack(track, audioStream);
+    });
+
+    final offer = await _pc1.createOffer();
+    await _pc2.setRemoteDescription(offer);
+    await _pc1.setLocalDescription(offer);
+
+    final answer = await _pc2.createAnswer();
+    await _pc1.setRemoteDescription(answer);
+    await _pc2.setLocalDescription(answer);
+
+    _initCompleter?.complete();
+    _initCompleter = null;
   }
 
   VoidCallback _startListening(SoundStateChangedCallback onSoundStateChanged) {
@@ -95,7 +93,7 @@ class SpeechRecognition {
         <double>[]; // Store recent audio levels for smoother detection
     const historyLength = 10;
     const silenceThreshold = 1.1;
-    const speechThreshold = 2.5;
+    const speechThreshold = 5;
     const resetThreshold = 0.9;
     // Speech is set to true after 500ms of audio detection
     const speechTimeout = Duration(milliseconds: 500);
@@ -141,13 +139,13 @@ class SpeechRecognition {
       if (averageAudioLevel > baselineNoiseLevel * speechThreshold) {
         if (!speechDetected) {
           speechDetected = true;
-          onSoundStateChanged(true);
+          onSoundStateChanged(true, averageAudioLevel);
         }
 
         speechTimer?.cancel();
         speechTimer = Timer(speechTimeout, () {
           speechDetected = false;
-          onSoundStateChanged(false);
+          onSoundStateChanged(false, averageAudioLevel);
           speechTimer = null;
         });
       }
