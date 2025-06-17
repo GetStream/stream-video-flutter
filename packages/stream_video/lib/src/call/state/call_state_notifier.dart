@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../audio_processing/speech_recognition.dart';
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
@@ -13,7 +12,6 @@ import 'mixins/state_lifecycle_mixin.dart';
 import 'mixins/state_participant_mixin.dart';
 import 'mixins/state_rtc_mixin.dart';
 import 'mixins/state_sfu_mixin.dart';
-import 'mixins/state_speech_recognition_mixin.dart';
 
 class CallStateNotifier extends StateNotifier<CallState>
     with
@@ -22,12 +20,8 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateParticipantMixin,
         StateRtcMixin,
         StateSfuMixin,
-        StateCallActionsMixin,
-        StateSpeechRecognitionMixin {
-  CallStateNotifier(CallState initialState,
-      {SpeechRecognition? speechRecognition})
-      : _speechRecognition = speechRecognition ?? SpeechRecognition(),
-        super(initialState) {
+        StateCallActionsMixin {
+  CallStateNotifier(CallState initialState) : super(initialState) {
     callStateStream =
         MutableStateEmitterImpl<CallState>(initialState, sync: true);
     _durationTimerController = StreamController<Duration>.broadcast();
@@ -35,7 +29,6 @@ class CallStateNotifier extends StateNotifier<CallState>
   }
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
-  final SpeechRecognition _speechRecognition;
 
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
@@ -47,18 +40,10 @@ class CallStateNotifier extends StateNotifier<CallState>
   Timer? _durationTimer;
 
   @override
-  get state => super.state;
-
-  @override
   set state(CallState value) {
     if (value.status != super.state.status) {
       _logger.v(() => '[setState] ${value.status} <= ${super.state.status}');
     }
-    updateSpeechRecognition(
-      oldState: super.state,
-      newState: value,
-      speechRecognition: _speechRecognition,
-    );
 
     super.state = value;
     callStateStream.value = value;
