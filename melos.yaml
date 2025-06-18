@@ -22,7 +22,10 @@ command:
       device_info_plus: ">=10.1.2 <12.0.0"
       share_plus: ^11.0.0
       stream_chat_flutter: ^9.8.0
-      stream_webrtc_flutter: ^1.0.7
+      stream_webrtc_flutter:
+        git:
+          url: https://github.com/GetStream/webrtc-flutter.git
+          ref: e9a2356d5b4ac32c8d59df1f02d6c7fd5e31ddb9
 
 scripts:
   postclean:
