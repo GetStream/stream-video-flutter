@@ -40,7 +40,7 @@ dependencies:
   stream_video_flutter: ^0.9.6
   stream_video_push_notification: ^0.9.6
   stream_video_screen_sharing: ^0.9.6
-  stream_video_noise_cancellation: ^0.9.6
+  # stream_video_noise_cancellation: ^0.9.6
 
 dependency_overrides:
   just_audio_web: ^0.4.13
@@ -53,8 +53,8 @@ dependency_overrides:
     path: ../packages/stream_video_push_notification
   stream_video_screen_sharing:
     path: ../packages/stream_video_screen_sharing
-  stream_video_noise_cancellation:
-    path: ../packages/stream_video_noise_cancellation
+  # stream_video_noise_cancellation:
+  #   path: ../packages/stream_video_noise_cancellation
 
 dev_dependencies:
   build_runner: ^2.4.6
