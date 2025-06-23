@@ -2503,6 +2503,11 @@ class Call {
     return result;
   }
 
+  /// Sets the mirror state for a remote participant's video track.
+  ///
+  /// - [sessionId]: The session ID of the participant.
+  /// - [userId]: The user ID of the participant.
+  /// - [mirrorVideo]: Whether to mirror the participant's video.
   Result<None> setParticipantMirrorVideo({
     required String sessionId,
     required String userId,
