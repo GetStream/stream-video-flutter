@@ -2503,6 +2503,20 @@ class Call {
     return result;
   }
 
+  Result<None> setParticipantMirrorVideo({
+    required String sessionId,
+    required String userId,
+    required bool mirrorVideo,
+  }) {
+    _stateManager.participantMirrorVideo(
+      sessionId: sessionId,
+      userId: userId,
+      mirrorVideo: mirrorVideo,
+    );
+
+    return const Result.success(none);
+  }
+
   @Deprecated('Use setParticipantPinnedLocally instead')
   Future<Result<None>> setParticipantPinned({
     required String sessionId,
