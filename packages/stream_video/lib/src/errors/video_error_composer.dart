@@ -2,6 +2,9 @@ import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../open_api/video/coordinator/api.dart';
+import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../sfu/data/events/sfu_event_mapper_extensions.dart';
+import '../sfu/data/models/sfu_error.dart';
 import 'video_error.dart';
 
 /// TODO
@@ -11,6 +14,17 @@ mixin VideoErrors {
     if (exception is String) {
       return VideoError(
         message: exception,
+        stackTrace: stackTrace,
+      );
+    } else if (exception is sfu_models.Error) {
+      return VideoErrorWithCause(
+        message: exception.message,
+        cause: SfuError(
+          message: exception.message,
+          code: exception.code.toDomain(),
+          shouldRetry: exception.shouldRetry,
+          reconnectStrategy: SfuReconnectionStrategy.unspecified,
+        ),
         stackTrace: stackTrace,
       );
     } else if (exception is TwirpError) {

@@ -2,10 +2,15 @@ import 'dart:async';
 
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../protobuf/video/sfu/models/models.pbenum.dart';
+import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
 import '../disposable.dart';
+import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../sfu/data/models/sfu_error.dart';
+import '../sfu/sfu_client.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
@@ -26,19 +31,21 @@ typedef OnStreamAdded = void Function(StreamPeerConnection, rtc.MediaStream);
 /// {@endtemplate}
 typedef OnRenegotiationNeeded = void Function(StreamPeerConnection);
 
+/// {@template onReconnectionNeeded}
+/// Handler when a reconnection is needed.
+/// The [SfuReconnectionStrategy] indicates how the reconnection should be handled.
+/// {@endtemplate}
+typedef OnReconnectionNeeded = void Function(
+  StreamPeerConnection,
+  SfuReconnectionStrategy,
+);
+
 /// {@template onIceCandidate}
 /// Handler whenever we receive [rtc.RTCIceCandidate]s.
 /// {@endtemplate}
 typedef OnIceCandidate = void Function(
   StreamPeerConnection,
   rtc.RTCIceCandidate,
-);
-
-/// {@template onIceCandidate}
-/// Handler whenever [rtc.RTCIceConnectionState]s is [rtc.RTCIceConnectionState.RTCIceConnectionStateFailed] or [rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected].
-/// {@endtemplate}
-typedef OnIssue = void Function(
-  StreamPeerConnection,
 );
 
 /// {@template onTrack}
@@ -53,22 +60,28 @@ typedef OnTrack = void Function(
 class StreamPeerConnection extends Disposable {
   /// Creates [StreamPeerConnection] instance.
   StreamPeerConnection({
+    required this.sfuClient,
     required this.sessionId,
     required this.callCid,
     required this.type,
     required this.pc,
     required this.sdpEditor,
+    this.iceRestartDelay = const Duration(milliseconds: 2500),
   }) {
     _initRtcCallbacks();
   }
 
   final _logger = taggedLogger(tag: 'SV:PeerConnection');
 
+  final SfuClient sfuClient;
   final String sessionId;
   final StreamCallCid callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
   final SdpEditor sdpEditor;
+  final Duration iceRestartDelay;
+
+  Timer? iceRestartTimeout;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -76,15 +89,60 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onRenegotiationNeeded}
   OnRenegotiationNeeded? onRenegotiationNeeded;
 
+  /// {@macro onReconnectionNeeded}
+  OnReconnectionNeeded? onReconnectionNeeded;
+
   /// {@macro onIceCandidate}
   OnIceCandidate? onIceCandidate;
-
-  OnIssue? onIssue;
 
   /// {@macro onTrack}
   OnTrack? onTrack;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
+
+  /// Attempts to restart ICE on the `RTCPeerConnection`.
+  /// This method intentionally doesn't await the `restartIce()` method,
+  /// allowing it to run in the background and handle any errors that may occur.
+  void tryRestartIce() {
+    _logger.v(() => '[restartIce] no args');
+    restartIce().then((result) {
+      if (result.isFailure) {
+        final error = result.getErrorOrNull();
+        if (error is VideoErrorWithCause && error.cause is SfuError) {
+          final sfuError = error.cause as SfuError;
+          if (sfuError.code == SfuErrorCode.participantSignalLost) {
+            onReconnectionNeeded?.call(this, SfuReconnectionStrategy.fast);
+            return;
+          }
+        }
+
+        onReconnectionNeeded?.call(this, SfuReconnectionStrategy.rejoin);
+      }
+    });
+  }
+
+  Future<Result<void>> restartIce() async {
+    _logger.v(() => '[restartIce] #$type; no args');
+    try {
+      if (type == StreamPeerType.publisher) {
+        try {
+          await pc.restartIce();
+        } catch (e, stk) {
+          return Result.failure(VideoErrors.compose(e, stk));
+        }
+        return const Result.success(null);
+      } else {
+        return await sfuClient.restartIce(
+          ICERestartRequest(
+            sessionId: sessionId,
+            peerType: PeerType.PEER_TYPE_SUBSCRIBER,
+          ),
+        );
+      }
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
 
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer([
@@ -237,6 +295,26 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
+  /// Checks if the `RTCPeerConnection` is healthy.
+  /// It checks the ICE connection state and the peer connection state.
+  /// If either state is `failed`, `disconnected`, or `closed`,
+  /// it returns `false`, otherwise it returns `true`.
+  bool isHealthy() {
+    const failedStates = {
+      rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+      rtc.RTCIceConnectionState.RTCIceConnectionStateClosed,
+      rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+      rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed,
+      rtc.RTCPeerConnectionState.RTCPeerConnectionStateClosed,
+      rtc.RTCPeerConnectionState.RTCPeerConnectionStateDisconnected,
+    };
+
+    final iceState = pc.iceConnectionState;
+    final connectionState = pc.connectionState;
+    return !failedStates.contains(iceState) &&
+        !failedStates.contains(connectionState);
+  }
+
   void _initRtcCallbacks() {
     pc
       ..onAddStream = _onAddStream
@@ -246,6 +324,7 @@ class StreamPeerConnection extends Disposable {
       ..onRemoveTrack = _onRemoveTrack
       ..onIceCandidate = _onIceCandidate
       ..onIceConnectionState = _onIceConnectionState
+      ..onConnectionState = _onConnectionState
       ..onRenegotiationNeeded = _onRenegotiationNeeded;
   }
 
@@ -304,10 +383,41 @@ class StreamPeerConnection extends Disposable {
 
     switch (state) {
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
+        // in the `failed` state, we try to restart ICE immediately
+        _logger.i(() => 'restartICE due to failed connection');
+        tryRestartIce();
+        break;
       case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
-        onIssue?.call(this);
+        // in the `disconnected` state, we schedule a restartICE() after a delay
+        // as the pc might recover the connection in the meantime
+        _logger.i(() => 'disconnected connection, scheduling restartICE');
+        iceRestartTimeout?.cancel();
+        iceRestartTimeout = Timer(iceRestartDelay, () {
+          final currentState = pc.iceConnectionState;
+          if (currentState ==
+                  rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
+              currentState ==
+                  rtc.RTCIceConnectionState.RTCIceConnectionStateFailed) {
+            tryRestartIce();
+          }
+        });
+        break;
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateConnected:
+        // in the `connected` state, we clear the ice restart timeout if it exists
+        _logger.i(() => 'connected connection, canceling restartICE');
+        iceRestartTimeout?.cancel();
+        iceRestartTimeout = null;
       default:
         break;
+    }
+  }
+
+  void _onConnectionState(rtc.RTCPeerConnectionState state) {
+    if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
+      _logger.w(() => '[onConnectionState] state: $state');
+      onReconnectionNeeded?.call(this, SfuReconnectionStrategy.rejoin);
+    } else {
+      _logger.v(() => '[onConnectionState] state: $state');
     }
   }
 
@@ -346,6 +456,7 @@ class StreamPeerConnection extends Disposable {
     _dropRtcCallbacks();
     onStreamAdded = null;
     onRenegotiationNeeded = null;
+    onReconnectionNeeded = null;
     onIceCandidate = null;
     onTrack = null;
     _pendingCandidates.clear();

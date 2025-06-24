@@ -55,8 +55,6 @@ const _tag = 'SV:CallSession';
 const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 
-typedef OnPeerConnectionIssue = void Function(StreamPeerConnection pc);
-
 class CallSession extends Disposable {
   CallSession({
     required this.callCid,
@@ -65,7 +63,7 @@ class CallSession extends Disposable {
     required this.config,
     required this.stateManager,
     required this.dynascaleManager,
-    required this.onPeerConnectionIssue,
+    required this.onReconnectionNeeded,
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
@@ -107,7 +105,7 @@ class CallSession extends Disposable {
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
-  final OnPeerConnectionIssue onPeerConnectionIssue;
+  final OnReconnectionNeeded onReconnectionNeeded;
   final ClientPublishOptions? clientPublishOptions;
   final InternetConnection networkMonitor;
   final StatsOptions statsOptions;
@@ -358,13 +356,14 @@ class CallSession extends Disposable {
 
       if (isAnonymousUser) {
         rtcManager = await rtcManagerFactory.makeRtcManager(
+          sfuClient: sfuClient,
           clientDetails: _clientDetails,
           sessionSequence: sessionSeq,
           statsOptions: statsOptions,
         )
           ..onSubscriberIceCandidate = _onLocalIceCandidate
-          ..onSubscriberIssue = onPeerConnectionIssue
           ..onRenegotiationNeeded = _onRenegotiationNeeded
+          ..onReconnectionNeeded = onReconnectionNeeded
           ..onRemoteTrackReceived = _onRemoteTrackReceived;
       } else {
         final currentUserId = stateManager.callState.currentUserId;
@@ -376,6 +375,7 @@ class CallSession extends Disposable {
         _logger.v(() => '[start] localTrackId: $localTrackId');
 
         rtcManager = await rtcManagerFactory.makeRtcManager(
+          sfuClient: sfuClient,
           publisherId: localTrackId,
           publishOptions: event.publishOptions,
           clientDetails: _clientDetails,
@@ -385,10 +385,9 @@ class CallSession extends Disposable {
         )
           ..onPublisherIceCandidate = _onLocalIceCandidate
           ..onSubscriberIceCandidate = _onLocalIceCandidate
-          ..onPublisherIssue = onPeerConnectionIssue
-          ..onSubscriberIssue = onPeerConnectionIssue
           ..onLocalTrackMuted = _onLocalTrackMuted
           ..onLocalTrackPublished = _onLocalTrackPublished
+          ..onReconnectionNeeded = onReconnectionNeeded
           ..onRenegotiationNeeded = _onRenegotiationNeeded
           ..onRemoteTrackReceived = _onRemoteTrackReceived;
       }

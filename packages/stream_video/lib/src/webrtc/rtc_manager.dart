@@ -86,16 +86,13 @@ class RtcManager extends Disposable {
     subscriber.onIceCandidate = cb;
   }
 
-  set onSubscriberIssue(OnIssue? cb) {
-    subscriber.onIssue = cb;
-  }
-
-  set onPublisherIssue(OnIssue? cb) {
-    publisher?.onIssue = cb;
-  }
-
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     publisher?.onRenegotiationNeeded = cb;
+  }
+
+  set onReconnectionNeeded(OnReconnectionNeeded? cb) {
+    subscriber.onReconnectionNeeded = cb;
+    publisher?.onReconnectionNeeded = cb;
   }
 
   OnLocalTrackMuted? onLocalTrackMuted;
