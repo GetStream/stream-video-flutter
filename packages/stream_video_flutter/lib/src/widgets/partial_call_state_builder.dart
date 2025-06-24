@@ -4,7 +4,7 @@ import 'package:stream_video/stream_video.dart';
 /// Convenience widget to build a part of the call screen based on a partial call state.
 ///
 /// It wraps a [StreamBuilder] and uses the [call] and the [selector] to
-/// rebuild the widget when the relevantstate changes.
+/// rebuild the widget when the relevant state changes.
 class PartialCallStateBuilder<T> extends StatelessWidget {
   const PartialCallStateBuilder({
     required this.call,
