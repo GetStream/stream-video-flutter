@@ -1,3 +1,7 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -6,6 +10,9 @@ import '../../../stream_video_flutter_background.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
+///
+/// Replaced by the simplified [CallPreferredSizeWidgetBuilder].
+@Deprecated('Use CallPreferredSizeWidgetBuilder instead.')
 typedef CallAppBarBuilder = PreferredSizeWidget? Function(
   BuildContext context,
   Call call,
@@ -13,6 +20,9 @@ typedef CallAppBarBuilder = PreferredSizeWidget? Function(
 );
 
 /// Builder used to create a custom call participants widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef CallParticipantsBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -20,6 +30,9 @@ typedef CallParticipantsBuilder = Widget Function(
 );
 
 /// Builder used to create a custom call controls widget.
+///
+/// Replaced by the simplified [CallWidgetBuilder].
+@Deprecated('Use CallWidgetBuilder instead.')
 typedef CallControlsBuilder = Widget Function(
   BuildContext context,
   Call call,
@@ -34,12 +47,17 @@ class StreamCallContent extends StatefulWidget {
   const StreamCallContent({
     super.key,
     required this.call,
-    required this.callState,
+    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.onBackPressed,
     this.onLeaveCallTap,
-    this.callAppBarBuilder,
+    @Deprecated('Use callAppBarWidgetBuilder instead.') this.callAppBarBuilder,
+    this.callAppBarWidgetBuilder,
+    @Deprecated('Use callParticipantsWidgetBuilder instead.')
     this.callParticipantsBuilder,
+    this.callParticipantsWidgetBuilder,
+    @Deprecated('Use callControlsWidgetBuilder instead.')
     this.callControlsBuilder,
+    this.callControlsWidgetBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.extendBody = false,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
@@ -49,7 +67,13 @@ class StreamCallContent extends StatefulWidget {
   final Call call;
 
   /// Holds information about the call.
-  final CallState callState;
+  @Deprecated(
+    """
+It's no longer recommended to provide `callState`.
+The widget can listen to more focussed partial state updates itself from the `call` object.
+""",
+  )
+  final CallState? callState;
 
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
@@ -58,13 +82,25 @@ class StreamCallContent extends StatefulWidget {
   final VoidCallback? onLeaveCallTap;
 
   /// Builder used to create a custom call app bar.
+  @Deprecated('Use callAppBarWidgetBuilder instead.')
   final CallAppBarBuilder? callAppBarBuilder;
 
+  /// Builder used to create a custom call app bar.
+  final CallPreferredSizeWidgetBuilder? callAppBarWidgetBuilder;
+
   /// Builder used to create a custom participants grid.
+  @Deprecated('Use callParticipantsWidgetBuilder instead.')
   final CallParticipantsBuilder? callParticipantsBuilder;
 
+  /// Builder used to create a custom participants grid.
+  final CallWidgetBuilder? callParticipantsWidgetBuilder;
+
   /// Builder used to create a custom call controls panel.
+  @Deprecated('Use callControlsWidgetBuilder instead.')
   final CallControlsBuilder? callControlsBuilder;
+
+  /// Builder used to create a custom call controls panel.
+  final CallWidgetBuilder? callControlsWidgetBuilder;
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
@@ -88,7 +124,12 @@ class _StreamCallContentState extends State<StreamCallContent>
   Call get call => widget.call;
 
   /// Holds information about the call.
-  CallState get callState => widget.callState;
+  CallState? get _callState => widget.callState;
+  late bool _isScreenShareEnabled;
+  late CallStatus _status;
+
+  StreamSubscription<({CallStatus status, bool isScreenShareEnabled})>?
+      _callStateSubscription;
 
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
@@ -99,6 +140,7 @@ class _StreamCallContentState extends State<StreamCallContent>
   @override
   void initState() {
     super.initState();
+    _startListeningToCallState();
 
     if (widget.pictureInPictureConfiguration.enablePictureInPicture) {
       StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: true);
@@ -120,24 +162,19 @@ class _StreamCallContentState extends State<StreamCallContent>
       }
     }
 
-    // Disable PiP when screen sharing is enabled
-    if (widget.callState.localParticipant?.isScreenShareEnabled !=
-        oldWidget.callState.localParticipant?.isScreenShareEnabled) {
-      if (widget.pictureInPictureConfiguration
-          .disablePictureInPictureWhenScreenSharing) {
-        StreamVideoFlutterBackground.setPictureInPictureEnabled(
-          enable: widget.pictureInPictureConfiguration.enablePictureInPicture &&
-              !(widget.callState.localParticipant?.isScreenShareEnabled ??
-                  false),
-        );
-      }
-    }
-
-    // Disable PiP when call is disconnected
-    if (widget.callState.status != oldWidget.callState.status) {
-      if (widget.callState.status.isDisconnected) {
-        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
-      }
+    //If the widget has a callState we expect that state to be updated when needed.
+    if (_callState != oldWidget.callState && _callState != null) {
+      _callStateSubscription?.cancel();
+      _updateCallState(
+        (
+          status: widget.callState!.status,
+          isScreenShareEnabled:
+              widget.callState!.localParticipant?.isScreenShareEnabled ?? false
+        ),
+      );
+    } else if (widget.call != oldWidget.call) {
+      _callStateSubscription?.cancel();
+      _startListeningToCallState();
     }
   }
 
@@ -148,7 +185,58 @@ class _StreamCallContentState extends State<StreamCallContent>
       WidgetsBinding.instance.removeObserver(this);
     }
 
+    _callStateSubscription?.cancel();
+
     super.dispose();
+  }
+
+  void _startListeningToCallState() {
+    final callState = _callState ?? call.state.value;
+    _status = callState.status;
+    _isScreenShareEnabled =
+        callState.localParticipant?.isScreenShareEnabled ?? false;
+
+    //If the widget has a callState we expect that state to be updated when needed.
+    if (_callState != null) {
+      return;
+    }
+
+    _callStateSubscription = call
+        .partialState(
+          (state) => (
+            status: state.status,
+            isScreenShareEnabled:
+                state.localParticipant?.isScreenShareEnabled ?? false
+          ),
+        )
+        .listen(_updateCallState);
+  }
+
+  void _updateCallState(
+    ({CallStatus status, bool isScreenShareEnabled}) callState,
+  ) {
+    // Disable PiP when screen sharing is enabled
+    if (callState.isScreenShareEnabled != _isScreenShareEnabled) {
+      if (widget.pictureInPictureConfiguration
+          .disablePictureInPictureWhenScreenSharing) {
+        StreamVideoFlutterBackground.setPictureInPictureEnabled(
+          enable: widget.pictureInPictureConfiguration.enablePictureInPicture &&
+              !callState.isScreenShareEnabled,
+        );
+      }
+    }
+
+    // Disable PiP when call is disconnected
+    if (callState.status != _status) {
+      if (callState.status.isDisconnected) {
+        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
+      }
+    }
+
+    setState(() {
+      _status = callState.status;
+      _isScreenShareEnabled = callState.isScreenShareEnabled;
+    });
   }
 
   @override
@@ -171,24 +259,26 @@ class _StreamCallContentState extends State<StreamCallContent>
         widget.pictureInPictureConfiguration.enablePictureInPicture &&
             (!widget.pictureInPictureConfiguration
                     .disablePictureInPictureWhenScreenSharing ||
-                !(callState.localParticipant?.isScreenShareEnabled ?? false));
+                !_isScreenShareEnabled);
 
     if (pipEnabled && _isPictureInPictureModeOn && CurrentPlatform.isAndroid) {
       return widget.pictureInPictureConfiguration.androidPiPConfiguration
+              .callPictureInPictureWidgetBuilder
+              ?.call(context, call) ??
+          widget.pictureInPictureConfiguration.androidPiPConfiguration
               .callPictureInPictureBuilder
-              ?.call(context, call, callState) ??
+              ?.call(context, call, _callState ?? call.state.value) ??
           StreamCallParticipants(
             call: call,
-            participants: callState.callParticipants,
             layoutMode: ParticipantLayoutMode.pictureInPicture,
             sort: widget.pictureInPictureConfiguration.sort,
           );
     }
 
     final Widget bodyWidget;
-    if (callState.status.isConnected ||
-        callState.status.isFastReconnecting ||
-        callState.status.isMigrating) {
+    if (_status.isConnected ||
+        _status.isFastReconnecting ||
+        _status.isMigrating) {
       bodyWidget = Stack(
         children: [
           if (CurrentPlatform.isIos && pipEnabled)
@@ -202,20 +292,20 @@ class _StreamCallContentState extends State<StreamCallContent>
                 participantSort: widget.pictureInPictureConfiguration.sort,
               ),
             ),
-          widget.callParticipantsBuilder?.call(
+          widget.callParticipantsWidgetBuilder?.call(context, call) ??
+              widget.callParticipantsBuilder?.call(
                 context,
                 call,
-                callState,
+                _callState ?? call.state.value,
               ) ??
               StreamCallParticipants(
                 call: call,
-                participants: callState.callParticipants,
                 layoutMode: widget.layoutMode,
               ),
         ],
       );
     } else {
-      final isReconnecting = callState.status.isReconnecting;
+      final isReconnecting = _status.isReconnecting;
       final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
       bodyWidget = Center(
         child: Text(
@@ -225,11 +315,11 @@ class _StreamCallContentState extends State<StreamCallContent>
       );
     }
 
-    final localParticipant = callState.localParticipant;
-
     return Scaffold(
       backgroundColor: theme.callContentTheme.callContentBackgroundColor,
-      appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
+      appBar: widget.callAppBarWidgetBuilder?.call(context, call) ??
+          widget.callAppBarBuilder
+              ?.call(context, call, _callState ?? call.state.value) ??
           CallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
@@ -248,7 +338,7 @@ class _StreamCallContentState extends State<StreamCallContent>
               onClosePressed: _toggleStatsVisibility,
             ),
           ),
-          if (callState.status.isFastReconnecting)
+          if (_status.isFastReconnecting)
             const Positioned(
               top: 25,
               left: 25,
@@ -264,13 +354,18 @@ class _StreamCallContentState extends State<StreamCallContent>
         ],
       ),
       extendBody: widget.extendBody,
-      bottomNavigationBar: localParticipant != null
-          ? widget.callControlsBuilder?.call(context, call, callState) ??
-              StreamCallControls.withDefaultOptions(
-                call: call,
-                localParticipant: localParticipant,
-              )
-          : null,
+      bottomNavigationBar: PartialCallStateBuilder(
+        call: call,
+        selector: (state) => state.localParticipant,
+        builder: (_, localParticipant) => localParticipant != null
+            ? widget.callControlsWidgetBuilder?.call(context, call) ??
+                widget.callControlsBuilder
+                    ?.call(context, call, _callState ?? call.state.value) ??
+                StreamCallControls.withDefaultOptions(
+                  call: call,
+                )
+            : const SizedBox.shrink(),
+      ),
     );
   }
 

@@ -1,3 +1,8 @@
+## Unreleased
+
+✅ Added
+* Added `call.partialState` for more specific and efficient state updates.
+
 ## 0.9.6
 
 ✅ Added

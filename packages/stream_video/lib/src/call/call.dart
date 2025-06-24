@@ -74,6 +74,7 @@ typedef SetActiveCall = Future<void> Function(Call?);
 typedef SetOutgoingCall = Future<void> Function(Call?);
 typedef GetActiveCall = Call? Function();
 typedef GetOutgoingCall = Call? Function();
+typedef CallStateSelector<T> = T Function(CallState state);
 
 const _idState = 1;
 const _idUserId = 2;
@@ -293,6 +294,10 @@ class Call {
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
+
+  Stream<T> partialState<T>(CallStateSelector<T> selector) {
+    return _stateManager.partialCallStateStream(selector);
+  }
 
   SharedEmitter<({CallStats publisherStats, CallStats subscriberStats})>
       get stats => _stats;
