@@ -271,6 +271,7 @@ class _StreamCallContentState extends State<StreamCallContent>
           StreamCallParticipants(
             call: call,
             layoutMode: ParticipantLayoutMode.pictureInPicture,
+            sort: widget.pictureInPictureConfiguration.sort,
           );
     }
 
@@ -286,10 +287,9 @@ class _StreamCallContentState extends State<StreamCallContent>
               width: 300,
               child: StreamPictureInPictureUiKitView(
                 call: call,
-                includeLocalParticipantVideo: widget
-                    .pictureInPictureConfiguration
-                    .iOSPiPConfiguration
-                    .includeLocalParticipantVideo,
+                configuration:
+                    widget.pictureInPictureConfiguration.iOSPiPConfiguration,
+                participantSort: widget.pictureInPictureConfiguration.sort,
               ),
             ),
           widget.callParticipantsWidgetBuilder?.call(context, call) ??

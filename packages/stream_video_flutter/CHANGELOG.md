@@ -1,8 +1,20 @@
+## Unreleased
+
+✅ Added
+* Added `handleCallInterruptionCallbacks` method to `RtcMediaDeviceNotifier` that provides an option to handle system audio interruption like incoming calls, or other media playing. See the [documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/) for details.
+* Improved the Picture-in-Picture (PiP) implementation for video calls
+    * (iOS) Shows participant avatar instead of black screen when video track is disabled.
+    * (iOS) Added overlay with participant name, microphone indicator and connection qualit indicator.
+    * (iOS/Android) Added `sort` in `PictureInPictureConfiguration` that enables customization of PiP participant selection.
+
+🐞 Fixed
+* Fixed the handling of user blocking event to disconnect the blocked user with a proper reason.
+
 ## 0.9.5
 
 ✅ Added
 * Introduced `extendBody` parameter in `StreamCallContent` that extends the participants view to the bottom edge of the scaffold when enabled.
-* Introduced `allowMultipleActiveCalls` option in `StreamVideoOptions` enabling support for concurrent active calls. See the [documentation](https://getstream.io/video/docs/flutter/ui-cookbook/multiple-simultaneous-calls-support/) for details.
+* Introduced `allowMultipleActiveCalls` option in `StreamVideoOptions` enabling support for concurrent active calls. See the [documentation](https://getstream.io/video/docs/flutter/advanced/multiple-simultaneous-calls-support/) for details.
 
 🐞 Fixed
 * Enhanced permission update handling to only process events targeting the current user.

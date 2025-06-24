@@ -1,0 +1,43 @@
+name: 'PR is Conventional and Semantic'
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+    branches:
+      - main
+        
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conventional_pr_title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5.5.3
+        with: 
+          scopes: |
+            llc
+            ui
+            doc
+            repo
+            samples
+          requireScope: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  semantic_changelog_update:
+    needs: conventional_pr_title # Trigger after the [conventional_pr_title] completes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GetStream/verify-semantic-changelog-update@main
+        with:
+          scopes: |
+            {
+              "llc": "packages/stream_video",
+              "ui": "packages/stream_video_flutter"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

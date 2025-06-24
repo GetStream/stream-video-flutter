@@ -9,6 +9,12 @@ import '../../utils/extensions.dart';
 import '../../utils/result.dart';
 import 'rtc_media_device.dart';
 
+abstract class InterruptionEvent {}
+
+class InterruptionBeginEvent extends InterruptionEvent {}
+
+class InterruptionEndEvent extends InterruptionEvent {}
+
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
@@ -21,6 +27,43 @@ class RtcMediaDeviceNotifier {
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
+
+  /// Allows to handle call interruption callbacks.
+  /// [onInterruptionStart] is called when the call interruption begins.
+  /// [onInterruptionEnd] is called when the call interruption ends.
+  /// [androidInterruptionSource] specifies the source of the interruption on Android.
+  ///
+  /// On iOS, interruptions can occur due to:
+  /// - Incoming phone calls
+  /// - Siri activation
+  /// - Alarm or timer sounds
+  /// - Audio from other apps taking over (e.g., voice memo, navigation)
+  ///
+  /// On Android, interruption sources depend on the [androidInterruptionSource]:
+  /// - With audioFocus:
+  ///   - Other media apps interrupting (e.g., Spotify)
+  ///   - Assistant voice prompts (e.g., Google Assistant)
+  ///   - Alarms and notifications
+  /// - With telephony:
+  ///   - Phone calls (requires READ_PHONE_STATE permission)
+  ///
+  /// This method allows you to pause the call, mute the audio, or perform any other
+  /// necessary actions when interruptions occur.
+  ///
+  /// For more details on handling call interruptions, refer to the
+  /// [Stream Video documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/).
+  Future<void> handleCallInterruptionCallbacks({
+    void Function()? onInterruptionStart,
+    void Function()? onInterruptionEnd,
+    rtc.AndroidInterruptionSource androidInterruptionSource =
+        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
+  }) {
+    return rtc.handleCallInterruptionCallbacks(
+      onInterruptionStart,
+      onInterruptionEnd,
+      androidInterruptionSource: androidInterruptionSource,
+    );
+  }
 
   Future<void> _onDeviceChange(_) async {
     final devicesResult = await enumerateDevices();

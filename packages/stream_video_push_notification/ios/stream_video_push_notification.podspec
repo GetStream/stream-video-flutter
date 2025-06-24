@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'stream_video_push_notification'
-  s.version          = '0.9.5'
+  s.version          = '0.9.6'
   s.summary          = 'Official Push Notification Plugin for Stream Video.'
   s.description      = <<-DESC
 Official Push Notification Plugin for Stream Video.

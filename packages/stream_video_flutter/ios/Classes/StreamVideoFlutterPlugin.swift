@@ -119,9 +119,19 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
 
     private func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
         switch call.method {
-        case "setTrack":
+        case "updateParticipant":
             let argumentsDictionary = call.arguments as? [String: Any]
             let trackId = argumentsDictionary?["trackId"] as? String
+            let name = argumentsDictionary?["name"] as? String
+            let imageUrl = argumentsDictionary?["imageUrl"] as? String
+            let isAudioEnabled = argumentsDictionary?["isAudioEnabled"] as? Bool ?? false
+            let isVideoEnabled = argumentsDictionary?["isVideoEnabled"] as? Bool ?? false
+            let connectionQuality = argumentsDictionary?["connectionQuality"] as? String
+            let showParticipantName = argumentsDictionary?["showParticipantName"] as? Bool ?? true
+            let showMicrophoneIndicator =
+                argumentsDictionary?["showMicrophoneIndicator"] as? Bool ?? true
+            let showConnectionQualityIndicator =
+                argumentsDictionary?["showConnectionQualityIndicator"] as? Bool ?? true
 
             DispatchQueue.main.async {
                 if let unwrappedTrackId = trackId {
@@ -131,10 +141,23 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
                         self.pictureInPictureController?.track = videoTrack
                     }
                 }
+
+                self.pictureInPictureController?.updateParticipant(
+                    name: name ?? "",
+                    imageUrl: imageUrl,
+                    connectionQuality: connectionQuality ?? "",
+                    isMuted: !isAudioEnabled,
+                    hasVideo: isVideoEnabled,
+                    showParticipantName: showParticipantName,
+                    showMicrophoneIndicator: showMicrophoneIndicator,
+                    showConnectionQualityIndicator: showConnectionQualityIndicator
+                )
             }
+            result(nil)
         case "callEnded":
             self.pictureInPictureController?.track = nil
             self.pictureInPictureController?.sourceView = nil
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }

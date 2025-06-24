@@ -19,6 +19,8 @@ abstract class DisconnectReason extends Equatable {
     CallRejectReason? reason,
   }) = DisconnectReasonRejected;
 
+  const factory DisconnectReason.blocked() = DisconnectReasonBlocked;
+
   const factory DisconnectReason.cancelled({
     required String byUserId,
   }) = DisconnectReasonCancelled;
@@ -81,6 +83,15 @@ class DisconnectReasonRejected extends DisconnectReason {
   @override
   String toString() {
     return 'Rejected{byUserId: $byUserId}';
+  }
+}
+
+class DisconnectReasonBlocked extends DisconnectReason {
+  const DisconnectReasonBlocked();
+
+  @override
+  String toString() {
+    return 'Blocked';
   }
 }
 
