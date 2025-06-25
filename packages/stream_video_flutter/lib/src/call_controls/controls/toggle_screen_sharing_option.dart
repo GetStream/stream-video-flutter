@@ -10,7 +10,6 @@ class ToggleScreenShareOption extends StatelessWidget {
   const ToggleScreenShareOption({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.localParticipant)
     this.localParticipant,
     this.enabledScreenShareIcon = Icons.screen_share,
     this.disabledScreenShareIcon = Icons.stop_screen_share,
@@ -27,7 +26,7 @@ class ToggleScreenShareOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  @Deprecated(PartialStateDeprecationMessage.localParticipant)
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the screen sharing is enabled.

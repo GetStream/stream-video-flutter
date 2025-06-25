@@ -9,7 +9,6 @@ class FlipCameraOption extends StatelessWidget {
   const FlipCameraOption({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.localParticipant)
     this.localParticipant,
     this.frontCameraIcon = Icons.flip_camera_ios_rounded,
     this.backCameraIcon = Icons.flip_camera_ios_rounded,
@@ -19,7 +18,7 @@ class FlipCameraOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  @Deprecated(PartialStateDeprecationMessage.localParticipant)
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the front camera is active.
