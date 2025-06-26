@@ -9,8 +9,8 @@ import '../sfu/data/models/sfu_publish_options.dart';
 import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_parameters.dart';
 
-class RTCRtpEncodingWithDimentions extends rtc.RTCRtpEncoding {
-  RTCRtpEncodingWithDimentions({
+class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
+  RTCRtpEncodingWithDimensions({
     required this.width,
     required this.height,
     super.rid,
@@ -28,11 +28,11 @@ class RTCRtpEncodingWithDimentions extends rtc.RTCRtpEncoding {
   final double height;
 }
 
-List<RTCRtpEncodingWithDimentions> findOptimalVideoLayers({
+List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   required RtcVideoDimension dimensions,
   required SfuPublishOptions publishOptions,
 }) {
-  final optimalVideoLayers = <RTCRtpEncodingWithDimentions>[];
+  final optimalVideoLayers = <RTCRtpEncodingWithDimensions>[];
   const defaultVideoPreset = RtcVideoParametersPresets.h720_16x9;
 
   final maxBitrate = getComputedMaxBitrate(
@@ -51,7 +51,7 @@ List<RTCRtpEncodingWithDimentions> findOptimalVideoLayers({
 
   final rids = ['f', 'h', 'q'].sublist(0, maxSpatialLayers);
   for (final rid in rids) {
-    final layer = RTCRtpEncodingWithDimentions(
+    final layer = RTCRtpEncodingWithDimensions(
       rid: rid,
       maxBitrate: (maxBitrate / bitrateFactor).round(),
       maxFramerate: publishOptions.fps,
@@ -109,12 +109,12 @@ int getComputedMaxBitrate(
   return maxBitrate;
 }
 
-List<RTCRtpEncodingWithDimentions> withSimulcastConstraints({
+List<RTCRtpEncodingWithDimensions> withSimulcastConstraints({
   required RtcVideoDimension dimensions,
-  required List<RTCRtpEncodingWithDimentions> optimalVideoLayers,
+  required List<RTCRtpEncodingWithDimensions> optimalVideoLayers,
   required bool useSingleLayer,
 }) {
-  var layers = <RTCRtpEncodingWithDimentions>[];
+  var layers = <RTCRtpEncodingWithDimensions>[];
 
   final size = max(dimensions.width, dimensions.height);
   if (size <= 320) {
@@ -131,7 +131,7 @@ List<RTCRtpEncodingWithDimentions> withSimulcastConstraints({
   final ridMapping = ['q', 'h', 'f'];
   return layers
       .mapIndexed(
-        (index, layer) => RTCRtpEncodingWithDimentions(
+        (index, layer) => RTCRtpEncodingWithDimensions(
           rid: ridMapping[index],
           scaleResolutionDownBy: layer.scaleResolutionDownBy,
           scalabilityMode: layer.scalabilityMode,
@@ -143,7 +143,7 @@ List<RTCRtpEncodingWithDimentions> withSimulcastConstraints({
           width: layer.width,
           height: layer.height,
           active:
-              !(useSingleLayer && index < layers.length - 1) && layer.active,
+              layer.active && !(useSingleLayer && index < layers.length - 1),
         ),
       )
       .toList();

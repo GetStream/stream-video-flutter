@@ -454,6 +454,8 @@ class StreamPeerConnection extends Disposable {
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     _dropRtcCallbacks();
+    iceRestartTimeout?.cancel();
+    iceRestartTimeout = null;
     onStreamAdded = null;
     onRenegotiationNeeded = null;
     onReconnectionNeeded = null;
