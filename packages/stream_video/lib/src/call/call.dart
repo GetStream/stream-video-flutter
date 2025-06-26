@@ -2053,8 +2053,20 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> startTranscription() async {
-    final result = await _permissionsManager.startTranscription();
+  /// Starts transcription for the call.
+  /// If [enableClosedCaptions] Enable closed captions along with transcriptions
+  /// [language] The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  /// [transcriptionExternalStorage] Store transcriptions in this external storage
+  Future<Result<None>> startTranscription({
+    bool? enableClosedCaptions,
+    TranscriptionSettingsLanguage? language,
+    String? transcriptionExternalStorage,
+  }) async {
+    final result = await _permissionsManager.startTranscription(
+      enableClosedCaptions: enableClosedCaptions,
+      language: language,
+      transcriptionExternalStorage: transcriptionExternalStorage,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallTranscribing(isTranscribing: true);
@@ -2078,8 +2090,19 @@ class Call {
   }
 
   /// Starts close captions for the call.
-  Future<Result<None>> startClosedCaptions() async {
-    final result = await _permissionsManager.startClosedCaptions();
+  /// If [enableTranscription] is set to `true`, it will also enable transcription.
+  /// [language] The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  /// [transcriptionExternalStorage] Which external storage to use for transcriptions (only applicable if enable_transcription is true)
+  Future<Result<None>> startClosedCaptions({
+    bool? enableTranscription,
+    StartClosedCaptionsRequestLanguageEnum? language,
+    String? transcriptionExternalStorage,
+  }) async {
+    final result = await _permissionsManager.startClosedCaptions(
+      enableTranscription: enableTranscription,
+      language: language,
+      transcriptionExternalStorage: transcriptionExternalStorage,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallClosedCaptioning(isCaptioning: true);

@@ -202,6 +202,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ),
       backstage: StreamBackstageSettings(
         enabled: backstage.enabled,
+        joinAheadTimeSeconds: backstage.joinAheadTimeSeconds,
       ),
       geofencing: StreamGeofencingSettings(
         names: geofencing.names,
@@ -209,6 +210,8 @@ extension CallSettingsExt on open.CallSettingsResponse {
       limits: StreamLimitsSettings(
         maxParticipants: limits.maxParticipants,
         maxDurationSeconds: limits.maxDurationSeconds,
+        maxParticipantsExcludeOwner: limits.maxParticipantsExcludeOwner,
+        maxParticipantsExcludeRoles: limits.maxParticipantsExcludeRoles,
       ),
     );
   }

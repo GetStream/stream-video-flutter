@@ -190,10 +190,16 @@ class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
     required this.callCid,
     required this.endedBy,
     required this.createdAt,
+    required this.metadata,
+    required this.type,
+    this.reason,
   });
 
   @override
   final StreamCallCid callCid;
+  final CallMetadata metadata;
+  final String type;
+  final String? reason;
   final CallUser? endedBy;
   final DateTime createdAt;
 
@@ -400,11 +406,13 @@ class CoordinatorCallTranscriptionFailedEvent extends CoordinatorCallEvent {
   const CoordinatorCallTranscriptionFailedEvent({
     required this.callCid,
     required this.createdAt,
+    this.error,
   });
 
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
+  final String? error;
 
   @override
   List<Object?> get props => [

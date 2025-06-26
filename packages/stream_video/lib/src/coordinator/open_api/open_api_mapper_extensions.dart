@@ -91,6 +91,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           endedBy: endedBy,
           createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+          type: event.type,
+          reason: event.reason,
         );
       case EventType.callSessionStarted:
         final event = callSessionStarted!;
@@ -285,6 +288,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallTranscriptionFailedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
+          error: event.error,
         );
       case EventType.callClosedCaptionStarted:
         final event = callClosedCaptionsStarted!;

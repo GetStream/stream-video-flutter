@@ -10,54 +10,39 @@
 
 part of openapi.api;
 
-class PublisherAggregateStats {
-  /// Returns a new [PublisherAggregateStats] instance.
-  PublisherAggregateStats({
-    this.byTrackType = const {},
-    this.total,
+class QueryCallParticipantsRequest {
+  /// Returns a new [QueryCallParticipantsRequest] instance.
+  QueryCallParticipantsRequest({
+    this.filterConditions = const {},
   });
 
-  Map<String, Count> byTrackType;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  Count? total;
+  Map<String, Object> filterConditions;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PublisherAggregateStats &&
-          _deepEquality.equals(other.byTrackType, byTrackType) &&
-          other.total == total;
+      other is QueryCallParticipantsRequest &&
+          _deepEquality.equals(other.filterConditions, filterConditions);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (byTrackType.hashCode) + (total == null ? 0 : total!.hashCode);
+      (filterConditions.hashCode);
 
   @override
   String toString() =>
-      'PublisherAggregateStats[byTrackType=$byTrackType, total=$total]';
+      'QueryCallParticipantsRequest[filterConditions=$filterConditions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'by_track_type'] = this.byTrackType;
-    if (this.total != null) {
-      json[r'total'] = this.total;
-    } else {
-      json[r'total'] = null;
-    }
+    json[r'filter_conditions'] = this.filterConditions;
     return json;
   }
 
-  /// Returns a new [PublisherAggregateStats] instance and imports its values from
+  /// Returns a new [QueryCallParticipantsRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static PublisherAggregateStats? fromJson(dynamic value) {
+  static QueryCallParticipantsRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -67,29 +52,30 @@ class PublisherAggregateStats {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "PublisherAggregateStats[$key]" is missing from JSON.');
+              'Required key "QueryCallParticipantsRequest[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "PublisherAggregateStats[$key]" has a null value in JSON.');
+              'Required key "QueryCallParticipantsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return PublisherAggregateStats(
-        byTrackType: Count.mapFromJson(json[r'by_track_type']),
-        total: Count.fromJson(json[r'total']),
+      return QueryCallParticipantsRequest(
+        filterConditions:
+            mapCastOfType<String, Object>(json, r'filter_conditions') ??
+                const {},
       );
     }
     return null;
   }
 
-  static List<PublisherAggregateStats> listFromJson(
+  static List<QueryCallParticipantsRequest> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <PublisherAggregateStats>[];
+    final result = <QueryCallParticipantsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = PublisherAggregateStats.fromJson(row);
+        final value = QueryCallParticipantsRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -98,12 +84,12 @@ class PublisherAggregateStats {
     return result.toList(growable: growable);
   }
 
-  static Map<String, PublisherAggregateStats> mapFromJson(dynamic json) {
-    final map = <String, PublisherAggregateStats>{};
+  static Map<String, QueryCallParticipantsRequest> mapFromJson(dynamic json) {
+    final map = <String, QueryCallParticipantsRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = PublisherAggregateStats.fromJson(entry.value);
+        final value = QueryCallParticipantsRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -112,17 +98,17 @@ class PublisherAggregateStats {
     return map;
   }
 
-  // maps a json object with a list of PublisherAggregateStats-objects as value to a dart map
-  static Map<String, List<PublisherAggregateStats>> mapListFromJson(
+  // maps a json object with a list of QueryCallParticipantsRequest-objects as value to a dart map
+  static Map<String, List<QueryCallParticipantsRequest>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<PublisherAggregateStats>>{};
+    final map = <String, List<QueryCallParticipantsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PublisherAggregateStats.listFromJson(
+        map[entry.key] = QueryCallParticipantsRequest.listFromJson(
           entry.value,
           growable: growable,
         );

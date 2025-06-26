@@ -844,7 +844,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> startTranscription(
     StreamCallCid callCid, {
     bool? enableClosedCaptions,
-    String? language,
+    TranscriptionSettingsLanguage? language,
     String? transcriptionExternalStorage,
   }) async {
     try {
@@ -859,7 +859,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         open.StartTranscriptionRequest(
           transcriptionExternalStorage: transcriptionExternalStorage,
           enableClosedCaptions: enableClosedCaptions,
-          language: language,
+          language: language?.toStartTranscriptionDto(),
         ),
       );
       return const Result.success(none);
@@ -916,7 +916,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> startClosedCaptions(
     StreamCallCid callCid, {
     bool? enableTranscription,
-    String? language,
+    TranscriptionSettingsLanguage? language,
     String? transcriptionExternalStorage,
   }) async {
     try {
@@ -931,7 +931,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         open.StartClosedCaptionsRequest(
           enableTranscription: enableTranscription,
           externalStorage: transcriptionExternalStorage,
-          language: language,
+          language: language?.toStartClosedCaptionsDto(),
         ),
       );
       if (result == null) {

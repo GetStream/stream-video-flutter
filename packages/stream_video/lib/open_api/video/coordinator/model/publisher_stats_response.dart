@@ -10,43 +10,49 @@
 
 part of openapi.api;
 
-class Count {
-  /// Returns a new [Count] instance.
-  Count({
-    required this.approximate,
-    required this.value,
+class PublisherStatsResponse {
+  /// Returns a new [PublisherStatsResponse] instance.
+  PublisherStatsResponse({
+    this.byTrack = const [],
+    required this.total,
+    required this.unique,
   });
 
-  bool approximate;
+  List<TrackStatsResponse> byTrack;
 
-  int value;
+  int total;
+
+  int unique;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Count &&
-          other.approximate == approximate &&
-          other.value == value;
+      other is PublisherStatsResponse &&
+          _deepEquality.equals(other.byTrack, byTrack) &&
+          other.total == total &&
+          other.unique == unique;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (approximate.hashCode) + (value.hashCode);
+      (byTrack.hashCode) + (total.hashCode) + (unique.hashCode);
 
   @override
-  String toString() => 'Count[approximate=$approximate, value=$value]';
+  String toString() =>
+      'PublisherStatsResponse[byTrack=$byTrack, total=$total, unique=$unique]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'approximate'] = this.approximate;
-    json[r'value'] = this.value;
+    json[r'by_track'] = this.byTrack;
+    json[r'total'] = this.total;
+    json[r'unique'] = this.unique;
     return json;
   }
 
-  /// Returns a new [Count] instance and imports its values from
+  /// Returns a new [PublisherStatsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Count? fromJson(dynamic value) {
+  static PublisherStatsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -56,29 +62,30 @@ class Count {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "Count[$key]" is missing from JSON.');
+              'Required key "PublisherStatsResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "Count[$key]" has a null value in JSON.');
+              'Required key "PublisherStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Count(
-        approximate: mapValueOfType<bool>(json, r'approximate')!,
-        value: mapValueOfType<int>(json, r'value')!,
+      return PublisherStatsResponse(
+        byTrack: TrackStatsResponse.listFromJson(json[r'by_track']),
+        total: mapValueOfType<int>(json, r'total')!,
+        unique: mapValueOfType<int>(json, r'unique')!,
       );
     }
     return null;
   }
 
-  static List<Count> listFromJson(
+  static List<PublisherStatsResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <Count>[];
+    final result = <PublisherStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Count.fromJson(row);
+        final value = PublisherStatsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -87,12 +94,12 @@ class Count {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Count> mapFromJson(dynamic json) {
-    final map = <String, Count>{};
+  static Map<String, PublisherStatsResponse> mapFromJson(dynamic json) {
+    final map = <String, PublisherStatsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Count.fromJson(entry.value);
+        final value = PublisherStatsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -101,17 +108,17 @@ class Count {
     return map;
   }
 
-  // maps a json object with a list of Count-objects as value to a dart map
-  static Map<String, List<Count>> mapListFromJson(
+  // maps a json object with a list of PublisherStatsResponse-objects as value to a dart map
+  static Map<String, List<PublisherStatsResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<Count>>{};
+    final map = <String, List<PublisherStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Count.listFromJson(
+        map[entry.key] = PublisherStatsResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -122,7 +129,7 @@ class Count {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'approximate',
-    'value',
+    'total',
+    'unique',
   };
 }
