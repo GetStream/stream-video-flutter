@@ -1070,6 +1070,7 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
             ),
             bitrate: layer.parameters.encoding.maxBitrate,
             fps: layer.parameters.encoding.maxFramerate,
+            quality: layer.parameters.encoding.quality.toDTO(),
           );
         }),
       );

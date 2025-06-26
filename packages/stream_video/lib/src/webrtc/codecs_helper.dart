@@ -42,7 +42,7 @@ List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
       // for SVC codecs, we need to set the scalability mode, and the
       // codec will handle the rest (layers, temporal layers, etc.)
       layer.scalabilityMode = toScalabilityMode(
-        maxSpatialLayers,
+        publishOptions.useSingleLayer ? 1 : maxSpatialLayers,
         maxTemporalLayers,
       );
     } else {
@@ -62,6 +62,7 @@ List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
   return withSimulcastConstraints(
     dimensions: dimensions,
     optimalVideoLayers: optimalVideoLayers,
+    useSingleLayer: publishOptions.useSingleLayer,
   );
 }
 
@@ -90,6 +91,7 @@ int getComputedMaxBitrate(
 List<rtc.RTCRtpEncoding> withSimulcastConstraints({
   required RtcVideoDimension dimensions,
   required List<rtc.RTCRtpEncoding> optimalVideoLayers,
+  required bool useSingleLayer,
 }) {
   var layers = <rtc.RTCRtpEncoding>[];
 
@@ -111,8 +113,14 @@ List<rtc.RTCRtpEncoding> withSimulcastConstraints({
         (index, layer) => rtc.RTCRtpEncoding(
           rid: ridMapping[index],
           scaleResolutionDownBy: layer.scaleResolutionDownBy,
+          scalabilityMode: layer.scalabilityMode,
           maxFramerate: layer.maxFramerate,
           maxBitrate: layer.maxBitrate,
+          minBitrate: layer.minBitrate,
+          numTemporalLayers: layer.numTemporalLayers,
+          ssrc: layer.ssrc,
+          active:
+              !(useSingleLayer && index < layers.length - 1) && layer.active,
         ),
       )
       .toList();

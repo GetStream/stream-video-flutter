@@ -444,6 +444,7 @@ extension on sfu_models.PublishOption {
       maxTemporalLayers: maxTemporalLayers,
       bitrate: bitrate,
       fps: fps,
+      useSingleLayer: useSingleLayer,
     );
   }
 }
