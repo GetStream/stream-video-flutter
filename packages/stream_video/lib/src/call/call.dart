@@ -2095,7 +2095,7 @@ class Call {
   /// [transcriptionExternalStorage] Which external storage to use for transcriptions (only applicable if enable_transcription is true)
   Future<Result<None>> startClosedCaptions({
     bool? enableTranscription,
-    StartClosedCaptionsRequestLanguageEnum? language,
+    TranscriptionSettingsLanguage? language,
     String? transcriptionExternalStorage,
   }) async {
     final result = await _permissionsManager.startClosedCaptions(
