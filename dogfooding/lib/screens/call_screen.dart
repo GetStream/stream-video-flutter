@@ -57,14 +57,15 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedRecognition =
         SpeakingWhileMutedRecognition(call: widget.call);
     _speechSubscription = _speakingWhileMutedRecognition.stream.listen((state) {
-      print(
-          'SpeechRecognition test callScreen: isSpeaking: ${state.isSpeakingWhileMuted}');
-
       final context = this.context;
       if (state.isSpeakingWhileMuted && context.mounted) {
+        final colorTheme = StreamVideoTheme.of(context).colorTheme;
+        
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          const SnackBar(
-            content: Text('You are speaking while muted'),
+          SnackBar(
+            content: const Text('You are speaking while muted'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: colorTheme.accentPrimary,
           ),
         );
       }
@@ -73,10 +74,10 @@ class _CallScreenState extends State<CallScreen> {
 
   @override
   void dispose() {
+    _speechSubscription.cancel();
     _speakingWhileMutedRecognition.dispose();
     widget.call.leave();
     _userChatRepo.disconnectUser();
-    _speechSubscription.cancel();
     super.dispose();
   }
 

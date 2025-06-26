@@ -2,10 +2,14 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
 
+class MockCall extends Mock implements Call {}
+
 class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
+
+class MockAudioRecognition extends Mock implements AudioRecognition {}
 
 /// Helper function to create CallDetails for testing
 CallDetails createTestCallDetails({
