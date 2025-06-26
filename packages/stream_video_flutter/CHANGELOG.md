@@ -7,6 +7,7 @@ By (only) using these callbacks the root widgets will use more efficient partial
 * Added `PartialCallStateBuilder` to help with making widgets that depend on `partialState`.
 * Deprecated old callbacks
 
+## 0.9.6
 
 ✅ Added
 * Added `handleCallInterruptionCallbacks` method to `RtcMediaDeviceNotifier` that provides an option to handle system audio interruption like incoming calls, or other media playing. See the [documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/) for details.
