@@ -203,7 +203,7 @@ class PermissionsManager {
 
   Future<Result<None>> startClosedCaptions({
     bool? enableTranscription,
-    StartClosedCaptionsRequestLanguageEnum? language,
+    TranscriptionSettingsLanguage? language,
     String? transcriptionExternalStorage,
   }) async {
     if (!hasPermission(CallPermission.startClosedCaptionsCall)) {
