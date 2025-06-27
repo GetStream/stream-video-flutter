@@ -113,6 +113,7 @@ class RemoteTrackState extends TrackState {
     required super.muted,
     this.subscribed = false,
     this.received = false,
+    this.mirrorVideo = false,
     this.audioSinkDevice,
     this.videoDimension,
   });
@@ -120,6 +121,9 @@ class RemoteTrackState extends TrackState {
   final bool subscribed;
   final bool received;
   final RtcVideoDimension? videoDimension;
+
+  /// Whether the video should be mirrored.
+  final bool mirrorVideo;
 
   /// The sinkId of the audio output device to use
   /// in case it is an audio track.
@@ -130,6 +134,7 @@ class RemoteTrackState extends TrackState {
         subscribed,
         received,
         muted,
+        mirrorVideo,
         audioSinkDevice,
         videoDimension,
       ];
@@ -140,6 +145,7 @@ class RemoteTrackState extends TrackState {
       if (subscribed) 'subscribed',
       if (received) 'received',
       if (muted) 'muted',
+      if (mirrorVideo) 'mirrorVideo',
       if (audioSinkDevice != null) 'audioSinkDevice($audioSinkDevice)',
       if (videoDimension != null)
         'videoDimension(width: ${videoDimension!.width}, height: ${videoDimension!.height})',
@@ -159,6 +165,7 @@ class RemoteTrackState extends TrackState {
     bool? subscribed,
     bool? received,
     bool? muted,
+    bool? mirrorVideo,
     RtcMediaDevice? audioSinkDevice,
     RtcVideoDimension? videoDimension,
   }) {
@@ -166,6 +173,7 @@ class RemoteTrackState extends TrackState {
       subscribed: subscribed ?? this.subscribed,
       received: received ?? this.received,
       muted: muted ?? this.muted,
+      mirrorVideo: mirrorVideo ?? this.mirrorVideo,
       audioSinkDevice: audioSinkDevice ?? this.audioSinkDevice,
       videoDimension: videoDimension ?? this.videoDimension,
     );

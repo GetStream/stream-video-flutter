@@ -124,7 +124,8 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
       return widget.placeholderBuilder.call(context);
     }
 
-    var mirror = widget.participant.isLocal;
+    var mirror = (trackState is RemoteTrackState && trackState.mirrorVideo) ||
+        widget.participant.isLocal;
 
     if (videoTrack is RtcLocalScreenShareTrack) {
       mirror = false;
