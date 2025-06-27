@@ -285,6 +285,10 @@ class TranscriptionSettingsRequestLanguageEnum {
   static const ms = TranscriptionSettingsRequestLanguageEnum._(r'ms');
   static const no = TranscriptionSettingsRequestLanguageEnum._(r'no');
   static const uk = TranscriptionSettingsRequestLanguageEnum._(r'uk');
+  static const bg = TranscriptionSettingsRequestLanguageEnum._(r'bg');
+  static const et = TranscriptionSettingsRequestLanguageEnum._(r'et');
+  static const sl = TranscriptionSettingsRequestLanguageEnum._(r'sl');
+  static const sk = TranscriptionSettingsRequestLanguageEnum._(r'sk');
 
   /// List of all possible values in this [enum][TranscriptionSettingsRequestLanguageEnum].
   static const values = <TranscriptionSettingsRequestLanguageEnum>[
@@ -321,6 +325,10 @@ class TranscriptionSettingsRequestLanguageEnum {
     ms,
     no,
     uk,
+    bg,
+    et,
+    sl,
+    sk,
   ];
 
   static TranscriptionSettingsRequestLanguageEnum? fromJson(dynamic value) =>
@@ -432,6 +440,14 @@ class TranscriptionSettingsRequestLanguageEnumTypeTransformer {
           return TranscriptionSettingsRequestLanguageEnum.no;
         case r'uk':
           return TranscriptionSettingsRequestLanguageEnum.uk;
+        case r'bg':
+          return TranscriptionSettingsRequestLanguageEnum.bg;
+        case r'et':
+          return TranscriptionSettingsRequestLanguageEnum.et;
+        case r'sl':
+          return TranscriptionSettingsRequestLanguageEnum.sl;
+        case r'sk':
+          return TranscriptionSettingsRequestLanguageEnum.sk;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

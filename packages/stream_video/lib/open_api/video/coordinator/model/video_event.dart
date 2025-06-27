@@ -23,6 +23,7 @@ class VideoEvent {
     required this.user,
     required this.call,
     this.members = const [],
+    this.reason,
     required this.egressId,
     required this.capturedAt,
     required this.sessionId,
@@ -32,22 +33,23 @@ class VideoEvent {
     required this.hlsPlaylistUrl,
     this.capabilitiesByRole = const {},
     required this.notifyUser,
+    required this.userId,
+    required this.message,
     required this.reaction,
     required this.callRecording,
-    this.reason,
     required this.video,
     required this.name,
     required this.anonymousParticipantCount,
     this.participantsCountByRole = const {},
     required this.participant,
     required this.durationSeconds,
+    required this.error,
     required this.callTranscription,
     required this.fromUserId,
     this.mutedUserIds = const [],
     required this.closedCaption,
     required this.connectionId,
     required this.me,
-    required this.error,
     required this.cid,
     this.permissions = const [],
     this.ownCapabilities = const [],
@@ -96,6 +98,14 @@ class VideoEvent {
   /// Call members
   List<MemberResponse> members;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? reason;
+
   String egressId;
 
   /// The time the frame was captured
@@ -120,17 +130,13 @@ class VideoEvent {
 
   bool notifyUser;
 
+  String userId;
+
+  String message;
+
   ReactionResponse reaction;
 
   CallRecording callRecording;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
 
   bool video;
 
@@ -146,6 +152,8 @@ class VideoEvent {
   /// The duration participant was in the session in seconds
   int durationSeconds;
 
+  APIError error;
+
   CallTranscription callTranscription;
 
   String fromUserId;
@@ -157,8 +165,6 @@ class VideoEvent {
   String connectionId;
 
   OwnUserResponse me;
-
-  APIError error;
 
   String cid;
 
@@ -216,6 +222,7 @@ class VideoEvent {
           other.user == user &&
           other.call == call &&
           _deepEquality.equals(other.members, members) &&
+          other.reason == reason &&
           other.egressId == egressId &&
           other.capturedAt == capturedAt &&
           other.sessionId == sessionId &&
@@ -225,9 +232,10 @@ class VideoEvent {
           other.hlsPlaylistUrl == hlsPlaylistUrl &&
           _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
           other.notifyUser == notifyUser &&
+          other.userId == userId &&
+          other.message == message &&
           other.reaction == reaction &&
           other.callRecording == callRecording &&
-          other.reason == reason &&
           other.video == video &&
           other.name == name &&
           other.anonymousParticipantCount == anonymousParticipantCount &&
@@ -235,13 +243,13 @@ class VideoEvent {
               other.participantsCountByRole, participantsCountByRole) &&
           other.participant == participant &&
           other.durationSeconds == durationSeconds &&
+          other.error == error &&
           other.callTranscription == callTranscription &&
           other.fromUserId == fromUserId &&
           _deepEquality.equals(other.mutedUserIds, mutedUserIds) &&
           other.closedCaption == closedCaption &&
           other.connectionId == connectionId &&
           other.me == me &&
-          other.error == error &&
           other.cid == cid &&
           _deepEquality.equals(other.permissions, permissions) &&
           _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
@@ -267,6 +275,7 @@ class VideoEvent {
       (user.hashCode) +
       (call.hashCode) +
       (members.hashCode) +
+      (reason == null ? 0 : reason!.hashCode) +
       (egressId.hashCode) +
       (capturedAt.hashCode) +
       (sessionId.hashCode) +
@@ -276,22 +285,23 @@ class VideoEvent {
       (hlsPlaylistUrl.hashCode) +
       (capabilitiesByRole.hashCode) +
       (notifyUser.hashCode) +
+      (userId.hashCode) +
+      (message.hashCode) +
       (reaction.hashCode) +
       (callRecording.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
       (video.hashCode) +
       (name.hashCode) +
       (anonymousParticipantCount.hashCode) +
       (participantsCountByRole.hashCode) +
       (participant.hashCode) +
       (durationSeconds.hashCode) +
+      (error.hashCode) +
       (callTranscription.hashCode) +
       (fromUserId.hashCode) +
       (mutedUserIds.hashCode) +
       (closedCaption.hashCode) +
       (connectionId.hashCode) +
       (me.hashCode) +
-      (error.hashCode) +
       (cid.hashCode) +
       (permissions.hashCode) +
       (ownCapabilities.hashCode) +
@@ -306,7 +316,7 @@ class VideoEvent {
 
   @override
   String toString() =>
-      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, reaction=$reaction, callRecording=$callRecording, reason=$reason, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, error=$error, cid=$cid, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
+      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, error=$error, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -328,6 +338,11 @@ class VideoEvent {
     json[r'user'] = this.user;
     json[r'call'] = this.call;
     json[r'members'] = this.members;
+    if (this.reason != null) {
+      json[r'reason'] = this.reason;
+    } else {
+      json[r'reason'] = null;
+    }
     json[r'egress_id'] = this.egressId;
     json[r'captured_at'] = this.capturedAt.toUtc().toIso8601String();
     json[r'session_id'] = this.sessionId;
@@ -337,26 +352,23 @@ class VideoEvent {
     json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
     json[r'capabilities_by_role'] = this.capabilitiesByRole;
     json[r'notify_user'] = this.notifyUser;
+    json[r'user_id'] = this.userId;
+    json[r'message'] = this.message;
     json[r'reaction'] = this.reaction;
     json[r'call_recording'] = this.callRecording;
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
-    }
     json[r'video'] = this.video;
     json[r'name'] = this.name;
     json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
     json[r'participants_count_by_role'] = this.participantsCountByRole;
     json[r'participant'] = this.participant;
     json[r'duration_seconds'] = this.durationSeconds;
+    json[r'error'] = this.error;
     json[r'call_transcription'] = this.callTranscription;
     json[r'from_user_id'] = this.fromUserId;
     json[r'muted_user_ids'] = this.mutedUserIds;
     json[r'closed_caption'] = this.closedCaption;
     json[r'connection_id'] = this.connectionId;
     json[r'me'] = this.me;
-    json[r'error'] = this.error;
     json[r'cid'] = this.cid;
     json[r'permissions'] = this.permissions;
     json[r'own_capabilities'] = this.ownCapabilities;
@@ -414,6 +426,7 @@ class VideoEvent {
         user: UserResponsePrivacyFields.fromJson(json[r'user'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members']),
+        reason: mapValueOfType<String>(json, r'reason'),
         egressId: mapValueOfType<String>(json, r'egress_id')!,
         capturedAt: mapDateTime(json, r'captured_at', r'')!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,
@@ -428,9 +441,10 @@ class VideoEvent {
                     json, r'capabilities_by_role') ??
                 const {},
         notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
+        userId: mapValueOfType<String>(json, r'user_id')!,
+        message: mapValueOfType<String>(json, r'message')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         callRecording: CallRecording.fromJson(json[r'call_recording'])!,
-        reason: mapValueOfType<String>(json, r'reason'),
         video: mapValueOfType<bool>(json, r'video')!,
         name: mapValueOfType<String>(json, r'name')!,
         anonymousParticipantCount:
@@ -439,6 +453,7 @@ class VideoEvent {
             mapCastOfType<String, int>(json, r'participants_count_by_role')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
+        error: APIError.fromJson(json[r'error'])!,
         callTranscription:
             CallTranscription.fromJson(json[r'call_transcription'])!,
         fromUserId: mapValueOfType<String>(json, r'from_user_id')!,
@@ -450,7 +465,6 @@ class VideoEvent {
         closedCaption: CallClosedCaption.fromJson(json[r'closed_caption'])!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
-        error: APIError.fromJson(json[r'error'])!,
         cid: mapValueOfType<String>(json, r'cid')!,
         permissions: json[r'permissions'] is Iterable
             ? (json[r'permissions'] as Iterable)
@@ -543,6 +557,8 @@ class VideoEvent {
     'hls_playlist_url',
     'capabilities_by_role',
     'notify_user',
+    'user_id',
+    'message',
     'reaction',
     'call_recording',
     'video',
@@ -551,13 +567,13 @@ class VideoEvent {
     'participants_count_by_role',
     'participant',
     'duration_seconds',
+    'error',
     'call_transcription',
     'from_user_id',
     'muted_user_ids',
     'closed_caption',
     'connection_id',
     'me',
-    'error',
     'cid',
     'permissions',
     'own_capabilities',

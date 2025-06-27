@@ -10,37 +10,44 @@
 
 part of openapi.api;
 
-class CallTimeline {
-  /// Returns a new [CallTimeline] instance.
-  CallTimeline({
-    this.events = const [],
+class TrackStatsResponse {
+  /// Returns a new [TrackStatsResponse] instance.
+  TrackStatsResponse({
+    required this.durationSeconds,
+    required this.trackType,
   });
 
-  List<CallEvent> events;
+  int durationSeconds;
+
+  String trackType;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CallTimeline && _deepEquality.equals(other.events, events);
+      other is TrackStatsResponse &&
+          other.durationSeconds == durationSeconds &&
+          other.trackType == trackType;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (events.hashCode);
+      (durationSeconds.hashCode) + (trackType.hashCode);
 
   @override
-  String toString() => 'CallTimeline[events=$events]';
+  String toString() =>
+      'TrackStatsResponse[durationSeconds=$durationSeconds, trackType=$trackType]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'events'] = this.events;
+    json[r'duration_seconds'] = this.durationSeconds;
+    json[r'track_type'] = this.trackType;
     return json;
   }
 
-  /// Returns a new [CallTimeline] instance and imports its values from
+  /// Returns a new [TrackStatsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallTimeline? fromJson(dynamic value) {
+  static TrackStatsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -50,28 +57,29 @@ class CallTimeline {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "CallTimeline[$key]" is missing from JSON.');
+              'Required key "TrackStatsResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "CallTimeline[$key]" has a null value in JSON.');
+              'Required key "TrackStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallTimeline(
-        events: CallEvent.listFromJson(json[r'events']),
+      return TrackStatsResponse(
+        durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
+        trackType: mapValueOfType<String>(json, r'track_type')!,
       );
     }
     return null;
   }
 
-  static List<CallTimeline> listFromJson(
+  static List<TrackStatsResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <CallTimeline>[];
+    final result = <TrackStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallTimeline.fromJson(row);
+        final value = TrackStatsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -80,12 +88,12 @@ class CallTimeline {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallTimeline> mapFromJson(dynamic json) {
-    final map = <String, CallTimeline>{};
+  static Map<String, TrackStatsResponse> mapFromJson(dynamic json) {
+    final map = <String, TrackStatsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallTimeline.fromJson(entry.value);
+        final value = TrackStatsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -94,17 +102,17 @@ class CallTimeline {
     return map;
   }
 
-  // maps a json object with a list of CallTimeline-objects as value to a dart map
-  static Map<String, List<CallTimeline>> mapListFromJson(
+  // maps a json object with a list of TrackStatsResponse-objects as value to a dart map
+  static Map<String, List<TrackStatsResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<CallTimeline>>{};
+    final map = <String, List<TrackStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallTimeline.listFromJson(
+        map[entry.key] = TrackStatsResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -115,6 +123,7 @@ class CallTimeline {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'events',
+    'duration_seconds',
+    'track_type',
   };
 }

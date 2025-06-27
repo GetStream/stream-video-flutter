@@ -10,43 +10,38 @@
 
 part of openapi.api;
 
-class Coordinates {
-  /// Returns a new [Coordinates] instance.
-  Coordinates({
-    required this.latitude,
-    required this.longitude,
+class VideoReactionOverTimeResponse {
+  /// Returns a new [VideoReactionOverTimeResponse] instance.
+  VideoReactionOverTimeResponse({
+    this.byMinute = const [],
   });
 
-  double latitude;
-
-  double longitude;
+  List<CountByMinuteResponse> byMinute;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Coordinates &&
-          other.latitude == latitude &&
-          other.longitude == longitude;
+      other is VideoReactionOverTimeResponse &&
+          _deepEquality.equals(other.byMinute, byMinute);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (latitude.hashCode) + (longitude.hashCode);
+      (byMinute.hashCode);
 
   @override
-  String toString() => 'Coordinates[latitude=$latitude, longitude=$longitude]';
+  String toString() => 'VideoReactionOverTimeResponse[byMinute=$byMinute]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'latitude'] = this.latitude;
-    json[r'longitude'] = this.longitude;
+    json[r'by_minute'] = this.byMinute;
     return json;
   }
 
-  /// Returns a new [Coordinates] instance and imports its values from
+  /// Returns a new [VideoReactionOverTimeResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Coordinates? fromJson(dynamic value) {
+  static VideoReactionOverTimeResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -56,29 +51,28 @@ class Coordinates {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "Coordinates[$key]" is missing from JSON.');
+              'Required key "VideoReactionOverTimeResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "Coordinates[$key]" has a null value in JSON.');
+              'Required key "VideoReactionOverTimeResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Coordinates(
-        latitude: mapValueOfType<double>(json, r'latitude')!,
-        longitude: mapValueOfType<double>(json, r'longitude')!,
+      return VideoReactionOverTimeResponse(
+        byMinute: CountByMinuteResponse.listFromJson(json[r'by_minute']),
       );
     }
     return null;
   }
 
-  static List<Coordinates> listFromJson(
+  static List<VideoReactionOverTimeResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <Coordinates>[];
+    final result = <VideoReactionOverTimeResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Coordinates.fromJson(row);
+        final value = VideoReactionOverTimeResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -87,12 +81,12 @@ class Coordinates {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Coordinates> mapFromJson(dynamic json) {
-    final map = <String, Coordinates>{};
+  static Map<String, VideoReactionOverTimeResponse> mapFromJson(dynamic json) {
+    final map = <String, VideoReactionOverTimeResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Coordinates.fromJson(entry.value);
+        final value = VideoReactionOverTimeResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -101,17 +95,17 @@ class Coordinates {
     return map;
   }
 
-  // maps a json object with a list of Coordinates-objects as value to a dart map
-  static Map<String, List<Coordinates>> mapListFromJson(
+  // maps a json object with a list of VideoReactionOverTimeResponse-objects as value to a dart map
+  static Map<String, List<VideoReactionOverTimeResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<Coordinates>>{};
+    final map = <String, List<VideoReactionOverTimeResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Coordinates.listFromJson(
+        map[entry.key] = VideoReactionOverTimeResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -121,8 +115,5 @@ class Coordinates {
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'latitude',
-    'longitude',
-  };
+  static const requiredKeys = <String>{};
 }

@@ -16,6 +16,7 @@ class CallEndedEvent {
     required this.call,
     required this.callCid,
     required this.createdAt,
+    this.reason,
     this.type = 'call.ended',
     this.user,
   });
@@ -25,6 +26,15 @@ class CallEndedEvent {
   String callCid;
 
   DateTime createdAt;
+
+  /// The reason why the call ended, if available
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? reason;
 
   /// The type of event: \"call.ended\" in this case
   String type;
@@ -44,6 +54,7 @@ class CallEndedEvent {
           other.call == call &&
           other.callCid == callCid &&
           other.createdAt == createdAt &&
+          other.reason == reason &&
           other.type == type &&
           other.user == user;
 
@@ -53,18 +64,24 @@ class CallEndedEvent {
       (call.hashCode) +
       (callCid.hashCode) +
       (createdAt.hashCode) +
+      (reason == null ? 0 : reason!.hashCode) +
       (type.hashCode) +
       (user == null ? 0 : user!.hashCode);
 
   @override
   String toString() =>
-      'CallEndedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+      'CallEndedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, reason=$reason, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call'] = this.call;
     json[r'call_cid'] = this.callCid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    if (this.reason != null) {
+      json[r'reason'] = this.reason;
+    } else {
+      json[r'reason'] = null;
+    }
     json[r'type'] = this.type;
     if (this.user != null) {
       json[r'user'] = this.user;
@@ -98,6 +115,7 @@ class CallEndedEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        reason: mapValueOfType<String>(json, r'reason'),
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user']),
       );

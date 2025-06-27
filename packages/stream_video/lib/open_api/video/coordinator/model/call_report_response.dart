@@ -10,11 +10,12 @@
 
 part of openapi.api;
 
-class AggregatedStats {
-  /// Returns a new [AggregatedStats] instance.
-  AggregatedStats({
-    this.publisherAggregateStats,
-    this.turn,
+class CallReportResponse {
+  /// Returns a new [CallReportResponse] instance.
+  CallReportResponse({
+    this.endedAt,
+    required this.score,
+    this.startedAt,
   });
 
   ///
@@ -23,7 +24,9 @@ class AggregatedStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PublisherAggregateStats? publisherAggregateStats;
+  DateTime? endedAt;
+
+  double score;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -31,46 +34,47 @@ class AggregatedStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  TURNAggregatedStats? turn;
+  DateTime? startedAt;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AggregatedStats &&
-          other.publisherAggregateStats == publisherAggregateStats &&
-          other.turn == turn;
+      other is CallReportResponse &&
+          other.endedAt == endedAt &&
+          other.score == score &&
+          other.startedAt == startedAt;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (publisherAggregateStats == null
-          ? 0
-          : publisherAggregateStats!.hashCode) +
-      (turn == null ? 0 : turn!.hashCode);
+      (endedAt == null ? 0 : endedAt!.hashCode) +
+      (score.hashCode) +
+      (startedAt == null ? 0 : startedAt!.hashCode);
 
   @override
   String toString() =>
-      'AggregatedStats[publisherAggregateStats=$publisherAggregateStats, turn=$turn]';
+      'CallReportResponse[endedAt=$endedAt, score=$score, startedAt=$startedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.publisherAggregateStats != null) {
-      json[r'publisher_aggregate_stats'] = this.publisherAggregateStats;
+    if (this.endedAt != null) {
+      json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
     } else {
-      json[r'publisher_aggregate_stats'] = null;
+      json[r'ended_at'] = null;
     }
-    if (this.turn != null) {
-      json[r'turn'] = this.turn;
+    json[r'score'] = this.score;
+    if (this.startedAt != null) {
+      json[r'started_at'] = this.startedAt!.toUtc().toIso8601String();
     } else {
-      json[r'turn'] = null;
+      json[r'started_at'] = null;
     }
     return json;
   }
 
-  /// Returns a new [AggregatedStats] instance and imports its values from
+  /// Returns a new [CallReportResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static AggregatedStats? fromJson(dynamic value) {
+  static CallReportResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -80,30 +84,30 @@ class AggregatedStats {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "AggregatedStats[$key]" is missing from JSON.');
+              'Required key "CallReportResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "AggregatedStats[$key]" has a null value in JSON.');
+              'Required key "CallReportResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return AggregatedStats(
-        publisherAggregateStats: PublisherAggregateStats.fromJson(
-            json[r'publisher_aggregate_stats']),
-        turn: TURNAggregatedStats.fromJson(json[r'turn']),
+      return CallReportResponse(
+        endedAt: mapDateTime(json, r'ended_at', r''),
+        score: mapValueOfType<double>(json, r'score')!,
+        startedAt: mapDateTime(json, r'started_at', r''),
       );
     }
     return null;
   }
 
-  static List<AggregatedStats> listFromJson(
+  static List<CallReportResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <AggregatedStats>[];
+    final result = <CallReportResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = AggregatedStats.fromJson(row);
+        final value = CallReportResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -112,12 +116,12 @@ class AggregatedStats {
     return result.toList(growable: growable);
   }
 
-  static Map<String, AggregatedStats> mapFromJson(dynamic json) {
-    final map = <String, AggregatedStats>{};
+  static Map<String, CallReportResponse> mapFromJson(dynamic json) {
+    final map = <String, CallReportResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = AggregatedStats.fromJson(entry.value);
+        final value = CallReportResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -126,17 +130,17 @@ class AggregatedStats {
     return map;
   }
 
-  // maps a json object with a list of AggregatedStats-objects as value to a dart map
-  static Map<String, List<AggregatedStats>> mapListFromJson(
+  // maps a json object with a list of CallReportResponse-objects as value to a dart map
+  static Map<String, List<CallReportResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<AggregatedStats>>{};
+    final map = <String, List<CallReportResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = AggregatedStats.listFromJson(
+        map[entry.key] = CallReportResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -146,5 +150,7 @@ class AggregatedStats {
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  static const requiredKeys = <String>{
+    'score',
+  };
 }

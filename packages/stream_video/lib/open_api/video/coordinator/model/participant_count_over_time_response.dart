@@ -10,44 +10,38 @@
 
 part of openapi.api;
 
-class TimeStats {
-  /// Returns a new [TimeStats] instance.
-  TimeStats({
-    required this.averageSeconds,
-    required this.maxSeconds,
+class ParticipantCountOverTimeResponse {
+  /// Returns a new [ParticipantCountOverTimeResponse] instance.
+  ParticipantCountOverTimeResponse({
+    this.byMinute = const [],
   });
 
-  double averageSeconds;
-
-  double maxSeconds;
+  List<ParticipantCountByMinuteResponse> byMinute;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TimeStats &&
-          other.averageSeconds == averageSeconds &&
-          other.maxSeconds == maxSeconds;
+      other is ParticipantCountOverTimeResponse &&
+          _deepEquality.equals(other.byMinute, byMinute);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (averageSeconds.hashCode) + (maxSeconds.hashCode);
+      (byMinute.hashCode);
 
   @override
-  String toString() =>
-      'TimeStats[averageSeconds=$averageSeconds, maxSeconds=$maxSeconds]';
+  String toString() => 'ParticipantCountOverTimeResponse[byMinute=$byMinute]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'average_seconds'] = this.averageSeconds;
-    json[r'max_seconds'] = this.maxSeconds;
+    json[r'by_minute'] = this.byMinute;
     return json;
   }
 
-  /// Returns a new [TimeStats] instance and imports its values from
+  /// Returns a new [ParticipantCountOverTimeResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static TimeStats? fromJson(dynamic value) {
+  static ParticipantCountOverTimeResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -57,29 +51,29 @@ class TimeStats {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "TimeStats[$key]" is missing from JSON.');
+              'Required key "ParticipantCountOverTimeResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "TimeStats[$key]" has a null value in JSON.');
+              'Required key "ParticipantCountOverTimeResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return TimeStats(
-        averageSeconds: mapValueOfType<double>(json, r'average_seconds')!,
-        maxSeconds: mapValueOfType<double>(json, r'max_seconds')!,
+      return ParticipantCountOverTimeResponse(
+        byMinute:
+            ParticipantCountByMinuteResponse.listFromJson(json[r'by_minute']),
       );
     }
     return null;
   }
 
-  static List<TimeStats> listFromJson(
+  static List<ParticipantCountOverTimeResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <TimeStats>[];
+    final result = <ParticipantCountOverTimeResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = TimeStats.fromJson(row);
+        final value = ParticipantCountOverTimeResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -88,12 +82,13 @@ class TimeStats {
     return result.toList(growable: growable);
   }
 
-  static Map<String, TimeStats> mapFromJson(dynamic json) {
-    final map = <String, TimeStats>{};
+  static Map<String, ParticipantCountOverTimeResponse> mapFromJson(
+      dynamic json) {
+    final map = <String, ParticipantCountOverTimeResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = TimeStats.fromJson(entry.value);
+        final value = ParticipantCountOverTimeResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -102,17 +97,17 @@ class TimeStats {
     return map;
   }
 
-  // maps a json object with a list of TimeStats-objects as value to a dart map
-  static Map<String, List<TimeStats>> mapListFromJson(
+  // maps a json object with a list of ParticipantCountOverTimeResponse-objects as value to a dart map
+  static Map<String, List<ParticipantCountOverTimeResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<TimeStats>>{};
+    final map = <String, List<ParticipantCountOverTimeResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TimeStats.listFromJson(
+        map[entry.key] = ParticipantCountOverTimeResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -122,8 +117,5 @@ class TimeStats {
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'average_seconds',
-    'max_seconds',
-  };
+  static const requiredKeys = <String>{};
 }

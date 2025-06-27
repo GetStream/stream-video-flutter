@@ -164,6 +164,8 @@ abstract class CoordinatorClient {
   /// Starts transcription for the call described by the given [callCid].
   Future<Result<None>> startTranscription(
     StreamCallCid callCid, {
+    bool? enableClosedCaptions,
+    TranscriptionSettingsLanguage? language,
     String? transcriptionExternalStorage,
   });
 
@@ -174,7 +176,12 @@ abstract class CoordinatorClient {
   /// Stops transcription for the call described by the given [callCid].
   Future<Result<None>> stopTranscription(StreamCallCid callCid);
 
-  Future<Result<None>> startClosedCaptions(StreamCallCid callCid);
+  Future<Result<None>> startClosedCaptions(
+    StreamCallCid callCid, {
+    bool? enableTranscription,
+    TranscriptionSettingsLanguage? language,
+    String? transcriptionExternalStorage,
+  });
 
   Future<Result<None>> stopClosedCaptions(StreamCallCid callCid);
 

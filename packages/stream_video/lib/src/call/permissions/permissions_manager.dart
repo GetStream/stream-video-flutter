@@ -163,13 +163,22 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> startTranscription() async {
+  Future<Result<None>> startTranscription({
+    bool? enableClosedCaptions,
+    TranscriptionSettingsLanguage? language,
+    String? transcriptionExternalStorage,
+  }) async {
     if (!hasPermission(CallPermission.startTranscriptionCall)) {
       _logger.w(() => '[startTranscription] rejected (no permission)');
       return Result.error('Cannot start transcription (no permission)');
     }
     _logger.d(() => '[startTranscription] no args');
-    final result = await coordinatorClient.startTranscription(callCid);
+    final result = await coordinatorClient.startTranscription(
+      callCid,
+      enableClosedCaptions: enableClosedCaptions,
+      language: language,
+      transcriptionExternalStorage: transcriptionExternalStorage,
+    );
     _logger.v(() => '[startTranscription] result: $result');
     return result;
   }
@@ -192,13 +201,22 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> startClosedCaptions() async {
+  Future<Result<None>> startClosedCaptions({
+    bool? enableTranscription,
+    TranscriptionSettingsLanguage? language,
+    String? transcriptionExternalStorage,
+  }) async {
     if (!hasPermission(CallPermission.startClosedCaptionsCall)) {
       _logger.w(() => '[startClosedCaptions] rejected (no permission)');
       return Result.error('Cannot start closed captions (no permission)');
     }
     _logger.d(() => '[startClosedCaptions] no args');
-    final result = await coordinatorClient.startClosedCaptions(callCid);
+    final result = await coordinatorClient.startClosedCaptions(
+      callCid,
+      enableTranscription: enableTranscription,
+      language: language,
+      transcriptionExternalStorage: transcriptionExternalStorage,
+    );
     _logger.v(() => '[startClosedCaptions] result: $result');
     return result;
   }

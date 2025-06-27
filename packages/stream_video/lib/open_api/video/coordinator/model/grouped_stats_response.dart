@@ -10,43 +10,43 @@
 
 part of openapi.api;
 
-class FPSStats {
-  /// Returns a new [FPSStats] instance.
-  FPSStats({
-    required this.averageFps,
-    required this.tracked,
+class GroupedStatsResponse {
+  /// Returns a new [GroupedStatsResponse] instance.
+  GroupedStatsResponse({
+    required this.name,
+    required this.unique,
   });
 
-  double averageFps;
+  String name;
 
-  int tracked;
+  int unique;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FPSStats &&
-          other.averageFps == averageFps &&
-          other.tracked == tracked;
+      other is GroupedStatsResponse &&
+          other.name == name &&
+          other.unique == unique;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (averageFps.hashCode) + (tracked.hashCode);
+      (name.hashCode) + (unique.hashCode);
 
   @override
-  String toString() => 'FPSStats[averageFps=$averageFps, tracked=$tracked]';
+  String toString() => 'GroupedStatsResponse[name=$name, unique=$unique]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'average_fps'] = this.averageFps;
-    json[r'tracked'] = this.tracked;
+    json[r'name'] = this.name;
+    json[r'unique'] = this.unique;
     return json;
   }
 
-  /// Returns a new [FPSStats] instance and imports its values from
+  /// Returns a new [GroupedStatsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static FPSStats? fromJson(dynamic value) {
+  static GroupedStatsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -56,29 +56,29 @@ class FPSStats {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "FPSStats[$key]" is missing from JSON.');
+              'Required key "GroupedStatsResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "FPSStats[$key]" has a null value in JSON.');
+              'Required key "GroupedStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return FPSStats(
-        averageFps: mapValueOfType<double>(json, r'average_fps')!,
-        tracked: mapValueOfType<int>(json, r'tracked')!,
+      return GroupedStatsResponse(
+        name: mapValueOfType<String>(json, r'name')!,
+        unique: mapValueOfType<int>(json, r'unique')!,
       );
     }
     return null;
   }
 
-  static List<FPSStats> listFromJson(
+  static List<GroupedStatsResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <FPSStats>[];
+    final result = <GroupedStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = FPSStats.fromJson(row);
+        final value = GroupedStatsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -87,12 +87,12 @@ class FPSStats {
     return result.toList(growable: growable);
   }
 
-  static Map<String, FPSStats> mapFromJson(dynamic json) {
-    final map = <String, FPSStats>{};
+  static Map<String, GroupedStatsResponse> mapFromJson(dynamic json) {
+    final map = <String, GroupedStatsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = FPSStats.fromJson(entry.value);
+        final value = GroupedStatsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -101,17 +101,17 @@ class FPSStats {
     return map;
   }
 
-  // maps a json object with a list of FPSStats-objects as value to a dart map
-  static Map<String, List<FPSStats>> mapListFromJson(
+  // maps a json object with a list of GroupedStatsResponse-objects as value to a dart map
+  static Map<String, List<GroupedStatsResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<FPSStats>>{};
+    final map = <String, List<GroupedStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = FPSStats.listFromJson(
+        map[entry.key] = GroupedStatsResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -122,7 +122,7 @@ class FPSStats {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'average_fps',
-    'tracked',
+    'name',
+    'unique',
   };
 }

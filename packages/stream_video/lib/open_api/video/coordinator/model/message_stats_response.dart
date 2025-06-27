@@ -10,51 +10,38 @@
 
 part of openapi.api;
 
-class Location {
-  /// Returns a new [Location] instance.
-  Location({
-    required this.continentCode,
-    required this.countryIsoCode,
-    required this.subdivisionIsoCode,
+class MessageStatsResponse {
+  /// Returns a new [MessageStatsResponse] instance.
+  MessageStatsResponse({
+    this.countOverTime = const [],
   });
 
-  String continentCode;
-
-  String countryIsoCode;
-
-  String subdivisionIsoCode;
+  List<CountByMinuteResponse> countOverTime;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Location &&
-          other.continentCode == continentCode &&
-          other.countryIsoCode == countryIsoCode &&
-          other.subdivisionIsoCode == subdivisionIsoCode;
+      other is MessageStatsResponse &&
+          _deepEquality.equals(other.countOverTime, countOverTime);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (continentCode.hashCode) +
-      (countryIsoCode.hashCode) +
-      (subdivisionIsoCode.hashCode);
+      (countOverTime.hashCode);
 
   @override
-  String toString() =>
-      'Location[continentCode=$continentCode, countryIsoCode=$countryIsoCode, subdivisionIsoCode=$subdivisionIsoCode]';
+  String toString() => 'MessageStatsResponse[countOverTime=$countOverTime]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'continent_code'] = this.continentCode;
-    json[r'country_iso_code'] = this.countryIsoCode;
-    json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
+    json[r'count_over_time'] = this.countOverTime;
     return json;
   }
 
-  /// Returns a new [Location] instance and imports its values from
+  /// Returns a new [MessageStatsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Location? fromJson(dynamic value) {
+  static MessageStatsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -64,31 +51,29 @@ class Location {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "Location[$key]" is missing from JSON.');
+              'Required key "MessageStatsResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "Location[$key]" has a null value in JSON.');
+              'Required key "MessageStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Location(
-        continentCode: mapValueOfType<String>(json, r'continent_code')!,
-        countryIsoCode: mapValueOfType<String>(json, r'country_iso_code')!,
-        subdivisionIsoCode:
-            mapValueOfType<String>(json, r'subdivision_iso_code')!,
+      return MessageStatsResponse(
+        countOverTime:
+            CountByMinuteResponse.listFromJson(json[r'count_over_time']),
       );
     }
     return null;
   }
 
-  static List<Location> listFromJson(
+  static List<MessageStatsResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <Location>[];
+    final result = <MessageStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Location.fromJson(row);
+        final value = MessageStatsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -97,12 +82,12 @@ class Location {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Location> mapFromJson(dynamic json) {
-    final map = <String, Location>{};
+  static Map<String, MessageStatsResponse> mapFromJson(dynamic json) {
+    final map = <String, MessageStatsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Location.fromJson(entry.value);
+        final value = MessageStatsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -111,17 +96,17 @@ class Location {
     return map;
   }
 
-  // maps a json object with a list of Location-objects as value to a dart map
-  static Map<String, List<Location>> mapListFromJson(
+  // maps a json object with a list of MessageStatsResponse-objects as value to a dart map
+  static Map<String, List<MessageStatsResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<Location>>{};
+    final map = <String, List<MessageStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Location.listFromJson(
+        map[entry.key] = MessageStatsResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -131,9 +116,5 @@ class Location {
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'continent_code',
-    'country_iso_code',
-    'subdivision_iso_code',
-  };
+  static const requiredKeys = <String>{};
 }
