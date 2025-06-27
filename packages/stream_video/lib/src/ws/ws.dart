@@ -24,6 +24,8 @@ enum StreamWebSocketCloseCode {
   //  */
   goingAway(1001),
 
+  policyViolation(1008),
+
   // /**
   //  * The error code used when the SFU connection is unhealthy.
   //  * Usually, this means that no message has been received from the SFU for
@@ -43,7 +45,9 @@ enum StreamWebSocketCloseCode {
   final int value;
 
   static bool isIntentionalClosure(int? code) =>
-      code == normalClosure.value || code == goingAway.value;
+      code == normalClosure.value ||
+      code == goingAway.value ||
+      code == policyViolation.value;
 }
 
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
