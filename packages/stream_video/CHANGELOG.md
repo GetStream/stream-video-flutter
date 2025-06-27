@@ -2,6 +2,7 @@
 
 ✅ Added
 * Added `call.partialState` for more specific and efficient state updates.
+* `SpeakingWhileMutedRecognition` to notify users when there is audio input, but microphone is muted.
 
 ## 0.9.6
 
