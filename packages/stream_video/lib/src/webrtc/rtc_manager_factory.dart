@@ -4,6 +4,7 @@ import '../call/session/call_session_config.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
+import '../sfu/sfu_client.dart';
 import '../types/other.dart';
 import 'peer_connection_factory.dart';
 import 'rtc_manager.dart';
@@ -31,6 +32,7 @@ class RtcManagerFactory {
   final Map<String, dynamic> mediaConstraints;
 
   Future<RtcManager> makeRtcManager({
+    required SfuClient sfuClient,
     ClientDetails? clientDetails,
     String? publisherId,
     int? sessionSequence,
@@ -42,6 +44,7 @@ class RtcManagerFactory {
 
     final publisher = publisherId != null
         ? await pcFactory.makePublisher(
+            sfuClient,
             configuration,
             clientDetails,
             sessionSequence?.toString(),
@@ -52,6 +55,7 @@ class RtcManagerFactory {
         : null;
 
     final subscriber = await pcFactory.makeSubscriber(
+      sfuClient,
       configuration,
       clientDetails,
       sessionSequence?.toString(),

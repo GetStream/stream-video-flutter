@@ -86,16 +86,13 @@ class RtcManager extends Disposable {
     subscriber.onIceCandidate = cb;
   }
 
-  set onSubscriberIssue(OnIssue? cb) {
-    subscriber.onIssue = cb;
-  }
-
-  set onPublisherIssue(OnIssue? cb) {
-    publisher?.onIssue = cb;
-  }
-
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     publisher?.onRenegotiationNeeded = cb;
+  }
+
+  set onReconnectionNeeded(OnReconnectionNeeded? cb) {
+    subscriber.onReconnectionNeeded = cb;
+    publisher?.onReconnectionNeeded = cb;
   }
 
   OnLocalTrackMuted? onLocalTrackMuted;
@@ -565,8 +562,6 @@ extension PublisherRtcManager on RtcManager {
         muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
       );
     } else if (track is RtcLocalVideoTrack) {
-      final dimension = _getTrackDimension(track);
-
       final encodings = codecs.findOptimalVideoLayers(
         dimensions: _getTrackDimension(track),
         publishOptions: transceiverCache.publishOption,
@@ -584,7 +579,6 @@ extension PublisherRtcManager on RtcManager {
         codec: transceiverCache.publishOption.codec,
         muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
         layers: encodings.map((it) {
-          final scale = it.scaleResolutionDownBy ?? 1;
           return RtcVideoLayer(
             rid: it.rid ?? '',
             parameters: RtcVideoParameters(
@@ -594,8 +588,8 @@ extension PublisherRtcManager on RtcManager {
                 quality: ridToVideoQuality(it.rid ?? ''),
               ),
               dimension: RtcVideoDimension(
-                width: (dimension.width / scale).floor(),
-                height: (dimension.height / scale).floor(),
+                width: it.width.floor(),
+                height: it.height.floor(),
               ),
             ),
           );

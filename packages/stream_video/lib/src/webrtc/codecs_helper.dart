@@ -9,11 +9,30 @@ import '../sfu/data/models/sfu_publish_options.dart';
 import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_parameters.dart';
 
-List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
+class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
+  RTCRtpEncodingWithDimensions({
+    required this.width,
+    required this.height,
+    super.rid,
+    super.active,
+    super.maxBitrate,
+    super.maxFramerate,
+    super.minBitrate,
+    super.numTemporalLayers,
+    super.scaleResolutionDownBy,
+    super.ssrc,
+    super.scalabilityMode,
+  });
+
+  final double width;
+  final double height;
+}
+
+List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   required RtcVideoDimension dimensions,
   required SfuPublishOptions publishOptions,
 }) {
-  final optimalVideoLayers = <rtc.RTCRtpEncoding>[];
+  final optimalVideoLayers = <RTCRtpEncodingWithDimensions>[];
   const defaultVideoPreset = RtcVideoParametersPresets.h720_16x9;
 
   final maxBitrate = getComputedMaxBitrate(
@@ -32,17 +51,19 @@ List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
 
   final rids = ['f', 'h', 'q'].sublist(0, maxSpatialLayers);
   for (final rid in rids) {
-    final layer = rtc.RTCRtpEncoding(
+    final layer = RTCRtpEncodingWithDimensions(
       rid: rid,
       maxBitrate: (maxBitrate / bitrateFactor).round(),
       maxFramerate: publishOptions.fps,
+      width: dimensions.width / downscaleFactor,
+      height: dimensions.height / downscaleFactor,
     );
 
     if (svcCodec) {
       // for SVC codecs, we need to set the scalability mode, and the
       // codec will handle the rest (layers, temporal layers, etc.)
       layer.scalabilityMode = toScalabilityMode(
-        maxSpatialLayers,
+        publishOptions.useSingleLayer ? 1 : maxSpatialLayers,
         maxTemporalLayers,
       );
     } else {
@@ -62,6 +83,7 @@ List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
   return withSimulcastConstraints(
     dimensions: dimensions,
     optimalVideoLayers: optimalVideoLayers,
+    useSingleLayer: publishOptions.useSingleLayer,
   );
 }
 
@@ -87,11 +109,12 @@ int getComputedMaxBitrate(
   return maxBitrate;
 }
 
-List<rtc.RTCRtpEncoding> withSimulcastConstraints({
+List<RTCRtpEncodingWithDimensions> withSimulcastConstraints({
   required RtcVideoDimension dimensions,
-  required List<rtc.RTCRtpEncoding> optimalVideoLayers,
+  required List<RTCRtpEncodingWithDimensions> optimalVideoLayers,
+  required bool useSingleLayer,
 }) {
-  var layers = <rtc.RTCRtpEncoding>[];
+  var layers = <RTCRtpEncodingWithDimensions>[];
 
   final size = max(dimensions.width, dimensions.height);
   if (size <= 320) {
@@ -108,11 +131,19 @@ List<rtc.RTCRtpEncoding> withSimulcastConstraints({
   final ridMapping = ['q', 'h', 'f'];
   return layers
       .mapIndexed(
-        (index, layer) => rtc.RTCRtpEncoding(
+        (index, layer) => RTCRtpEncodingWithDimensions(
           rid: ridMapping[index],
           scaleResolutionDownBy: layer.scaleResolutionDownBy,
+          scalabilityMode: layer.scalabilityMode,
           maxFramerate: layer.maxFramerate,
           maxBitrate: layer.maxBitrate,
+          minBitrate: layer.minBitrate,
+          numTemporalLayers: layer.numTemporalLayers,
+          ssrc: layer.ssrc,
+          width: layer.width,
+          height: layer.height,
+          active:
+              layer.active && !(useSingleLayer && index < layers.length - 1),
         ),
       )
       .toList();

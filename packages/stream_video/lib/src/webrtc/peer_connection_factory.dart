@@ -6,6 +6,7 @@ import '../call/session/call_session_config.dart';
 import '../call/stats/tracer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../sfu/sfu_client.dart';
 import '../types/other.dart';
 import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
@@ -25,6 +26,7 @@ class StreamPeerConnectionFactory {
   final SdpEditor sdpEditor;
 
   Future<TracedStreamPeerConnection> makeSubscriber(
+    SfuClient sfuClient,
     RTCConfiguration configuration,
     ClientDetails? clientDetails, [
     String? tracerIdPrefix,
@@ -33,6 +35,7 @@ class StreamPeerConnectionFactory {
     CallSessionConfig? callSessionConfig,
   ]) async {
     return makePeerConnection(
+      sfuClient: sfuClient,
       type: StreamPeerType.subscriber,
       configuration: configuration,
       clientDetails: clientDetails,
@@ -44,6 +47,7 @@ class StreamPeerConnectionFactory {
   }
 
   Future<TracedStreamPeerConnection> makePublisher(
+    SfuClient sfuClient,
     RTCConfiguration configuration,
     ClientDetails? clientDetails, [
     String? tracerIdPrefix,
@@ -52,6 +56,7 @@ class StreamPeerConnectionFactory {
     CallSessionConfig? callSessionConfig,
   ]) async {
     return makePeerConnection(
+      sfuClient: sfuClient,
       type: StreamPeerType.publisher,
       configuration: configuration,
       clientDetails: clientDetails,
@@ -63,6 +68,7 @@ class StreamPeerConnectionFactory {
   }
 
   Future<TracedStreamPeerConnection> makePeerConnection({
+    required SfuClient sfuClient,
     required StreamPeerType type,
     required RTCConfiguration configuration,
     required ClientDetails? clientDetails,
@@ -97,6 +103,7 @@ class StreamPeerConnectionFactory {
     );
 
     return TracedStreamPeerConnection(
+      sfuClient: sfuClient,
       sessionId: sessionId,
       callCid: callCid,
       type: type,

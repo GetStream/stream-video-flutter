@@ -945,6 +945,7 @@ class PublishOption extends $pb.GeneratedMessage {
     $core.int? maxTemporalLayers,
     VideoDimension? videoDimension,
     $core.int? id,
+    $core.bool? useSingleLayer,
   }) {
     final $result = create();
     if (trackType != null) {
@@ -970,6 +971,9 @@ class PublishOption extends $pb.GeneratedMessage {
     }
     if (id != null) {
       $result.id = id;
+    }
+    if (useSingleLayer != null) {
+      $result.useSingleLayer = useSingleLayer;
     }
     return $result;
   }
@@ -1000,6 +1004,7 @@ class PublishOption extends $pb.GeneratedMessage {
     ..aOM<VideoDimension>(7, _omitFieldNames ? '' : 'videoDimension',
         subBuilder: VideoDimension.create)
     ..a<$core.int>(8, _omitFieldNames ? '' : 'id', $pb.PbFieldType.O3)
+    ..aOB(9, _omitFieldNames ? '' : 'useSingleLayer')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -1155,6 +1160,21 @@ class PublishOption extends $pb.GeneratedMessage {
   $core.bool hasId() => $_has(7);
   @$pb.TagNumber(8)
   void clearId() => $_clearField(8);
+
+  /// If true, instructs the publisher to send only the highest available simulcast layer,
+  /// disabling all lower layers. This applies to simulcast encodings.
+  /// For SVC codecs, prefer using the L1T3 (single spatial, 3 temporal layers) mode instead.
+  @$pb.TagNumber(9)
+  $core.bool get useSingleLayer => $_getBF(8);
+  @$pb.TagNumber(9)
+  set useSingleLayer($core.bool v) {
+    $_setBool(8, v);
+  }
+
+  @$pb.TagNumber(9)
+  $core.bool hasUseSingleLayer() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearUseSingleLayer() => $_clearField(9);
 }
 
 class Codec extends $pb.GeneratedMessage {

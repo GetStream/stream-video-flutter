@@ -762,13 +762,7 @@ class Call {
           dynascaleManager: dynascaleManager,
           networkMonitor: networkMonitor,
           statsOptions: _sfuStatsOptions!,
-          onPeerConnectionFailure: (pc) async {
-            if (state.value.status is! CallStatusReconnecting) {
-              await pc.pc.restartIce().onError((_, __) {
-                _reconnect(SfuReconnectionStrategy.rejoin);
-              });
-            }
-          },
+          onReconnectionNeeded: (pc, strategy) => _reconnect(strategy),
           clientPublishOptions:
               _stateManager.callState.preferences.clientPublishOptions,
         );
@@ -1209,6 +1203,7 @@ class Call {
       _reconnectStrategy = strategy;
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
+      var attempt = 0;
       do {
         _stateManager.lifecycleCallConnecting(
           attempt: _reconnectAttempts,
@@ -1262,7 +1257,28 @@ class Call {
               await Future<void>.delayed(
                 _retryPolicy.backoff(_reconnectAttempts),
               );
-              _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+
+              final wasMigrating =
+                  _reconnectStrategy == SfuReconnectionStrategy.migrate;
+
+              // don't immediately switch to the REJOIN strategy, but instead attempt
+              // to reconnect with the FAST strategy for a few times before switching.
+              // in some cases, we immediately switch to the REJOIN strategy.
+              final shouldRejoin =
+                  wasMigrating || // if we were migrating, but the migration failed
+                      attempt >= 3 || // after 3 failed attempts
+                      !(_session?.rtcManager?.publisher?.isHealthy() ??
+                          true) || // if the publisher is not healthy
+                      !(_session?.rtcManager?.subscriber.isHealthy() ??
+                          true); // if the subscriber is not healthy
+
+              attempt++;
+
+              final nextStrategy = shouldRejoin
+                  ? SfuReconnectionStrategy.rejoin
+                  : SfuReconnectionStrategy.fast;
+
+              _reconnectStrategy = nextStrategy;
           }
         }
       } while (state.value.status is! CallStatusConnected &&

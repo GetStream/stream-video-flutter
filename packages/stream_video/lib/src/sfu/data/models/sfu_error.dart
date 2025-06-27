@@ -31,14 +31,23 @@ enum SfuErrorCode {
   publishTracksMismatch,
   publishTrackOutOfOrder,
   publishTrackVideoLayerNotFound,
+  liveEnded,
   participantNotFound,
+  participantMigratingOut,
+  participantMigrationFailed,
+  participantMigrating,
+  participantReconnectFailed,
   participantMediaTransportFailure,
+  participantSignalLost,
   callNotFound,
+  callParticipantLimitReached,
   requestValidationFailed,
   unauthenticated,
   permissionDenied,
   tooManyRequests,
-  internalServerError;
+  internalServerError,
+  sfuShuttingDown,
+  sfuFull;
 
   @override
   String toString() => name;

@@ -319,12 +319,26 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.publishTrackOutOfOrder;
       case sfu_models.ErrorCode.ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND:
         return SfuErrorCode.publishTrackVideoLayerNotFound;
+      case sfu_models.ErrorCode.ERROR_CODE_LIVE_ENDED:
+        return SfuErrorCode.liveEnded;
       case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND:
         return SfuErrorCode.participantNotFound;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_MIGRATING_OUT:
+        return SfuErrorCode.participantMigratingOut;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_MIGRATION_FAILED:
+        return SfuErrorCode.participantMigrationFailed;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_MIGRATING:
+        return SfuErrorCode.participantMigrating;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_RECONNECT_FAILED:
+        return SfuErrorCode.participantReconnectFailed;
       case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE:
         return SfuErrorCode.participantMediaTransportFailure;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST:
+        return SfuErrorCode.participantSignalLost;
       case sfu_models.ErrorCode.ERROR_CODE_CALL_NOT_FOUND:
         return SfuErrorCode.callNotFound;
+      case sfu_models.ErrorCode.ERROR_CODE_CALL_PARTICIPANT_LIMIT_REACHED:
+        return SfuErrorCode.callParticipantLimitReached;
       case sfu_models.ErrorCode.ERROR_CODE_INTERNAL_SERVER_ERROR:
         return SfuErrorCode.internalServerError;
       case sfu_models.ErrorCode.ERROR_CODE_UNSPECIFIED:
@@ -337,8 +351,12 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.tooManyRequests;
       case sfu_models.ErrorCode.ERROR_CODE_UNAUTHENTICATED:
         return SfuErrorCode.unauthenticated;
+      case sfu_models.ErrorCode.ERROR_CODE_SFU_SHUTTING_DOWN:
+        return SfuErrorCode.sfuShuttingDown;
+      case sfu_models.ErrorCode.ERROR_CODE_SFU_FULL:
+        return SfuErrorCode.sfuFull;
       default:
-        throw StateError('unexpected error code: $this');
+        return SfuErrorCode.unspecified;
     }
   }
 }
@@ -426,6 +444,7 @@ extension on sfu_models.PublishOption {
       maxTemporalLayers: maxTemporalLayers,
       bitrate: bitrate,
       fps: fps,
+      useSingleLayer: useSingleLayer,
     );
   }
 }
