@@ -110,7 +110,7 @@ class AudioRecognitionWebRTC implements AudioRecognition {
         silenceTimer ??= Timer(config.silenceTimeout, () {
           baselineNoiseLevel = math.min(
             averageAudioLevel * config.resetThreshold,
-            config.initialBaselineNoiseLevel,
+            baselineNoiseLevel,
           );
         });
       } else {

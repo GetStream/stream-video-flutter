@@ -218,7 +218,6 @@ class CallState extends Equatable {
     bool? iOSMultitaskingCameraAccessEnabled,
     Map<String, Object>? custom,
   }) {
-
     return CallState._(
       preferences: preferences ?? this.preferences,
       currentUserId: currentUserId ?? this.currentUserId,

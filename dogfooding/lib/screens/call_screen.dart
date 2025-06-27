@@ -60,7 +60,7 @@ class _CallScreenState extends State<CallScreen> {
       final context = this.context;
       if (state.isSpeakingWhileMuted && context.mounted) {
         final colorTheme = StreamVideoTheme.of(context).colorTheme;
-        
+
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(
             content: const Text('You are speaking while muted'),

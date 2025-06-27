@@ -6,7 +6,6 @@ import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
 
-
 void main() {
   group('StreamVideo - allowMultipleActiveCalls', () {
     late User user;
