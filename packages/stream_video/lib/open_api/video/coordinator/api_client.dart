@@ -381,6 +381,8 @@ class ApiClient {
           return CallsPerDayReport.fromJson(value);
         case 'CallsPerDayReportResponse':
           return CallsPerDayReportResponse.fromJson(value);
+        case 'ChatActivityStatsResponse':
+          return ChatActivityStatsResponse.fromJson(value);
         case 'ClosedCaptionEvent':
           return ClosedCaptionEvent.fromJson(value);
         case 'CollectUserFeedbackRequest':
@@ -580,8 +582,8 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
-        case 'Response':
-          return Response.fromJson(value);
+        case 'DurationResponse':
+          return DurationResponse.fromJson(value);
         case 'RingSettingsRequest':
           return RingSettingsRequest.fromJson(value);
         case 'RingSettingsResponse':

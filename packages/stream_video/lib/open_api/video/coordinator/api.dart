@@ -106,6 +106,7 @@ part 'model/call_updated_event.dart';
 part 'model/call_user_muted_event.dart';
 part 'model/calls_per_day_report.dart';
 part 'model/calls_per_day_report_response.dart';
+part 'model/chat_activity_stats_response.dart';
 part 'model/closed_caption_event.dart';
 part 'model/collect_user_feedback_request.dart';
 part 'model/collect_user_feedback_response.dart';
