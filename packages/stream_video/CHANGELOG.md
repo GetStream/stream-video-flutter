@@ -1,3 +1,8 @@
+## Unreleased
+
+✅ Added
+* Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
+
 ## 0.9.6
 
 ✅ Added

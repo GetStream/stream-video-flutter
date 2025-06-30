@@ -2508,7 +2508,7 @@ class Call {
   /// - [sessionId]: The session ID of the participant.
   /// - [userId]: The user ID of the participant.
   /// - [mirrorVideo]: Whether to mirror the participant's video.
-  Result<None> setParticipantMirrorVideo({
+  Result<None> setMirrorVideo({
     required String sessionId,
     required String userId,
     required bool mirrorVideo,
