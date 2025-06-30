@@ -101,9 +101,9 @@ class StreamPeerConnection extends Disposable {
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
 
   /// Attempts to restart ICE on the `RTCPeerConnection`.
-  /// This method intentionally doesn't await the `restartIce()` method,
-  /// allowing it to run in the background and handle any errors that may occur.
-  void tryRestartIce() {
+  /// If the restart fails, this method will trigger onReconnectionNeeded with
+  /// the appropriate reconnection strategy based on the error.
+  void _tryRestartIce() {
     _logger.v(() => '[restartIce] no args');
     restartIce().then((result) {
       if (result.isFailure) {
@@ -385,7 +385,7 @@ class StreamPeerConnection extends Disposable {
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
         // in the `failed` state, we try to restart ICE immediately
         _logger.i(() => 'restartICE due to failed connection');
-        tryRestartIce();
+        _tryRestartIce();
         break;
       case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
         // in the `disconnected` state, we schedule a restartICE() after a delay
@@ -398,7 +398,7 @@ class StreamPeerConnection extends Disposable {
                   rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
               currentState ==
                   rtc.RTCIceConnectionState.RTCIceConnectionStateFailed) {
-            tryRestartIce();
+            _tryRestartIce();
           }
         });
         break;

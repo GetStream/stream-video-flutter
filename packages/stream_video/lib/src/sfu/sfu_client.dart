@@ -2,6 +2,7 @@
 
 import 'dart:math';
 
+import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -48,7 +49,7 @@ class SfuClient {
     return (min + Random().nextDouble() * (max - min)).floor();
   }
 
-  Future<Result<T>> _executeWithRetry<T>({
+  Future<Result<T>> _executeWithRetry<T extends GeneratedMessage>({
     required Future<T> Function() call,
     int maxRetries = 3,
   }) async {
