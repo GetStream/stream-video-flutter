@@ -227,12 +227,14 @@ class Call {
     required SdpPolicy sdpPolicy,
     required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
     CallCredentials? credentials,
-  })  : _sessionFactory = CallSessionFactory(
-          callCid: stateManager.callState.callCid,
-          sdpEditor: sdpPolicy.spdEditingEnabled
-              ? SdpEditorImpl(sdpPolicy)
-              : NoOpSdpEditor(),
-        ),
+    CallSessionFactory? sessionFactory,
+  })  : _sessionFactory = sessionFactory ??
+            CallSessionFactory(
+              callCid: stateManager.callState.callCid,
+              sdpEditor: sdpPolicy.spdEditingEnabled
+                  ? SdpEditorImpl(sdpPolicy)
+                  : NoOpSdpEditor(),
+            ),
         _stateManager = stateManager,
         _permissionsManager = permissionManager,
         _coordinatorClient = coordinatorClient,
@@ -2918,4 +2920,35 @@ extension FutureStartWithEx<T> on Stream<T> {
     yield await futureValue;
     yield* this;
   }
+}
+
+// ignore: avoid_classes_with_only_static_members
+/// Call factory to create a [Call] instance.
+/// Only meant for testing purposes.
+@visibleForTesting
+class BaseCallFactory {
+  static Call makeCall({
+    required CoordinatorClient coordinatorClient,
+    required StreamVideo streamVideo,
+    required CallStateNotifier stateManager,
+    required PermissionsManager permissionManager,
+    required InternetConnection networkMonitor,
+    required RetryPolicy retryPolicy,
+    required SdpPolicy sdpPolicy,
+    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
+    required CallCredentials? credentials,
+    required CallSessionFactory? sessionFactory,
+  }) =>
+      Call._(
+        coordinatorClient: coordinatorClient,
+        streamVideo: streamVideo,
+        stateManager: stateManager,
+        permissionManager: permissionManager,
+        networkMonitor: networkMonitor,
+        retryPolicy: retryPolicy,
+        sdpPolicy: sdpPolicy,
+        rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
+        credentials: credentials,
+        sessionFactory: sessionFactory,
+      );
 }
