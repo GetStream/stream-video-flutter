@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
+import android.util.Log
 import android.util.Rational
 import android.app.PictureInPictureUiState
 import io.flutter.embedding.engine.FlutterEngine
@@ -115,9 +116,12 @@ class PictureInPictureHelper {
          */
         @Deprecated("Use PictureInPictureConfiguration in StreamCallContent instead")
         fun enterPictureInPictureIfInCall(activity: Activity) {
-            // For backwards compatibility, delegate to the new handlePipTrigger method
-            // This maintains the same behavior but uses the new automatic PiP system
-            handlePipTrigger(activity)
+            Log.e("PictureInPictureHelper", 
+                "ERROR: enterPictureInPictureIfInCall is deprecated and no longer functional. " +
+                "Please migrate to the new Picture-in-Picture implementation by:\n" +
+                "1. Extending StreamFlutterActivity instead of FlutterActivity\n" +
+                "2. Removing manual override of onUserLeaveHint method\n" +
+                "See the updated documentation for migration details.")
         }
     }
 }
