@@ -78,7 +78,9 @@ class PictureInPictureHelper {
         }
 
         fun notifyPictureInPictureModeChanged(activity: Activity, isInPictureInPictureMode: Boolean) {
-            methodChannel?.invokeMethod("onPictureInPictureModeChanged", isInPictureInPictureMode)
+            activity.runOnUiThread {
+                methodChannel?.invokeMethod("onPictureInPictureModeChanged", isInPictureInPictureMode)
+            }
         }
 
         fun enterPictureInPictureMode(activity: Activity) {
