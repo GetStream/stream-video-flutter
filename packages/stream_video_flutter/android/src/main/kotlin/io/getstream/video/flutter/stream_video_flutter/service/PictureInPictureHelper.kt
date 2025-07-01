@@ -18,6 +18,7 @@ class PictureInPictureHelper {
         
         private var methodChannel: MethodChannel? = null
         private var getActivity: (() -> Activity?)? = null
+        private var isPictureInPictureAllowed: Boolean = false
 
         fun initializeWithFlutterEngine(engine: FlutterEngine, activityGetter: () -> Activity?) {
             methodChannel = MethodChannel(engine.dartExecutor.binaryMessenger, PIP_CHANNEL)
@@ -29,17 +30,25 @@ class PictureInPictureHelper {
 
         private fun handleMethodCall(call: MethodCall, result: MethodChannel.Result) {
             when (call.method) {
-                "disablePictureInPictureMode" -> {
-                    val activity = getActivity?.invoke()
-                    if (activity != null) {
-                        disablePictureInPicture(activity)
-                        result.success(null)
-                    } else {
-                        result.error("NO_ACTIVITY", "No activity available", null)
-                    }
+                "setPictureInPictureAllowed" -> {
+                    val isAllowed = call.arguments as Boolean
+                    setPictureInPictureAllowed(isAllowed)
+                    result.success(null)
                 }
                 else -> {
                     result.notImplemented()
+                }
+            }
+        }
+
+        private fun setPictureInPictureAllowed(isAllowed: Boolean) {
+            isPictureInPictureAllowed = isAllowed
+            
+            // If PiP is being disabled and we're currently in PiP mode, exit it
+            if (!isAllowed) {
+                val activity = getActivity?.invoke()
+                if (activity != null) {
+                    disablePictureInPicture(activity)
                 }
             }
         }
@@ -62,14 +71,12 @@ class PictureInPictureHelper {
                 return
             }
 
-            // Directly enter PiP mode - Flutter will handle overlay via onPictureInPictureModeChanged
-            if (canEnterPictureInPicture(activity)) {
+            if (isPictureInPictureAllowed && canEnterPictureInPicture(activity)) {
                 enterPictureInPictureMode(activity)
             }
         }
 
         fun notifyPictureInPictureModeChanged(activity: Activity, isInPictureInPictureMode: Boolean) {
-            // Notify Android PiP specific channel
             methodChannel?.invokeMethod("onPictureInPictureModeChanged", isInPictureInPictureMode)
         }
 

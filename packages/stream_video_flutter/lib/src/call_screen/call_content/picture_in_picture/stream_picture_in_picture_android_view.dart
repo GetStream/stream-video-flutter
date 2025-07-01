@@ -31,7 +31,7 @@ class _StreamPictureInPictureAndroidViewState
   OverlayEntry? _overlayEntry;
   bool _isOverlayVisible = false;
 
-  StreamSubscription<CallStatus>? _callStateSubscription;
+  StreamSubscription<(CallStatus, bool?)>? _callStateSubscription;
 
   Call get call => widget.call;
 
@@ -42,6 +42,7 @@ class _StreamPictureInPictureAndroidViewState
     if (widget.configuration.enablePictureInPicture) {
       _setupPictureInPictureListener();
       _startListeningToCallState();
+      _updatePictureInPictureAllowedState();
     }
   }
 
@@ -54,16 +55,19 @@ class _StreamPictureInPictureAndroidViewState
       if (widget.configuration.enablePictureInPicture) {
         _setupPictureInPictureListener();
         _startListeningToCallState();
+        _updatePictureInPictureAllowedState();
       } else {
         _cleanupPictureInPictureListener();
         _hideOverlay();
         _callStateSubscription?.cancel();
+        _setPictureInPictureAllowed(false);
       }
     }
 
     if (widget.call != oldWidget.call) {
       _callStateSubscription?.cancel();
       _startListeningToCallState();
+      _updatePictureInPictureAllowedState();
     }
   }
 
@@ -71,6 +75,7 @@ class _StreamPictureInPictureAndroidViewState
   void dispose() {
     if (widget.configuration.enablePictureInPicture) {
       _cleanupPictureInPictureListener();
+      _setPictureInPictureAllowed(false);
     }
 
     _hideOverlay();
@@ -81,13 +86,25 @@ class _StreamPictureInPictureAndroidViewState
   void _startListeningToCallState() {
     _callStateSubscription = call
         .partialState(
-      (state) => state.status,
-    )
-        .listen((status) {
-      if (status.isDisconnected) {
-        disablePictureInPictureMode();
-      }
-    });
+          (state) => (
+            state.status,
+            state.localParticipant?.isScreenShareEnabled,
+          ),
+        )
+        .listen((_) => _updatePictureInPictureAllowedState());
+  }
+
+  void _updatePictureInPictureAllowedState() {
+    final shouldAllow = _shouldAllowPictureInPicture();
+    _setPictureInPictureAllowed(shouldAllow);
+  }
+
+  /// Updates the Android side about whether PiP should be allowed based on current call state
+  Future<void> _setPictureInPictureAllowed(bool isAllowed) async {
+    await _methodChannel.invokeMethod(
+      'setPictureInPictureAllowed',
+      isAllowed,
+    );
   }
 
   void _setupPictureInPictureListener() {
@@ -103,19 +120,13 @@ class _StreamPictureInPictureAndroidViewState
     }
   }
 
-  /// Disables Picture-in-Picture mode if currently active
-  Future<void> disablePictureInPictureMode() async {
-    _hideOverlay();
-    await _methodChannel.invokeMethod('disablePictureInPictureMode');
-  }
-
   void _handlePictureInPictureModeChanged(bool isInPictureInPictureMode) {
     if (isInPictureInPictureMode) {
       // Check if we should actually be in PiP mode
       if (_shouldAllowPictureInPicture()) {
         _showOverlay();
       } else {
-        disablePictureInPictureMode();
+        _hideOverlay();
       }
     } else {
       _hideOverlay();
@@ -176,8 +187,6 @@ class _StreamPictureInPictureAndroidViewState
 
   @override
   Widget build(BuildContext context) {
-    // This widget doesn't render anything visible - it just manages PiP state
-    // Similar to how iOS StreamPictureInPictureUiKitView works
     return const SizedBox.shrink();
   }
 }
