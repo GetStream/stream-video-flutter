@@ -111,19 +111,6 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
   }
 
   @override
-  Future<void> setPictureInPictureEnabled({required bool enable}) async {
-    if (enable) {
-      return methodChannel.invokeMethod(
-        'enablePictureInPictureMode',
-      );
-    }
-
-    return methodChannel.invokeMethod(
-      'disablePictureInPictureMode',
-    );
-  }
-
-  @override
   Future<bool?> isBackgroundEffectSupported() async {
     return methodChannel.invokeMethod<bool>(
       'isBackgroundEffectSupported',
@@ -144,5 +131,13 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
     return methodChannel.invokeMethod('registerImageEffectProcessors', {
       'backgroundImageUrl': backgroundImageUrl,
     });
+  }
+
+  @override
+  @Deprecated(
+      'PiP is now handled automatically by StreamPictureInPictureAndroidView. '
+      'This method is now a no-op for backward compatibility.')
+  Future<void> setPictureInPictureEnabled({required bool enable}) async {
+    return;
   }
 }

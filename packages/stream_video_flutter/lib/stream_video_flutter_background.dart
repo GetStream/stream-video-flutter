@@ -63,13 +63,11 @@ mixin StreamVideoFlutterBackground {
         .isBackgroundServiceRunning(type, callCid: callCid);
   }
 
+  @Deprecated(
+      'PiP is now handled automatically by StreamPictureInPictureAndroidView. '
+      'This method is now a no-op for backward compatibility.')
   static Future<void> setPictureInPictureEnabled({required bool enable}) async {
-    if (!isAndroid) {
-      return;
-    }
-
-    return StreamVideoFlutterPlatform.instance
-        .setPictureInPictureEnabled(enable: enable);
+    return;
   }
 
   static void setOnNotificationContentClick(
