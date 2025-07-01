@@ -1,11 +1,10 @@
 ## Unreleased
 
-(Android) Picture-in-Picture (PiP) Improvements
+🚧 (Android) Picture-in-Picture (PiP) Improvements - Breaking Change
 * **Simplified Setup:** Introduced `StreamFlutterActivity` - extend it instead of `FlutterActivity` for automatic PiP support.
 * **Automatic Activation:** PiP now triggers automatically when users press home button or background the app during calls.
 * **Fixed Overlay Issues:** PiP view can no longer be overlapped by other widgets and will always display the correct video layout.
-* **Backwards Compatibility:** Deprecated manual PiP methods (`setPictureInPictureEnabled`, `enterPictureInPictureIfInCall`) but maintained compatibility.
-* **Migration Recommended:** In your `MainActivity`, replace manual `onUserLeaveHint()` implementation with `StreamFlutterActivity`. Previously required manually calling `PictureInPictureHelper.enterPictureInPictureIfInCall(this)` - now handled automatically.
+* **Migration Required:** Update your `MainActivity` by extending `StreamFlutterActivity` instead of implementing `onUserLeaveHint()` manually. This replaces the previous approach of calling `PictureInPictureHelper.enterPictureInPictureIfInCall(this)` with automatic PiP handling.
 
 🔄 Partial State Updates:
 * Added `call.partialState` for more specific and efficient state updates.
