@@ -17,7 +17,6 @@ analyzer:
     - packages/*/lib/**/*.*.dart
     - packages/stream_video/lib/open_api/**
     - packages/stream_video/lib/protobuf/**
-    - packages/stream_video_flutter/test_fixes/**
 
 linter:
   rules:
