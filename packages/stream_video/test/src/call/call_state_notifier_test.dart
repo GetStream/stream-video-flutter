@@ -127,7 +127,7 @@ void main() {
       final stateWithAudioOnly = initialState.copyWith(
         callParticipants: [
           ...initialState.callParticipants,
-          participantWithoutVideo
+          participantWithoutVideo,
         ],
       );
       stateNotifier.state = stateWithAudioOnly;

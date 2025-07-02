@@ -144,8 +144,10 @@ class SfuClient {
       );
 
       if (result.isSuccess) {
-        _logger.v(() =>
-            '[setPublisher] response: ${(result as Success<sfu.SetPublisherResponse>).data.stringify()}');
+        _logger.v(
+          () =>
+              '[setPublisher] response: ${(result as Success<sfu.SetPublisherResponse>).data.stringify()}',
+        );
       }
 
       return result;
@@ -167,8 +169,10 @@ class SfuClient {
       );
 
       if (result.isSuccess) {
-        _logger.v(() =>
-            '[updateMuteState] response: ${(result as Success<sfu.UpdateMuteStatesResponse>).data}');
+        _logger.v(
+          () =>
+              '[updateMuteState] response: ${(result as Success<sfu.UpdateMuteStatesResponse>).data}',
+        );
       }
 
       return result;
@@ -190,8 +194,10 @@ class SfuClient {
       );
 
       if (result.isSuccess) {
-        _logger.v(() =>
-            '[updateSubscriptions] response: ${(result as Success<sfu.UpdateSubscriptionsResponse>).data}');
+        _logger.v(
+          () =>
+              '[updateSubscriptions] response: ${(result as Success<sfu.UpdateSubscriptionsResponse>).data}',
+        );
       }
 
       return result;
@@ -214,8 +220,10 @@ class SfuClient {
       );
 
       if (result.isSuccess) {
-        _logger.v(() =>
-            '[startNoiseCancellation] response: ${(result as Success<sfu.StartNoiseCancellationResponse>).data}');
+        _logger.v(
+          () =>
+              '[startNoiseCancellation] response: ${(result as Success<sfu.StartNoiseCancellationResponse>).data}',
+        );
       }
 
       return result;
@@ -237,8 +245,10 @@ class SfuClient {
       );
 
       if (result.isSuccess) {
-        _logger.v(() =>
-            '[stopNoiseCancellation] response: ${(result as Success<sfu.StopNoiseCancellationResponse>).data}');
+        _logger.v(
+          () =>
+              '[stopNoiseCancellation] response: ${(result as Success<sfu.StopNoiseCancellationResponse>).data}',
+        );
       }
 
       return result;
