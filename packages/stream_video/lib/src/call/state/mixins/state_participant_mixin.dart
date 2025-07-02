@@ -143,6 +143,32 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     );
   }
 
+  void participantMirrorVideo({
+    required String sessionId,
+    required String userId,
+    required bool mirrorVideo,
+  }) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == sessionId &&
+            participant.userId == userId) {
+          final trackState = participant.publishedTracks[SfuTrackType.video];
+          if (trackState is RemoteTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.video: trackState.copyWith(
+                  mirrorVideo: mirrorVideo,
+                ),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
   void participantUpdateCameraPosition({
     required CameraPosition cameraPosition,
   }) {

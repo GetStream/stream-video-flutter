@@ -20,6 +20,7 @@ import 'peer_type.dart';
 
 class TracedStreamPeerConnection extends StreamPeerConnection {
   TracedStreamPeerConnection({
+    required super.sfuClient,
     required super.sessionId,
     required super.callCid,
     required super.type,

@@ -12,6 +12,7 @@ class SfuPublishOptions {
     this.maxTemporalLayers,
     this.bitrate,
     this.fps,
+    this.useSingleLayer = false,
   });
 
   /// The unique identifier for the publish request.
@@ -61,8 +62,13 @@ class SfuPublishOptions {
   /// The type of the track being published (e.g., video, screenshare).
   final SfuTrackType trackType;
 
+  /// If true, instructs the publisher to send only the highest available simulcast layer,
+  /// disabling all lower layers. This applies to simulcast encodings.
+  /// For SVC codecs, prefer using the L1T3 (single spatial, 3 temporal layers) mode instead.
+  final bool useSingleLayer;
+
   @override
   String toString() {
-    return 'SfuPublishOptions{id: $id, codec: $codec, trackType: $trackType, videoDimension: $videoDimension, maxSpatialLayers: $maxSpatialLayers, maxTemporalLayers: $maxTemporalLayers, bitrate: $bitrate, fps: $fps}';
+    return 'SfuPublishOptions{id: $id, codec: $codec, trackType: $trackType, videoDimension: $videoDimension, maxSpatialLayers: $maxSpatialLayers, maxTemporalLayers: $maxTemporalLayers, bitrate: $bitrate, fps: $fps, useSingleLayer: $useSingleLayer}';
   }
 }

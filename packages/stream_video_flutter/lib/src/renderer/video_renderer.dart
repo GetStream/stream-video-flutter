@@ -124,7 +124,8 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
       return widget.placeholderBuilder.call(context);
     }
 
-    var mirror = widget.participant.isLocal;
+    var mirror = (trackState is RemoteTrackState && trackState.mirrorVideo) ||
+        widget.participant.isLocal;
 
     if (videoTrack is RtcLocalScreenShareTrack) {
       mirror = false;
@@ -168,6 +169,14 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
     if (visibility != ViewportVisibility.visible) {
       // If the visibility is not visible, set the size to zero.
       size = Size.zero;
+    } else {
+      // VisibilityDetector measures the size in logical, device-independent pixels.
+      // We need to convert it to device pixels to get the correct size for the video track.
+      final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+      size = Size(
+        size.width * devicePixelRatio,
+        size.height * devicePixelRatio,
+      );
     }
 
     return _onSizeChanged(size, participantId);
