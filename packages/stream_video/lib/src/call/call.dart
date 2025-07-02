@@ -1162,8 +1162,10 @@ class Call {
         _logger.w(() => '[onSfuEvent] socket disconnected');
         await _reconnect(SfuReconnectionStrategy.fast);
       } else if (_leaveCallTriggered) {
-        _logger.d(() =>
-            '[onSfuEvent] socket disconnected, leaving call was triggered - no reconnection');
+        _logger.d(
+          () =>
+              '[onSfuEvent] socket disconnected, leaving call was triggered - no reconnection',
+        );
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
