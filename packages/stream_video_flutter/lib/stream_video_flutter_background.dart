@@ -63,15 +63,6 @@ mixin StreamVideoFlutterBackground {
         .isBackgroundServiceRunning(type, callCid: callCid);
   }
 
-  static Future<void> setPictureInPictureEnabled({required bool enable}) async {
-    if (!isAndroid) {
-      return;
-    }
-
-    return StreamVideoFlutterPlatform.instance
-        .setPictureInPictureEnabled(enable: enable);
-  }
-
   static void setOnNotificationContentClick(
     OnNotificationContentClick? onContentClick,
   ) {

@@ -24,7 +24,6 @@ import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
 import io.getstream.video.flutter.stream_video_flutter.service.StreamCallService
 import io.getstream.video.flutter.stream_video_flutter.service.StreamScreenShareService
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
-import io.getstream.video.flutter.stream_video_flutter.service.utils.putBoolean
 import io.getstream.webrtc.flutter.videoEffects.ProcessorProvider
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.BackgroundBlurFactory
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.factories.BlurIntensity
@@ -105,15 +104,7 @@ class MethodCallHandlerImpl(
 
                 result.success(null)
             }
-            "enablePictureInPictureMode" -> {
-                val activity = getActivity()
-                putBoolean(activity, PictureInPictureHelper.PIP_ENABLED_PREF_KEY, true)
-            }
-            "disablePictureInPictureMode" -> {
-                val activity = getActivity()
-                putBoolean(activity, PictureInPictureHelper.PIP_ENABLED_PREF_KEY, false)
-                PictureInPictureHelper.disablePictureInPicture(activity!!)
-            }
+
             "isBackgroundServiceRunning" -> {
                 val typeString = call.argument<String>("type")
                 val serviceType = ServiceType.valueOf(typeString ?: "call")
