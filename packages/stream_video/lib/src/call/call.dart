@@ -227,12 +227,14 @@ class Call {
     required SdpPolicy sdpPolicy,
     required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
     CallCredentials? credentials,
-  })  : _sessionFactory = CallSessionFactory(
-          callCid: stateManager.callState.callCid,
-          sdpEditor: sdpPolicy.spdEditingEnabled
-              ? SdpEditorImpl(sdpPolicy)
-              : NoOpSdpEditor(),
-        ),
+    CallSessionFactory? sessionFactory,
+  })  : _sessionFactory = sessionFactory ??
+            CallSessionFactory(
+              callCid: stateManager.callState.callCid,
+              sdpEditor: sdpPolicy.spdEditingEnabled
+                  ? SdpEditorImpl(sdpPolicy)
+                  : NoOpSdpEditor(),
+            ),
         _stateManager = stateManager,
         _permissionsManager = permissionManager,
         _coordinatorClient = coordinatorClient,
@@ -762,13 +764,7 @@ class Call {
           dynascaleManager: dynascaleManager,
           networkMonitor: networkMonitor,
           statsOptions: _sfuStatsOptions!,
-          onPeerConnectionFailure: (pc) async {
-            if (state.value.status is! CallStatusReconnecting) {
-              await pc.pc.restartIce().onError((_, __) {
-                _reconnect(SfuReconnectionStrategy.rejoin);
-              });
-            }
-          },
+          onReconnectionNeeded: (pc, strategy) => _reconnect(strategy),
           clientPublishOptions:
               _stateManager.callState.preferences.clientPublishOptions,
         );
@@ -1209,6 +1205,7 @@ class Call {
       _reconnectStrategy = strategy;
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
+      var attempt = 0;
       do {
         _stateManager.lifecycleCallConnecting(
           attempt: _reconnectAttempts,
@@ -1262,7 +1259,28 @@ class Call {
               await Future<void>.delayed(
                 _retryPolicy.backoff(_reconnectAttempts),
               );
-              _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+
+              final wasMigrating =
+                  _reconnectStrategy == SfuReconnectionStrategy.migrate;
+
+              // don't immediately switch to the REJOIN strategy, but instead attempt
+              // to reconnect with the FAST strategy for a few times before switching.
+              // in some cases, we immediately switch to the REJOIN strategy.
+              final shouldRejoin =
+                  wasMigrating || // if we were migrating, but the migration failed
+                      attempt >= 3 || // after 3 failed attempts
+                      !(_session?.rtcManager?.publisher?.isHealthy() ??
+                          true) || // if the publisher is not healthy
+                      !(_session?.rtcManager?.subscriber.isHealthy() ??
+                          true); // if the subscriber is not healthy
+
+              attempt++;
+
+              final nextStrategy = shouldRejoin
+                  ? SfuReconnectionStrategy.rejoin
+                  : SfuReconnectionStrategy.fast;
+
+              _reconnectStrategy = nextStrategy;
           }
         }
       } while (state.value.status is! CallStatusConnected &&
@@ -1337,10 +1355,7 @@ class Call {
     final previousCheckInterval = networkMonitor.checkInterval;
     networkMonitor.setIntervalAndResetTimer(const Duration(seconds: 1));
 
-    final connectionStatus = await InternetConnection.createInstance(
-      checkInterval: const Duration(seconds: 1),
-    )
-        .onStatusChange
+    final connectionStatus = await networkMonitor.onStatusChange
         .startWithFuture(networkMonitor.internetStatus)
         .firstWhere((status) => status == InternetStatus.connected)
         .timeout(
@@ -2531,6 +2546,25 @@ class Call {
     return result;
   }
 
+  /// Sets the mirror state for a remote participant's video track.
+  ///
+  /// - [sessionId]: The session ID of the participant.
+  /// - [userId]: The user ID of the participant.
+  /// - [mirrorVideo]: Whether to mirror the participant's video.
+  Result<None> setMirrorVideo({
+    required String sessionId,
+    required String userId,
+    required bool mirrorVideo,
+  }) {
+    _stateManager.participantMirrorVideo(
+      sessionId: sessionId,
+      userId: userId,
+      mirrorVideo: mirrorVideo,
+    );
+
+    return const Result.success(none);
+  }
+
   @Deprecated('Use setParticipantPinnedLocally instead')
   Future<Result<None>> setParticipantPinned({
     required String sessionId,
@@ -2925,4 +2959,35 @@ extension FutureStartWithEx<T> on Stream<T> {
     yield await futureValue;
     yield* this;
   }
+}
+
+// ignore: avoid_classes_with_only_static_members
+/// Call factory to create a [Call] instance.
+/// Only meant for testing purposes.
+@visibleForTesting
+class BaseCallFactory {
+  static Call makeCall({
+    required CoordinatorClient coordinatorClient,
+    required StreamVideo streamVideo,
+    required CallStateNotifier stateManager,
+    required PermissionsManager permissionManager,
+    required InternetConnection networkMonitor,
+    required RetryPolicy retryPolicy,
+    required SdpPolicy sdpPolicy,
+    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
+    required CallCredentials? credentials,
+    required CallSessionFactory? sessionFactory,
+  }) =>
+      Call._(
+        coordinatorClient: coordinatorClient,
+        streamVideo: streamVideo,
+        stateManager: stateManager,
+        permissionManager: permissionManager,
+        networkMonitor: networkMonitor,
+        retryPolicy: retryPolicy,
+        sdpPolicy: sdpPolicy,
+        rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
+        credentials: credentials,
+        sessionFactory: sessionFactory,
+      );
 }

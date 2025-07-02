@@ -148,18 +148,6 @@ transforms:
         value: 'arguments[callControlsWidgetBuilder]'
   #endregion StreamCallContent
 
-  #region StreamCallParticipants
-  - title: 'remove participants from StreamCallParticipants'
-    date: '2025-06-06'
-    element:
-      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
-      constructor: ''
-      inClass: 'StreamCallParticipants'
-    changes:
-      - kind: 'removeParameter'
-        name: 'participants'
-  #endregion StreamCallParticipants
-
   #region StreamIncomingCallContent
   - title: 'remove callState from StreamIncomingCallContent'
     date: '2025-06-06'
@@ -293,58 +281,6 @@ transforms:
         kind: 'fragment'
         value: 'arguments[participantsDisplayNameWidgetBuilder]'
   #endregion StreamOutgoingCallContent
-
-  #region StreamCallControls
-  - title: 'remove localParticipant from StreamCallControls.withDefaultOptions'
-    date: '2025-06-06'
-    element:
-      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
-      constructor: 'withDefaultOptions'
-      inClass: 'StreamCallControls'
-    changes:
-      - kind: 'removeParameter'
-        name: 'localParticipant'
-
-  - title: 'remove localParticipant from FlipCameraOption'
-    date: '2025-06-06'
-    element:
-      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
-      constructor: ''
-      inClass: 'FlipCameraOption'
-    changes:
-      - kind: 'removeParameter'
-        name: 'localParticipant'
-
-  - title: 'remove localParticipant from ToggleScreenShareOption'
-    date: '2025-06-06'
-    element:
-      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
-      constructor: ''
-      inClass: 'ToggleScreenShareOption'
-    changes:
-      - kind: 'removeParameter'
-        name: 'localParticipant'
-
-  - title: 'remove localParticipant from ToggleMicrophoneOption'
-    date: '2025-06-06'
-    element:
-      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
-      constructor: ''
-      inClass: 'ToggleMicrophoneOption'
-    changes:
-      - kind: 'removeParameter'
-        name: 'localParticipant'
-
-  - title: 'remove localParticipant from ToggleCameraOption'
-    date: '2025-06-06'
-    element:
-      uris: ['package:stream_video_flutter/stream_video_flutter.dart']
-      constructor: ''
-      inClass: 'ToggleCameraOption'
-    changes:
-      - kind: 'removeParameter'
-        name: 'localParticipant'
-  #endregion StreamCallControls
 
   #region PictureInPictureConfiguration
   - title: 'replace callPictureInPictureBuilder with callPictureInPictureWidgetBuilder in AndroidPictureInPictureConfiguration'

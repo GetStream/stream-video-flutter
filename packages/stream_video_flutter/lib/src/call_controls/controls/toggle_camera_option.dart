@@ -11,7 +11,6 @@ class ToggleCameraOption extends StatelessWidget {
   const ToggleCameraOption({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.localParticipant)
     this.localParticipant,
     this.enabledCameraIcon = Icons.videocam_rounded,
     this.disabledCameraIcon = Icons.videocam_off_rounded,
@@ -25,7 +24,7 @@ class ToggleCameraOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  @Deprecated(PartialStateDeprecationMessage.localParticipant)
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.
