@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 
@@ -7,7 +9,7 @@ class FlipCameraOption extends StatelessWidget {
   const FlipCameraOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    this.localParticipant,
     this.frontCameraIcon = Icons.flip_camera_ios_rounded,
     this.backCameraIcon = Icons.flip_camera_ios_rounded,
   });
@@ -16,7 +18,8 @@ class FlipCameraOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the front camera is active.
   final IconData frontCameraIcon;
@@ -26,19 +29,29 @@ class FlipCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CameraPosition? position;
-    final trackState = localParticipant.videoTrack;
-    if (trackState is LocalTrackState) {
-      position = trackState.cameraPosition;
+    Widget buildContent(TrackState? trackState) {
+      CameraPosition? position;
+      if (trackState is LocalTrackState) {
+        position = trackState.cameraPosition;
+      }
+
+      return CallControlOption(
+        icon: position == CameraPosition.front
+            ? Icon(frontCameraIcon)
+            : Icon(backCameraIcon),
+        onPressed: trackState?.muted == false //
+            ? call.flipCamera
+            : () {},
+      );
     }
 
-    return CallControlOption(
-      icon: position == CameraPosition.front
-          ? Icon(frontCameraIcon)
-          : Icon(backCameraIcon),
-      onPressed: trackState?.muted == false //
-          ? call.flipCamera
-          : () {},
+    if (localParticipant != null) {
+      return buildContent(localParticipant!.videoTrack);
+    }
+    return PartialCallStateBuilder(
+      call: call,
+      selector: (state) => state.localParticipant?.videoTrack,
+      builder: (_, trackState) => buildContent(trackState),
     );
   }
 }

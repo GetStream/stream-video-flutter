@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -19,27 +21,19 @@ class StreamCallControls extends StatelessWidget {
   });
 
   /// Builds a call controls bar with the default set of call control options.
-  factory StreamCallControls.withDefaultOptions({
+  StreamCallControls.withDefaultOptions({
     required Call call,
-    required CallParticipantState localParticipant,
-    Color? backgroundColor,
-    double? elevation,
-    double? spacing,
-    EdgeInsets? padding,
-    BorderRadius? borderRadius,
-  }) {
-    return StreamCallControls(
-      options: defaultCallControlOptions(
-        call: call,
-        localParticipant: localParticipant,
-      ),
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      spacing: spacing,
-      padding: padding,
-      borderRadius: borderRadius,
-    );
-  }
+    CallParticipantState? localParticipant,
+    this.backgroundColor,
+    this.elevation,
+    this.spacing,
+    this.padding,
+    this.borderRadius,
+    super.key,
+  }) : options = defaultCallControlOptions(
+          call: call,
+          localParticipant: localParticipant,
+        );
 
   /// List of options to display.
   final List<Widget> options;

@@ -47,5 +47,6 @@ export 'src/utils/device_segmentation.dart';
 export 'src/video_effects/video_effects_manager.dart';
 export 'src/widgets/floating_view/floating_view_alignment.dart';
 export 'src/widgets/floating_view/floating_view_container.dart';
+export 'src/widgets/partial_call_state_builder.dart';
 export 'src/widgets/size_change_listener.dart';
 export 'src/widgets/stream_user_avatar.dart';

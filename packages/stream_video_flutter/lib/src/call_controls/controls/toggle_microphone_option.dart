@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -9,7 +11,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
   const ToggleMicrophoneOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    this.localParticipant,
     this.enabledMicrophoneIcon = Icons.mic_rounded,
     this.disabledMicrophoneIcon = Icons.mic_off_rounded,
     this.enabledMicrophoneIconColor,
@@ -22,7 +24,8 @@ class ToggleMicrophoneOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
   final IconData enabledMicrophoneIcon;
@@ -44,19 +47,29 @@ class ToggleMicrophoneOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = localParticipant.isAudioEnabled;
+    Widget buildContent(bool enabled) {
+      return CallControlOption(
+        icon: enabled
+            ? Icon(enabledMicrophoneIcon)
+            : Icon(disabledMicrophoneIcon),
+        iconColor:
+            enabled ? enabledMicrophoneIconColor : disabledMicrophoneIconColor,
+        backgroundColor: enabled
+            ? enabledMicrophoneBackgroundColor
+            : disabledMicrophoneBackgroundColor,
+        onPressed: () {
+          call.setMicrophoneEnabled(enabled: !enabled);
+        },
+      );
+    }
 
-    return CallControlOption(
-      icon:
-          enabled ? Icon(enabledMicrophoneIcon) : Icon(disabledMicrophoneIcon),
-      iconColor:
-          enabled ? enabledMicrophoneIconColor : disabledMicrophoneIconColor,
-      backgroundColor: enabled
-          ? enabledMicrophoneBackgroundColor
-          : disabledMicrophoneBackgroundColor,
-      onPressed: () {
-        call.setMicrophoneEnabled(enabled: !enabled);
-      },
+    if (localParticipant != null) {
+      return buildContent(localParticipant!.isAudioEnabled);
+    }
+    return PartialCallStateBuilder(
+      call: call,
+      selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
+      builder: (_, enabled) => buildContent(enabled),
     );
   }
 }

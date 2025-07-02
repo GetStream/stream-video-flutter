@@ -2,6 +2,7 @@
 
 ✅ Added
 * Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
+* Added `call.partialState` for more specific and efficient state updates.
 
 ## 0.9.6
 

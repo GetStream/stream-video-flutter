@@ -1,5 +1,14 @@
 ## Unreleased
 
+🔄 Partial State Updates:
+* Added `call.partialState` for more specific and efficient state updates.
+* Added callbacks in `StreamCallContainer`, `StreamCallContent`, `StreamIncomingCallContent`, and others that no longer return a state.
+By (only) using these callbacks the root widgets will use more efficient partial state updates.
+* Added `PartialCallStateBuilder` to help with making widgets that depend on `partialState`.
+* Deprecated old callbacks
+
+## 0.9.6
+
 ✅ Added
 * Added `handleCallInterruptionCallbacks` method to `RtcMediaDeviceNotifier` that provides an option to handle system audio interruption like incoming calls, or other media playing. See the [documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/) for details.
 * Improved the Picture-in-Picture (PiP) implementation for video calls

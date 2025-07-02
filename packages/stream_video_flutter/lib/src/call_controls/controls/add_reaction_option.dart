@@ -9,7 +9,7 @@ class AddReactionOption extends StatefulWidget {
   const AddReactionOption({
     super.key,
     required this.call,
-    required this.localParticipant,
+    @Deprecated('localParticipant is no longer used') this.localParticipant,
     this.reactionIcon = Icons.add_reaction_outlined,
   });
 
@@ -17,7 +17,8 @@ class AddReactionOption extends StatefulWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  @Deprecated('localParticipant is no longer used')
+  final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.
   final IconData reactionIcon;
