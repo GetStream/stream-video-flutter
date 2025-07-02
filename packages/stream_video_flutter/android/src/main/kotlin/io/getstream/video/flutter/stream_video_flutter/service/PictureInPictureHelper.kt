@@ -111,19 +111,5 @@ class PictureInPictureHelper {
         private fun canEnterPictureInPicture(activity: Activity): Boolean {
             return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         }
-
-        /**
-         * @deprecated This method is deprecated. PiP is now handled automatically by 
-         * StreamPictureInPictureAndroidView when using PictureInPictureConfiguration.
-         */
-        @Deprecated("Use PictureInPictureConfiguration in StreamCallContent instead")
-        fun enterPictureInPictureIfInCall(activity: Activity) {
-            Log.e("PictureInPictureHelper", 
-                "ERROR: enterPictureInPictureIfInCall is deprecated and no longer functional. " +
-                "Please migrate to the new Picture-in-Picture implementation by:\n" +
-                "1. Extending StreamFlutterActivity instead of FlutterActivity\n" +
-                "2. Removing manual override of onUserLeaveHint method\n" +
-                "See the updated documentation for migration details.")
-        }
     }
 }

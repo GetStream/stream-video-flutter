@@ -5,6 +5,7 @@
 * **Automatic Activation:** PiP now triggers automatically when users press home button or background the app during calls.
 * **Fixed Overlay Issues:** PiP view can no longer be overlapped by other widgets and will always display the correct video layout.
 * **Migration Required:** In your `MainActivity`, remove the manual `onUserLeaveHint()` implementation and extend the MainActivity with `StreamFlutterActivity`. Previously required manually calling `PictureInPictureHelper.enterPictureInPictureIfInCall(this)` - now handled automatically.
+* **Removed Deprecated Methods:** Removed the deprecated `setPictureInPictureEnabled` method from `StreamVideoFlutterPlatform`, `StreamVideoFlutterBackground`, and `MethodChannelStreamVideoFlutter` classes, and the deprecated `enterPictureInPictureIfInCall` method from `PictureInPictureHelper` (Android). PiP is now handled automatically by `StreamPictureInPictureAndroidView`.
 
 🔄 Partial State Updates:
 * Added `call.partialState` for more specific and efficient state updates.

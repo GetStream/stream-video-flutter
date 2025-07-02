@@ -187,6 +187,8 @@ class _StreamPictureInPictureAndroidViewState
 
   @override
   Widget build(BuildContext context) {
+    // The build method is empty on purpose as the content of the call is shown using an `Overlay`
+    // so we are sure to cover all existing widgets.
     return const SizedBox.shrink();
   }
 }

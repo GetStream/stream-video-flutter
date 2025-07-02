@@ -132,12 +132,4 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
       'backgroundImageUrl': backgroundImageUrl,
     });
   }
-
-  @override
-  @Deprecated(
-      'PiP is now handled automatically by StreamPictureInPictureAndroidView. '
-      'This method is now a no-op for backward compatibility.')
-  Future<void> setPictureInPictureEnabled({required bool enable}) async {
-    return;
-  }
 }
