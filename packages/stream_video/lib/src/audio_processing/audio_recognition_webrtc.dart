@@ -86,9 +86,9 @@ class AudioRecognitionWebRTC implements AudioRecognition {
     Future<void> checkAudioLevel(Timer timer) async {
       final stats = await _pc1.getStats();
       final audioMediaSourceStats = stats
-              .map((stat) => stat.toRtcStats())
-              .firstWhereOrNull((rtcStat) => rtcStat is RtcAudioSource)
-          as RtcAudioSource?;
+          .map((stat) => stat.toRtcStats())
+          .whereType<RtcAudioSource>()
+          .firstOrNull;
 
       final audioLevel = audioMediaSourceStats?.audioLevel;
       if (audioLevel == null) return;

@@ -6,17 +6,22 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../stream_video.dart';
 import 'audio_recognition_webrtc.dart';
 
-/// [SpeakingWhileMutedRecognition.stream] gives state changes when there is an increase
-/// in audio volume detected while the user is muted. While the users is not muted or
-/// there is no audio detected, the [SpeakingWhileMutedState.isSpeakingWhileMuted] is false.
+/// The [SpeakingWhileMutedRecognition.stream] emits state changes when an increase in audio volume 
+/// is detected while the user is muted.
 ///
-/// When there is an increase in audio volume detected while the user is muted, the [SpeakingWhileMutedState.isSpeakingWhileMuted] is true.
-/// If no audio has been detected for a while, the state changes to [SpeakingWhileMutedState.isSpeakingWhileMuted] is false.
-/// When the users unmutes the state changes immediately to [SpeakingWhileMutedState.isSpeakingWhileMuted] is false.
+/// - When the user is not muted or no audio is detected, 
+///   [SpeakingWhileMutedState.isSpeakingWhileMuted] remains `false`.
 ///
-/// The audio detection only starts when the user mutes themselves or is being muted,
-/// so when the user joins a call muted the audio detection will not start.
-/// If you want to start the audio detection when the user joins a call muted, you can use the [start] method.
+/// - If audio is detected while the user is muted, 
+///   [SpeakingWhileMutedState.isSpeakingWhileMuted] becomes `true`.
+///
+/// - If no audio is detected for a period of time, or if the user unmutes, 
+///   the state reverts to `false`.
+///
+/// Note:
+/// - Audio detection begins only after the user mutes themselves or is muted by someone else.
+/// - If the user joins a call already muted, audio detection won't start automatically.
+///   To enable detection in such cases, use the [start] method manually.
 ///
 /// Example usage:
 /// ```dart
