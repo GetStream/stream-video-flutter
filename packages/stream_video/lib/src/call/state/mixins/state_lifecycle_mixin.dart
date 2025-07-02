@@ -166,6 +166,13 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallDisconnected({DisconnectReason? reason}) {
+    if (state.status.isDisconnected) {
+      _logger.w(
+        () => '[lifecycleCallDisconnected] already disconnected: $state',
+      );
+      return;
+    }
+
     _logger.i(
       () => '[lifecycleCallDisconnected] state: $state, reason: $reason',
     );
@@ -187,16 +194,14 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
   void lifecycleCallTimeout() {
     _logger.e(() => '[lifecycleCallTimeout] state: $state');
+    lifecycleCallDisconnected(reason: const DisconnectReason.timeout());
+  }
 
-    state = state.copyWith(
-      status: CallStatus.disconnected(
-        const DisconnectReason.timeout(),
-      ),
-      sessionId: '',
-      localStats: LocalStats.empty(),
-      publisherStats: PeerConnectionStats.empty(),
-      subscriberStats: PeerConnectionStats.empty(),
-    );
+  void lifecycleCallConnectFailed({
+    required VideoError error,
+  }) {
+    _logger.e(() => '[lifecycleCallConnectFailed] state: $state');
+    lifecycleCallDisconnected(reason: DisconnectReason.failure(error));
   }
 
   void lifecycleCallConnecting({
@@ -218,20 +223,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     }
     state = state.copyWith(
       status: status,
-    );
-  }
-
-  void lifecycleCallConnectFailed({
-    required VideoError error,
-  }) {
-    _logger.e(() => '[lifecycleCallConnectFailed] state: $state');
-    state = state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.failure(error),
-      ),
-      localStats: LocalStats.empty(),
-      publisherStats: PeerConnectionStats.empty(),
-      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 

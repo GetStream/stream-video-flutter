@@ -283,6 +283,7 @@ class Call {
   Future<InternetStatus>? _awaitNetworkAvailableFuture;
   Future<Result<None>>? _awaitMigrationCompleteFuture;
   bool _initialized = false;
+  bool _leaveCallTriggered = false;
 
   final List<Timer> _reactionTimers = [];
   final Map<String, Timer> _captionsTimers = {};
@@ -673,7 +674,11 @@ class Call {
       _logger.v(() => '[join] finished: $result');
     } else {
       _logger.e(() => '[join] failed: $result');
-      await leave();
+      final videoError = result.getErrorOrNull();
+      await leave(
+        reason:
+            videoError != null ? DisconnectReason.failure(videoError) : null,
+      );
     }
 
     return result;
@@ -1135,7 +1140,7 @@ class Call {
           callParticipants.first.userId == _streamVideo.currentUser.id &&
           state.value.isRingingFlow &&
           _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
-        await leave();
+        await leave(reason: DisconnectReason.lastParticipantLeft());
       }
     } else if (sfuEvent is SfuHealthCheckResponseEvent) {
       _stateManager.setParticipantsCount(
@@ -1149,11 +1154,16 @@ class Call {
 
     if (sfuEvent is SfuSocketDisconnected) {
       await _sfuStatsReporter?.sendSfuStats();
-      if (!StreamWebSocketCloseCode.isIntentionalClosure(
-        sfuEvent.reason.closeCode,
-      )) {
+      // Don't attempt reconnection if leaving the call was triggered
+      if (!_leaveCallTriggered &&
+          !StreamWebSocketCloseCode.isIntentionalClosure(
+            sfuEvent.reason.closeCode,
+          )) {
         _logger.w(() => '[onSfuEvent] socket disconnected');
         await _reconnect(SfuReconnectionStrategy.fast);
+      } else if (_leaveCallTriggered) {
+        _logger.d(() =>
+            '[onSfuEvent] socket disconnected, leaving call was triggered - no reconnection');
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
@@ -1178,7 +1188,7 @@ class Call {
           _logger.w(
             () => '[onSfuEvent] SFU error: ${sfuEvent.error}, leaving call',
           );
-          await leave();
+          await leave(reason: DisconnectReason.sfuError(sfuEvent.error));
           break;
         case SfuReconnectionStrategy.unspecified:
           _logger.w(() => '[onSfuEvent] SFU error: ${sfuEvent.error}');
@@ -1407,25 +1417,31 @@ class Call {
   ///
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) async {
-    final state = this.state.value;
-    _logger.i(() => '[leave] state: $state');
-
-    if (state.status.isDisconnected) {
-      _logger.w(() => '[leave] rejected (state.status is disconnected)');
-      return const Result.success(none);
-    }
-
     try {
-      _session?.leave(reason: 'user is leaving the call');
+      _leaveCallTriggered = true;
+
+      final state = this.state.value;
+      _logger.i(() => '[leave] state: $state');
+
+      if (state.status.isDisconnected) {
+        _logger.w(() => '[leave] rejected (state.status is disconnected)');
+        return const Result.success(none);
+      }
+
+      try {
+        _session?.leave(reason: 'user is leaving the call');
+      } finally {
+        await _clear('leave');
+      }
+
+      _stateManager.lifecycleCallDisconnected(reason: reason);
+
+      _logger.v(() => '[leave] finished');
+
+      return const Result.success(none);
     } finally {
-      await _clear('leave');
+      _leaveCallTriggered = false;
     }
-
-    _stateManager.lifecycleCallDisconnected(reason: reason);
-
-    _logger.v(() => '[leave] finished');
-
-    return const Result.success(none);
   }
 
   Future<void> _clear(String src) async {
