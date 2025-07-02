@@ -25,6 +25,11 @@ abstract class StreamFlutterFragmentActivity : FlutterFragmentActivity() {
         PictureInPictureHelper.initializeWithFlutterEngine(flutterEngine) { this }
     }
 
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        super.cleanUpFlutterEngine(flutterEngine)
+        PictureInPictureHelper.cleanup()
+    }
+
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
         // Trigger PiP when user leaves the app (e.g., presses home button)

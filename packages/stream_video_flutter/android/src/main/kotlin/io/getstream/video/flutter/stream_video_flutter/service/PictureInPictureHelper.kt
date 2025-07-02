@@ -111,5 +111,11 @@ class PictureInPictureHelper {
         private fun canEnterPictureInPicture(activity: Activity): Boolean {
             return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         }
+
+        fun cleanup() {
+            methodChannel?.setMethodCallHandler(null)
+            methodChannel = null
+            getActivity = null
+        }
     }
 }
