@@ -14,6 +14,12 @@ By (only) using these callbacks the root widgets will use more efficient partial
 * Added `PartialCallStateBuilder` to help with making widgets that depend on `partialState`.
 * Deprecated old callbacks
 
+✅ Added
+* Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
+
+🐞 Fixed
+* Improved SFU error handling in Call flow and disconnect reason handling. The disconnected call state now accurately reflects the original cause of disconnection.
+
 ## 0.9.6
 
 ✅ Added

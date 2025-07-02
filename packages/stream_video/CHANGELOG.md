@@ -4,6 +4,9 @@
 * Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
 * Added `call.partialState` for more specific and efficient state updates.
 
+🐞 Fixed
+* Improved SFU error handling in Call flow and disconnect reason handling. The disconnected call state now accurately reflects the original cause of disconnection.
+
 ## 0.9.6
 
 ✅ Added
