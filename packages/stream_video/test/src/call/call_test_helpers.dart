@@ -96,7 +96,14 @@ Call createTestCall({
   return BaseCallFactory.makeCall(
     coordinatorClient: coordinatorClient ?? setupMockCoordinatorClient(),
     streamVideo: streamVideo ?? setupMockStreamVideo(),
-    stateManager: stateManager ?? createTestCallStateManager(),
+    stateManager: stateManager ??
+        CallStateNotifier(
+          CallState(
+            preferences: DefaultCallPreferences(),
+            currentUserId: defaultUserInfo.id,
+            callCid: defaultCid,
+          ),
+        ),
     permissionManager: permissionManager ?? MockPermissionsManager(),
     networkMonitor: networkMonitor ?? setupMockInternetConnection(),
     retryPolicy: retryPolicy ?? setupMockRetryPolicy(),

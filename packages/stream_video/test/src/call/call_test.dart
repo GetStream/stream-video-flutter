@@ -32,8 +32,6 @@ void main() {
 
       final coordinatorClient = setupMockCoordinatorClient();
       final callSession = setupMockCallSession();
-      final callStateStream =
-          MutableStateEmitterImpl<CallState>(createTestCallState(), sync: true);
 
       final call = createTestCall(
         networkMonitor: setupMockInternetConnection(
@@ -43,7 +41,6 @@ void main() {
         sessionFactory: setupMockSessionFactory(
           callSession: callSession,
         ),
-        stateManager: createTestCallStateManager(callState: callStateStream),
       );
 
       final result = await call.join();
@@ -62,10 +59,6 @@ void main() {
       ).called(1);
 
       verifyNever(callSession.fastReconnect);
-
-      callStateStream.value = callStateStream.value.copyWith(
-        status: CallStatus.connected(),
-      );
 
       internetStatusController.add(InternetStatus.disconnected);
       await Future<void>.delayed(Duration.zero);
