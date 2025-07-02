@@ -2523,6 +2523,25 @@ class Call {
     return result;
   }
 
+  /// Sets the mirror state for a remote participant's video track.
+  ///
+  /// - [sessionId]: The session ID of the participant.
+  /// - [userId]: The user ID of the participant.
+  /// - [mirrorVideo]: Whether to mirror the participant's video.
+  Result<None> setMirrorVideo({
+    required String sessionId,
+    required String userId,
+    required bool mirrorVideo,
+  }) {
+    _stateManager.participantMirrorVideo(
+      sessionId: sessionId,
+      userId: userId,
+      mirrorVideo: mirrorVideo,
+    );
+
+    return const Result.success(none);
+  }
+
   @Deprecated('Use setParticipantPinnedLocally instead')
   Future<Result<None>> setParticipantPinned({
     required String sessionId,
