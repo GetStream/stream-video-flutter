@@ -1355,10 +1355,7 @@ class Call {
     final previousCheckInterval = networkMonitor.checkInterval;
     networkMonitor.setIntervalAndResetTimer(const Duration(seconds: 1));
 
-    final connectionStatus = await InternetConnection.createInstance(
-      checkInterval: const Duration(seconds: 1),
-    )
-        .onStatusChange
+    final connectionStatus = await networkMonitor.onStatusChange
         .startWithFuture(networkMonitor.internetStatus)
         .firstWhere((status) => status == InternetStatus.connected)
         .timeout(

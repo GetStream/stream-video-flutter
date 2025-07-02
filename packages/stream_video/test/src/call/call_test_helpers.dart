@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
+    as sfu_events;
 import 'package:stream_video/src/call/call.dart';
 import 'package:stream_video/src/call/permissions/permissions_manager.dart';
 import 'package:stream_video/src/call/session/call_session_config.dart';
@@ -10,6 +13,7 @@ import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_error.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/state_emitter.dart';
@@ -45,7 +49,9 @@ void registerMockFallbackValues() {
   );
   registerFallbackValue(InternetConnection());
   registerFallbackValue(
-      StatsOptions(enableRtcStats: false, reportingIntervalMs: 500));
+    StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
+  );
+  registerFallbackValue(SfuReconnectionStrategy.fast);
 }
 
 Call createStubCall({
@@ -89,8 +95,7 @@ Call createTestCall({
 }) {
   return BaseCallFactory.makeCall(
     coordinatorClient: coordinatorClient ?? setupMockCoordinatorClient(),
-    streamVideo: streamVideo ??
-        setupMockStreamVideo(clientState: setupMockClientState()),
+    streamVideo: streamVideo ?? setupMockStreamVideo(),
     stateManager: stateManager ?? createTestCallStateManager(),
     permissionManager: permissionManager ?? MockPermissionsManager(),
     networkMonitor: networkMonitor ?? setupMockInternetConnection(),
@@ -115,8 +120,10 @@ CallState createTestCallState({
   );
 }
 
-MockCallStateNotifier createTestCallStateManager() {
-  final callStateStream =
+MockCallStateNotifier createTestCallStateManager({
+  MutableStateEmitterImpl<CallState>? callState,
+}) {
+  final callStateStream = callState ??
       MutableStateEmitterImpl<CallState>(createTestCallState(), sync: true);
 
   final stateManager = MockCallStateNotifier();
@@ -153,10 +160,11 @@ MockClientState setupMockClientState() {
   return clientState;
 }
 
-MockStreamVideo setupMockStreamVideo({required ClientState clientState}) {
+MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
   final streamVideo = MockStreamVideo();
+  final effectiveClientState = clientState ?? setupMockClientState();
 
-  when(() => streamVideo.state).thenReturn(clientState);
+  when(() => streamVideo.state).thenReturn(effectiveClientState);
   when(() => streamVideo.currentUser).thenReturn(defaultUserInfo);
   when(streamVideo.isAudioProcessorConfigured).thenReturn(false);
 
@@ -233,11 +241,15 @@ MockCoordinatorClient setupMockCoordinatorClient() {
 }
 
 MockInternetConnection setupMockInternetConnection({
-  Stream<InternetStatus>? statusStream,
+  BehaviorSubject<InternetStatus>? statusStream,
 }) {
   final internetConnection = MockInternetConnection();
   when(() => internetConnection.onStatusChange).thenAnswer(
-    (_) => statusStream ?? Stream.value(InternetStatus.connected),
+    (_) => statusStream?.stream ?? Stream.value(InternetStatus.connected),
+  );
+  when(() => internetConnection.checkInterval).thenReturn(Duration.zero);
+  when(() => internetConnection.internetStatus).thenAnswer(
+    (_) async => statusStream?.value ?? InternetStatus.connected,
   );
   return internetConnection;
 }
@@ -252,7 +264,17 @@ MockRtcMediaDeviceNotifier setupMockRtcMediaDeviceNotifier() {
 MockRetryPolicy setupMockRetryPolicy() {
   final retryPolicy = MockRetryPolicy();
   when(() => retryPolicy.backoff(any())).thenReturn(Duration.zero);
+  when(() => retryPolicy.config).thenReturn(const RetryConfig());
   return retryPolicy;
+}
+
+SfuCallState createTestSfuCallState() {
+  return SfuCallState(
+    participants: const [],
+    participantCount: SfuParticipantCount(total: 0, anonymous: 0),
+    startedAt: DateTime.now(),
+    pins: const [],
+  );
 }
 
 MockCallSession setupMockCallSession() {
@@ -270,12 +292,7 @@ MockCallSession setupMockCallSession() {
     (_) => Future.value(
       Result.success(
         (
-          callState: SfuCallState(
-            participants: const [],
-            participantCount: SfuParticipantCount(total: 0, anonymous: 0),
-            startedAt: DateTime.now(),
-            pins: const [],
-          ),
+          callState: createTestSfuCallState(),
           fastReconnectDeadline: Duration.zero
         ),
       ),
@@ -286,13 +303,34 @@ MockCallSession setupMockCallSession() {
   when(() => callSession.sessionId).thenReturn('test-session-id');
   final callSessionEvents = MutableSharedEmitterImpl<SfuEvent>();
   when(() => callSession.events).thenReturn(callSessionEvents);
-  when(() => callSession.config).thenReturn(CallSessionConfig(
-    sfuName: defaultCredentials.sfuServer.name,
-    sfuUrl: defaultCredentials.sfuServer.url,
-    sfuWsEndpoint: defaultCredentials.sfuServer.wsEndpoint,
-    sfuToken: defaultCredentials.sfuToken,
-    rtcConfig: const RTCConfiguration(),
-  ));
+  when(() => callSession.config).thenReturn(
+    CallSessionConfig(
+      sfuName: defaultCredentials.sfuServer.name,
+      sfuUrl: defaultCredentials.sfuServer.url,
+      sfuWsEndpoint: defaultCredentials.sfuServer.wsEndpoint,
+      sfuToken: defaultCredentials.sfuToken,
+      rtcConfig: const RTCConfiguration(),
+    ),
+  );
+
+  when(
+    () => callSession.getReconnectDetails(
+      any(),
+      migratingFromSfuId: any(named: 'migratingFromSfuId'),
+      reconnectAttempts: any(named: 'reconnectAttempts'),
+    ),
+  ).thenAnswer((_) => Future.value(sfu_events.ReconnectDetails()));
+
+  when(callSession.fastReconnect).thenAnswer(
+    (_) => Future.value(
+      Result.success(
+        (
+          callState: createTestSfuCallState(),
+          fastReconnectDeadline: Duration.zero,
+        ),
+      ),
+    ),
+  );
 
   return callSession;
 }
