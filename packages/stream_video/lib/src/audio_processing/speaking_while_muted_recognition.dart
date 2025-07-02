@@ -6,16 +6,16 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../stream_video.dart';
 import 'audio_recognition_webrtc.dart';
 
-/// The [SpeakingWhileMutedRecognition.stream] emits state changes when an increase in audio volume 
+/// The [SpeakingWhileMutedRecognition.stream] emits state changes when an increase in audio volume
 /// is detected while the user is muted.
 ///
-/// - When the user is not muted or no audio is detected, 
+/// - When the user is not muted or no audio is detected,
 ///   [SpeakingWhileMutedState.isSpeakingWhileMuted] remains `false`.
 ///
-/// - If audio is detected while the user is muted, 
+/// - If audio is detected while the user is muted,
 ///   [SpeakingWhileMutedState.isSpeakingWhileMuted] becomes `true`.
 ///
-/// - If no audio is detected for a period of time, or if the user unmutes, 
+/// - If no audio is detected for a period of time, or if the user unmutes,
 ///   the state reverts to `false`.
 ///
 /// Note:
@@ -100,13 +100,18 @@ class SpeakingWhileMutedRecognition
   Future<void> start() async {
     if (_isActive) return;
     _isActive = true;
-    await _audioRecognition.start(
-      onSoundStateChanged: (soundState) {
-        state = SpeakingWhileMutedState._(
-          isSpeakingWhileMuted: soundState.isSpeaking,
-        );
-      },
-    );
+    try {
+      await _audioRecognition.start(
+        onSoundStateChanged: (soundState) {
+          state = SpeakingWhileMutedState._(
+            isSpeakingWhileMuted: soundState.isSpeaking,
+          );
+        },
+      );
+    } catch (e, trace) {
+      _isActive = false;
+      _logger.e(() => 'Error starting audio recognition: $e\n$trace');
+    }
   }
 
   Future<void> _stop() async {
@@ -139,3 +144,5 @@ class SpeakingWhileMutedState extends Equatable {
   @override
   List<Object?> get props => [isSpeakingWhileMuted];
 }
+
+final _logger = taggedLogger(tag: 'SV:SpeakingWhileMutedRecognition');

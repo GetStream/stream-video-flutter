@@ -48,31 +48,34 @@ class AudioRecognitionWebRTC implements AudioRecognition {
 
   Future<void> _init() async {
     _initCompleter = Completer<void>();
-    _pc1 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
-    _pc2 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
+    try {
+      _pc1 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
+      _pc2 = await rtc.createPeerConnection(const RTCConfiguration().toMap());
 
-    final audioStream = await rtc.navigator.mediaDevices.getUserMedia(
-      const AudioConstraints().toMap(),
-    );
-    _audioStream = audioStream;
+      final audioStream = await rtc.navigator.mediaDevices.getUserMedia(
+        const AudioConstraints().toMap(),
+      );
+      _audioStream = audioStream;
 
-    _pc1.onIceCandidate = _pc2.addCandidate;
-    _pc2.onIceCandidate = _pc1.addCandidate;
+      _pc1.onIceCandidate = _pc2.addCandidate;
+      _pc2.onIceCandidate = _pc1.addCandidate;
 
-    audioStream.getAudioTracks().forEach((track) {
-      _pc1.addTrack(track, audioStream);
-    });
+      audioStream.getAudioTracks().forEach((track) {
+        _pc1.addTrack(track, audioStream);
+      });
 
-    final offer = await _pc1.createOffer();
-    await _pc2.setRemoteDescription(offer);
-    await _pc1.setLocalDescription(offer);
+      final offer = await _pc1.createOffer();
+      await _pc2.setRemoteDescription(offer);
+      await _pc1.setLocalDescription(offer);
 
-    final answer = await _pc2.createAnswer();
-    await _pc1.setRemoteDescription(answer);
-    await _pc2.setLocalDescription(answer);
-
-    _initCompleter?.complete();
-    _initCompleter = null;
+      final answer = await _pc2.createAnswer();
+      await _pc1.setRemoteDescription(answer);
+      await _pc2.setLocalDescription(answer);
+      _initCompleter?.complete();
+      _initCompleter = null;
+    } catch (e, trace) {
+      _initCompleter?.completeError(e, trace);
+    }
   }
 
   VoidCallback _startListening(SoundStateChangedCallback onSoundStateChanged) {
