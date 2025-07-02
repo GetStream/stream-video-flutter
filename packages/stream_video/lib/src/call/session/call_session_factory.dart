@@ -8,6 +8,7 @@ import '../../models/call_cid.dart';
 import '../../models/call_client_publish_options.dart';
 import '../../models/call_credentials.dart';
 import '../../types/other.dart';
+import '../../webrtc/peer_connection.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/tracer.dart';
@@ -32,7 +33,7 @@ class CallSessionFactory {
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
-    required OnPeerConnectionIssue onPeerConnectionFailure,
+    required OnReconnectionNeeded onReconnectionNeeded,
     required InternetConnection networkMonitor,
     required StatsOptions statsOptions,
     ClientPublishOptions? clientPublishOptions,
@@ -68,7 +69,7 @@ class CallSessionFactory {
       stateManager: stateManager,
       dynascaleManager: dynascaleManager,
       sdpEditor: sdpEditor,
-      onPeerConnectionIssue: onPeerConnectionFailure,
+      onReconnectionNeeded: onReconnectionNeeded,
       clientPublishOptions: clientPublishOptions,
       networkMonitor: networkMonitor,
       statsOptions: statsOptions,
