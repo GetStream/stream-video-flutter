@@ -366,10 +366,16 @@ class StreamCallEndedEvent extends StreamCallEvent {
     super.callCid, {
     required this.endedBy,
     required this.createdAt,
+    required this.metadata,
+    required this.type,
+    this.reason,
   });
 
   final CallUser? endedBy;
   final DateTime createdAt;
+  final CallMetadata metadata;
+  final String type;
+  final String? reason;
 
   String? get endedByUserId => endedBy?.id;
 
@@ -849,9 +855,11 @@ class StreamCallTranscriptionFailedEvent extends StreamCallEvent {
   const StreamCallTranscriptionFailedEvent(
     super.callCid, {
     required this.createdAt,
+    this.error,
   });
 
   final DateTime createdAt;
+  final String? error;
 
   @override
   List<Object?> get props => [
@@ -1325,6 +1333,9 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           event.callCid,
           endedBy: event.endedBy,
           createdAt: event.createdAt,
+          metadata: event.metadata,
+          type: event.type,
+          reason: event.reason,
         ),
       final CoordinatorCallAcceptedEvent event => StreamCallAcceptedEvent(
           event.callCid,
@@ -1389,6 +1400,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
         StreamCallTranscriptionFailedEvent(
           event.callCid,
           createdAt: event.createdAt,
+          error: event.error,
         ),
       final CoordinatorCallClosedCaptionStartedEvent event =>
         StreamCallClosedCaptionsStartedEvent(

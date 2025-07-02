@@ -16,6 +16,7 @@ class CallResponse {
     required this.backstage,
     this.blockedUserIds = const [],
     required this.captioning,
+    this.channelCid,
     required this.cid,
     required this.createdAt,
     required this.createdBy,
@@ -42,6 +43,14 @@ class CallResponse {
   List<String> blockedUserIds;
 
   bool captioning;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? channelCid;
 
   /// The unique identifier for a call (<type>:<id>)
   String cid;
@@ -132,6 +141,7 @@ class CallResponse {
           other.backstage == backstage &&
           _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
           other.captioning == captioning &&
+          other.channelCid == channelCid &&
           other.cid == cid &&
           other.createdAt == createdAt &&
           other.createdBy == createdBy &&
@@ -158,6 +168,7 @@ class CallResponse {
       (backstage.hashCode) +
       (blockedUserIds.hashCode) +
       (captioning.hashCode) +
+      (channelCid == null ? 0 : channelCid!.hashCode) +
       (cid.hashCode) +
       (createdAt.hashCode) +
       (createdBy.hashCode) +
@@ -180,13 +191,18 @@ class CallResponse {
 
   @override
   String toString() =>
-      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, channelCid=$channelCid, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'backstage'] = this.backstage;
     json[r'blocked_user_ids'] = this.blockedUserIds;
     json[r'captioning'] = this.captioning;
+    if (this.channelCid != null) {
+      json[r'channel_cid'] = this.channelCid;
+    } else {
+      json[r'channel_cid'] = null;
+    }
     json[r'cid'] = this.cid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     json[r'created_by'] = this.createdBy;
@@ -261,6 +277,7 @@ class CallResponse {
                 .toList(growable: false)
             : const [],
         captioning: mapValueOfType<bool>(json, r'captioning')!,
+        channelCid: mapValueOfType<String>(json, r'channel_cid'),
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         createdBy: UserResponse.fromJson(json[r'created_by'])!,

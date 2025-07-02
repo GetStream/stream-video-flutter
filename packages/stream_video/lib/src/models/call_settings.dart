@@ -216,18 +216,29 @@ class StreamLimitsSettings extends AbstractSettings {
   const StreamLimitsSettings({
     this.maxDurationSeconds,
     this.maxParticipants,
+    this.maxParticipantsExcludeOwner,
+    this.maxParticipantsExcludeRoles = const [],
   });
 
   final int? maxDurationSeconds;
   final int? maxParticipants;
+  final bool? maxParticipantsExcludeOwner;
+  final List<String> maxParticipantsExcludeRoles;
 
   @override
-  List<Object?> get props => [maxDurationSeconds, maxParticipants];
+  List<Object?> get props => [
+        maxDurationSeconds,
+        maxParticipants,
+        maxParticipantsExcludeOwner,
+        maxParticipantsExcludeRoles,
+      ];
 
   LimitsSettingsRequest toOpenDto() {
     return LimitsSettingsRequest(
       maxDurationSeconds: maxDurationSeconds,
       maxParticipants: maxParticipants,
+      maxParticipantsExcludeOwner: maxParticipantsExcludeOwner,
+      maxParticipantsExcludeRoles: maxParticipantsExcludeRoles,
     );
   }
 }
@@ -797,7 +808,11 @@ enum TranscriptionSettingsLanguage {
   ko('ko'),
   ms('ms'),
   no('no'),
-  uk('uk');
+  uk('uk'),
+  bg('bg'),
+  et('et'),
+  sl('sl'),
+  sk('sk');
 
   const TranscriptionSettingsLanguage(this.value);
   final String value;
@@ -809,6 +824,18 @@ enum TranscriptionSettingsLanguage {
     return TranscriptionSettingsRequestLanguageEnumTypeTransformer()
             .decode(value) ??
         TranscriptionSettingsRequestLanguageEnum.auto;
+  }
+
+  StartTranscriptionRequestLanguageEnum toStartTranscriptionDto() {
+    return StartTranscriptionRequestLanguageEnumTypeTransformer()
+            .decode(value) ??
+        StartTranscriptionRequestLanguageEnum.auto;
+  }
+
+  StartClosedCaptionsRequestLanguageEnum toStartClosedCaptionsDto() {
+    return StartClosedCaptionsRequestLanguageEnumTypeTransformer()
+            .decode(value) ??
+        StartClosedCaptionsRequestLanguageEnum.auto;
   }
 }
 

@@ -10,57 +10,44 @@
 
 part of openapi.api;
 
-class SFULocationResponse {
-  /// Returns a new [SFULocationResponse] instance.
-  SFULocationResponse({
-    required this.coordinates,
-    required this.datacenter,
-    required this.id,
-    required this.location,
+class UserRatingReportResponse {
+  /// Returns a new [UserRatingReportResponse] instance.
+  UserRatingReportResponse({
+    required this.average,
+    required this.count,
   });
 
-  Coordinates coordinates;
+  double average;
 
-  String datacenter;
-
-  String id;
-
-  Location location;
+  int count;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SFULocationResponse &&
-          other.coordinates == coordinates &&
-          other.datacenter == datacenter &&
-          other.id == id &&
-          other.location == location;
+      other is UserRatingReportResponse &&
+          other.average == average &&
+          other.count == count;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (coordinates.hashCode) +
-      (datacenter.hashCode) +
-      (id.hashCode) +
-      (location.hashCode);
+      (average.hashCode) + (count.hashCode);
 
   @override
   String toString() =>
-      'SFULocationResponse[coordinates=$coordinates, datacenter=$datacenter, id=$id, location=$location]';
+      'UserRatingReportResponse[average=$average, count=$count]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'coordinates'] = this.coordinates;
-    json[r'datacenter'] = this.datacenter;
-    json[r'id'] = this.id;
-    json[r'location'] = this.location;
+    json[r'average'] = this.average;
+    json[r'count'] = this.count;
     return json;
   }
 
-  /// Returns a new [SFULocationResponse] instance and imports its values from
+  /// Returns a new [UserRatingReportResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static SFULocationResponse? fromJson(dynamic value) {
+  static UserRatingReportResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -70,31 +57,29 @@ class SFULocationResponse {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "SFULocationResponse[$key]" is missing from JSON.');
+              'Required key "UserRatingReportResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "SFULocationResponse[$key]" has a null value in JSON.');
+              'Required key "UserRatingReportResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return SFULocationResponse(
-        coordinates: Coordinates.fromJson(json[r'coordinates'])!,
-        datacenter: mapValueOfType<String>(json, r'datacenter')!,
-        id: mapValueOfType<String>(json, r'id')!,
-        location: Location.fromJson(json[r'location'])!,
+      return UserRatingReportResponse(
+        average: mapValueOfType<double>(json, r'average')!,
+        count: mapValueOfType<int>(json, r'count')!,
       );
     }
     return null;
   }
 
-  static List<SFULocationResponse> listFromJson(
+  static List<UserRatingReportResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <SFULocationResponse>[];
+    final result = <UserRatingReportResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = SFULocationResponse.fromJson(row);
+        final value = UserRatingReportResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -103,12 +88,12 @@ class SFULocationResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, SFULocationResponse> mapFromJson(dynamic json) {
-    final map = <String, SFULocationResponse>{};
+  static Map<String, UserRatingReportResponse> mapFromJson(dynamic json) {
+    final map = <String, UserRatingReportResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = SFULocationResponse.fromJson(entry.value);
+        final value = UserRatingReportResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -117,17 +102,17 @@ class SFULocationResponse {
     return map;
   }
 
-  // maps a json object with a list of SFULocationResponse-objects as value to a dart map
-  static Map<String, List<SFULocationResponse>> mapListFromJson(
+  // maps a json object with a list of UserRatingReportResponse-objects as value to a dart map
+  static Map<String, List<UserRatingReportResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<SFULocationResponse>>{};
+    final map = <String, List<UserRatingReportResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SFULocationResponse.listFromJson(
+        map[entry.key] = UserRatingReportResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -138,9 +123,7 @@ class SFULocationResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'coordinates',
-    'datacenter',
-    'id',
-    'location',
+    'average',
+    'count',
   };
 }

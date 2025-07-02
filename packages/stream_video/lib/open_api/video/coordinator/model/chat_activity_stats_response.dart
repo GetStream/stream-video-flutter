@@ -10,11 +10,10 @@
 
 part of openapi.api;
 
-class VideoQuality {
-  /// Returns a new [VideoQuality] instance.
-  VideoQuality({
-    this.resolution,
-    this.usageType,
+class ChatActivityStatsResponse {
+  /// Returns a new [ChatActivityStatsResponse] instance.
+  ChatActivityStatsResponse({
+    this.messages,
   });
 
   ///
@@ -23,52 +22,35 @@ class VideoQuality {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  VideoDimension? resolution;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? usageType;
+  MessageStatsResponse? messages;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is VideoQuality &&
-          other.resolution == resolution &&
-          other.usageType == usageType;
+      other is ChatActivityStatsResponse && other.messages == messages;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (resolution == null ? 0 : resolution!.hashCode) +
-      (usageType == null ? 0 : usageType!.hashCode);
+      (messages == null ? 0 : messages!.hashCode);
 
   @override
-  String toString() =>
-      'VideoQuality[resolution=$resolution, usageType=$usageType]';
+  String toString() => 'ChatActivityStatsResponse[messages=$messages]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.resolution != null) {
-      json[r'resolution'] = this.resolution;
+    if (this.messages != null) {
+      json[r'Messages'] = this.messages;
     } else {
-      json[r'resolution'] = null;
-    }
-    if (this.usageType != null) {
-      json[r'usage_type'] = this.usageType;
-    } else {
-      json[r'usage_type'] = null;
+      json[r'Messages'] = null;
     }
     return json;
   }
 
-  /// Returns a new [VideoQuality] instance and imports its values from
+  /// Returns a new [ChatActivityStatsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static VideoQuality? fromJson(dynamic value) {
+  static ChatActivityStatsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -78,29 +60,28 @@ class VideoQuality {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "VideoQuality[$key]" is missing from JSON.');
+              'Required key "ChatActivityStatsResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "VideoQuality[$key]" has a null value in JSON.');
+              'Required key "ChatActivityStatsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return VideoQuality(
-        resolution: VideoDimension.fromJson(json[r'resolution']),
-        usageType: mapValueOfType<String>(json, r'usage_type'),
+      return ChatActivityStatsResponse(
+        messages: MessageStatsResponse.fromJson(json[r'Messages']),
       );
     }
     return null;
   }
 
-  static List<VideoQuality> listFromJson(
+  static List<ChatActivityStatsResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <VideoQuality>[];
+    final result = <ChatActivityStatsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = VideoQuality.fromJson(row);
+        final value = ChatActivityStatsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -109,12 +90,12 @@ class VideoQuality {
     return result.toList(growable: growable);
   }
 
-  static Map<String, VideoQuality> mapFromJson(dynamic json) {
-    final map = <String, VideoQuality>{};
+  static Map<String, ChatActivityStatsResponse> mapFromJson(dynamic json) {
+    final map = <String, ChatActivityStatsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = VideoQuality.fromJson(entry.value);
+        final value = ChatActivityStatsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -123,17 +104,17 @@ class VideoQuality {
     return map;
   }
 
-  // maps a json object with a list of VideoQuality-objects as value to a dart map
-  static Map<String, List<VideoQuality>> mapListFromJson(
+  // maps a json object with a list of ChatActivityStatsResponse-objects as value to a dart map
+  static Map<String, List<ChatActivityStatsResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<VideoQuality>>{};
+    final map = <String, List<ChatActivityStatsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = VideoQuality.listFromJson(
+        map[entry.key] = ChatActivityStatsResponse.listFromJson(
           entry.value,
           growable: growable,
         );

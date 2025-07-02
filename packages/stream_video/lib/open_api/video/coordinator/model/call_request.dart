@@ -13,6 +13,7 @@ part of openapi.api;
 class CallRequest {
   /// Returns a new [CallRequest] instance.
   CallRequest({
+    this.channelCid,
     this.custom = const {},
     this.members = const [],
     this.settingsOverride,
@@ -20,6 +21,14 @@ class CallRequest {
     this.team,
     this.video,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? channelCid;
 
   Map<String, Object> custom;
 
@@ -61,6 +70,7 @@ class CallRequest {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CallRequest &&
+          other.channelCid == channelCid &&
           _deepEquality.equals(other.custom, custom) &&
           _deepEquality.equals(other.members, members) &&
           other.settingsOverride == settingsOverride &&
@@ -71,6 +81,7 @@ class CallRequest {
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
+      (channelCid == null ? 0 : channelCid!.hashCode) +
       (custom.hashCode) +
       (members.hashCode) +
       (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
@@ -80,10 +91,15 @@ class CallRequest {
 
   @override
   String toString() =>
-      'CallRequest[custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team, video=$video]';
+      'CallRequest[channelCid=$channelCid, custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.channelCid != null) {
+      json[r'channel_cid'] = this.channelCid;
+    } else {
+      json[r'channel_cid'] = null;
+    }
     json[r'custom'] = this.custom;
     json[r'members'] = this.members;
     if (this.settingsOverride != null) {
@@ -130,6 +146,7 @@ class CallRequest {
       }());
 
       return CallRequest(
+        channelCid: mapValueOfType<String>(json, r'channel_cid'),
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         members: MemberRequest.listFromJson(json[r'members']),
         settingsOverride:

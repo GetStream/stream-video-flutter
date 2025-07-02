@@ -1,12 +1,9 @@
 // ignore_for_file: avoid_redundant_argument_values
 
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'call_test_helpers.dart';
