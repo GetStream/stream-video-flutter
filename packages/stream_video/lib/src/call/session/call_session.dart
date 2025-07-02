@@ -856,9 +856,11 @@ class CallSession extends Disposable {
         return;
       }
 
-      final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
-      if (ansResult is! Success<void>) {
-        _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
+      if (pubResult.data.hasSdp()) {
+        final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
+        if (ansResult is! Success<void>) {
+          _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
+        }
       }
     });
   }

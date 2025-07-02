@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../call/call_reject_reason.dart';
 import '../errors/video_error.dart';
+import '../sfu/data/models/sfu_error.dart';
 
 @immutable
 abstract class DisconnectReason extends Equatable {
@@ -13,6 +14,10 @@ abstract class DisconnectReason extends Equatable {
   const factory DisconnectReason.failure(
     VideoError error,
   ) = DisconnectReasonFailure;
+
+  const factory DisconnectReason.sfuError(
+    SfuError error,
+  ) = DisconnectReasonSfuError;
 
   const factory DisconnectReason.rejected({
     required String byUserId,
@@ -65,6 +70,20 @@ class DisconnectReasonFailure extends DisconnectReason {
   @override
   String toString() {
     return 'Failure{error: $error}';
+  }
+}
+
+class DisconnectReasonSfuError extends DisconnectReason {
+  const DisconnectReasonSfuError(this.error);
+
+  final SfuError error;
+
+  @override
+  List<Object?> get props => [error];
+
+  @override
+  String toString() {
+    return 'SfuError{error: $error}';
   }
 }
 

@@ -209,7 +209,7 @@ class OpenApiEvent with EquatableMixin {
         final event = open.CallFrameRecordingFrameReadyEvent.fromJson(jsonObj);
         return result.copyWith(callFrameRecordingFrameReady: event);
       case EventType.unknown:
-        streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
+        streamLog.d(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
     }
   }
