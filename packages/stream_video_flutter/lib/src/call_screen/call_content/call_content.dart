@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../../stream_video_flutter_background.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
@@ -118,8 +117,7 @@ The widget can listen to more focussed partial state updates itself from the `ca
   State<StreamCallContent> createState() => _StreamCallContentState();
 }
 
-class _StreamCallContentState extends State<StreamCallContent>
-    with WidgetsBindingObserver {
+class _StreamCallContentState extends State<StreamCallContent> {
   /// Represents a call.
   Call get call => widget.call;
 
@@ -134,33 +132,15 @@ class _StreamCallContentState extends State<StreamCallContent>
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
 
-  /// Whether the picture in picture mode is on
-  bool _isPictureInPictureModeOn = false;
-
   @override
   void initState() {
     super.initState();
     _startListeningToCallState();
-
-    if (widget.pictureInPictureConfiguration.enablePictureInPicture) {
-      StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: true);
-      WidgetsBinding.instance.addObserver(this);
-    }
   }
 
   @override
   void didUpdateWidget(covariant StreamCallContent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.pictureInPictureConfiguration.enablePictureInPicture !=
-        oldWidget.pictureInPictureConfiguration.enablePictureInPicture) {
-      if (widget.pictureInPictureConfiguration.enablePictureInPicture) {
-        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: true);
-        WidgetsBinding.instance.addObserver(this);
-      } else {
-        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
-        WidgetsBinding.instance.removeObserver(this);
-      }
-    }
 
     //If the widget has a callState we expect that state to be updated when needed.
     if (_callState != oldWidget.callState && _callState != null) {
@@ -180,13 +160,7 @@ class _StreamCallContentState extends State<StreamCallContent>
 
   @override
   void dispose() {
-    if (widget.pictureInPictureConfiguration.enablePictureInPicture) {
-      StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
-      WidgetsBinding.instance.removeObserver(this);
-    }
-
     _callStateSubscription?.cancel();
-
     super.dispose();
   }
 
@@ -215,41 +189,10 @@ class _StreamCallContentState extends State<StreamCallContent>
   void _updateCallState(
     ({CallStatus status, bool isScreenShareEnabled}) callState,
   ) {
-    // Disable PiP when screen sharing is enabled
-    if (callState.isScreenShareEnabled != _isScreenShareEnabled) {
-      if (widget.pictureInPictureConfiguration
-          .disablePictureInPictureWhenScreenSharing) {
-        StreamVideoFlutterBackground.setPictureInPictureEnabled(
-          enable: widget.pictureInPictureConfiguration.enablePictureInPicture &&
-              !callState.isScreenShareEnabled,
-        );
-      }
-    }
-
-    // Disable PiP when call is disconnected
-    if (callState.status != _status) {
-      if (callState.status.isDisconnected) {
-        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
-      }
-    }
-
     setState(() {
       _status = callState.status;
       _isScreenShareEnabled = callState.isScreenShareEnabled;
     });
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      setState(() {
-        _isPictureInPictureModeOn = false;
-      });
-    } else if (state == AppLifecycleState.inactive) {
-      setState(() {
-        _isPictureInPictureModeOn = true;
-      });
-    }
   }
 
   @override
@@ -260,20 +203,6 @@ class _StreamCallContentState extends State<StreamCallContent>
             (!widget.pictureInPictureConfiguration
                     .disablePictureInPictureWhenScreenSharing ||
                 !_isScreenShareEnabled);
-
-    if (pipEnabled && _isPictureInPictureModeOn && CurrentPlatform.isAndroid) {
-      return widget.pictureInPictureConfiguration.androidPiPConfiguration
-              .callPictureInPictureWidgetBuilder
-              ?.call(context, call) ??
-          widget.pictureInPictureConfiguration.androidPiPConfiguration
-              .callPictureInPictureBuilder
-              ?.call(context, call, _callState ?? call.state.value) ??
-          StreamCallParticipants(
-            call: call,
-            layoutMode: ParticipantLayoutMode.pictureInPicture,
-            sort: widget.pictureInPictureConfiguration.sort,
-          );
-    }
 
     final Widget bodyWidget;
     if (_status.isConnected ||
@@ -291,6 +220,11 @@ class _StreamCallContentState extends State<StreamCallContent>
                     widget.pictureInPictureConfiguration.iOSPiPConfiguration,
                 participantSort: widget.pictureInPictureConfiguration.sort,
               ),
+            ),
+          if (CurrentPlatform.isAndroid && pipEnabled)
+            StreamPictureInPictureAndroidView(
+              call: call,
+              configuration: widget.pictureInPictureConfiguration,
             ),
           widget.callParticipantsWidgetBuilder?.call(context, call) ??
               widget.callParticipantsBuilder?.call(

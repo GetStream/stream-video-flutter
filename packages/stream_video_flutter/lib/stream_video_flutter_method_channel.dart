@@ -111,19 +111,6 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
   }
 
   @override
-  Future<void> setPictureInPictureEnabled({required bool enable}) async {
-    if (enable) {
-      return methodChannel.invokeMethod(
-        'enablePictureInPictureMode',
-      );
-    }
-
-    return methodChannel.invokeMethod(
-      'disablePictureInPictureMode',
-    );
-  }
-
-  @override
   Future<bool?> isBackgroundEffectSupported() async {
     return methodChannel.invokeMethod<bool>(
       'isBackgroundEffectSupported',

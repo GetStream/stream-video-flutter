@@ -6,31 +6,22 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 
-import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry
 
-import io.getstream.video.flutter.stream_video_flutter.service.PictureInPictureHelper
+import io.getstream.video.flutter.stream_video_flutter.StreamFlutterActivity
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.VideoFrameProcessorWithBitmapFilter
 import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.BitmapVideoFilter
 import io.getstream.webrtc.flutter.videoEffects.ProcessorProvider
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessorFactoryInterface
 
-class MainActivity: FlutterActivity() {
+class MainActivity: StreamFlutterActivity() {
     private val CHANNEL = "io.getstream.video.flutter.dogfooding.channel"
-
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        PictureInPictureHelper.enterPictureInPictureIfInCall(this)
-    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "registerGreyscaleEffect") {
                 ProcessorProvider.addProcessor("grayscale", GrayScaleVideoFilterFactory())

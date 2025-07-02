@@ -23,7 +23,6 @@ class StreamCallControls extends StatelessWidget {
   /// Builds a call controls bar with the default set of call control options.
   StreamCallControls.withDefaultOptions({
     required Call call,
-    @Deprecated(PartialStateDeprecationMessage.localParticipant)
     CallParticipantState? localParticipant,
     this.backgroundColor,
     this.elevation,

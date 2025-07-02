@@ -11,7 +11,6 @@ class ToggleMicrophoneOption extends StatelessWidget {
   const ToggleMicrophoneOption({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.localParticipant)
     this.localParticipant,
     this.enabledMicrophoneIcon = Icons.mic_rounded,
     this.disabledMicrophoneIcon = Icons.mic_off_rounded,
@@ -25,7 +24,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  @Deprecated(PartialStateDeprecationMessage.localParticipant)
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
