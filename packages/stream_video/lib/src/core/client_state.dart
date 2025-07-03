@@ -116,6 +116,7 @@ class MutableClientState implements ClientState {
   @override
   Future<void> removeActiveCall(Call call) async {
     if (!options.allowMultipleActiveCalls &&
+        activeCall.hasValue &&
         activeCall.value?.callCid == call.callCid) {
       activeCall.value = null;
     }

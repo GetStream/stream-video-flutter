@@ -92,9 +92,10 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     }).toList();
 
     if (state.createdByMe) {
-      final everyoneElseRejected = state.callMembers
-          .where((m) => m.userId != state.currentUserId)
-          .every((m) => rejectedBy.keys.contains(m.userId));
+      final everyoneElseRejected = state.otherParticipants.isEmpty &&
+          state.callMembers
+              .where((m) => m.userId != state.currentUserId)
+              .every((m) => rejectedBy.keys.contains(m.userId));
 
       if (everyoneElseRejected) {
         _logger.d(

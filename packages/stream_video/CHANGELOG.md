@@ -6,6 +6,7 @@
 
 🐞 Fixed
 * Improved SFU error handling in Call flow and disconnect reason handling. The disconnected call state now accurately reflects the original cause of disconnection.
+* Fixed an issue where rejecting a ringing call by one participant would incorrectly end the call for all other ringing participants.
 
 ## 0.9.6
 
