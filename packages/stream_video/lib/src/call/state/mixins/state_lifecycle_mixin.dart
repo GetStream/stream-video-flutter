@@ -192,18 +192,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallTimeout() {
-    _logger.e(() => '[lifecycleCallTimeout] state: $state');
-    lifecycleCallDisconnected(reason: const DisconnectReason.timeout());
-  }
-
-  void lifecycleCallConnectFailed({
-    required VideoError error,
-  }) {
-    _logger.e(() => '[lifecycleCallConnectFailed] state: $state');
-    lifecycleCallDisconnected(reason: DisconnectReason.failure(error));
-  }
-
   void lifecycleCallConnecting({
     required int attempt,
     SfuReconnectionStrategy? strategy,
