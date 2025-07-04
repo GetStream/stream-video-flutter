@@ -3,10 +3,13 @@
 ✅ Added
 * Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
 * Added `call.partialState` for more specific and efficient state updates.
+* Added `maxParticipantsExcludeOwner` and `maxParticipantsExcludeRoles` to Call limits settings, providing finer control over participant limits by allowing exclusion of call owners and specific roles from the maximum count.
 
 🐞 Fixed
 * Improved SFU error handling in Call flow and disconnect reason handling. The disconnected call state now accurately reflects the original cause of disconnection.
-* Fixed an issue where rejecting a ringing call by one participant would incorrectly end the call for all other ringing participants.
+* Fixed an issue where rejecting a ringing call on one device would incorrectly end the call for all already connected participants.
+* Enhanced fast reconnect mechanism with improved PeerConnection issue detection and recovery. The system now attempts multiple fast reconnects before falling back to a full call rejoin.
+* Fixed simulcast video quality by correcting resolution calculations and layer selection for optimal video track display.
 
 ## 0.9.6
 
