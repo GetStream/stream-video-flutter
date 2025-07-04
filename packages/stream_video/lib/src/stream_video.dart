@@ -453,6 +453,15 @@ class StreamVideo extends Disposable {
         event.metadata.details.createdBy.id != currentUserId &&
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
+
+      // In a edge case where call with the same CID as the incoming call is also an outgoing call
+      // we want to use the same Call instance.
+      if (state.outgoingCall.valueOrNull?.callCid.value ==
+          event.data.callCid.value) {
+        _state.incomingCall.value = state.outgoingCall.valueOrNull;
+        return;
+      }
+
       final call = _makeCallFromRinging(data: event.data);
       _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
