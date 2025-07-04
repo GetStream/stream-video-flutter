@@ -10,6 +10,8 @@ import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 import 'package:stream_video/stream_video.dart';
 
+class MockCall extends Mock implements Call {}
+
 class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
 class MockRtcMediaDeviceNotifier extends Mock
@@ -38,6 +40,8 @@ class MockCallSession extends Mock implements CallSession {}
 class MockSfuClient extends Mock implements SfuClient {}
 
 class MockClientState extends Mock implements ClientState {}
+
+class MockAudioRecognition extends Mock implements AudioRecognition {}
 
 /// Helper function to create CallDetails for testing
 CallDetails createTestCallDetails({
