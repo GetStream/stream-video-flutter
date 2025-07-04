@@ -24,6 +24,7 @@ export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/retry/retry_policy.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
+export 'src/sfu/data/models/sfu_error.dart';
 export 'src/sfu/data/models/sfu_goaway_reason.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/sorting/call_participant_sorting_presets.dart';
