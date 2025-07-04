@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../../call_state.dart';
-import '../../../errors/video_error.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_member_state.dart';
 import '../../../models/call_received_data.dart';
