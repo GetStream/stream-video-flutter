@@ -10,6 +10,7 @@
 * Fixed an issue where rejecting a ringing call on one device would incorrectly end the call for all already connected participants.
 * Enhanced fast reconnect mechanism with improved PeerConnection issue detection and recovery. The system now attempts multiple fast reconnects before falling back to a full call rejoin.
 * Fixed simulcast video quality by correcting resolution calculations and layer selection for optimal video track display.
+* Fixed an edge case where a call with the same CID as an incoming call is also an outgoing call to ensure the same Call instance is used.
 
 ## 0.9.6
 
