@@ -15,7 +15,7 @@ StreamCallContainer(
 );
 ```
 
-You expect this state to be up to date and because of that the `StreamCallContainer` will always rebuild everything when anything in the state changes. The builders are replaced by new ones that do not contain a state object. Because of this you will have to observe the state inside your own widgets, but can do this more efficient by using `call.partialState` or the `PartialCallStateBuilder`. When none of the deprecated callbacks are used the call container will no longer trigger a rebuild on every state change.
+You expect this state to be up to date and because of that the `StreamCallContainer` will always rebuild everything when anything in the state changes. The previous builders have been replaced with new ones that no longer include a state object. When migrating to use these updated builders, you'll need to handle state observation within your own widgets. You can do this more efficiently by using `call.partialState` or the `PartialCallStateBuilder`. When none of the deprecated callbacks are used, the call container will no longer trigger a rebuild on every state change.
 
 ```dart
 StreamCallContainer(
