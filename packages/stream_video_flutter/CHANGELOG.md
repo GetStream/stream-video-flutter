@@ -1,4 +1,4 @@
-## Unreleased
+## 0.10.0
 
 🚧 (Android) Picture-in-Picture (PiP) Improvements - Breaking Change
 * **Simplified Setup:** Introduced `StreamFlutterActivity` - extend it instead of `FlutterActivity` for automatic PiP support.
