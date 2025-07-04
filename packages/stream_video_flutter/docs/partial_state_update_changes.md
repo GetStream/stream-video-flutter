@@ -32,7 +32,7 @@ For most of the changes automatic fixes are available, but not everywhere and no
 ### Changes in `StreamCallContainer` and `StreamCallContent`
 In `StreamCallContainer` the IDE should suggest changes to migrate from `incomingCallBuilder`, `outgoingCallBuilder` and `callContentBuilder` to the new `...WidgetBuilder` alternative. However, these changes are not applied automatically with `dart fix --apply` because you have to make changes in the callback itself.
 
-The same is true for `StreamCallContent` and similar widgets like `StreamIncomingCallContent`. Here it's also important that you no longer supply a state object. If you do supply a state object it's assumed to always be up to date and the widget won't listen to the `call.state` directly. If you don't supply a state object the widget will listen to relevant changes in the state itself. The `state` object is deprecated and `dart fix --apply` will also automatically remove the state object as it won't break any of your other code.
+The same is true for `StreamCallContent` and similar widgets like `StreamIncomingCallContent`. Here, it's also important that you no longer provide the deprecated `callState` parameter. If you do, it's assumed to always be up to date and the widget won't listen to the partial state directly. If you won't provide it, the widget will listen to relevant changes only using the partial state. The `callState` object is deprecated and `dart fix --apply` will also automatically remove the state object as it won't break any of your other code.
 
 ## Other recommended changes
 Some of the other widgets have properties that are no longer required and now nullable.
