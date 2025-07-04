@@ -719,7 +719,6 @@ class Call {
         _logger.e(() => '[join] waiting failed: $result');
 
         await reject(reason: CallRejectReason.timeout());
-        _stateManager.lifecycleCallTimeout();
 
         return result;
       }
@@ -738,8 +737,8 @@ class Call {
         _logger.e(() => '[join] coordinator joining failed: $joinedResult');
 
         final error = (joinedResult as Failure).error;
-        _stateManager.lifecycleCallConnectFailed(error: error);
-        return result;
+        await leave(reason: DisconnectReason.failure(error));
+        return joinedResult;
       }
 
       _credentials = joinedResult.data;
@@ -794,7 +793,7 @@ class Call {
           _logger.e(() => '[join] sfu session start failed: $sessionResult');
 
           final error = (sessionResult as Failure).error;
-          _stateManager.lifecycleCallConnectFailed(error: error);
+          await leave(reason: DisconnectReason.failure(error));
           return sessionResult;
         }
       } else {
@@ -1420,6 +1419,10 @@ class Call {
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) async {
     try {
+      if (_leaveCallTriggered) {
+        _logger.w(() => '[leave] rejected (already leaving call)');
+        return const Result.success(none);
+      }
       _leaveCallTriggered = true;
 
       final state = this.state.value;
