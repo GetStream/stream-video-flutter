@@ -738,7 +738,7 @@ class Call {
 
         final error = (joinedResult as Failure).error;
         await leave(reason: DisconnectReason.failure(error));
-        return result;
+        return joinedResult;
       }
 
       _credentials = joinedResult.data;
