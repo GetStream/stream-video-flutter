@@ -8,6 +8,8 @@
 * **Removed Deprecated Methods:** Removed the deprecated `setPictureInPictureEnabled` method from `StreamVideoFlutterPlatform`, `StreamVideoFlutterBackground`, and `MethodChannelStreamVideoFlutter` classes, and the deprecated `enterPictureInPictureIfInCall` method from `PictureInPictureHelper` (Android). PiP is now handled automatically by `StreamPictureInPictureAndroidView`.
 
 🔄 Partial State Updates:
+
+For a more detailed explanation check [the dedicated documentation](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video_flutter/docs/partial_state_update_changes.md).
 * Added `call.partialState` for more specific and efficient state updates.
 * Added callbacks in `StreamCallContainer`, `StreamCallContent`, `StreamIncomingCallContent`, and others that no longer return a state.
 By (only) using these callbacks the root widgets will use more efficient partial state updates.
