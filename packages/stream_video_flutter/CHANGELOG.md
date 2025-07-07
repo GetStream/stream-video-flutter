@@ -1,3 +1,8 @@
+## 0.10.1
+
+🐞 Fixed
+* (iOS) Fixed Picture-in-Picture (PiP) issue where remote participants joining during active PiP mode would not have their video tracks displayed properly.
+
 ## 0.10.0
 
 🚧 (Android) Picture-in-Picture (PiP) Improvements - Breaking Change
