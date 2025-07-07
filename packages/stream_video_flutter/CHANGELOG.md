@@ -1,4 +1,4 @@
-## 0.10.1
+## Unreleased
 
 🐞 Fixed
 * (iOS) Fixed Picture-in-Picture (PiP) issue where remote participants joining during active PiP mode would not have their video tracks displayed properly.
