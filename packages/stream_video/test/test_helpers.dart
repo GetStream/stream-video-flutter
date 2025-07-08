@@ -9,6 +9,7 @@ import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
@@ -38,6 +39,10 @@ class MockCallSession extends Mock implements CallSession {}
 class MockSfuClient extends Mock implements SfuClient {}
 
 class MockClientState extends Mock implements ClientState {}
+
+class MockWebSocketChannel extends Mock implements WebSocketChannel {}
+
+class MockWebSocketSink extends Mock implements WebSocketSink {}
 
 /// Helper function to create CallDetails for testing
 CallDetails createTestCallDetails({

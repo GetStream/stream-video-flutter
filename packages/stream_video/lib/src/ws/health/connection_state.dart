@@ -1,4 +1,3 @@
-
 import '../../logger/logger.dart';
 
 /// Connection state type used throughout the SDK.
@@ -29,7 +28,6 @@ class ConnectionStateUpdatedEvent {
   /// Whether the connection state changed to [ConnectionState.connected].
   final bool didConnected;
 }
-
 
 typedef OnConnectionStateUpdated = void Function(ConnectionStateUpdatedEvent);
 

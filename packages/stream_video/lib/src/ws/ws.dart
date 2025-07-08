@@ -50,14 +50,25 @@ enum StreamWebSocketCloseCode {
       code == normalClosure.value || code == goingAway.value;
 }
 
+/// Typedef used for connecting to a websocket. Method returns a
+/// [WebSocketChannel] and accepts a connection [url] and an optional
+/// [Iterable] of `protocols`.
+typedef WebSocketChannelConnector = Future<WebSocketChannel> Function(
+  Uri uri, {
+  Iterable<String>? protocols,
+});
+
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
 abstract class StreamWebSocket with ConnectionStateMixin {
   /// Creates a new instance of [StreamWebSocket].
   StreamWebSocket(
     this.url, {
     this.protocols,
+    WebSocketChannelConnector? webSocketChannelConnector,
     String tag = 'SV:AbstractWS',
-  }) : _logger = taggedLogger(tag: tag);
+  })  : _webSocketChannelConnector =
+            webSocketChannelConnector ?? platform.connect,
+        _logger = taggedLogger(tag: tag);
 
   /// The URI to connect to.
   final String url;
@@ -68,6 +79,7 @@ abstract class StreamWebSocket with ConnectionStateMixin {
   /// The descendant tag.
   final TaggedLogger _logger;
 
+  final WebSocketChannelConnector _webSocketChannelConnector;
   WebSocketChannel? _ws;
   StreamSubscription<dynamic>? _wsSubscription;
 
@@ -96,7 +108,7 @@ abstract class StreamWebSocket with ConnectionStateMixin {
       _connectRequestInProgress = true;
 
       final uri = Uri.parse(url);
-      _ws = await platform.connect(uri, protocols: protocols);
+      _ws = await _webSocketChannelConnector(uri, protocols: protocols);
 
       onOpen();
 
