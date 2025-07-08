@@ -1,3 +1,8 @@
+## Unreleased
+
+🐞 Fixed
+* Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
+
 ## 0.10.0
 
 ✅ Added
