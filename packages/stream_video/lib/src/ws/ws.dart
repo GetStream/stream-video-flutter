@@ -10,8 +10,12 @@ import 'connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
     as platform;
+import 'health/connection_state.dart';
 
 export 'package:web_socket_channel/web_socket_channel.dart';
+
+export 'health/connection_state.dart';
+export 'health/network_monitor.dart';
 
 enum StreamWebSocketCloseCode {
   // /**
@@ -47,7 +51,7 @@ enum StreamWebSocketCloseCode {
 }
 
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
-abstract class StreamWebSocket {
+abstract class StreamWebSocket with ConnectionStateMixin {
   /// Creates a new instance of [StreamWebSocket].
   StreamWebSocket(
     this.url, {

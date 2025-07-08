@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../logger/impl/tagged_logger.dart';
+import 'network_monitor.dart';
 
 abstract class HealthMonitor {
   bool get isStarted;
@@ -38,12 +38,12 @@ class HealthMonitorImpl implements HealthMonitor {
   HealthMonitorImpl(
     this.owner,
     this.listener, {
-    required InternetConnection? networkMonitor,
-  }) : _networkMonitor = networkMonitor ?? InternetConnection.createInstance();
+    required NetworkMonitor networkMonitor,
+  }) : _networkMonitor = networkMonitor;
 
   final String owner;
   final HealthListener listener;
-  final InternetConnection _networkMonitor;
+  final NetworkMonitor _networkMonitor;
 
   late final _logger = taggedLogger(tag: 'SV:$owner-HM');
   final _pingPeriod = const Duration(seconds: 7);
@@ -52,7 +52,7 @@ class HealthMonitorImpl implements HealthMonitor {
   bool _started = false;
   Timer? _pingTimer;
   Timer? _pongTimer;
-  StreamSubscription<InternetStatus>? _networkChangeSubscription;
+  StreamSubscription<NetworkStatus>? _networkChangeSubscription;
 
   @override
   bool get isStarted => _started;
@@ -150,7 +150,7 @@ class HealthMonitorImpl implements HealthMonitor {
     _networkChangeSubscription = _networkMonitor.onStatusChange.listen(
       (status) {
         _logger.v(() => '[onConnectivityChanged] status: $status');
-        if (status == InternetStatus.disconnected) {
+        if (status == NetworkStatus.disconnected) {
           _logger.d(() => '[_listenNetworkChanges] no network');
           listener.onNetworkDisconnected();
           _stopPinging();
