@@ -1,3 +1,8 @@
+## Unreleased
+
+🐞 Fixed
+- Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash
+
 ## 0.10.0
 
 ✅ Added
