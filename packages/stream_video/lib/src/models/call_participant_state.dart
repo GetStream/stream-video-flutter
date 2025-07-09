@@ -36,6 +36,28 @@ class CallParticipantState
     this.viewportVisibility = ViewportVisibility.unknown,
   }) : audioLevels = audioLevels ?? [audioLevel];
 
+  /// Internal constructor to be used with copyWith methods
+  CallParticipantState._({
+    required this.userId,
+    required this.roles,
+    required this.name,
+    required this.custom,
+    required this.image,
+    required this.sessionId,
+    required this.trackIdPrefix,
+    required this.publishedTracks,
+    required this.isLocal,
+    required this.connectionQuality,
+    required this.isOnline,
+    required this.audioLevel,
+    required this.audioLevels,
+    required this.isSpeaking,
+    required this.isDominantSpeaker,
+    required this.pin,
+    required this.reaction,
+    required this.viewportVisibility,
+  });
+
   final String userId;
   final List<String> roles;
   final String name;
@@ -87,7 +109,7 @@ class CallParticipantState
     CallReaction? reaction,
     ViewportVisibility? viewportVisibility,
   }) {
-    return CallParticipantState(
+    return CallParticipantState._(
       userId: userId ?? this.userId,
       roles: roles ?? this.roles,
       name: name ?? this.name,
@@ -130,7 +152,7 @@ class CallParticipantState
   CallParticipantState copyWithPin({
     required CallParticipantPin? participantPin,
   }) {
-    return CallParticipantState(
+    return CallParticipantState._(
       userId: userId,
       roles: roles,
       name: name,
@@ -147,6 +169,35 @@ class CallParticipantState
       isSpeaking: isSpeaking,
       isDominantSpeaker: isDominantSpeaker,
       pin: participantPin,
+      reaction: reaction,
+      viewportVisibility: viewportVisibility,
+    );
+  }
+
+  /// Returns a copy of this [CallParticipantState] with the [reaction] updated.
+  ///
+  /// This can be used any time you want to update the reaction, but mainly helps
+  /// to set it to `null`.
+  CallParticipantState copyWithReaction({
+    required CallReaction? reaction,
+  }) {
+    return CallParticipantState._(
+      userId: userId,
+      roles: roles,
+      name: name,
+      custom: custom,
+      image: image,
+      sessionId: sessionId,
+      trackIdPrefix: trackIdPrefix,
+      publishedTracks: publishedTracks,
+      isLocal: isLocal,
+      connectionQuality: connectionQuality,
+      isOnline: isOnline,
+      audioLevel: audioLevel,
+      audioLevels: audioLevels,
+      isSpeaking: isSpeaking,
+      isDominantSpeaker: isDominantSpeaker,
+      pin: pin,
       reaction: reaction,
       viewportVisibility: viewportVisibility,
     );

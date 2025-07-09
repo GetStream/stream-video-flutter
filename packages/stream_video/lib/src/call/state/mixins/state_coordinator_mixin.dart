@@ -434,24 +434,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     final newParticipants = state.callParticipants.map((e) {
       if (userId == e.userId) {
-        return CallParticipantState(
-          userId: e.userId,
-          roles: e.roles,
-          name: e.name,
-          custom: e.custom,
-          sessionId: e.sessionId,
-          trackIdPrefix: e.trackIdPrefix,
-          image: e.image,
-          publishedTracks: e.publishedTracks,
-          isLocal: e.isLocal,
-          connectionQuality: e.connectionQuality,
-          isOnline: e.isOnline,
-          audioLevel: e.audioLevel,
-          isSpeaking: e.isSpeaking,
-          isDominantSpeaker: e.isDominantSpeaker,
-          viewportVisibility: e.viewportVisibility,
-          pin: e.pin,
-        );
+        return e.copyWithReaction(reaction: null);
       } else {
         return e;
       }
