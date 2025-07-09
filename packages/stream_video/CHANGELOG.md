@@ -1,3 +1,8 @@
+## unreleased
+
+🐞 Fixed
+* Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
+
 ## 0.10.0
 
 ✅ Added
