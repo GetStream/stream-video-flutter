@@ -1,4 +1,7 @@
-## unreleased
+## Unreleased
+
+✅ Added
+* Added support for customization of display name for ringing notifications by providing `display_name` custom data to the call. See the [documentation](https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization) for details.
 
 🐞 Fixed
 * Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
