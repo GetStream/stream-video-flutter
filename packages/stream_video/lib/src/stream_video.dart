@@ -896,6 +896,8 @@ class StreamVideo extends Disposable {
 
     final createdById = payload['created_by_id'] as String?;
     final createdByName = payload['created_by_display_name'] as String?;
+    final callDisplayName = payload['call_display_name'] as String?;
+
     final hasVideo = payload['video'] as String?;
 
     final type = payload['type'] as String?;
@@ -904,7 +906,7 @@ class StreamVideo extends Disposable {
         manager.showMissedCall(
           uuid: callUUID,
           handle: createdById,
-          nameCaller: createdByName,
+          nameCaller: callDisplayName ?? createdByName,
           callCid: callCid,
         ),
       );
@@ -925,7 +927,7 @@ class StreamVideo extends Disposable {
           manager.showIncomingCall(
             uuid: callUUID,
             handle: createdById,
-            nameCaller: createdByName,
+            nameCaller: callDisplayName ?? createdByName,
             callCid: callCid,
             hasVideo: hasVideo != 'false',
           ),

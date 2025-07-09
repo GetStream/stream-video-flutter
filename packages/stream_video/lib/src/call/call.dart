@@ -257,6 +257,7 @@ class Call {
   late final _callJoinLock = Lock();
   late final _callReconnectLock = Lock();
   late final _callClosedCaptionsLock = Lock();
+  late final _multitaskingCameraLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
   final StreamVideo _streamVideo;
@@ -285,7 +286,7 @@ class Call {
   bool _initialized = false;
   bool _leaveCallTriggered = false;
 
-  final List<Timer> _reactionTimers = [];
+  final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
 
@@ -492,11 +493,14 @@ class Call {
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
-        _reactionTimers.add(
-          Timer(_stateManager.callState.preferences.reactionAutoDismissTime,
-              () {
+        _reactionTimers[event.user.id]?.cancel();
+
+        _reactionTimers[event.user.id] = Timer(
+          _stateManager.callState.preferences.reactionAutoDismissTime,
+          () {
             _stateManager.resetCallReaction(event.user.id);
-          }),
+            _reactionTimers.remove(event.user.id);
+          },
         );
         return _stateManager.coordinatorCallReaction(event);
       case StreamCallSessionParticipantCountUpdatedEvent _:
@@ -1458,7 +1462,7 @@ class Call {
     }
 
     for (final timer in [
-      ..._reactionTimers,
+      ..._reactionTimers.values,
       ..._captionsTimers.values,
     ]) {
       timer.cancel();
@@ -1524,9 +1528,6 @@ class Call {
     final audioInputs = mediaDevices
         .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
         .toList();
-    final videoInputs = mediaDevices
-        .where((d) => d.kind == RtcMediaDeviceKind.videoInput)
-        .toList();
 
     /// Determines if the speaker should be enabled based on a priority hierarchy of
     /// settings.
@@ -1576,17 +1577,6 @@ class Call {
     final defaultAudioInput = audioInputs
         .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label);
 
-    var defaultVideoInput = videoInputs.firstWhereOrNull(
-      (device) => device.label
-          .toLowerCase()
-          .contains(settings.video.cameraFacing.value.toLowerCase()),
-    );
-
-    // If it's not front or back then take one of the external cameras
-    if (defaultVideoInput == null && videoInputs.length > 2) {
-      defaultVideoInput = videoInputs.last;
-    }
-
     _connectOptions = connectOptions.copyWith(
       camera: TrackOption.fromSetting(
         enabled: settings.video.cameraDefaultOn,
@@ -1596,7 +1586,6 @@ class Call {
       ),
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
-      videoInputDevice: defaultVideoInput ?? videoInputs.firstOrNull,
       cameraFacingMode: settings.video.cameraFacing ==
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
@@ -2330,21 +2319,23 @@ class Call {
   }
 
   Future<Result<bool>> setMultitaskingCameraAccessEnabled(bool enabled) async {
-    if (CurrentPlatform.isIos) {
-      try {
-        final result =
-            await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
-        return Result.success(result);
-      } catch (error, stackTrace) {
-        _logger.e(() => 'Failed to set multitasking camera access: $error');
-        return Result.error(
-          'Failed to set multitasking camera access',
-          stackTrace,
-        );
+    return _multitaskingCameraLock.synchronized(() async {
+      if (CurrentPlatform.isIos) {
+        try {
+          final result =
+              await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
+          return Result.success(result);
+        } catch (error, stackTrace) {
+          _logger.e(() => 'Failed to set multitasking camera access: $error');
+          return Result.error(
+            'Failed to set multitasking camera access',
+            stackTrace,
+          );
+        }
       }
-    }
 
-    return const Result.success(false);
+      return const Result.success(false);
+    });
   }
 
   Future<Result<None>> setZoom({
