@@ -1528,9 +1528,6 @@ class Call {
     final audioInputs = mediaDevices
         .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
         .toList();
-    final videoInputs = mediaDevices
-        .where((d) => d.kind == RtcMediaDeviceKind.videoInput)
-        .toList();
 
     /// Determines if the speaker should be enabled based on a priority hierarchy of
     /// settings.
@@ -1580,17 +1577,6 @@ class Call {
     final defaultAudioInput = audioInputs
         .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label);
 
-    var defaultVideoInput = videoInputs.firstWhereOrNull(
-      (device) => device.label
-          .toLowerCase()
-          .contains(settings.video.cameraFacing.value.toLowerCase()),
-    );
-
-    // If it's not front or back then take one of the external cameras
-    if (defaultVideoInput == null && videoInputs.length > 2) {
-      defaultVideoInput = videoInputs.last;
-    }
-
     _connectOptions = connectOptions.copyWith(
       camera: TrackOption.fromSetting(
         enabled: settings.video.cameraDefaultOn,
@@ -1600,7 +1586,6 @@ class Call {
       ),
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
-      videoInputDevice: defaultVideoInput ?? videoInputs.firstOrNull,
       cameraFacingMode: settings.video.cameraFacing ==
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
