@@ -32,6 +32,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
+    @Deprecated(
+        "Caller customization is deprecated as it was not fully compatible with iOS (foreground calls only). Use 'display_name' custom field in the call instead. See details: [https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization]")
     CallerCustomizationFunction? callerCustomizationCallback,
     @Deprecated(
         'Background handler is no longer needed for terminated state ringing on iOS.')
