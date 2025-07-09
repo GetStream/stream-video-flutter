@@ -257,6 +257,7 @@ class Call {
   late final _callJoinLock = Lock();
   late final _callReconnectLock = Lock();
   late final _callClosedCaptionsLock = Lock();
+  late final _multitaskingCameraLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
   final StreamVideo _streamVideo;
@@ -2333,21 +2334,23 @@ class Call {
   }
 
   Future<Result<bool>> setMultitaskingCameraAccessEnabled(bool enabled) async {
-    if (CurrentPlatform.isIos) {
-      try {
-        final result =
-            await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
-        return Result.success(result);
-      } catch (error, stackTrace) {
-        _logger.e(() => 'Failed to set multitasking camera access: $error');
-        return Result.error(
-          'Failed to set multitasking camera access',
-          stackTrace,
-        );
+    return _multitaskingCameraLock.synchronized(() async {
+      if (CurrentPlatform.isIos) {
+        try {
+          final result =
+              await rtc.Helper.enableIOSMultitaskingCameraAccess(enabled);
+          return Result.success(result);
+        } catch (error, stackTrace) {
+          _logger.e(() => 'Failed to set multitasking camera access: $error');
+          return Result.error(
+            'Failed to set multitasking camera access',
+            stackTrace,
+          );
+        }
       }
-    }
 
-    return const Result.success(false);
+      return const Result.success(false);
+    });
   }
 
   Future<Result<None>> setZoom({
