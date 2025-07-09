@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../test_helpers.dart';
 import 'call_test_helpers.dart';
 
 void main() {
@@ -65,6 +66,49 @@ void main() {
       verify(callSession.fastReconnect).called(1);
 
       await internetStatusController.close();
+    });
+
+    test(
+        'should handle concurrent setCameraEnabled calls without race conditions',
+        () async {
+      final mockPermissionManager = MockPermissionsManager();
+      when(() => mockPermissionManager.hasPermission(CallPermission.sendVideo))
+          .thenAnswer((_) => true);
+
+      final call = createTestCall(permissionManager: mockPermissionManager);
+      final callOrder = <String>[];
+
+      final futures = <Future<Result<None>>>[];
+
+      for (var i = 0; i < 8; i++) {
+        final enabled = i.isEven;
+        futures.add(
+          call.setCameraEnabled(enabled: enabled).then((result) {
+            callOrder.add('call-$i-enabled-$enabled-completed');
+            return result;
+          }),
+        );
+
+        // Small delay to ensure calls are started in order
+        await Future<void>.delayed(const Duration(milliseconds: 2));
+      }
+
+      // Wait for all calls to complete
+      final results = await Future.wait(futures);
+
+      // Assert
+      expect(results.length, 8);
+      expect(callOrder.length, 8);
+
+      for (var i = 0; i < results.length; i++) {
+        expect(results[i], isA<Result<None>>());
+      }
+
+      // Verify that calls completed in order (indicating proper serialization)
+      for (var i = 0; i < 8; i++) {
+        final enabled = i.isEven;
+        expect(callOrder[i], 'call-$i-enabled-$enabled-completed');
+      }
     });
   });
 }
