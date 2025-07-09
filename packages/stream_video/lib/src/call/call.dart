@@ -285,7 +285,7 @@ class Call {
   bool _initialized = false;
   bool _leaveCallTriggered = false;
 
-  final List<Timer> _reactionTimers = [];
+  final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
 
@@ -492,11 +492,14 @@ class Call {
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
-        _reactionTimers.add(
-          Timer(_stateManager.callState.preferences.reactionAutoDismissTime,
-              () {
+        _reactionTimers[event.user.id]?.cancel();
+
+        _reactionTimers[event.user.id] = Timer(
+          _stateManager.callState.preferences.reactionAutoDismissTime,
+          () {
             _stateManager.resetCallReaction(event.user.id);
-          }),
+            _reactionTimers.remove(event.user.id);
+          },
         );
         return _stateManager.coordinatorCallReaction(event);
       case StreamCallSessionParticipantCountUpdatedEvent _:
@@ -1458,7 +1461,7 @@ class Call {
     }
 
     for (final timer in [
-      ..._reactionTimers,
+      ..._reactionTimers.values,
       ..._captionsTimers.values,
     ]) {
       timer.cancel();
