@@ -85,6 +85,23 @@ class _StreamPictureInPictureUiKitViewState
             : SfuTrackType.video,
       );
 
+      if (videoTrack == null &&
+          (participant.isVideoEnabled || participant.isScreenShareEnabled)) {
+        // If the video track is not available, we need to update the subscription
+        // to ensure that the participant's video is displayed correctly.
+        await widget.call.updateSubscription(
+          userId: participant.userId,
+          sessionId: participant.sessionId,
+          trackIdPrefix: participant.trackIdPrefix,
+          trackType: participant.isScreenShareEnabled
+              ? SfuTrackType.screenShare
+              : SfuTrackType.video,
+          videoDimension: RtcVideoDimensionPresets.h360_169,
+        );
+
+        return;
+      }
+
       await _channel.invokeMethod(
         'updateParticipant',
         {
@@ -93,8 +110,8 @@ class _StreamPictureInPictureUiKitViewState
               participant.name.isEmpty ? participant.userId : participant.name,
           'imageUrl': participant.image,
           'isAudioEnabled': participant.isAudioEnabled,
-          'isVideoEnabled':
-              participant.isVideoEnabled || participant.isScreenShareEnabled,
+          'isVideoEnabled': videoTrack != null &&
+              (participant.isVideoEnabled || participant.isScreenShareEnabled),
           'connectionQuality': participant.connectionQuality.name,
           'showParticipantName': widget.configuration.showParticipantName,
           'showMicrophoneIndicator':
