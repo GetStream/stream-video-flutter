@@ -325,6 +325,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? nameCaller,
     bool hasVideo = true,
   }) {
+    // ignore: deprecated_member_use_from_same_package
     final customData = callerCustomizationCallback?.call(
       callCid: callCid,
       callerName: nameCaller,
@@ -352,6 +353,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? nameCaller,
     bool hasVideo = true,
   }) {
+    // ignore: deprecated_member_use_from_same_package
     final customData = callerCustomizationCallback?.call(
       callCid: callCid,
       callerName: nameCaller,
