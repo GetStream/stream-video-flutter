@@ -12,7 +12,6 @@ export 'src/call/session/dynascale_manager.dart';
 export 'src/call_state.dart';
 export 'src/coordinator/coordinator_client.dart';
 export 'src/coordinator/models/coordinator_events.dart';
-export 'src/events.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';

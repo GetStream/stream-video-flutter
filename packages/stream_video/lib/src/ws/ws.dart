@@ -10,8 +10,12 @@ import 'connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
     as platform;
+import 'health/connection_state.dart';
 
 export 'package:web_socket_channel/web_socket_channel.dart';
+
+export 'health/connection_state.dart';
+export 'health/network_monitor.dart';
 
 enum StreamWebSocketCloseCode {
   // /**
@@ -46,14 +50,25 @@ enum StreamWebSocketCloseCode {
       code == normalClosure.value || code == goingAway.value;
 }
 
+/// Typedef used for connecting to a websocket. Method returns a
+/// [WebSocketChannel] and accepts a connection [url] and an optional
+/// [Iterable] of `protocols`.
+typedef WebSocketChannelConnector = Future<WebSocketChannel> Function(
+  Uri uri, {
+  Iterable<String>? protocols,
+});
+
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
-abstract class StreamWebSocket {
+abstract class StreamWebSocket with ConnectionStateMixin {
   /// Creates a new instance of [StreamWebSocket].
   StreamWebSocket(
     this.url, {
     this.protocols,
+    WebSocketChannelConnector? webSocketChannelConnector,
     String tag = 'SV:AbstractWS',
-  }) : _logger = taggedLogger(tag: tag);
+  })  : _webSocketChannelConnector =
+            webSocketChannelConnector ?? platform.connect,
+        _logger = taggedLogger(tag: tag);
 
   /// The URI to connect to.
   final String url;
@@ -64,6 +79,7 @@ abstract class StreamWebSocket {
   /// The descendant tag.
   final TaggedLogger _logger;
 
+  final WebSocketChannelConnector _webSocketChannelConnector;
   WebSocketChannel? _ws;
   StreamSubscription<dynamic>? _wsSubscription;
 
@@ -92,7 +108,7 @@ abstract class StreamWebSocket {
       _connectRequestInProgress = true;
 
       final uri = Uri.parse(url);
-      _ws = await platform.connect(uri, protocols: protocols);
+      _ws = await _webSocketChannelConnector(uri, protocols: protocols);
 
       onOpen();
 
