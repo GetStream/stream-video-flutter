@@ -13,12 +13,12 @@ class QrCodeScanner extends StatefulWidget {
   @override
   State<QrCodeScanner> createState() => _QrCodeScannerState();
 
-  static Future<String> scan(BuildContext context) async {
+  static Future<String?> scan(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute<String>(builder: (_) => const QrCodeScanner()),
     );
-    return result!;
+    return result;
   }
 }
 

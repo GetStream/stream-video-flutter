@@ -418,7 +418,7 @@ class _JoinForm extends StatelessWidget {
         onPressed: () async {
           final result = await QrCodeScanner.scan(context);
 
-          if (context.mounted) {
+          if (context.mounted && result != null) {
             _handleJoinUrl(context, result);
           }
         },
