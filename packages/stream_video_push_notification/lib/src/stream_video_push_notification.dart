@@ -33,7 +33,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
     @Deprecated(
-        "Caller customization is deprecated as it was not fully compatible with iOS (foreground calls only). Use 'display_name' custom field in the call instead. See details: [https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization]")
+      "Caller customization is deprecated as it was not fully compatible with iOS "
+      "(foreground calls only). Use 'display_name' custom field in the call instead. "
+      "See details: https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization",
+    )
     CallerCustomizationFunction? callerCustomizationCallback,
     @Deprecated(
         'Background handler is no longer needed for terminated state ringing on iOS.')
@@ -222,6 +225,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final StreamVideoPushProvider iosPushProvider;
   final StreamVideoPushProvider androidPushProvider;
   final StreamVideoPushParams pushParams;
+  @Deprecated(
+    "Caller customization is deprecated as it was not fully compatible with iOS "
+    "(foreground calls only). Use 'display_name' custom field in the call instead. "
+    "See details: https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization",
+  )
   final CallerCustomizationFunction? callerCustomizationCallback;
   final bool registerApnDeviceToken;
   late SharedPreferences _sharedPreferences;
