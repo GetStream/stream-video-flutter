@@ -85,7 +85,8 @@ class _StreamPictureInPictureUiKitViewState
             : SfuTrackType.video,
       );
 
-      if (videoTrack == null && participant.isVideoEnabled) {
+      if (videoTrack == null &&
+          (participant.isVideoEnabled || participant.isScreenShareEnabled)) {
         // If the video track is not available, we need to update the subscription
         // to ensure that the participant's video is displayed correctly.
         await widget.call.updateSubscription(
