@@ -155,9 +155,7 @@ extension EgressRtmpExt on open.EgressRTMPResponse {
 }
 
 extension CallSettingsExt on open.CallSettingsResponse {
-  // TODO open api provides wider settings options
   CallSettings toCallSettings() {
-    streamLog.i('CallSettingsExt', () => '[toCallSettings] settings: $this');
     return CallSettings(
       ring: StreamRingSettings(
         autoCancelTimeout: Duration(milliseconds: ring.autoCancelTimeoutMs),

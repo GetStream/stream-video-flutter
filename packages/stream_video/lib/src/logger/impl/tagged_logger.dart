@@ -33,4 +33,8 @@ class TaggedLogger {
   void log(Priority priority, MessageBuilder message) {
     streamLog.log(priority, tag, message);
   }
+
+  void logConditional(String? Function(Priority priority) messageBuilder) {
+    streamLog.logConditional(tag, messageBuilder);
+  }
 }
