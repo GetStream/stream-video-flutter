@@ -1490,9 +1490,10 @@ class Call {
   Future<Result<None>> leave({DisconnectReason? reason}) async {
     try {
       if (_leaveCallTriggered) {
-        _logger.w(() => '[leave] rejected (already leaving call)');
+        _logger.i(() => '[leave] rejected (already leaving call)');
         return const Result.success(none);
       }
+
       _leaveCallTriggered = true;
 
       // Complete the leave completer to cancel ongoing operations
@@ -1504,7 +1505,7 @@ class Call {
       _logger.i(() => '[leave] state: $state');
 
       if (state.status.isDisconnected) {
-        _logger.w(() => '[leave] rejected (state.status is disconnected)');
+        _logger.d(() => '[leave] rejected (state.status is disconnected)');
         return const Result.success(none);
       }
 
