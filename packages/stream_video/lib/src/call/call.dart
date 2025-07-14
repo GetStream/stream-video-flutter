@@ -1530,7 +1530,11 @@ class Call {
 
     if (state.value.settings.audio.noiseCancellation?.mode ==
         NoiceCancellationSettingsMode.autoOn) {
-      await stopAudioProcessing();
+      try {
+        await stopAudioProcessing();
+      } catch (e) {
+        _logger.w(() => '[clear] stopAudioProcessing failed: $e');
+      }
     }
 
     for (final timer in [
@@ -1545,14 +1549,18 @@ class Call {
     }
 
     _sfuStatsReporter?.stop();
-
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
-    await _session?.dispose();
+
+    try {
+      await _session?.dispose();
+    } catch (e) {
+      _logger.w(() => '[clear] stop dispose failed: $e');
+    }
+
     await dynascaleManager.dispose();
 
     await _streamVideo.state.removeActiveCall(this);
-
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
     }
