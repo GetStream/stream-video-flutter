@@ -2268,10 +2268,13 @@ class Call {
   /// Allows for the muting of all users on a call including the current user
   /// calling the function.
   ///
+  /// By default the function will mute all the tracks (audio and video) of the users but this
+  /// can be override by passing a [track] to the function.
+  ///
   /// Note: The user calling this function must have permission to perform the
   /// action else it will result in an error.
-  Future<Result<None>> muteAllUsers() {
-    return _permissionsManager.muteAllUsers();
+  Future<Result<None>> muteAllUsers({TrackType track = TrackType.all}) {
+    return _permissionsManager.muteAllUsers(track: track);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
