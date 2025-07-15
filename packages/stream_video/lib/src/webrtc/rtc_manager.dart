@@ -1053,7 +1053,7 @@ extension RtcManagerTrackHelper on RtcManager {
   }) async {
     final track = getPublisherTrackByType(SfuTrackType.audio);
     if (track == null) {
-      _logger.w(() => '[setMicrophoneDeviceId] rejected (track is null)');
+      _logger.d(() => '[setMicrophoneDeviceId] rejected (track is null)');
       return Result.error('Track is null');
     }
 
