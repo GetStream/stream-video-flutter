@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/src/errors/video_error.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -64,6 +66,112 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verify(callSession.fastReconnect).called(1);
+
+      await internetStatusController.close();
+    });
+
+    test('should set audio input device', () async {
+      final internetStatusController =
+          BehaviorSubject<InternetStatus>.seeded(InternetStatus.connected);
+
+      final coordinatorClient = setupMockCoordinatorClient();
+      final callSession = setupMockCallSession();
+
+      when(() => callSession.setAudioInputDevice(any<RtcMediaDevice>()))
+          .thenAnswer((_) => Future.value(const Result.success(none)));
+
+      final call = createTestCall(
+        networkMonitor: setupMockInternetConnection(
+          statusStream: internetStatusController,
+        ),
+        coordinatorClient: coordinatorClient,
+        sessionFactory: setupMockSessionFactory(
+          callSession: callSession,
+        ),
+      );
+
+      const audioDevice = RtcMediaDevice(
+        id: 'id',
+        label: 'label',
+        kind: RtcMediaDeviceKind.audioInput,
+      );
+
+      await call.join();
+
+      final result = await call.setAudioInputDevice(audioDevice);
+
+      expect(result, isA<Result<None>>());
+      expect(result.isSuccess, isTrue);
+
+      expect(call.connectOptions.audioInputDevice, audioDevice);
+
+      await internetStatusController.close();
+    });
+
+    test(
+        'should set audio input device when track missing, set later when unmute',
+        () async {
+      final internetStatusController =
+          BehaviorSubject<InternetStatus>.seeded(InternetStatus.connected);
+
+      final coordinatorClient = setupMockCoordinatorClient();
+      final callSession = setupMockCallSession();
+      final mockPermissionManager = MockPermissionsManager();
+
+      when(() => mockPermissionManager.hasPermission(CallPermission.sendAudio))
+          .thenAnswer((_) => true);
+
+      final resultArray = <Result<None>>[
+        Result.failure(
+          VideoErrorWithCause(
+            message: '',
+            cause: TrackMissingException(trackType: SfuTrackType.audio),
+          ),
+        ),
+        const Result.success(none),
+      ];
+
+      when(() => callSession.setAudioInputDevice(any<RtcMediaDevice>()))
+          .thenAnswer(
+        (_) => Future.value(resultArray.removeAt(0)),
+      );
+
+      when(() => callSession.setMicrophoneEnabled(any()))
+          .thenAnswer((_) => Future.value(Result.success(MockRtcLocalTrack())));
+
+      final call = createTestCall(
+        permissionManager: mockPermissionManager,
+        networkMonitor: setupMockInternetConnection(
+          statusStream: internetStatusController,
+        ),
+        coordinatorClient: coordinatorClient,
+        sessionFactory: setupMockSessionFactory(
+          callSession: callSession,
+        ),
+      );
+
+      const audioDevice = RtcMediaDevice(
+        id: 'id',
+        label: 'label',
+        kind: RtcMediaDeviceKind.audioInput,
+      );
+
+      await call.join();
+
+      final result = await call.setAudioInputDevice(audioDevice);
+
+      expect(result, isA<Result<None>>());
+      expect(result.isSuccess, isTrue);
+
+      expect(call.connectOptions.audioInputDevice, audioDevice);
+
+      await call.setMicrophoneEnabled(enabled: true);
+
+      verifyInOrder([
+        () => callSession.setAudioInputDevice(audioDevice),
+        () => callSession.setMicrophoneEnabled(true),
+        () => callSession.setAudioInputDevice(audioDevice),
+      ]);
 
       await internetStatusController.close();
     });

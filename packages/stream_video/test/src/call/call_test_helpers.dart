@@ -36,6 +36,13 @@ const defaultCredentials = CallCredentials(
   ),
 );
 
+const defaultMediaDevice = RtcMediaDevice(
+  id: 'fallback-device',
+  label: 'Fallback Device',
+  kind: RtcMediaDeviceKind.audioInput,
+  groupId: 'fallback-group',
+);
+
 const defaultUserInfo = UserInfo(id: 'testUserId');
 
 void registerMockFallbackValues() {
@@ -51,6 +58,7 @@ void registerMockFallbackValues() {
     StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
   );
   registerFallbackValue(SfuReconnectionStrategy.fast);
+  registerFallbackValue(defaultMediaDevice);
 }
 
 Call createStubCall({

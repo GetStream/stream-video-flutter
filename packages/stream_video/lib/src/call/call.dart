@@ -2542,6 +2542,11 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      // Make sure the audio input device is set
+      if (enabled && _connectOptions.audioInputDevice != null) {
+        await setAudioInputDevice(_connectOptions.audioInputDevice!);
+      }
+
       _sfuStatsTimers.add(
         Future<void>.delayed(const Duration(seconds: 3)).then((_) {
           if (result.getDataOrNull()!.mediaTrack.enabled) {
@@ -2616,13 +2621,22 @@ class Call {
     final result = await _session?.setAudioInputDevice(device) ??
         Result.error('Session is null');
 
+    _connectOptions = _connectOptions.copyWith(audioInputDevice: device);
+
     if (result.isSuccess) {
-      _connectOptions = connectOptions.copyWith(audioInputDevice: device);
-
       _stateManager.participantSetAudioInputDevice(device: device);
+      return const Result.success(none);
+    } else {
+      if (result.getErrorOrNull()
+          case VideoErrorWithCause(cause: TrackMissingException())) {
+        // If the track is null, it most probably means that the user
+        // joined the call muted and the audio track was not created.
+        // We will set the audio input device when the user unmutes.
+        return const Result.success(none);
+      } else {
+        return result;
+      }
     }
-
-    return result;
   }
 
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
