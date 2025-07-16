@@ -15,13 +15,6 @@ void main() {
   setUpAll(() {
     registerMockFallbackValues();
     TestWidgetsFlutterBinding.ensureInitialized();
-
-    registerFallbackValue(const RtcMediaDevice(
-      id: 'fallback-device',
-      label: 'Fallback Device',
-      kind: RtcMediaDeviceKind.audioInput,
-      groupId: 'fallback-group',
-    ));
   });
 
   group('Call', () {
