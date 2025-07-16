@@ -2539,7 +2539,7 @@ class Call {
     final result = await _session?.setAudioInputDevice(device) ??
         Result.error('Session is null');
 
-    _connectOptions = connectOptions.copyWith(audioInputDevice: device);
+    _connectOptions = _connectOptions.copyWith(audioInputDevice: device);
 
     if (result.isSuccess) {
       _stateManager.participantSetAudioInputDevice(device: device);
