@@ -1053,8 +1053,11 @@ extension RtcManagerTrackHelper on RtcManager {
   }) async {
     final track = getPublisherTrackByType(SfuTrackType.audio);
     if (track == null) {
-      _logger.w(() => '[setMicrophoneDeviceId] rejected (track is null)');
-      return Result.error('Track is null');
+      _logger.d(() => '[setMicrophoneDeviceId] rejected (track is null)');
+      return Result.errorWithCause(
+        'Track is null',
+        TrackMissingException(trackType: SfuTrackType.audio),
+      );
     }
 
     if (track is! RtcLocalAudioTrack) {
@@ -1336,5 +1339,15 @@ extension on RtcLocalTrack<VideoConstraints> {
       }
     }
     return dimension;
+  }
+}
+
+class TrackMissingException implements Exception {
+  TrackMissingException({required this.trackType});
+  final SfuTrackType trackType;
+
+  @override
+  String toString() {
+    return 'TrackMissingException: Track with type "$trackType" is missing.';
   }
 }

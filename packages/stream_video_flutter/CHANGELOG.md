@@ -3,7 +3,8 @@
 🐞 Fixed
 * (iOS) Fixed Picture-in-Picture (PiP) issue where remote participants joining during active PiP mode would not have their video tracks displayed properly.
 * (iOS) Fixed a visual issue where the Picture-in-Picture view displayed an empty container when participant name and microphone indicator settings were disabled.
-* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash
+* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash.
+* Fixed an issue where changing the audio input device while muted from the start of a call would not apply the new device when unmuting. The selected device will now be correctly set upon unmuting.
 
 ✅ Added
 * Added support for customization of display name for ringing notifications by providing `display_name` custom data to the call. See the [documentation](https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization) for details.

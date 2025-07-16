@@ -348,9 +348,21 @@ class CallSession extends Disposable {
       );
 
       _logger.v(() => '[start] wait for SfuJoinResponseEvent');
-      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
+      final joinResponseFuture = sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: joinResponseTimeout,
       );
+
+      final sfuErrorFuture =
+          sfuWS.events.waitFor<SfuErrorEvent>(timeLimit: joinResponseTimeout);
+
+      final event = await Future.any([joinResponseFuture, sfuErrorFuture]);
+
+      if (event is SfuErrorEvent) {
+        _logger.e(() => '[start] sfu error: ${event.error}');
+        return Result.errorWithCause(event.error.message, event.error);
+      }
+
+      final joinResponseEvent = event as SfuJoinResponseEvent;
 
       _logger.v(() => '[start] sfu joined: $event');
 
@@ -367,7 +379,8 @@ class CallSession extends Disposable {
           ..onRemoteTrackReceived = _onRemoteTrackReceived;
       } else {
         final currentUserId = stateManager.callState.currentUserId;
-        final localParticipant = event.callState.participants.firstWhere(
+        final localParticipant =
+            joinResponseEvent.callState.participants.firstWhere(
           (it) => it.userId == currentUserId && it.sessionId == sessionId,
         );
         final localTrackId = localParticipant.trackLookupPrefix;
@@ -377,7 +390,7 @@ class CallSession extends Disposable {
         rtcManager = await rtcManagerFactory.makeRtcManager(
           sfuClient: sfuClient,
           publisherId: localTrackId,
-          publishOptions: event.publishOptions,
+          publishOptions: joinResponseEvent.publishOptions,
           clientDetails: _clientDetails,
           sessionSequence: sessionSeq,
           statsOptions: statsOptions,

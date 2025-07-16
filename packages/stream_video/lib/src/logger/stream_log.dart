@@ -14,6 +14,7 @@ class StreamLog {
   StreamLogger _logger = const SilentStreamLogger();
   IsLoggableValidator _validator = (Priority priority, Tag tag) => false;
   Finder _finder = _defaultFinder;
+  Priority _priority = Priority.none;
 
   static StreamLog get instance => _instance;
   static List<String> excludeTags = <String>[];
@@ -24,6 +25,7 @@ class StreamLog {
   }
 
   set priority(Priority priority) {
+    _priority = priority;
     _validator = (logPriority, tag) {
       if (excludeTags.isNotEmpty && excludeTags.contains(tag)) {
         return false;
@@ -80,8 +82,22 @@ class StreamLog {
   }
 
   void log(Priority priority, Tag tag, MessageBuilder message) {
-    if (_validator.call(Priority.verbose, tag)) {
+    if (_validator.call(priority, tag)) {
       _logger.log(priority, tag, message);
+    }
+  }
+
+  void logConditional(
+    Tag tag,
+    String? Function(Priority priority) messageBuilder,
+  ) {
+    final message = messageBuilder(_priority);
+    if (message != null && message.isNotEmpty) {
+      _logger.log(
+        _priority,
+        tag,
+        () => message,
+      );
     }
   }
 
