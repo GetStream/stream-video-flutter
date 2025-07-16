@@ -44,6 +44,8 @@ class MockWebSocketChannel extends Mock implements WebSocketChannel {}
 
 class MockWebSocketSink extends Mock implements WebSocketSink {}
 
+class MockRtcLocalTrack extends Mock implements RtcLocalTrack {}
+
 /// Helper function to create CallDetails for testing
 CallDetails createTestCallDetails({
   required String createdByUserId,

@@ -2545,7 +2545,8 @@ class Call {
       _stateManager.participantSetAudioInputDevice(device: device);
       return const Result.success(none);
     } else {
-      if (result case VideoErrorWithCause(cause: TrackMissingException())) {
+      if (result.getErrorOrNull()
+          case VideoErrorWithCause(cause: TrackMissingException())) {
         // If the track is null, it most probably means that the user
         // joined the call muted and the audio track was not created.
         // We will set the audio input device when the user unmutes.
