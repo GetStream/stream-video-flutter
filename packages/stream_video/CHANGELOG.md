@@ -7,6 +7,7 @@
 * Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
 * Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash
 * Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
+* Fixes an issue with `muteUsers` method when called for all tracks.
 
 ## 0.10.0
 
