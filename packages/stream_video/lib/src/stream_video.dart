@@ -474,6 +474,30 @@ class StreamVideo extends Disposable {
       _connectionState = ConnectionState.disconnected(
         _state.currentUser.id,
       );
+    } else if (event is CoordinatorReconnectedEvent) {
+      _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
+      if (state.watchedCalls.value.isNotEmpty) {
+        // Re-watch the previously watched calls.
+        unawaited(
+          queryCalls(
+            watch: true,
+            filterConditions: {
+              'cid': {
+                r'$in': state.watchedCalls.value
+                    .map((call) => call.callCid.value)
+                    .toList(),
+              },
+            },
+          ).onError(
+            (error, stackTrace) {
+              _logger.e(
+                () => '[onCoordinatorEvent] re-watching calls failed: $error',
+              );
+              return Result.failure(VideoErrors.compose(error, stackTrace));
+            },
+          ),
+        );
+      }
     }
   }
 
