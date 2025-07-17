@@ -52,6 +52,20 @@ class CoordinatorDisconnectedEvent extends CoordinatorEvent {
   List<Object?> get props => [connectionId, userId, closeCode, closeReason];
 }
 
+/// Fired when web socket reconnected.
+class CoordinatorReconnectedEvent extends CoordinatorEvent {
+  const CoordinatorReconnectedEvent({
+    this.connectionId,
+    this.userId,
+  });
+
+  final String? connectionId;
+  final String? userId;
+
+  @override
+  List<Object?> get props => [connectionId, userId];
+}
+
 /// Sent periodically by the server to keep the connection alive.
 class CoordinatorHealthCheckEvent extends CoordinatorEvent {
   const CoordinatorHealthCheckEvent({

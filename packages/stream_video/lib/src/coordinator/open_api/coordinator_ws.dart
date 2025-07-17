@@ -48,7 +48,19 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
           _buildUrl(url, apiKey),
           protocols: protocols,
           tag: '$_tag-${++_seq}',
+        ) {
+    onConnectionStateUpdated = (event) {
+      if (event.oldState == ConnectionState.reconnecting &&
+          event.newState == ConnectionState.connected) {
+        _events.emit(
+          CoordinatorReconnectedEvent(
+            userId: userId,
+            connectionId: connectionId,
+          ),
         );
+      }
+    };
+  }
 
   late final _logger = taggedLogger(tag: '$_tag-$_seq');
 
