@@ -5,7 +5,6 @@ import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_member_state.dart';
 import '../../../models/call_metadata.dart';
-import '../../../models/call_participant_state.dart';
 import '../../../models/call_reaction.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';

@@ -906,7 +906,9 @@ class StreamVideo extends Disposable {
         manager.showMissedCall(
           uuid: callUUID,
           handle: createdById,
-          nameCaller: callDisplayName ?? createdByName,
+          nameCaller: (callDisplayName?.isNotEmpty ?? false)
+              ? callDisplayName
+              : createdByName,
           callCid: callCid,
         ),
       );
@@ -927,7 +929,9 @@ class StreamVideo extends Disposable {
           manager.showIncomingCall(
             uuid: callUUID,
             handle: createdById,
-            nameCaller: callDisplayName ?? createdByName,
+            nameCaller: (callDisplayName?.isNotEmpty ?? false)
+                ? callDisplayName
+                : createdByName,
             callCid: callCid,
             hasVideo: hasVideo != 'false',
           ),

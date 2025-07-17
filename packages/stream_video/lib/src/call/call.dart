@@ -1233,6 +1233,11 @@ class Call {
   }
 
   Future<void> _reconnect(SfuReconnectionStrategy strategy) async {
+    if (_callJoinLock.inLock) {
+      _logger.w(() => '[_reconnect] skipping reconnect (join in progress)');
+      return;
+    }
+
     if (state.value.status is CallStatusDisconnected) {
       _logger.w(() => '[reconnect] rejected (call is already disconnected)');
       return;
