@@ -1945,6 +1945,7 @@ class Call {
   }) async {
     if (watch) {
       _observeEvents();
+      _streamVideo.state.setWatchedCall(this);
     }
 
     final response = await coordinatorCall();
