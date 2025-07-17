@@ -19,6 +19,7 @@ import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
+import '../coordinator/models/video_dimension.dart';
 import '../coordinator/open_api/error/open_api_error.dart';
 import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';

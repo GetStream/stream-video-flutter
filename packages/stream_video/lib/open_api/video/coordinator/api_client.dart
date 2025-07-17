@@ -1,7 +1,6 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -507,7 +506,7 @@ class ApiClient {
         case 'NoiseCancellationSettings':
           return NoiseCancellationSettings.fromJson(value);
         case 'OwnCapability':
-          return OwnCapabilityTypeTransformer().decode(value);
+          return OwnCapability.fromJson(value);
         case 'OwnUserResponse':
           return OwnUserResponse.fromJson(value);
         case 'ParticipantCountByMinuteResponse':
