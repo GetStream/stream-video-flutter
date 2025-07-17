@@ -307,14 +307,15 @@ class PermissionsManager {
 
     final usersToMute = <String>[];
     for (final participant in stateManager.callState.otherParticipants) {
-      if (participant.publishedTracks.containsKey(track.toSFUTrackType())) {
+      if ((track == TrackType.all && participant.publishedTracks.isNotEmpty) ||
+          participant.publishedTracks.containsKey(track.toSFUTrackType())) {
         usersToMute.add(participant.userId);
       }
     }
     return muteUsers(userIds: usersToMute, track: track);
   }
 
-  Future<Result<None>> muteAllUsers() async {
+  Future<Result<None>> muteAllUsers({TrackType track = TrackType.all}) async {
     if (!hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteAllUsers] rejected (no permission)');
       return Result.error('Cannot mute users (no permission)');
@@ -325,9 +326,9 @@ class PermissionsManager {
       callCid: callCid,
       muteAllUsers: true,
       userIds: const [],
-      audio: true,
-      video: true,
-      screenshare: true,
+      audio: track == TrackType.audio || track == TrackType.all,
+      video: track == TrackType.video || track == TrackType.all,
+      screenshare: track == TrackType.screenshare || track == TrackType.all,
     );
   }
 

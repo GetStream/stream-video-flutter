@@ -9,6 +9,7 @@
 * Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
 * Fixed an issue where changing the audio input device while muted from the start of a call would not apply the new device when unmuting. The selected device will now be correctly set upon unmuting.
 * Fixed an issue where coordinator events were not listened to after a fast reconnect in a Call.
+* Fixes an issue with `muteUsers` method when called for all tracks.
 
 ## 0.10.0
 
