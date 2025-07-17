@@ -93,8 +93,13 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
             data = StreamVideoPushParams(args: [String: Any]())
         }
 
+        let nonEmptyString: (String?) -> String? = { str in
+            return str?.isEmpty == false ? str : nil
+        }
+
         data.callKitData.uuid = callUUID
-        data.callKitData.nameCaller = callDisplayName ?? createdByName ?? defaultCallText
+        data.callKitData.nameCaller =
+            nonEmptyString(callDisplayName) ?? nonEmptyString(createdByName) ?? defaultCallText
         data.callKitData.handle = createdById ?? defaultCallText
         data.callKitData.type = videoData
         data.callKitData.extra = ["callCid": callCid]
