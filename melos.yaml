@@ -23,11 +23,11 @@ command:
       share_plus: ^11.0.0
       stream_chat_flutter: ^9.8.0
       stream_webrtc_flutter: ^1.0.9
-      stream_video: ^0.10.0
-      stream_video_flutter: ^0.10.0
-      stream_video_noise_cancellation: ^0.10.0
-      stream_video_push_notification: ^0.10.0
-      stream_video_screen_sharing: ^0.10.0
+      stream_video: ^0.10.1
+      stream_video_flutter: ^0.10.1
+      stream_video_noise_cancellation: ^0.10.1
+      stream_video_push_notification: ^0.10.1
+      stream_video_screen_sharing: ^0.10.1
 
 scripts:
   postclean:

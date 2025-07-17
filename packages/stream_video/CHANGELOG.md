@@ -1,4 +1,4 @@
-## Unreleased
+## 0.10.1
 
 ✅ Added
 * Added support for customization of display name for ringing notifications by providing `display_name` custom data to the call. See the [documentation](https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization) for details.
