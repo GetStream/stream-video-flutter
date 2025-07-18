@@ -1,3 +1,11 @@
+## Unreleased
+
+✅ Added
+* Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+
+🔄 Changed
+* Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
+
 ## 0.10.1
 
 ✅ Added
