@@ -42,6 +42,7 @@ class RetryConfig with EquatableMixin {
   const RetryConfig({
     this.rpcMaxRetries = _defaultRpcMaxRetries,
     this.maxBackoff = _defaultMaxBackoff,
+    @Deprecated('Use CallPreferences.networkAvailabilityTimeout instead')
     this.callRejoinTimeout = _defaultRejoinTimeout,
   });
 
@@ -49,6 +50,7 @@ class RetryConfig with EquatableMixin {
 
   final Duration maxBackoff;
 
+  @Deprecated('Use CallPreferences.networkAvailabilityTimeout instead')
   final Duration callRejoinTimeout;
 
   @override
