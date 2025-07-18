@@ -1255,8 +1255,18 @@ class Call {
       _reconnectStrategy = strategy;
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
+      final reconnectStartTime = DateTime.now();
       var attempt = 0;
       do {
+        if (state.value.preferences.reconnectTimeout > Duration.zero) {
+          final elapsed = DateTime.now().difference(reconnectStartTime);
+          if (elapsed > state.value.preferences.reconnectTimeout) {
+            _logger.w(() => '[reconnect] reconnection timeout');
+            _stateManager.lifecycleCallReconnectingFailed();
+            return;
+          }
+        }
+
         if (_callLifecycleCompleter.isCompleted) {
           _logger.w(() => '[reconnect] rejected (call was left)');
           return;
@@ -1421,7 +1431,7 @@ class Call {
         .startWithFuture(networkMonitor.internetStatus)
         .firstWhere((status) => status == InternetStatus.connected)
         .timeout(
-      _retryPolicy.config.callRejoinTimeout,
+      state.value.preferences.networkAvailabilityTimeout,
       onTimeout: () {
         _logger.w(() => '[awaitNetworkAwailable] timeout');
         return InternetStatus.disconnected;
