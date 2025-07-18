@@ -1,9 +1,11 @@
-## Unreleased
+## 0.10.1
 
 🐞 Fixed
 * (iOS) Fixed Picture-in-Picture (PiP) issue where remote participants joining during active PiP mode would not have their video tracks displayed properly.
 * (iOS) Fixed a visual issue where the Picture-in-Picture view displayed an empty container when participant name and microphone indicator settings were disabled.
+* Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
 * Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash.
+* Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
 * Fixed an issue where changing the audio input device while muted from the start of a call would not apply the new device when unmuting. The selected device will now be correctly set upon unmuting.
 
 ✅ Added
