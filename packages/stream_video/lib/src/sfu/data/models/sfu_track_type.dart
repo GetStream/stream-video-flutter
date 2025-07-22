@@ -17,6 +17,8 @@ class SfuTrackType {
   bool get isAudio => this is SfuTrackTypeAudio;
 
   bool get isVideo => this is SfuTrackTypeVideo;
+
+  bool get isScreenShare => this is SfuTrackTypeVideo && this == screenShare;
 }
 
 abstract class SfuTrackTypeAudio extends SfuTrackType {

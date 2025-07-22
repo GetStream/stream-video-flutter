@@ -153,7 +153,10 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
     latestVisibilityInfo = info;
     final fraction = info.visibleFraction;
 
-    final prevVisibility = widget.participant.viewportVisibility;
+    final prevVisibility = widget.videoTrackType.isScreenShare
+        ? widget.participant.screenShareViewportVisibility
+        : widget.participant.viewportVisibility;
+
     final visibility = ViewportVisibility.fromVisibleFraction(fraction);
 
     // Update the viewport visibility of the participant.
@@ -162,6 +165,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
         sessionId: widget.participant.sessionId,
         userId: widget.participant.userId,
         visibility: visibility,
+        trackType: widget.videoTrackType,
       );
     }
 
