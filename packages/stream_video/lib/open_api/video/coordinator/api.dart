@@ -131,6 +131,7 @@ part 'model/delete_call_response.dart';
 part 'model/delete_recording_response.dart';
 part 'model/delete_transcription_response.dart';
 part 'model/device_response.dart';
+part 'model/duration_response.dart';
 part 'model/edge_response.dart';
 part 'model/egress_hls_response.dart';
 part 'model/egress_rtmp_response.dart';
@@ -283,8 +284,6 @@ part 'model/video_reactions_response.dart';
 part 'model/video_settings_request.dart';
 part 'model/video_settings_response.dart';
 part 'model/ws_auth_message.dart';
-
-part 'model/duration_response.dart';
 
 /// An [ApiClient] instance that uses the default values obtained from
 /// the OpenAPI specification file.
