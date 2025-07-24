@@ -37,7 +37,7 @@ class RingSettingsRequest {
         incomingCallTimeoutMs:
             mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
         missedCallTimeoutMs:
-            mapValueOfType<int?>(json, r'missed_call_timeout_ms', null),
+            mapValueOfType<int>(json, r'missed_call_timeout_ms', null),
       );
     }
     return null;

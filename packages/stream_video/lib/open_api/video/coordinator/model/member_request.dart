@@ -33,7 +33,7 @@ class MemberRequest {
 
       return MemberRequest(
         custom: mapCastOfType<String, Object>(json, r'custom'),
-        role: mapValueOfType<String?>(json, r'role', null),
+        role: mapValueOfType<String>(json, r'role', null),
         userId: mapValueOfType<String>(json, r'user_id')!,
       );
     }

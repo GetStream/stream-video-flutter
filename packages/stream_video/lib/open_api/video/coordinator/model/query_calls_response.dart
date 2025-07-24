@@ -38,8 +38,8 @@ class QueryCallsResponse {
       return QueryCallsResponse(
         calls: CallStateResponseFields.listFromJson(json[r'calls'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
-        next: mapValueOfType<String?>(json, r'next', null),
-        prev: mapValueOfType<String?>(json, r'prev', null),
+        next: mapValueOfType<String>(json, r'next', null),
+        prev: mapValueOfType<String>(json, r'prev', null),
       );
     }
     return null;

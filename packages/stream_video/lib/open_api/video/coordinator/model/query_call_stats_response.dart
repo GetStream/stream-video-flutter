@@ -37,8 +37,8 @@ class QueryCallStatsResponse {
 
       return QueryCallStatsResponse(
         duration: mapValueOfType<String>(json, r'duration')!,
-        next: mapValueOfType<String?>(json, r'next', null),
-        prev: mapValueOfType<String?>(json, r'prev', null),
+        next: mapValueOfType<String>(json, r'next', null),
+        prev: mapValueOfType<String>(json, r'prev', null),
         reports: CallStatsReportSummaryResponse.listFromJson(json[r'reports'])!,
       );
     }

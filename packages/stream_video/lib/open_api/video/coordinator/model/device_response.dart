@@ -53,14 +53,14 @@ class DeviceResponse {
 
       return DeviceResponse(
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
-        disabled: mapValueOfType<bool?>(json, r'disabled', null),
-        disabledReason: mapValueOfType<String?>(json, r'disabled_reason', null),
+        disabled: mapValueOfType<bool>(json, r'disabled', null),
+        disabledReason: mapValueOfType<String>(json, r'disabled_reason', null),
         id: mapValueOfType<String>(json, r'id')!,
         pushProvider: mapValueOfType<String>(json, r'push_provider')!,
         pushProviderName:
-            mapValueOfType<String?>(json, r'push_provider_name', null),
+            mapValueOfType<String>(json, r'push_provider_name', null),
         userId: mapValueOfType<String>(json, r'user_id')!,
-        voip: mapValueOfType<bool?>(json, r'voip', null),
+        voip: mapValueOfType<bool>(json, r'voip', null),
       );
     }
     return null;

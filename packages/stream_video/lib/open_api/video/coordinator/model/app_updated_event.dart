@@ -43,7 +43,7 @@ class AppUpdatedEvent {
         app: AppEventResponse.fromJson(json[r'app'])!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        receivedAt: mapValueOfType<DateTime?>(json, r'received_at', null),
+        receivedAt: mapValueOfType<DateTime>(json, r'received_at', null),
         type: mapValueOfType<String>(json, r'type', "app.updated")!,
       );
     }

@@ -41,14 +41,14 @@ class UserMutedEvent {
 
       return UserMutedEvent(
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
-        targetUser: mapValueOfType<String?>(json, r'target_user', null),
+        targetUser: mapValueOfType<String>(json, r'target_user', null),
         targetUsers: json[r'target_users'] is Iterable
             ? (json[r'target_users'] as Iterable)
                 .cast<String>()
                 .toList(growable: false)
             : const [],
         type: mapValueOfType<String>(json, r'type', "user.muted")!,
-        user: User?.fromJson(json[r'user'] ?? null),
+        user: User.fromJson(json[r'user'] ?? null),
       );
     }
     return null;

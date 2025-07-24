@@ -46,11 +46,11 @@ class QueryCallsRequest {
       return QueryCallsRequest(
         filterConditions:
             mapCastOfType<String, Object>(json, r'filter_conditions'),
-        limit: mapValueOfType<int?>(json, r'limit', null),
-        next: mapValueOfType<String?>(json, r'next', null),
-        prev: mapValueOfType<String?>(json, r'prev', null),
+        limit: mapValueOfType<int>(json, r'limit', null),
+        next: mapValueOfType<String>(json, r'next', null),
+        prev: mapValueOfType<String>(json, r'prev', null),
         sort: SortParamRequest.listFromJson(json[r'sort']),
-        watch: mapValueOfType<bool?>(json, r'watch', null),
+        watch: mapValueOfType<bool>(json, r'watch', null),
       );
     }
     return null;

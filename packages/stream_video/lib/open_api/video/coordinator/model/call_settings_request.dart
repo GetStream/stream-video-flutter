@@ -72,26 +72,26 @@ class CallSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return CallSettingsRequest(
-        audio: AudioSettingsRequest?.fromJson(json[r'audio'] ?? null),
+        audio: AudioSettingsRequest.fromJson(json[r'audio'] ?? null),
         backstage:
-            BackstageSettingsRequest?.fromJson(json[r'backstage'] ?? null),
+            BackstageSettingsRequest.fromJson(json[r'backstage'] ?? null),
         broadcasting:
-            BroadcastSettingsRequest?.fromJson(json[r'broadcasting'] ?? null),
-        frameRecording: FrameRecordingSettingsRequest?.fromJson(
+            BroadcastSettingsRequest.fromJson(json[r'broadcasting'] ?? null),
+        frameRecording: FrameRecordingSettingsRequest.fromJson(
             json[r'frame_recording'] ?? null),
         geofencing:
-            GeofenceSettingsRequest?.fromJson(json[r'geofencing'] ?? null),
-        limits: LimitsSettingsRequest?.fromJson(json[r'limits'] ?? null),
-        recording: RecordSettingsRequest?.fromJson(json[r'recording'] ?? null),
-        ring: RingSettingsRequest?.fromJson(json[r'ring'] ?? null),
-        screensharing: ScreensharingSettingsRequest?.fromJson(
+            GeofenceSettingsRequest.fromJson(json[r'geofencing'] ?? null),
+        limits: LimitsSettingsRequest.fromJson(json[r'limits'] ?? null),
+        recording: RecordSettingsRequest.fromJson(json[r'recording'] ?? null),
+        ring: RingSettingsRequest.fromJson(json[r'ring'] ?? null),
+        screensharing: ScreensharingSettingsRequest.fromJson(
             json[r'screensharing'] ?? null),
-        session: SessionSettingsRequest?.fromJson(json[r'session'] ?? null),
+        session: SessionSettingsRequest.fromJson(json[r'session'] ?? null),
         thumbnails:
-            ThumbnailsSettingsRequest?.fromJson(json[r'thumbnails'] ?? null),
-        transcription: TranscriptionSettingsRequest?.fromJson(
+            ThumbnailsSettingsRequest.fromJson(json[r'thumbnails'] ?? null),
+        transcription: TranscriptionSettingsRequest.fromJson(
             json[r'transcription'] ?? null),
-        video: VideoSettingsRequest?.fromJson(json[r'video'] ?? null),
+        video: VideoSettingsRequest.fromJson(json[r'video'] ?? null),
       );
     }
     return null;

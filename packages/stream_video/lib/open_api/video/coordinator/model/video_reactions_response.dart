@@ -28,7 +28,7 @@ class VideoReactionsResponse {
       final json = value.cast<String, dynamic>();
 
       return VideoReactionsResponse(
-        countOverTime: VideoReactionOverTimeResponse?.fromJson(
+        countOverTime: VideoReactionOverTimeResponse.fromJson(
             json[r'count_over_time'] ?? null),
         reaction: mapValueOfType<String>(json, r'reaction')!,
       );

@@ -28,9 +28,9 @@ class BackstageSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return BackstageSettingsRequest(
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
         joinAheadTimeSeconds:
-            mapValueOfType<int?>(json, r'join_ahead_time_seconds', null),
+            mapValueOfType<int>(json, r'join_ahead_time_seconds', null),
       );
     }
     return null;

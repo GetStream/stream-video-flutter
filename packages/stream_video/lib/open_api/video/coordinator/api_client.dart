@@ -304,6 +304,10 @@ class ApiClient {
           return CallMemberUpdatedPermissionEvent.fromJson(value);
         case 'CallMissedEvent':
           return CallMissedEvent.fromJson(value);
+        case 'CallModerationBlurEvent':
+          return CallModerationBlurEvent.fromJson(value);
+        case 'CallModerationWarningEvent':
+          return CallModerationWarningEvent.fromJson(value);
         case 'CallNotificationEvent':
           return CallNotificationEvent.fromJson(value);
         case 'CallParticipantCountReport':
@@ -429,6 +433,8 @@ class ApiClient {
           return DeleteTranscriptionResponse.fromJson(value);
         case 'DeviceResponse':
           return DeviceResponse.fromJson(value);
+        case 'DurationResponse':
+          return DurationResponse.fromJson(value);
         case 'EdgeResponse':
           return EdgeResponse.fromJson(value);
         case 'EgressHLSResponse':
@@ -581,8 +587,6 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
-        case 'DurationResponse':
-          return DurationResponse.fromJson(value);
         case 'RingSettingsRequest':
           return RingSettingsRequest.fromJson(value);
         case 'RingSettingsResponse':

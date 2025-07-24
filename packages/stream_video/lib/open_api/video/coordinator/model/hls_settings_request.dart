@@ -32,8 +32,8 @@ class HLSSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return HLSSettingsRequest(
-        autoOn: mapValueOfType<bool?>(json, r'auto_on', null),
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
+        autoOn: mapValueOfType<bool>(json, r'auto_on', null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
         qualityTracks: json[r'quality_tracks'] is Iterable
             ? (json[r'quality_tracks'] as Iterable)
                 .cast<String>()

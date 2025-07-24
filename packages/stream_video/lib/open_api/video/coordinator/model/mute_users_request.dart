@@ -44,17 +44,17 @@ class MuteUsersRequest {
       final json = value.cast<String, dynamic>();
 
       return MuteUsersRequest(
-        audio: mapValueOfType<bool?>(json, r'audio', null),
-        muteAllUsers: mapValueOfType<bool?>(json, r'mute_all_users', null),
-        screenshare: mapValueOfType<bool?>(json, r'screenshare', null),
+        audio: mapValueOfType<bool>(json, r'audio', null),
+        muteAllUsers: mapValueOfType<bool>(json, r'mute_all_users', null),
+        screenshare: mapValueOfType<bool>(json, r'screenshare', null),
         screenshareAudio:
-            mapValueOfType<bool?>(json, r'screenshare_audio', null),
+            mapValueOfType<bool>(json, r'screenshare_audio', null),
         userIds: json[r'user_ids'] is Iterable
             ? (json[r'user_ids'] as Iterable)
                 .cast<String>()
                 .toList(growable: false)
             : const [],
-        video: mapValueOfType<bool?>(json, r'video', null),
+        video: mapValueOfType<bool>(json, r'video', null),
       );
     }
     return null;

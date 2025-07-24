@@ -95,17 +95,17 @@ class OwnUserResponse {
             : const [],
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        deactivatedAt: mapValueOfType<DateTime?>(json, r'deactivated_at', null),
-        deletedAt: mapValueOfType<DateTime?>(json, r'deleted_at', null),
+        deactivatedAt: mapValueOfType<DateTime>(json, r'deactivated_at', null),
+        deletedAt: mapValueOfType<DateTime>(json, r'deleted_at', null),
         devices: DeviceResponse.listFromJson(json[r'devices'])!,
         id: mapValueOfType<String>(json, r'id')!,
-        image: mapValueOfType<String?>(json, r'image', null),
+        image: mapValueOfType<String>(json, r'image', null),
         language: mapValueOfType<String>(json, r'language')!,
-        lastActive: mapValueOfType<DateTime?>(json, r'last_active', null),
-        name: mapValueOfType<String?>(json, r'name', null),
+        lastActive: mapValueOfType<DateTime>(json, r'last_active', null),
+        name: mapValueOfType<String>(json, r'name', null),
         pushPreferences:
-            PushPreferences?.fromJson(json[r'push_preferences'] ?? null),
-        revokeTokensIssuedBefore: mapValueOfType<DateTime?>(
+            PushPreferences.fromJson(json[r'push_preferences'] ?? null),
+        revokeTokensIssuedBefore: mapValueOfType<DateTime>(
             json, r'revoke_tokens_issued_before', null),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable

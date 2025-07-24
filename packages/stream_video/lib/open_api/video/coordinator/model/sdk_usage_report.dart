@@ -11,7 +11,7 @@ class SDKUsageReport {
     required this.perSdkUsage,
   });
 
-  final Map<String, PerSDKUsageReport?> perSdkUsage;
+  final Map<String, PerSDKUsageReport> perSdkUsage;
 
   Map<String, dynamic> toJson() {
     return {
@@ -25,7 +25,7 @@ class SDKUsageReport {
 
       return SDKUsageReport(
         perSdkUsage:
-            mapCastOfType<String, PerSDKUsageReport?>(json, r'per_sdk_usage')!,
+            mapCastOfType<String, PerSDKUsageReport>(json, r'per_sdk_usage')!,
       );
     }
     return null;

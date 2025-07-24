@@ -39,7 +39,7 @@ class UserDeactivatedEvent {
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         createdBy: User.fromJson(json[r'created_by'])!,
         type: mapValueOfType<String>(json, r'type', "user.deactivated")!,
-        user: User?.fromJson(json[r'user'] ?? null),
+        user: User.fromJson(json[r'user'] ?? null),
       );
     }
     return null;

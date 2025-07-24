@@ -38,7 +38,7 @@ class CallStateResponseFields {
       return CallStateResponseFields(
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members'])!,
-        membership: MemberResponse?.fromJson(json[r'membership'] ?? null),
+        membership: MemberResponse.fromJson(json[r'membership'] ?? null),
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
       );
     }

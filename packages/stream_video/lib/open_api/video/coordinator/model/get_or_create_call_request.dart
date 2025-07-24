@@ -40,11 +40,11 @@ class GetOrCreateCallRequest {
       final json = value.cast<String, dynamic>();
 
       return GetOrCreateCallRequest(
-        data: CallRequest?.fromJson(json[r'data'] ?? null),
-        membersLimit: mapValueOfType<int?>(json, r'members_limit', null),
-        notify: mapValueOfType<bool?>(json, r'notify', null),
-        ring: mapValueOfType<bool?>(json, r'ring', null),
-        video: mapValueOfType<bool?>(json, r'video', null),
+        data: CallRequest.fromJson(json[r'data'] ?? null),
+        membersLimit: mapValueOfType<int>(json, r'members_limit', null),
+        notify: mapValueOfType<bool>(json, r'notify', null),
+        ring: mapValueOfType<bool>(json, r'ring', null),
+        video: mapValueOfType<bool>(json, r'video', null),
       );
     }
     return null;

@@ -92,22 +92,21 @@ class User {
       final json = value.cast<String, dynamic>();
 
       return User(
-        banExpires: mapValueOfType<DateTime?>(json, r'ban_expires', null),
+        banExpires: mapValueOfType<DateTime>(json, r'ban_expires', null),
         banned: mapValueOfType<bool>(json, r'banned')!,
-        createdAt: mapValueOfType<DateTime?>(json, r'created_at', null),
+        createdAt: mapValueOfType<DateTime>(json, r'created_at', null),
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        deactivatedAt: mapValueOfType<DateTime?>(json, r'deactivated_at', null),
-        deletedAt: mapValueOfType<DateTime?>(json, r'deleted_at', null),
+        deactivatedAt: mapValueOfType<DateTime>(json, r'deactivated_at', null),
+        deletedAt: mapValueOfType<DateTime>(json, r'deleted_at', null),
         id: mapValueOfType<String>(json, r'id')!,
-        invisible: mapValueOfType<bool?>(json, r'invisible', null),
-        language: mapValueOfType<String?>(json, r'language', null),
-        lastActive: mapValueOfType<DateTime?>(json, r'last_active', null),
-        lastEngagedAt:
-            mapValueOfType<DateTime?>(json, r'last_engaged_at', null),
+        invisible: mapValueOfType<bool>(json, r'invisible', null),
+        language: mapValueOfType<String>(json, r'language', null),
+        lastActive: mapValueOfType<DateTime>(json, r'last_active', null),
+        lastEngagedAt: mapValueOfType<DateTime>(json, r'last_engaged_at', null),
         online: mapValueOfType<bool>(json, r'online')!,
         privacySettings:
-            PrivacySettings?.fromJson(json[r'privacy_settings'] ?? null),
-        revokeTokensIssuedBefore: mapValueOfType<DateTime?>(
+            PrivacySettings.fromJson(json[r'privacy_settings'] ?? null),
+        revokeTokensIssuedBefore: mapValueOfType<DateTime>(
             json, r'revoke_tokens_issued_before', null),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable
@@ -116,7 +115,7 @@ class User {
                 .toList(growable: false)
             : const [],
         teamsRole: mapCastOfType<String, String>(json, r'teams_role')!,
-        updatedAt: mapValueOfType<DateTime?>(json, r'updated_at', null),
+        updatedAt: mapValueOfType<DateTime>(json, r'updated_at', null),
       );
     }
     return null;

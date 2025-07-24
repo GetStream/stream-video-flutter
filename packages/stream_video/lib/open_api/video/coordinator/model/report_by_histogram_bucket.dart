@@ -42,9 +42,9 @@ class ReportByHistogramBucket {
       return ReportByHistogramBucket(
         category: mapValueOfType<String>(json, r'category')!,
         count: mapValueOfType<int>(json, r'count')!,
-        lowerBound: Bound?.fromJson(json[r'lower_bound'] ?? null),
+        lowerBound: Bound.fromJson(json[r'lower_bound'] ?? null),
         sum: mapValueOfType<num>(json, r'sum')!,
-        upperBound: Bound?.fromJson(json[r'upper_bound'] ?? null),
+        upperBound: Bound.fromJson(json[r'upper_bound'] ?? null),
       );
     }
     return null;

@@ -62,7 +62,7 @@ class APIError {
         message: mapValueOfType<String>(json, r'message')!,
         moreInfo: mapValueOfType<String>(json, r'more_info')!,
         statusCode: mapValueOfType<int>(json, r'StatusCode')!,
-        unrecoverable: mapValueOfType<bool?>(json, r'unrecoverable', null),
+        unrecoverable: mapValueOfType<bool>(json, r'unrecoverable', null),
       );
     }
     return null;

@@ -25,7 +25,7 @@ class StopTranscriptionRequest {
 
       return StopTranscriptionRequest(
         stopClosedCaptions:
-            mapValueOfType<bool?>(json, r'stop_closed_captions', null),
+            mapValueOfType<bool>(json, r'stop_closed_captions', null),
       );
     }
     return null;

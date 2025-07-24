@@ -75,7 +75,7 @@ class AudioSettingsResponse {
         defaultDevice: AudioSettingsResponseDefaultDeviceEnum.fromValue(
             json['default_device'])!,
         micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on')!,
-        noiseCancellation: NoiseCancellationSettings?.fromJson(
+        noiseCancellation: NoiseCancellationSettings.fromJson(
             json[r'noise_cancellation'] ?? null),
         opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled')!,
         redundantCodingEnabled:

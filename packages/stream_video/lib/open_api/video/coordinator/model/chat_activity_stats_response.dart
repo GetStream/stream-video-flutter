@@ -24,7 +24,7 @@ class ChatActivityStatsResponse {
       final json = value.cast<String, dynamic>();
 
       return ChatActivityStatsResponse(
-        messages: MessageStatsResponse?.fromJson(json[r'Messages'] ?? null),
+        messages: MessageStatsResponse.fromJson(json[r'Messages'] ?? null),
       );
     }
     return null;

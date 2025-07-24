@@ -37,11 +37,11 @@ class NetworkMetricsReportResponse {
 
       return NetworkMetricsReportResponse(
         averageConnectionTime:
-            mapValueOfType<num?>(json, r'average_connection_time', null),
-        averageJitter: mapValueOfType<num?>(json, r'average_jitter', null),
-        averageLatency: mapValueOfType<num?>(json, r'average_latency', null),
+            mapValueOfType<num>(json, r'average_connection_time', null),
+        averageJitter: mapValueOfType<num>(json, r'average_jitter', null),
+        averageLatency: mapValueOfType<num>(json, r'average_latency', null),
         averageTimeToReconnect:
-            mapValueOfType<num?>(json, r'average_time_to_reconnect', null),
+            mapValueOfType<num>(json, r'average_time_to_reconnect', null),
       );
     }
     return null;

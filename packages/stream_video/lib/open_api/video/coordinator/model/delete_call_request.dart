@@ -24,7 +24,7 @@ class DeleteCallRequest {
       final json = value.cast<String, dynamic>();
 
       return DeleteCallRequest(
-        hard: mapValueOfType<bool?>(json, r'hard', null),
+        hard: mapValueOfType<bool>(json, r'hard', null),
       );
     }
     return null;

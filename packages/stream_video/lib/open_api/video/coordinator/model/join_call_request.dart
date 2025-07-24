@@ -52,14 +52,14 @@ class JoinCallRequest {
       final json = value.cast<String, dynamic>();
 
       return JoinCallRequest(
-        create: mapValueOfType<bool?>(json, r'create', null),
-        data: CallRequest?.fromJson(json[r'data'] ?? null),
+        create: mapValueOfType<bool>(json, r'create', null),
+        data: CallRequest.fromJson(json[r'data'] ?? null),
         location: mapValueOfType<String>(json, r'location')!,
-        membersLimit: mapValueOfType<int?>(json, r'members_limit', null),
-        migratingFrom: mapValueOfType<String?>(json, r'migrating_from', null),
-        notify: mapValueOfType<bool?>(json, r'notify', null),
-        ring: mapValueOfType<bool?>(json, r'ring', null),
-        video: mapValueOfType<bool?>(json, r'video', null),
+        membersLimit: mapValueOfType<int>(json, r'members_limit', null),
+        migratingFrom: mapValueOfType<String>(json, r'migrating_from', null),
+        notify: mapValueOfType<bool>(json, r'notify', null),
+        ring: mapValueOfType<bool>(json, r'ring', null),
+        video: mapValueOfType<bool>(json, r'video', null),
       );
     }
     return null;

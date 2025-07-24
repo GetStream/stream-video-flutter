@@ -41,14 +41,14 @@ class StopLiveRequest {
 
       return StopLiveRequest(
         continueClosedCaption:
-            mapValueOfType<bool?>(json, r'continue_closed_caption', null),
-        continueHls: mapValueOfType<bool?>(json, r'continue_hls', null),
+            mapValueOfType<bool>(json, r'continue_closed_caption', null),
+        continueHls: mapValueOfType<bool>(json, r'continue_hls', null),
         continueRecording:
-            mapValueOfType<bool?>(json, r'continue_recording', null),
+            mapValueOfType<bool>(json, r'continue_recording', null),
         continueRtmpBroadcasts:
-            mapValueOfType<bool?>(json, r'continue_rtmp_broadcasts', null),
+            mapValueOfType<bool>(json, r'continue_rtmp_broadcasts', null),
         continueTranscription:
-            mapValueOfType<bool?>(json, r'continue_transcription', null),
+            mapValueOfType<bool>(json, r'continue_transcription', null),
       );
     }
     return null;

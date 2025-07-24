@@ -28,9 +28,9 @@ class PrivacySettings {
       final json = value.cast<String, dynamic>();
 
       return PrivacySettings(
-        readReceipts: ReadReceipts?.fromJson(json[r'read_receipts'] ?? null),
+        readReceipts: ReadReceipts.fromJson(json[r'read_receipts'] ?? null),
         typingIndicators:
-            TypingIndicators?.fromJson(json[r'typing_indicators'] ?? null),
+            TypingIndicators.fromJson(json[r'typing_indicators'] ?? null),
       );
     }
     return null;

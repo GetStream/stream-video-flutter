@@ -160,10 +160,10 @@ class StartTranscriptionRequest {
 
       return StartTranscriptionRequest(
         enableClosedCaptions:
-            mapValueOfType<bool?>(json, r'enable_closed_captions', null),
+            mapValueOfType<bool>(json, r'enable_closed_captions', null),
         language:
             StartTranscriptionRequestLanguageEnum.fromValue(json['language']),
-        transcriptionExternalStorage: mapValueOfType<String?>(
+        transcriptionExternalStorage: mapValueOfType<String>(
             json, r'transcription_external_storage', null),
       );
     }

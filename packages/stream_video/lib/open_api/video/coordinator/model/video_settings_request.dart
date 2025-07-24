@@ -66,14 +66,13 @@ class VideoSettingsRequest {
 
       return VideoSettingsRequest(
         accessRequestEnabled:
-            mapValueOfType<bool?>(json, r'access_request_enabled', null),
-        cameraDefaultOn:
-            mapValueOfType<bool?>(json, r'camera_default_on', null),
+            mapValueOfType<bool>(json, r'access_request_enabled', null),
+        cameraDefaultOn: mapValueOfType<bool>(json, r'camera_default_on', null),
         cameraFacing: VideoSettingsRequestCameraFacingEnum.fromValue(
             json['camera_facing']),
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
         targetResolution:
-            TargetResolution?.fromJson(json[r'target_resolution'] ?? null),
+            TargetResolution.fromJson(json[r'target_resolution'] ?? null),
       );
     }
     return null;

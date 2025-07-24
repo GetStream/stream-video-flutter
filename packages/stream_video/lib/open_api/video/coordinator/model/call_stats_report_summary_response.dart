@@ -57,10 +57,10 @@ class CallStatsReportSummaryResponse {
             mapValueOfType<int>(json, r'call_duration_seconds')!,
         callSessionId: mapValueOfType<String>(json, r'call_session_id')!,
         callStatus: mapValueOfType<String>(json, r'call_status')!,
-        createdAt: mapValueOfType<DateTime?>(json, r'created_at', null),
+        createdAt: mapValueOfType<DateTime>(json, r'created_at', null),
         firstStatsTime: mapValueOfType<DateTime>(json, r'first_stats_time')!,
-        minUserRating: mapValueOfType<int?>(json, r'min_user_rating', null),
-        qualityScore: mapValueOfType<int?>(json, r'quality_score', null),
+        minUserRating: mapValueOfType<int>(json, r'min_user_rating', null),
+        qualityScore: mapValueOfType<int>(json, r'quality_score', null),
       );
     }
     return null;

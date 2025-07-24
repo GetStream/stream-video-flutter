@@ -103,7 +103,7 @@ class RecordSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return RecordSettingsRequest(
-        audioOnly: mapValueOfType<bool?>(json, r'audio_only', null),
+        audioOnly: mapValueOfType<bool>(json, r'audio_only', null),
         mode: RecordSettingsRequestModeEnum.fromValue(json['mode'])!,
         quality: RecordSettingsRequestQualityEnum.fromValue(json['quality']),
       );

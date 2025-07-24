@@ -47,7 +47,7 @@ class CallRejectedEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
-        reason: mapValueOfType<String?>(json, r'reason', null),
+        reason: mapValueOfType<String>(json, r'reason', null),
         type: mapValueOfType<String>(json, r'type', "call.rejected")!,
         user: UserResponse.fromJson(json[r'user'])!,
       );

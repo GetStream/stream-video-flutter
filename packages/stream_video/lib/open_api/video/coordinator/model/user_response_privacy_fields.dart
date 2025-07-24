@@ -91,15 +91,15 @@ class UserResponsePrivacyFields {
             : const []!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        deactivatedAt: mapValueOfType<DateTime?>(json, r'deactivated_at', null),
-        deletedAt: mapValueOfType<DateTime?>(json, r'deleted_at', null),
+        deactivatedAt: mapValueOfType<DateTime>(json, r'deactivated_at', null),
+        deletedAt: mapValueOfType<DateTime>(json, r'deleted_at', null),
         id: mapValueOfType<String>(json, r'id')!,
-        image: mapValueOfType<String?>(json, r'image', null),
-        invisible: mapValueOfType<bool?>(json, r'invisible', null),
+        image: mapValueOfType<String>(json, r'image', null),
+        invisible: mapValueOfType<bool>(json, r'invisible', null),
         language: mapValueOfType<String>(json, r'language')!,
-        lastActive: mapValueOfType<DateTime?>(json, r'last_active', null),
-        name: mapValueOfType<String?>(json, r'name', null),
-        revokeTokensIssuedBefore: mapValueOfType<DateTime?>(
+        lastActive: mapValueOfType<DateTime>(json, r'last_active', null),
+        name: mapValueOfType<String>(json, r'name', null),
+        revokeTokensIssuedBefore: mapValueOfType<DateTime>(
             json, r'revoke_tokens_issued_before', null),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable

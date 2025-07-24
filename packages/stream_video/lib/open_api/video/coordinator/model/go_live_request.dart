@@ -45,15 +45,15 @@ class GoLiveRequest {
 
       return GoLiveRequest(
         recordingStorageName:
-            mapValueOfType<String?>(json, r'recording_storage_name', null),
+            mapValueOfType<String>(json, r'recording_storage_name', null),
         startClosedCaption:
-            mapValueOfType<bool?>(json, r'start_closed_caption', null),
-        startHls: mapValueOfType<bool?>(json, r'start_hls', null),
-        startRecording: mapValueOfType<bool?>(json, r'start_recording', null),
+            mapValueOfType<bool>(json, r'start_closed_caption', null),
+        startHls: mapValueOfType<bool>(json, r'start_hls', null),
+        startRecording: mapValueOfType<bool>(json, r'start_recording', null),
         startTranscription:
-            mapValueOfType<bool?>(json, r'start_transcription', null),
+            mapValueOfType<bool>(json, r'start_transcription', null),
         transcriptionStorageName:
-            mapValueOfType<String?>(json, r'transcription_storage_name', null),
+            mapValueOfType<String>(json, r'transcription_storage_name', null),
       );
     }
     return null;

@@ -32,9 +32,9 @@ class CallReportResponse {
       final json = value.cast<String, dynamic>();
 
       return CallReportResponse(
-        endedAt: mapValueOfType<DateTime?>(json, r'ended_at', null),
+        endedAt: mapValueOfType<DateTime>(json, r'ended_at', null),
         score: mapValueOfType<num>(json, r'score')!,
-        startedAt: mapValueOfType<DateTime?>(json, r'started_at', null),
+        startedAt: mapValueOfType<DateTime>(json, r'started_at', null),
       );
     }
     return null;

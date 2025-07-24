@@ -42,9 +42,9 @@ class QueryCallStatsRequest {
       return QueryCallStatsRequest(
         filterConditions:
             mapCastOfType<String, Object>(json, r'filter_conditions'),
-        limit: mapValueOfType<int?>(json, r'limit', null),
-        next: mapValueOfType<String?>(json, r'next', null),
-        prev: mapValueOfType<String?>(json, r'prev', null),
+        limit: mapValueOfType<int>(json, r'limit', null),
+        next: mapValueOfType<String>(json, r'next', null),
+        prev: mapValueOfType<String>(json, r'prev', null),
         sort: SortParamRequest.listFromJson(json[r'sort']),
       );
     }

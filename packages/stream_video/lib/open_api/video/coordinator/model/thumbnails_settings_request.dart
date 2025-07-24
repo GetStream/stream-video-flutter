@@ -24,7 +24,7 @@ class ThumbnailsSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return ThumbnailsSettingsRequest(
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
       );
     }
     return null;

@@ -43,7 +43,7 @@ class UpdateCallResponse {
         call: CallResponse.fromJson(json[r'call'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
         members: MemberResponse.listFromJson(json[r'members'])!,
-        membership: MemberResponse?.fromJson(json[r'membership'] ?? null),
+        membership: MemberResponse.fromJson(json[r'membership'] ?? null),
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
       );
     }

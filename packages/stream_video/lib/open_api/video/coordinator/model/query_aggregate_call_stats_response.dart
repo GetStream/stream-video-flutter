@@ -52,21 +52,20 @@ class QueryAggregateCallStatsResponse {
       final json = value.cast<String, dynamic>();
 
       return QueryAggregateCallStatsResponse(
-        callDurationReport: CallDurationReportResponse?.fromJson(
+        callDurationReport: CallDurationReportResponse.fromJson(
             json[r'call_duration_report'] ?? null),
-        callParticipantCountReport:
-            CallParticipantCountReportResponse?.fromJson(
-                json[r'call_participant_count_report'] ?? null),
-        callsPerDayReport: CallsPerDayReportResponse?.fromJson(
+        callParticipantCountReport: CallParticipantCountReportResponse.fromJson(
+            json[r'call_participant_count_report'] ?? null),
+        callsPerDayReport: CallsPerDayReportResponse.fromJson(
             json[r'calls_per_day_report'] ?? null),
         duration: mapValueOfType<String>(json, r'duration')!,
-        networkMetricsReport: NetworkMetricsReportResponse?.fromJson(
+        networkMetricsReport: NetworkMetricsReportResponse.fromJson(
             json[r'network_metrics_report'] ?? null),
-        qualityScoreReport: QualityScoreReportResponse?.fromJson(
+        qualityScoreReport: QualityScoreReportResponse.fromJson(
             json[r'quality_score_report'] ?? null),
         sdkUsageReport:
-            SDKUsageReportResponse?.fromJson(json[r'sdk_usage_report'] ?? null),
-        userFeedbackReport: UserFeedbackReportResponse?.fromJson(
+            SDKUsageReportResponse.fromJson(json[r'sdk_usage_report'] ?? null),
+        userFeedbackReport: UserFeedbackReportResponse.fromJson(
             json[r'user_feedback_report'] ?? null),
       );
     }

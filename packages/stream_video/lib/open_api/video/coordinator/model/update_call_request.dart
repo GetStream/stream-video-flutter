@@ -34,8 +34,8 @@ class UpdateCallRequest {
       return UpdateCallRequest(
         custom: mapCastOfType<String, Object>(json, r'custom'),
         settingsOverride:
-            CallSettingsRequest?.fromJson(json[r'settings_override'] ?? null),
-        startsAt: mapValueOfType<DateTime?>(json, r'starts_at', null),
+            CallSettingsRequest.fromJson(json[r'settings_override'] ?? null),
+        startsAt: mapValueOfType<DateTime>(json, r'starts_at', null),
       );
     }
     return null;

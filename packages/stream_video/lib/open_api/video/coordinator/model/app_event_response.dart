@@ -41,13 +41,13 @@ class AppEventResponse {
 
       return AppEventResponse(
         asyncUrlEnrichEnabled:
-            mapValueOfType<bool?>(json, r'async_url_enrich_enabled', null),
+            mapValueOfType<bool>(json, r'async_url_enrich_enabled', null),
         autoTranslationEnabled:
             mapValueOfType<bool>(json, r'auto_translation_enabled')!,
         fileUploadConfig:
-            FileUploadConfig?.fromJson(json[r'file_upload_config'] ?? null),
+            FileUploadConfig.fromJson(json[r'file_upload_config'] ?? null),
         imageUploadConfig:
-            FileUploadConfig?.fromJson(json[r'image_upload_config'] ?? null),
+            FileUploadConfig.fromJson(json[r'image_upload_config'] ?? null),
         name: mapValueOfType<String>(json, r'name')!,
       );
     }

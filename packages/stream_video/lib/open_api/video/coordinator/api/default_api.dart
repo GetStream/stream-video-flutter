@@ -55,7 +55,10 @@ class DefaultApi {
     return null;
   }
 
-  Future<AcceptCallResponse?> acceptCall(String type, String id) async {
+  Future<AcceptCallResponse?> acceptCall(
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/accept"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -78,7 +81,10 @@ class DefaultApi {
   }
 
   Future<BlockUserResponse?> blockUser(
-      String type, String id, BlockUserRequest blockUserRequest) async {
+    String type,
+    String id,
+    BlockUserRequest blockUserRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/block"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -100,8 +106,11 @@ class DefaultApi {
     );
   }
 
-  Future<CollectUserFeedbackResponse?> collectUserFeedback(String type,
-      String id, CollectUserFeedbackRequest collectUserFeedbackRequest) async {
+  Future<CollectUserFeedbackResponse?> collectUserFeedback(
+    String type,
+    String id,
+    CollectUserFeedbackRequest collectUserFeedbackRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/feedback"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -124,7 +133,8 @@ class DefaultApi {
   }
 
   Future<DurationResponse?> createDevice(
-      CreateDeviceRequest createDeviceRequest) async {
+    CreateDeviceRequest createDeviceRequest,
+  ) async {
     const path = r"/video/devices";
 
     final queryParams = <QueryParam>[];
@@ -145,7 +155,8 @@ class DefaultApi {
   }
 
   Future<CreateGuestResponse?> createGuest(
-      CreateGuestRequest createGuestRequest) async {
+    CreateGuestRequest createGuestRequest,
+  ) async {
     const path = r"/video/guest";
 
     final queryParams = <QueryParam>[];
@@ -166,7 +177,10 @@ class DefaultApi {
   }
 
   Future<DeleteCallResponse?> deleteCall(
-      String type, String id, DeleteCallRequest deleteCallRequest) async {
+    String type,
+    String id,
+    DeleteCallRequest? deleteCallRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/delete"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -188,7 +202,9 @@ class DefaultApi {
     );
   }
 
-  Future<DurationResponse?> deleteDevice(String id) async {
+  Future<DurationResponse?> deleteDevice(
+    String id,
+  ) async {
     const path = r"/video/devices";
 
     final queryParams = <QueryParam>[];
@@ -210,7 +226,11 @@ class DefaultApi {
   }
 
   Future<DeleteRecordingResponse?> deleteRecording(
-      String type, String id, String session, String filename) async {
+    String type,
+    String id,
+    String session,
+    String filename,
+  ) async {
     var path = r"/video/call/{type}/{id}/{session}/recordings/{filename}"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id)
@@ -235,7 +255,11 @@ class DefaultApi {
   }
 
   Future<DeleteTranscriptionResponse?> deleteTranscription(
-      String type, String id, String session, String filename) async {
+    String type,
+    String id,
+    String session,
+    String filename,
+  ) async {
     var path = r"/video/call/{type}/{id}/{session}/transcriptions/{filename}"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id)
@@ -259,7 +283,10 @@ class DefaultApi {
     );
   }
 
-  Future<EndCallResponse?> endCall(String type, String id) async {
+  Future<EndCallResponse?> endCall(
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/mark_ended"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -281,8 +308,14 @@ class DefaultApi {
     );
   }
 
-  Future<GetCallResponse?> getCall(String type, String id, int? membersLimit,
-      bool? ring, bool? notify, bool? video) async {
+  Future<GetCallResponse?> getCall(
+    String type,
+    String id,
+    int? membersLimit,
+    bool? ring,
+    bool? notify,
+    bool? video,
+  ) async {
     var path = r"/video/call/{type}/{id}"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -318,7 +351,10 @@ class DefaultApi {
   }
 
   Future<GetCallReportResponse?> getCallReport(
-      String type, String id, String? sessionId) async {
+    String type,
+    String id,
+    String? sessionId,
+  ) async {
     var path = r"/video/call/{type}/{id}/report"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -364,8 +400,11 @@ class DefaultApi {
     );
   }
 
-  Future<GetOrCreateCallResponse?> getOrCreateCall(String type, String id,
-      GetOrCreateCallRequest getOrCreateCallRequest) async {
+  Future<GetOrCreateCallResponse?> getOrCreateCall(
+    String type,
+    String id,
+    GetOrCreateCallRequest? getOrCreateCallRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -388,7 +427,10 @@ class DefaultApi {
   }
 
   Future<GoLiveResponse?> goLive(
-      String type, String id, GoLiveRequest goLiveRequest) async {
+    String type,
+    String id,
+    GoLiveRequest? goLiveRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/go_live"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -411,7 +453,10 @@ class DefaultApi {
   }
 
   Future<JoinCallResponse?> joinCall(
-      String type, String id, JoinCallRequest joinCallRequest) async {
+    String type,
+    String id,
+    JoinCallRequest joinCallRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/join"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -453,7 +498,10 @@ class DefaultApi {
     );
   }
 
-  Future<ListRecordingsResponse?> listRecordings(String type, String id) async {
+  Future<ListRecordingsResponse?> listRecordings(
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/recordings"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -476,7 +524,9 @@ class DefaultApi {
   }
 
   Future<ListTranscriptionsResponse?> listTranscriptions(
-      String type, String id) async {
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/transcriptions"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -499,7 +549,10 @@ class DefaultApi {
   }
 
   Future<MuteUsersResponse?> muteUsers(
-      String type, String id, MuteUsersRequest muteUsersRequest) async {
+    String type,
+    String id,
+    MuteUsersRequest? muteUsersRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/mute_users"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -522,7 +575,8 @@ class DefaultApi {
   }
 
   Future<QueryAggregateCallStatsResponse?> queryAggregateCallStats(
-      QueryAggregateCallStatsRequest queryAggregateCallStatsRequest) async {
+    QueryAggregateCallStatsRequest? queryAggregateCallStatsRequest,
+  ) async {
     const path = r"/video/stats";
 
     final queryParams = <QueryParam>[];
@@ -543,7 +597,8 @@ class DefaultApi {
   }
 
   Future<QueryCallMembersResponse?> queryCallMembers(
-      QueryCallMembersRequest queryCallMembersRequest) async {
+    QueryCallMembersRequest queryCallMembersRequest,
+  ) async {
     const path = r"/video/call/members";
 
     final queryParams = <QueryParam>[];
@@ -564,10 +619,11 @@ class DefaultApi {
   }
 
   Future<QueryCallParticipantsResponse?> queryCallParticipants(
-      String id,
-      String type,
-      int? limit,
-      QueryCallParticipantsRequest queryCallParticipantsRequest) async {
+    String id,
+    String type,
+    int? limit,
+    QueryCallParticipantsRequest? queryCallParticipantsRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/participants"
         .replaceAll('{id}', id)
         .replaceAll('{type}', type);
@@ -594,7 +650,8 @@ class DefaultApi {
   }
 
   Future<QueryCallStatsResponse?> queryCallStats(
-      QueryCallStatsRequest queryCallStatsRequest) async {
+    QueryCallStatsRequest? queryCallStatsRequest,
+  ) async {
     const path = r"/video/call/stats";
 
     final queryParams = <QueryParam>[];
@@ -615,7 +672,8 @@ class DefaultApi {
   }
 
   Future<QueryCallsResponse?> queryCalls(
-      QueryCallsRequest queryCallsRequest) async {
+    QueryCallsRequest? queryCallsRequest,
+  ) async {
     const path = r"/video/calls";
 
     final queryParams = <QueryParam>[];
@@ -636,7 +694,10 @@ class DefaultApi {
   }
 
   Future<RejectCallResponse?> rejectCall(
-      String type, String id, RejectCallRequest rejectCallRequest) async {
+    String type,
+    String id,
+    RejectCallRequest? rejectCallRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/reject"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -658,8 +719,11 @@ class DefaultApi {
     );
   }
 
-  Future<RequestPermissionResponse?> requestPermission(String type, String id,
-      RequestPermissionRequest requestPermissionRequest) async {
+  Future<RequestPermissionResponse?> requestPermission(
+    String type,
+    String id,
+    RequestPermissionRequest requestPermissionRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/request_permission"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -682,7 +746,10 @@ class DefaultApi {
   }
 
   Future<SendCallEventResponse?> sendCallEvent(
-      String type, String id, SendCallEventRequest sendCallEventRequest) async {
+    String type,
+    String id,
+    SendCallEventRequest? sendCallEventRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/event"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -705,7 +772,10 @@ class DefaultApi {
   }
 
   Future<SendReactionResponse?> sendVideoReaction(
-      String type, String id, SendReactionRequest sendReactionRequest) async {
+    String type,
+    String id,
+    SendReactionRequest sendReactionRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/reaction"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -727,8 +797,11 @@ class DefaultApi {
     );
   }
 
-  Future<StartClosedCaptionsResponse?> startClosedCaptions(String type,
-      String id, StartClosedCaptionsRequest startClosedCaptionsRequest) async {
+  Future<StartClosedCaptionsResponse?> startClosedCaptions(
+    String type,
+    String id,
+    StartClosedCaptionsRequest? startClosedCaptionsRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/start_closed_captions"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -750,8 +823,11 @@ class DefaultApi {
     );
   }
 
-  Future<StartFrameRecordingResponse?> startFrameRecording(String type,
-      String id, StartFrameRecordingRequest startFrameRecordingRequest) async {
+  Future<StartFrameRecordingResponse?> startFrameRecording(
+    String type,
+    String id,
+    StartFrameRecordingRequest? startFrameRecordingRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/start_frame_recording"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -774,7 +850,9 @@ class DefaultApi {
   }
 
   Future<StartHLSBroadcastingResponse?> startHLSBroadcasting(
-      String type, String id) async {
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/start_broadcasting"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -796,8 +874,11 @@ class DefaultApi {
     );
   }
 
-  Future<StartRTMPBroadcastsResponse?> startRTMPBroadcasts(String type,
-      String id, StartRTMPBroadcastsRequest startRTMPBroadcastsRequest) async {
+  Future<StartRTMPBroadcastsResponse?> startRTMPBroadcasts(
+    String type,
+    String id,
+    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/rtmp_broadcasts"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -819,8 +900,11 @@ class DefaultApi {
     );
   }
 
-  Future<StartRecordingResponse?> startRecording(String type, String id,
-      StartRecordingRequest startRecordingRequest) async {
+  Future<StartRecordingResponse?> startRecording(
+    String type,
+    String id,
+    StartRecordingRequest? startRecordingRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/start_recording"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -842,8 +926,11 @@ class DefaultApi {
     );
   }
 
-  Future<StartTranscriptionResponse?> startTranscription(String type, String id,
-      StartTranscriptionRequest startTranscriptionRequest) async {
+  Future<StartTranscriptionResponse?> startTranscription(
+    String type,
+    String id,
+    StartTranscriptionRequest? startTranscriptionRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/start_transcription"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -866,7 +953,9 @@ class DefaultApi {
   }
 
   Future<StopAllRTMPBroadcastsResponse?> stopAllRTMPBroadcasts(
-      String type, String id) async {
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/rtmp_broadcasts/stop"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -888,8 +977,11 @@ class DefaultApi {
     );
   }
 
-  Future<StopClosedCaptionsResponse?> stopClosedCaptions(String type, String id,
-      StopClosedCaptionsRequest stopClosedCaptionsRequest) async {
+  Future<StopClosedCaptionsResponse?> stopClosedCaptions(
+    String type,
+    String id,
+    StopClosedCaptionsRequest? stopClosedCaptionsRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/stop_closed_captions"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -912,7 +1004,9 @@ class DefaultApi {
   }
 
   Future<StopFrameRecordingResponse?> stopFrameRecording(
-      String type, String id) async {
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/stop_frame_recording"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -935,7 +1029,9 @@ class DefaultApi {
   }
 
   Future<StopHLSBroadcastingResponse?> stopHLSBroadcasting(
-      String type, String id) async {
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/stop_broadcasting"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -958,7 +1054,10 @@ class DefaultApi {
   }
 
   Future<StopLiveResponse?> stopLive(
-      String type, String id, StopLiveRequest stopLiveRequest) async {
+    String type,
+    String id,
+    StopLiveRequest? stopLiveRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/stop_live"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -981,7 +1080,10 @@ class DefaultApi {
   }
 
   Future<StopRTMPBroadcastsResponse?> stopRTMPBroadcast(
-      String type, String id, String name) async {
+    String type,
+    String id,
+    String name,
+  ) async {
     var path = r"/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id)
@@ -1004,7 +1106,10 @@ class DefaultApi {
     );
   }
 
-  Future<StopRecordingResponse?> stopRecording(String type, String id) async {
+  Future<StopRecordingResponse?> stopRecording(
+    String type,
+    String id,
+  ) async {
     var path = r"/video/call/{type}/{id}/stop_recording"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1026,8 +1131,11 @@ class DefaultApi {
     );
   }
 
-  Future<StopTranscriptionResponse?> stopTranscription(String type, String id,
-      StopTranscriptionRequest stopTranscriptionRequest) async {
+  Future<StopTranscriptionResponse?> stopTranscription(
+    String type,
+    String id,
+    StopTranscriptionRequest? stopTranscriptionRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/stop_transcription"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1050,7 +1158,10 @@ class DefaultApi {
   }
 
   Future<UnblockUserResponse?> unblockUser(
-      String type, String id, UnblockUserRequest unblockUserRequest) async {
+    String type,
+    String id,
+    UnblockUserRequest unblockUserRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/unblock"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1073,7 +1184,10 @@ class DefaultApi {
   }
 
   Future<UpdateCallResponse?> updateCall(
-      String type, String id, UpdateCallRequest updateCallRequest) async {
+    String type,
+    String id,
+    UpdateCallRequest? updateCallRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1095,8 +1209,11 @@ class DefaultApi {
     );
   }
 
-  Future<UpdateCallMembersResponse?> updateCallMembers(String type, String id,
-      UpdateCallMembersRequest updateCallMembersRequest) async {
+  Future<UpdateCallMembersResponse?> updateCallMembers(
+    String type,
+    String id,
+    UpdateCallMembersRequest? updateCallMembersRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/members"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1119,9 +1236,10 @@ class DefaultApi {
   }
 
   Future<UpdateUserPermissionsResponse?> updateUserPermissions(
-      String type,
-      String id,
-      UpdateUserPermissionsRequest updateUserPermissionsRequest) async {
+    String type,
+    String id,
+    UpdateUserPermissionsRequest updateUserPermissionsRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/user_permissions"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1164,7 +1282,10 @@ class DefaultApi {
   }
 
   Future<PinResponse?> videoPin(
-      String type, String id, PinRequest pinRequest) async {
+    String type,
+    String id,
+    PinRequest pinRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/pin"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);
@@ -1187,7 +1308,10 @@ class DefaultApi {
   }
 
   Future<UnpinResponse?> videoUnpin(
-      String type, String id, UnpinRequest unpinRequest) async {
+    String type,
+    String id,
+    UnpinRequest unpinRequest,
+  ) async {
     var path = r"/video/call/{type}/{id}/unpin"
         .replaceAll('{type}', type)
         .replaceAll('{id}', id);

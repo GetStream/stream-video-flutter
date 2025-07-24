@@ -48,14 +48,14 @@ class CallRequest {
       final json = value.cast<String, dynamic>();
 
       return CallRequest(
-        channelCid: mapValueOfType<String?>(json, r'channel_cid', null),
+        channelCid: mapValueOfType<String>(json, r'channel_cid', null),
         custom: mapCastOfType<String, Object>(json, r'custom'),
         members: MemberRequest.listFromJson(json[r'members']),
         settingsOverride:
-            CallSettingsRequest?.fromJson(json[r'settings_override'] ?? null),
-        startsAt: mapValueOfType<DateTime?>(json, r'starts_at', null),
-        team: mapValueOfType<String?>(json, r'team', null),
-        video: mapValueOfType<bool?>(json, r'video', null),
+            CallSettingsRequest.fromJson(json[r'settings_override'] ?? null),
+        startsAt: mapValueOfType<DateTime>(json, r'starts_at', null),
+        team: mapValueOfType<String>(json, r'team', null),
+        video: mapValueOfType<bool>(json, r'video', null),
       );
     }
     return null;

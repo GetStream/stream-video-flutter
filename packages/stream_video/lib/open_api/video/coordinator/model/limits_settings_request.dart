@@ -37,10 +37,10 @@ class LimitsSettingsRequest {
 
       return LimitsSettingsRequest(
         maxDurationSeconds:
-            mapValueOfType<int?>(json, r'max_duration_seconds', null),
-        maxParticipants: mapValueOfType<int?>(json, r'max_participants', null),
-        maxParticipantsExcludeOwner: mapValueOfType<bool?>(
-            json, r'max_participants_exclude_owner', null),
+            mapValueOfType<int>(json, r'max_duration_seconds', null),
+        maxParticipants: mapValueOfType<int>(json, r'max_participants', null),
+        maxParticipantsExcludeOwner:
+            mapValueOfType<bool>(json, r'max_participants_exclude_owner', null),
         maxParticipantsExcludeRoles:
             json[r'max_participants_exclude_roles'] is Iterable
                 ? (json[r'max_participants_exclude_roles'] as Iterable)

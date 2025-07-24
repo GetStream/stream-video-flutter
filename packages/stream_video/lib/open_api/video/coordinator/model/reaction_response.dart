@@ -37,7 +37,7 @@ class ReactionResponse {
 
       return ReactionResponse(
         custom: mapCastOfType<String, Object>(json, r'custom'),
-        emojiCode: mapValueOfType<String?>(json, r'emoji_code', null),
+        emojiCode: mapValueOfType<String>(json, r'emoji_code', null),
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
       );

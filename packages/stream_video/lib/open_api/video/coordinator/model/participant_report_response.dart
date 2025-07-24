@@ -65,13 +65,13 @@ class ParticipantReportResponse {
         byDevice: GroupedStatsResponse.listFromJson(json[r'by_device']),
         byOperatingSystem:
             GroupedStatsResponse.listFromJson(json[r'by_operating_system']),
-        countOverTime: ParticipantCountOverTimeResponse?.fromJson(
+        countOverTime: ParticipantCountOverTimeResponse.fromJson(
             json[r'count_over_time'] ?? null),
-        maxConcurrent: mapValueOfType<int?>(json, r'max_concurrent', null),
+        maxConcurrent: mapValueOfType<int>(json, r'max_concurrent', null),
         publishers:
-            PublisherStatsResponse?.fromJson(json[r'publishers'] ?? null),
+            PublisherStatsResponse.fromJson(json[r'publishers'] ?? null),
         subscribers:
-            SubscriberStatsResponse?.fromJson(json[r'subscribers'] ?? null),
+            SubscriberStatsResponse.fromJson(json[r'subscribers'] ?? null),
         sum: mapValueOfType<int>(json, r'sum')!,
         unique: mapValueOfType<int>(json, r'unique')!,
       );

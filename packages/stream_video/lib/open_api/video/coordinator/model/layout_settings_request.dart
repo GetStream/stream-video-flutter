@@ -72,11 +72,9 @@ class LayoutSettingsRequest {
 
       return LayoutSettingsRequest(
         detectOrientation:
-            mapValueOfType<bool?>(json, r'detect_orientation', null),
-        externalAppUrl:
-            mapValueOfType<String?>(json, r'external_app_url', null),
-        externalCssUrl:
-            mapValueOfType<String?>(json, r'external_css_url', null),
+            mapValueOfType<bool>(json, r'detect_orientation', null),
+        externalAppUrl: mapValueOfType<String>(json, r'external_app_url', null),
+        externalCssUrl: mapValueOfType<String>(json, r'external_css_url', null),
         name: LayoutSettingsRequestNameEnum.fromValue(json['name'])!,
         options: mapCastOfType<String, Object>(json, r'options'),
       );

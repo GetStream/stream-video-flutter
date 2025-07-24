@@ -34,7 +34,7 @@ class UserReactivatedEvent {
       return UserReactivatedEvent(
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         type: mapValueOfType<String>(json, r'type', "user.reactivated")!,
-        user: User?.fromJson(json[r'user'] ?? null),
+        user: User.fromJson(json[r'user'] ?? null),
       );
     }
     return null;

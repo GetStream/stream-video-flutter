@@ -74,7 +74,7 @@ class RTMPSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return RTMPSettingsRequest(
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
         quality: RTMPSettingsRequestQualityEnum.fromValue(json['quality']),
       );
     }

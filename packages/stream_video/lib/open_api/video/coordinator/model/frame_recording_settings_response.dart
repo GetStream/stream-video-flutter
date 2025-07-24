@@ -60,7 +60,7 @@ class FrameRecordingSettingsResponse {
         captureIntervalInSeconds:
             mapValueOfType<int>(json, r'capture_interval_in_seconds')!,
         mode: FrameRecordingSettingsResponseModeEnum.fromValue(json['mode'])!,
-        quality: mapValueOfType<String?>(json, r'quality', null),
+        quality: mapValueOfType<String>(json, r'quality', null),
       );
     }
     return null;

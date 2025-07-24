@@ -33,10 +33,10 @@ class ScreensharingSettingsRequest {
 
       return ScreensharingSettingsRequest(
         accessRequestEnabled:
-            mapValueOfType<bool?>(json, r'access_request_enabled', null),
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
+            mapValueOfType<bool>(json, r'access_request_enabled', null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
         targetResolution:
-            TargetResolution?.fromJson(json[r'target_resolution'] ?? null),
+            TargetResolution.fromJson(json[r'target_resolution'] ?? null),
       );
     }
     return null;

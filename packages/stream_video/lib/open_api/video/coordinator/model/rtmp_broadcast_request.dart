@@ -86,10 +86,10 @@ class RTMPBroadcastRequest {
       final json = value.cast<String, dynamic>();
 
       return RTMPBroadcastRequest(
-        layout: LayoutSettingsRequest?.fromJson(json[r'layout'] ?? null),
+        layout: LayoutSettingsRequest.fromJson(json[r'layout'] ?? null),
         name: mapValueOfType<String>(json, r'name')!,
         quality: RTMPBroadcastRequestQualityEnum.fromValue(json['quality']),
-        streamKey: mapValueOfType<String?>(json, r'stream_key', null),
+        streamKey: mapValueOfType<String>(json, r'stream_key', null),
         streamUrl: mapValueOfType<String>(json, r'stream_url')!,
       );
     }

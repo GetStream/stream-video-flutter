@@ -32,9 +32,9 @@ class PushPreferences {
       final json = value.cast<String, dynamic>();
 
       return PushPreferences(
-        callLevel: mapValueOfType<String?>(json, r'call_level', null),
-        chatLevel: mapValueOfType<String?>(json, r'chat_level', null),
-        disabledUntil: mapValueOfType<DateTime?>(json, r'disabled_until', null),
+        callLevel: mapValueOfType<String>(json, r'call_level', null),
+        chatLevel: mapValueOfType<String>(json, r'chat_level', null),
+        disabledUntil: mapValueOfType<DateTime>(json, r'disabled_until', null),
       );
     }
     return null;

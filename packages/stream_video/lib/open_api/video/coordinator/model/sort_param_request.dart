@@ -28,8 +28,8 @@ class SortParamRequest {
       final json = value.cast<String, dynamic>();
 
       return SortParamRequest(
-        direction: mapValueOfType<int?>(json, r'direction', null),
-        field: mapValueOfType<String?>(json, r'field', null),
+        direction: mapValueOfType<int>(json, r'direction', null),
+        field: mapValueOfType<String>(json, r'field', null),
       );
     }
     return null;

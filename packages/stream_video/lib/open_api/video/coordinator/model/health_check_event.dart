@@ -44,11 +44,11 @@ class HealthCheckEvent {
       final json = value.cast<String, dynamic>();
 
       return HealthCheckEvent(
-        cid: mapValueOfType<String?>(json, r'cid', null),
+        cid: mapValueOfType<String>(json, r'cid', null),
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        receivedAt: mapValueOfType<DateTime?>(json, r'received_at', null),
+        receivedAt: mapValueOfType<DateTime>(json, r'received_at', null),
         type: mapValueOfType<String>(json, r'type', "health.check")!,
       );
     }

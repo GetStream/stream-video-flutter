@@ -25,7 +25,7 @@ class StartFrameRecordingRequest {
 
       return StartFrameRecordingRequest(
         recordingExternalStorage:
-            mapValueOfType<String?>(json, r'recording_external_storage', null),
+            mapValueOfType<String>(json, r'recording_external_storage', null),
       );
     }
     return null;

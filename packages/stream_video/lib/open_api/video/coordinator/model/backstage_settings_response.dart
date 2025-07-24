@@ -30,7 +30,7 @@ class BackstageSettingsResponse {
       return BackstageSettingsResponse(
         enabled: mapValueOfType<bool>(json, r'enabled')!,
         joinAheadTimeSeconds:
-            mapValueOfType<int?>(json, r'join_ahead_time_seconds', null),
+            mapValueOfType<int>(json, r'join_ahead_time_seconds', null),
       );
     }
     return null;

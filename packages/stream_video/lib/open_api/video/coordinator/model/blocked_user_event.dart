@@ -40,7 +40,7 @@ class BlockedUserEvent {
       final json = value.cast<String, dynamic>();
 
       return BlockedUserEvent(
-        blockedByUser: UserResponse?.fromJson(json[r'blocked_by_user'] ?? null),
+        blockedByUser: UserResponse.fromJson(json[r'blocked_by_user'] ?? null),
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         type: mapValueOfType<String>(json, r'type', "call.blocked_user")!,

@@ -41,7 +41,7 @@ class GetCallReportResponse {
 
       return GetCallReportResponse(
         chatActivity:
-            ChatActivityStatsResponse?.fromJson(json[r'chat_activity'] ?? null),
+            ChatActivityStatsResponse.fromJson(json[r'chat_activity'] ?? null),
         duration: mapValueOfType<String>(json, r'duration')!,
         report: ReportResponse.fromJson(json[r'report'])!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,

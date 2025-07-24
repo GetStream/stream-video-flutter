@@ -38,8 +38,8 @@ class EgressRTMPResponse {
       return EgressRTMPResponse(
         name: mapValueOfType<String>(json, r'name')!,
         startedAt: mapValueOfType<DateTime>(json, r'started_at')!,
-        streamKey: mapValueOfType<String?>(json, r'stream_key', null),
-        streamUrl: mapValueOfType<String?>(json, r'stream_url', null),
+        streamKey: mapValueOfType<String>(json, r'stream_key', null),
+        streamUrl: mapValueOfType<String>(json, r'stream_url', null),
       );
     }
     return null;

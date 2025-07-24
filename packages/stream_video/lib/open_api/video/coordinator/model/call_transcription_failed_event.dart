@@ -43,7 +43,7 @@ class CallTranscriptionFailedEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         egressId: mapValueOfType<String>(json, r'egress_id')!,
-        error: mapValueOfType<String?>(json, r'error', null),
+        error: mapValueOfType<String>(json, r'error', null),
         type:
             mapValueOfType<String>(json, r'type', "call.transcription_failed")!,
       );

@@ -38,8 +38,8 @@ class EgressResponse {
       return EgressResponse(
         broadcasting: mapValueOfType<bool>(json, r'broadcasting')!,
         frameRecording:
-            FrameRecordingResponse?.fromJson(json[r'frame_recording'] ?? null),
-        hls: EgressHLSResponse?.fromJson(json[r'hls'] ?? null),
+            FrameRecordingResponse.fromJson(json[r'frame_recording'] ?? null),
+        hls: EgressHLSResponse.fromJson(json[r'hls'] ?? null),
         rtmps: EgressRTMPResponse.listFromJson(json[r'rtmps'])!,
       );
     }

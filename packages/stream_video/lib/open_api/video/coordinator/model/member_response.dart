@@ -50,8 +50,8 @@ class MemberResponse {
       return MemberResponse(
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        deletedAt: mapValueOfType<DateTime?>(json, r'deleted_at', null),
-        role: mapValueOfType<String?>(json, r'role', null),
+        deletedAt: mapValueOfType<DateTime>(json, r'deleted_at', null),
+        role: mapValueOfType<String>(json, r'role', null),
         updatedAt: mapValueOfType<DateTime>(json, r'updated_at')!,
         user: UserResponse.fromJson(json[r'user'])!,
         userId: mapValueOfType<String>(json, r'user_id')!,

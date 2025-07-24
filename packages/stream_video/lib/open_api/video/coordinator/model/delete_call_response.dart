@@ -34,7 +34,7 @@ class DeleteCallResponse {
       return DeleteCallResponse(
         call: CallResponse.fromJson(json[r'call'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
-        taskId: mapValueOfType<String?>(json, r'task_id', null),
+        taskId: mapValueOfType<String>(json, r'task_id', null),
       );
     }
     return null;

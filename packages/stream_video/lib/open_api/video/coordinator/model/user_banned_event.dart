@@ -69,12 +69,12 @@ class UserBannedEvent {
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapValueOfType<DateTime>(json, r'created_at')!,
         createdBy: User.fromJson(json[r'created_by'])!,
-        expiration: mapValueOfType<DateTime?>(json, r'expiration', null),
-        reason: mapValueOfType<String?>(json, r'reason', null),
+        expiration: mapValueOfType<DateTime>(json, r'expiration', null),
+        reason: mapValueOfType<String>(json, r'reason', null),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
-        team: mapValueOfType<String?>(json, r'team', null),
+        team: mapValueOfType<String>(json, r'team', null),
         type: mapValueOfType<String>(json, r'type', "user.banned")!,
-        user: User?.fromJson(json[r'user'] ?? null),
+        user: User.fromJson(json[r'user'] ?? null),
       );
     }
     return null;

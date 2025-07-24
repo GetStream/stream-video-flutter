@@ -71,19 +71,18 @@ class CallSessionResponse {
         acceptedBy: mapCastOfType<String, DateTime>(json, r'accepted_by')!,
         anonymousParticipantCount:
             mapValueOfType<int>(json, r'anonymous_participant_count')!,
-        endedAt: mapValueOfType<DateTime?>(json, r'ended_at', null),
+        endedAt: mapValueOfType<DateTime>(json, r'ended_at', null),
         id: mapValueOfType<String>(json, r'id')!,
-        liveEndedAt: mapValueOfType<DateTime?>(json, r'live_ended_at', null),
-        liveStartedAt:
-            mapValueOfType<DateTime?>(json, r'live_started_at', null),
+        liveEndedAt: mapValueOfType<DateTime>(json, r'live_ended_at', null),
+        liveStartedAt: mapValueOfType<DateTime>(json, r'live_started_at', null),
         missedBy: mapCastOfType<String, DateTime>(json, r'missed_by')!,
         participants:
             CallParticipantResponse.listFromJson(json[r'participants'])!,
         participantsCountByRole:
             mapCastOfType<String, int>(json, r'participants_count_by_role')!,
         rejectedBy: mapCastOfType<String, DateTime>(json, r'rejected_by')!,
-        startedAt: mapValueOfType<DateTime?>(json, r'started_at', null),
-        timerEndsAt: mapValueOfType<DateTime?>(json, r'timer_ends_at', null),
+        startedAt: mapValueOfType<DateTime>(json, r'started_at', null),
+        timerEndsAt: mapValueOfType<DateTime>(json, r'timer_ends_at', null),
       );
     }
     return null;

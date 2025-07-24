@@ -68,8 +68,8 @@ class CreateDeviceRequest {
         pushProvider: CreateDeviceRequestPushProviderEnum.fromValue(
             json['push_provider'])!,
         pushProviderName:
-            mapValueOfType<String?>(json, r'push_provider_name', null),
-        voipToken: mapValueOfType<bool?>(json, r'voip_token', null),
+            mapValueOfType<String>(json, r'push_provider_name', null),
+        voipToken: mapValueOfType<bool>(json, r'voip_token', null),
       );
     }
     return null;

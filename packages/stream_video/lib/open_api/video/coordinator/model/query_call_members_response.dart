@@ -38,8 +38,8 @@ class QueryCallMembersResponse {
       return QueryCallMembersResponse(
         duration: mapValueOfType<String>(json, r'duration')!,
         members: MemberResponse.listFromJson(json[r'members'])!,
-        next: mapValueOfType<String?>(json, r'next', null),
-        prev: mapValueOfType<String?>(json, r'prev', null),
+        next: mapValueOfType<String>(json, r'next', null),
+        prev: mapValueOfType<String>(json, r'prev', null),
       );
     }
     return null;

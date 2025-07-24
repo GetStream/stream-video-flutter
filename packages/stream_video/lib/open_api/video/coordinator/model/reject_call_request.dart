@@ -24,7 +24,7 @@ class RejectCallRequest {
       final json = value.cast<String, dynamic>();
 
       return RejectCallRequest(
-        reason: mapValueOfType<String?>(json, r'reason', null),
+        reason: mapValueOfType<String>(json, r'reason', null),
       );
     }
     return null;

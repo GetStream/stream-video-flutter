@@ -32,13 +32,13 @@ class QueryAggregateCallStatsRequest {
       final json = value.cast<String, dynamic>();
 
       return QueryAggregateCallStatsRequest(
-        from: mapValueOfType<String?>(json, r'from', null),
+        from: mapValueOfType<String>(json, r'from', null),
         reportTypes: json[r'report_types'] is Iterable
             ? (json[r'report_types'] as Iterable)
                 .cast<String>()
                 .toList(growable: false)
             : const [],
-        to: mapValueOfType<String?>(json, r'to', null),
+        to: mapValueOfType<String>(json, r'to', null),
       );
     }
     return null;

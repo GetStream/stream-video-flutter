@@ -32,9 +32,9 @@ class BroadcastSettingsRequest {
       final json = value.cast<String, dynamic>();
 
       return BroadcastSettingsRequest(
-        enabled: mapValueOfType<bool?>(json, r'enabled', null),
-        hls: HLSSettingsRequest?.fromJson(json[r'hls'] ?? null),
-        rtmp: RTMPSettingsRequest?.fromJson(json[r'rtmp'] ?? null),
+        enabled: mapValueOfType<bool>(json, r'enabled', null),
+        hls: HLSSettingsRequest.fromJson(json[r'hls'] ?? null),
+        rtmp: RTMPSettingsRequest.fromJson(json[r'rtmp'] ?? null),
       );
     }
     return null;

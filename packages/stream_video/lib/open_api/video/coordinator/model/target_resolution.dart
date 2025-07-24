@@ -32,7 +32,7 @@ class TargetResolution {
       final json = value.cast<String, dynamic>();
 
       return TargetResolution(
-        bitrate: mapValueOfType<int?>(json, r'bitrate', null),
+        bitrate: mapValueOfType<int>(json, r'bitrate', null),
         height: mapValueOfType<int>(json, r'height')!,
         width: mapValueOfType<int>(json, r'width')!,
       );

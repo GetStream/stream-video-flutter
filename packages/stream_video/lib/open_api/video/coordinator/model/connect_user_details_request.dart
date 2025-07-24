@@ -46,10 +46,10 @@ class ConnectUserDetailsRequest {
       return ConnectUserDetailsRequest(
         custom: mapCastOfType<String, Object>(json, r'custom'),
         id: mapValueOfType<String>(json, r'id')!,
-        image: mapValueOfType<String?>(json, r'image', null),
-        invisible: mapValueOfType<bool?>(json, r'invisible', null),
-        language: mapValueOfType<String?>(json, r'language', null),
-        name: mapValueOfType<String?>(json, r'name', null),
+        image: mapValueOfType<String>(json, r'image', null),
+        invisible: mapValueOfType<bool>(json, r'invisible', null),
+        language: mapValueOfType<String>(json, r'language', null),
+        name: mapValueOfType<String>(json, r'name', null),
       );
     }
     return null;

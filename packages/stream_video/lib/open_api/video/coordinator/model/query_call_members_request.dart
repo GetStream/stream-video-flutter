@@ -51,9 +51,9 @@ class QueryCallMembersRequest {
         filterConditions:
             mapCastOfType<String, Object>(json, r'filter_conditions'),
         id: mapValueOfType<String>(json, r'id')!,
-        limit: mapValueOfType<int?>(json, r'limit', null),
-        next: mapValueOfType<String?>(json, r'next', null),
-        prev: mapValueOfType<String?>(json, r'prev', null),
+        limit: mapValueOfType<int>(json, r'limit', null),
+        next: mapValueOfType<String>(json, r'next', null),
+        prev: mapValueOfType<String>(json, r'prev', null),
         sort: SortParamRequest.listFromJson(json[r'sort']),
         type: mapValueOfType<String>(json, r'type')!,
       );

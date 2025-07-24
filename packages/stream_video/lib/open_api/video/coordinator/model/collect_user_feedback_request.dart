@@ -46,10 +46,10 @@ class CollectUserFeedbackRequest {
       return CollectUserFeedbackRequest(
         custom: mapCastOfType<String, Object>(json, r'custom'),
         rating: mapValueOfType<int>(json, r'rating')!,
-        reason: mapValueOfType<String?>(json, r'reason', null),
+        reason: mapValueOfType<String>(json, r'reason', null),
         sdk: mapValueOfType<String>(json, r'sdk')!,
         sdkVersion: mapValueOfType<String>(json, r'sdk_version')!,
-        userSessionId: mapValueOfType<String?>(json, r'user_session_id', null),
+        userSessionId: mapValueOfType<String>(json, r'user_session_id', null),
       );
     }
     return null;

@@ -71,17 +71,17 @@ class AudioSettingsRequest {
 
       return AudioSettingsRequest(
         accessRequestEnabled:
-            mapValueOfType<bool?>(json, r'access_request_enabled', null),
+            mapValueOfType<bool>(json, r'access_request_enabled', null),
         defaultDevice: AudioSettingsRequestDefaultDeviceEnum.fromValue(
             json['default_device'])!,
-        micDefaultOn: mapValueOfType<bool?>(json, r'mic_default_on', null),
-        noiseCancellation: NoiseCancellationSettings?.fromJson(
+        micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on', null),
+        noiseCancellation: NoiseCancellationSettings.fromJson(
             json[r'noise_cancellation'] ?? null),
-        opusDtxEnabled: mapValueOfType<bool?>(json, r'opus_dtx_enabled', null),
+        opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled', null),
         redundantCodingEnabled:
-            mapValueOfType<bool?>(json, r'redundant_coding_enabled', null),
+            mapValueOfType<bool>(json, r'redundant_coding_enabled', null),
         speakerDefaultOn:
-            mapValueOfType<bool?>(json, r'speaker_default_on', null),
+            mapValueOfType<bool>(json, r'speaker_default_on', null),
       );
     }
     return null;
