@@ -821,20 +821,17 @@ enum TranscriptionSettingsLanguage {
   String toString() => value;
 
   TranscriptionSettingsRequestLanguageEnum toOpenDto() {
-    return TranscriptionSettingsRequestLanguageEnumTypeTransformer()
-            .decode(value) ??
+    return TranscriptionSettingsRequestLanguageEnum.fromValue(value) ??
         TranscriptionSettingsRequestLanguageEnum.auto;
   }
 
   StartTranscriptionRequestLanguageEnum toStartTranscriptionDto() {
-    return StartTranscriptionRequestLanguageEnumTypeTransformer()
-            .decode(value) ??
+    return StartTranscriptionRequestLanguageEnum.fromValue(value) ??
         StartTranscriptionRequestLanguageEnum.auto;
   }
 
   StartClosedCaptionsRequestLanguageEnum toStartClosedCaptionsDto() {
-    return StartClosedCaptionsRequestLanguageEnumTypeTransformer()
-            .decode(value) ??
+    return StartClosedCaptionsRequestLanguageEnum.fromValue(value) ??
         StartClosedCaptionsRequestLanguageEnum.auto;
   }
 }
