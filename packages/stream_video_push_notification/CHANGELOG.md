@@ -1,3 +1,8 @@
+## Unreleased
+
+🔄 Dependency updates
+* Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
+
 ## 0.10.1
 
 ✅ Added
