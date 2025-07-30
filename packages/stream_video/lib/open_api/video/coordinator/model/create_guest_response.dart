@@ -1,138 +1,149 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'create_guest_response.g.dart';
 
-class CreateGuestResponse {
-  /// Returns a new [CreateGuestResponse] instance.
-  CreateGuestResponse({
-    required this.accessToken,
-    required this.duration,
-    required this.user,
-  });
-
+/// CreateGuestResponse
+///
+/// Properties:
+/// * [accessToken] - the access token to authenticate the user
+/// * [duration] - Duration of the request in milliseconds
+/// * [user]
+@BuiltValue()
+abstract class CreateGuestResponse
+    implements Built<CreateGuestResponse, CreateGuestResponseBuilder> {
   /// the access token to authenticate the user
-  String accessToken;
+  @BuiltValueField(wireName: r'access_token')
+  String get accessToken;
 
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  UserResponse user;
+  @BuiltValueField(wireName: r'user')
+  UserResponse get user;
+
+  CreateGuestResponse._();
+
+  factory CreateGuestResponse([void updates(CreateGuestResponseBuilder b)]) =
+      _$CreateGuestResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CreateGuestResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CreateGuestResponse> get serializer =>
+      _$CreateGuestResponseSerializer();
+}
+
+class _$CreateGuestResponseSerializer
+    implements PrimitiveSerializer<CreateGuestResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CreateGuestResponse,
+    _$CreateGuestResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CreateGuestResponse &&
-          other.accessToken == accessToken &&
-          other.duration == duration &&
-          other.user == user;
+  final String wireName = r'CreateGuestResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (accessToken.hashCode) + (duration.hashCode) + (user.hashCode);
-
-  @override
-  String toString() =>
-      'CreateGuestResponse[accessToken=$accessToken, duration=$duration, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'access_token'] = this.accessToken;
-    json[r'duration'] = this.duration;
-    json[r'user'] = this.user;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CreateGuestResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'access_token';
+    yield serializers.serialize(
+      object.accessToken,
+      specifiedType: const FullType(String),
+    );
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    yield r'user';
+    yield serializers.serialize(
+      object.user,
+      specifiedType: const FullType(UserResponse),
+    );
   }
 
-  /// Returns a new [CreateGuestResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CreateGuestResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CreateGuestResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CreateGuestResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CreateGuestResponse(
-        accessToken: mapValueOfType<String>(json, r'access_token')!,
-        duration: mapValueOfType<String>(json, r'duration')!,
-        user: UserResponse.fromJson(json[r'user'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<CreateGuestResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CreateGuestResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CreateGuestResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CreateGuestResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CreateGuestResponse> mapFromJson(dynamic json) {
-    final map = <String, CreateGuestResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CreateGuestResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CreateGuestResponse-objects as value to a dart map
-  static Map<String, List<CreateGuestResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CreateGuestResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CreateGuestResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CreateGuestResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'access_token':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.accessToken = valueDes;
+          break;
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'access_token',
-    'duration',
-    'user',
-  };
+  @override
+  CreateGuestResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CreateGuestResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

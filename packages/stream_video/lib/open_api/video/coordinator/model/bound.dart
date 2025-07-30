@@ -1,126 +1,123 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'bound.g.dart';
 
-class Bound {
-  /// Returns a new [Bound] instance.
-  Bound({
-    required this.inclusive,
-    required this.value,
-  });
+/// Bound
+///
+/// Properties:
+/// * [inclusive]
+/// * [value]
+@BuiltValue()
+abstract class Bound implements Built<Bound, BoundBuilder> {
+  @BuiltValueField(wireName: r'inclusive')
+  bool get inclusive;
 
-  bool inclusive;
+  @BuiltValueField(wireName: r'value')
+  double get value;
 
-  double value;
+  Bound._();
+
+  factory Bound([void updates(BoundBuilder b)]) = _$Bound;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(BoundBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<Bound> get serializer => _$BoundSerializer();
+}
+
+class _$BoundSerializer implements PrimitiveSerializer<Bound> {
+  @override
+  final Iterable<Type> types = const [Bound, _$Bound];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Bound && other.inclusive == inclusive && other.value == value;
+  final String wireName = r'Bound';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (inclusive.hashCode) + (value.hashCode);
-
-  @override
-  String toString() => 'Bound[inclusive=$inclusive, value=$value]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'inclusive'] = this.inclusive;
-    json[r'value'] = this.value;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    Bound object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'inclusive';
+    yield serializers.serialize(
+      object.inclusive,
+      specifiedType: const FullType(bool),
+    );
+    yield r'value';
+    yield serializers.serialize(
+      object.value,
+      specifiedType: const FullType(double),
+    );
   }
 
-  /// Returns a new [Bound] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static Bound? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "Bound[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "Bound[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return Bound(
-        inclusive: mapValueOfType<bool>(json, r'inclusive')!,
-        value: mapValueOfType<double>(json, r'value')!,
-      );
-    }
-    return null;
-  }
-
-  static List<Bound> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    Bound object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <Bound>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = Bound.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, Bound> mapFromJson(dynamic json) {
-    final map = <String, Bound>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = Bound.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of Bound-objects as value to a dart map
-  static Map<String, List<Bound>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required BoundBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<Bound>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = Bound.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'inclusive':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.inclusive = valueDes;
+          break;
+        case r'value':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.value = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'inclusive',
-    'value',
-  };
+  @override
+  Bound deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = BoundBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

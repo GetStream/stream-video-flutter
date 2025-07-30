@@ -1,164 +1,180 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'blocked_user_event.g.dart';
 
-class BlockedUserEvent {
-  /// Returns a new [BlockedUserEvent] instance.
-  BlockedUserEvent({
-    this.blockedByUser,
-    required this.callCid,
-    required this.createdAt,
-    this.type = 'call.blocked_user',
-    required this.user,
-  });
+/// This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification. If the user is the current user, the client should leave the call screen as well
+///
+/// Properties:
+/// * [blockedByUser]
+/// * [callCid]
+/// * [createdAt]
+/// * [type] - The type of event: \"call.blocked_user\" in this case
+/// * [user]
+@BuiltValue()
+abstract class BlockedUserEvent
+    implements Built<BlockedUserEvent, BlockedUserEventBuilder> {
+  @BuiltValueField(wireName: r'blocked_by_user')
+  UserResponse? get blockedByUser;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  UserResponse? blockedByUser;
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// The type of event: \"call.blocked_user\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  UserResponse user;
+  @BuiltValueField(wireName: r'user')
+  UserResponse get user;
+
+  BlockedUserEvent._();
+
+  factory BlockedUserEvent([void updates(BlockedUserEventBuilder b)]) =
+      _$BlockedUserEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(BlockedUserEventBuilder b) =>
+      b..type = 'call.blocked_user';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<BlockedUserEvent> get serializer =>
+      _$BlockedUserEventSerializer();
+}
+
+class _$BlockedUserEventSerializer
+    implements PrimitiveSerializer<BlockedUserEvent> {
+  @override
+  final Iterable<Type> types = const [BlockedUserEvent, _$BlockedUserEvent];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is BlockedUserEvent &&
-          other.blockedByUser == blockedByUser &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          other.type == type &&
-          other.user == user;
+  final String wireName = r'BlockedUserEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (type.hashCode) +
-      (user.hashCode);
-
-  @override
-  String toString() =>
-      'BlockedUserEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.blockedByUser != null) {
-      json[r'blocked_by_user'] = this.blockedByUser;
-    } else {
-      json[r'blocked_by_user'] = null;
-    }
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'type'] = this.type;
-    json[r'user'] = this.user;
-    return json;
-  }
-
-  /// Returns a new [BlockedUserEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static BlockedUserEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "BlockedUserEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "BlockedUserEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return BlockedUserEvent(
-        blockedByUser: UserResponse.fromJson(json[r'blocked_by_user']),
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    BlockedUserEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.blockedByUser != null) {
+      yield r'blocked_by_user';
+      yield serializers.serialize(
+        object.blockedByUser,
+        specifiedType: const FullType(UserResponse),
       );
     }
-    return null;
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    yield r'user';
+    yield serializers.serialize(
+      object.user,
+      specifiedType: const FullType(UserResponse),
+    );
   }
 
-  static List<BlockedUserEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    BlockedUserEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <BlockedUserEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = BlockedUserEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, BlockedUserEvent> mapFromJson(dynamic json) {
-    final map = <String, BlockedUserEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = BlockedUserEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of BlockedUserEvent-objects as value to a dart map
-  static Map<String, List<BlockedUserEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required BlockedUserEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<BlockedUserEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = BlockedUserEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'blocked_by_user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.blockedByUser.replace(valueDes);
+          break;
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'created_at',
-    'type',
-    'user',
-  };
+  @override
+  BlockedUserEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = BlockedUserEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

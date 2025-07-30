@@ -1,140 +1,134 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/video_reaction_over_time_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'video_reactions_response.g.dart';
 
-class VideoReactionsResponse {
-  /// Returns a new [VideoReactionsResponse] instance.
-  VideoReactionsResponse({
-    this.countOverTime,
-    required this.reaction,
-  });
+/// VideoReactionsResponse
+///
+/// Properties:
+/// * [countOverTime]
+/// * [reaction]
+@BuiltValue()
+abstract class VideoReactionsResponse
+    implements Built<VideoReactionsResponse, VideoReactionsResponseBuilder> {
+  @BuiltValueField(wireName: r'count_over_time')
+  VideoReactionOverTimeResponse? get countOverTime;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  VideoReactionOverTimeResponse? countOverTime;
+  @BuiltValueField(wireName: r'reaction')
+  String get reaction;
 
-  String reaction;
+  VideoReactionsResponse._();
+
+  factory VideoReactionsResponse(
+          [void updates(VideoReactionsResponseBuilder b)]) =
+      _$VideoReactionsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(VideoReactionsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<VideoReactionsResponse> get serializer =>
+      _$VideoReactionsResponseSerializer();
+}
+
+class _$VideoReactionsResponseSerializer
+    implements PrimitiveSerializer<VideoReactionsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    VideoReactionsResponse,
+    _$VideoReactionsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoReactionsResponse &&
-          other.countOverTime == countOverTime &&
-          other.reaction == reaction;
+  final String wireName = r'VideoReactionsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (countOverTime == null ? 0 : countOverTime!.hashCode) +
-      (reaction.hashCode);
-
-  @override
-  String toString() =>
-      'VideoReactionsResponse[countOverTime=$countOverTime, reaction=$reaction]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.countOverTime != null) {
-      json[r'count_over_time'] = this.countOverTime;
-    } else {
-      json[r'count_over_time'] = null;
-    }
-    json[r'reaction'] = this.reaction;
-    return json;
-  }
-
-  /// Returns a new [VideoReactionsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static VideoReactionsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoReactionsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoReactionsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return VideoReactionsResponse(
-        countOverTime:
-            VideoReactionOverTimeResponse.fromJson(json[r'count_over_time']),
-        reaction: mapValueOfType<String>(json, r'reaction')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    VideoReactionsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.countOverTime != null) {
+      yield r'count_over_time';
+      yield serializers.serialize(
+        object.countOverTime,
+        specifiedType: const FullType(VideoReactionOverTimeResponse),
       );
     }
-    return null;
+    yield r'reaction';
+    yield serializers.serialize(
+      object.reaction,
+      specifiedType: const FullType(String),
+    );
   }
 
-  static List<VideoReactionsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    VideoReactionsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <VideoReactionsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = VideoReactionsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, VideoReactionsResponse> mapFromJson(dynamic json) {
-    final map = <String, VideoReactionsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = VideoReactionsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of VideoReactionsResponse-objects as value to a dart map
-  static Map<String, List<VideoReactionsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required VideoReactionsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<VideoReactionsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = VideoReactionsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'count_over_time':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(VideoReactionOverTimeResponse),
+          ) as VideoReactionOverTimeResponse;
+          result.countOverTime.replace(valueDes);
+          break;
+        case r'reaction':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.reaction = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'reaction',
-  };
+  @override
+  VideoReactionsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = VideoReactionsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

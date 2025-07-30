@@ -1,155 +1,181 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'participant_count_by_minute_response.g.dart';
 
-class ParticipantCountByMinuteResponse {
-  /// Returns a new [ParticipantCountByMinuteResponse] instance.
-  ParticipantCountByMinuteResponse({
-    required this.first,
-    required this.last,
-    required this.max,
-    required this.min,
-    required this.startTs,
-  });
+/// ParticipantCountByMinuteResponse
+///
+/// Properties:
+/// * [first]
+/// * [last]
+/// * [max]
+/// * [min]
+/// * [startTs]
+@BuiltValue()
+abstract class ParticipantCountByMinuteResponse
+    implements
+        Built<ParticipantCountByMinuteResponse,
+            ParticipantCountByMinuteResponseBuilder> {
+  @BuiltValueField(wireName: r'first')
+  int get first;
 
-  int first;
+  @BuiltValueField(wireName: r'last')
+  int get last;
 
-  int last;
+  @BuiltValueField(wireName: r'max')
+  int get max;
 
-  int max;
+  @BuiltValueField(wireName: r'min')
+  int get min;
 
-  int min;
+  @BuiltValueField(wireName: r'start_ts')
+  DateTime get startTs;
 
-  DateTime startTs;
+  ParticipantCountByMinuteResponse._();
+
+  factory ParticipantCountByMinuteResponse(
+          [void updates(ParticipantCountByMinuteResponseBuilder b)]) =
+      _$ParticipantCountByMinuteResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(ParticipantCountByMinuteResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<ParticipantCountByMinuteResponse> get serializer =>
+      _$ParticipantCountByMinuteResponseSerializer();
+}
+
+class _$ParticipantCountByMinuteResponseSerializer
+    implements PrimitiveSerializer<ParticipantCountByMinuteResponse> {
+  @override
+  final Iterable<Type> types = const [
+    ParticipantCountByMinuteResponse,
+    _$ParticipantCountByMinuteResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ParticipantCountByMinuteResponse &&
-          other.first == first &&
-          other.last == last &&
-          other.max == max &&
-          other.min == min &&
-          other.startTs == startTs;
+  final String wireName = r'ParticipantCountByMinuteResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (first.hashCode) +
-      (last.hashCode) +
-      (max.hashCode) +
-      (min.hashCode) +
-      (startTs.hashCode);
-
-  @override
-  String toString() =>
-      'ParticipantCountByMinuteResponse[first=$first, last=$last, max=$max, min=$min, startTs=$startTs]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'first'] = this.first;
-    json[r'last'] = this.last;
-    json[r'max'] = this.max;
-    json[r'min'] = this.min;
-    json[r'start_ts'] = this.startTs.toUtc().toIso8601String();
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    ParticipantCountByMinuteResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'first';
+    yield serializers.serialize(
+      object.first,
+      specifiedType: const FullType(int),
+    );
+    yield r'last';
+    yield serializers.serialize(
+      object.last,
+      specifiedType: const FullType(int),
+    );
+    yield r'max';
+    yield serializers.serialize(
+      object.max,
+      specifiedType: const FullType(int),
+    );
+    yield r'min';
+    yield serializers.serialize(
+      object.min,
+      specifiedType: const FullType(int),
+    );
+    yield r'start_ts';
+    yield serializers.serialize(
+      object.startTs,
+      specifiedType: const FullType(DateTime),
+    );
   }
 
-  /// Returns a new [ParticipantCountByMinuteResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ParticipantCountByMinuteResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ParticipantCountByMinuteResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ParticipantCountByMinuteResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ParticipantCountByMinuteResponse(
-        first: mapValueOfType<int>(json, r'first')!,
-        last: mapValueOfType<int>(json, r'last')!,
-        max: mapValueOfType<int>(json, r'max')!,
-        min: mapValueOfType<int>(json, r'min')!,
-        startTs: mapDateTime(json, r'start_ts', r'')!,
-      );
-    }
-    return null;
-  }
-
-  static List<ParticipantCountByMinuteResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    ParticipantCountByMinuteResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <ParticipantCountByMinuteResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = ParticipantCountByMinuteResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, ParticipantCountByMinuteResponse> mapFromJson(
-      dynamic json) {
-    final map = <String, ParticipantCountByMinuteResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = ParticipantCountByMinuteResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of ParticipantCountByMinuteResponse-objects as value to a dart map
-  static Map<String, List<ParticipantCountByMinuteResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required ParticipantCountByMinuteResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<ParticipantCountByMinuteResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ParticipantCountByMinuteResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'first':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.first = valueDes;
+          break;
+        case r'last':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.last = valueDes;
+          break;
+        case r'max':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.max = valueDes;
+          break;
+        case r'min':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.min = valueDes;
+          break;
+        case r'start_ts':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.startTs = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'first',
-    'last',
-    'max',
-    'min',
-    'start_ts',
-  };
+  @override
+  ParticipantCountByMinuteResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = ParticipantCountByMinuteResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

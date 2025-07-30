@@ -1,147 +1,133 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/typing_indicators.dart';
+import 'package:stream_video/open_api/video/coordinator/model/read_receipts.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'privacy_settings.g.dart';
 
-class PrivacySettings {
-  /// Returns a new [PrivacySettings] instance.
-  PrivacySettings({
-    this.readReceipts,
-    this.typingIndicators,
-  });
+/// PrivacySettings
+///
+/// Properties:
+/// * [readReceipts]
+/// * [typingIndicators]
+@BuiltValue()
+abstract class PrivacySettings
+    implements Built<PrivacySettings, PrivacySettingsBuilder> {
+  @BuiltValueField(wireName: r'read_receipts')
+  ReadReceipts? get readReceipts;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  ReadReceipts? readReceipts;
+  @BuiltValueField(wireName: r'typing_indicators')
+  TypingIndicators? get typingIndicators;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  TypingIndicators? typingIndicators;
+  PrivacySettings._();
+
+  factory PrivacySettings([void updates(PrivacySettingsBuilder b)]) =
+      _$PrivacySettings;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(PrivacySettingsBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<PrivacySettings> get serializer =>
+      _$PrivacySettingsSerializer();
+}
+
+class _$PrivacySettingsSerializer
+    implements PrimitiveSerializer<PrivacySettings> {
+  @override
+  final Iterable<Type> types = const [PrivacySettings, _$PrivacySettings];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PrivacySettings &&
-          other.readReceipts == readReceipts &&
-          other.typingIndicators == typingIndicators;
+  final String wireName = r'PrivacySettings';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (readReceipts == null ? 0 : readReceipts!.hashCode) +
-      (typingIndicators == null ? 0 : typingIndicators!.hashCode);
-
-  @override
-  String toString() =>
-      'PrivacySettings[readReceipts=$readReceipts, typingIndicators=$typingIndicators]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.readReceipts != null) {
-      json[r'read_receipts'] = this.readReceipts;
-    } else {
-      json[r'read_receipts'] = null;
-    }
-    if (this.typingIndicators != null) {
-      json[r'typing_indicators'] = this.typingIndicators;
-    } else {
-      json[r'typing_indicators'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [PrivacySettings] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static PrivacySettings? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PrivacySettings[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PrivacySettings[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return PrivacySettings(
-        readReceipts: ReadReceipts.fromJson(json[r'read_receipts']),
-        typingIndicators: TypingIndicators.fromJson(json[r'typing_indicators']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    PrivacySettings object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.readReceipts != null) {
+      yield r'read_receipts';
+      yield serializers.serialize(
+        object.readReceipts,
+        specifiedType: const FullType(ReadReceipts),
       );
     }
-    return null;
+    if (object.typingIndicators != null) {
+      yield r'typing_indicators';
+      yield serializers.serialize(
+        object.typingIndicators,
+        specifiedType: const FullType(TypingIndicators),
+      );
+    }
   }
 
-  static List<PrivacySettings> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    PrivacySettings object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <PrivacySettings>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = PrivacySettings.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, PrivacySettings> mapFromJson(dynamic json) {
-    final map = <String, PrivacySettings>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = PrivacySettings.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of PrivacySettings-objects as value to a dart map
-  static Map<String, List<PrivacySettings>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required PrivacySettingsBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<PrivacySettings>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = PrivacySettings.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'read_receipts':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ReadReceipts),
+          ) as ReadReceipts;
+          result.readReceipts.replace(valueDes);
+          break;
+        case r'typing_indicators':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(TypingIndicators),
+          ) as TypingIndicators;
+          result.typingIndicators.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  PrivacySettings deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = PrivacySettingsBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

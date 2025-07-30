@@ -1,164 +1,149 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'push_preferences.g.dart';
 
-class PushPreferences {
-  /// Returns a new [PushPreferences] instance.
-  PushPreferences({
-    this.callLevel,
-    this.chatLevel,
-    this.disabledUntil,
-  });
+/// PushPreferences
+///
+/// Properties:
+/// * [callLevel]
+/// * [chatLevel]
+/// * [disabledUntil]
+@BuiltValue()
+abstract class PushPreferences
+    implements Built<PushPreferences, PushPreferencesBuilder> {
+  @BuiltValueField(wireName: r'call_level')
+  String? get callLevel;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? callLevel;
+  @BuiltValueField(wireName: r'chat_level')
+  String? get chatLevel;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? chatLevel;
+  @BuiltValueField(wireName: r'disabled_until')
+  DateTime? get disabledUntil;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? disabledUntil;
+  PushPreferences._();
+
+  factory PushPreferences([void updates(PushPreferencesBuilder b)]) =
+      _$PushPreferences;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(PushPreferencesBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<PushPreferences> get serializer =>
+      _$PushPreferencesSerializer();
+}
+
+class _$PushPreferencesSerializer
+    implements PrimitiveSerializer<PushPreferences> {
+  @override
+  final Iterable<Type> types = const [PushPreferences, _$PushPreferences];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PushPreferences &&
-          other.callLevel == callLevel &&
-          other.chatLevel == chatLevel &&
-          other.disabledUntil == disabledUntil;
+  final String wireName = r'PushPreferences';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callLevel == null ? 0 : callLevel!.hashCode) +
-      (chatLevel == null ? 0 : chatLevel!.hashCode) +
-      (disabledUntil == null ? 0 : disabledUntil!.hashCode);
-
-  @override
-  String toString() =>
-      'PushPreferences[callLevel=$callLevel, chatLevel=$chatLevel, disabledUntil=$disabledUntil]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.callLevel != null) {
-      json[r'call_level'] = this.callLevel;
-    } else {
-      json[r'call_level'] = null;
-    }
-    if (this.chatLevel != null) {
-      json[r'chat_level'] = this.chatLevel;
-    } else {
-      json[r'chat_level'] = null;
-    }
-    if (this.disabledUntil != null) {
-      json[r'disabled_until'] = this.disabledUntil!.toUtc().toIso8601String();
-    } else {
-      json[r'disabled_until'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [PushPreferences] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static PushPreferences? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PushPreferences[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PushPreferences[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return PushPreferences(
-        callLevel: mapValueOfType<String>(json, r'call_level'),
-        chatLevel: mapValueOfType<String>(json, r'chat_level'),
-        disabledUntil: mapDateTime(json, r'disabled_until', r''),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    PushPreferences object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.callLevel != null) {
+      yield r'call_level';
+      yield serializers.serialize(
+        object.callLevel,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.chatLevel != null) {
+      yield r'chat_level';
+      yield serializers.serialize(
+        object.chatLevel,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.disabledUntil != null) {
+      yield r'disabled_until';
+      yield serializers.serialize(
+        object.disabledUntil,
+        specifiedType: const FullType(DateTime),
+      );
+    }
   }
 
-  static List<PushPreferences> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    PushPreferences object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <PushPreferences>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = PushPreferences.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, PushPreferences> mapFromJson(dynamic json) {
-    final map = <String, PushPreferences>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = PushPreferences.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of PushPreferences-objects as value to a dart map
-  static Map<String, List<PushPreferences>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required PushPreferencesBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<PushPreferences>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = PushPreferences.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_level':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callLevel = valueDes;
+          break;
+        case r'chat_level':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.chatLevel = valueDes;
+          break;
+        case r'disabled_until':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.disabledUntil = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  PushPreferences deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = PushPreferencesBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

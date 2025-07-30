@@ -1,163 +1,182 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/own_capability.dart';
+import 'package:stream_video/open_api/video/coordinator/model/member_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'get_call_response.g.dart';
 
-class GetCallResponse {
-  /// Returns a new [GetCallResponse] instance.
-  GetCallResponse({
-    required this.call,
-    required this.duration,
-    this.members = const [],
-    this.membership,
-    this.ownCapabilities = const [],
-  });
+/// GetCallResponse
+///
+/// Properties:
+/// * [call]
+/// * [duration]
+/// * [members]
+/// * [membership]
+/// * [ownCapabilities]
+@BuiltValue()
+abstract class GetCallResponse
+    implements Built<GetCallResponse, GetCallResponseBuilder> {
+  @BuiltValueField(wireName: r'call')
+  CallResponse get call;
 
-  CallResponse call;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  String duration;
+  @BuiltValueField(wireName: r'members')
+  BuiltList<MemberResponse> get members;
 
-  List<MemberResponse> members;
+  @BuiltValueField(wireName: r'membership')
+  MemberResponse? get membership;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  MemberResponse? membership;
+  @BuiltValueField(wireName: r'own_capabilities')
+  BuiltList<OwnCapability> get ownCapabilities;
 
-  List<OwnCapability> ownCapabilities;
+  GetCallResponse._();
+
+  factory GetCallResponse([void updates(GetCallResponseBuilder b)]) =
+      _$GetCallResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(GetCallResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<GetCallResponse> get serializer =>
+      _$GetCallResponseSerializer();
+}
+
+class _$GetCallResponseSerializer
+    implements PrimitiveSerializer<GetCallResponse> {
+  @override
+  final Iterable<Type> types = const [GetCallResponse, _$GetCallResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GetCallResponse &&
-          other.call == call &&
-          other.duration == duration &&
-          _deepEquality.equals(other.members, members) &&
-          other.membership == membership &&
-          _deepEquality.equals(other.ownCapabilities, ownCapabilities);
+  final String wireName = r'GetCallResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (call.hashCode) +
-      (duration.hashCode) +
-      (members.hashCode) +
-      (membership == null ? 0 : membership!.hashCode) +
-      (ownCapabilities.hashCode);
-
-  @override
-  String toString() =>
-      'GetCallResponse[call=$call, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call'] = this.call;
-    json[r'duration'] = this.duration;
-    json[r'members'] = this.members;
-    if (this.membership != null) {
-      json[r'membership'] = this.membership;
-    } else {
-      json[r'membership'] = null;
-    }
-    json[r'own_capabilities'] = this.ownCapabilities;
-    return json;
-  }
-
-  /// Returns a new [GetCallResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static GetCallResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GetCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GetCallResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return GetCallResponse(
-        call: CallResponse.fromJson(json[r'call'])!,
-        duration: mapValueOfType<String>(json, r'duration')!,
-        members: MemberResponse.listFromJson(json[r'members']),
-        membership: MemberResponse.fromJson(json[r'membership']),
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    GetCallResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call';
+    yield serializers.serialize(
+      object.call,
+      specifiedType: const FullType(CallResponse),
+    );
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    yield r'members';
+    yield serializers.serialize(
+      object.members,
+      specifiedType: const FullType(BuiltList, [FullType(MemberResponse)]),
+    );
+    if (object.membership != null) {
+      yield r'membership';
+      yield serializers.serialize(
+        object.membership,
+        specifiedType: const FullType(MemberResponse),
       );
     }
-    return null;
+    yield r'own_capabilities';
+    yield serializers.serialize(
+      object.ownCapabilities,
+      specifiedType: const FullType(BuiltList, [FullType(OwnCapability)]),
+    );
   }
 
-  static List<GetCallResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    GetCallResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <GetCallResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = GetCallResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, GetCallResponse> mapFromJson(dynamic json) {
-    final map = <String, GetCallResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = GetCallResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of GetCallResponse-objects as value to a dart map
-  static Map<String, List<GetCallResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required GetCallResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<GetCallResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = GetCallResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallResponse),
+          ) as CallResponse;
+          result.call.replace(valueDes);
+          break;
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'members':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(MemberResponse)]),
+          ) as BuiltList<MemberResponse>;
+          result.members.replace(valueDes);
+          break;
+        case r'membership':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(MemberResponse),
+          ) as MemberResponse;
+          result.membership.replace(valueDes);
+          break;
+        case r'own_capabilities':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(OwnCapability)]),
+          ) as BuiltList<OwnCapability>;
+          result.ownCapabilities.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call',
-    'duration',
-    'members',
-    'own_capabilities',
-  };
+  @override
+  GetCallResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = GetCallResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

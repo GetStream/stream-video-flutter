@@ -15,7 +15,7 @@ analyzer:
   exclude:
     # exclude all the generated files
     - packages/*/lib/**/*.*.dart
-    - packages/stream_video/lib/open_api/**
+    # - packages/stream_video/lib/open_api/**
     - packages/stream_video/lib/protobuf/**
 
 linter:

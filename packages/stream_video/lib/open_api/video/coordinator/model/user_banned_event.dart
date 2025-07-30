@@ -1,238 +1,280 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'user_banned_event.g.dart';
 
-class UserBannedEvent {
-  /// Returns a new [UserBannedEvent] instance.
-  UserBannedEvent({
-    required this.channelId,
-    required this.channelType,
-    required this.cid,
-    required this.createdAt,
-    required this.createdBy,
-    this.expiration,
-    this.reason,
-    required this.shadow,
-    this.team,
-    this.type = 'user.banned',
-    this.user,
-  });
+/// UserBannedEvent
+///
+/// Properties:
+/// * [channelId]
+/// * [channelType]
+/// * [cid]
+/// * [createdAt]
+/// * [createdBy]
+/// * [expiration]
+/// * [reason]
+/// * [shadow]
+/// * [team]
+/// * [type]
+/// * [user]
+@BuiltValue()
+abstract class UserBannedEvent
+    implements Built<UserBannedEvent, UserBannedEventBuilder> {
+  @BuiltValueField(wireName: r'channel_id')
+  String get channelId;
 
-  String channelId;
+  @BuiltValueField(wireName: r'channel_type')
+  String get channelType;
 
-  String channelType;
+  @BuiltValueField(wireName: r'cid')
+  String get cid;
 
-  String cid;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_by')
+  User get createdBy;
 
-  User createdBy;
+  @BuiltValueField(wireName: r'expiration')
+  DateTime? get expiration;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? expiration;
+  @BuiltValueField(wireName: r'reason')
+  String? get reason;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
+  @BuiltValueField(wireName: r'shadow')
+  bool get shadow;
 
-  bool shadow;
+  @BuiltValueField(wireName: r'team')
+  String? get team;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? team;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  String type;
+  @BuiltValueField(wireName: r'user')
+  User? get user;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  User? user;
+  UserBannedEvent._();
+
+  factory UserBannedEvent([void updates(UserBannedEventBuilder b)]) =
+      _$UserBannedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UserBannedEventBuilder b) => b..type = 'user.banned';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UserBannedEvent> get serializer =>
+      _$UserBannedEventSerializer();
+}
+
+class _$UserBannedEventSerializer
+    implements PrimitiveSerializer<UserBannedEvent> {
+  @override
+  final Iterable<Type> types = const [UserBannedEvent, _$UserBannedEvent];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserBannedEvent &&
-          other.channelId == channelId &&
-          other.channelType == channelType &&
-          other.cid == cid &&
-          other.createdAt == createdAt &&
-          other.createdBy == createdBy &&
-          other.expiration == expiration &&
-          other.reason == reason &&
-          other.shadow == shadow &&
-          other.team == team &&
-          other.type == type &&
-          other.user == user;
+  final String wireName = r'UserBannedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (channelId.hashCode) +
-      (channelType.hashCode) +
-      (cid.hashCode) +
-      (createdAt.hashCode) +
-      (createdBy.hashCode) +
-      (expiration == null ? 0 : expiration!.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
-      (shadow.hashCode) +
-      (team == null ? 0 : team!.hashCode) +
-      (type.hashCode) +
-      (user == null ? 0 : user!.hashCode);
-
-  @override
-  String toString() =>
-      'UserBannedEvent[channelId=$channelId, channelType=$channelType, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, expiration=$expiration, reason=$reason, shadow=$shadow, team=$team, type=$type, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'channel_id'] = this.channelId;
-    json[r'channel_type'] = this.channelType;
-    json[r'cid'] = this.cid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'created_by'] = this.createdBy;
-    if (this.expiration != null) {
-      json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
-    } else {
-      json[r'expiration'] = null;
-    }
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
-    }
-    json[r'shadow'] = this.shadow;
-    if (this.team != null) {
-      json[r'team'] = this.team;
-    } else {
-      json[r'team'] = null;
-    }
-    json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
-    } else {
-      json[r'user'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [UserBannedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UserBannedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserBannedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserBannedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UserBannedEvent(
-        channelId: mapValueOfType<String>(json, r'channel_id')!,
-        channelType: mapValueOfType<String>(json, r'channel_type')!,
-        cid: mapValueOfType<String>(json, r'cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: User.fromJson(json[r'created_by'])!,
-        expiration: mapDateTime(json, r'expiration', r''),
-        reason: mapValueOfType<String>(json, r'reason'),
-        shadow: mapValueOfType<bool>(json, r'shadow')!,
-        team: mapValueOfType<String>(json, r'team'),
-        type: mapValueOfType<String>(json, r'type')!,
-        user: User.fromJson(json[r'user']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UserBannedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'channel_id';
+    yield serializers.serialize(
+      object.channelId,
+      specifiedType: const FullType(String),
+    );
+    yield r'channel_type';
+    yield serializers.serialize(
+      object.channelType,
+      specifiedType: const FullType(String),
+    );
+    yield r'cid';
+    yield serializers.serialize(
+      object.cid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'created_by';
+    yield serializers.serialize(
+      object.createdBy,
+      specifiedType: const FullType(User),
+    );
+    if (object.expiration != null) {
+      yield r'expiration';
+      yield serializers.serialize(
+        object.expiration,
+        specifiedType: const FullType(DateTime),
       );
     }
-    return null;
+    if (object.reason != null) {
+      yield r'reason';
+      yield serializers.serialize(
+        object.reason,
+        specifiedType: const FullType(String),
+      );
+    }
+    yield r'shadow';
+    yield serializers.serialize(
+      object.shadow,
+      specifiedType: const FullType(bool),
+    );
+    if (object.team != null) {
+      yield r'team';
+      yield serializers.serialize(
+        object.team,
+        specifiedType: const FullType(String),
+      );
+    }
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    if (object.user != null) {
+      yield r'user';
+      yield serializers.serialize(
+        object.user,
+        specifiedType: const FullType(User),
+      );
+    }
   }
 
-  static List<UserBannedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UserBannedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UserBannedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UserBannedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UserBannedEvent> mapFromJson(dynamic json) {
-    final map = <String, UserBannedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UserBannedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UserBannedEvent-objects as value to a dart map
-  static Map<String, List<UserBannedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UserBannedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UserBannedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UserBannedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'channel_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.channelId = valueDes;
+          break;
+        case r'channel_type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.channelType = valueDes;
+          break;
+        case r'cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.cid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'created_by':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(User),
+          ) as User;
+          result.createdBy.replace(valueDes);
+          break;
+        case r'expiration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.expiration = valueDes;
+          break;
+        case r'reason':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.reason = valueDes;
+          break;
+        case r'shadow':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.shadow = valueDes;
+          break;
+        case r'team':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.team = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(User),
+          ) as User;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'channel_id',
-    'channel_type',
-    'cid',
-    'created_at',
-    'created_by',
-    'shadow',
-    'type',
-  };
+  @override
+  UserBannedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UserBannedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

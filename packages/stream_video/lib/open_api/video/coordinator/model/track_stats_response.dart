@@ -1,129 +1,127 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'track_stats_response.g.dart';
 
-class TrackStatsResponse {
-  /// Returns a new [TrackStatsResponse] instance.
-  TrackStatsResponse({
-    required this.durationSeconds,
-    required this.trackType,
-  });
+/// TrackStatsResponse
+///
+/// Properties:
+/// * [durationSeconds]
+/// * [trackType]
+@BuiltValue()
+abstract class TrackStatsResponse
+    implements Built<TrackStatsResponse, TrackStatsResponseBuilder> {
+  @BuiltValueField(wireName: r'duration_seconds')
+  int get durationSeconds;
 
-  int durationSeconds;
+  @BuiltValueField(wireName: r'track_type')
+  String get trackType;
 
-  String trackType;
+  TrackStatsResponse._();
+
+  factory TrackStatsResponse([void updates(TrackStatsResponseBuilder b)]) =
+      _$TrackStatsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(TrackStatsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<TrackStatsResponse> get serializer =>
+      _$TrackStatsResponseSerializer();
+}
+
+class _$TrackStatsResponseSerializer
+    implements PrimitiveSerializer<TrackStatsResponse> {
+  @override
+  final Iterable<Type> types = const [TrackStatsResponse, _$TrackStatsResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TrackStatsResponse &&
-          other.durationSeconds == durationSeconds &&
-          other.trackType == trackType;
+  final String wireName = r'TrackStatsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (durationSeconds.hashCode) + (trackType.hashCode);
-
-  @override
-  String toString() =>
-      'TrackStatsResponse[durationSeconds=$durationSeconds, trackType=$trackType]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'duration_seconds'] = this.durationSeconds;
-    json[r'track_type'] = this.trackType;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    TrackStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'duration_seconds';
+    yield serializers.serialize(
+      object.durationSeconds,
+      specifiedType: const FullType(int),
+    );
+    yield r'track_type';
+    yield serializers.serialize(
+      object.trackType,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [TrackStatsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static TrackStatsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "TrackStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "TrackStatsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return TrackStatsResponse(
-        durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
-        trackType: mapValueOfType<String>(json, r'track_type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<TrackStatsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    TrackStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <TrackStatsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = TrackStatsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, TrackStatsResponse> mapFromJson(dynamic json) {
-    final map = <String, TrackStatsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = TrackStatsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of TrackStatsResponse-objects as value to a dart map
-  static Map<String, List<TrackStatsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required TrackStatsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<TrackStatsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = TrackStatsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'duration_seconds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.durationSeconds = valueDes;
+          break;
+        case r'track_type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.trackType = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration_seconds',
-    'track_type',
-  };
+  @override
+  TrackStatsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = TrackStatsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

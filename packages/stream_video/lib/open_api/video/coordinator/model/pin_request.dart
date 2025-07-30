@@ -1,130 +1,125 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'pin_request.g.dart';
 
-class PinRequest {
-  /// Returns a new [PinRequest] instance.
-  PinRequest({
-    required this.sessionId,
-    required this.userId,
-  });
-
+/// PinRequest is the payload for pinning a message.
+///
+/// Properties:
+/// * [sessionId] - the session ID of the user who pinned the message
+/// * [userId] - the user ID of the user who pinned the message
+@BuiltValue()
+abstract class PinRequest implements Built<PinRequest, PinRequestBuilder> {
   /// the session ID of the user who pinned the message
-  String sessionId;
+  @BuiltValueField(wireName: r'session_id')
+  String get sessionId;
 
   /// the user ID of the user who pinned the message
-  String userId;
+  @BuiltValueField(wireName: r'user_id')
+  String get userId;
+
+  PinRequest._();
+
+  factory PinRequest([void updates(PinRequestBuilder b)]) = _$PinRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(PinRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<PinRequest> get serializer => _$PinRequestSerializer();
+}
+
+class _$PinRequestSerializer implements PrimitiveSerializer<PinRequest> {
+  @override
+  final Iterable<Type> types = const [PinRequest, _$PinRequest];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PinRequest &&
-          other.sessionId == sessionId &&
-          other.userId == userId;
+  final String wireName = r'PinRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (sessionId.hashCode) + (userId.hashCode);
-
-  @override
-  String toString() => 'PinRequest[sessionId=$sessionId, userId=$userId]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'session_id'] = this.sessionId;
-    json[r'user_id'] = this.userId;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    PinRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'session_id';
+    yield serializers.serialize(
+      object.sessionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'user_id';
+    yield serializers.serialize(
+      object.userId,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [PinRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static PinRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PinRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PinRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return PinRequest(
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        userId: mapValueOfType<String>(json, r'user_id')!,
-      );
-    }
-    return null;
-  }
-
-  static List<PinRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    PinRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <PinRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = PinRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, PinRequest> mapFromJson(dynamic json) {
-    final map = <String, PinRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = PinRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of PinRequest-objects as value to a dart map
-  static Map<String, List<PinRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required PinRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<PinRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = PinRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.sessionId = valueDes;
+          break;
+        case r'user_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.userId = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'session_id',
-    'user_id',
-  };
+  @override
+  PinRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = PinRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

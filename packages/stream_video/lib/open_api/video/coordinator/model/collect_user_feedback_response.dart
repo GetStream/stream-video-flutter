@@ -1,121 +1,117 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'collect_user_feedback_response.g.dart';
 
-class CollectUserFeedbackResponse {
-  /// Returns a new [CollectUserFeedbackResponse] instance.
-  CollectUserFeedbackResponse({
-    required this.duration,
-  });
-
+/// Basic response information
+///
+/// Properties:
+/// * [duration] - Duration of the request in milliseconds
+@BuiltValue()
+abstract class CollectUserFeedbackResponse
+    implements
+        Built<CollectUserFeedbackResponse, CollectUserFeedbackResponseBuilder> {
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
+
+  CollectUserFeedbackResponse._();
+
+  factory CollectUserFeedbackResponse(
+          [void updates(CollectUserFeedbackResponseBuilder b)]) =
+      _$CollectUserFeedbackResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CollectUserFeedbackResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CollectUserFeedbackResponse> get serializer =>
+      _$CollectUserFeedbackResponseSerializer();
+}
+
+class _$CollectUserFeedbackResponseSerializer
+    implements PrimitiveSerializer<CollectUserFeedbackResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CollectUserFeedbackResponse,
+    _$CollectUserFeedbackResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CollectUserFeedbackResponse && other.duration == duration;
+  final String wireName = r'CollectUserFeedbackResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (duration.hashCode);
-
-  @override
-  String toString() => 'CollectUserFeedbackResponse[duration=$duration]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'duration'] = this.duration;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CollectUserFeedbackResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CollectUserFeedbackResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CollectUserFeedbackResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CollectUserFeedbackResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CollectUserFeedbackResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CollectUserFeedbackResponse(
-        duration: mapValueOfType<String>(json, r'duration')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CollectUserFeedbackResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CollectUserFeedbackResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CollectUserFeedbackResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CollectUserFeedbackResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CollectUserFeedbackResponse> mapFromJson(dynamic json) {
-    final map = <String, CollectUserFeedbackResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CollectUserFeedbackResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CollectUserFeedbackResponse-objects as value to a dart map
-  static Map<String, List<CollectUserFeedbackResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CollectUserFeedbackResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CollectUserFeedbackResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CollectUserFeedbackResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration',
-  };
+  @override
+  CollectUserFeedbackResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CollectUserFeedbackResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

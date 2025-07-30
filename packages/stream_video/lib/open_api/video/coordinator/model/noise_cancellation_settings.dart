@@ -1,204 +1,140 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'noise_cancellation_settings.g.dart';
 
-class NoiseCancellationSettings {
-  /// Returns a new [NoiseCancellationSettings] instance.
-  NoiseCancellationSettings({
-    required this.mode,
-  });
+/// NoiseCancellationSettings
+///
+/// Properties:
+/// * [mode]
+@BuiltValue()
+abstract class NoiseCancellationSettings
+    implements
+        Built<NoiseCancellationSettings, NoiseCancellationSettingsBuilder> {
+  @BuiltValueField(wireName: r'mode')
+  NoiseCancellationSettingsModeEnum get mode;
+  // enum modeEnum {  available,  disabled,  auto-on,  };
 
-  NoiseCancellationSettingsModeEnum mode;
+  NoiseCancellationSettings._();
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is NoiseCancellationSettings && other.mode == mode;
+  factory NoiseCancellationSettings(
+          [void updates(NoiseCancellationSettingsBuilder b)]) =
+      _$NoiseCancellationSettings;
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (mode.hashCode);
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(NoiseCancellationSettingsBuilder b) => b;
 
-  @override
-  String toString() => 'NoiseCancellationSettings[mode=$mode]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'mode'] = this.mode;
-    return json;
-  }
-
-  /// Returns a new [NoiseCancellationSettings] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static NoiseCancellationSettings? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "NoiseCancellationSettings[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "NoiseCancellationSettings[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return NoiseCancellationSettings(
-        mode: NoiseCancellationSettingsModeEnum.fromJson(json[r'mode'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<NoiseCancellationSettings> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <NoiseCancellationSettings>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = NoiseCancellationSettings.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-
-  static Map<String, NoiseCancellationSettings> mapFromJson(dynamic json) {
-    final map = <String, NoiseCancellationSettings>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = NoiseCancellationSettings.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of NoiseCancellationSettings-objects as value to a dart map
-  static Map<String, List<NoiseCancellationSettings>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<NoiseCancellationSettings>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = NoiseCancellationSettings.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'mode',
-  };
+  @BuiltValueSerializer(custom: true)
+  static Serializer<NoiseCancellationSettings> get serializer =>
+      _$NoiseCancellationSettingsSerializer();
 }
 
-class NoiseCancellationSettingsModeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const NoiseCancellationSettingsModeEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
+class _$NoiseCancellationSettingsSerializer
+    implements PrimitiveSerializer<NoiseCancellationSettings> {
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const available = NoiseCancellationSettingsModeEnum._(r'available');
-  static const disabled = NoiseCancellationSettingsModeEnum._(r'disabled');
-  static const autoOn = NoiseCancellationSettingsModeEnum._(r'auto-on');
-
-  /// List of all possible values in this [enum][NoiseCancellationSettingsModeEnum].
-  static const values = <NoiseCancellationSettingsModeEnum>[
-    available,
-    disabled,
-    autoOn,
+  final Iterable<Type> types = const [
+    NoiseCancellationSettings,
+    _$NoiseCancellationSettings
   ];
 
-  static NoiseCancellationSettingsModeEnum? fromJson(dynamic value) =>
-      NoiseCancellationSettingsModeEnumTypeTransformer().decode(value);
+  @override
+  final String wireName = r'NoiseCancellationSettings';
 
-  static List<NoiseCancellationSettingsModeEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    NoiseCancellationSettings object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'mode';
+    yield serializers.serialize(
+      object.mode,
+      specifiedType: const FullType(NoiseCancellationSettingsModeEnum),
+    );
+  }
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    NoiseCancellationSettings object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <NoiseCancellationSettingsModeEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = NoiseCancellationSettingsModeEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
+  }
+
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required NoiseCancellationSettingsBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'mode':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(NoiseCancellationSettingsModeEnum),
+          ) as NoiseCancellationSettingsModeEnum;
+          result.mode = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return result.toList(growable: growable);
+  }
+
+  @override
+  NoiseCancellationSettings deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = NoiseCancellationSettingsBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
   }
 }
 
-/// Transformation class that can [encode] an instance of [NoiseCancellationSettingsModeEnum] to String,
-/// and [decode] dynamic data back to [NoiseCancellationSettingsModeEnum].
-class NoiseCancellationSettingsModeEnumTypeTransformer {
-  factory NoiseCancellationSettingsModeEnumTypeTransformer() =>
-      _instance ??= const NoiseCancellationSettingsModeEnumTypeTransformer._();
+class NoiseCancellationSettingsModeEnum extends EnumClass {
+  @BuiltValueEnumConst(wireName: r'available')
+  static const NoiseCancellationSettingsModeEnum available =
+      _$noiseCancellationSettingsModeEnum_available;
+  @BuiltValueEnumConst(wireName: r'disabled')
+  static const NoiseCancellationSettingsModeEnum disabled =
+      _$noiseCancellationSettingsModeEnum_disabled;
+  @BuiltValueEnumConst(wireName: r'auto-on')
+  static const NoiseCancellationSettingsModeEnum autoOn =
+      _$noiseCancellationSettingsModeEnum_autoOn;
 
-  const NoiseCancellationSettingsModeEnumTypeTransformer._();
+  static Serializer<NoiseCancellationSettingsModeEnum> get serializer =>
+      _$noiseCancellationSettingsModeEnumSerializer;
 
-  String encode(NoiseCancellationSettingsModeEnum data) => data.value;
+  const NoiseCancellationSettingsModeEnum._(String name) : super(name);
 
-  /// Decodes a [dynamic value][data] to a NoiseCancellationSettingsModeEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  NoiseCancellationSettingsModeEnum? decode(dynamic data,
-      {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'available':
-          return NoiseCancellationSettingsModeEnum.available;
-        case r'disabled':
-          return NoiseCancellationSettingsModeEnum.disabled;
-        case r'auto-on':
-          return NoiseCancellationSettingsModeEnum.autoOn;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
-
-  /// Singleton [NoiseCancellationSettingsModeEnumTypeTransformer] instance.
-  static NoiseCancellationSettingsModeEnumTypeTransformer? _instance;
+  static BuiltSet<NoiseCancellationSettingsModeEnum> get values =>
+      _$noiseCancellationSettingsModeEnumValues;
+  static NoiseCancellationSettingsModeEnum valueOf(String name) =>
+      _$noiseCancellationSettingsModeEnumValueOf(name);
 }

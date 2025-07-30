@@ -1,252 +1,251 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/quality_score_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_participant_count_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_duration_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/calls_per_day_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/network_metrics_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/sdk_usage_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_feedback_report_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'query_aggregate_call_stats_response.g.dart';
 
-class QueryAggregateCallStatsResponse {
-  /// Returns a new [QueryAggregateCallStatsResponse] instance.
-  QueryAggregateCallStatsResponse({
-    this.callDurationReport,
-    this.callParticipantCountReport,
-    this.callsPerDayReport,
-    required this.duration,
-    this.networkMetricsReport,
-    this.qualityScoreReport,
-    this.sdkUsageReport,
-    this.userFeedbackReport,
-  });
+/// Basic response information
+///
+/// Properties:
+/// * [callDurationReport]
+/// * [callParticipantCountReport]
+/// * [callsPerDayReport]
+/// * [duration] - Duration of the request in milliseconds
+/// * [networkMetricsReport]
+/// * [qualityScoreReport]
+/// * [sdkUsageReport]
+/// * [userFeedbackReport]
+@BuiltValue()
+abstract class QueryAggregateCallStatsResponse
+    implements
+        Built<QueryAggregateCallStatsResponse,
+            QueryAggregateCallStatsResponseBuilder> {
+  @BuiltValueField(wireName: r'call_duration_report')
+  CallDurationReportResponse? get callDurationReport;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallDurationReportResponse? callDurationReport;
+  @BuiltValueField(wireName: r'call_participant_count_report')
+  CallParticipantCountReportResponse? get callParticipantCountReport;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallParticipantCountReportResponse? callParticipantCountReport;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallsPerDayReportResponse? callsPerDayReport;
+  @BuiltValueField(wireName: r'calls_per_day_report')
+  CallsPerDayReportResponse? get callsPerDayReport;
 
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  NetworkMetricsReportResponse? networkMetricsReport;
+  @BuiltValueField(wireName: r'network_metrics_report')
+  NetworkMetricsReportResponse? get networkMetricsReport;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  QualityScoreReportResponse? qualityScoreReport;
+  @BuiltValueField(wireName: r'quality_score_report')
+  QualityScoreReportResponse? get qualityScoreReport;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  SDKUsageReportResponse? sdkUsageReport;
+  @BuiltValueField(wireName: r'sdk_usage_report')
+  SDKUsageReportResponse? get sdkUsageReport;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  UserFeedbackReportResponse? userFeedbackReport;
+  @BuiltValueField(wireName: r'user_feedback_report')
+  UserFeedbackReportResponse? get userFeedbackReport;
+
+  QueryAggregateCallStatsResponse._();
+
+  factory QueryAggregateCallStatsResponse(
+          [void updates(QueryAggregateCallStatsResponseBuilder b)]) =
+      _$QueryAggregateCallStatsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(QueryAggregateCallStatsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<QueryAggregateCallStatsResponse> get serializer =>
+      _$QueryAggregateCallStatsResponseSerializer();
+}
+
+class _$QueryAggregateCallStatsResponseSerializer
+    implements PrimitiveSerializer<QueryAggregateCallStatsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    QueryAggregateCallStatsResponse,
+    _$QueryAggregateCallStatsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is QueryAggregateCallStatsResponse &&
-          other.callDurationReport == callDurationReport &&
-          other.callParticipantCountReport == callParticipantCountReport &&
-          other.callsPerDayReport == callsPerDayReport &&
-          other.duration == duration &&
-          other.networkMetricsReport == networkMetricsReport &&
-          other.qualityScoreReport == qualityScoreReport &&
-          other.sdkUsageReport == sdkUsageReport &&
-          other.userFeedbackReport == userFeedbackReport;
+  final String wireName = r'QueryAggregateCallStatsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callDurationReport == null ? 0 : callDurationReport!.hashCode) +
-      (callParticipantCountReport == null
-          ? 0
-          : callParticipantCountReport!.hashCode) +
-      (callsPerDayReport == null ? 0 : callsPerDayReport!.hashCode) +
-      (duration.hashCode) +
-      (networkMetricsReport == null ? 0 : networkMetricsReport!.hashCode) +
-      (qualityScoreReport == null ? 0 : qualityScoreReport!.hashCode) +
-      (sdkUsageReport == null ? 0 : sdkUsageReport!.hashCode) +
-      (userFeedbackReport == null ? 0 : userFeedbackReport!.hashCode);
-
-  @override
-  String toString() =>
-      'QueryAggregateCallStatsResponse[callDurationReport=$callDurationReport, callParticipantCountReport=$callParticipantCountReport, callsPerDayReport=$callsPerDayReport, duration=$duration, networkMetricsReport=$networkMetricsReport, qualityScoreReport=$qualityScoreReport, sdkUsageReport=$sdkUsageReport, userFeedbackReport=$userFeedbackReport]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.callDurationReport != null) {
-      json[r'call_duration_report'] = this.callDurationReport;
-    } else {
-      json[r'call_duration_report'] = null;
-    }
-    if (this.callParticipantCountReport != null) {
-      json[r'call_participant_count_report'] = this.callParticipantCountReport;
-    } else {
-      json[r'call_participant_count_report'] = null;
-    }
-    if (this.callsPerDayReport != null) {
-      json[r'calls_per_day_report'] = this.callsPerDayReport;
-    } else {
-      json[r'calls_per_day_report'] = null;
-    }
-    json[r'duration'] = this.duration;
-    if (this.networkMetricsReport != null) {
-      json[r'network_metrics_report'] = this.networkMetricsReport;
-    } else {
-      json[r'network_metrics_report'] = null;
-    }
-    if (this.qualityScoreReport != null) {
-      json[r'quality_score_report'] = this.qualityScoreReport;
-    } else {
-      json[r'quality_score_report'] = null;
-    }
-    if (this.sdkUsageReport != null) {
-      json[r'sdk_usage_report'] = this.sdkUsageReport;
-    } else {
-      json[r'sdk_usage_report'] = null;
-    }
-    if (this.userFeedbackReport != null) {
-      json[r'user_feedback_report'] = this.userFeedbackReport;
-    } else {
-      json[r'user_feedback_report'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [QueryAggregateCallStatsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static QueryAggregateCallStatsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryAggregateCallStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryAggregateCallStatsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return QueryAggregateCallStatsResponse(
-        callDurationReport:
-            CallDurationReportResponse.fromJson(json[r'call_duration_report']),
-        callParticipantCountReport: CallParticipantCountReportResponse.fromJson(
-            json[r'call_participant_count_report']),
-        callsPerDayReport:
-            CallsPerDayReportResponse.fromJson(json[r'calls_per_day_report']),
-        duration: mapValueOfType<String>(json, r'duration')!,
-        networkMetricsReport: NetworkMetricsReportResponse.fromJson(
-            json[r'network_metrics_report']),
-        qualityScoreReport:
-            QualityScoreReportResponse.fromJson(json[r'quality_score_report']),
-        sdkUsageReport:
-            SDKUsageReportResponse.fromJson(json[r'sdk_usage_report']),
-        userFeedbackReport:
-            UserFeedbackReportResponse.fromJson(json[r'user_feedback_report']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    QueryAggregateCallStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.callDurationReport != null) {
+      yield r'call_duration_report';
+      yield serializers.serialize(
+        object.callDurationReport,
+        specifiedType: const FullType(CallDurationReportResponse),
       );
     }
-    return null;
+    if (object.callParticipantCountReport != null) {
+      yield r'call_participant_count_report';
+      yield serializers.serialize(
+        object.callParticipantCountReport,
+        specifiedType: const FullType(CallParticipantCountReportResponse),
+      );
+    }
+    if (object.callsPerDayReport != null) {
+      yield r'calls_per_day_report';
+      yield serializers.serialize(
+        object.callsPerDayReport,
+        specifiedType: const FullType(CallsPerDayReportResponse),
+      );
+    }
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    if (object.networkMetricsReport != null) {
+      yield r'network_metrics_report';
+      yield serializers.serialize(
+        object.networkMetricsReport,
+        specifiedType: const FullType(NetworkMetricsReportResponse),
+      );
+    }
+    if (object.qualityScoreReport != null) {
+      yield r'quality_score_report';
+      yield serializers.serialize(
+        object.qualityScoreReport,
+        specifiedType: const FullType(QualityScoreReportResponse),
+      );
+    }
+    if (object.sdkUsageReport != null) {
+      yield r'sdk_usage_report';
+      yield serializers.serialize(
+        object.sdkUsageReport,
+        specifiedType: const FullType(SDKUsageReportResponse),
+      );
+    }
+    if (object.userFeedbackReport != null) {
+      yield r'user_feedback_report';
+      yield serializers.serialize(
+        object.userFeedbackReport,
+        specifiedType: const FullType(UserFeedbackReportResponse),
+      );
+    }
   }
 
-  static List<QueryAggregateCallStatsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    QueryAggregateCallStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <QueryAggregateCallStatsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = QueryAggregateCallStatsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, QueryAggregateCallStatsResponse> mapFromJson(
-      dynamic json) {
-    final map = <String, QueryAggregateCallStatsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = QueryAggregateCallStatsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of QueryAggregateCallStatsResponse-objects as value to a dart map
-  static Map<String, List<QueryAggregateCallStatsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required QueryAggregateCallStatsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<QueryAggregateCallStatsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = QueryAggregateCallStatsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_duration_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallDurationReportResponse),
+          ) as CallDurationReportResponse;
+          result.callDurationReport.replace(valueDes);
+          break;
+        case r'call_participant_count_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallParticipantCountReportResponse),
+          ) as CallParticipantCountReportResponse;
+          result.callParticipantCountReport.replace(valueDes);
+          break;
+        case r'calls_per_day_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallsPerDayReportResponse),
+          ) as CallsPerDayReportResponse;
+          result.callsPerDayReport.replace(valueDes);
+          break;
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'network_metrics_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(NetworkMetricsReportResponse),
+          ) as NetworkMetricsReportResponse;
+          result.networkMetricsReport.replace(valueDes);
+          break;
+        case r'quality_score_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(QualityScoreReportResponse),
+          ) as QualityScoreReportResponse;
+          result.qualityScoreReport.replace(valueDes);
+          break;
+        case r'sdk_usage_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(SDKUsageReportResponse),
+          ) as SDKUsageReportResponse;
+          result.sdkUsageReport.replace(valueDes);
+          break;
+        case r'user_feedback_report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserFeedbackReportResponse),
+          ) as UserFeedbackReportResponse;
+          result.userFeedbackReport.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration',
-  };
+  @override
+  QueryAggregateCallStatsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = QueryAggregateCallStatsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

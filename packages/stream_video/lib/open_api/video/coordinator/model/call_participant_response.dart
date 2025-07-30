@@ -1,146 +1,164 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_participant_response.g.dart';
 
-class CallParticipantResponse {
-  /// Returns a new [CallParticipantResponse] instance.
-  CallParticipantResponse({
-    required this.joinedAt,
-    required this.role,
-    required this.user,
-    required this.userSessionId,
-  });
+/// CallParticipantResponse
+///
+/// Properties:
+/// * [joinedAt]
+/// * [role]
+/// * [user]
+/// * [userSessionId]
+@BuiltValue()
+abstract class CallParticipantResponse
+    implements Built<CallParticipantResponse, CallParticipantResponseBuilder> {
+  @BuiltValueField(wireName: r'joined_at')
+  DateTime get joinedAt;
 
-  DateTime joinedAt;
+  @BuiltValueField(wireName: r'role')
+  String get role;
 
-  String role;
+  @BuiltValueField(wireName: r'user')
+  UserResponse get user;
 
-  UserResponse user;
+  @BuiltValueField(wireName: r'user_session_id')
+  String get userSessionId;
 
-  String userSessionId;
+  CallParticipantResponse._();
+
+  factory CallParticipantResponse(
+          [void updates(CallParticipantResponseBuilder b)]) =
+      _$CallParticipantResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallParticipantResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallParticipantResponse> get serializer =>
+      _$CallParticipantResponseSerializer();
+}
+
+class _$CallParticipantResponseSerializer
+    implements PrimitiveSerializer<CallParticipantResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallParticipantResponse,
+    _$CallParticipantResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallParticipantResponse &&
-          other.joinedAt == joinedAt &&
-          other.role == role &&
-          other.user == user &&
-          other.userSessionId == userSessionId;
+  final String wireName = r'CallParticipantResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (joinedAt.hashCode) +
-      (role.hashCode) +
-      (user.hashCode) +
-      (userSessionId.hashCode);
-
-  @override
-  String toString() =>
-      'CallParticipantResponse[joinedAt=$joinedAt, role=$role, user=$user, userSessionId=$userSessionId]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'joined_at'] = this.joinedAt.toUtc().toIso8601String();
-    json[r'role'] = this.role;
-    json[r'user'] = this.user;
-    json[r'user_session_id'] = this.userSessionId;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallParticipantResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'joined_at';
+    yield serializers.serialize(
+      object.joinedAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'role';
+    yield serializers.serialize(
+      object.role,
+      specifiedType: const FullType(String),
+    );
+    yield r'user';
+    yield serializers.serialize(
+      object.user,
+      specifiedType: const FullType(UserResponse),
+    );
+    yield r'user_session_id';
+    yield serializers.serialize(
+      object.userSessionId,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CallParticipantResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallParticipantResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallParticipantResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallParticipantResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallParticipantResponse(
-        joinedAt: mapDateTime(json, r'joined_at', r'')!,
-        role: mapValueOfType<String>(json, r'role')!,
-        user: UserResponse.fromJson(json[r'user'])!,
-        userSessionId: mapValueOfType<String>(json, r'user_session_id')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallParticipantResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallParticipantResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallParticipantResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallParticipantResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallParticipantResponse> mapFromJson(dynamic json) {
-    final map = <String, CallParticipantResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallParticipantResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallParticipantResponse-objects as value to a dart map
-  static Map<String, List<CallParticipantResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallParticipantResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallParticipantResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallParticipantResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'joined_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.joinedAt = valueDes;
+          break;
+        case r'role':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.role = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.user.replace(valueDes);
+          break;
+        case r'user_session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.userSessionId = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'joined_at',
-    'role',
-    'user',
-    'user_session_id',
-  };
+  @override
+  CallParticipantResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallParticipantResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,166 +1,202 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_participant_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_session_participant_left_event.g.dart';
 
-class CallSessionParticipantLeftEvent {
-  /// Returns a new [CallSessionParticipantLeftEvent] instance.
-  CallSessionParticipantLeftEvent({
-    required this.callCid,
-    required this.createdAt,
-    required this.durationSeconds,
-    required this.participant,
-    required this.sessionId,
-    this.type = 'call.session_participant_left',
-  });
+/// This event is sent when a participant leaves a call session
+///
+/// Properties:
+/// * [callCid]
+/// * [createdAt]
+/// * [durationSeconds] - The duration participant was in the session in seconds
+/// * [participant]
+/// * [sessionId] - Call session ID
+/// * [type] - The type of event: \"call.session_participant_left\" in this case
+@BuiltValue()
+abstract class CallSessionParticipantLeftEvent
+    implements
+        Built<CallSessionParticipantLeftEvent,
+            CallSessionParticipantLeftEventBuilder> {
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// The duration participant was in the session in seconds
-  int durationSeconds;
+  @BuiltValueField(wireName: r'duration_seconds')
+  int get durationSeconds;
 
-  CallParticipantResponse participant;
+  @BuiltValueField(wireName: r'participant')
+  CallParticipantResponse get participant;
 
   /// Call session ID
-  String sessionId;
+  @BuiltValueField(wireName: r'session_id')
+  String get sessionId;
 
   /// The type of event: \"call.session_participant_left\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
+
+  CallSessionParticipantLeftEvent._();
+
+  factory CallSessionParticipantLeftEvent(
+          [void updates(CallSessionParticipantLeftEventBuilder b)]) =
+      _$CallSessionParticipantLeftEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallSessionParticipantLeftEventBuilder b) =>
+      b..type = 'call.session_participant_left';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallSessionParticipantLeftEvent> get serializer =>
+      _$CallSessionParticipantLeftEventSerializer();
+}
+
+class _$CallSessionParticipantLeftEventSerializer
+    implements PrimitiveSerializer<CallSessionParticipantLeftEvent> {
+  @override
+  final Iterable<Type> types = const [
+    CallSessionParticipantLeftEvent,
+    _$CallSessionParticipantLeftEvent
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallSessionParticipantLeftEvent &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          other.durationSeconds == durationSeconds &&
-          other.participant == participant &&
-          other.sessionId == sessionId &&
-          other.type == type;
+  final String wireName = r'CallSessionParticipantLeftEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (durationSeconds.hashCode) +
-      (participant.hashCode) +
-      (sessionId.hashCode) +
-      (type.hashCode);
-
-  @override
-  String toString() =>
-      'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, durationSeconds=$durationSeconds, participant=$participant, sessionId=$sessionId, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'duration_seconds'] = this.durationSeconds;
-    json[r'participant'] = this.participant;
-    json[r'session_id'] = this.sessionId;
-    json[r'type'] = this.type;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallSessionParticipantLeftEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'duration_seconds';
+    yield serializers.serialize(
+      object.durationSeconds,
+      specifiedType: const FullType(int),
+    );
+    yield r'participant';
+    yield serializers.serialize(
+      object.participant,
+      specifiedType: const FullType(CallParticipantResponse),
+    );
+    yield r'session_id';
+    yield serializers.serialize(
+      object.sessionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CallSessionParticipantLeftEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallSessionParticipantLeftEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSessionParticipantLeftEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSessionParticipantLeftEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallSessionParticipantLeftEvent(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
-        participant: CallParticipantResponse.fromJson(json[r'participant'])!,
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        type: mapValueOfType<String>(json, r'type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallSessionParticipantLeftEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallSessionParticipantLeftEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallSessionParticipantLeftEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallSessionParticipantLeftEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallSessionParticipantLeftEvent> mapFromJson(
-      dynamic json) {
-    final map = <String, CallSessionParticipantLeftEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallSessionParticipantLeftEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallSessionParticipantLeftEvent-objects as value to a dart map
-  static Map<String, List<CallSessionParticipantLeftEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallSessionParticipantLeftEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallSessionParticipantLeftEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallSessionParticipantLeftEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'duration_seconds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.durationSeconds = valueDes;
+          break;
+        case r'participant':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallParticipantResponse),
+          ) as CallParticipantResponse;
+          result.participant.replace(valueDes);
+          break;
+        case r'session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.sessionId = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'created_at',
-    'duration_seconds',
-    'participant',
-    'session_id',
-    'type',
-  };
+  @override
+  CallSessionParticipantLeftEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallSessionParticipantLeftEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

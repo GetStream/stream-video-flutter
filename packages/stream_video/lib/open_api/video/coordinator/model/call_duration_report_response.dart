@@ -1,122 +1,120 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/daily_aggregate_call_duration_report_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_duration_report_response.g.dart';
 
-class CallDurationReportResponse {
-  /// Returns a new [CallDurationReportResponse] instance.
-  CallDurationReportResponse({
-    this.daily = const [],
-  });
+/// CallDurationReportResponse
+///
+/// Properties:
+/// * [daily]
+@BuiltValue()
+abstract class CallDurationReportResponse
+    implements
+        Built<CallDurationReportResponse, CallDurationReportResponseBuilder> {
+  @BuiltValueField(wireName: r'daily')
+  BuiltList<DailyAggregateCallDurationReportResponse> get daily;
 
-  List<DailyAggregateCallDurationReportResponse> daily;
+  CallDurationReportResponse._();
+
+  factory CallDurationReportResponse(
+          [void updates(CallDurationReportResponseBuilder b)]) =
+      _$CallDurationReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallDurationReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallDurationReportResponse> get serializer =>
+      _$CallDurationReportResponseSerializer();
+}
+
+class _$CallDurationReportResponseSerializer
+    implements PrimitiveSerializer<CallDurationReportResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallDurationReportResponse,
+    _$CallDurationReportResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallDurationReportResponse &&
-          _deepEquality.equals(other.daily, daily);
+  final String wireName = r'CallDurationReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (daily.hashCode);
-
-  @override
-  String toString() => 'CallDurationReportResponse[daily=$daily]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'daily'] = this.daily;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallDurationReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'daily';
+    yield serializers.serialize(
+      object.daily,
+      specifiedType: const FullType(
+          BuiltList, [FullType(DailyAggregateCallDurationReportResponse)]),
+    );
   }
 
-  /// Returns a new [CallDurationReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallDurationReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallDurationReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallDurationReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallDurationReportResponse(
-        daily: DailyAggregateCallDurationReportResponse.listFromJson(
-            json[r'daily']),
-      );
-    }
-    return null;
-  }
-
-  static List<CallDurationReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallDurationReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallDurationReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallDurationReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallDurationReportResponse> mapFromJson(dynamic json) {
-    final map = <String, CallDurationReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallDurationReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallDurationReportResponse-objects as value to a dart map
-  static Map<String, List<CallDurationReportResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallDurationReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallDurationReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallDurationReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'daily':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList,
+                [FullType(DailyAggregateCallDurationReportResponse)]),
+          ) as BuiltList<DailyAggregateCallDurationReportResponse>;
+          result.daily.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'daily',
-  };
+  @override
+  CallDurationReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallDurationReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,129 +1,127 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'egress_hls_response.g.dart';
 
-class EgressHLSResponse {
-  /// Returns a new [EgressHLSResponse] instance.
-  EgressHLSResponse({
-    required this.playlistUrl,
-    required this.status,
-  });
+/// EgressHLSResponse
+///
+/// Properties:
+/// * [playlistUrl]
+/// * [status]
+@BuiltValue()
+abstract class EgressHLSResponse
+    implements Built<EgressHLSResponse, EgressHLSResponseBuilder> {
+  @BuiltValueField(wireName: r'playlist_url')
+  String get playlistUrl;
 
-  String playlistUrl;
+  @BuiltValueField(wireName: r'status')
+  String get status;
 
-  String status;
+  EgressHLSResponse._();
+
+  factory EgressHLSResponse([void updates(EgressHLSResponseBuilder b)]) =
+      _$EgressHLSResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(EgressHLSResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<EgressHLSResponse> get serializer =>
+      _$EgressHLSResponseSerializer();
+}
+
+class _$EgressHLSResponseSerializer
+    implements PrimitiveSerializer<EgressHLSResponse> {
+  @override
+  final Iterable<Type> types = const [EgressHLSResponse, _$EgressHLSResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is EgressHLSResponse &&
-          other.playlistUrl == playlistUrl &&
-          other.status == status;
+  final String wireName = r'EgressHLSResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (playlistUrl.hashCode) + (status.hashCode);
-
-  @override
-  String toString() =>
-      'EgressHLSResponse[playlistUrl=$playlistUrl, status=$status]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'playlist_url'] = this.playlistUrl;
-    json[r'status'] = this.status;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    EgressHLSResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'playlist_url';
+    yield serializers.serialize(
+      object.playlistUrl,
+      specifiedType: const FullType(String),
+    );
+    yield r'status';
+    yield serializers.serialize(
+      object.status,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [EgressHLSResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static EgressHLSResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "EgressHLSResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "EgressHLSResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return EgressHLSResponse(
-        playlistUrl: mapValueOfType<String>(json, r'playlist_url')!,
-        status: mapValueOfType<String>(json, r'status')!,
-      );
-    }
-    return null;
-  }
-
-  static List<EgressHLSResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    EgressHLSResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <EgressHLSResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = EgressHLSResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, EgressHLSResponse> mapFromJson(dynamic json) {
-    final map = <String, EgressHLSResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = EgressHLSResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of EgressHLSResponse-objects as value to a dart map
-  static Map<String, List<EgressHLSResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required EgressHLSResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<EgressHLSResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = EgressHLSResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'playlist_url':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.playlistUrl = valueDes;
+          break;
+        case r'status':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.status = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'playlist_url',
-    'status',
-  };
+  @override
+  EgressHLSResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = EgressHLSResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,374 +1,492 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/egress_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_session_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/thumbnail_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_ingress_response.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_response.g.dart';
 
-class CallResponse {
-  /// Returns a new [CallResponse] instance.
-  CallResponse({
-    required this.backstage,
-    this.blockedUserIds = const [],
-    required this.captioning,
-    this.channelCid,
-    required this.cid,
-    required this.createdAt,
-    required this.createdBy,
-    required this.currentSessionId,
-    this.custom = const {},
-    required this.egress,
-    this.endedAt,
-    required this.id,
-    required this.ingress,
-    this.joinAheadTimeSeconds,
-    required this.recording,
-    this.session,
-    required this.settings,
-    this.startsAt,
-    this.team,
-    this.thumbnails,
-    required this.transcribing,
-    required this.type,
-    required this.updatedAt,
-  });
+/// Represents a call
+///
+/// Properties:
+/// * [backstage]
+/// * [blockedUserIds]
+/// * [captioning]
+/// * [channelCid]
+/// * [cid] - The unique identifier for a call (<type>:<id>)
+/// * [createdAt] - Date/time of creation
+/// * [createdBy]
+/// * [currentSessionId]
+/// * [custom] - Custom data for this object
+/// * [egress]
+/// * [endedAt] - Date/time when the call ended
+/// * [id] - Call ID
+/// * [ingress]
+/// * [joinAheadTimeSeconds]
+/// * [recording]
+/// * [session]
+/// * [settings]
+/// * [startsAt] - Date/time when the call will start
+/// * [team]
+/// * [thumbnails]
+/// * [transcribing]
+/// * [type] - The type of call
+/// * [updatedAt] - Date/time of the last update
+@BuiltValue()
+abstract class CallResponse
+    implements Built<CallResponse, CallResponseBuilder> {
+  @BuiltValueField(wireName: r'backstage')
+  bool get backstage;
 
-  bool backstage;
+  @BuiltValueField(wireName: r'blocked_user_ids')
+  BuiltList<String> get blockedUserIds;
 
-  List<String> blockedUserIds;
+  @BuiltValueField(wireName: r'captioning')
+  bool get captioning;
 
-  bool captioning;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? channelCid;
+  @BuiltValueField(wireName: r'channel_cid')
+  String? get channelCid;
 
   /// The unique identifier for a call (<type>:<id>)
-  String cid;
+  @BuiltValueField(wireName: r'cid')
+  String get cid;
 
   /// Date/time of creation
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
-  UserResponse createdBy;
+  @BuiltValueField(wireName: r'created_by')
+  UserResponse get createdBy;
 
-  String currentSessionId;
+  @BuiltValueField(wireName: r'current_session_id')
+  String get currentSessionId;
 
   /// Custom data for this object
-  Map<String, Object> custom;
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?> get custom;
 
-  EgressResponse egress;
+  @BuiltValueField(wireName: r'egress')
+  EgressResponse get egress;
 
   /// Date/time when the call ended
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? endedAt;
+  @BuiltValueField(wireName: r'ended_at')
+  DateTime? get endedAt;
 
   /// Call ID
-  String id;
+  @BuiltValueField(wireName: r'id')
+  String get id;
 
-  CallIngressResponse ingress;
+  @BuiltValueField(wireName: r'ingress')
+  CallIngressResponse get ingress;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? joinAheadTimeSeconds;
+  @BuiltValueField(wireName: r'join_ahead_time_seconds')
+  int? get joinAheadTimeSeconds;
 
-  bool recording;
+  @BuiltValueField(wireName: r'recording')
+  bool get recording;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallSessionResponse? session;
+  @BuiltValueField(wireName: r'session')
+  CallSessionResponse? get session;
 
-  CallSettingsResponse settings;
+  @BuiltValueField(wireName: r'settings')
+  CallSettingsResponse get settings;
 
   /// Date/time when the call will start
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? startsAt;
+  @BuiltValueField(wireName: r'starts_at')
+  DateTime? get startsAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? team;
+  @BuiltValueField(wireName: r'team')
+  String? get team;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  ThumbnailResponse? thumbnails;
+  @BuiltValueField(wireName: r'thumbnails')
+  ThumbnailResponse? get thumbnails;
 
-  bool transcribing;
+  @BuiltValueField(wireName: r'transcribing')
+  bool get transcribing;
 
   /// The type of call
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
   /// Date/time of the last update
-  DateTime updatedAt;
+  @BuiltValueField(wireName: r'updated_at')
+  DateTime get updatedAt;
+
+  CallResponse._();
+
+  factory CallResponse([void updates(CallResponseBuilder b)]) = _$CallResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallResponse> get serializer => _$CallResponseSerializer();
+}
+
+class _$CallResponseSerializer implements PrimitiveSerializer<CallResponse> {
+  @override
+  final Iterable<Type> types = const [CallResponse, _$CallResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallResponse &&
-          other.backstage == backstage &&
-          _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
-          other.captioning == captioning &&
-          other.channelCid == channelCid &&
-          other.cid == cid &&
-          other.createdAt == createdAt &&
-          other.createdBy == createdBy &&
-          other.currentSessionId == currentSessionId &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.egress == egress &&
-          other.endedAt == endedAt &&
-          other.id == id &&
-          other.ingress == ingress &&
-          other.joinAheadTimeSeconds == joinAheadTimeSeconds &&
-          other.recording == recording &&
-          other.session == session &&
-          other.settings == settings &&
-          other.startsAt == startsAt &&
-          other.team == team &&
-          other.thumbnails == thumbnails &&
-          other.transcribing == transcribing &&
-          other.type == type &&
-          other.updatedAt == updatedAt;
+  final String wireName = r'CallResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (backstage.hashCode) +
-      (blockedUserIds.hashCode) +
-      (captioning.hashCode) +
-      (channelCid == null ? 0 : channelCid!.hashCode) +
-      (cid.hashCode) +
-      (createdAt.hashCode) +
-      (createdBy.hashCode) +
-      (currentSessionId.hashCode) +
-      (custom.hashCode) +
-      (egress.hashCode) +
-      (endedAt == null ? 0 : endedAt!.hashCode) +
-      (id.hashCode) +
-      (ingress.hashCode) +
-      (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode) +
-      (recording.hashCode) +
-      (session == null ? 0 : session!.hashCode) +
-      (settings.hashCode) +
-      (startsAt == null ? 0 : startsAt!.hashCode) +
-      (team == null ? 0 : team!.hashCode) +
-      (thumbnails == null ? 0 : thumbnails!.hashCode) +
-      (transcribing.hashCode) +
-      (type.hashCode) +
-      (updatedAt.hashCode);
-
-  @override
-  String toString() =>
-      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, channelCid=$channelCid, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'backstage'] = this.backstage;
-    json[r'blocked_user_ids'] = this.blockedUserIds;
-    json[r'captioning'] = this.captioning;
-    if (this.channelCid != null) {
-      json[r'channel_cid'] = this.channelCid;
-    } else {
-      json[r'channel_cid'] = null;
-    }
-    json[r'cid'] = this.cid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'created_by'] = this.createdBy;
-    json[r'current_session_id'] = this.currentSessionId;
-    json[r'custom'] = this.custom;
-    json[r'egress'] = this.egress;
-    if (this.endedAt != null) {
-      json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'ended_at'] = null;
-    }
-    json[r'id'] = this.id;
-    json[r'ingress'] = this.ingress;
-    if (this.joinAheadTimeSeconds != null) {
-      json[r'join_ahead_time_seconds'] = this.joinAheadTimeSeconds;
-    } else {
-      json[r'join_ahead_time_seconds'] = null;
-    }
-    json[r'recording'] = this.recording;
-    if (this.session != null) {
-      json[r'session'] = this.session;
-    } else {
-      json[r'session'] = null;
-    }
-    json[r'settings'] = this.settings;
-    if (this.startsAt != null) {
-      json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
-    } else {
-      json[r'starts_at'] = null;
-    }
-    if (this.team != null) {
-      json[r'team'] = this.team;
-    } else {
-      json[r'team'] = null;
-    }
-    if (this.thumbnails != null) {
-      json[r'thumbnails'] = this.thumbnails;
-    } else {
-      json[r'thumbnails'] = null;
-    }
-    json[r'transcribing'] = this.transcribing;
-    json[r'type'] = this.type;
-    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
-    return json;
-  }
-
-  /// Returns a new [CallResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallResponse(
-        backstage: mapValueOfType<bool>(json, r'backstage')!,
-        blockedUserIds: json[r'blocked_user_ids'] is Iterable
-            ? (json[r'blocked_user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        captioning: mapValueOfType<bool>(json, r'captioning')!,
-        channelCid: mapValueOfType<String>(json, r'channel_cid'),
-        cid: mapValueOfType<String>(json, r'cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: UserResponse.fromJson(json[r'created_by'])!,
-        currentSessionId: mapValueOfType<String>(json, r'current_session_id')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
-        egress: EgressResponse.fromJson(json[r'egress'])!,
-        endedAt: mapDateTime(json, r'ended_at', r''),
-        id: mapValueOfType<String>(json, r'id')!,
-        ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
-        joinAheadTimeSeconds:
-            mapValueOfType<int>(json, r'join_ahead_time_seconds'),
-        recording: mapValueOfType<bool>(json, r'recording')!,
-        session: CallSessionResponse.fromJson(json[r'session']),
-        settings: CallSettingsResponse.fromJson(json[r'settings'])!,
-        startsAt: mapDateTime(json, r'starts_at', r''),
-        team: mapValueOfType<String>(json, r'team'),
-        thumbnails: ThumbnailResponse.fromJson(json[r'thumbnails']),
-        transcribing: mapValueOfType<bool>(json, r'transcribing')!,
-        type: mapValueOfType<String>(json, r'type')!,
-        updatedAt: mapDateTime(json, r'updated_at', r'')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'backstage';
+    yield serializers.serialize(
+      object.backstage,
+      specifiedType: const FullType(bool),
+    );
+    yield r'blocked_user_ids';
+    yield serializers.serialize(
+      object.blockedUserIds,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    yield r'captioning';
+    yield serializers.serialize(
+      object.captioning,
+      specifiedType: const FullType(bool),
+    );
+    if (object.channelCid != null) {
+      yield r'channel_cid';
+      yield serializers.serialize(
+        object.channelCid,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    yield r'cid';
+    yield serializers.serialize(
+      object.cid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'created_by';
+    yield serializers.serialize(
+      object.createdBy,
+      specifiedType: const FullType(UserResponse),
+    );
+    yield r'current_session_id';
+    yield serializers.serialize(
+      object.currentSessionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'custom';
+    yield serializers.serialize(
+      object.custom,
+      specifiedType: const FullType(
+          BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+    );
+    yield r'egress';
+    yield serializers.serialize(
+      object.egress,
+      specifiedType: const FullType(EgressResponse),
+    );
+    if (object.endedAt != null) {
+      yield r'ended_at';
+      yield serializers.serialize(
+        object.endedAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(String),
+    );
+    yield r'ingress';
+    yield serializers.serialize(
+      object.ingress,
+      specifiedType: const FullType(CallIngressResponse),
+    );
+    if (object.joinAheadTimeSeconds != null) {
+      yield r'join_ahead_time_seconds';
+      yield serializers.serialize(
+        object.joinAheadTimeSeconds,
+        specifiedType: const FullType(int),
+      );
+    }
+    yield r'recording';
+    yield serializers.serialize(
+      object.recording,
+      specifiedType: const FullType(bool),
+    );
+    if (object.session != null) {
+      yield r'session';
+      yield serializers.serialize(
+        object.session,
+        specifiedType: const FullType(CallSessionResponse),
+      );
+    }
+    yield r'settings';
+    yield serializers.serialize(
+      object.settings,
+      specifiedType: const FullType(CallSettingsResponse),
+    );
+    if (object.startsAt != null) {
+      yield r'starts_at';
+      yield serializers.serialize(
+        object.startsAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.team != null) {
+      yield r'team';
+      yield serializers.serialize(
+        object.team,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.thumbnails != null) {
+      yield r'thumbnails';
+      yield serializers.serialize(
+        object.thumbnails,
+        specifiedType: const FullType(ThumbnailResponse),
+      );
+    }
+    yield r'transcribing';
+    yield serializers.serialize(
+      object.transcribing,
+      specifiedType: const FullType(bool),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    yield r'updated_at';
+    yield serializers.serialize(
+      object.updatedAt,
+      specifiedType: const FullType(DateTime),
+    );
   }
 
-  static List<CallResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallResponse> mapFromJson(dynamic json) {
-    final map = <String, CallResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallResponse-objects as value to a dart map
-  static Map<String, List<CallResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'backstage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.backstage = valueDes;
+          break;
+        case r'blocked_user_ids':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.blockedUserIds.replace(valueDes);
+          break;
+        case r'captioning':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.captioning = valueDes;
+          break;
+        case r'channel_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.channelCid = valueDes;
+          break;
+        case r'cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.cid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'created_by':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.createdBy.replace(valueDes);
+          break;
+        case r'current_session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.currentSessionId = valueDes;
+          break;
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        case r'egress':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(EgressResponse),
+          ) as EgressResponse;
+          result.egress.replace(valueDes);
+          break;
+        case r'ended_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.endedAt = valueDes;
+          break;
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.id = valueDes;
+          break;
+        case r'ingress':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallIngressResponse),
+          ) as CallIngressResponse;
+          result.ingress.replace(valueDes);
+          break;
+        case r'join_ahead_time_seconds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.joinAheadTimeSeconds = valueDes;
+          break;
+        case r'recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.recording = valueDes;
+          break;
+        case r'session':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallSessionResponse),
+          ) as CallSessionResponse;
+          result.session.replace(valueDes);
+          break;
+        case r'settings':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallSettingsResponse),
+          ) as CallSettingsResponse;
+          result.settings.replace(valueDes);
+          break;
+        case r'starts_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.startsAt = valueDes;
+          break;
+        case r'team':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.team = valueDes;
+          break;
+        case r'thumbnails':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ThumbnailResponse),
+          ) as ThumbnailResponse;
+          result.thumbnails.replace(valueDes);
+          break;
+        case r'transcribing':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.transcribing = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'updated_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.updatedAt = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'backstage',
-    'blocked_user_ids',
-    'captioning',
-    'cid',
-    'created_at',
-    'created_by',
-    'current_session_id',
-    'custom',
-    'egress',
-    'id',
-    'ingress',
-    'recording',
-    'settings',
-    'transcribing',
-    'type',
-    'updated_at',
-  };
+  @override
+  CallResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

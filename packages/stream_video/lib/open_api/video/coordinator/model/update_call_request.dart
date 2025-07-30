@@ -1,157 +1,156 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_settings_request.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'update_call_request.g.dart';
 
-class UpdateCallRequest {
-  /// Returns a new [UpdateCallRequest] instance.
-  UpdateCallRequest({
-    this.custom = const {},
-    this.settingsOverride,
-    this.startsAt,
-  });
-
+/// Request for updating a call
+///
+/// Properties:
+/// * [custom] - Custom data for this object
+/// * [settingsOverride]
+/// * [startsAt] - the time the call is scheduled to start
+@BuiltValue()
+abstract class UpdateCallRequest
+    implements Built<UpdateCallRequest, UpdateCallRequestBuilder> {
   /// Custom data for this object
-  Map<String, Object> custom;
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?>? get custom;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallSettingsRequest? settingsOverride;
+  @BuiltValueField(wireName: r'settings_override')
+  CallSettingsRequest? get settingsOverride;
 
   /// the time the call is scheduled to start
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? startsAt;
+  @BuiltValueField(wireName: r'starts_at')
+  DateTime? get startsAt;
+
+  UpdateCallRequest._();
+
+  factory UpdateCallRequest([void updates(UpdateCallRequestBuilder b)]) =
+      _$UpdateCallRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UpdateCallRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UpdateCallRequest> get serializer =>
+      _$UpdateCallRequestSerializer();
+}
+
+class _$UpdateCallRequestSerializer
+    implements PrimitiveSerializer<UpdateCallRequest> {
+  @override
+  final Iterable<Type> types = const [UpdateCallRequest, _$UpdateCallRequest];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UpdateCallRequest &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.settingsOverride == settingsOverride &&
-          other.startsAt == startsAt;
+  final String wireName = r'UpdateCallRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (custom.hashCode) +
-      (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
-      (startsAt == null ? 0 : startsAt!.hashCode);
-
-  @override
-  String toString() =>
-      'UpdateCallRequest[custom=$custom, settingsOverride=$settingsOverride, startsAt=$startsAt]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'custom'] = this.custom;
-    if (this.settingsOverride != null) {
-      json[r'settings_override'] = this.settingsOverride;
-    } else {
-      json[r'settings_override'] = null;
-    }
-    if (this.startsAt != null) {
-      json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
-    } else {
-      json[r'starts_at'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [UpdateCallRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UpdateCallRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UpdateCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UpdateCallRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UpdateCallRequest(
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        settingsOverride:
-            CallSettingsRequest.fromJson(json[r'settings_override']),
-        startsAt: mapDateTime(json, r'starts_at', r''),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UpdateCallRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.custom != null) {
+      yield r'custom';
+      yield serializers.serialize(
+        object.custom,
+        specifiedType: const FullType(
+            BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
       );
     }
-    return null;
+    if (object.settingsOverride != null) {
+      yield r'settings_override';
+      yield serializers.serialize(
+        object.settingsOverride,
+        specifiedType: const FullType(CallSettingsRequest),
+      );
+    }
+    if (object.startsAt != null) {
+      yield r'starts_at';
+      yield serializers.serialize(
+        object.startsAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
   }
 
-  static List<UpdateCallRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UpdateCallRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UpdateCallRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UpdateCallRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UpdateCallRequest> mapFromJson(dynamic json) {
-    final map = <String, UpdateCallRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UpdateCallRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UpdateCallRequest-objects as value to a dart map
-  static Map<String, List<UpdateCallRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UpdateCallRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UpdateCallRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UpdateCallRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        case r'settings_override':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallSettingsRequest),
+          ) as CallSettingsRequest;
+          result.settingsOverride.replace(valueDes);
+          break;
+        case r'starts_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.startsAt = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  UpdateCallRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UpdateCallRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

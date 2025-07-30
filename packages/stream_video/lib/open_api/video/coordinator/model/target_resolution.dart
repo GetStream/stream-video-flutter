@@ -1,152 +1,145 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'target_resolution.g.dart';
 
-class TargetResolution {
-  /// Returns a new [TargetResolution] instance.
-  TargetResolution({
-    this.bitrate,
-    required this.height,
-    required this.width,
-  });
+/// TargetResolution
+///
+/// Properties:
+/// * [bitrate]
+/// * [height]
+/// * [width]
+@BuiltValue()
+abstract class TargetResolution
+    implements Built<TargetResolution, TargetResolutionBuilder> {
+  @BuiltValueField(wireName: r'bitrate')
+  int? get bitrate;
 
-  /// Maximum value: 6000000
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? bitrate;
+  @BuiltValueField(wireName: r'height')
+  int get height;
 
-  /// Minimum value: 240
-  /// Maximum value: 3840
-  int height;
+  @BuiltValueField(wireName: r'width')
+  int get width;
 
-  /// Minimum value: 240
-  /// Maximum value: 3840
-  int width;
+  TargetResolution._();
+
+  factory TargetResolution([void updates(TargetResolutionBuilder b)]) =
+      _$TargetResolution;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(TargetResolutionBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<TargetResolution> get serializer =>
+      _$TargetResolutionSerializer();
+}
+
+class _$TargetResolutionSerializer
+    implements PrimitiveSerializer<TargetResolution> {
+  @override
+  final Iterable<Type> types = const [TargetResolution, _$TargetResolution];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TargetResolution &&
-          other.bitrate == bitrate &&
-          other.height == height &&
-          other.width == width;
+  final String wireName = r'TargetResolution';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (bitrate == null ? 0 : bitrate!.hashCode) +
-      (height.hashCode) +
-      (width.hashCode);
-
-  @override
-  String toString() =>
-      'TargetResolution[bitrate=$bitrate, height=$height, width=$width]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.bitrate != null) {
-      json[r'bitrate'] = this.bitrate;
-    } else {
-      json[r'bitrate'] = null;
-    }
-    json[r'height'] = this.height;
-    json[r'width'] = this.width;
-    return json;
-  }
-
-  /// Returns a new [TargetResolution] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static TargetResolution? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "TargetResolution[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "TargetResolution[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return TargetResolution(
-        bitrate: mapValueOfType<int>(json, r'bitrate'),
-        height: mapValueOfType<int>(json, r'height')!,
-        width: mapValueOfType<int>(json, r'width')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    TargetResolution object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.bitrate != null) {
+      yield r'bitrate';
+      yield serializers.serialize(
+        object.bitrate,
+        specifiedType: const FullType(int),
       );
     }
-    return null;
+    yield r'height';
+    yield serializers.serialize(
+      object.height,
+      specifiedType: const FullType(int),
+    );
+    yield r'width';
+    yield serializers.serialize(
+      object.width,
+      specifiedType: const FullType(int),
+    );
   }
 
-  static List<TargetResolution> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    TargetResolution object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <TargetResolution>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = TargetResolution.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, TargetResolution> mapFromJson(dynamic json) {
-    final map = <String, TargetResolution>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = TargetResolution.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of TargetResolution-objects as value to a dart map
-  static Map<String, List<TargetResolution>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required TargetResolutionBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<TargetResolution>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = TargetResolution.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'bitrate':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.bitrate = valueDes;
+          break;
+        case r'height':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.height = valueDes;
+          break;
+        case r'width':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.width = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'height',
-    'width',
-  };
+  @override
+  TargetResolution deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = TargetResolutionBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

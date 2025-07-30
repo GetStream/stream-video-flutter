@@ -1,121 +1,115 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/per_sdk_usage_report.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'sdk_usage_report.g.dart';
 
-class SDKUsageReport {
-  /// Returns a new [SDKUsageReport] instance.
-  SDKUsageReport({
-    this.perSdkUsage = const {},
-  });
+/// SDKUsageReport
+///
+/// Properties:
+/// * [perSdkUsage]
+@BuiltValue()
+abstract class SDKUsageReport
+    implements Built<SDKUsageReport, SDKUsageReportBuilder> {
+  @BuiltValueField(wireName: r'per_sdk_usage')
+  BuiltMap<String, PerSDKUsageReport?> get perSdkUsage;
 
-  Map<String, PerSDKUsageReport> perSdkUsage;
+  SDKUsageReport._();
+
+  factory SDKUsageReport([void updates(SDKUsageReportBuilder b)]) =
+      _$SDKUsageReport;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(SDKUsageReportBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<SDKUsageReport> get serializer =>
+      _$SDKUsageReportSerializer();
+}
+
+class _$SDKUsageReportSerializer
+    implements PrimitiveSerializer<SDKUsageReport> {
+  @override
+  final Iterable<Type> types = const [SDKUsageReport, _$SDKUsageReport];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SDKUsageReport &&
-          _deepEquality.equals(other.perSdkUsage, perSdkUsage);
+  final String wireName = r'SDKUsageReport';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (perSdkUsage.hashCode);
-
-  @override
-  String toString() => 'SDKUsageReport[perSdkUsage=$perSdkUsage]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'per_sdk_usage'] = this.perSdkUsage;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    SDKUsageReport object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'per_sdk_usage';
+    yield serializers.serialize(
+      object.perSdkUsage,
+      specifiedType: const FullType(
+          BuiltMap, [FullType(String), FullType.nullable(PerSDKUsageReport)]),
+    );
   }
 
-  /// Returns a new [SDKUsageReport] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static SDKUsageReport? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SDKUsageReport[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SDKUsageReport[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return SDKUsageReport(
-        perSdkUsage: PerSDKUsageReport.mapFromJson(json[r'per_sdk_usage']),
-      );
-    }
-    return null;
-  }
-
-  static List<SDKUsageReport> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    SDKUsageReport object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <SDKUsageReport>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = SDKUsageReport.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, SDKUsageReport> mapFromJson(dynamic json) {
-    final map = <String, SDKUsageReport>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = SDKUsageReport.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of SDKUsageReport-objects as value to a dart map
-  static Map<String, List<SDKUsageReport>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required SDKUsageReportBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<SDKUsageReport>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = SDKUsageReport.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'per_sdk_usage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltMap,
+                [FullType(String), FullType.nullable(PerSDKUsageReport)]),
+          ) as BuiltMap<String, PerSDKUsageReport?>;
+          result.perSdkUsage.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'per_sdk_usage',
-  };
+  @override
+  SDKUsageReport deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = SDKUsageReportBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

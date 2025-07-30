@@ -1,165 +1,172 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/member_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'query_call_members_response.g.dart';
 
-class QueryCallMembersResponse {
-  /// Returns a new [QueryCallMembersResponse] instance.
-  QueryCallMembersResponse({
-    required this.duration,
-    this.members = const [],
-    this.next,
-    this.prev,
-  });
-
+/// Basic response information
+///
+/// Properties:
+/// * [duration] - Duration of the request in milliseconds
+/// * [members]
+/// * [next]
+/// * [prev]
+@BuiltValue()
+abstract class QueryCallMembersResponse
+    implements
+        Built<QueryCallMembersResponse, QueryCallMembersResponseBuilder> {
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  List<MemberResponse> members;
+  @BuiltValueField(wireName: r'members')
+  BuiltList<MemberResponse> get members;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? next;
+  @BuiltValueField(wireName: r'next')
+  String? get next;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? prev;
+  @BuiltValueField(wireName: r'prev')
+  String? get prev;
+
+  QueryCallMembersResponse._();
+
+  factory QueryCallMembersResponse(
+          [void updates(QueryCallMembersResponseBuilder b)]) =
+      _$QueryCallMembersResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(QueryCallMembersResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<QueryCallMembersResponse> get serializer =>
+      _$QueryCallMembersResponseSerializer();
+}
+
+class _$QueryCallMembersResponseSerializer
+    implements PrimitiveSerializer<QueryCallMembersResponse> {
+  @override
+  final Iterable<Type> types = const [
+    QueryCallMembersResponse,
+    _$QueryCallMembersResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is QueryCallMembersResponse &&
-          other.duration == duration &&
-          _deepEquality.equals(other.members, members) &&
-          other.next == next &&
-          other.prev == prev;
+  final String wireName = r'QueryCallMembersResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (duration.hashCode) +
-      (members.hashCode) +
-      (next == null ? 0 : next!.hashCode) +
-      (prev == null ? 0 : prev!.hashCode);
-
-  @override
-  String toString() =>
-      'QueryCallMembersResponse[duration=$duration, members=$members, next=$next, prev=$prev]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'duration'] = this.duration;
-    json[r'members'] = this.members;
-    if (this.next != null) {
-      json[r'next'] = this.next;
-    } else {
-      json[r'next'] = null;
-    }
-    if (this.prev != null) {
-      json[r'prev'] = this.prev;
-    } else {
-      json[r'prev'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [QueryCallMembersResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static QueryCallMembersResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryCallMembersResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryCallMembersResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return QueryCallMembersResponse(
-        duration: mapValueOfType<String>(json, r'duration')!,
-        members: MemberResponse.listFromJson(json[r'members']),
-        next: mapValueOfType<String>(json, r'next'),
-        prev: mapValueOfType<String>(json, r'prev'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    QueryCallMembersResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    yield r'members';
+    yield serializers.serialize(
+      object.members,
+      specifiedType: const FullType(BuiltList, [FullType(MemberResponse)]),
+    );
+    if (object.next != null) {
+      yield r'next';
+      yield serializers.serialize(
+        object.next,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.prev != null) {
+      yield r'prev';
+      yield serializers.serialize(
+        object.prev,
+        specifiedType: const FullType(String),
+      );
+    }
   }
 
-  static List<QueryCallMembersResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    QueryCallMembersResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <QueryCallMembersResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = QueryCallMembersResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, QueryCallMembersResponse> mapFromJson(dynamic json) {
-    final map = <String, QueryCallMembersResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = QueryCallMembersResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of QueryCallMembersResponse-objects as value to a dart map
-  static Map<String, List<QueryCallMembersResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required QueryCallMembersResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<QueryCallMembersResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = QueryCallMembersResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'members':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(MemberResponse)]),
+          ) as BuiltList<MemberResponse>;
+          result.members.replace(valueDes);
+          break;
+        case r'next':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.next = valueDes;
+          break;
+        case r'prev':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.prev = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration',
-    'members',
-  };
+  @override
+  QueryCallMembersResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = QueryCallMembersResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

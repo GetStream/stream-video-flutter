@@ -1,132 +1,134 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/sdk_usage_report.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'daily_aggregate_sdk_usage_report_response.g.dart';
 
-class DailyAggregateSDKUsageReportResponse {
-  /// Returns a new [DailyAggregateSDKUsageReportResponse] instance.
-  DailyAggregateSDKUsageReportResponse({
-    required this.date,
-    required this.report,
-  });
+/// DailyAggregateSDKUsageReportResponse
+///
+/// Properties:
+/// * [date]
+/// * [report]
+@BuiltValue()
+abstract class DailyAggregateSDKUsageReportResponse
+    implements
+        Built<DailyAggregateSDKUsageReportResponse,
+            DailyAggregateSDKUsageReportResponseBuilder> {
+  @BuiltValueField(wireName: r'date')
+  String get date;
 
-  String date;
+  @BuiltValueField(wireName: r'report')
+  SDKUsageReport get report;
 
-  SDKUsageReport report;
+  DailyAggregateSDKUsageReportResponse._();
+
+  factory DailyAggregateSDKUsageReportResponse(
+          [void updates(DailyAggregateSDKUsageReportResponseBuilder b)]) =
+      _$DailyAggregateSDKUsageReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(DailyAggregateSDKUsageReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<DailyAggregateSDKUsageReportResponse> get serializer =>
+      _$DailyAggregateSDKUsageReportResponseSerializer();
+}
+
+class _$DailyAggregateSDKUsageReportResponseSerializer
+    implements PrimitiveSerializer<DailyAggregateSDKUsageReportResponse> {
+  @override
+  final Iterable<Type> types = const [
+    DailyAggregateSDKUsageReportResponse,
+    _$DailyAggregateSDKUsageReportResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DailyAggregateSDKUsageReportResponse &&
-          other.date == date &&
-          other.report == report;
+  final String wireName = r'DailyAggregateSDKUsageReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (date.hashCode) + (report.hashCode);
-
-  @override
-  String toString() =>
-      'DailyAggregateSDKUsageReportResponse[date=$date, report=$report]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'date'] = this.date;
-    json[r'report'] = this.report;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    DailyAggregateSDKUsageReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'date';
+    yield serializers.serialize(
+      object.date,
+      specifiedType: const FullType(String),
+    );
+    yield r'report';
+    yield serializers.serialize(
+      object.report,
+      specifiedType: const FullType(SDKUsageReport),
+    );
   }
 
-  /// Returns a new [DailyAggregateSDKUsageReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static DailyAggregateSDKUsageReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "DailyAggregateSDKUsageReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "DailyAggregateSDKUsageReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return DailyAggregateSDKUsageReportResponse(
-        date: mapValueOfType<String>(json, r'date')!,
-        report: SDKUsageReport.fromJson(json[r'report'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<DailyAggregateSDKUsageReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    DailyAggregateSDKUsageReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <DailyAggregateSDKUsageReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = DailyAggregateSDKUsageReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, DailyAggregateSDKUsageReportResponse> mapFromJson(
-      dynamic json) {
-    final map = <String, DailyAggregateSDKUsageReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value =
-            DailyAggregateSDKUsageReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of DailyAggregateSDKUsageReportResponse-objects as value to a dart map
-  static Map<String, List<DailyAggregateSDKUsageReportResponse>>
-      mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required DailyAggregateSDKUsageReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<DailyAggregateSDKUsageReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = DailyAggregateSDKUsageReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'date':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.date = valueDes;
+          break;
+        case r'report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(SDKUsageReport),
+          ) as SDKUsageReport;
+          result.report.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'date',
-    'report',
-  };
+  @override
+  DailyAggregateSDKUsageReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = DailyAggregateSDKUsageReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

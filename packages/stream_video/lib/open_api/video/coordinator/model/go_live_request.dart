@@ -1,219 +1,202 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'go_live_request.g.dart';
 
-class GoLiveRequest {
-  /// Returns a new [GoLiveRequest] instance.
-  GoLiveRequest({
-    this.recordingStorageName,
-    this.startClosedCaption,
-    this.startHls,
-    this.startRecording,
-    this.startTranscription,
-    this.transcriptionStorageName,
-  });
+/// GoLiveRequest
+///
+/// Properties:
+/// * [recordingStorageName]
+/// * [startClosedCaption]
+/// * [startHls]
+/// * [startRecording]
+/// * [startTranscription]
+/// * [transcriptionStorageName]
+@BuiltValue()
+abstract class GoLiveRequest
+    implements Built<GoLiveRequest, GoLiveRequestBuilder> {
+  @BuiltValueField(wireName: r'recording_storage_name')
+  String? get recordingStorageName;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? recordingStorageName;
+  @BuiltValueField(wireName: r'start_closed_caption')
+  bool? get startClosedCaption;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? startClosedCaption;
+  @BuiltValueField(wireName: r'start_hls')
+  bool? get startHls;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? startHls;
+  @BuiltValueField(wireName: r'start_recording')
+  bool? get startRecording;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? startRecording;
+  @BuiltValueField(wireName: r'start_transcription')
+  bool? get startTranscription;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? startTranscription;
+  @BuiltValueField(wireName: r'transcription_storage_name')
+  String? get transcriptionStorageName;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? transcriptionStorageName;
+  GoLiveRequest._();
+
+  factory GoLiveRequest([void updates(GoLiveRequestBuilder b)]) =
+      _$GoLiveRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(GoLiveRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<GoLiveRequest> get serializer =>
+      _$GoLiveRequestSerializer();
+}
+
+class _$GoLiveRequestSerializer implements PrimitiveSerializer<GoLiveRequest> {
+  @override
+  final Iterable<Type> types = const [GoLiveRequest, _$GoLiveRequest];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GoLiveRequest &&
-          other.recordingStorageName == recordingStorageName &&
-          other.startClosedCaption == startClosedCaption &&
-          other.startHls == startHls &&
-          other.startRecording == startRecording &&
-          other.startTranscription == startTranscription &&
-          other.transcriptionStorageName == transcriptionStorageName;
+  final String wireName = r'GoLiveRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (recordingStorageName == null ? 0 : recordingStorageName!.hashCode) +
-      (startClosedCaption == null ? 0 : startClosedCaption!.hashCode) +
-      (startHls == null ? 0 : startHls!.hashCode) +
-      (startRecording == null ? 0 : startRecording!.hashCode) +
-      (startTranscription == null ? 0 : startTranscription!.hashCode) +
-      (transcriptionStorageName == null
-          ? 0
-          : transcriptionStorageName!.hashCode);
-
-  @override
-  String toString() =>
-      'GoLiveRequest[recordingStorageName=$recordingStorageName, startClosedCaption=$startClosedCaption, startHls=$startHls, startRecording=$startRecording, startTranscription=$startTranscription, transcriptionStorageName=$transcriptionStorageName]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.recordingStorageName != null) {
-      json[r'recording_storage_name'] = this.recordingStorageName;
-    } else {
-      json[r'recording_storage_name'] = null;
-    }
-    if (this.startClosedCaption != null) {
-      json[r'start_closed_caption'] = this.startClosedCaption;
-    } else {
-      json[r'start_closed_caption'] = null;
-    }
-    if (this.startHls != null) {
-      json[r'start_hls'] = this.startHls;
-    } else {
-      json[r'start_hls'] = null;
-    }
-    if (this.startRecording != null) {
-      json[r'start_recording'] = this.startRecording;
-    } else {
-      json[r'start_recording'] = null;
-    }
-    if (this.startTranscription != null) {
-      json[r'start_transcription'] = this.startTranscription;
-    } else {
-      json[r'start_transcription'] = null;
-    }
-    if (this.transcriptionStorageName != null) {
-      json[r'transcription_storage_name'] = this.transcriptionStorageName;
-    } else {
-      json[r'transcription_storage_name'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [GoLiveRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static GoLiveRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GoLiveRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GoLiveRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return GoLiveRequest(
-        recordingStorageName:
-            mapValueOfType<String>(json, r'recording_storage_name'),
-        startClosedCaption: mapValueOfType<bool>(json, r'start_closed_caption'),
-        startHls: mapValueOfType<bool>(json, r'start_hls'),
-        startRecording: mapValueOfType<bool>(json, r'start_recording'),
-        startTranscription: mapValueOfType<bool>(json, r'start_transcription'),
-        transcriptionStorageName:
-            mapValueOfType<String>(json, r'transcription_storage_name'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    GoLiveRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.recordingStorageName != null) {
+      yield r'recording_storage_name';
+      yield serializers.serialize(
+        object.recordingStorageName,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.startClosedCaption != null) {
+      yield r'start_closed_caption';
+      yield serializers.serialize(
+        object.startClosedCaption,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.startHls != null) {
+      yield r'start_hls';
+      yield serializers.serialize(
+        object.startHls,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.startRecording != null) {
+      yield r'start_recording';
+      yield serializers.serialize(
+        object.startRecording,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.startTranscription != null) {
+      yield r'start_transcription';
+      yield serializers.serialize(
+        object.startTranscription,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.transcriptionStorageName != null) {
+      yield r'transcription_storage_name';
+      yield serializers.serialize(
+        object.transcriptionStorageName,
+        specifiedType: const FullType(String),
+      );
+    }
   }
 
-  static List<GoLiveRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    GoLiveRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <GoLiveRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = GoLiveRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, GoLiveRequest> mapFromJson(dynamic json) {
-    final map = <String, GoLiveRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = GoLiveRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of GoLiveRequest-objects as value to a dart map
-  static Map<String, List<GoLiveRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required GoLiveRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<GoLiveRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = GoLiveRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'recording_storage_name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.recordingStorageName = valueDes;
+          break;
+        case r'start_closed_caption':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.startClosedCaption = valueDes;
+          break;
+        case r'start_hls':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.startHls = valueDes;
+          break;
+        case r'start_recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.startRecording = valueDes;
+          break;
+        case r'start_transcription':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.startTranscription = valueDes;
+          break;
+        case r'transcription_storage_name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.transcriptionStorageName = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  GoLiveRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = GoLiveRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

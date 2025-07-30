@@ -1,175 +1,183 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'user_muted_event.g.dart';
 
-class UserMutedEvent {
-  /// Returns a new [UserMutedEvent] instance.
-  UserMutedEvent({
-    required this.createdAt,
-    this.targetUser,
-    this.targetUsers = const [],
-    this.type = 'user.muted',
-    this.user,
-  });
+/// UserMutedEvent
+///
+/// Properties:
+/// * [createdAt]
+/// * [targetUser]
+/// * [targetUsers]
+/// * [type]
+/// * [user]
+@BuiltValue()
+abstract class UserMutedEvent
+    implements Built<UserMutedEvent, UserMutedEventBuilder> {
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'target_user')
+  String? get targetUser;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? targetUser;
+  @BuiltValueField(wireName: r'target_users')
+  BuiltList<String>? get targetUsers;
 
-  List<String> targetUsers;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  String type;
+  @BuiltValueField(wireName: r'user')
+  User? get user;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  User? user;
+  UserMutedEvent._();
+
+  factory UserMutedEvent([void updates(UserMutedEventBuilder b)]) =
+      _$UserMutedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UserMutedEventBuilder b) => b..type = 'user.muted';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UserMutedEvent> get serializer =>
+      _$UserMutedEventSerializer();
+}
+
+class _$UserMutedEventSerializer
+    implements PrimitiveSerializer<UserMutedEvent> {
+  @override
+  final Iterable<Type> types = const [UserMutedEvent, _$UserMutedEvent];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserMutedEvent &&
-          other.createdAt == createdAt &&
-          other.targetUser == targetUser &&
-          _deepEquality.equals(other.targetUsers, targetUsers) &&
-          other.type == type &&
-          other.user == user;
+  final String wireName = r'UserMutedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (createdAt.hashCode) +
-      (targetUser == null ? 0 : targetUser!.hashCode) +
-      (targetUsers.hashCode) +
-      (type.hashCode) +
-      (user == null ? 0 : user!.hashCode);
-
-  @override
-  String toString() =>
-      'UserMutedEvent[createdAt=$createdAt, targetUser=$targetUser, targetUsers=$targetUsers, type=$type, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.targetUser != null) {
-      json[r'target_user'] = this.targetUser;
-    } else {
-      json[r'target_user'] = null;
-    }
-    json[r'target_users'] = this.targetUsers;
-    json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
-    } else {
-      json[r'user'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [UserMutedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UserMutedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserMutedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserMutedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UserMutedEvent(
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        targetUser: mapValueOfType<String>(json, r'target_user'),
-        targetUsers: json[r'target_users'] is Iterable
-            ? (json[r'target_users'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        type: mapValueOfType<String>(json, r'type')!,
-        user: User.fromJson(json[r'user']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UserMutedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    if (object.targetUser != null) {
+      yield r'target_user';
+      yield serializers.serialize(
+        object.targetUser,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.targetUsers != null) {
+      yield r'target_users';
+      yield serializers.serialize(
+        object.targetUsers,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    if (object.user != null) {
+      yield r'user';
+      yield serializers.serialize(
+        object.user,
+        specifiedType: const FullType(User),
+      );
+    }
   }
 
-  static List<UserMutedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UserMutedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UserMutedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UserMutedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UserMutedEvent> mapFromJson(dynamic json) {
-    final map = <String, UserMutedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UserMutedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UserMutedEvent-objects as value to a dart map
-  static Map<String, List<UserMutedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UserMutedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UserMutedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UserMutedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'target_user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.targetUser = valueDes;
+          break;
+        case r'target_users':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.targetUsers.replace(valueDes);
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(User),
+          ) as User;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'created_at',
-    'type',
-  };
+  @override
+  UserMutedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UserMutedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

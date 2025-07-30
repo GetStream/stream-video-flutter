@@ -1,137 +1,146 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/participant_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_rating_report_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'report_response.g.dart';
 
-class ReportResponse {
-  /// Returns a new [ReportResponse] instance.
-  ReportResponse({
-    required this.call,
-    required this.participants,
-    required this.userRatings,
-  });
+/// ReportResponse
+///
+/// Properties:
+/// * [call]
+/// * [participants]
+/// * [userRatings]
+@BuiltValue()
+abstract class ReportResponse
+    implements Built<ReportResponse, ReportResponseBuilder> {
+  @BuiltValueField(wireName: r'call')
+  CallReportResponse get call;
 
-  CallReportResponse call;
+  @BuiltValueField(wireName: r'participants')
+  ParticipantReportResponse get participants;
 
-  ParticipantReportResponse participants;
+  @BuiltValueField(wireName: r'user_ratings')
+  UserRatingReportResponse get userRatings;
 
-  UserRatingReportResponse userRatings;
+  ReportResponse._();
+
+  factory ReportResponse([void updates(ReportResponseBuilder b)]) =
+      _$ReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(ReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<ReportResponse> get serializer =>
+      _$ReportResponseSerializer();
+}
+
+class _$ReportResponseSerializer
+    implements PrimitiveSerializer<ReportResponse> {
+  @override
+  final Iterable<Type> types = const [ReportResponse, _$ReportResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ReportResponse &&
-          other.call == call &&
-          other.participants == participants &&
-          other.userRatings == userRatings;
+  final String wireName = r'ReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (call.hashCode) + (participants.hashCode) + (userRatings.hashCode);
-
-  @override
-  String toString() =>
-      'ReportResponse[call=$call, participants=$participants, userRatings=$userRatings]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call'] = this.call;
-    json[r'participants'] = this.participants;
-    json[r'user_ratings'] = this.userRatings;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    ReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call';
+    yield serializers.serialize(
+      object.call,
+      specifiedType: const FullType(CallReportResponse),
+    );
+    yield r'participants';
+    yield serializers.serialize(
+      object.participants,
+      specifiedType: const FullType(ParticipantReportResponse),
+    );
+    yield r'user_ratings';
+    yield serializers.serialize(
+      object.userRatings,
+      specifiedType: const FullType(UserRatingReportResponse),
+    );
   }
 
-  /// Returns a new [ReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ReportResponse(
-        call: CallReportResponse.fromJson(json[r'call'])!,
-        participants:
-            ParticipantReportResponse.fromJson(json[r'participants'])!,
-        userRatings: UserRatingReportResponse.fromJson(json[r'user_ratings'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<ReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    ReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <ReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = ReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, ReportResponse> mapFromJson(dynamic json) {
-    final map = <String, ReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = ReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of ReportResponse-objects as value to a dart map
-  static Map<String, List<ReportResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required ReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<ReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallReportResponse),
+          ) as CallReportResponse;
+          result.call.replace(valueDes);
+          break;
+        case r'participants':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ParticipantReportResponse),
+          ) as ParticipantReportResponse;
+          result.participants.replace(valueDes);
+          break;
+        case r'user_ratings':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserRatingReportResponse),
+          ) as UserRatingReportResponse;
+          result.userRatings.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call',
-    'participants',
-    'user_ratings',
-  };
+  @override
+  ReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = ReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

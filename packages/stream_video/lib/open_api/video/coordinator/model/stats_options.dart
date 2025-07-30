@@ -1,130 +1,124 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'stats_options.g.dart';
 
-class StatsOptions {
-  /// Returns a new [StatsOptions] instance.
-  StatsOptions({
-    required this.enableRtcStats,
-    required this.reportingIntervalMs,
-  });
+/// StatsOptions
+///
+/// Properties:
+/// * [enableRtcStats]
+/// * [reportingIntervalMs]
+@BuiltValue()
+abstract class StatsOptions
+    implements Built<StatsOptions, StatsOptionsBuilder> {
+  @BuiltValueField(wireName: r'enable_rtc_stats')
+  bool get enableRtcStats;
 
-  bool enableRtcStats;
+  @BuiltValueField(wireName: r'reporting_interval_ms')
+  int get reportingIntervalMs;
 
-  int reportingIntervalMs;
+  StatsOptions._();
+
+  factory StatsOptions([void updates(StatsOptionsBuilder b)]) = _$StatsOptions;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(StatsOptionsBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<StatsOptions> get serializer => _$StatsOptionsSerializer();
+}
+
+class _$StatsOptionsSerializer implements PrimitiveSerializer<StatsOptions> {
+  @override
+  final Iterable<Type> types = const [StatsOptions, _$StatsOptions];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StatsOptions &&
-          other.enableRtcStats == enableRtcStats &&
-          other.reportingIntervalMs == reportingIntervalMs;
+  final String wireName = r'StatsOptions';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (enableRtcStats.hashCode) + (reportingIntervalMs.hashCode);
-
-  @override
-  String toString() =>
-      'StatsOptions[enableRtcStats=$enableRtcStats, reportingIntervalMs=$reportingIntervalMs]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'enable_rtc_stats'] = this.enableRtcStats;
-    json[r'reporting_interval_ms'] = this.reportingIntervalMs;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    StatsOptions object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'enable_rtc_stats';
+    yield serializers.serialize(
+      object.enableRtcStats,
+      specifiedType: const FullType(bool),
+    );
+    yield r'reporting_interval_ms';
+    yield serializers.serialize(
+      object.reportingIntervalMs,
+      specifiedType: const FullType(int),
+    );
   }
 
-  /// Returns a new [StatsOptions] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static StatsOptions? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StatsOptions[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StatsOptions[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return StatsOptions(
-        enableRtcStats: mapValueOfType<bool>(json, r'enable_rtc_stats')!,
-        reportingIntervalMs:
-            mapValueOfType<int>(json, r'reporting_interval_ms')!,
-      );
-    }
-    return null;
-  }
-
-  static List<StatsOptions> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    StatsOptions object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <StatsOptions>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = StatsOptions.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, StatsOptions> mapFromJson(dynamic json) {
-    final map = <String, StatsOptions>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = StatsOptions.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of StatsOptions-objects as value to a dart map
-  static Map<String, List<StatsOptions>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required StatsOptionsBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<StatsOptions>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = StatsOptions.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'enable_rtc_stats':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enableRtcStats = valueDes;
+          break;
+        case r'reporting_interval_ms':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.reportingIntervalMs = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'enable_rtc_stats',
-    'reporting_interval_ms',
-  };
+  @override
+  StatsOptions deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = StatsOptionsBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

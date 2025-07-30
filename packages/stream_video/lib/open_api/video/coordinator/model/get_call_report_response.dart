@@ -1,165 +1,189 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/chat_activity_stats_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/video_reactions_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'get_call_report_response.g.dart';
 
-class GetCallReportResponse {
-  /// Returns a new [GetCallReportResponse] instance.
-  GetCallReportResponse({
-    this.chatActivity,
-    required this.duration,
-    required this.report,
-    required this.sessionId,
-    this.videoReactions = const [],
-  });
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  ChatActivityStatsResponse? chatActivity;
+/// Basic response information
+///
+/// Properties:
+/// * [chatActivity]
+/// * [duration] - Duration of the request in milliseconds
+/// * [report]
+/// * [sessionId]
+/// * [videoReactions]
+@BuiltValue()
+abstract class GetCallReportResponse
+    implements Built<GetCallReportResponse, GetCallReportResponseBuilder> {
+  @BuiltValueField(wireName: r'chat_activity')
+  ChatActivityStatsResponse? get chatActivity;
 
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  ReportResponse report;
+  @BuiltValueField(wireName: r'report')
+  ReportResponse get report;
 
-  String sessionId;
+  @BuiltValueField(wireName: r'session_id')
+  String get sessionId;
 
-  List<VideoReactionsResponse> videoReactions;
+  @BuiltValueField(wireName: r'video_reactions')
+  BuiltList<VideoReactionsResponse?>? get videoReactions;
+
+  GetCallReportResponse._();
+
+  factory GetCallReportResponse(
+      [void updates(GetCallReportResponseBuilder b)]) = _$GetCallReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(GetCallReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<GetCallReportResponse> get serializer =>
+      _$GetCallReportResponseSerializer();
+}
+
+class _$GetCallReportResponseSerializer
+    implements PrimitiveSerializer<GetCallReportResponse> {
+  @override
+  final Iterable<Type> types = const [
+    GetCallReportResponse,
+    _$GetCallReportResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GetCallReportResponse &&
-          other.chatActivity == chatActivity &&
-          other.duration == duration &&
-          other.report == report &&
-          other.sessionId == sessionId &&
-          _deepEquality.equals(other.videoReactions, videoReactions);
+  final String wireName = r'GetCallReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (chatActivity == null ? 0 : chatActivity!.hashCode) +
-      (duration.hashCode) +
-      (report.hashCode) +
-      (sessionId.hashCode) +
-      (videoReactions.hashCode);
-
-  @override
-  String toString() =>
-      'GetCallReportResponse[chatActivity=$chatActivity, duration=$duration, report=$report, sessionId=$sessionId, videoReactions=$videoReactions]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.chatActivity != null) {
-      json[r'chat_activity'] = this.chatActivity;
-    } else {
-      json[r'chat_activity'] = null;
-    }
-    json[r'duration'] = this.duration;
-    json[r'report'] = this.report;
-    json[r'session_id'] = this.sessionId;
-    json[r'video_reactions'] = this.videoReactions;
-    return json;
-  }
-
-  /// Returns a new [GetCallReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static GetCallReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GetCallReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GetCallReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return GetCallReportResponse(
-        chatActivity:
-            ChatActivityStatsResponse.fromJson(json[r'chat_activity']),
-        duration: mapValueOfType<String>(json, r'duration')!,
-        report: ReportResponse.fromJson(json[r'report'])!,
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        videoReactions:
-            VideoReactionsResponse.listFromJson(json[r'video_reactions']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    GetCallReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.chatActivity != null) {
+      yield r'chat_activity';
+      yield serializers.serialize(
+        object.chatActivity,
+        specifiedType: const FullType(ChatActivityStatsResponse),
       );
     }
-    return null;
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    yield r'report';
+    yield serializers.serialize(
+      object.report,
+      specifiedType: const FullType(ReportResponse),
+    );
+    yield r'session_id';
+    yield serializers.serialize(
+      object.sessionId,
+      specifiedType: const FullType(String),
+    );
+    if (object.videoReactions != null) {
+      yield r'video_reactions';
+      yield serializers.serialize(
+        object.videoReactions,
+        specifiedType: const FullType(
+            BuiltList, [FullType.nullable(VideoReactionsResponse)]),
+      );
+    }
   }
 
-  static List<GetCallReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    GetCallReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <GetCallReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = GetCallReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, GetCallReportResponse> mapFromJson(dynamic json) {
-    final map = <String, GetCallReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = GetCallReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of GetCallReportResponse-objects as value to a dart map
-  static Map<String, List<GetCallReportResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required GetCallReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<GetCallReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = GetCallReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'chat_activity':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ChatActivityStatsResponse),
+          ) as ChatActivityStatsResponse;
+          result.chatActivity.replace(valueDes);
+          break;
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ReportResponse),
+          ) as ReportResponse;
+          result.report.replace(valueDes);
+          break;
+        case r'session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.sessionId = valueDes;
+          break;
+        case r'video_reactions':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltList, [FullType.nullable(VideoReactionsResponse)]),
+          ) as BuiltList<VideoReactionsResponse?>;
+          result.videoReactions.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration',
-    'report',
-    'session_id',
-  };
+  @override
+  GetCallReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = GetCallReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

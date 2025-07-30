@@ -1,312 +1,364 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'user_response.g.dart';
 
-class UserResponse {
-  /// Returns a new [UserResponse] instance.
-  UserResponse({
-    this.blockedUserIds = const [],
-    required this.createdAt,
-    this.custom = const {},
-    this.deactivatedAt,
-    this.deletedAt,
-    required this.id,
-    this.image,
-    required this.language,
-    this.lastActive,
-    this.name,
-    this.revokeTokensIssuedBefore,
-    required this.role,
-    this.teams = const [],
-    this.teamsRole = const {},
-    required this.updatedAt,
-  });
-
-  List<String> blockedUserIds;
+/// User response object
+///
+/// Properties:
+/// * [blockedUserIds]
+/// * [createdAt] - Date/time of creation
+/// * [custom] - Custom data for this object
+/// * [deactivatedAt] - Date of deactivation
+/// * [deletedAt] - Date/time of deletion
+/// * [id] - Unique user identifier
+/// * [image]
+/// * [language] - Preferred language of a user
+/// * [lastActive] - Date of last activity
+/// * [name] - Optional name of user
+/// * [revokeTokensIssuedBefore] - Revocation date for tokens
+/// * [role] - Determines the set of user permissions
+/// * [teams] - List of teams user is a part of
+/// * [teamsRole]
+/// * [updatedAt] - Date/time of the last update
+@BuiltValue()
+abstract class UserResponse
+    implements Built<UserResponse, UserResponseBuilder> {
+  @BuiltValueField(wireName: r'blocked_user_ids')
+  BuiltList<String> get blockedUserIds;
 
   /// Date/time of creation
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// Custom data for this object
-  Map<String, Object> custom;
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?> get custom;
 
   /// Date of deactivation
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? deactivatedAt;
+  @BuiltValueField(wireName: r'deactivated_at')
+  DateTime? get deactivatedAt;
 
   /// Date/time of deletion
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? deletedAt;
+  @BuiltValueField(wireName: r'deleted_at')
+  DateTime? get deletedAt;
 
   /// Unique user identifier
-  String id;
+  @BuiltValueField(wireName: r'id')
+  String get id;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? image;
+  @BuiltValueField(wireName: r'image')
+  String? get image;
 
   /// Preferred language of a user
-  String language;
+  @BuiltValueField(wireName: r'language')
+  String get language;
 
   /// Date of last activity
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? lastActive;
+  @BuiltValueField(wireName: r'last_active')
+  DateTime? get lastActive;
 
   /// Optional name of user
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? name;
+  @BuiltValueField(wireName: r'name')
+  String? get name;
 
   /// Revocation date for tokens
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? revokeTokensIssuedBefore;
+  @BuiltValueField(wireName: r'revoke_tokens_issued_before')
+  DateTime? get revokeTokensIssuedBefore;
 
   /// Determines the set of user permissions
-  String role;
+  @BuiltValueField(wireName: r'role')
+  String get role;
 
   /// List of teams user is a part of
-  List<String> teams;
+  @BuiltValueField(wireName: r'teams')
+  BuiltList<String> get teams;
 
-  Map<String, String> teamsRole;
+  @BuiltValueField(wireName: r'teams_role')
+  BuiltMap<String, String>? get teamsRole;
 
   /// Date/time of the last update
-  DateTime updatedAt;
+  @BuiltValueField(wireName: r'updated_at')
+  DateTime get updatedAt;
+
+  UserResponse._();
+
+  factory UserResponse([void updates(UserResponseBuilder b)]) = _$UserResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UserResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UserResponse> get serializer => _$UserResponseSerializer();
+}
+
+class _$UserResponseSerializer implements PrimitiveSerializer<UserResponse> {
+  @override
+  final Iterable<Type> types = const [UserResponse, _$UserResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserResponse &&
-          _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.deactivatedAt == deactivatedAt &&
-          other.deletedAt == deletedAt &&
-          other.id == id &&
-          other.image == image &&
-          other.language == language &&
-          other.lastActive == lastActive &&
-          other.name == name &&
-          other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
-          other.role == role &&
-          _deepEquality.equals(other.teams, teams) &&
-          _deepEquality.equals(other.teamsRole, teamsRole) &&
-          other.updatedAt == updatedAt;
+  final String wireName = r'UserResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (blockedUserIds.hashCode) +
-      (createdAt.hashCode) +
-      (custom.hashCode) +
-      (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
-      (deletedAt == null ? 0 : deletedAt!.hashCode) +
-      (id.hashCode) +
-      (image == null ? 0 : image!.hashCode) +
-      (language.hashCode) +
-      (lastActive == null ? 0 : lastActive!.hashCode) +
-      (name == null ? 0 : name!.hashCode) +
-      (revokeTokensIssuedBefore == null
-          ? 0
-          : revokeTokensIssuedBefore!.hashCode) +
-      (role.hashCode) +
-      (teams.hashCode) +
-      (teamsRole.hashCode) +
-      (updatedAt.hashCode);
-
-  @override
-  String toString() =>
-      'UserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'blocked_user_ids'] = this.blockedUserIds;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom'] = this.custom;
-    if (this.deactivatedAt != null) {
-      json[r'deactivated_at'] = this.deactivatedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'deactivated_at'] = null;
-    }
-    if (this.deletedAt != null) {
-      json[r'deleted_at'] = this.deletedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'deleted_at'] = null;
-    }
-    json[r'id'] = this.id;
-    if (this.image != null) {
-      json[r'image'] = this.image;
-    } else {
-      json[r'image'] = null;
-    }
-    json[r'language'] = this.language;
-    if (this.lastActive != null) {
-      json[r'last_active'] = this.lastActive!.toUtc().toIso8601String();
-    } else {
-      json[r'last_active'] = null;
-    }
-    if (this.name != null) {
-      json[r'name'] = this.name;
-    } else {
-      json[r'name'] = null;
-    }
-    if (this.revokeTokensIssuedBefore != null) {
-      json[r'revoke_tokens_issued_before'] =
-          this.revokeTokensIssuedBefore!.toUtc().toIso8601String();
-    } else {
-      json[r'revoke_tokens_issued_before'] = null;
-    }
-    json[r'role'] = this.role;
-    json[r'teams'] = this.teams;
-    json[r'teams_role'] = this.teamsRole;
-    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
-    return json;
-  }
-
-  /// Returns a new [UserResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UserResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UserResponse(
-        blockedUserIds: json[r'blocked_user_ids'] is Iterable
-            ? (json[r'blocked_user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
-        deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
-        deletedAt: mapDateTime(json, r'deleted_at', r''),
-        id: mapValueOfType<String>(json, r'id')!,
-        image: mapValueOfType<String>(json, r'image'),
-        language: mapValueOfType<String>(json, r'language')!,
-        lastActive: mapDateTime(json, r'last_active', r''),
-        name: mapValueOfType<String>(json, r'name'),
-        revokeTokensIssuedBefore:
-            mapDateTime(json, r'revoke_tokens_issued_before', r''),
-        role: mapValueOfType<String>(json, r'role')!,
-        teams: json[r'teams'] is Iterable
-            ? (json[r'teams'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        teamsRole:
-            mapCastOfType<String, String>(json, r'teams_role') ?? const {},
-        updatedAt: mapDateTime(json, r'updated_at', r'')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UserResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'blocked_user_ids';
+    yield serializers.serialize(
+      object.blockedUserIds,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'custom';
+    yield serializers.serialize(
+      object.custom,
+      specifiedType: const FullType(
+          BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+    );
+    if (object.deactivatedAt != null) {
+      yield r'deactivated_at';
+      yield serializers.serialize(
+        object.deactivatedAt,
+        specifiedType: const FullType(DateTime),
       );
     }
-    return null;
+    if (object.deletedAt != null) {
+      yield r'deleted_at';
+      yield serializers.serialize(
+        object.deletedAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(String),
+    );
+    if (object.image != null) {
+      yield r'image';
+      yield serializers.serialize(
+        object.image,
+        specifiedType: const FullType(String),
+      );
+    }
+    yield r'language';
+    yield serializers.serialize(
+      object.language,
+      specifiedType: const FullType(String),
+    );
+    if (object.lastActive != null) {
+      yield r'last_active';
+      yield serializers.serialize(
+        object.lastActive,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.name != null) {
+      yield r'name';
+      yield serializers.serialize(
+        object.name,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.revokeTokensIssuedBefore != null) {
+      yield r'revoke_tokens_issued_before';
+      yield serializers.serialize(
+        object.revokeTokensIssuedBefore,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    yield r'role';
+    yield serializers.serialize(
+      object.role,
+      specifiedType: const FullType(String),
+    );
+    yield r'teams';
+    yield serializers.serialize(
+      object.teams,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
+    if (object.teamsRole != null) {
+      yield r'teams_role';
+      yield serializers.serialize(
+        object.teamsRole,
+        specifiedType:
+            const FullType(BuiltMap, [FullType(String), FullType(String)]),
+      );
+    }
+    yield r'updated_at';
+    yield serializers.serialize(
+      object.updatedAt,
+      specifiedType: const FullType(DateTime),
+    );
   }
 
-  static List<UserResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UserResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UserResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UserResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UserResponse> mapFromJson(dynamic json) {
-    final map = <String, UserResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UserResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UserResponse-objects as value to a dart map
-  static Map<String, List<UserResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UserResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UserResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UserResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'blocked_user_ids':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.blockedUserIds.replace(valueDes);
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        case r'deactivated_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.deactivatedAt = valueDes;
+          break;
+        case r'deleted_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.deletedAt = valueDes;
+          break;
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.id = valueDes;
+          break;
+        case r'image':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.image = valueDes;
+          break;
+        case r'language':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.language = valueDes;
+          break;
+        case r'last_active':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.lastActive = valueDes;
+          break;
+        case r'name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.name = valueDes;
+          break;
+        case r'revoke_tokens_issued_before':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.revokeTokensIssuedBefore = valueDes;
+          break;
+        case r'role':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.role = valueDes;
+          break;
+        case r'teams':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.teams.replace(valueDes);
+          break;
+        case r'teams_role':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltMap, [FullType(String), FullType(String)]),
+          ) as BuiltMap<String, String>;
+          result.teamsRole.replace(valueDes);
+          break;
+        case r'updated_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.updatedAt = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'blocked_user_ids',
-    'created_at',
-    'custom',
-    'id',
-    'language',
-    'role',
-    'teams',
-    'updated_at',
-  };
+  @override
+  UserResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UserResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

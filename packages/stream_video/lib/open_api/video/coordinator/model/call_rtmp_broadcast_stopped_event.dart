@@ -1,150 +1,170 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_rtmp_broadcast_stopped_event.g.dart';
 
-class CallRtmpBroadcastStoppedEvent {
-  /// Returns a new [CallRtmpBroadcastStoppedEvent] instance.
-  CallRtmpBroadcastStoppedEvent({
-    required this.callCid,
-    required this.createdAt,
-    required this.name,
-    this.type = 'call.rtmp_broadcast_stopped',
-  });
-
+/// This event is sent when RTMP broadcast has stopped
+///
+/// Properties:
+/// * [callCid] - The unique identifier for a call (<type>:<id>)
+/// * [createdAt] - Date/time of creation
+/// * [name] - Name of the given RTMP broadcast
+/// * [type] - The type of event: \"call.rtmp_broadcast_stopped\" in this case
+@BuiltValue()
+abstract class CallRtmpBroadcastStoppedEvent
+    implements
+        Built<CallRtmpBroadcastStoppedEvent,
+            CallRtmpBroadcastStoppedEventBuilder> {
   /// The unique identifier for a call (<type>:<id>)
-  String callCid;
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
   /// Date/time of creation
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// Name of the given RTMP broadcast
-  String name;
+  @BuiltValueField(wireName: r'name')
+  String get name;
 
   /// The type of event: \"call.rtmp_broadcast_stopped\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
+
+  CallRtmpBroadcastStoppedEvent._();
+
+  factory CallRtmpBroadcastStoppedEvent(
+          [void updates(CallRtmpBroadcastStoppedEventBuilder b)]) =
+      _$CallRtmpBroadcastStoppedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallRtmpBroadcastStoppedEventBuilder b) =>
+      b..type = 'call.rtmp_broadcast_stopped';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallRtmpBroadcastStoppedEvent> get serializer =>
+      _$CallRtmpBroadcastStoppedEventSerializer();
+}
+
+class _$CallRtmpBroadcastStoppedEventSerializer
+    implements PrimitiveSerializer<CallRtmpBroadcastStoppedEvent> {
+  @override
+  final Iterable<Type> types = const [
+    CallRtmpBroadcastStoppedEvent,
+    _$CallRtmpBroadcastStoppedEvent
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallRtmpBroadcastStoppedEvent &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          other.name == name &&
-          other.type == type;
+  final String wireName = r'CallRtmpBroadcastStoppedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (name.hashCode) +
-      (type.hashCode);
-
-  @override
-  String toString() =>
-      'CallRtmpBroadcastStoppedEvent[callCid=$callCid, createdAt=$createdAt, name=$name, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'name'] = this.name;
-    json[r'type'] = this.type;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallRtmpBroadcastStoppedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'name';
+    yield serializers.serialize(
+      object.name,
+      specifiedType: const FullType(String),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CallRtmpBroadcastStoppedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallRtmpBroadcastStoppedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRtmpBroadcastStoppedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRtmpBroadcastStoppedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallRtmpBroadcastStoppedEvent(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        name: mapValueOfType<String>(json, r'name')!,
-        type: mapValueOfType<String>(json, r'type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallRtmpBroadcastStoppedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallRtmpBroadcastStoppedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallRtmpBroadcastStoppedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallRtmpBroadcastStoppedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallRtmpBroadcastStoppedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallRtmpBroadcastStoppedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallRtmpBroadcastStoppedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallRtmpBroadcastStoppedEvent-objects as value to a dart map
-  static Map<String, List<CallRtmpBroadcastStoppedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallRtmpBroadcastStoppedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallRtmpBroadcastStoppedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallRtmpBroadcastStoppedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.name = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'created_at',
-    'name',
-    'type',
-  };
+  @override
+  CallRtmpBroadcastStoppedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallRtmpBroadcastStoppedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

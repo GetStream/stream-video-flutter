@@ -1,582 +1,1126 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_session_participant_left_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_response_privacy_fields.dart';
+import 'package:stream_video/open_api/video/coordinator/model/connected_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_recording.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_reaction_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_rtmp_broadcast_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_stats_report_ready_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/health_check_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_updated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/unblocked_user_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_rtmp_broadcast_stopped_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_member_updated_permission_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/own_capability.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_member_removed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_transcription_failed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_transcription_ready_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/custom_video_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_updated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_rejected_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_moderation_warning_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_transcription_stopped_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_frame_recording_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_recording_ready_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_frame_recording_frame_ready_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_member_updated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_reactivated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_session_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/reaction_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/api_error.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_ended_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_transcription_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_frame_recording_stopped_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/app_updated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_closed_captions_stopped_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_closed_captions_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_hls_broadcasting_stopped_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_transcription.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_member_added_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_missed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_muted_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/connection_error_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_deactivated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_hls_broadcasting_failed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_user_muted_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_live_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/member_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/app_event_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_recording_failed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_moderation_blur_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_session_participant_counts_updated_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_closed_caption.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_accepted_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_rtmp_broadcast_failed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_closed_captions_failed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_session_participant_joined_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/updated_call_permissions_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_hls_broadcasting_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_deleted_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_session_ended_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/closed_caption_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_ring_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_frame_recording_failed_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/permission_request_event.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/own_user_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_participant_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_created_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_notification_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_banned_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_recording_started_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_recording_stopped_event.dart';
+import 'package:stream_video/open_api/video/coordinator/model/blocked_user_event.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
+import 'package:one_of/one_of.dart';
 
-part of openapi.api;
+part 'video_event.g.dart';
 
-class VideoEvent {
-  /// Returns a new [VideoEvent] instance.
-  VideoEvent({
-    required this.app,
-    required this.createdAt,
-    this.custom = const {},
-    this.receivedAt,
-    this.type = 'user.updated',
-    this.blockedByUser,
-    required this.callCid,
-    required this.user,
-    required this.call,
-    this.members = const [],
-    this.reason,
-    required this.egressId,
-    required this.capturedAt,
-    required this.sessionId,
-    required this.trackType,
-    required this.url,
-    this.users = const {},
-    required this.hlsPlaylistUrl,
-    this.capabilitiesByRole = const {},
-    required this.notifyUser,
-    required this.userId,
-    required this.message,
-    required this.reaction,
-    required this.callRecording,
-    required this.video,
-    required this.name,
-    required this.anonymousParticipantCount,
-    this.participantsCountByRole = const {},
-    required this.participant,
-    required this.durationSeconds,
-    required this.error,
-    required this.callTranscription,
-    required this.fromUserId,
-    this.mutedUserIds = const [],
-    required this.closedCaption,
-    required this.connectionId,
-    required this.me,
-    required this.cid,
-    this.permissions = const [],
-    this.ownCapabilities = const [],
-    required this.channelId,
-    required this.channelType,
-    required this.createdBy,
-    this.expiration,
-    required this.shadow,
-    this.team,
-    this.targetUser,
-    this.targetUsers = const [],
-  });
+/// The discriminator object for all websocket events, it maps events' payload to the final type
+///
+/// Properties:
+/// * [app]
+/// * [createdAt] - Date/time of creation
+/// * [custom]
+/// * [receivedAt]
+/// * [type] - The type of event: \"user.updated\" in this case
+/// * [blockedByUser]
+/// * [callCid]
+/// * [user]
+/// * [call]
+/// * [members] - Call members
+/// * [reason]
+/// * [egressId]
+/// * [capturedAt] - The time the frame was captured
+/// * [sessionId] - Call session ID
+/// * [trackType] - The type of the track frame was captured from (TRACK_TYPE_VIDEO|TRACK_TYPE_SCREEN_SHARE)
+/// * [url] - The URL of the frame
+/// * [users] - The users in the frame
+/// * [hlsPlaylistUrl]
+/// * [capabilitiesByRole] - The capabilities by role for this call
+/// * [notifyUser]
+/// * [userId]
+/// * [message]
+/// * [reaction]
+/// * [callRecording]
+/// * [video]
+/// * [name] - Name of the given RTMP broadcast
+/// * [anonymousParticipantCount]
+/// * [participantsCountByRole]
+/// * [participant]
+/// * [durationSeconds] - The duration participant was in the session in seconds
+/// * [error]
+/// * [callTranscription]
+/// * [fromUserId]
+/// * [mutedUserIds]
+/// * [closedCaption]
+/// * [connectionId]
+/// * [me]
+/// * [cid]
+/// * [permissions] - The list of permissions requested by the user
+/// * [ownCapabilities] - The capabilities of the current user
+/// * [channelId]
+/// * [channelType]
+/// * [createdBy]
+/// * [expiration]
+/// * [shadow]
+/// * [team]
+/// * [targetUser]
+/// * [targetUsers]
+@BuiltValue()
+abstract class VideoEvent implements Built<VideoEvent, VideoEventBuilder> {
+  /// One Of [AppUpdatedEvent], [BlockedUserEvent], [CallAcceptedEvent], [CallClosedCaptionsFailedEvent], [CallClosedCaptionsStartedEvent], [CallClosedCaptionsStoppedEvent], [CallCreatedEvent], [CallDeletedEvent], [CallEndedEvent], [CallFrameRecordingFailedEvent], [CallFrameRecordingFrameReadyEvent], [CallFrameRecordingStartedEvent], [CallFrameRecordingStoppedEvent], [CallHLSBroadcastingFailedEvent], [CallHLSBroadcastingStartedEvent], [CallHLSBroadcastingStoppedEvent], [CallLiveStartedEvent], [CallMemberAddedEvent], [CallMemberRemovedEvent], [CallMemberUpdatedEvent], [CallMemberUpdatedPermissionEvent], [CallMissedEvent], [CallModerationBlurEvent], [CallModerationWarningEvent], [CallNotificationEvent], [CallReactionEvent], [CallRecordingFailedEvent], [CallRecordingReadyEvent], [CallRecordingStartedEvent], [CallRecordingStoppedEvent], [CallRejectedEvent], [CallRingEvent], [CallRtmpBroadcastFailedEvent], [CallRtmpBroadcastStartedEvent], [CallRtmpBroadcastStoppedEvent], [CallSessionEndedEvent], [CallSessionParticipantCountsUpdatedEvent], [CallSessionParticipantJoinedEvent], [CallSessionParticipantLeftEvent], [CallSessionStartedEvent], [CallStatsReportReadyEvent], [CallTranscriptionFailedEvent], [CallTranscriptionReadyEvent], [CallTranscriptionStartedEvent], [CallTranscriptionStoppedEvent], [CallUpdatedEvent], [CallUserMutedEvent], [ClosedCaptionEvent], [ConnectedEvent], [ConnectionErrorEvent], [CustomVideoEvent], [HealthCheckEvent], [PermissionRequestEvent], [UnblockedUserEvent], [UpdatedCallPermissionsEvent], [UserBannedEvent], [UserDeactivatedEvent], [UserMutedEvent], [UserReactivatedEvent], [UserUpdatedEvent]
+  OneOf get oneOf;
 
-  AppEventResponse app;
+  static const String discriminatorFieldName = r'type';
 
-  /// Date/time of creation
-  DateTime createdAt;
+  static const Map<String, Type> discriminatorMapping = {
+    r'app.updated': AppUpdatedEvent,
+    r'call.accepted': CallAcceptedEvent,
+    r'call.blocked_user': BlockedUserEvent,
+    r'call.closed_caption': ClosedCaptionEvent,
+    r'call.closed_captions_failed': CallClosedCaptionsFailedEvent,
+    r'call.closed_captions_started': CallClosedCaptionsStartedEvent,
+    r'call.closed_captions_stopped': CallClosedCaptionsStoppedEvent,
+    r'call.created': CallCreatedEvent,
+    r'call.deleted': CallDeletedEvent,
+    r'call.ended': CallEndedEvent,
+    r'call.frame_recording_failed': CallFrameRecordingFailedEvent,
+    r'call.frame_recording_ready': CallFrameRecordingFrameReadyEvent,
+    r'call.frame_recording_started': CallFrameRecordingStartedEvent,
+    r'call.frame_recording_stopped': CallFrameRecordingStoppedEvent,
+    r'call.hls_broadcasting_failed': CallHLSBroadcastingFailedEvent,
+    r'call.hls_broadcasting_started': CallHLSBroadcastingStartedEvent,
+    r'call.hls_broadcasting_stopped': CallHLSBroadcastingStoppedEvent,
+    r'call.live_started': CallLiveStartedEvent,
+    r'call.member_added': CallMemberAddedEvent,
+    r'call.member_removed': CallMemberRemovedEvent,
+    r'call.member_updated': CallMemberUpdatedEvent,
+    r'call.member_updated_permission': CallMemberUpdatedPermissionEvent,
+    r'call.missed': CallMissedEvent,
+    r'call.moderation_blur': CallModerationBlurEvent,
+    r'call.moderation_warning': CallModerationWarningEvent,
+    r'call.notification': CallNotificationEvent,
+    r'call.permission_request': PermissionRequestEvent,
+    r'call.permissions_updated': UpdatedCallPermissionsEvent,
+    r'call.reaction_new': CallReactionEvent,
+    r'call.recording_failed': CallRecordingFailedEvent,
+    r'call.recording_ready': CallRecordingReadyEvent,
+    r'call.recording_started': CallRecordingStartedEvent,
+    r'call.recording_stopped': CallRecordingStoppedEvent,
+    r'call.rejected': CallRejectedEvent,
+    r'call.ring': CallRingEvent,
+    r'call.rtmp_broadcast_failed': CallRtmpBroadcastFailedEvent,
+    r'call.rtmp_broadcast_started': CallRtmpBroadcastStartedEvent,
+    r'call.rtmp_broadcast_stopped': CallRtmpBroadcastStoppedEvent,
+    r'call.session_ended': CallSessionEndedEvent,
+    r'call.session_participant_count_updated':
+        CallSessionParticipantCountsUpdatedEvent,
+    r'call.session_participant_joined': CallSessionParticipantJoinedEvent,
+    r'call.session_participant_left': CallSessionParticipantLeftEvent,
+    r'call.session_started': CallSessionStartedEvent,
+    r'call.stats_report_ready': CallStatsReportReadyEvent,
+    r'call.transcription_failed': CallTranscriptionFailedEvent,
+    r'call.transcription_ready': CallTranscriptionReadyEvent,
+    r'call.transcription_started': CallTranscriptionStartedEvent,
+    r'call.transcription_stopped': CallTranscriptionStoppedEvent,
+    r'call.unblocked_user': UnblockedUserEvent,
+    r'call.updated': CallUpdatedEvent,
+    r'call.user_muted': CallUserMutedEvent,
+    r'connection.error': ConnectionErrorEvent,
+    r'connection.ok': ConnectedEvent,
+    r'custom': CustomVideoEvent,
+    r'health.check': HealthCheckEvent,
+    r'user.banned': UserBannedEvent,
+    r'user.deactivated': UserDeactivatedEvent,
+    r'user.muted': UserMutedEvent,
+    r'user.reactivated': UserReactivatedEvent,
+    r'user.updated': UserUpdatedEvent,
+  };
 
-  Map<String, Object> custom;
+  VideoEvent._();
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? receivedAt;
+  factory VideoEvent([void updates(VideoEventBuilder b)]) = _$VideoEvent;
 
-  /// The type of event: \"user.updated\" in this case
-  String type;
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(VideoEventBuilder b) => b;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  UserResponse? blockedByUser;
+  @BuiltValueSerializer(custom: true)
+  static Serializer<VideoEvent> get serializer => _$VideoEventSerializer();
+}
 
-  String callCid;
-
-  UserResponsePrivacyFields user;
-
-  CallResponse call;
-
-  /// Call members
-  List<MemberResponse> members;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
-
-  String egressId;
-
-  /// The time the frame was captured
-  DateTime capturedAt;
-
-  /// Call session ID
-  String sessionId;
-
-  /// The type of the track frame was captured from (TRACK_TYPE_VIDEO|TRACK_TYPE_SCREEN_SHARE)
-  String trackType;
-
-  /// The URL of the frame
-  String url;
-
-  /// The users in the frame
-  Map<String, UserResponse> users;
-
-  String hlsPlaylistUrl;
-
-  /// The capabilities by role for this call
-  Map<String, List<String>> capabilitiesByRole;
-
-  bool notifyUser;
-
-  String userId;
-
-  String message;
-
-  ReactionResponse reaction;
-
-  CallRecording callRecording;
-
-  bool video;
-
-  /// Name of the given RTMP broadcast
-  String name;
-
-  int anonymousParticipantCount;
-
-  Map<String, int> participantsCountByRole;
-
-  CallParticipantResponse participant;
-
-  /// The duration participant was in the session in seconds
-  int durationSeconds;
-
-  APIError error;
-
-  CallTranscription callTranscription;
-
-  String fromUserId;
-
-  List<String> mutedUserIds;
-
-  CallClosedCaption closedCaption;
-
-  String connectionId;
-
-  OwnUserResponse me;
-
-  String cid;
-
-  /// The list of permissions requested by the user
-  List<String> permissions;
-
-  /// The capabilities of the current user
-  List<OwnCapability> ownCapabilities;
-
-  String channelId;
-
-  String channelType;
-
-  User createdBy;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? expiration;
-
-  bool shadow;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? team;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? targetUser;
-
-  List<String> targetUsers;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoEvent &&
-          other.app == app &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.receivedAt == receivedAt &&
-          other.type == type &&
-          other.blockedByUser == blockedByUser &&
-          other.callCid == callCid &&
-          other.user == user &&
-          other.call == call &&
-          _deepEquality.equals(other.members, members) &&
-          other.reason == reason &&
-          other.egressId == egressId &&
-          other.capturedAt == capturedAt &&
-          other.sessionId == sessionId &&
-          other.trackType == trackType &&
-          other.url == url &&
-          _deepEquality.equals(other.users, users) &&
-          other.hlsPlaylistUrl == hlsPlaylistUrl &&
-          _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
-          other.notifyUser == notifyUser &&
-          other.userId == userId &&
-          other.message == message &&
-          other.reaction == reaction &&
-          other.callRecording == callRecording &&
-          other.video == video &&
-          other.name == name &&
-          other.anonymousParticipantCount == anonymousParticipantCount &&
-          _deepEquality.equals(
-              other.participantsCountByRole, participantsCountByRole) &&
-          other.participant == participant &&
-          other.durationSeconds == durationSeconds &&
-          other.error == error &&
-          other.callTranscription == callTranscription &&
-          other.fromUserId == fromUserId &&
-          _deepEquality.equals(other.mutedUserIds, mutedUserIds) &&
-          other.closedCaption == closedCaption &&
-          other.connectionId == connectionId &&
-          other.me == me &&
-          other.cid == cid &&
-          _deepEquality.equals(other.permissions, permissions) &&
-          _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
-          other.channelId == channelId &&
-          other.channelType == channelType &&
-          other.createdBy == createdBy &&
-          other.expiration == expiration &&
-          other.shadow == shadow &&
-          other.team == team &&
-          other.targetUser == targetUser &&
-          _deepEquality.equals(other.targetUsers, targetUsers);
-
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (app.hashCode) +
-      (createdAt.hashCode) +
-      (custom.hashCode) +
-      (receivedAt == null ? 0 : receivedAt!.hashCode) +
-      (type.hashCode) +
-      (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
-      (callCid.hashCode) +
-      (user.hashCode) +
-      (call.hashCode) +
-      (members.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
-      (egressId.hashCode) +
-      (capturedAt.hashCode) +
-      (sessionId.hashCode) +
-      (trackType.hashCode) +
-      (url.hashCode) +
-      (users.hashCode) +
-      (hlsPlaylistUrl.hashCode) +
-      (capabilitiesByRole.hashCode) +
-      (notifyUser.hashCode) +
-      (userId.hashCode) +
-      (message.hashCode) +
-      (reaction.hashCode) +
-      (callRecording.hashCode) +
-      (video.hashCode) +
-      (name.hashCode) +
-      (anonymousParticipantCount.hashCode) +
-      (participantsCountByRole.hashCode) +
-      (participant.hashCode) +
-      (durationSeconds.hashCode) +
-      (error.hashCode) +
-      (callTranscription.hashCode) +
-      (fromUserId.hashCode) +
-      (mutedUserIds.hashCode) +
-      (closedCaption.hashCode) +
-      (connectionId.hashCode) +
-      (me.hashCode) +
-      (cid.hashCode) +
-      (permissions.hashCode) +
-      (ownCapabilities.hashCode) +
-      (channelId.hashCode) +
-      (channelType.hashCode) +
-      (createdBy.hashCode) +
-      (expiration == null ? 0 : expiration!.hashCode) +
-      (shadow.hashCode) +
-      (team == null ? 0 : team!.hashCode) +
-      (targetUser == null ? 0 : targetUser!.hashCode) +
-      (targetUsers.hashCode);
-
-  @override
-  String toString() =>
-      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, error=$error, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'app'] = this.app;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom'] = this.custom;
-    if (this.receivedAt != null) {
-      json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'received_at'] = null;
+extension VideoEventDiscriminatorExt on VideoEvent {
+  String? get discriminatorValue {
+    if (this is AppUpdatedEvent) {
+      return r'app.updated';
     }
-    json[r'type'] = this.type;
-    if (this.blockedByUser != null) {
-      json[r'blocked_by_user'] = this.blockedByUser;
-    } else {
-      json[r'blocked_by_user'] = null;
+    if (this is CallAcceptedEvent) {
+      return r'call.accepted';
     }
-    json[r'call_cid'] = this.callCid;
-    json[r'user'] = this.user;
-    json[r'call'] = this.call;
-    json[r'members'] = this.members;
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
+    if (this is BlockedUserEvent) {
+      return r'call.blocked_user';
     }
-    json[r'egress_id'] = this.egressId;
-    json[r'captured_at'] = this.capturedAt.toUtc().toIso8601String();
-    json[r'session_id'] = this.sessionId;
-    json[r'track_type'] = this.trackType;
-    json[r'url'] = this.url;
-    json[r'users'] = this.users;
-    json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
-    json[r'capabilities_by_role'] = this.capabilitiesByRole;
-    json[r'notify_user'] = this.notifyUser;
-    json[r'user_id'] = this.userId;
-    json[r'message'] = this.message;
-    json[r'reaction'] = this.reaction;
-    json[r'call_recording'] = this.callRecording;
-    json[r'video'] = this.video;
-    json[r'name'] = this.name;
-    json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
-    json[r'participants_count_by_role'] = this.participantsCountByRole;
-    json[r'participant'] = this.participant;
-    json[r'duration_seconds'] = this.durationSeconds;
-    json[r'error'] = this.error;
-    json[r'call_transcription'] = this.callTranscription;
-    json[r'from_user_id'] = this.fromUserId;
-    json[r'muted_user_ids'] = this.mutedUserIds;
-    json[r'closed_caption'] = this.closedCaption;
-    json[r'connection_id'] = this.connectionId;
-    json[r'me'] = this.me;
-    json[r'cid'] = this.cid;
-    json[r'permissions'] = this.permissions;
-    json[r'own_capabilities'] = this.ownCapabilities;
-    json[r'channel_id'] = this.channelId;
-    json[r'channel_type'] = this.channelType;
-    json[r'created_by'] = this.createdBy;
-    if (this.expiration != null) {
-      json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
-    } else {
-      json[r'expiration'] = null;
+    if (this is ClosedCaptionEvent) {
+      return r'call.closed_caption';
     }
-    json[r'shadow'] = this.shadow;
-    if (this.team != null) {
-      json[r'team'] = this.team;
-    } else {
-      json[r'team'] = null;
+    if (this is CallClosedCaptionsFailedEvent) {
+      return r'call.closed_captions_failed';
     }
-    if (this.targetUser != null) {
-      json[r'target_user'] = this.targetUser;
-    } else {
-      json[r'target_user'] = null;
+    if (this is CallClosedCaptionsStartedEvent) {
+      return r'call.closed_captions_started';
     }
-    json[r'target_users'] = this.targetUsers;
-    return json;
-  }
-
-  /// Returns a new [VideoEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static VideoEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return VideoEvent(
-        app: AppEventResponse.fromJson(json[r'app'])!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
-        receivedAt: mapDateTime(json, r'received_at', r''),
-        type: mapValueOfType<String>(json, r'type')!,
-        blockedByUser: UserResponse.fromJson(json[r'blocked_by_user']),
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        user: UserResponsePrivacyFields.fromJson(json[r'user'])!,
-        call: CallResponse.fromJson(json[r'call'])!,
-        members: MemberResponse.listFromJson(json[r'members']),
-        reason: mapValueOfType<String>(json, r'reason'),
-        egressId: mapValueOfType<String>(json, r'egress_id')!,
-        capturedAt: mapDateTime(json, r'captured_at', r'')!,
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        trackType: mapValueOfType<String>(json, r'track_type')!,
-        url: mapValueOfType<String>(json, r'url')!,
-        users: UserResponse.mapFromJson(json[r'users']),
-        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        capabilitiesByRole: json[r'capabilities_by_role'] == null
-            ? const {}
-            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
-        notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
-        userId: mapValueOfType<String>(json, r'user_id')!,
-        message: mapValueOfType<String>(json, r'message')!,
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
-        callRecording: CallRecording.fromJson(json[r'call_recording'])!,
-        video: mapValueOfType<bool>(json, r'video')!,
-        name: mapValueOfType<String>(json, r'name')!,
-        anonymousParticipantCount:
-            mapValueOfType<int>(json, r'anonymous_participant_count')!,
-        participantsCountByRole:
-            mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        participant: CallParticipantResponse.fromJson(json[r'participant'])!,
-        durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
-        error: APIError.fromJson(json[r'error'])!,
-        callTranscription:
-            CallTranscription.fromJson(json[r'call_transcription'])!,
-        fromUserId: mapValueOfType<String>(json, r'from_user_id')!,
-        mutedUserIds: json[r'muted_user_ids'] is Iterable
-            ? (json[r'muted_user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        closedCaption: CallClosedCaption.fromJson(json[r'closed_caption'])!,
-        connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        me: OwnUserResponse.fromJson(json[r'me'])!,
-        cid: mapValueOfType<String>(json, r'cid')!,
-        permissions: json[r'permissions'] is Iterable
-            ? (json[r'permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
-        channelId: mapValueOfType<String>(json, r'channel_id')!,
-        channelType: mapValueOfType<String>(json, r'channel_type')!,
-        createdBy: User.fromJson(json[r'created_by'])!,
-        expiration: mapDateTime(json, r'expiration', r''),
-        shadow: mapValueOfType<bool>(json, r'shadow')!,
-        team: mapValueOfType<String>(json, r'team'),
-        targetUser: mapValueOfType<String>(json, r'target_user'),
-        targetUsers: json[r'target_users'] is Iterable
-            ? (json[r'target_users'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-      );
+    if (this is CallClosedCaptionsStoppedEvent) {
+      return r'call.closed_captions_stopped';
+    }
+    if (this is CallCreatedEvent) {
+      return r'call.created';
+    }
+    if (this is CallDeletedEvent) {
+      return r'call.deleted';
+    }
+    if (this is CallEndedEvent) {
+      return r'call.ended';
+    }
+    if (this is CallFrameRecordingFailedEvent) {
+      return r'call.frame_recording_failed';
+    }
+    if (this is CallFrameRecordingFrameReadyEvent) {
+      return r'call.frame_recording_ready';
+    }
+    if (this is CallFrameRecordingStartedEvent) {
+      return r'call.frame_recording_started';
+    }
+    if (this is CallFrameRecordingStoppedEvent) {
+      return r'call.frame_recording_stopped';
+    }
+    if (this is CallHLSBroadcastingFailedEvent) {
+      return r'call.hls_broadcasting_failed';
+    }
+    if (this is CallHLSBroadcastingStartedEvent) {
+      return r'call.hls_broadcasting_started';
+    }
+    if (this is CallHLSBroadcastingStoppedEvent) {
+      return r'call.hls_broadcasting_stopped';
+    }
+    if (this is CallLiveStartedEvent) {
+      return r'call.live_started';
+    }
+    if (this is CallMemberAddedEvent) {
+      return r'call.member_added';
+    }
+    if (this is CallMemberRemovedEvent) {
+      return r'call.member_removed';
+    }
+    if (this is CallMemberUpdatedEvent) {
+      return r'call.member_updated';
+    }
+    if (this is CallMemberUpdatedPermissionEvent) {
+      return r'call.member_updated_permission';
+    }
+    if (this is CallMissedEvent) {
+      return r'call.missed';
+    }
+    if (this is CallModerationBlurEvent) {
+      return r'call.moderation_blur';
+    }
+    if (this is CallModerationWarningEvent) {
+      return r'call.moderation_warning';
+    }
+    if (this is CallNotificationEvent) {
+      return r'call.notification';
+    }
+    if (this is PermissionRequestEvent) {
+      return r'call.permission_request';
+    }
+    if (this is UpdatedCallPermissionsEvent) {
+      return r'call.permissions_updated';
+    }
+    if (this is CallReactionEvent) {
+      return r'call.reaction_new';
+    }
+    if (this is CallRecordingFailedEvent) {
+      return r'call.recording_failed';
+    }
+    if (this is CallRecordingReadyEvent) {
+      return r'call.recording_ready';
+    }
+    if (this is CallRecordingStartedEvent) {
+      return r'call.recording_started';
+    }
+    if (this is CallRecordingStoppedEvent) {
+      return r'call.recording_stopped';
+    }
+    if (this is CallRejectedEvent) {
+      return r'call.rejected';
+    }
+    if (this is CallRingEvent) {
+      return r'call.ring';
+    }
+    if (this is CallRtmpBroadcastFailedEvent) {
+      return r'call.rtmp_broadcast_failed';
+    }
+    if (this is CallRtmpBroadcastStartedEvent) {
+      return r'call.rtmp_broadcast_started';
+    }
+    if (this is CallRtmpBroadcastStoppedEvent) {
+      return r'call.rtmp_broadcast_stopped';
+    }
+    if (this is CallSessionEndedEvent) {
+      return r'call.session_ended';
+    }
+    if (this is CallSessionParticipantCountsUpdatedEvent) {
+      return r'call.session_participant_count_updated';
+    }
+    if (this is CallSessionParticipantJoinedEvent) {
+      return r'call.session_participant_joined';
+    }
+    if (this is CallSessionParticipantLeftEvent) {
+      return r'call.session_participant_left';
+    }
+    if (this is CallSessionStartedEvent) {
+      return r'call.session_started';
+    }
+    if (this is CallStatsReportReadyEvent) {
+      return r'call.stats_report_ready';
+    }
+    if (this is CallTranscriptionFailedEvent) {
+      return r'call.transcription_failed';
+    }
+    if (this is CallTranscriptionReadyEvent) {
+      return r'call.transcription_ready';
+    }
+    if (this is CallTranscriptionStartedEvent) {
+      return r'call.transcription_started';
+    }
+    if (this is CallTranscriptionStoppedEvent) {
+      return r'call.transcription_stopped';
+    }
+    if (this is UnblockedUserEvent) {
+      return r'call.unblocked_user';
+    }
+    if (this is CallUpdatedEvent) {
+      return r'call.updated';
+    }
+    if (this is CallUserMutedEvent) {
+      return r'call.user_muted';
+    }
+    if (this is ConnectionErrorEvent) {
+      return r'connection.error';
+    }
+    if (this is ConnectedEvent) {
+      return r'connection.ok';
+    }
+    if (this is CustomVideoEvent) {
+      return r'custom';
+    }
+    if (this is HealthCheckEvent) {
+      return r'health.check';
+    }
+    if (this is UserBannedEvent) {
+      return r'user.banned';
+    }
+    if (this is UserDeactivatedEvent) {
+      return r'user.deactivated';
+    }
+    if (this is UserMutedEvent) {
+      return r'user.muted';
+    }
+    if (this is UserReactivatedEvent) {
+      return r'user.reactivated';
+    }
+    if (this is UserUpdatedEvent) {
+      return r'user.updated';
     }
     return null;
   }
+}
 
-  static List<VideoEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+extension VideoEventBuilderDiscriminatorExt on VideoEventBuilder {
+  String? get discriminatorValue {
+    if (this is AppUpdatedEventBuilder) {
+      return r'app.updated';
+    }
+    if (this is CallAcceptedEventBuilder) {
+      return r'call.accepted';
+    }
+    if (this is BlockedUserEventBuilder) {
+      return r'call.blocked_user';
+    }
+    if (this is ClosedCaptionEventBuilder) {
+      return r'call.closed_caption';
+    }
+    if (this is CallClosedCaptionsFailedEventBuilder) {
+      return r'call.closed_captions_failed';
+    }
+    if (this is CallClosedCaptionsStartedEventBuilder) {
+      return r'call.closed_captions_started';
+    }
+    if (this is CallClosedCaptionsStoppedEventBuilder) {
+      return r'call.closed_captions_stopped';
+    }
+    if (this is CallCreatedEventBuilder) {
+      return r'call.created';
+    }
+    if (this is CallDeletedEventBuilder) {
+      return r'call.deleted';
+    }
+    if (this is CallEndedEventBuilder) {
+      return r'call.ended';
+    }
+    if (this is CallFrameRecordingFailedEventBuilder) {
+      return r'call.frame_recording_failed';
+    }
+    if (this is CallFrameRecordingFrameReadyEventBuilder) {
+      return r'call.frame_recording_ready';
+    }
+    if (this is CallFrameRecordingStartedEventBuilder) {
+      return r'call.frame_recording_started';
+    }
+    if (this is CallFrameRecordingStoppedEventBuilder) {
+      return r'call.frame_recording_stopped';
+    }
+    if (this is CallHLSBroadcastingFailedEventBuilder) {
+      return r'call.hls_broadcasting_failed';
+    }
+    if (this is CallHLSBroadcastingStartedEventBuilder) {
+      return r'call.hls_broadcasting_started';
+    }
+    if (this is CallHLSBroadcastingStoppedEventBuilder) {
+      return r'call.hls_broadcasting_stopped';
+    }
+    if (this is CallLiveStartedEventBuilder) {
+      return r'call.live_started';
+    }
+    if (this is CallMemberAddedEventBuilder) {
+      return r'call.member_added';
+    }
+    if (this is CallMemberRemovedEventBuilder) {
+      return r'call.member_removed';
+    }
+    if (this is CallMemberUpdatedEventBuilder) {
+      return r'call.member_updated';
+    }
+    if (this is CallMemberUpdatedPermissionEventBuilder) {
+      return r'call.member_updated_permission';
+    }
+    if (this is CallMissedEventBuilder) {
+      return r'call.missed';
+    }
+    if (this is CallModerationBlurEventBuilder) {
+      return r'call.moderation_blur';
+    }
+    if (this is CallModerationWarningEventBuilder) {
+      return r'call.moderation_warning';
+    }
+    if (this is CallNotificationEventBuilder) {
+      return r'call.notification';
+    }
+    if (this is PermissionRequestEventBuilder) {
+      return r'call.permission_request';
+    }
+    if (this is UpdatedCallPermissionsEventBuilder) {
+      return r'call.permissions_updated';
+    }
+    if (this is CallReactionEventBuilder) {
+      return r'call.reaction_new';
+    }
+    if (this is CallRecordingFailedEventBuilder) {
+      return r'call.recording_failed';
+    }
+    if (this is CallRecordingReadyEventBuilder) {
+      return r'call.recording_ready';
+    }
+    if (this is CallRecordingStartedEventBuilder) {
+      return r'call.recording_started';
+    }
+    if (this is CallRecordingStoppedEventBuilder) {
+      return r'call.recording_stopped';
+    }
+    if (this is CallRejectedEventBuilder) {
+      return r'call.rejected';
+    }
+    if (this is CallRingEventBuilder) {
+      return r'call.ring';
+    }
+    if (this is CallRtmpBroadcastFailedEventBuilder) {
+      return r'call.rtmp_broadcast_failed';
+    }
+    if (this is CallRtmpBroadcastStartedEventBuilder) {
+      return r'call.rtmp_broadcast_started';
+    }
+    if (this is CallRtmpBroadcastStoppedEventBuilder) {
+      return r'call.rtmp_broadcast_stopped';
+    }
+    if (this is CallSessionEndedEventBuilder) {
+      return r'call.session_ended';
+    }
+    if (this is CallSessionParticipantCountsUpdatedEventBuilder) {
+      return r'call.session_participant_count_updated';
+    }
+    if (this is CallSessionParticipantJoinedEventBuilder) {
+      return r'call.session_participant_joined';
+    }
+    if (this is CallSessionParticipantLeftEventBuilder) {
+      return r'call.session_participant_left';
+    }
+    if (this is CallSessionStartedEventBuilder) {
+      return r'call.session_started';
+    }
+    if (this is CallStatsReportReadyEventBuilder) {
+      return r'call.stats_report_ready';
+    }
+    if (this is CallTranscriptionFailedEventBuilder) {
+      return r'call.transcription_failed';
+    }
+    if (this is CallTranscriptionReadyEventBuilder) {
+      return r'call.transcription_ready';
+    }
+    if (this is CallTranscriptionStartedEventBuilder) {
+      return r'call.transcription_started';
+    }
+    if (this is CallTranscriptionStoppedEventBuilder) {
+      return r'call.transcription_stopped';
+    }
+    if (this is UnblockedUserEventBuilder) {
+      return r'call.unblocked_user';
+    }
+    if (this is CallUpdatedEventBuilder) {
+      return r'call.updated';
+    }
+    if (this is CallUserMutedEventBuilder) {
+      return r'call.user_muted';
+    }
+    if (this is ConnectionErrorEventBuilder) {
+      return r'connection.error';
+    }
+    if (this is ConnectedEventBuilder) {
+      return r'connection.ok';
+    }
+    if (this is CustomVideoEventBuilder) {
+      return r'custom';
+    }
+    if (this is HealthCheckEventBuilder) {
+      return r'health.check';
+    }
+    if (this is UserBannedEventBuilder) {
+      return r'user.banned';
+    }
+    if (this is UserDeactivatedEventBuilder) {
+      return r'user.deactivated';
+    }
+    if (this is UserMutedEventBuilder) {
+      return r'user.muted';
+    }
+    if (this is UserReactivatedEventBuilder) {
+      return r'user.reactivated';
+    }
+    if (this is UserUpdatedEventBuilder) {
+      return r'user.updated';
+    }
+    return null;
+  }
+}
+
+class _$VideoEventSerializer implements PrimitiveSerializer<VideoEvent> {
+  @override
+  final Iterable<Type> types = const [VideoEvent, _$VideoEvent];
+
+  @override
+  final String wireName = r'VideoEvent';
+
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    VideoEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {}
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    VideoEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <VideoEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = VideoEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    final oneOf = object.oneOf;
+    return serializers.serialize(oneOf.value,
+        specifiedType: FullType(oneOf.valueType))!;
   }
 
-  static Map<String, VideoEvent> mapFromJson(dynamic json) {
-    final map = <String, VideoEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = VideoEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of VideoEvent-objects as value to a dart map
-  static Map<String, List<VideoEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  VideoEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final map = <String, List<VideoEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = VideoEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
+    final result = VideoEventBuilder();
+    Object? oneOfDataSrc;
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final discIndex =
+        serializedList.indexOf(VideoEvent.discriminatorFieldName) + 1;
+    final discValue = serializers.deserialize(serializedList[discIndex],
+        specifiedType: FullType(String)) as String;
+    oneOfDataSrc = serialized;
+    final oneOfTypes = [
+      AppUpdatedEvent,
+      CallAcceptedEvent,
+      BlockedUserEvent,
+      ClosedCaptionEvent,
+      CallClosedCaptionsFailedEvent,
+      CallClosedCaptionsStartedEvent,
+      CallClosedCaptionsStoppedEvent,
+      CallCreatedEvent,
+      CallDeletedEvent,
+      CallEndedEvent,
+      CallFrameRecordingFailedEvent,
+      CallFrameRecordingFrameReadyEvent,
+      CallFrameRecordingStartedEvent,
+      CallFrameRecordingStoppedEvent,
+      CallHLSBroadcastingFailedEvent,
+      CallHLSBroadcastingStartedEvent,
+      CallHLSBroadcastingStoppedEvent,
+      CallLiveStartedEvent,
+      CallMemberAddedEvent,
+      CallMemberRemovedEvent,
+      CallMemberUpdatedEvent,
+      CallMemberUpdatedPermissionEvent,
+      CallMissedEvent,
+      CallModerationBlurEvent,
+      CallModerationWarningEvent,
+      CallNotificationEvent,
+      PermissionRequestEvent,
+      UpdatedCallPermissionsEvent,
+      CallReactionEvent,
+      CallRecordingFailedEvent,
+      CallRecordingReadyEvent,
+      CallRecordingStartedEvent,
+      CallRecordingStoppedEvent,
+      CallRejectedEvent,
+      CallRingEvent,
+      CallRtmpBroadcastFailedEvent,
+      CallRtmpBroadcastStartedEvent,
+      CallRtmpBroadcastStoppedEvent,
+      CallSessionEndedEvent,
+      CallSessionParticipantCountsUpdatedEvent,
+      CallSessionParticipantJoinedEvent,
+      CallSessionParticipantLeftEvent,
+      CallSessionStartedEvent,
+      CallStatsReportReadyEvent,
+      CallTranscriptionFailedEvent,
+      CallTranscriptionReadyEvent,
+      CallTranscriptionStartedEvent,
+      CallTranscriptionStoppedEvent,
+      UnblockedUserEvent,
+      CallUpdatedEvent,
+      CallUserMutedEvent,
+      ConnectionErrorEvent,
+      ConnectedEvent,
+      CustomVideoEvent,
+      HealthCheckEvent,
+      UserBannedEvent,
+      UserDeactivatedEvent,
+      UserMutedEvent,
+      UserReactivatedEvent,
+      UserUpdatedEvent,
+    ];
+    Object oneOfResult;
+    Type oneOfType;
+    switch (discValue) {
+      case r'app.updated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(AppUpdatedEvent),
+        ) as AppUpdatedEvent;
+        oneOfType = AppUpdatedEvent;
+        break;
+      case r'call.accepted':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallAcceptedEvent),
+        ) as CallAcceptedEvent;
+        oneOfType = CallAcceptedEvent;
+        break;
+      case r'call.blocked_user':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(BlockedUserEvent),
+        ) as BlockedUserEvent;
+        oneOfType = BlockedUserEvent;
+        break;
+      case r'call.closed_caption':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(ClosedCaptionEvent),
+        ) as ClosedCaptionEvent;
+        oneOfType = ClosedCaptionEvent;
+        break;
+      case r'call.closed_captions_failed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallClosedCaptionsFailedEvent),
+        ) as CallClosedCaptionsFailedEvent;
+        oneOfType = CallClosedCaptionsFailedEvent;
+        break;
+      case r'call.closed_captions_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallClosedCaptionsStartedEvent),
+        ) as CallClosedCaptionsStartedEvent;
+        oneOfType = CallClosedCaptionsStartedEvent;
+        break;
+      case r'call.closed_captions_stopped':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallClosedCaptionsStoppedEvent),
+        ) as CallClosedCaptionsStoppedEvent;
+        oneOfType = CallClosedCaptionsStoppedEvent;
+        break;
+      case r'call.created':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallCreatedEvent),
+        ) as CallCreatedEvent;
+        oneOfType = CallCreatedEvent;
+        break;
+      case r'call.deleted':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallDeletedEvent),
+        ) as CallDeletedEvent;
+        oneOfType = CallDeletedEvent;
+        break;
+      case r'call.ended':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallEndedEvent),
+        ) as CallEndedEvent;
+        oneOfType = CallEndedEvent;
+        break;
+      case r'call.frame_recording_failed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallFrameRecordingFailedEvent),
+        ) as CallFrameRecordingFailedEvent;
+        oneOfType = CallFrameRecordingFailedEvent;
+        break;
+      case r'call.frame_recording_ready':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallFrameRecordingFrameReadyEvent),
+        ) as CallFrameRecordingFrameReadyEvent;
+        oneOfType = CallFrameRecordingFrameReadyEvent;
+        break;
+      case r'call.frame_recording_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallFrameRecordingStartedEvent),
+        ) as CallFrameRecordingStartedEvent;
+        oneOfType = CallFrameRecordingStartedEvent;
+        break;
+      case r'call.frame_recording_stopped':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallFrameRecordingStoppedEvent),
+        ) as CallFrameRecordingStoppedEvent;
+        oneOfType = CallFrameRecordingStoppedEvent;
+        break;
+      case r'call.hls_broadcasting_failed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallHLSBroadcastingFailedEvent),
+        ) as CallHLSBroadcastingFailedEvent;
+        oneOfType = CallHLSBroadcastingFailedEvent;
+        break;
+      case r'call.hls_broadcasting_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallHLSBroadcastingStartedEvent),
+        ) as CallHLSBroadcastingStartedEvent;
+        oneOfType = CallHLSBroadcastingStartedEvent;
+        break;
+      case r'call.hls_broadcasting_stopped':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallHLSBroadcastingStoppedEvent),
+        ) as CallHLSBroadcastingStoppedEvent;
+        oneOfType = CallHLSBroadcastingStoppedEvent;
+        break;
+      case r'call.live_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallLiveStartedEvent),
+        ) as CallLiveStartedEvent;
+        oneOfType = CallLiveStartedEvent;
+        break;
+      case r'call.member_added':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallMemberAddedEvent),
+        ) as CallMemberAddedEvent;
+        oneOfType = CallMemberAddedEvent;
+        break;
+      case r'call.member_removed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallMemberRemovedEvent),
+        ) as CallMemberRemovedEvent;
+        oneOfType = CallMemberRemovedEvent;
+        break;
+      case r'call.member_updated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallMemberUpdatedEvent),
+        ) as CallMemberUpdatedEvent;
+        oneOfType = CallMemberUpdatedEvent;
+        break;
+      case r'call.member_updated_permission':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallMemberUpdatedPermissionEvent),
+        ) as CallMemberUpdatedPermissionEvent;
+        oneOfType = CallMemberUpdatedPermissionEvent;
+        break;
+      case r'call.missed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallMissedEvent),
+        ) as CallMissedEvent;
+        oneOfType = CallMissedEvent;
+        break;
+      case r'call.moderation_blur':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallModerationBlurEvent),
+        ) as CallModerationBlurEvent;
+        oneOfType = CallModerationBlurEvent;
+        break;
+      case r'call.moderation_warning':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallModerationWarningEvent),
+        ) as CallModerationWarningEvent;
+        oneOfType = CallModerationWarningEvent;
+        break;
+      case r'call.notification':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallNotificationEvent),
+        ) as CallNotificationEvent;
+        oneOfType = CallNotificationEvent;
+        break;
+      case r'call.permission_request':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(PermissionRequestEvent),
+        ) as PermissionRequestEvent;
+        oneOfType = PermissionRequestEvent;
+        break;
+      case r'call.permissions_updated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UpdatedCallPermissionsEvent),
+        ) as UpdatedCallPermissionsEvent;
+        oneOfType = UpdatedCallPermissionsEvent;
+        break;
+      case r'call.reaction_new':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallReactionEvent),
+        ) as CallReactionEvent;
+        oneOfType = CallReactionEvent;
+        break;
+      case r'call.recording_failed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRecordingFailedEvent),
+        ) as CallRecordingFailedEvent;
+        oneOfType = CallRecordingFailedEvent;
+        break;
+      case r'call.recording_ready':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRecordingReadyEvent),
+        ) as CallRecordingReadyEvent;
+        oneOfType = CallRecordingReadyEvent;
+        break;
+      case r'call.recording_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRecordingStartedEvent),
+        ) as CallRecordingStartedEvent;
+        oneOfType = CallRecordingStartedEvent;
+        break;
+      case r'call.recording_stopped':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRecordingStoppedEvent),
+        ) as CallRecordingStoppedEvent;
+        oneOfType = CallRecordingStoppedEvent;
+        break;
+      case r'call.rejected':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRejectedEvent),
+        ) as CallRejectedEvent;
+        oneOfType = CallRejectedEvent;
+        break;
+      case r'call.ring':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRingEvent),
+        ) as CallRingEvent;
+        oneOfType = CallRingEvent;
+        break;
+      case r'call.rtmp_broadcast_failed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRtmpBroadcastFailedEvent),
+        ) as CallRtmpBroadcastFailedEvent;
+        oneOfType = CallRtmpBroadcastFailedEvent;
+        break;
+      case r'call.rtmp_broadcast_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRtmpBroadcastStartedEvent),
+        ) as CallRtmpBroadcastStartedEvent;
+        oneOfType = CallRtmpBroadcastStartedEvent;
+        break;
+      case r'call.rtmp_broadcast_stopped':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallRtmpBroadcastStoppedEvent),
+        ) as CallRtmpBroadcastStoppedEvent;
+        oneOfType = CallRtmpBroadcastStoppedEvent;
+        break;
+      case r'call.session_ended':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallSessionEndedEvent),
+        ) as CallSessionEndedEvent;
+        oneOfType = CallSessionEndedEvent;
+        break;
+      case r'call.session_participant_count_updated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallSessionParticipantCountsUpdatedEvent),
+        ) as CallSessionParticipantCountsUpdatedEvent;
+        oneOfType = CallSessionParticipantCountsUpdatedEvent;
+        break;
+      case r'call.session_participant_joined':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallSessionParticipantJoinedEvent),
+        ) as CallSessionParticipantJoinedEvent;
+        oneOfType = CallSessionParticipantJoinedEvent;
+        break;
+      case r'call.session_participant_left':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallSessionParticipantLeftEvent),
+        ) as CallSessionParticipantLeftEvent;
+        oneOfType = CallSessionParticipantLeftEvent;
+        break;
+      case r'call.session_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallSessionStartedEvent),
+        ) as CallSessionStartedEvent;
+        oneOfType = CallSessionStartedEvent;
+        break;
+      case r'call.stats_report_ready':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallStatsReportReadyEvent),
+        ) as CallStatsReportReadyEvent;
+        oneOfType = CallStatsReportReadyEvent;
+        break;
+      case r'call.transcription_failed':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallTranscriptionFailedEvent),
+        ) as CallTranscriptionFailedEvent;
+        oneOfType = CallTranscriptionFailedEvent;
+        break;
+      case r'call.transcription_ready':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallTranscriptionReadyEvent),
+        ) as CallTranscriptionReadyEvent;
+        oneOfType = CallTranscriptionReadyEvent;
+        break;
+      case r'call.transcription_started':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallTranscriptionStartedEvent),
+        ) as CallTranscriptionStartedEvent;
+        oneOfType = CallTranscriptionStartedEvent;
+        break;
+      case r'call.transcription_stopped':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallTranscriptionStoppedEvent),
+        ) as CallTranscriptionStoppedEvent;
+        oneOfType = CallTranscriptionStoppedEvent;
+        break;
+      case r'call.unblocked_user':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UnblockedUserEvent),
+        ) as UnblockedUserEvent;
+        oneOfType = UnblockedUserEvent;
+        break;
+      case r'call.updated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallUpdatedEvent),
+        ) as CallUpdatedEvent;
+        oneOfType = CallUpdatedEvent;
+        break;
+      case r'call.user_muted':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CallUserMutedEvent),
+        ) as CallUserMutedEvent;
+        oneOfType = CallUserMutedEvent;
+        break;
+      case r'connection.error':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(ConnectionErrorEvent),
+        ) as ConnectionErrorEvent;
+        oneOfType = ConnectionErrorEvent;
+        break;
+      case r'connection.ok':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(ConnectedEvent),
+        ) as ConnectedEvent;
+        oneOfType = ConnectedEvent;
+        break;
+      case r'custom':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(CustomVideoEvent),
+        ) as CustomVideoEvent;
+        oneOfType = CustomVideoEvent;
+        break;
+      case r'health.check':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(HealthCheckEvent),
+        ) as HealthCheckEvent;
+        oneOfType = HealthCheckEvent;
+        break;
+      case r'user.banned':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UserBannedEvent),
+        ) as UserBannedEvent;
+        oneOfType = UserBannedEvent;
+        break;
+      case r'user.deactivated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UserDeactivatedEvent),
+        ) as UserDeactivatedEvent;
+        oneOfType = UserDeactivatedEvent;
+        break;
+      case r'user.muted':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UserMutedEvent),
+        ) as UserMutedEvent;
+        oneOfType = UserMutedEvent;
+        break;
+      case r'user.reactivated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UserReactivatedEvent),
+        ) as UserReactivatedEvent;
+        oneOfType = UserReactivatedEvent;
+        break;
+      case r'user.updated':
+        oneOfResult = serializers.deserialize(
+          oneOfDataSrc,
+          specifiedType: FullType(UserUpdatedEvent),
+        ) as UserUpdatedEvent;
+        oneOfType = UserUpdatedEvent;
+        break;
+      default:
+        throw UnsupportedError(
+            "Couldn't deserialize oneOf for the discriminator value: ${discValue}");
     }
-    return map;
+    result.oneOf = OneOfDynamic(
+        typeIndex: oneOfTypes.indexOf(oneOfType),
+        types: oneOfTypes,
+        value: oneOfResult);
+    return result.build();
   }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'app',
-    'created_at',
-    'custom',
-    'type',
-    'call_cid',
-    'user',
-    'call',
-    'members',
-    'egress_id',
-    'captured_at',
-    'session_id',
-    'track_type',
-    'url',
-    'users',
-    'hls_playlist_url',
-    'capabilities_by_role',
-    'notify_user',
-    'user_id',
-    'message',
-    'reaction',
-    'call_recording',
-    'video',
-    'name',
-    'anonymous_participant_count',
-    'participants_count_by_role',
-    'participant',
-    'duration_seconds',
-    'error',
-    'call_transcription',
-    'from_user_id',
-    'muted_user_ids',
-    'closed_caption',
-    'connection_id',
-    'me',
-    'cid',
-    'permissions',
-    'own_capabilities',
-    'channel_id',
-    'channel_type',
-    'created_by',
-    'shadow',
-  };
 }

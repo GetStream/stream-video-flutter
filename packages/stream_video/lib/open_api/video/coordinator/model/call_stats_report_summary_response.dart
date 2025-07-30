@@ -1,206 +1,235 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_stats_report_summary_response.g.dart';
 
-class CallStatsReportSummaryResponse {
-  /// Returns a new [CallStatsReportSummaryResponse] instance.
-  CallStatsReportSummaryResponse({
-    required this.callCid,
-    required this.callDurationSeconds,
-    required this.callSessionId,
-    required this.callStatus,
-    this.createdAt,
-    required this.firstStatsTime,
-    this.minUserRating,
-    this.qualityScore,
-  });
+/// CallStatsReportSummaryResponse
+///
+/// Properties:
+/// * [callCid]
+/// * [callDurationSeconds]
+/// * [callSessionId]
+/// * [callStatus]
+/// * [createdAt]
+/// * [firstStatsTime]
+/// * [minUserRating]
+/// * [qualityScore]
+@BuiltValue()
+abstract class CallStatsReportSummaryResponse
+    implements
+        Built<CallStatsReportSummaryResponse,
+            CallStatsReportSummaryResponseBuilder> {
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
+  @BuiltValueField(wireName: r'call_duration_seconds')
+  int get callDurationSeconds;
 
-  int callDurationSeconds;
+  @BuiltValueField(wireName: r'call_session_id')
+  String get callSessionId;
 
-  String callSessionId;
+  @BuiltValueField(wireName: r'call_status')
+  String get callStatus;
 
-  String callStatus;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime? get createdAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? createdAt;
+  @BuiltValueField(wireName: r'first_stats_time')
+  DateTime get firstStatsTime;
 
-  DateTime firstStatsTime;
+  @BuiltValueField(wireName: r'min_user_rating')
+  int? get minUserRating;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? minUserRating;
+  @BuiltValueField(wireName: r'quality_score')
+  int? get qualityScore;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? qualityScore;
+  CallStatsReportSummaryResponse._();
+
+  factory CallStatsReportSummaryResponse(
+          [void updates(CallStatsReportSummaryResponseBuilder b)]) =
+      _$CallStatsReportSummaryResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallStatsReportSummaryResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallStatsReportSummaryResponse> get serializer =>
+      _$CallStatsReportSummaryResponseSerializer();
+}
+
+class _$CallStatsReportSummaryResponseSerializer
+    implements PrimitiveSerializer<CallStatsReportSummaryResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallStatsReportSummaryResponse,
+    _$CallStatsReportSummaryResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallStatsReportSummaryResponse &&
-          other.callCid == callCid &&
-          other.callDurationSeconds == callDurationSeconds &&
-          other.callSessionId == callSessionId &&
-          other.callStatus == callStatus &&
-          other.createdAt == createdAt &&
-          other.firstStatsTime == firstStatsTime &&
-          other.minUserRating == minUserRating &&
-          other.qualityScore == qualityScore;
+  final String wireName = r'CallStatsReportSummaryResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callCid.hashCode) +
-      (callDurationSeconds.hashCode) +
-      (callSessionId.hashCode) +
-      (callStatus.hashCode) +
-      (createdAt == null ? 0 : createdAt!.hashCode) +
-      (firstStatsTime.hashCode) +
-      (minUserRating == null ? 0 : minUserRating!.hashCode) +
-      (qualityScore == null ? 0 : qualityScore!.hashCode);
-
-  @override
-  String toString() =>
-      'CallStatsReportSummaryResponse[callCid=$callCid, callDurationSeconds=$callDurationSeconds, callSessionId=$callSessionId, callStatus=$callStatus, createdAt=$createdAt, firstStatsTime=$firstStatsTime, minUserRating=$minUserRating, qualityScore=$qualityScore]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call_cid'] = this.callCid;
-    json[r'call_duration_seconds'] = this.callDurationSeconds;
-    json[r'call_session_id'] = this.callSessionId;
-    json[r'call_status'] = this.callStatus;
-    if (this.createdAt != null) {
-      json[r'created_at'] = this.createdAt!.toUtc().toIso8601String();
-    } else {
-      json[r'created_at'] = null;
-    }
-    json[r'first_stats_time'] = this.firstStatsTime.toUtc().toIso8601String();
-    if (this.minUserRating != null) {
-      json[r'min_user_rating'] = this.minUserRating;
-    } else {
-      json[r'min_user_rating'] = null;
-    }
-    if (this.qualityScore != null) {
-      json[r'quality_score'] = this.qualityScore;
-    } else {
-      json[r'quality_score'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [CallStatsReportSummaryResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallStatsReportSummaryResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallStatsReportSummaryResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallStatsReportSummaryResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallStatsReportSummaryResponse(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        callDurationSeconds:
-            mapValueOfType<int>(json, r'call_duration_seconds')!,
-        callSessionId: mapValueOfType<String>(json, r'call_session_id')!,
-        callStatus: mapValueOfType<String>(json, r'call_status')!,
-        createdAt: mapDateTime(json, r'created_at', r''),
-        firstStatsTime: mapDateTime(json, r'first_stats_time', r'')!,
-        minUserRating: mapValueOfType<int>(json, r'min_user_rating'),
-        qualityScore: mapValueOfType<int>(json, r'quality_score'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallStatsReportSummaryResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'call_duration_seconds';
+    yield serializers.serialize(
+      object.callDurationSeconds,
+      specifiedType: const FullType(int),
+    );
+    yield r'call_session_id';
+    yield serializers.serialize(
+      object.callSessionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'call_status';
+    yield serializers.serialize(
+      object.callStatus,
+      specifiedType: const FullType(String),
+    );
+    if (object.createdAt != null) {
+      yield r'created_at';
+      yield serializers.serialize(
+        object.createdAt,
+        specifiedType: const FullType(DateTime),
       );
     }
-    return null;
+    yield r'first_stats_time';
+    yield serializers.serialize(
+      object.firstStatsTime,
+      specifiedType: const FullType(DateTime),
+    );
+    if (object.minUserRating != null) {
+      yield r'min_user_rating';
+      yield serializers.serialize(
+        object.minUserRating,
+        specifiedType: const FullType(int),
+      );
+    }
+    if (object.qualityScore != null) {
+      yield r'quality_score';
+      yield serializers.serialize(
+        object.qualityScore,
+        specifiedType: const FullType(int),
+      );
+    }
   }
 
-  static List<CallStatsReportSummaryResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallStatsReportSummaryResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallStatsReportSummaryResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallStatsReportSummaryResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallStatsReportSummaryResponse> mapFromJson(dynamic json) {
-    final map = <String, CallStatsReportSummaryResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallStatsReportSummaryResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallStatsReportSummaryResponse-objects as value to a dart map
-  static Map<String, List<CallStatsReportSummaryResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallStatsReportSummaryResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallStatsReportSummaryResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallStatsReportSummaryResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'call_duration_seconds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.callDurationSeconds = valueDes;
+          break;
+        case r'call_session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callSessionId = valueDes;
+          break;
+        case r'call_status':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callStatus = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'first_stats_time':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.firstStatsTime = valueDes;
+          break;
+        case r'min_user_rating':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.minUserRating = valueDes;
+          break;
+        case r'quality_score':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.qualityScore = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'call_duration_seconds',
-    'call_session_id',
-    'call_status',
-    'first_stats_time',
-  };
+  @override
+  CallStatsReportSummaryResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallStatsReportSummaryResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

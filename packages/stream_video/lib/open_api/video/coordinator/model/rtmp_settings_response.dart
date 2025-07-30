@@ -1,129 +1,130 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'rtmp_settings_response.g.dart';
 
-class RTMPSettingsResponse {
-  /// Returns a new [RTMPSettingsResponse] instance.
-  RTMPSettingsResponse({
-    required this.enabled,
-    required this.quality,
-  });
+/// RTMPSettingsResponse is the payload for RTMP settings
+///
+/// Properties:
+/// * [enabled]
+/// * [quality]
+@BuiltValue()
+abstract class RTMPSettingsResponse
+    implements Built<RTMPSettingsResponse, RTMPSettingsResponseBuilder> {
+  @BuiltValueField(wireName: r'enabled')
+  bool get enabled;
 
-  bool enabled;
+  @BuiltValueField(wireName: r'quality')
+  String get quality;
 
-  String quality;
+  RTMPSettingsResponse._();
+
+  factory RTMPSettingsResponse([void updates(RTMPSettingsResponseBuilder b)]) =
+      _$RTMPSettingsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(RTMPSettingsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<RTMPSettingsResponse> get serializer =>
+      _$RTMPSettingsResponseSerializer();
+}
+
+class _$RTMPSettingsResponseSerializer
+    implements PrimitiveSerializer<RTMPSettingsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    RTMPSettingsResponse,
+    _$RTMPSettingsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RTMPSettingsResponse &&
-          other.enabled == enabled &&
-          other.quality == quality;
+  final String wireName = r'RTMPSettingsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (enabled.hashCode) + (quality.hashCode);
-
-  @override
-  String toString() =>
-      'RTMPSettingsResponse[enabled=$enabled, quality=$quality]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'enabled'] = this.enabled;
-    json[r'quality'] = this.quality;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    RTMPSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'enabled';
+    yield serializers.serialize(
+      object.enabled,
+      specifiedType: const FullType(bool),
+    );
+    yield r'quality';
+    yield serializers.serialize(
+      object.quality,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [RTMPSettingsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static RTMPSettingsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RTMPSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RTMPSettingsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return RTMPSettingsResponse(
-        enabled: mapValueOfType<bool>(json, r'enabled')!,
-        quality: mapValueOfType<String>(json, r'quality')!,
-      );
-    }
-    return null;
-  }
-
-  static List<RTMPSettingsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    RTMPSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <RTMPSettingsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = RTMPSettingsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, RTMPSettingsResponse> mapFromJson(dynamic json) {
-    final map = <String, RTMPSettingsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = RTMPSettingsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of RTMPSettingsResponse-objects as value to a dart map
-  static Map<String, List<RTMPSettingsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required RTMPSettingsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<RTMPSettingsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = RTMPSettingsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enabled = valueDes;
+          break;
+        case r'quality':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.quality = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'enabled',
-    'quality',
-  };
+  @override
+  RTMPSettingsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = RTMPSettingsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,129 +1,130 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'user_feedback_report.g.dart';
 
-class UserFeedbackReport {
-  /// Returns a new [UserFeedbackReport] instance.
-  UserFeedbackReport({
-    this.countByRating = const {},
-    required this.unreportedCount,
-  });
+/// UserFeedbackReport
+///
+/// Properties:
+/// * [countByRating]
+/// * [unreportedCount]
+@BuiltValue()
+abstract class UserFeedbackReport
+    implements Built<UserFeedbackReport, UserFeedbackReportBuilder> {
+  @BuiltValueField(wireName: r'count_by_rating')
+  BuiltMap<String, int> get countByRating;
 
-  Map<String, int> countByRating;
+  @BuiltValueField(wireName: r'unreported_count')
+  int get unreportedCount;
 
-  int unreportedCount;
+  UserFeedbackReport._();
+
+  factory UserFeedbackReport([void updates(UserFeedbackReportBuilder b)]) =
+      _$UserFeedbackReport;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UserFeedbackReportBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UserFeedbackReport> get serializer =>
+      _$UserFeedbackReportSerializer();
+}
+
+class _$UserFeedbackReportSerializer
+    implements PrimitiveSerializer<UserFeedbackReport> {
+  @override
+  final Iterable<Type> types = const [UserFeedbackReport, _$UserFeedbackReport];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserFeedbackReport &&
-          _deepEquality.equals(other.countByRating, countByRating) &&
-          other.unreportedCount == unreportedCount;
+  final String wireName = r'UserFeedbackReport';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (countByRating.hashCode) + (unreportedCount.hashCode);
-
-  @override
-  String toString() =>
-      'UserFeedbackReport[countByRating=$countByRating, unreportedCount=$unreportedCount]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'count_by_rating'] = this.countByRating;
-    json[r'unreported_count'] = this.unreportedCount;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UserFeedbackReport object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'count_by_rating';
+    yield serializers.serialize(
+      object.countByRating,
+      specifiedType:
+          const FullType(BuiltMap, [FullType(String), FullType(int)]),
+    );
+    yield r'unreported_count';
+    yield serializers.serialize(
+      object.unreportedCount,
+      specifiedType: const FullType(int),
+    );
   }
 
-  /// Returns a new [UserFeedbackReport] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UserFeedbackReport? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserFeedbackReport[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserFeedbackReport[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UserFeedbackReport(
-        countByRating: mapCastOfType<String, int>(json, r'count_by_rating')!,
-        unreportedCount: mapValueOfType<int>(json, r'unreported_count')!,
-      );
-    }
-    return null;
-  }
-
-  static List<UserFeedbackReport> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UserFeedbackReport object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UserFeedbackReport>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UserFeedbackReport.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UserFeedbackReport> mapFromJson(dynamic json) {
-    final map = <String, UserFeedbackReport>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UserFeedbackReport.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UserFeedbackReport-objects as value to a dart map
-  static Map<String, List<UserFeedbackReport>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UserFeedbackReportBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UserFeedbackReport>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UserFeedbackReport.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'count_by_rating':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltMap, [FullType(String), FullType(int)]),
+          ) as BuiltMap<String, int>;
+          result.countByRating.replace(valueDes);
+          break;
+        case r'unreported_count':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.unreportedCount = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'count_by_rating',
-    'unreported_count',
-  };
+  @override
+  UserFeedbackReport deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UserFeedbackReportBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

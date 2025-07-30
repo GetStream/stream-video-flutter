@@ -1,137 +1,151 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_closed_captions_started_event.g.dart';
 
-class CallClosedCaptionsStartedEvent {
-  /// Returns a new [CallClosedCaptionsStartedEvent] instance.
-  CallClosedCaptionsStartedEvent({
-    required this.callCid,
-    required this.createdAt,
-    this.type = 'call.closed_captions_started',
-  });
+/// This event is sent when call closed caption has started
+///
+/// Properties:
+/// * [callCid]
+/// * [createdAt]
+/// * [type] - The type of event: \"call.closed_captions_started\" in this case
+@BuiltValue()
+abstract class CallClosedCaptionsStartedEvent
+    implements
+        Built<CallClosedCaptionsStartedEvent,
+            CallClosedCaptionsStartedEventBuilder> {
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// The type of event: \"call.closed_captions_started\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
+
+  CallClosedCaptionsStartedEvent._();
+
+  factory CallClosedCaptionsStartedEvent(
+          [void updates(CallClosedCaptionsStartedEventBuilder b)]) =
+      _$CallClosedCaptionsStartedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallClosedCaptionsStartedEventBuilder b) =>
+      b..type = 'call.closed_captions_started';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallClosedCaptionsStartedEvent> get serializer =>
+      _$CallClosedCaptionsStartedEventSerializer();
+}
+
+class _$CallClosedCaptionsStartedEventSerializer
+    implements PrimitiveSerializer<CallClosedCaptionsStartedEvent> {
+  @override
+  final Iterable<Type> types = const [
+    CallClosedCaptionsStartedEvent,
+    _$CallClosedCaptionsStartedEvent
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallClosedCaptionsStartedEvent &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          other.type == type;
+  final String wireName = r'CallClosedCaptionsStartedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callCid.hashCode) + (createdAt.hashCode) + (type.hashCode);
-
-  @override
-  String toString() =>
-      'CallClosedCaptionsStartedEvent[callCid=$callCid, createdAt=$createdAt, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'type'] = this.type;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallClosedCaptionsStartedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CallClosedCaptionsStartedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallClosedCaptionsStartedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallClosedCaptionsStartedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallClosedCaptionsStartedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallClosedCaptionsStartedEvent(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        type: mapValueOfType<String>(json, r'type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallClosedCaptionsStartedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallClosedCaptionsStartedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallClosedCaptionsStartedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallClosedCaptionsStartedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallClosedCaptionsStartedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallClosedCaptionsStartedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallClosedCaptionsStartedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallClosedCaptionsStartedEvent-objects as value to a dart map
-  static Map<String, List<CallClosedCaptionsStartedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallClosedCaptionsStartedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallClosedCaptionsStartedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallClosedCaptionsStartedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'created_at',
-    'type',
-  };
+  @override
+  CallClosedCaptionsStartedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallClosedCaptionsStartedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

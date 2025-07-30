@@ -1,140 +1,147 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'hls_settings_response.g.dart';
 
-class HLSSettingsResponse {
-  /// Returns a new [HLSSettingsResponse] instance.
-  HLSSettingsResponse({
-    required this.autoOn,
-    required this.enabled,
-    this.qualityTracks = const [],
-  });
+/// HLSSettings is the payload for HLS settings
+///
+/// Properties:
+/// * [autoOn]
+/// * [enabled]
+/// * [qualityTracks]
+@BuiltValue()
+abstract class HLSSettingsResponse
+    implements Built<HLSSettingsResponse, HLSSettingsResponseBuilder> {
+  @BuiltValueField(wireName: r'auto_on')
+  bool get autoOn;
 
-  bool autoOn;
+  @BuiltValueField(wireName: r'enabled')
+  bool get enabled;
 
-  bool enabled;
+  @BuiltValueField(wireName: r'quality_tracks')
+  BuiltList<String> get qualityTracks;
 
-  List<String> qualityTracks;
+  HLSSettingsResponse._();
+
+  factory HLSSettingsResponse([void updates(HLSSettingsResponseBuilder b)]) =
+      _$HLSSettingsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(HLSSettingsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<HLSSettingsResponse> get serializer =>
+      _$HLSSettingsResponseSerializer();
+}
+
+class _$HLSSettingsResponseSerializer
+    implements PrimitiveSerializer<HLSSettingsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    HLSSettingsResponse,
+    _$HLSSettingsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is HLSSettingsResponse &&
-          other.autoOn == autoOn &&
-          other.enabled == enabled &&
-          _deepEquality.equals(other.qualityTracks, qualityTracks);
+  final String wireName = r'HLSSettingsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (autoOn.hashCode) + (enabled.hashCode) + (qualityTracks.hashCode);
-
-  @override
-  String toString() =>
-      'HLSSettingsResponse[autoOn=$autoOn, enabled=$enabled, qualityTracks=$qualityTracks]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'auto_on'] = this.autoOn;
-    json[r'enabled'] = this.enabled;
-    json[r'quality_tracks'] = this.qualityTracks;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    HLSSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'auto_on';
+    yield serializers.serialize(
+      object.autoOn,
+      specifiedType: const FullType(bool),
+    );
+    yield r'enabled';
+    yield serializers.serialize(
+      object.enabled,
+      specifiedType: const FullType(bool),
+    );
+    yield r'quality_tracks';
+    yield serializers.serialize(
+      object.qualityTracks,
+      specifiedType: const FullType(BuiltList, [FullType(String)]),
+    );
   }
 
-  /// Returns a new [HLSSettingsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static HLSSettingsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "HLSSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "HLSSettingsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return HLSSettingsResponse(
-        autoOn: mapValueOfType<bool>(json, r'auto_on')!,
-        enabled: mapValueOfType<bool>(json, r'enabled')!,
-        qualityTracks: json[r'quality_tracks'] is Iterable
-            ? (json[r'quality_tracks'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-      );
-    }
-    return null;
-  }
-
-  static List<HLSSettingsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    HLSSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <HLSSettingsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = HLSSettingsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, HLSSettingsResponse> mapFromJson(dynamic json) {
-    final map = <String, HLSSettingsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = HLSSettingsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of HLSSettingsResponse-objects as value to a dart map
-  static Map<String, List<HLSSettingsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required HLSSettingsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<HLSSettingsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = HLSSettingsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'auto_on':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.autoOn = valueDes;
+          break;
+        case r'enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enabled = valueDes;
+          break;
+        case r'quality_tracks':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.qualityTracks.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'auto_on',
-    'enabled',
-    'quality_tracks',
-  };
+  @override
+  HLSSettingsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = HLSSettingsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

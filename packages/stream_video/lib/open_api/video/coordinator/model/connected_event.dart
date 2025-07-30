@@ -1,148 +1,162 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/own_user_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'connected_event.g.dart';
 
-class ConnectedEvent {
-  /// Returns a new [ConnectedEvent] instance.
-  ConnectedEvent({
-    required this.connectionId,
-    required this.createdAt,
-    required this.me,
-    this.type = 'connection.ok',
-  });
-
+/// This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
+///
+/// Properties:
+/// * [connectionId] - The connection_id for this client
+/// * [createdAt]
+/// * [me]
+/// * [type] - The type of event: \"connection.ok\" in this case
+@BuiltValue()
+abstract class ConnectedEvent
+    implements Built<ConnectedEvent, ConnectedEventBuilder> {
   /// The connection_id for this client
-  String connectionId;
+  @BuiltValueField(wireName: r'connection_id')
+  String get connectionId;
 
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
-  OwnUserResponse me;
+  @BuiltValueField(wireName: r'me')
+  OwnUserResponse get me;
 
   /// The type of event: \"connection.ok\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
+
+  ConnectedEvent._();
+
+  factory ConnectedEvent([void updates(ConnectedEventBuilder b)]) =
+      _$ConnectedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(ConnectedEventBuilder b) => b..type = 'connection.ok';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<ConnectedEvent> get serializer =>
+      _$ConnectedEventSerializer();
+}
+
+class _$ConnectedEventSerializer
+    implements PrimitiveSerializer<ConnectedEvent> {
+  @override
+  final Iterable<Type> types = const [ConnectedEvent, _$ConnectedEvent];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ConnectedEvent &&
-          other.connectionId == connectionId &&
-          other.createdAt == createdAt &&
-          other.me == me &&
-          other.type == type;
+  final String wireName = r'ConnectedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (connectionId.hashCode) +
-      (createdAt.hashCode) +
-      (me.hashCode) +
-      (type.hashCode);
-
-  @override
-  String toString() =>
-      'ConnectedEvent[connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'connection_id'] = this.connectionId;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'me'] = this.me;
-    json[r'type'] = this.type;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    ConnectedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'connection_id';
+    yield serializers.serialize(
+      object.connectionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'me';
+    yield serializers.serialize(
+      object.me,
+      specifiedType: const FullType(OwnUserResponse),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [ConnectedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ConnectedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ConnectedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ConnectedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ConnectedEvent(
-        connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        me: OwnUserResponse.fromJson(json[r'me'])!,
-        type: mapValueOfType<String>(json, r'type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<ConnectedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    ConnectedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <ConnectedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = ConnectedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, ConnectedEvent> mapFromJson(dynamic json) {
-    final map = <String, ConnectedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = ConnectedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of ConnectedEvent-objects as value to a dart map
-  static Map<String, List<ConnectedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required ConnectedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<ConnectedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ConnectedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'connection_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.connectionId = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'me':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(OwnUserResponse),
+          ) as OwnUserResponse;
+          result.me.replace(valueDes);
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'connection_id',
-    'created_at',
-    'me',
-    'type',
-  };
+  @override
+  ConnectedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = ConnectedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

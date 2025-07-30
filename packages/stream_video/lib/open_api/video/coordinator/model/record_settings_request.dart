@@ -1,350 +1,218 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'record_settings_request.g.dart';
 
-class RecordSettingsRequest {
-  /// Returns a new [RecordSettingsRequest] instance.
-  RecordSettingsRequest({
-    this.audioOnly,
-    required this.mode,
-    this.quality,
-  });
+/// RecordSettingsRequest
+///
+/// Properties:
+/// * [audioOnly]
+/// * [mode]
+/// * [quality]
+@BuiltValue()
+abstract class RecordSettingsRequest
+    implements Built<RecordSettingsRequest, RecordSettingsRequestBuilder> {
+  @BuiltValueField(wireName: r'audio_only')
+  bool? get audioOnly;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? audioOnly;
+  @BuiltValueField(wireName: r'mode')
+  RecordSettingsRequestModeEnum get mode;
+  // enum modeEnum {  available,  disabled,  auto-on,  };
 
-  RecordSettingsRequestModeEnum mode;
+  @BuiltValueField(wireName: r'quality')
+  RecordSettingsRequestQualityEnum? get quality;
+  // enum qualityEnum {  360p,  480p,  720p,  1080p,  1440p,  portrait-360x640,  portrait-480x854,  portrait-720x1280,  portrait-1080x1920,  portrait-1440x2560,  };
 
-  RecordSettingsRequestQualityEnum? quality;
+  RecordSettingsRequest._();
+
+  factory RecordSettingsRequest(
+      [void updates(RecordSettingsRequestBuilder b)]) = _$RecordSettingsRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(RecordSettingsRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<RecordSettingsRequest> get serializer =>
+      _$RecordSettingsRequestSerializer();
+}
+
+class _$RecordSettingsRequestSerializer
+    implements PrimitiveSerializer<RecordSettingsRequest> {
+  @override
+  final Iterable<Type> types = const [
+    RecordSettingsRequest,
+    _$RecordSettingsRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RecordSettingsRequest &&
-          other.audioOnly == audioOnly &&
-          other.mode == mode &&
-          other.quality == quality;
+  final String wireName = r'RecordSettingsRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (audioOnly == null ? 0 : audioOnly!.hashCode) +
-      (mode.hashCode) +
-      (quality == null ? 0 : quality!.hashCode);
-
-  @override
-  String toString() =>
-      'RecordSettingsRequest[audioOnly=$audioOnly, mode=$mode, quality=$quality]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.audioOnly != null) {
-      json[r'audio_only'] = this.audioOnly;
-    } else {
-      json[r'audio_only'] = null;
-    }
-    json[r'mode'] = this.mode;
-    if (this.quality != null) {
-      json[r'quality'] = this.quality;
-    } else {
-      json[r'quality'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [RecordSettingsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static RecordSettingsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RecordSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RecordSettingsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return RecordSettingsRequest(
-        audioOnly: mapValueOfType<bool>(json, r'audio_only'),
-        mode: RecordSettingsRequestModeEnum.fromJson(json[r'mode'])!,
-        quality: RecordSettingsRequestQualityEnum.fromJson(json[r'quality']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    RecordSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.audioOnly != null) {
+      yield r'audio_only';
+      yield serializers.serialize(
+        object.audioOnly,
+        specifiedType: const FullType(bool),
       );
     }
-    return null;
-  }
-
-  static List<RecordSettingsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <RecordSettingsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = RecordSettingsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
+    yield r'mode';
+    yield serializers.serialize(
+      object.mode,
+      specifiedType: const FullType(RecordSettingsRequestModeEnum),
+    );
+    if (object.quality != null) {
+      yield r'quality';
+      yield serializers.serialize(
+        object.quality,
+        specifiedType: const FullType(RecordSettingsRequestQualityEnum),
+      );
     }
-    return result.toList(growable: growable);
   }
-
-  static Map<String, RecordSettingsRequest> mapFromJson(dynamic json) {
-    final map = <String, RecordSettingsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = RecordSettingsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of RecordSettingsRequest-objects as value to a dart map
-  static Map<String, List<RecordSettingsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<RecordSettingsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = RecordSettingsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'mode',
-  };
-}
-
-class RecordSettingsRequestModeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const RecordSettingsRequestModeEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
 
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const available = RecordSettingsRequestModeEnum._(r'available');
-  static const disabled = RecordSettingsRequestModeEnum._(r'disabled');
-  static const autoOn = RecordSettingsRequestModeEnum._(r'auto-on');
-
-  /// List of all possible values in this [enum][RecordSettingsRequestModeEnum].
-  static const values = <RecordSettingsRequestModeEnum>[
-    available,
-    disabled,
-    autoOn,
-  ];
-
-  static RecordSettingsRequestModeEnum? fromJson(dynamic value) =>
-      RecordSettingsRequestModeEnumTypeTransformer().decode(value);
-
-  static List<RecordSettingsRequestModeEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  Object serialize(
+    Serializers serializers,
+    RecordSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <RecordSettingsRequestModeEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = RecordSettingsRequestModeEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
-}
 
-/// Transformation class that can [encode] an instance of [RecordSettingsRequestModeEnum] to String,
-/// and [decode] dynamic data back to [RecordSettingsRequestModeEnum].
-class RecordSettingsRequestModeEnumTypeTransformer {
-  factory RecordSettingsRequestModeEnumTypeTransformer() =>
-      _instance ??= const RecordSettingsRequestModeEnumTypeTransformer._();
-
-  const RecordSettingsRequestModeEnumTypeTransformer._();
-
-  String encode(RecordSettingsRequestModeEnum data) => data.value;
-
-  /// Decodes a [dynamic value][data] to a RecordSettingsRequestModeEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  RecordSettingsRequestModeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'available':
-          return RecordSettingsRequestModeEnum.available;
-        case r'disabled':
-          return RecordSettingsRequestModeEnum.disabled;
-        case r'auto-on':
-          return RecordSettingsRequestModeEnum.autoOn;
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required RecordSettingsRequestBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'audio_only':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.audioOnly = valueDes;
+          break;
+        case r'mode':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RecordSettingsRequestModeEnum),
+          ) as RecordSettingsRequestModeEnum;
+          result.mode = valueDes;
+          break;
+        case r'quality':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RecordSettingsRequestQualityEnum),
+          ) as RecordSettingsRequestQualityEnum;
+          result.quality = valueDes;
+          break;
         default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return null;
   }
-
-  /// Singleton [RecordSettingsRequestModeEnumTypeTransformer] instance.
-  static RecordSettingsRequestModeEnumTypeTransformer? _instance;
-}
-
-class RecordSettingsRequestQualityEnum {
-  /// Instantiate a new enum with the provided [value].
-  const RecordSettingsRequestQualityEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
 
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const n360p = RecordSettingsRequestQualityEnum._(r'360p');
-  static const n480p = RecordSettingsRequestQualityEnum._(r'480p');
-  static const n720p = RecordSettingsRequestQualityEnum._(r'720p');
-  static const n1080p = RecordSettingsRequestQualityEnum._(r'1080p');
-  static const n1440p = RecordSettingsRequestQualityEnum._(r'1440p');
-  static const portrait360x640 =
-      RecordSettingsRequestQualityEnum._(r'portrait-360x640');
-  static const portrait480x854 =
-      RecordSettingsRequestQualityEnum._(r'portrait-480x854');
-  static const portrait720x1280 =
-      RecordSettingsRequestQualityEnum._(r'portrait-720x1280');
-  static const portrait1080x1920 =
-      RecordSettingsRequestQualityEnum._(r'portrait-1080x1920');
-  static const portrait1440x2560 =
-      RecordSettingsRequestQualityEnum._(r'portrait-1440x2560');
-
-  /// List of all possible values in this [enum][RecordSettingsRequestQualityEnum].
-  static const values = <RecordSettingsRequestQualityEnum>[
-    n360p,
-    n480p,
-    n720p,
-    n1080p,
-    n1440p,
-    portrait360x640,
-    portrait480x854,
-    portrait720x1280,
-    portrait1080x1920,
-    portrait1440x2560,
-  ];
-
-  static RecordSettingsRequestQualityEnum? fromJson(dynamic value) =>
-      RecordSettingsRequestQualityEnumTypeTransformer().decode(value);
-
-  static List<RecordSettingsRequestQualityEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  RecordSettingsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <RecordSettingsRequestQualityEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = RecordSettingsRequestQualityEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    final result = RecordSettingsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
   }
 }
 
-/// Transformation class that can [encode] an instance of [RecordSettingsRequestQualityEnum] to String,
-/// and [decode] dynamic data back to [RecordSettingsRequestQualityEnum].
-class RecordSettingsRequestQualityEnumTypeTransformer {
-  factory RecordSettingsRequestQualityEnumTypeTransformer() =>
-      _instance ??= const RecordSettingsRequestQualityEnumTypeTransformer._();
+class RecordSettingsRequestModeEnum extends EnumClass {
+  @BuiltValueEnumConst(wireName: r'available')
+  static const RecordSettingsRequestModeEnum available =
+      _$recordSettingsRequestModeEnum_available;
+  @BuiltValueEnumConst(wireName: r'disabled')
+  static const RecordSettingsRequestModeEnum disabled =
+      _$recordSettingsRequestModeEnum_disabled;
+  @BuiltValueEnumConst(wireName: r'auto-on')
+  static const RecordSettingsRequestModeEnum autoOn =
+      _$recordSettingsRequestModeEnum_autoOn;
 
-  const RecordSettingsRequestQualityEnumTypeTransformer._();
+  static Serializer<RecordSettingsRequestModeEnum> get serializer =>
+      _$recordSettingsRequestModeEnumSerializer;
 
-  String encode(RecordSettingsRequestQualityEnum data) => data.value;
+  const RecordSettingsRequestModeEnum._(String name) : super(name);
 
-  /// Decodes a [dynamic value][data] to a RecordSettingsRequestQualityEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  RecordSettingsRequestQualityEnum? decode(dynamic data,
-      {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'360p':
-          return RecordSettingsRequestQualityEnum.n360p;
-        case r'480p':
-          return RecordSettingsRequestQualityEnum.n480p;
-        case r'720p':
-          return RecordSettingsRequestQualityEnum.n720p;
-        case r'1080p':
-          return RecordSettingsRequestQualityEnum.n1080p;
-        case r'1440p':
-          return RecordSettingsRequestQualityEnum.n1440p;
-        case r'portrait-360x640':
-          return RecordSettingsRequestQualityEnum.portrait360x640;
-        case r'portrait-480x854':
-          return RecordSettingsRequestQualityEnum.portrait480x854;
-        case r'portrait-720x1280':
-          return RecordSettingsRequestQualityEnum.portrait720x1280;
-        case r'portrait-1080x1920':
-          return RecordSettingsRequestQualityEnum.portrait1080x1920;
-        case r'portrait-1440x2560':
-          return RecordSettingsRequestQualityEnum.portrait1440x2560;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
+  static BuiltSet<RecordSettingsRequestModeEnum> get values =>
+      _$recordSettingsRequestModeEnumValues;
+  static RecordSettingsRequestModeEnum valueOf(String name) =>
+      _$recordSettingsRequestModeEnumValueOf(name);
+}
 
-  /// Singleton [RecordSettingsRequestQualityEnumTypeTransformer] instance.
-  static RecordSettingsRequestQualityEnumTypeTransformer? _instance;
+class RecordSettingsRequestQualityEnum extends EnumClass {
+  @BuiltValueEnumConst(wireName: r'360p')
+  static const RecordSettingsRequestQualityEnum n360p =
+      _$recordSettingsRequestQualityEnum_n360p;
+  @BuiltValueEnumConst(wireName: r'480p')
+  static const RecordSettingsRequestQualityEnum n480p =
+      _$recordSettingsRequestQualityEnum_n480p;
+  @BuiltValueEnumConst(wireName: r'720p')
+  static const RecordSettingsRequestQualityEnum n720p =
+      _$recordSettingsRequestQualityEnum_n720p;
+  @BuiltValueEnumConst(wireName: r'1080p')
+  static const RecordSettingsRequestQualityEnum n1080p =
+      _$recordSettingsRequestQualityEnum_n1080p;
+  @BuiltValueEnumConst(wireName: r'1440p')
+  static const RecordSettingsRequestQualityEnum n1440p =
+      _$recordSettingsRequestQualityEnum_n1440p;
+  @BuiltValueEnumConst(wireName: r'portrait-360x640')
+  static const RecordSettingsRequestQualityEnum portrait360x640 =
+      _$recordSettingsRequestQualityEnum_portrait360x640;
+  @BuiltValueEnumConst(wireName: r'portrait-480x854')
+  static const RecordSettingsRequestQualityEnum portrait480x854 =
+      _$recordSettingsRequestQualityEnum_portrait480x854;
+  @BuiltValueEnumConst(wireName: r'portrait-720x1280')
+  static const RecordSettingsRequestQualityEnum portrait720x1280 =
+      _$recordSettingsRequestQualityEnum_portrait720x1280;
+  @BuiltValueEnumConst(wireName: r'portrait-1080x1920')
+  static const RecordSettingsRequestQualityEnum portrait1080x1920 =
+      _$recordSettingsRequestQualityEnum_portrait1080x1920;
+  @BuiltValueEnumConst(wireName: r'portrait-1440x2560')
+  static const RecordSettingsRequestQualityEnum portrait1440x2560 =
+      _$recordSettingsRequestQualityEnum_portrait1440x2560;
+
+  static Serializer<RecordSettingsRequestQualityEnum> get serializer =>
+      _$recordSettingsRequestQualityEnumSerializer;
+
+  const RecordSettingsRequestQualityEnum._(String name) : super(name);
+
+  static BuiltSet<RecordSettingsRequestQualityEnum> get values =>
+      _$recordSettingsRequestQualityEnumValues;
+  static RecordSettingsRequestQualityEnum valueOf(String name) =>
+      _$recordSettingsRequestQualityEnumValueOf(name);
 }

@@ -1,209 +1,204 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'mute_users_request.g.dart';
 
-class MuteUsersRequest {
-  /// Returns a new [MuteUsersRequest] instance.
-  MuteUsersRequest({
-    this.audio,
-    this.muteAllUsers,
-    this.screenshare,
-    this.screenshareAudio,
-    this.userIds = const [],
-    this.video,
-  });
+/// MuteUsersRequest
+///
+/// Properties:
+/// * [audio]
+/// * [muteAllUsers]
+/// * [screenshare]
+/// * [screenshareAudio]
+/// * [userIds]
+/// * [video]
+@BuiltValue()
+abstract class MuteUsersRequest
+    implements Built<MuteUsersRequest, MuteUsersRequestBuilder> {
+  @BuiltValueField(wireName: r'audio')
+  bool? get audio;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? audio;
+  @BuiltValueField(wireName: r'mute_all_users')
+  bool? get muteAllUsers;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? muteAllUsers;
+  @BuiltValueField(wireName: r'screenshare')
+  bool? get screenshare;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? screenshare;
+  @BuiltValueField(wireName: r'screenshare_audio')
+  bool? get screenshareAudio;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? screenshareAudio;
+  @BuiltValueField(wireName: r'user_ids')
+  BuiltList<String>? get userIds;
 
-  List<String> userIds;
+  @BuiltValueField(wireName: r'video')
+  bool? get video;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? video;
+  MuteUsersRequest._();
+
+  factory MuteUsersRequest([void updates(MuteUsersRequestBuilder b)]) =
+      _$MuteUsersRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(MuteUsersRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<MuteUsersRequest> get serializer =>
+      _$MuteUsersRequestSerializer();
+}
+
+class _$MuteUsersRequestSerializer
+    implements PrimitiveSerializer<MuteUsersRequest> {
+  @override
+  final Iterable<Type> types = const [MuteUsersRequest, _$MuteUsersRequest];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MuteUsersRequest &&
-          other.audio == audio &&
-          other.muteAllUsers == muteAllUsers &&
-          other.screenshare == screenshare &&
-          other.screenshareAudio == screenshareAudio &&
-          _deepEquality.equals(other.userIds, userIds) &&
-          other.video == video;
+  final String wireName = r'MuteUsersRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (audio == null ? 0 : audio!.hashCode) +
-      (muteAllUsers == null ? 0 : muteAllUsers!.hashCode) +
-      (screenshare == null ? 0 : screenshare!.hashCode) +
-      (screenshareAudio == null ? 0 : screenshareAudio!.hashCode) +
-      (userIds.hashCode) +
-      (video == null ? 0 : video!.hashCode);
-
-  @override
-  String toString() =>
-      'MuteUsersRequest[audio=$audio, muteAllUsers=$muteAllUsers, screenshare=$screenshare, screenshareAudio=$screenshareAudio, userIds=$userIds, video=$video]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.audio != null) {
-      json[r'audio'] = this.audio;
-    } else {
-      json[r'audio'] = null;
-    }
-    if (this.muteAllUsers != null) {
-      json[r'mute_all_users'] = this.muteAllUsers;
-    } else {
-      json[r'mute_all_users'] = null;
-    }
-    if (this.screenshare != null) {
-      json[r'screenshare'] = this.screenshare;
-    } else {
-      json[r'screenshare'] = null;
-    }
-    if (this.screenshareAudio != null) {
-      json[r'screenshare_audio'] = this.screenshareAudio;
-    } else {
-      json[r'screenshare_audio'] = null;
-    }
-    json[r'user_ids'] = this.userIds;
-    if (this.video != null) {
-      json[r'video'] = this.video;
-    } else {
-      json[r'video'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [MuteUsersRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static MuteUsersRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "MuteUsersRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "MuteUsersRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return MuteUsersRequest(
-        audio: mapValueOfType<bool>(json, r'audio'),
-        muteAllUsers: mapValueOfType<bool>(json, r'mute_all_users'),
-        screenshare: mapValueOfType<bool>(json, r'screenshare'),
-        screenshareAudio: mapValueOfType<bool>(json, r'screenshare_audio'),
-        userIds: json[r'user_ids'] is Iterable
-            ? (json[r'user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        video: mapValueOfType<bool>(json, r'video'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    MuteUsersRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.audio != null) {
+      yield r'audio';
+      yield serializers.serialize(
+        object.audio,
+        specifiedType: const FullType(bool),
       );
     }
-    return null;
+    if (object.muteAllUsers != null) {
+      yield r'mute_all_users';
+      yield serializers.serialize(
+        object.muteAllUsers,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.screenshare != null) {
+      yield r'screenshare';
+      yield serializers.serialize(
+        object.screenshare,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.screenshareAudio != null) {
+      yield r'screenshare_audio';
+      yield serializers.serialize(
+        object.screenshareAudio,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.userIds != null) {
+      yield r'user_ids';
+      yield serializers.serialize(
+        object.userIds,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
+    if (object.video != null) {
+      yield r'video';
+      yield serializers.serialize(
+        object.video,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
-  static List<MuteUsersRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    MuteUsersRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <MuteUsersRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = MuteUsersRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, MuteUsersRequest> mapFromJson(dynamic json) {
-    final map = <String, MuteUsersRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = MuteUsersRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of MuteUsersRequest-objects as value to a dart map
-  static Map<String, List<MuteUsersRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required MuteUsersRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<MuteUsersRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = MuteUsersRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'audio':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.audio = valueDes;
+          break;
+        case r'mute_all_users':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.muteAllUsers = valueDes;
+          break;
+        case r'screenshare':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.screenshare = valueDes;
+          break;
+        case r'screenshare_audio':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.screenshareAudio = valueDes;
+          break;
+        case r'user_ids':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.userIds.replace(valueDes);
+          break;
+        case r'video':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.video = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  MuteUsersRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = MuteUsersRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

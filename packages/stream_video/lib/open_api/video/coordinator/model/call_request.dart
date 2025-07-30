@@ -1,213 +1,223 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/member_request.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_settings_request.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_request.g.dart';
 
-class CallRequest {
-  /// Returns a new [CallRequest] instance.
-  CallRequest({
-    this.channelCid,
-    this.custom = const {},
-    this.members = const [],
-    this.settingsOverride,
-    this.startsAt,
-    this.team,
-    this.video,
-  });
+/// CallRequest is the payload for creating a call.
+///
+/// Properties:
+/// * [channelCid]
+/// * [custom]
+/// * [members]
+/// * [settingsOverride]
+/// * [startsAt]
+/// * [team]
+/// * [video]
+@BuiltValue()
+abstract class CallRequest implements Built<CallRequest, CallRequestBuilder> {
+  @BuiltValueField(wireName: r'channel_cid')
+  String? get channelCid;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? channelCid;
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?>? get custom;
 
-  Map<String, Object> custom;
+  @BuiltValueField(wireName: r'members')
+  BuiltList<MemberRequest>? get members;
 
-  List<MemberRequest> members;
+  @BuiltValueField(wireName: r'settings_override')
+  CallSettingsRequest? get settingsOverride;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallSettingsRequest? settingsOverride;
+  @BuiltValueField(wireName: r'starts_at')
+  DateTime? get startsAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? startsAt;
+  @BuiltValueField(wireName: r'team')
+  String? get team;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? team;
+  @BuiltValueField(wireName: r'video')
+  bool? get video;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? video;
+  CallRequest._();
+
+  factory CallRequest([void updates(CallRequestBuilder b)]) = _$CallRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallRequest> get serializer => _$CallRequestSerializer();
+}
+
+class _$CallRequestSerializer implements PrimitiveSerializer<CallRequest> {
+  @override
+  final Iterable<Type> types = const [CallRequest, _$CallRequest];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallRequest &&
-          other.channelCid == channelCid &&
-          _deepEquality.equals(other.custom, custom) &&
-          _deepEquality.equals(other.members, members) &&
-          other.settingsOverride == settingsOverride &&
-          other.startsAt == startsAt &&
-          other.team == team &&
-          other.video == video;
+  final String wireName = r'CallRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (channelCid == null ? 0 : channelCid!.hashCode) +
-      (custom.hashCode) +
-      (members.hashCode) +
-      (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
-      (startsAt == null ? 0 : startsAt!.hashCode) +
-      (team == null ? 0 : team!.hashCode) +
-      (video == null ? 0 : video!.hashCode);
-
-  @override
-  String toString() =>
-      'CallRequest[channelCid=$channelCid, custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team, video=$video]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.channelCid != null) {
-      json[r'channel_cid'] = this.channelCid;
-    } else {
-      json[r'channel_cid'] = null;
-    }
-    json[r'custom'] = this.custom;
-    json[r'members'] = this.members;
-    if (this.settingsOverride != null) {
-      json[r'settings_override'] = this.settingsOverride;
-    } else {
-      json[r'settings_override'] = null;
-    }
-    if (this.startsAt != null) {
-      json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
-    } else {
-      json[r'starts_at'] = null;
-    }
-    if (this.team != null) {
-      json[r'team'] = this.team;
-    } else {
-      json[r'team'] = null;
-    }
-    if (this.video != null) {
-      json[r'video'] = this.video;
-    } else {
-      json[r'video'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [CallRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallRequest(
-        channelCid: mapValueOfType<String>(json, r'channel_cid'),
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        members: MemberRequest.listFromJson(json[r'members']),
-        settingsOverride:
-            CallSettingsRequest.fromJson(json[r'settings_override']),
-        startsAt: mapDateTime(json, r'starts_at', r''),
-        team: mapValueOfType<String>(json, r'team'),
-        video: mapValueOfType<bool>(json, r'video'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.channelCid != null) {
+      yield r'channel_cid';
+      yield serializers.serialize(
+        object.channelCid,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.custom != null) {
+      yield r'custom';
+      yield serializers.serialize(
+        object.custom,
+        specifiedType: const FullType(
+            BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+      );
+    }
+    if (object.members != null) {
+      yield r'members';
+      yield serializers.serialize(
+        object.members,
+        specifiedType: const FullType(BuiltList, [FullType(MemberRequest)]),
+      );
+    }
+    if (object.settingsOverride != null) {
+      yield r'settings_override';
+      yield serializers.serialize(
+        object.settingsOverride,
+        specifiedType: const FullType(CallSettingsRequest),
+      );
+    }
+    if (object.startsAt != null) {
+      yield r'starts_at';
+      yield serializers.serialize(
+        object.startsAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.team != null) {
+      yield r'team';
+      yield serializers.serialize(
+        object.team,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.video != null) {
+      yield r'video';
+      yield serializers.serialize(
+        object.video,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
-  static List<CallRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallRequest> mapFromJson(dynamic json) {
-    final map = <String, CallRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallRequest-objects as value to a dart map
-  static Map<String, List<CallRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'channel_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.channelCid = valueDes;
+          break;
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        case r'members':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(MemberRequest)]),
+          ) as BuiltList<MemberRequest>;
+          result.members.replace(valueDes);
+          break;
+        case r'settings_override':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallSettingsRequest),
+          ) as CallSettingsRequest;
+          result.settingsOverride.replace(valueDes);
+          break;
+        case r'starts_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.startsAt = valueDes;
+          break;
+        case r'team':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.team = valueDes;
+          break;
+        case r'video':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.video = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  CallRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

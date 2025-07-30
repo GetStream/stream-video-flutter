@@ -1,136 +1,139 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'sfu_response.g.dart';
 
-class SFUResponse {
-  /// Returns a new [SFUResponse] instance.
-  SFUResponse({
-    required this.edgeName,
-    required this.url,
-    required this.wsEndpoint,
-  });
+/// SFUResponse
+///
+/// Properties:
+/// * [edgeName]
+/// * [url]
+/// * [wsEndpoint]
+@BuiltValue()
+abstract class SFUResponse implements Built<SFUResponse, SFUResponseBuilder> {
+  @BuiltValueField(wireName: r'edge_name')
+  String get edgeName;
 
-  String edgeName;
+  @BuiltValueField(wireName: r'url')
+  String get url;
 
-  String url;
+  @BuiltValueField(wireName: r'ws_endpoint')
+  String get wsEndpoint;
 
-  String wsEndpoint;
+  SFUResponse._();
+
+  factory SFUResponse([void updates(SFUResponseBuilder b)]) = _$SFUResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(SFUResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<SFUResponse> get serializer => _$SFUResponseSerializer();
+}
+
+class _$SFUResponseSerializer implements PrimitiveSerializer<SFUResponse> {
+  @override
+  final Iterable<Type> types = const [SFUResponse, _$SFUResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SFUResponse &&
-          other.edgeName == edgeName &&
-          other.url == url &&
-          other.wsEndpoint == wsEndpoint;
+  final String wireName = r'SFUResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (edgeName.hashCode) + (url.hashCode) + (wsEndpoint.hashCode);
-
-  @override
-  String toString() =>
-      'SFUResponse[edgeName=$edgeName, url=$url, wsEndpoint=$wsEndpoint]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'edge_name'] = this.edgeName;
-    json[r'url'] = this.url;
-    json[r'ws_endpoint'] = this.wsEndpoint;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    SFUResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'edge_name';
+    yield serializers.serialize(
+      object.edgeName,
+      specifiedType: const FullType(String),
+    );
+    yield r'url';
+    yield serializers.serialize(
+      object.url,
+      specifiedType: const FullType(String),
+    );
+    yield r'ws_endpoint';
+    yield serializers.serialize(
+      object.wsEndpoint,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [SFUResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static SFUResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SFUResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SFUResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return SFUResponse(
-        edgeName: mapValueOfType<String>(json, r'edge_name')!,
-        url: mapValueOfType<String>(json, r'url')!,
-        wsEndpoint: mapValueOfType<String>(json, r'ws_endpoint')!,
-      );
-    }
-    return null;
-  }
-
-  static List<SFUResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    SFUResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <SFUResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = SFUResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, SFUResponse> mapFromJson(dynamic json) {
-    final map = <String, SFUResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = SFUResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of SFUResponse-objects as value to a dart map
-  static Map<String, List<SFUResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required SFUResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<SFUResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = SFUResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'edge_name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.edgeName = valueDes;
+          break;
+        case r'url':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.url = valueDes;
+          break;
+        case r'ws_endpoint':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.wsEndpoint = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'edge_name',
-    'url',
-    'ws_endpoint',
-  };
+  @override
+  SFUResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = SFUResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

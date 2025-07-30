@@ -1,181 +1,230 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/member_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_ring_event.g.dart';
 
-class CallRingEvent {
-  /// Returns a new [CallRingEvent] instance.
-  CallRingEvent({
-    required this.call,
-    required this.callCid,
-    required this.createdAt,
-    this.members = const [],
-    required this.sessionId,
-    this.type = 'call.ring',
-    required this.user,
-    required this.video,
-  });
+/// This event is sent to all call members to notify they are getting called
+///
+/// Properties:
+/// * [call]
+/// * [callCid]
+/// * [createdAt]
+/// * [members] - Call members
+/// * [sessionId] - Call session ID
+/// * [type] - The type of event: \"call.notification\" in this case
+/// * [user]
+/// * [video]
+@BuiltValue()
+abstract class CallRingEvent
+    implements Built<CallRingEvent, CallRingEventBuilder> {
+  @BuiltValueField(wireName: r'call')
+  CallResponse get call;
 
-  CallResponse call;
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// Call members
-  List<MemberResponse> members;
+  @BuiltValueField(wireName: r'members')
+  BuiltList<MemberResponse> get members;
 
   /// Call session ID
-  String sessionId;
+  @BuiltValueField(wireName: r'session_id')
+  String get sessionId;
 
   /// The type of event: \"call.notification\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  UserResponse user;
+  @BuiltValueField(wireName: r'user')
+  UserResponse get user;
 
-  bool video;
+  @BuiltValueField(wireName: r'video')
+  bool get video;
+
+  CallRingEvent._();
+
+  factory CallRingEvent([void updates(CallRingEventBuilder b)]) =
+      _$CallRingEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallRingEventBuilder b) => b..type = 'call.ring';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallRingEvent> get serializer =>
+      _$CallRingEventSerializer();
+}
+
+class _$CallRingEventSerializer implements PrimitiveSerializer<CallRingEvent> {
+  @override
+  final Iterable<Type> types = const [CallRingEvent, _$CallRingEvent];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallRingEvent &&
-          other.call == call &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.members, members) &&
-          other.sessionId == sessionId &&
-          other.type == type &&
-          other.user == user &&
-          other.video == video;
+  final String wireName = r'CallRingEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (call.hashCode) +
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (members.hashCode) +
-      (sessionId.hashCode) +
-      (type.hashCode) +
-      (user.hashCode) +
-      (video.hashCode);
-
-  @override
-  String toString() =>
-      'CallRingEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, sessionId=$sessionId, type=$type, user=$user, video=$video]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call'] = this.call;
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'members'] = this.members;
-    json[r'session_id'] = this.sessionId;
-    json[r'type'] = this.type;
-    json[r'user'] = this.user;
-    json[r'video'] = this.video;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallRingEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call';
+    yield serializers.serialize(
+      object.call,
+      specifiedType: const FullType(CallResponse),
+    );
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'members';
+    yield serializers.serialize(
+      object.members,
+      specifiedType: const FullType(BuiltList, [FullType(MemberResponse)]),
+    );
+    yield r'session_id';
+    yield serializers.serialize(
+      object.sessionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    yield r'user';
+    yield serializers.serialize(
+      object.user,
+      specifiedType: const FullType(UserResponse),
+    );
+    yield r'video';
+    yield serializers.serialize(
+      object.video,
+      specifiedType: const FullType(bool),
+    );
   }
 
-  /// Returns a new [CallRingEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallRingEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRingEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRingEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallRingEvent(
-        call: CallResponse.fromJson(json[r'call'])!,
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        members: MemberResponse.listFromJson(json[r'members']),
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
-        video: mapValueOfType<bool>(json, r'video')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallRingEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallRingEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallRingEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallRingEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallRingEvent> mapFromJson(dynamic json) {
-    final map = <String, CallRingEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallRingEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallRingEvent-objects as value to a dart map
-  static Map<String, List<CallRingEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallRingEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallRingEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallRingEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallResponse),
+          ) as CallResponse;
+          result.call.replace(valueDes);
+          break;
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'members':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(MemberResponse)]),
+          ) as BuiltList<MemberResponse>;
+          result.members.replace(valueDes);
+          break;
+        case r'session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.sessionId = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.user.replace(valueDes);
+          break;
+        case r'video':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.video = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call',
-    'call_cid',
-    'created_at',
-    'members',
-    'session_id',
-    'type',
-    'user',
-    'video',
-  };
+  @override
+  CallRingEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallRingEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

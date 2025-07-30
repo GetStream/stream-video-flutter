@@ -1,156 +1,186 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/member_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_member_updated_event.g.dart';
 
-class CallMemberUpdatedEvent {
-  /// Returns a new [CallMemberUpdatedEvent] instance.
-  CallMemberUpdatedEvent({
-    required this.call,
-    required this.callCid,
-    required this.createdAt,
-    this.members = const [],
-    this.type = 'call.member_updated',
-  });
+/// This event is sent when one or more members are updated
+///
+/// Properties:
+/// * [call]
+/// * [callCid]
+/// * [createdAt]
+/// * [members] - The list of members that were updated
+/// * [type] - The type of event: \"call.member_updated\" in this case
+@BuiltValue()
+abstract class CallMemberUpdatedEvent
+    implements Built<CallMemberUpdatedEvent, CallMemberUpdatedEventBuilder> {
+  @BuiltValueField(wireName: r'call')
+  CallResponse get call;
 
-  CallResponse call;
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// The list of members that were updated
-  List<MemberResponse> members;
+  @BuiltValueField(wireName: r'members')
+  BuiltList<MemberResponse> get members;
 
   /// The type of event: \"call.member_updated\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
+
+  CallMemberUpdatedEvent._();
+
+  factory CallMemberUpdatedEvent(
+          [void updates(CallMemberUpdatedEventBuilder b)]) =
+      _$CallMemberUpdatedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallMemberUpdatedEventBuilder b) =>
+      b..type = 'call.member_updated';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallMemberUpdatedEvent> get serializer =>
+      _$CallMemberUpdatedEventSerializer();
+}
+
+class _$CallMemberUpdatedEventSerializer
+    implements PrimitiveSerializer<CallMemberUpdatedEvent> {
+  @override
+  final Iterable<Type> types = const [
+    CallMemberUpdatedEvent,
+    _$CallMemberUpdatedEvent
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallMemberUpdatedEvent &&
-          other.call == call &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.members, members) &&
-          other.type == type;
+  final String wireName = r'CallMemberUpdatedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (call.hashCode) +
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (members.hashCode) +
-      (type.hashCode);
-
-  @override
-  String toString() =>
-      'CallMemberUpdatedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call'] = this.call;
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'members'] = this.members;
-    json[r'type'] = this.type;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallMemberUpdatedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call';
+    yield serializers.serialize(
+      object.call,
+      specifiedType: const FullType(CallResponse),
+    );
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'members';
+    yield serializers.serialize(
+      object.members,
+      specifiedType: const FullType(BuiltList, [FullType(MemberResponse)]),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CallMemberUpdatedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallMemberUpdatedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallMemberUpdatedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallMemberUpdatedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallMemberUpdatedEvent(
-        call: CallResponse.fromJson(json[r'call'])!,
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        members: MemberResponse.listFromJson(json[r'members']),
-        type: mapValueOfType<String>(json, r'type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallMemberUpdatedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallMemberUpdatedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallMemberUpdatedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallMemberUpdatedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallMemberUpdatedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallMemberUpdatedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallMemberUpdatedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallMemberUpdatedEvent-objects as value to a dart map
-  static Map<String, List<CallMemberUpdatedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallMemberUpdatedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallMemberUpdatedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallMemberUpdatedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallResponse),
+          ) as CallResponse;
+          result.call.replace(valueDes);
+          break;
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'members':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(MemberResponse)]),
+          ) as BuiltList<MemberResponse>;
+          result.members.replace(valueDes);
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call',
-    'call_cid',
-    'created_at',
-    'members',
-    'type',
-  };
+  @override
+  CallMemberUpdatedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallMemberUpdatedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

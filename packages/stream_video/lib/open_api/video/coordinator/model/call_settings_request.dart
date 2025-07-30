@@ -1,337 +1,345 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/record_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/audio_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/limits_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/session_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/screensharing_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/video_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/broadcast_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/geofence_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/backstage_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/frame_recording_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/ring_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/thumbnails_settings_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/transcription_settings_request.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_settings_request.g.dart';
 
-class CallSettingsRequest {
-  /// Returns a new [CallSettingsRequest] instance.
-  CallSettingsRequest({
-    this.audio,
-    this.backstage,
-    this.broadcasting,
-    this.frameRecording,
-    this.geofencing,
-    this.limits,
-    this.recording,
-    this.ring,
-    this.screensharing,
-    this.session,
-    this.thumbnails,
-    this.transcription,
-    this.video,
-  });
+/// CallSettingsRequest
+///
+/// Properties:
+/// * [audio]
+/// * [backstage]
+/// * [broadcasting]
+/// * [frameRecording]
+/// * [geofencing]
+/// * [limits]
+/// * [recording]
+/// * [ring]
+/// * [screensharing]
+/// * [session]
+/// * [thumbnails]
+/// * [transcription]
+/// * [video]
+@BuiltValue()
+abstract class CallSettingsRequest
+    implements Built<CallSettingsRequest, CallSettingsRequestBuilder> {
+  @BuiltValueField(wireName: r'audio')
+  AudioSettingsRequest? get audio;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  AudioSettingsRequest? audio;
+  @BuiltValueField(wireName: r'backstage')
+  BackstageSettingsRequest? get backstage;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  BackstageSettingsRequest? backstage;
+  @BuiltValueField(wireName: r'broadcasting')
+  BroadcastSettingsRequest? get broadcasting;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  BroadcastSettingsRequest? broadcasting;
+  @BuiltValueField(wireName: r'frame_recording')
+  FrameRecordingSettingsRequest? get frameRecording;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  FrameRecordingSettingsRequest? frameRecording;
+  @BuiltValueField(wireName: r'geofencing')
+  GeofenceSettingsRequest? get geofencing;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  GeofenceSettingsRequest? geofencing;
+  @BuiltValueField(wireName: r'limits')
+  LimitsSettingsRequest? get limits;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  LimitsSettingsRequest? limits;
+  @BuiltValueField(wireName: r'recording')
+  RecordSettingsRequest? get recording;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  RecordSettingsRequest? recording;
+  @BuiltValueField(wireName: r'ring')
+  RingSettingsRequest? get ring;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  RingSettingsRequest? ring;
+  @BuiltValueField(wireName: r'screensharing')
+  ScreensharingSettingsRequest? get screensharing;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  ScreensharingSettingsRequest? screensharing;
+  @BuiltValueField(wireName: r'session')
+  SessionSettingsRequest? get session;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  SessionSettingsRequest? session;
+  @BuiltValueField(wireName: r'thumbnails')
+  ThumbnailsSettingsRequest? get thumbnails;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  ThumbnailsSettingsRequest? thumbnails;
+  @BuiltValueField(wireName: r'transcription')
+  TranscriptionSettingsRequest? get transcription;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  TranscriptionSettingsRequest? transcription;
+  @BuiltValueField(wireName: r'video')
+  VideoSettingsRequest? get video;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  VideoSettingsRequest? video;
+  CallSettingsRequest._();
+
+  factory CallSettingsRequest([void updates(CallSettingsRequestBuilder b)]) =
+      _$CallSettingsRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallSettingsRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallSettingsRequest> get serializer =>
+      _$CallSettingsRequestSerializer();
+}
+
+class _$CallSettingsRequestSerializer
+    implements PrimitiveSerializer<CallSettingsRequest> {
+  @override
+  final Iterable<Type> types = const [
+    CallSettingsRequest,
+    _$CallSettingsRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallSettingsRequest &&
-          other.audio == audio &&
-          other.backstage == backstage &&
-          other.broadcasting == broadcasting &&
-          other.frameRecording == frameRecording &&
-          other.geofencing == geofencing &&
-          other.limits == limits &&
-          other.recording == recording &&
-          other.ring == ring &&
-          other.screensharing == screensharing &&
-          other.session == session &&
-          other.thumbnails == thumbnails &&
-          other.transcription == transcription &&
-          other.video == video;
+  final String wireName = r'CallSettingsRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (audio == null ? 0 : audio!.hashCode) +
-      (backstage == null ? 0 : backstage!.hashCode) +
-      (broadcasting == null ? 0 : broadcasting!.hashCode) +
-      (frameRecording == null ? 0 : frameRecording!.hashCode) +
-      (geofencing == null ? 0 : geofencing!.hashCode) +
-      (limits == null ? 0 : limits!.hashCode) +
-      (recording == null ? 0 : recording!.hashCode) +
-      (ring == null ? 0 : ring!.hashCode) +
-      (screensharing == null ? 0 : screensharing!.hashCode) +
-      (session == null ? 0 : session!.hashCode) +
-      (thumbnails == null ? 0 : thumbnails!.hashCode) +
-      (transcription == null ? 0 : transcription!.hashCode) +
-      (video == null ? 0 : video!.hashCode);
-
-  @override
-  String toString() =>
-      'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.audio != null) {
-      json[r'audio'] = this.audio;
-    } else {
-      json[r'audio'] = null;
-    }
-    if (this.backstage != null) {
-      json[r'backstage'] = this.backstage;
-    } else {
-      json[r'backstage'] = null;
-    }
-    if (this.broadcasting != null) {
-      json[r'broadcasting'] = this.broadcasting;
-    } else {
-      json[r'broadcasting'] = null;
-    }
-    if (this.frameRecording != null) {
-      json[r'frame_recording'] = this.frameRecording;
-    } else {
-      json[r'frame_recording'] = null;
-    }
-    if (this.geofencing != null) {
-      json[r'geofencing'] = this.geofencing;
-    } else {
-      json[r'geofencing'] = null;
-    }
-    if (this.limits != null) {
-      json[r'limits'] = this.limits;
-    } else {
-      json[r'limits'] = null;
-    }
-    if (this.recording != null) {
-      json[r'recording'] = this.recording;
-    } else {
-      json[r'recording'] = null;
-    }
-    if (this.ring != null) {
-      json[r'ring'] = this.ring;
-    } else {
-      json[r'ring'] = null;
-    }
-    if (this.screensharing != null) {
-      json[r'screensharing'] = this.screensharing;
-    } else {
-      json[r'screensharing'] = null;
-    }
-    if (this.session != null) {
-      json[r'session'] = this.session;
-    } else {
-      json[r'session'] = null;
-    }
-    if (this.thumbnails != null) {
-      json[r'thumbnails'] = this.thumbnails;
-    } else {
-      json[r'thumbnails'] = null;
-    }
-    if (this.transcription != null) {
-      json[r'transcription'] = this.transcription;
-    } else {
-      json[r'transcription'] = null;
-    }
-    if (this.video != null) {
-      json[r'video'] = this.video;
-    } else {
-      json[r'video'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [CallSettingsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallSettingsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSettingsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallSettingsRequest(
-        audio: AudioSettingsRequest.fromJson(json[r'audio']),
-        backstage: BackstageSettingsRequest.fromJson(json[r'backstage']),
-        broadcasting: BroadcastSettingsRequest.fromJson(json[r'broadcasting']),
-        frameRecording:
-            FrameRecordingSettingsRequest.fromJson(json[r'frame_recording']),
-        geofencing: GeofenceSettingsRequest.fromJson(json[r'geofencing']),
-        limits: LimitsSettingsRequest.fromJson(json[r'limits']),
-        recording: RecordSettingsRequest.fromJson(json[r'recording']),
-        ring: RingSettingsRequest.fromJson(json[r'ring']),
-        screensharing:
-            ScreensharingSettingsRequest.fromJson(json[r'screensharing']),
-        session: SessionSettingsRequest.fromJson(json[r'session']),
-        thumbnails: ThumbnailsSettingsRequest.fromJson(json[r'thumbnails']),
-        transcription:
-            TranscriptionSettingsRequest.fromJson(json[r'transcription']),
-        video: VideoSettingsRequest.fromJson(json[r'video']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.audio != null) {
+      yield r'audio';
+      yield serializers.serialize(
+        object.audio,
+        specifiedType: const FullType(AudioSettingsRequest),
       );
     }
-    return null;
+    if (object.backstage != null) {
+      yield r'backstage';
+      yield serializers.serialize(
+        object.backstage,
+        specifiedType: const FullType(BackstageSettingsRequest),
+      );
+    }
+    if (object.broadcasting != null) {
+      yield r'broadcasting';
+      yield serializers.serialize(
+        object.broadcasting,
+        specifiedType: const FullType(BroadcastSettingsRequest),
+      );
+    }
+    if (object.frameRecording != null) {
+      yield r'frame_recording';
+      yield serializers.serialize(
+        object.frameRecording,
+        specifiedType: const FullType(FrameRecordingSettingsRequest),
+      );
+    }
+    if (object.geofencing != null) {
+      yield r'geofencing';
+      yield serializers.serialize(
+        object.geofencing,
+        specifiedType: const FullType(GeofenceSettingsRequest),
+      );
+    }
+    if (object.limits != null) {
+      yield r'limits';
+      yield serializers.serialize(
+        object.limits,
+        specifiedType: const FullType(LimitsSettingsRequest),
+      );
+    }
+    if (object.recording != null) {
+      yield r'recording';
+      yield serializers.serialize(
+        object.recording,
+        specifiedType: const FullType(RecordSettingsRequest),
+      );
+    }
+    if (object.ring != null) {
+      yield r'ring';
+      yield serializers.serialize(
+        object.ring,
+        specifiedType: const FullType(RingSettingsRequest),
+      );
+    }
+    if (object.screensharing != null) {
+      yield r'screensharing';
+      yield serializers.serialize(
+        object.screensharing,
+        specifiedType: const FullType(ScreensharingSettingsRequest),
+      );
+    }
+    if (object.session != null) {
+      yield r'session';
+      yield serializers.serialize(
+        object.session,
+        specifiedType: const FullType(SessionSettingsRequest),
+      );
+    }
+    if (object.thumbnails != null) {
+      yield r'thumbnails';
+      yield serializers.serialize(
+        object.thumbnails,
+        specifiedType: const FullType(ThumbnailsSettingsRequest),
+      );
+    }
+    if (object.transcription != null) {
+      yield r'transcription';
+      yield serializers.serialize(
+        object.transcription,
+        specifiedType: const FullType(TranscriptionSettingsRequest),
+      );
+    }
+    if (object.video != null) {
+      yield r'video';
+      yield serializers.serialize(
+        object.video,
+        specifiedType: const FullType(VideoSettingsRequest),
+      );
+    }
   }
 
-  static List<CallSettingsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallSettingsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallSettingsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallSettingsRequest> mapFromJson(dynamic json) {
-    final map = <String, CallSettingsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallSettingsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallSettingsRequest-objects as value to a dart map
-  static Map<String, List<CallSettingsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallSettingsRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallSettingsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallSettingsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'audio':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(AudioSettingsRequest),
+          ) as AudioSettingsRequest;
+          result.audio.replace(valueDes);
+          break;
+        case r'backstage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BackstageSettingsRequest),
+          ) as BackstageSettingsRequest;
+          result.backstage.replace(valueDes);
+          break;
+        case r'broadcasting':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BroadcastSettingsRequest),
+          ) as BroadcastSettingsRequest;
+          result.broadcasting.replace(valueDes);
+          break;
+        case r'frame_recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(FrameRecordingSettingsRequest),
+          ) as FrameRecordingSettingsRequest;
+          result.frameRecording.replace(valueDes);
+          break;
+        case r'geofencing':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(GeofenceSettingsRequest),
+          ) as GeofenceSettingsRequest;
+          result.geofencing.replace(valueDes);
+          break;
+        case r'limits':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(LimitsSettingsRequest),
+          ) as LimitsSettingsRequest;
+          result.limits.replace(valueDes);
+          break;
+        case r'recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RecordSettingsRequest),
+          ) as RecordSettingsRequest;
+          result.recording.replace(valueDes);
+          break;
+        case r'ring':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RingSettingsRequest),
+          ) as RingSettingsRequest;
+          result.ring.replace(valueDes);
+          break;
+        case r'screensharing':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ScreensharingSettingsRequest),
+          ) as ScreensharingSettingsRequest;
+          result.screensharing.replace(valueDes);
+          break;
+        case r'session':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(SessionSettingsRequest),
+          ) as SessionSettingsRequest;
+          result.session.replace(valueDes);
+          break;
+        case r'thumbnails':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ThumbnailsSettingsRequest),
+          ) as ThumbnailsSettingsRequest;
+          result.thumbnails.replace(valueDes);
+          break;
+        case r'transcription':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(TranscriptionSettingsRequest),
+          ) as TranscriptionSettingsRequest;
+          result.transcription.replace(valueDes);
+          break;
+        case r'video':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(VideoSettingsRequest),
+          ) as VideoSettingsRequest;
+          result.video.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  CallSettingsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallSettingsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

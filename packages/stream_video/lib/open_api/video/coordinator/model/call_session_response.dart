@@ -1,259 +1,312 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_participant_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_session_response.g.dart';
 
-class CallSessionResponse {
-  /// Returns a new [CallSessionResponse] instance.
-  CallSessionResponse({
-    this.acceptedBy = const {},
-    required this.anonymousParticipantCount,
-    this.endedAt,
-    required this.id,
-    this.liveEndedAt,
-    this.liveStartedAt,
-    this.missedBy = const {},
-    this.participants = const [],
-    this.participantsCountByRole = const {},
-    this.rejectedBy = const {},
-    this.startedAt,
-    this.timerEndsAt,
-  });
+/// CallSessionResponse
+///
+/// Properties:
+/// * [acceptedBy]
+/// * [anonymousParticipantCount]
+/// * [endedAt]
+/// * [id]
+/// * [liveEndedAt]
+/// * [liveStartedAt]
+/// * [missedBy]
+/// * [participants]
+/// * [participantsCountByRole]
+/// * [rejectedBy]
+/// * [startedAt]
+/// * [timerEndsAt]
+@BuiltValue()
+abstract class CallSessionResponse
+    implements Built<CallSessionResponse, CallSessionResponseBuilder> {
+  @BuiltValueField(wireName: r'accepted_by')
+  BuiltMap<String, DateTime> get acceptedBy;
 
-  Map<String, DateTime> acceptedBy;
+  @BuiltValueField(wireName: r'anonymous_participant_count')
+  int get anonymousParticipantCount;
 
-  int anonymousParticipantCount;
+  @BuiltValueField(wireName: r'ended_at')
+  DateTime? get endedAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? endedAt;
+  @BuiltValueField(wireName: r'id')
+  String get id;
 
-  String id;
+  @BuiltValueField(wireName: r'live_ended_at')
+  DateTime? get liveEndedAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? liveEndedAt;
+  @BuiltValueField(wireName: r'live_started_at')
+  DateTime? get liveStartedAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? liveStartedAt;
+  @BuiltValueField(wireName: r'missed_by')
+  BuiltMap<String, DateTime> get missedBy;
 
-  Map<String, DateTime> missedBy;
+  @BuiltValueField(wireName: r'participants')
+  BuiltList<CallParticipantResponse> get participants;
 
-  List<CallParticipantResponse> participants;
+  @BuiltValueField(wireName: r'participants_count_by_role')
+  BuiltMap<String, int> get participantsCountByRole;
 
-  Map<String, int> participantsCountByRole;
+  @BuiltValueField(wireName: r'rejected_by')
+  BuiltMap<String, DateTime> get rejectedBy;
 
-  Map<String, DateTime> rejectedBy;
+  @BuiltValueField(wireName: r'started_at')
+  DateTime? get startedAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? startedAt;
+  @BuiltValueField(wireName: r'timer_ends_at')
+  DateTime? get timerEndsAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? timerEndsAt;
+  CallSessionResponse._();
+
+  factory CallSessionResponse([void updates(CallSessionResponseBuilder b)]) =
+      _$CallSessionResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallSessionResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallSessionResponse> get serializer =>
+      _$CallSessionResponseSerializer();
+}
+
+class _$CallSessionResponseSerializer
+    implements PrimitiveSerializer<CallSessionResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallSessionResponse,
+    _$CallSessionResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallSessionResponse &&
-          _deepEquality.equals(other.acceptedBy, acceptedBy) &&
-          other.anonymousParticipantCount == anonymousParticipantCount &&
-          other.endedAt == endedAt &&
-          other.id == id &&
-          other.liveEndedAt == liveEndedAt &&
-          other.liveStartedAt == liveStartedAt &&
-          _deepEquality.equals(other.missedBy, missedBy) &&
-          _deepEquality.equals(other.participants, participants) &&
-          _deepEquality.equals(
-              other.participantsCountByRole, participantsCountByRole) &&
-          _deepEquality.equals(other.rejectedBy, rejectedBy) &&
-          other.startedAt == startedAt &&
-          other.timerEndsAt == timerEndsAt;
+  final String wireName = r'CallSessionResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (acceptedBy.hashCode) +
-      (anonymousParticipantCount.hashCode) +
-      (endedAt == null ? 0 : endedAt!.hashCode) +
-      (id.hashCode) +
-      (liveEndedAt == null ? 0 : liveEndedAt!.hashCode) +
-      (liveStartedAt == null ? 0 : liveStartedAt!.hashCode) +
-      (missedBy.hashCode) +
-      (participants.hashCode) +
-      (participantsCountByRole.hashCode) +
-      (rejectedBy.hashCode) +
-      (startedAt == null ? 0 : startedAt!.hashCode) +
-      (timerEndsAt == null ? 0 : timerEndsAt!.hashCode);
-
-  @override
-  String toString() =>
-      'CallSessionResponse[acceptedBy=$acceptedBy, anonymousParticipantCount=$anonymousParticipantCount, endedAt=$endedAt, id=$id, liveEndedAt=$liveEndedAt, liveStartedAt=$liveStartedAt, missedBy=$missedBy, participants=$participants, participantsCountByRole=$participantsCountByRole, rejectedBy=$rejectedBy, startedAt=$startedAt, timerEndsAt=$timerEndsAt]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'accepted_by'] = this.acceptedBy;
-    json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
-    if (this.endedAt != null) {
-      json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'ended_at'] = null;
-    }
-    json[r'id'] = this.id;
-    if (this.liveEndedAt != null) {
-      json[r'live_ended_at'] = this.liveEndedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'live_ended_at'] = null;
-    }
-    if (this.liveStartedAt != null) {
-      json[r'live_started_at'] = this.liveStartedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'live_started_at'] = null;
-    }
-    json[r'missed_by'] = this.missedBy;
-    json[r'participants'] = this.participants;
-    json[r'participants_count_by_role'] = this.participantsCountByRole;
-    json[r'rejected_by'] = this.rejectedBy;
-    if (this.startedAt != null) {
-      json[r'started_at'] = this.startedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'started_at'] = null;
-    }
-    if (this.timerEndsAt != null) {
-      json[r'timer_ends_at'] = this.timerEndsAt!.toUtc().toIso8601String();
-    } else {
-      json[r'timer_ends_at'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [CallSessionResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallSessionResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSessionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSessionResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallSessionResponse(
-        acceptedBy: DateTime.mapFromJson(json[r'accepted_by']),
-        anonymousParticipantCount:
-            mapValueOfType<int>(json, r'anonymous_participant_count')!,
-        endedAt: mapDateTime(json, r'ended_at', r''),
-        id: mapValueOfType<String>(json, r'id')!,
-        liveEndedAt: mapDateTime(json, r'live_ended_at', r''),
-        liveStartedAt: mapDateTime(json, r'live_started_at', r''),
-        missedBy: DateTime.mapFromJson(json[r'missed_by']),
-        participants:
-            CallParticipantResponse.listFromJson(json[r'participants']),
-        participantsCountByRole:
-            mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        rejectedBy: DateTime.mapFromJson(json[r'rejected_by']),
-        startedAt: mapDateTime(json, r'started_at', r''),
-        timerEndsAt: mapDateTime(json, r'timer_ends_at', r''),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallSessionResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'accepted_by';
+    yield serializers.serialize(
+      object.acceptedBy,
+      specifiedType:
+          const FullType(BuiltMap, [FullType(String), FullType(DateTime)]),
+    );
+    yield r'anonymous_participant_count';
+    yield serializers.serialize(
+      object.anonymousParticipantCount,
+      specifiedType: const FullType(int),
+    );
+    if (object.endedAt != null) {
+      yield r'ended_at';
+      yield serializers.serialize(
+        object.endedAt,
+        specifiedType: const FullType(DateTime),
       );
     }
-    return null;
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(String),
+    );
+    if (object.liveEndedAt != null) {
+      yield r'live_ended_at';
+      yield serializers.serialize(
+        object.liveEndedAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.liveStartedAt != null) {
+      yield r'live_started_at';
+      yield serializers.serialize(
+        object.liveStartedAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    yield r'missed_by';
+    yield serializers.serialize(
+      object.missedBy,
+      specifiedType:
+          const FullType(BuiltMap, [FullType(String), FullType(DateTime)]),
+    );
+    yield r'participants';
+    yield serializers.serialize(
+      object.participants,
+      specifiedType:
+          const FullType(BuiltList, [FullType(CallParticipantResponse)]),
+    );
+    yield r'participants_count_by_role';
+    yield serializers.serialize(
+      object.participantsCountByRole,
+      specifiedType:
+          const FullType(BuiltMap, [FullType(String), FullType(int)]),
+    );
+    yield r'rejected_by';
+    yield serializers.serialize(
+      object.rejectedBy,
+      specifiedType:
+          const FullType(BuiltMap, [FullType(String), FullType(DateTime)]),
+    );
+    if (object.startedAt != null) {
+      yield r'started_at';
+      yield serializers.serialize(
+        object.startedAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.timerEndsAt != null) {
+      yield r'timer_ends_at';
+      yield serializers.serialize(
+        object.timerEndsAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
   }
 
-  static List<CallSessionResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallSessionResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallSessionResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallSessionResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallSessionResponse> mapFromJson(dynamic json) {
-    final map = <String, CallSessionResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallSessionResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallSessionResponse-objects as value to a dart map
-  static Map<String, List<CallSessionResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallSessionResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallSessionResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallSessionResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'accepted_by':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType(DateTime)]),
+          ) as BuiltMap<String, DateTime>;
+          result.acceptedBy.replace(valueDes);
+          break;
+        case r'anonymous_participant_count':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.anonymousParticipantCount = valueDes;
+          break;
+        case r'ended_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.endedAt = valueDes;
+          break;
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.id = valueDes;
+          break;
+        case r'live_ended_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.liveEndedAt = valueDes;
+          break;
+        case r'live_started_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.liveStartedAt = valueDes;
+          break;
+        case r'missed_by':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType(DateTime)]),
+          ) as BuiltMap<String, DateTime>;
+          result.missedBy.replace(valueDes);
+          break;
+        case r'participants':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(CallParticipantResponse)]),
+          ) as BuiltList<CallParticipantResponse>;
+          result.participants.replace(valueDes);
+          break;
+        case r'participants_count_by_role':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltMap, [FullType(String), FullType(int)]),
+          ) as BuiltMap<String, int>;
+          result.participantsCountByRole.replace(valueDes);
+          break;
+        case r'rejected_by':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType(DateTime)]),
+          ) as BuiltMap<String, DateTime>;
+          result.rejectedBy.replace(valueDes);
+          break;
+        case r'started_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.startedAt = valueDes;
+          break;
+        case r'timer_ends_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.timerEndsAt = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'accepted_by',
-    'anonymous_participant_count',
-    'id',
-    'missed_by',
-    'participants',
-    'participants_count_by_role',
-    'rejected_by',
-  };
+  @override
+  CallSessionResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallSessionResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

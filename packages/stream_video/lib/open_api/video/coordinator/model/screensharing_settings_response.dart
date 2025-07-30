@@ -1,148 +1,152 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/target_resolution.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'screensharing_settings_response.g.dart';
 
-class ScreensharingSettingsResponse {
-  /// Returns a new [ScreensharingSettingsResponse] instance.
-  ScreensharingSettingsResponse({
-    required this.accessRequestEnabled,
-    required this.enabled,
-    this.targetResolution,
-  });
+/// ScreensharingSettingsResponse
+///
+/// Properties:
+/// * [accessRequestEnabled]
+/// * [enabled]
+/// * [targetResolution]
+@BuiltValue()
+abstract class ScreensharingSettingsResponse
+    implements
+        Built<ScreensharingSettingsResponse,
+            ScreensharingSettingsResponseBuilder> {
+  @BuiltValueField(wireName: r'access_request_enabled')
+  bool get accessRequestEnabled;
 
-  bool accessRequestEnabled;
+  @BuiltValueField(wireName: r'enabled')
+  bool get enabled;
 
-  bool enabled;
+  @BuiltValueField(wireName: r'target_resolution')
+  TargetResolution? get targetResolution;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  TargetResolution? targetResolution;
+  ScreensharingSettingsResponse._();
+
+  factory ScreensharingSettingsResponse(
+          [void updates(ScreensharingSettingsResponseBuilder b)]) =
+      _$ScreensharingSettingsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(ScreensharingSettingsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<ScreensharingSettingsResponse> get serializer =>
+      _$ScreensharingSettingsResponseSerializer();
+}
+
+class _$ScreensharingSettingsResponseSerializer
+    implements PrimitiveSerializer<ScreensharingSettingsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    ScreensharingSettingsResponse,
+    _$ScreensharingSettingsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ScreensharingSettingsResponse &&
-          other.accessRequestEnabled == accessRequestEnabled &&
-          other.enabled == enabled &&
-          other.targetResolution == targetResolution;
+  final String wireName = r'ScreensharingSettingsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (accessRequestEnabled.hashCode) +
-      (enabled.hashCode) +
-      (targetResolution == null ? 0 : targetResolution!.hashCode);
-
-  @override
-  String toString() =>
-      'ScreensharingSettingsResponse[accessRequestEnabled=$accessRequestEnabled, enabled=$enabled, targetResolution=$targetResolution]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'access_request_enabled'] = this.accessRequestEnabled;
-    json[r'enabled'] = this.enabled;
-    if (this.targetResolution != null) {
-      json[r'target_resolution'] = this.targetResolution;
-    } else {
-      json[r'target_resolution'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [ScreensharingSettingsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ScreensharingSettingsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ScreensharingSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ScreensharingSettingsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ScreensharingSettingsResponse(
-        accessRequestEnabled:
-            mapValueOfType<bool>(json, r'access_request_enabled')!,
-        enabled: mapValueOfType<bool>(json, r'enabled')!,
-        targetResolution: TargetResolution.fromJson(json[r'target_resolution']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    ScreensharingSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'access_request_enabled';
+    yield serializers.serialize(
+      object.accessRequestEnabled,
+      specifiedType: const FullType(bool),
+    );
+    yield r'enabled';
+    yield serializers.serialize(
+      object.enabled,
+      specifiedType: const FullType(bool),
+    );
+    if (object.targetResolution != null) {
+      yield r'target_resolution';
+      yield serializers.serialize(
+        object.targetResolution,
+        specifiedType: const FullType(TargetResolution),
       );
     }
-    return null;
   }
 
-  static List<ScreensharingSettingsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    ScreensharingSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <ScreensharingSettingsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = ScreensharingSettingsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, ScreensharingSettingsResponse> mapFromJson(dynamic json) {
-    final map = <String, ScreensharingSettingsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = ScreensharingSettingsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of ScreensharingSettingsResponse-objects as value to a dart map
-  static Map<String, List<ScreensharingSettingsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required ScreensharingSettingsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<ScreensharingSettingsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ScreensharingSettingsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'access_request_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.accessRequestEnabled = valueDes;
+          break;
+        case r'enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enabled = valueDes;
+          break;
+        case r'target_resolution':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(TargetResolution),
+          ) as TargetResolution;
+          result.targetResolution.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'access_request_enabled',
-    'enabled',
-  };
+  @override
+  ScreensharingSettingsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = ScreensharingSettingsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

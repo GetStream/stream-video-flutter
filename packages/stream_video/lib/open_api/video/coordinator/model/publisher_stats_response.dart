@@ -1,135 +1,153 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/track_stats_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'publisher_stats_response.g.dart';
 
-class PublisherStatsResponse {
-  /// Returns a new [PublisherStatsResponse] instance.
-  PublisherStatsResponse({
-    this.byTrack = const [],
-    required this.total,
-    required this.unique,
-  });
+/// PublisherStatsResponse
+///
+/// Properties:
+/// * [byTrack]
+/// * [total]
+/// * [unique]
+@BuiltValue()
+abstract class PublisherStatsResponse
+    implements Built<PublisherStatsResponse, PublisherStatsResponseBuilder> {
+  @BuiltValueField(wireName: r'by_track')
+  BuiltList<TrackStatsResponse?>? get byTrack;
 
-  List<TrackStatsResponse> byTrack;
+  @BuiltValueField(wireName: r'total')
+  int get total;
 
-  int total;
+  @BuiltValueField(wireName: r'unique')
+  int get unique;
 
-  int unique;
+  PublisherStatsResponse._();
+
+  factory PublisherStatsResponse(
+          [void updates(PublisherStatsResponseBuilder b)]) =
+      _$PublisherStatsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(PublisherStatsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<PublisherStatsResponse> get serializer =>
+      _$PublisherStatsResponseSerializer();
+}
+
+class _$PublisherStatsResponseSerializer
+    implements PrimitiveSerializer<PublisherStatsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    PublisherStatsResponse,
+    _$PublisherStatsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PublisherStatsResponse &&
-          _deepEquality.equals(other.byTrack, byTrack) &&
-          other.total == total &&
-          other.unique == unique;
+  final String wireName = r'PublisherStatsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (byTrack.hashCode) + (total.hashCode) + (unique.hashCode);
-
-  @override
-  String toString() =>
-      'PublisherStatsResponse[byTrack=$byTrack, total=$total, unique=$unique]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'by_track'] = this.byTrack;
-    json[r'total'] = this.total;
-    json[r'unique'] = this.unique;
-    return json;
-  }
-
-  /// Returns a new [PublisherStatsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static PublisherStatsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PublisherStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PublisherStatsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return PublisherStatsResponse(
-        byTrack: TrackStatsResponse.listFromJson(json[r'by_track']),
-        total: mapValueOfType<int>(json, r'total')!,
-        unique: mapValueOfType<int>(json, r'unique')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    PublisherStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.byTrack != null) {
+      yield r'by_track';
+      yield serializers.serialize(
+        object.byTrack,
+        specifiedType:
+            const FullType(BuiltList, [FullType.nullable(TrackStatsResponse)]),
       );
     }
-    return null;
+    yield r'total';
+    yield serializers.serialize(
+      object.total,
+      specifiedType: const FullType(int),
+    );
+    yield r'unique';
+    yield serializers.serialize(
+      object.unique,
+      specifiedType: const FullType(int),
+    );
   }
 
-  static List<PublisherStatsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    PublisherStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <PublisherStatsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = PublisherStatsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, PublisherStatsResponse> mapFromJson(dynamic json) {
-    final map = <String, PublisherStatsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = PublisherStatsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of PublisherStatsResponse-objects as value to a dart map
-  static Map<String, List<PublisherStatsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required PublisherStatsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<PublisherStatsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = PublisherStatsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'by_track':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltList, [FullType.nullable(TrackStatsResponse)]),
+          ) as BuiltList<TrackStatsResponse?>;
+          result.byTrack.replace(valueDes);
+          break;
+        case r'total':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.total = valueDes;
+          break;
+        case r'unique':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.unique = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'total',
-    'unique',
-  };
+  @override
+  PublisherStatsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = PublisherStatsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

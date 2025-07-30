@@ -1,165 +1,172 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/call_stats_report_summary_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'query_call_stats_response.g.dart';
 
-class QueryCallStatsResponse {
-  /// Returns a new [QueryCallStatsResponse] instance.
-  QueryCallStatsResponse({
-    required this.duration,
-    this.next,
-    this.prev,
-    this.reports = const [],
-  });
-
+/// Basic response information
+///
+/// Properties:
+/// * [duration] - Duration of the request in milliseconds
+/// * [next]
+/// * [prev]
+/// * [reports]
+@BuiltValue()
+abstract class QueryCallStatsResponse
+    implements Built<QueryCallStatsResponse, QueryCallStatsResponseBuilder> {
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? next;
+  @BuiltValueField(wireName: r'next')
+  String? get next;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? prev;
+  @BuiltValueField(wireName: r'prev')
+  String? get prev;
 
-  List<CallStatsReportSummaryResponse> reports;
+  @BuiltValueField(wireName: r'reports')
+  BuiltList<CallStatsReportSummaryResponse> get reports;
+
+  QueryCallStatsResponse._();
+
+  factory QueryCallStatsResponse(
+          [void updates(QueryCallStatsResponseBuilder b)]) =
+      _$QueryCallStatsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(QueryCallStatsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<QueryCallStatsResponse> get serializer =>
+      _$QueryCallStatsResponseSerializer();
+}
+
+class _$QueryCallStatsResponseSerializer
+    implements PrimitiveSerializer<QueryCallStatsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    QueryCallStatsResponse,
+    _$QueryCallStatsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is QueryCallStatsResponse &&
-          other.duration == duration &&
-          other.next == next &&
-          other.prev == prev &&
-          _deepEquality.equals(other.reports, reports);
+  final String wireName = r'QueryCallStatsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (duration.hashCode) +
-      (next == null ? 0 : next!.hashCode) +
-      (prev == null ? 0 : prev!.hashCode) +
-      (reports.hashCode);
-
-  @override
-  String toString() =>
-      'QueryCallStatsResponse[duration=$duration, next=$next, prev=$prev, reports=$reports]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'duration'] = this.duration;
-    if (this.next != null) {
-      json[r'next'] = this.next;
-    } else {
-      json[r'next'] = null;
-    }
-    if (this.prev != null) {
-      json[r'prev'] = this.prev;
-    } else {
-      json[r'prev'] = null;
-    }
-    json[r'reports'] = this.reports;
-    return json;
-  }
-
-  /// Returns a new [QueryCallStatsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static QueryCallStatsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryCallStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryCallStatsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return QueryCallStatsResponse(
-        duration: mapValueOfType<String>(json, r'duration')!,
-        next: mapValueOfType<String>(json, r'next'),
-        prev: mapValueOfType<String>(json, r'prev'),
-        reports: CallStatsReportSummaryResponse.listFromJson(json[r'reports']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    QueryCallStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    if (object.next != null) {
+      yield r'next';
+      yield serializers.serialize(
+        object.next,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.prev != null) {
+      yield r'prev';
+      yield serializers.serialize(
+        object.prev,
+        specifiedType: const FullType(String),
+      );
+    }
+    yield r'reports';
+    yield serializers.serialize(
+      object.reports,
+      specifiedType:
+          const FullType(BuiltList, [FullType(CallStatsReportSummaryResponse)]),
+    );
   }
 
-  static List<QueryCallStatsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    QueryCallStatsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <QueryCallStatsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = QueryCallStatsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, QueryCallStatsResponse> mapFromJson(dynamic json) {
-    final map = <String, QueryCallStatsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = QueryCallStatsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of QueryCallStatsResponse-objects as value to a dart map
-  static Map<String, List<QueryCallStatsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required QueryCallStatsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<QueryCallStatsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = QueryCallStatsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'next':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.next = valueDes;
+          break;
+        case r'prev':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.prev = valueDes;
+          break;
+        case r'reports':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltList, [FullType(CallStatsReportSummaryResponse)]),
+          ) as BuiltList<CallStatsReportSummaryResponse>;
+          result.reports.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration',
-    'reports',
-  };
+  @override
+  QueryCallStatsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = QueryCallStatsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,147 +1,150 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'user_reactivated_event.g.dart';
 
-class UserReactivatedEvent {
-  /// Returns a new [UserReactivatedEvent] instance.
-  UserReactivatedEvent({
-    required this.createdAt,
-    this.type = 'user.reactivated',
-    this.user,
-  });
+/// UserReactivatedEvent
+///
+/// Properties:
+/// * [createdAt]
+/// * [type]
+/// * [user]
+@BuiltValue()
+abstract class UserReactivatedEvent
+    implements Built<UserReactivatedEvent, UserReactivatedEventBuilder> {
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  String type;
+  @BuiltValueField(wireName: r'user')
+  User? get user;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  User? user;
+  UserReactivatedEvent._();
+
+  factory UserReactivatedEvent([void updates(UserReactivatedEventBuilder b)]) =
+      _$UserReactivatedEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UserReactivatedEventBuilder b) =>
+      b..type = 'user.reactivated';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UserReactivatedEvent> get serializer =>
+      _$UserReactivatedEventSerializer();
+}
+
+class _$UserReactivatedEventSerializer
+    implements PrimitiveSerializer<UserReactivatedEvent> {
+  @override
+  final Iterable<Type> types = const [
+    UserReactivatedEvent,
+    _$UserReactivatedEvent
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserReactivatedEvent &&
-          other.createdAt == createdAt &&
-          other.type == type &&
-          other.user == user;
+  final String wireName = r'UserReactivatedEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (createdAt.hashCode) +
-      (type.hashCode) +
-      (user == null ? 0 : user!.hashCode);
-
-  @override
-  String toString() =>
-      'UserReactivatedEvent[createdAt=$createdAt, type=$type, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
-    } else {
-      json[r'user'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [UserReactivatedEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UserReactivatedEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserReactivatedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserReactivatedEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UserReactivatedEvent(
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        type: mapValueOfType<String>(json, r'type')!,
-        user: User.fromJson(json[r'user']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UserReactivatedEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    if (object.user != null) {
+      yield r'user';
+      yield serializers.serialize(
+        object.user,
+        specifiedType: const FullType(User),
       );
     }
-    return null;
   }
 
-  static List<UserReactivatedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UserReactivatedEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UserReactivatedEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UserReactivatedEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UserReactivatedEvent> mapFromJson(dynamic json) {
-    final map = <String, UserReactivatedEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UserReactivatedEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UserReactivatedEvent-objects as value to a dart map
-  static Map<String, List<UserReactivatedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UserReactivatedEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UserReactivatedEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UserReactivatedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(User),
+          ) as User;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'created_at',
-    'type',
-  };
+  @override
+  UserReactivatedEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UserReactivatedEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

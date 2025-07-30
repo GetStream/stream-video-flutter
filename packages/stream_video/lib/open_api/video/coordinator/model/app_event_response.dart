@@ -1,188 +1,185 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/file_upload_config.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'app_event_response.g.dart';
 
-class AppEventResponse {
-  /// Returns a new [AppEventResponse] instance.
-  AppEventResponse({
-    this.asyncUrlEnrichEnabled,
-    required this.autoTranslationEnabled,
-    this.fileUploadConfig,
-    this.imageUploadConfig,
-    required this.name,
-  });
+/// AppEventResponse
+///
+/// Properties:
+/// * [asyncUrlEnrichEnabled] - boolean
+/// * [autoTranslationEnabled] - boolean
+/// * [fileUploadConfig]
+/// * [imageUploadConfig]
+/// * [name] - string
+@BuiltValue()
+abstract class AppEventResponse
+    implements Built<AppEventResponse, AppEventResponseBuilder> {
+  /// boolean
+  @BuiltValueField(wireName: r'async_url_enrich_enabled')
+  bool? get asyncUrlEnrichEnabled;
 
   /// boolean
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? asyncUrlEnrichEnabled;
+  @BuiltValueField(wireName: r'auto_translation_enabled')
+  bool get autoTranslationEnabled;
 
-  /// boolean
-  bool autoTranslationEnabled;
+  @BuiltValueField(wireName: r'file_upload_config')
+  FileUploadConfig? get fileUploadConfig;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  FileUploadConfig? fileUploadConfig;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  FileUploadConfig? imageUploadConfig;
+  @BuiltValueField(wireName: r'image_upload_config')
+  FileUploadConfig? get imageUploadConfig;
 
   /// string
-  String name;
+  @BuiltValueField(wireName: r'name')
+  String get name;
+
+  AppEventResponse._();
+
+  factory AppEventResponse([void updates(AppEventResponseBuilder b)]) =
+      _$AppEventResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(AppEventResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<AppEventResponse> get serializer =>
+      _$AppEventResponseSerializer();
+}
+
+class _$AppEventResponseSerializer
+    implements PrimitiveSerializer<AppEventResponse> {
+  @override
+  final Iterable<Type> types = const [AppEventResponse, _$AppEventResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AppEventResponse &&
-          other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled &&
-          other.autoTranslationEnabled == autoTranslationEnabled &&
-          other.fileUploadConfig == fileUploadConfig &&
-          other.imageUploadConfig == imageUploadConfig &&
-          other.name == name;
+  final String wireName = r'AppEventResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (asyncUrlEnrichEnabled == null ? 0 : asyncUrlEnrichEnabled!.hashCode) +
-      (autoTranslationEnabled.hashCode) +
-      (fileUploadConfig == null ? 0 : fileUploadConfig!.hashCode) +
-      (imageUploadConfig == null ? 0 : imageUploadConfig!.hashCode) +
-      (name.hashCode);
-
-  @override
-  String toString() =>
-      'AppEventResponse[asyncUrlEnrichEnabled=$asyncUrlEnrichEnabled, autoTranslationEnabled=$autoTranslationEnabled, fileUploadConfig=$fileUploadConfig, imageUploadConfig=$imageUploadConfig, name=$name]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.asyncUrlEnrichEnabled != null) {
-      json[r'async_url_enrich_enabled'] = this.asyncUrlEnrichEnabled;
-    } else {
-      json[r'async_url_enrich_enabled'] = null;
-    }
-    json[r'auto_translation_enabled'] = this.autoTranslationEnabled;
-    if (this.fileUploadConfig != null) {
-      json[r'file_upload_config'] = this.fileUploadConfig;
-    } else {
-      json[r'file_upload_config'] = null;
-    }
-    if (this.imageUploadConfig != null) {
-      json[r'image_upload_config'] = this.imageUploadConfig;
-    } else {
-      json[r'image_upload_config'] = null;
-    }
-    json[r'name'] = this.name;
-    return json;
-  }
-
-  /// Returns a new [AppEventResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static AppEventResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "AppEventResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "AppEventResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return AppEventResponse(
-        asyncUrlEnrichEnabled:
-            mapValueOfType<bool>(json, r'async_url_enrich_enabled'),
-        autoTranslationEnabled:
-            mapValueOfType<bool>(json, r'auto_translation_enabled')!,
-        fileUploadConfig:
-            FileUploadConfig.fromJson(json[r'file_upload_config']),
-        imageUploadConfig:
-            FileUploadConfig.fromJson(json[r'image_upload_config']),
-        name: mapValueOfType<String>(json, r'name')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    AppEventResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.asyncUrlEnrichEnabled != null) {
+      yield r'async_url_enrich_enabled';
+      yield serializers.serialize(
+        object.asyncUrlEnrichEnabled,
+        specifiedType: const FullType(bool),
       );
     }
-    return null;
+    yield r'auto_translation_enabled';
+    yield serializers.serialize(
+      object.autoTranslationEnabled,
+      specifiedType: const FullType(bool),
+    );
+    if (object.fileUploadConfig != null) {
+      yield r'file_upload_config';
+      yield serializers.serialize(
+        object.fileUploadConfig,
+        specifiedType: const FullType(FileUploadConfig),
+      );
+    }
+    if (object.imageUploadConfig != null) {
+      yield r'image_upload_config';
+      yield serializers.serialize(
+        object.imageUploadConfig,
+        specifiedType: const FullType(FileUploadConfig),
+      );
+    }
+    yield r'name';
+    yield serializers.serialize(
+      object.name,
+      specifiedType: const FullType(String),
+    );
   }
 
-  static List<AppEventResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    AppEventResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <AppEventResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = AppEventResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, AppEventResponse> mapFromJson(dynamic json) {
-    final map = <String, AppEventResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = AppEventResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of AppEventResponse-objects as value to a dart map
-  static Map<String, List<AppEventResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required AppEventResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<AppEventResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = AppEventResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'async_url_enrich_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.asyncUrlEnrichEnabled = valueDes;
+          break;
+        case r'auto_translation_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.autoTranslationEnabled = valueDes;
+          break;
+        case r'file_upload_config':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(FileUploadConfig),
+          ) as FileUploadConfig;
+          result.fileUploadConfig.replace(valueDes);
+          break;
+        case r'image_upload_config':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(FileUploadConfig),
+          ) as FileUploadConfig;
+          result.imageUploadConfig.replace(valueDes);
+          break;
+        case r'name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.name = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'auto_translation_enabled',
-    'name',
-  };
+  @override
+  AppEventResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = AppEventResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

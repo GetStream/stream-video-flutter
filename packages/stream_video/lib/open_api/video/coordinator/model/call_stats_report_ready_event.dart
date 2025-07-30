@@ -1,148 +1,167 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_stats_report_ready_event.g.dart';
 
-class CallStatsReportReadyEvent {
-  /// Returns a new [CallStatsReportReadyEvent] instance.
-  CallStatsReportReadyEvent({
-    required this.callCid,
-    required this.createdAt,
-    required this.sessionId,
-    this.type = 'call.stats_report_ready',
-  });
+/// This event is sent when the insights report is ready
+///
+/// Properties:
+/// * [callCid]
+/// * [createdAt]
+/// * [sessionId] - Call session ID
+/// * [type] - The type of event, \"call.report_ready\" in this case
+@BuiltValue()
+abstract class CallStatsReportReadyEvent
+    implements
+        Built<CallStatsReportReadyEvent, CallStatsReportReadyEventBuilder> {
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// Call session ID
-  String sessionId;
+  @BuiltValueField(wireName: r'session_id')
+  String get sessionId;
 
   /// The type of event, \"call.report_ready\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
+
+  CallStatsReportReadyEvent._();
+
+  factory CallStatsReportReadyEvent(
+          [void updates(CallStatsReportReadyEventBuilder b)]) =
+      _$CallStatsReportReadyEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallStatsReportReadyEventBuilder b) =>
+      b..type = 'call.stats_report_ready';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallStatsReportReadyEvent> get serializer =>
+      _$CallStatsReportReadyEventSerializer();
+}
+
+class _$CallStatsReportReadyEventSerializer
+    implements PrimitiveSerializer<CallStatsReportReadyEvent> {
+  @override
+  final Iterable<Type> types = const [
+    CallStatsReportReadyEvent,
+    _$CallStatsReportReadyEvent
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallStatsReportReadyEvent &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          other.sessionId == sessionId &&
-          other.type == type;
+  final String wireName = r'CallStatsReportReadyEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (sessionId.hashCode) +
-      (type.hashCode);
-
-  @override
-  String toString() =>
-      'CallStatsReportReadyEvent[callCid=$callCid, createdAt=$createdAt, sessionId=$sessionId, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'session_id'] = this.sessionId;
-    json[r'type'] = this.type;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallStatsReportReadyEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'session_id';
+    yield serializers.serialize(
+      object.sessionId,
+      specifiedType: const FullType(String),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [CallStatsReportReadyEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallStatsReportReadyEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallStatsReportReadyEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallStatsReportReadyEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallStatsReportReadyEvent(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        type: mapValueOfType<String>(json, r'type')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallStatsReportReadyEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallStatsReportReadyEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallStatsReportReadyEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallStatsReportReadyEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallStatsReportReadyEvent> mapFromJson(dynamic json) {
-    final map = <String, CallStatsReportReadyEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallStatsReportReadyEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallStatsReportReadyEvent-objects as value to a dart map
-  static Map<String, List<CallStatsReportReadyEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallStatsReportReadyEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallStatsReportReadyEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallStatsReportReadyEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'session_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.sessionId = valueDes;
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'created_at',
-    'session_id',
-    'type',
-  };
+  @override
+  CallStatsReportReadyEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallStatsReportReadyEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

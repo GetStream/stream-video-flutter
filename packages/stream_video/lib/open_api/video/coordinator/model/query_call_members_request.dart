@@ -1,199 +1,228 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/sort_param_request.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'query_call_members_request.g.dart';
 
-class QueryCallMembersRequest {
-  /// Returns a new [QueryCallMembersRequest] instance.
-  QueryCallMembersRequest({
-    this.filterConditions = const {},
-    required this.id,
-    this.limit,
-    this.next,
-    this.prev,
-    this.sort = const [],
-    required this.type,
-  });
+/// QueryCallMembersRequest
+///
+/// Properties:
+/// * [filterConditions]
+/// * [id]
+/// * [limit]
+/// * [next]
+/// * [prev]
+/// * [sort]
+/// * [type]
+@BuiltValue()
+abstract class QueryCallMembersRequest
+    implements Built<QueryCallMembersRequest, QueryCallMembersRequestBuilder> {
+  @BuiltValueField(wireName: r'filter_conditions')
+  BuiltMap<String, JsonObject?>? get filterConditions;
 
-  Map<String, Object> filterConditions;
+  @BuiltValueField(wireName: r'id')
+  String get id;
 
-  String id;
+  @BuiltValueField(wireName: r'limit')
+  int? get limit;
 
-  /// Minimum value: 0
-  /// Maximum value: 100
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? limit;
+  @BuiltValueField(wireName: r'next')
+  String? get next;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? next;
+  @BuiltValueField(wireName: r'prev')
+  String? get prev;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? prev;
+  @BuiltValueField(wireName: r'sort')
+  BuiltList<SortParamRequest?>? get sort;
 
-  List<SortParamRequest> sort;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  String type;
+  QueryCallMembersRequest._();
+
+  factory QueryCallMembersRequest(
+          [void updates(QueryCallMembersRequestBuilder b)]) =
+      _$QueryCallMembersRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(QueryCallMembersRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<QueryCallMembersRequest> get serializer =>
+      _$QueryCallMembersRequestSerializer();
+}
+
+class _$QueryCallMembersRequestSerializer
+    implements PrimitiveSerializer<QueryCallMembersRequest> {
+  @override
+  final Iterable<Type> types = const [
+    QueryCallMembersRequest,
+    _$QueryCallMembersRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is QueryCallMembersRequest &&
-          _deepEquality.equals(other.filterConditions, filterConditions) &&
-          other.id == id &&
-          other.limit == limit &&
-          other.next == next &&
-          other.prev == prev &&
-          _deepEquality.equals(other.sort, sort) &&
-          other.type == type;
+  final String wireName = r'QueryCallMembersRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (filterConditions.hashCode) +
-      (id.hashCode) +
-      (limit == null ? 0 : limit!.hashCode) +
-      (next == null ? 0 : next!.hashCode) +
-      (prev == null ? 0 : prev!.hashCode) +
-      (sort.hashCode) +
-      (type.hashCode);
-
-  @override
-  String toString() =>
-      'QueryCallMembersRequest[filterConditions=$filterConditions, id=$id, limit=$limit, next=$next, prev=$prev, sort=$sort, type=$type]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'filter_conditions'] = this.filterConditions;
-    json[r'id'] = this.id;
-    if (this.limit != null) {
-      json[r'limit'] = this.limit;
-    } else {
-      json[r'limit'] = null;
-    }
-    if (this.next != null) {
-      json[r'next'] = this.next;
-    } else {
-      json[r'next'] = null;
-    }
-    if (this.prev != null) {
-      json[r'prev'] = this.prev;
-    } else {
-      json[r'prev'] = null;
-    }
-    json[r'sort'] = this.sort;
-    json[r'type'] = this.type;
-    return json;
-  }
-
-  /// Returns a new [QueryCallMembersRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static QueryCallMembersRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryCallMembersRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryCallMembersRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return QueryCallMembersRequest(
-        filterConditions:
-            mapCastOfType<String, Object>(json, r'filter_conditions') ??
-                const {},
-        id: mapValueOfType<String>(json, r'id')!,
-        limit: mapValueOfType<int>(json, r'limit'),
-        next: mapValueOfType<String>(json, r'next'),
-        prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParamRequest.listFromJson(json[r'sort']),
-        type: mapValueOfType<String>(json, r'type')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    QueryCallMembersRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.filterConditions != null) {
+      yield r'filter_conditions';
+      yield serializers.serialize(
+        object.filterConditions,
+        specifiedType: const FullType(
+            BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
       );
     }
-    return null;
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(String),
+    );
+    if (object.limit != null) {
+      yield r'limit';
+      yield serializers.serialize(
+        object.limit,
+        specifiedType: const FullType(int),
+      );
+    }
+    if (object.next != null) {
+      yield r'next';
+      yield serializers.serialize(
+        object.next,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.prev != null) {
+      yield r'prev';
+      yield serializers.serialize(
+        object.prev,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.sort != null) {
+      yield r'sort';
+      yield serializers.serialize(
+        object.sort,
+        specifiedType:
+            const FullType(BuiltList, [FullType.nullable(SortParamRequest)]),
+      );
+    }
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
   }
 
-  static List<QueryCallMembersRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    QueryCallMembersRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <QueryCallMembersRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = QueryCallMembersRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, QueryCallMembersRequest> mapFromJson(dynamic json) {
-    final map = <String, QueryCallMembersRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = QueryCallMembersRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of QueryCallMembersRequest-objects as value to a dart map
-  static Map<String, List<QueryCallMembersRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required QueryCallMembersRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<QueryCallMembersRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = QueryCallMembersRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'filter_conditions':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.filterConditions.replace(valueDes);
+          break;
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.id = valueDes;
+          break;
+        case r'limit':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.limit = valueDes;
+          break;
+        case r'next':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.next = valueDes;
+          break;
+        case r'prev':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.prev = valueDes;
+          break;
+        case r'sort':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltList, [FullType.nullable(SortParamRequest)]),
+          ) as BuiltList<SortParamRequest?>;
+          result.sort.replace(valueDes);
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'id',
-    'type',
-  };
+  @override
+  QueryCallMembersRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = QueryCallMembersRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

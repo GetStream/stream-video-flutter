@@ -1,3904 +1,6035 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+import 'dart:async';
 
-part of openapi.api;
+import 'package:built_value/json_object.dart';
+import 'package:built_value/serializer.dart';
+import 'package:dio/dio.dart';
+
+import 'package:built_value/json_object.dart';
+import 'package:stream_video/open_api/video/coordinator/src/api_util.dart';
+import 'package:stream_video/open_api/video/coordinator/model/accept_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/api_error.dart';
+import 'package:stream_video/open_api/video/coordinator/model/block_user_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/block_user_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/collect_user_feedback_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/collect_user_feedback_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/create_device_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/create_guest_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/create_guest_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/delete_call_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/delete_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/delete_recording_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/delete_transcription_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/end_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/get_call_report_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/get_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/get_edges_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/get_or_create_call_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/get_or_create_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/go_live_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/go_live_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/join_call_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/join_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/list_devices_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/list_recordings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/list_transcriptions_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/mute_users_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/mute_users_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/pin_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/pin_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_aggregate_call_stats_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_aggregate_call_stats_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_call_members_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_call_members_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_call_participants_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_call_participants_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_call_stats_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_call_stats_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_calls_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/query_calls_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/reject_call_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/reject_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/request_permission_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/request_permission_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/send_call_event_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/send_call_event_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/send_reaction_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/send_reaction_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_closed_captions_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_closed_captions_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_frame_recording_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_frame_recording_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_hls_broadcasting_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_recording_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_recording_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_rtmp_broadcasts_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_rtmp_broadcasts_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_transcription_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/start_transcription_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_all_rtmp_broadcasts_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_closed_captions_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_closed_captions_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_frame_recording_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_hls_broadcasting_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_live_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_live_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_recording_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_rtmp_broadcasts_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_transcription_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/stop_transcription_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/unblock_user_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/unblock_user_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/unpin_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/unpin_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/update_call_members_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/update_call_members_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/update_call_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/update_call_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/update_user_permissions_request.dart';
+import 'package:stream_video/open_api/video/coordinator/model/update_user_permissions_response.dart';
 
 class ProductVideoApi {
-  ProductVideoApi([ApiClient? apiClient])
-      : apiClient = apiClient ?? defaultApiClient;
+  final Dio _dio;
 
-  final ApiClient apiClient;
+  final Serializers _serializers;
 
-  /// Accept Call
-  ///
-  ///   Sends events: - call.accepted
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> acceptCallWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/accept'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
+  const ProductVideoApi(this._dio, this._serializers);
 
   /// Accept Call
-  ///
   ///   Sends events: - call.accepted
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<AcceptCallResponse?> acceptCall(
-    String type,
-    String id,
-  ) async {
-    final response = await acceptCallWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [AcceptCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<AcceptCallResponse>> acceptCall({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/accept'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    AcceptCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(AcceptCallResponse),
+            ) as AcceptCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'AcceptCallResponse',
-      ) as AcceptCallResponse;
-    }
-    return null;
-  }
 
-  /// Block user on a call
-  ///
-  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [BlockUserRequest] blockUserRequest (required):
-  ///   BlockUserRequest
-  Future<Response> blockUserWithHttpInfo(
-    String type,
-    String id,
-    BlockUserRequest blockUserRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/block'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = blockUserRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<AcceptCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Block user on a call
-  ///
   /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [blockUserRequest] - BlockUserRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [BlockUserRequest] blockUserRequest (required):
-  ///   BlockUserRequest
-  Future<BlockUserResponse?> blockUser(
-    String type,
-    String id,
-    BlockUserRequest blockUserRequest,
-  ) async {
-    final response = await blockUserWithHttpInfo(
-      type,
-      id,
-      blockUserRequest,
+  /// Returns a [Future] containing a [Response] with a [BlockUserResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<BlockUserResponse>> blockUser({
+    required String type,
+    required String id,
+    BlockUserRequest? blockUserRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/block'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(BlockUserRequest);
+      _bodyData =
+          _serializers.serialize(blockUserRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'BlockUserResponse',
-      ) as BlockUserResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    BlockUserResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(BlockUserResponse),
+            ) as BlockUserResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<BlockUserResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Collect user feedback
-  ///
-  ///   Sends events: - call.user_feedback_submitted
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [CollectUserFeedbackRequest] collectUserFeedbackRequest (required):
-  Future<Response> collectUserFeedbackWithHttpInfo(
-    String type,
-    String id,
-    CollectUserFeedbackRequest collectUserFeedbackRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/feedback'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = collectUserFeedbackRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Collect user feedback
-  ///
   ///   Sends events: - call.user_feedback_submitted
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [collectUserFeedbackRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [CollectUserFeedbackRequest] collectUserFeedbackRequest (required):
-  Future<CollectUserFeedbackResponse?> collectUserFeedback(
-    String type,
-    String id,
-    CollectUserFeedbackRequest collectUserFeedbackRequest,
-  ) async {
-    final response = await collectUserFeedbackWithHttpInfo(
-      type,
-      id,
-      collectUserFeedbackRequest,
+  /// Returns a [Future] containing a [Response] with a [CollectUserFeedbackResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<CollectUserFeedbackResponse>> collectUserFeedback({
+    required String type,
+    required String id,
+    CollectUserFeedbackRequest? collectUserFeedbackRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/feedback'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(CollectUserFeedbackRequest);
+      _bodyData = _serializers.serialize(collectUserFeedbackRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'CollectUserFeedbackResponse',
-      ) as CollectUserFeedbackResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    CollectUserFeedbackResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(CollectUserFeedbackResponse),
+            ) as CollectUserFeedbackResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<CollectUserFeedbackResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Create device
-  ///
-  /// Adds a new device to a user, if the same device already exists the call will have no effect
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [CreateDeviceRequest] createDeviceRequest (required):
-  ///   CreateDeviceRequest
-  Future<Response> createDeviceWithHttpInfo(
-    CreateDeviceRequest createDeviceRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/devices';
-
-    // ignore: prefer_final_locals
-    Object? postBody = createDeviceRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Create device
-  ///
   /// Adds a new device to a user, if the same device already exists the call will have no effect
   ///
   /// Parameters:
+  /// * [createDeviceRequest] - CreateDeviceRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [CreateDeviceRequest] createDeviceRequest (required):
-  ///   CreateDeviceRequest
-  Future<Response?> createDevice(
-    CreateDeviceRequest createDeviceRequest,
-  ) async {
-    final response = await createDeviceWithHttpInfo(
-      createDeviceRequest,
+  /// Returns a [Future] containing a [Response] with a [Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Response>> createDevice({
+    CreateDeviceRequest? createDeviceRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/devices';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(CreateDeviceRequest);
+      _bodyData =
+          _serializers.serialize(createDeviceRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'Response',
-      ) as Response;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Response? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(Response),
+            ) as Response;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Create Guest
   ///
   ///
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
   /// Parameters:
+  /// * [createGuestRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [CreateGuestRequest] createGuestRequest (required):
-  Future<Response> createGuestWithHttpInfo(
-    CreateGuestRequest createGuestRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/guest';
-
-    // ignore: prefer_final_locals
-    Object? postBody = createGuestRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+  /// Returns a [Future] containing a [Response] with a [CreateGuestResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<CreateGuestResponse>> createGuest({
+    CreateGuestRequest? createGuestRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/guest';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-  }
 
-  /// Create Guest
-  ///
-  ///
-  ///
-  /// Parameters:
-  ///
-  /// * [CreateGuestRequest] createGuestRequest (required):
-  Future<CreateGuestResponse?> createGuest(
-    CreateGuestRequest createGuestRequest,
-  ) async {
-    final response = await createGuestWithHttpInfo(
-      createGuestRequest,
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(CreateGuestRequest);
+      _bodyData =
+          _serializers.serialize(createGuestRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    CreateGuestResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(CreateGuestResponse),
+            ) as CreateGuestResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'CreateGuestResponse',
-      ) as CreateGuestResponse;
-    }
-    return null;
+
+    return Response<CreateGuestResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Delete Call
-  ///
-  ///   Sends events: - call.deleted
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [DeleteCallRequest] deleteCallRequest (required):
-  ///   DeleteCallRequest
-  Future<Response> deleteCallWithHttpInfo(
-    String type,
-    String id,
-    DeleteCallRequest deleteCallRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/delete'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = deleteCallRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Delete Call
-  ///
   ///   Sends events: - call.deleted
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [deleteCallRequest] - DeleteCallRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [DeleteCallRequest] deleteCallRequest (required):
-  ///   DeleteCallRequest
-  Future<DeleteCallResponse?> deleteCall(
-    String type,
-    String id,
-    DeleteCallRequest deleteCallRequest,
-  ) async {
-    final response = await deleteCallWithHttpInfo(
-      type,
-      id,
-      deleteCallRequest,
+  /// Returns a [Future] containing a [Response] with a [DeleteCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DeleteCallResponse>> deleteCall({
+    required String type,
+    required String id,
+    DeleteCallRequest? deleteCallRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/delete'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(DeleteCallRequest);
+      _bodyData =
+          _serializers.serialize(deleteCallRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'DeleteCallResponse',
-      ) as DeleteCallResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DeleteCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(DeleteCallResponse),
+            ) as DeleteCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<DeleteCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Delete device
-  ///
-  /// Deletes one device
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] id (required):
-  Future<Response> deleteDeviceWithHttpInfo(
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/devices';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    queryParams.addAll(_queryParams('', 'id', id));
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'DELETE',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Delete device
-  ///
   /// Deletes one device
   ///
   /// Parameters:
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] id (required):
-  Future<Response?> deleteDevice(
-    String id,
-  ) async {
-    final response = await deleteDeviceWithHttpInfo(
-      id,
+  /// Returns a [Future] containing a [Response] with a [Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<Response>> deleteDevice({
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/devices';
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _queryParameters = <String, dynamic>{
+      r'id': encodeQueryParameter(_serializers, id, const FullType(String)),
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    Response? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(Response),
+            ) as Response;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'Response',
-      ) as Response;
-    }
-    return null;
-  }
 
-  /// Delete recording
-  ///
-  /// Deletes recording
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  ///
-  /// * [String] filename (required):
-  Future<Response> deleteRecordingWithHttpInfo(
-    String type,
-    String id,
-    String session,
-    String filename,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/{session}/recordings/{filename}'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id)
-        .replaceAll('{session}', session)
-        .replaceAll('{filename}', filename);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'DELETE',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Delete recording
-  ///
   /// Deletes recording
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [session]
+  /// * [filename]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  ///
-  /// * [String] filename (required):
-  Future<DeleteRecordingResponse?> deleteRecording(
-    String type,
-    String id,
-    String session,
-    String filename,
-  ) async {
-    final response = await deleteRecordingWithHttpInfo(
-      type,
-      id,
-      session,
-      filename,
+  /// Returns a [Future] containing a [Response] with a [DeleteRecordingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DeleteRecordingResponse>> deleteRecording({
+    required String type,
+    required String id,
+    required String session,
+    required String filename,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/{session}/recordings/{filename}'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'session' '}',
+            encodeQueryParameter(_serializers, session, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'filename' '}',
+            encodeQueryParameter(_serializers, filename, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DeleteRecordingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(DeleteRecordingResponse),
+            ) as DeleteRecordingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'DeleteRecordingResponse',
-      ) as DeleteRecordingResponse;
-    }
-    return null;
+
+    return Response<DeleteRecordingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Delete transcription
-  ///
-  /// Deletes transcription
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  ///
-  /// * [String] filename (required):
-  Future<Response> deleteTranscriptionWithHttpInfo(
-    String type,
-    String id,
-    String session,
-    String filename,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/{session}/transcriptions/{filename}'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id)
-        .replaceAll('{session}', session)
-        .replaceAll('{filename}', filename);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'DELETE',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Delete transcription
-  ///
   /// Deletes transcription
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [session]
+  /// * [filename]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  ///
-  /// * [String] filename (required):
-  Future<DeleteTranscriptionResponse?> deleteTranscription(
-    String type,
-    String id,
-    String session,
-    String filename,
-  ) async {
-    final response = await deleteTranscriptionWithHttpInfo(
-      type,
-      id,
-      session,
-      filename,
+  /// Returns a [Future] containing a [Response] with a [DeleteTranscriptionResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DeleteTranscriptionResponse>> deleteTranscription({
+    required String type,
+    required String id,
+    required String session,
+    required String filename,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/{session}/transcriptions/{filename}'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'session' '}',
+            encodeQueryParameter(_serializers, session, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'filename' '}',
+            encodeQueryParameter(_serializers, filename, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DeleteTranscriptionResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(DeleteTranscriptionResponse),
+            ) as DeleteTranscriptionResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'DeleteTranscriptionResponse',
-      ) as DeleteTranscriptionResponse;
-    }
-    return null;
-  }
 
-  /// End call
-  ///
-  ///   Sends events: - call.ended
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> endCallWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/mark_ended'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<DeleteTranscriptionResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// End call
-  ///
   ///   Sends events: - call.ended
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<EndCallResponse?> endCall(
-    String type,
-    String id,
-  ) async {
-    final response = await endCallWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [EndCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<EndCallResponse>> endCall({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/mark_ended'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    EndCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(EndCallResponse),
+            ) as EndCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'EndCallResponse',
-      ) as EndCallResponse;
-    }
-    return null;
+
+    return Response<EndCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Get Call
   ///
   ///
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [connectionId]
+  /// * [membersLimit]
+  /// * [ring]
+  /// * [notify]
+  /// * [video]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] connectionId:
-  ///
-  /// * [int] membersLimit:
-  ///
-  /// * [bool] ring:
-  ///
-  /// * [bool] notify:
-  ///
-  /// * [bool] video:
-  Future<Response> getCallWithHttpInfo(
-    String type,
-    String id, {
+  /// Returns a [Future] containing a [Response] with a [GetCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<GetCallResponse>> getCall({
+    required String type,
+    required String id,
     String? connectionId,
     int? membersLimit,
     bool? ring,
     bool? notify,
     bool? video,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (connectionId != null) {
-      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
-    }
-    if (membersLimit != null) {
-      queryParams.addAll(_queryParams('', 'members_limit', membersLimit));
-    }
-    if (ring != null) {
-      queryParams.addAll(_queryParams('', 'ring', ring));
-    }
-    if (notify != null) {
-      queryParams.addAll(_queryParams('', 'notify', notify));
-    }
-    if (video != null) {
-      queryParams.addAll(_queryParams('', 'video', video));
-    }
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    final _path = r'/video/call/{type}/{id}'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-  }
 
-  /// Get Call
-  ///
-  ///
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] connectionId:
-  ///
-  /// * [int] membersLimit:
-  ///
-  /// * [bool] ring:
-  ///
-  /// * [bool] notify:
-  ///
-  /// * [bool] video:
-  Future<GetCallResponse?> getCall(
-    String type,
-    String id, {
-    String? connectionId,
-    int? membersLimit,
-    bool? ring,
-    bool? notify,
-    bool? video,
-  }) async {
-    final response = await getCallWithHttpInfo(
-      type,
-      id,
-      connectionId: connectionId,
-      membersLimit: membersLimit,
-      ring: ring,
-      notify: notify,
-      video: video,
+    final _queryParameters = <String, dynamic>{
+      if (connectionId != null)
+        r'connection_id': encodeQueryParameter(
+            _serializers, connectionId, const FullType(String)),
+      if (membersLimit != null)
+        r'members_limit': encodeQueryParameter(
+            _serializers, membersLimit, const FullType(int)),
+      if (ring != null)
+        r'ring': encodeQueryParameter(_serializers, ring, const FullType(bool)),
+      if (notify != null)
+        r'notify':
+            encodeQueryParameter(_serializers, notify, const FullType(bool)),
+      if (video != null)
+        r'video':
+            encodeQueryParameter(_serializers, video, const FullType(bool)),
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'GetCallResponse',
-      ) as GetCallResponse;
-    }
-    return null;
-  }
 
-  /// Get call report
-  ///
-  ///
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] sessionId:
-  Future<Response> getCallReportWithHttpInfo(
-    String type,
-    String id, {
-    String? sessionId,
-  }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/report'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
+    GetCallResponse? _responseData;
 
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (sessionId != null) {
-      queryParams.addAll(_queryParams('', 'session_id', sessionId));
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(GetCallResponse),
+            ) as GetCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
 
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<GetCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Get call report
   ///
   ///
-  ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [sessionId]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] sessionId:
-  Future<GetCallReportResponse?> getCallReport(
-    String type,
-    String id, {
+  /// Returns a [Future] containing a [Response] with a [GetCallReportResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<GetCallReportResponse>> getCallReport({
+    required String type,
+    required String id,
     String? sessionId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await getCallReportWithHttpInfo(
-      type,
-      id,
-      sessionId: sessionId,
+    final _path = r'/video/call/{type}/{id}/report'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _queryParameters = <String, dynamic>{
+      if (sessionId != null)
+        r'session_id': encodeQueryParameter(
+            _serializers, sessionId, const FullType(String)),
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    GetCallReportResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(GetCallReportResponse),
+            ) as GetCallReportResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'GetCallReportResponse',
-      ) as GetCallReportResponse;
-    }
-    return null;
+
+    return Response<GetCallReportResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Get Edges
-  ///
   /// Returns the list of all edges available for video calls.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  Future<Response> getEdgesWithHttpInfo() async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/edges';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Get Edges
-  ///
-  /// Returns the list of all edges available for video calls.
-  Future<GetEdgesResponse?> getEdges() async {
-    final response = await getEdgesWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'GetEdgesResponse',
-      ) as GetEdgesResponse;
-    }
-    return null;
-  }
-
-  /// Get or create a call
-  ///
-  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring
-  ///
-  /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [GetOrCreateCallRequest] getOrCreateCallRequest (required):
-  ///   GetOrCreateCallRequest
-  ///
-  /// * [String] connectionId:
-  Future<Response> getOrCreateCallWithHttpInfo(
-    String type,
-    String id,
-    GetOrCreateCallRequest getOrCreateCallRequest, {
-    String? connectionId,
+  /// Returns a [Future] containing a [Response] with a [GetEdgesResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<GetEdgesResponse>> getEdges({
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
+    final _path = r'/video/edges';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
 
-    // ignore: prefer_final_locals
-    Object? postBody = getOrCreateCallRequest;
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
 
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
+    GetEdgesResponse? _responseData;
 
-    if (connectionId != null) {
-      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(GetEdgesResponse),
+            ) as GetEdgesResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
 
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<GetEdgesResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Get or create a call
-  ///
   /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [getOrCreateCallRequest] - GetOrCreateCallRequest
+  /// * [connectionId]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [GetOrCreateCallRequest] getOrCreateCallRequest (required):
-  ///   GetOrCreateCallRequest
-  ///
-  /// * [String] connectionId:
-  Future<GetOrCreateCallResponse?> getOrCreateCall(
-    String type,
-    String id,
-    GetOrCreateCallRequest getOrCreateCallRequest, {
+  /// Returns a [Future] containing a [Response] with a [GetOrCreateCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<GetOrCreateCallResponse>> getOrCreateCall({
+    required String type,
+    required String id,
+    GetOrCreateCallRequest? getOrCreateCallRequest,
     String? connectionId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await getOrCreateCallWithHttpInfo(
-      type,
-      id,
-      getOrCreateCallRequest,
-      connectionId: connectionId,
+    final _path = r'/video/call/{type}/{id}'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _queryParameters = <String, dynamic>{
+      if (connectionId != null)
+        r'connection_id': encodeQueryParameter(
+            _serializers, connectionId, const FullType(String)),
+    };
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(GetOrCreateCallRequest);
+      _bodyData =
+          _serializers.serialize(getOrCreateCallRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+          queryParameters: _queryParameters,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'GetOrCreateCallResponse',
-      ) as GetOrCreateCallResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    GetOrCreateCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(GetOrCreateCallResponse),
+            ) as GetOrCreateCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<GetOrCreateCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Set call as live
-  ///
-  ///   Sends events: - call.live_started
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [GoLiveRequest] goLiveRequest (required):
-  ///   GoLiveRequest
-  Future<Response> goLiveWithHttpInfo(
-    String type,
-    String id,
-    GoLiveRequest goLiveRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/go_live'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = goLiveRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Set call as live
-  ///
   ///   Sends events: - call.live_started
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [goLiveRequest] - GoLiveRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [GoLiveRequest] goLiveRequest (required):
-  ///   GoLiveRequest
-  Future<GoLiveResponse?> goLive(
-    String type,
-    String id,
-    GoLiveRequest goLiveRequest,
-  ) async {
-    final response = await goLiveWithHttpInfo(
-      type,
-      id,
-      goLiveRequest,
-    );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'GoLiveResponse',
-      ) as GoLiveResponse;
-    }
-    return null;
-  }
-
-  /// Join call
-  ///
-  /// Request to join a call
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [JoinCallRequest] joinCallRequest (required):
-  ///   JoinCallRequest
-  ///
-  /// * [String] connectionId:
-  Future<Response> joinCallWithHttpInfo(
-    String type,
-    String id,
-    JoinCallRequest joinCallRequest, {
-    String? connectionId,
+  /// Returns a [Future] containing a [Response] with a [GoLiveResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<GoLiveResponse>> goLive({
+    required String type,
+    required String id,
+    GoLiveRequest? goLiveRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/join'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
+    final _path = r'/video/call/{type}/{id}/go_live'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
 
-    // ignore: prefer_final_locals
-    Object? postBody = joinCallRequest;
+    dynamic _bodyData;
 
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (connectionId != null) {
-      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
+    try {
+      const _type = FullType(GoLiveRequest);
+      _bodyData = _serializers.serialize(goLiveRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
 
-    const contentTypes = <String>['application/json'];
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
 
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    GoLiveResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(GoLiveResponse),
+            ) as GoLiveResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<GoLiveResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Join call
-  ///
   /// Request to join a call
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [joinCallRequest] - JoinCallRequest
+  /// * [connectionId]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [JoinCallRequest] joinCallRequest (required):
-  ///   JoinCallRequest
-  ///
-  /// * [String] connectionId:
-  Future<JoinCallResponse?> joinCall(
-    String type,
-    String id,
-    JoinCallRequest joinCallRequest, {
+  /// Returns a [Future] containing a [Response] with a [JoinCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<JoinCallResponse>> joinCall({
+    required String type,
+    required String id,
+    JoinCallRequest? joinCallRequest,
     String? connectionId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await joinCallWithHttpInfo(
-      type,
-      id,
-      joinCallRequest,
-      connectionId: connectionId,
+    final _path = r'/video/call/{type}/{id}/join'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _queryParameters = <String, dynamic>{
+      if (connectionId != null)
+        r'connection_id': encodeQueryParameter(
+            _serializers, connectionId, const FullType(String)),
+    };
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(JoinCallRequest);
+      _bodyData = _serializers.serialize(joinCallRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+          queryParameters: _queryParameters,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'JoinCallResponse',
-      ) as JoinCallResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    JoinCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(JoinCallResponse),
+            ) as JoinCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<JoinCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// List devices
-  ///
   /// Returns all available devices
   ///
-  /// Note: This method returns the HTTP [Response].
-  Future<Response> listDevicesWithHttpInfo() async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/devices';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+  /// Parameters:
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ListDevicesResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ListDevicesResponse>> listDevices({
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/devices';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-  }
 
-  /// List devices
-  ///
-  /// Returns all available devices
-  Future<ListDevicesResponse?> listDevices() async {
-    final response = await listDevicesWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ListDevicesResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(ListDevicesResponse),
+            ) as ListDevicesResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'ListDevicesResponse',
-      ) as ListDevicesResponse;
-    }
-    return null;
+
+    return Response<ListDevicesResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// List recordings
-  ///
-  /// Lists recordings
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> listRecordingsWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/recordings'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// List recordings
-  ///
   /// Lists recordings
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<ListRecordingsResponse?> listRecordings(
-    String type,
-    String id,
-  ) async {
-    final response = await listRecordingsWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [ListRecordingsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ListRecordingsResponse>> listRecordings({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/recordings'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ListRecordingsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(ListRecordingsResponse),
+            ) as ListRecordingsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'ListRecordingsResponse',
-      ) as ListRecordingsResponse;
-    }
-    return null;
-  }
 
-  /// List transcriptions
-  ///
-  /// Lists transcriptions
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> listTranscriptionsWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/transcriptions'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<ListRecordingsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// List transcriptions
-  ///
   /// Lists transcriptions
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<ListTranscriptionsResponse?> listTranscriptions(
-    String type,
-    String id,
-  ) async {
-    final response = await listTranscriptionsWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [ListTranscriptionsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ListTranscriptionsResponse>> listTranscriptions({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/transcriptions'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ListTranscriptionsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(ListTranscriptionsResponse),
+            ) as ListTranscriptionsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'ListTranscriptionsResponse',
-      ) as ListTranscriptionsResponse;
-    }
-    return null;
+
+    return Response<ListTranscriptionsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Mute users
-  ///
-  /// Mutes users in a call
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [MuteUsersRequest] muteUsersRequest (required):
-  ///   MuteUsersRequest
-  Future<Response> muteUsersWithHttpInfo(
-    String type,
-    String id,
-    MuteUsersRequest muteUsersRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/mute_users'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = muteUsersRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Mute users
-  ///
   /// Mutes users in a call
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [muteUsersRequest] - MuteUsersRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [MuteUsersRequest] muteUsersRequest (required):
-  ///   MuteUsersRequest
-  Future<MuteUsersResponse?> muteUsers(
-    String type,
-    String id,
-    MuteUsersRequest muteUsersRequest,
-  ) async {
-    final response = await muteUsersWithHttpInfo(
-      type,
-      id,
-      muteUsersRequest,
+  /// Returns a [Future] containing a [Response] with a [MuteUsersResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<MuteUsersResponse>> muteUsers({
+    required String type,
+    required String id,
+    MuteUsersRequest? muteUsersRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/mute_users'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(MuteUsersRequest);
+      _bodyData =
+          _serializers.serialize(muteUsersRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'MuteUsersResponse',
-      ) as MuteUsersResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    MuteUsersResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(MuteUsersResponse),
+            ) as MuteUsersResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<MuteUsersResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Query Aggregate call Stats
   ///
   ///
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
   /// Parameters:
+  /// * [queryAggregateCallStatsRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [QueryAggregateCallStatsRequest] queryAggregateCallStatsRequest (required):
-  Future<Response> queryAggregateCallStatsWithHttpInfo(
-    QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/stats';
-
-    // ignore: prefer_final_locals
-    Object? postBody = queryAggregateCallStatsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+  /// Returns a [Future] containing a [Response] with a [QueryAggregateCallStatsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<QueryAggregateCallStatsResponse>> queryAggregateCallStats({
+    QueryAggregateCallStatsRequest? queryAggregateCallStatsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/stats';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-  }
 
-  /// Query Aggregate call Stats
-  ///
-  ///
-  ///
-  /// Parameters:
-  ///
-  /// * [QueryAggregateCallStatsRequest] queryAggregateCallStatsRequest (required):
-  Future<QueryAggregateCallStatsResponse?> queryAggregateCallStats(
-    QueryAggregateCallStatsRequest queryAggregateCallStatsRequest,
-  ) async {
-    final response = await queryAggregateCallStatsWithHttpInfo(
-      queryAggregateCallStatsRequest,
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(QueryAggregateCallStatsRequest);
+      _bodyData = _serializers.serialize(queryAggregateCallStatsRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    QueryAggregateCallStatsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(QueryAggregateCallStatsResponse),
+            ) as QueryAggregateCallStatsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'QueryAggregateCallStatsResponse',
-      ) as QueryAggregateCallStatsResponse;
-    }
-    return null;
+
+    return Response<QueryAggregateCallStatsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Query call members
-  ///
-  /// Query call members with filter query
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [QueryCallMembersRequest] queryCallMembersRequest (required):
-  Future<Response> queryCallMembersWithHttpInfo(
-    QueryCallMembersRequest queryCallMembersRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/members';
-
-    // ignore: prefer_final_locals
-    Object? postBody = queryCallMembersRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Query call members
-  ///
   /// Query call members with filter query
   ///
   /// Parameters:
+  /// * [queryCallMembersRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [QueryCallMembersRequest] queryCallMembersRequest (required):
-  Future<QueryCallMembersResponse?> queryCallMembers(
-    QueryCallMembersRequest queryCallMembersRequest,
-  ) async {
-    final response = await queryCallMembersWithHttpInfo(
-      queryCallMembersRequest,
+  /// Returns a [Future] containing a [Response] with a [QueryCallMembersResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<QueryCallMembersResponse>> queryCallMembers({
+    QueryCallMembersRequest? queryCallMembersRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/members';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(QueryCallMembersRequest);
+      _bodyData =
+          _serializers.serialize(queryCallMembersRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'QueryCallMembersResponse',
-      ) as QueryCallMembersResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    QueryCallMembersResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(QueryCallMembersResponse),
+            ) as QueryCallMembersResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<QueryCallMembersResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Query call participants
-  ///
-  /// Returns a list of participants connected to the call
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [QueryCallParticipantsRequest] queryCallParticipantsRequest (required):
-  ///
-  /// * [int] limit:
-  Future<Response> queryCallParticipantsWithHttpInfo(
-    String id,
-    String type,
-    QueryCallParticipantsRequest queryCallParticipantsRequest, {
-    int? limit,
-  }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/participants'
-        .replaceAll('{id}', id)
-        .replaceAll('{type}', type);
-
-    // ignore: prefer_final_locals
-    Object? postBody = queryCallParticipantsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (limit != null) {
-      queryParams.addAll(_queryParams('', 'limit', limit));
-    }
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Query call participants
-  ///
   /// Returns a list of participants connected to the call
   ///
   /// Parameters:
+  /// * [id]
+  /// * [type]
+  /// * [queryCallParticipantsRequest]
+  /// * [limit]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] id (required):
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [QueryCallParticipantsRequest] queryCallParticipantsRequest (required):
-  ///
-  /// * [int] limit:
-  Future<QueryCallParticipantsResponse?> queryCallParticipants(
-    String id,
-    String type,
-    QueryCallParticipantsRequest queryCallParticipantsRequest, {
+  /// Returns a [Future] containing a [Response] with a [QueryCallParticipantsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<QueryCallParticipantsResponse>> queryCallParticipants({
+    required String id,
+    required String type,
+    QueryCallParticipantsRequest? queryCallParticipantsRequest,
     int? limit,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await queryCallParticipantsWithHttpInfo(
-      id,
-      type,
-      queryCallParticipantsRequest,
-      limit: limit,
+    final _path = r'/video/call/{type}/{id}/participants'
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _queryParameters = <String, dynamic>{
+      if (limit != null)
+        r'limit':
+            encodeQueryParameter(_serializers, limit, const FullType(int)),
+    };
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(QueryCallParticipantsRequest);
+      _bodyData = _serializers.serialize(queryCallParticipantsRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+          queryParameters: _queryParameters,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'QueryCallParticipantsResponse',
-      ) as QueryCallParticipantsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    QueryCallParticipantsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(QueryCallParticipantsResponse),
+            ) as QueryCallParticipantsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<QueryCallParticipantsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Query Call Stats
   ///
   ///
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
   /// Parameters:
+  /// * [queryCallStatsRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [QueryCallStatsRequest] queryCallStatsRequest (required):
-  Future<Response> queryCallStatsWithHttpInfo(
-    QueryCallStatsRequest queryCallStatsRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/stats';
-
-    // ignore: prefer_final_locals
-    Object? postBody = queryCallStatsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+  /// Returns a [Future] containing a [Response] with a [QueryCallStatsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<QueryCallStatsResponse>> queryCallStats({
+    QueryCallStatsRequest? queryCallStatsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/stats';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-  }
 
-  /// Query Call Stats
-  ///
-  ///
-  ///
-  /// Parameters:
-  ///
-  /// * [QueryCallStatsRequest] queryCallStatsRequest (required):
-  Future<QueryCallStatsResponse?> queryCallStats(
-    QueryCallStatsRequest queryCallStatsRequest,
-  ) async {
-    final response = await queryCallStatsWithHttpInfo(
-      queryCallStatsRequest,
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(QueryCallStatsRequest);
+      _bodyData =
+          _serializers.serialize(queryCallStatsRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    QueryCallStatsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(QueryCallStatsResponse),
+            ) as QueryCallStatsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'QueryCallStatsResponse',
-      ) as QueryCallStatsResponse;
-    }
-    return null;
+
+    return Response<QueryCallStatsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Query call
-  ///
-  /// Query calls with filter query
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [QueryCallsRequest] queryCallsRequest (required):
-  ///   QueryCallsRequest
-  ///
-  /// * [String] connectionId:
-  Future<Response> queryCallsWithHttpInfo(
-    QueryCallsRequest queryCallsRequest, {
-    String? connectionId,
-  }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/calls';
-
-    // ignore: prefer_final_locals
-    Object? postBody = queryCallsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (connectionId != null) {
-      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
-    }
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Query call
-  ///
   /// Query calls with filter query
   ///
   /// Parameters:
+  /// * [queryCallsRequest] - QueryCallsRequest
+  /// * [connectionId]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [QueryCallsRequest] queryCallsRequest (required):
-  ///   QueryCallsRequest
-  ///
-  /// * [String] connectionId:
-  Future<QueryCallsResponse?> queryCalls(
-    QueryCallsRequest queryCallsRequest, {
+  /// Returns a [Future] containing a [Response] with a [QueryCallsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<QueryCallsResponse>> queryCalls({
+    QueryCallsRequest? queryCallsRequest,
     String? connectionId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await queryCallsWithHttpInfo(
-      queryCallsRequest,
-      connectionId: connectionId,
+    final _path = r'/video/calls';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _queryParameters = <String, dynamic>{
+      if (connectionId != null)
+        r'connection_id': encodeQueryParameter(
+            _serializers, connectionId, const FullType(String)),
+    };
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(QueryCallsRequest);
+      _bodyData =
+          _serializers.serialize(queryCallsRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+          queryParameters: _queryParameters,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'QueryCallsResponse',
-      ) as QueryCallsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    QueryCallsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(QueryCallsResponse),
+            ) as QueryCallsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<QueryCallsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Reject Call
-  ///
-  ///   Sends events: - call.rejected
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [RejectCallRequest] rejectCallRequest (required):
-  ///   RejectCallRequest
-  Future<Response> rejectCallWithHttpInfo(
-    String type,
-    String id,
-    RejectCallRequest rejectCallRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/reject'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = rejectCallRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Reject Call
-  ///
   ///   Sends events: - call.rejected
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [rejectCallRequest] - RejectCallRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [RejectCallRequest] rejectCallRequest (required):
-  ///   RejectCallRequest
-  Future<RejectCallResponse?> rejectCall(
-    String type,
-    String id,
-    RejectCallRequest rejectCallRequest,
-  ) async {
-    final response = await rejectCallWithHttpInfo(
-      type,
-      id,
-      rejectCallRequest,
+  /// Returns a [Future] containing a [Response] with a [RejectCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<RejectCallResponse>> rejectCall({
+    required String type,
+    required String id,
+    RejectCallRequest? rejectCallRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/reject'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(RejectCallRequest);
+      _bodyData =
+          _serializers.serialize(rejectCallRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'RejectCallResponse',
-      ) as RejectCallResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    RejectCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(RejectCallResponse),
+            ) as RejectCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<RejectCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Request permission
-  ///
-  /// Request permission to perform an action  Sends events: - call.permission_request
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [RequestPermissionRequest] requestPermissionRequest (required):
-  ///   RequestPermissionRequest
-  Future<Response> requestPermissionWithHttpInfo(
-    String type,
-    String id,
-    RequestPermissionRequest requestPermissionRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/request_permission'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = requestPermissionRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Request permission
-  ///
   /// Request permission to perform an action  Sends events: - call.permission_request
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [requestPermissionRequest] - RequestPermissionRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [RequestPermissionRequest] requestPermissionRequest (required):
-  ///   RequestPermissionRequest
-  Future<RequestPermissionResponse?> requestPermission(
-    String type,
-    String id,
-    RequestPermissionRequest requestPermissionRequest,
-  ) async {
-    final response = await requestPermissionWithHttpInfo(
-      type,
-      id,
-      requestPermissionRequest,
+  /// Returns a [Future] containing a [Response] with a [RequestPermissionResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<RequestPermissionResponse>> requestPermission({
+    required String type,
+    required String id,
+    RequestPermissionRequest? requestPermissionRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/request_permission'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(RequestPermissionRequest);
+      _bodyData = _serializers.serialize(requestPermissionRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'RequestPermissionResponse',
-      ) as RequestPermissionResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    RequestPermissionResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(RequestPermissionResponse),
+            ) as RequestPermissionResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<RequestPermissionResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Send custom event
-  ///
-  /// Sends custom event to the call  Sends events: - custom
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [SendCallEventRequest] sendCallEventRequest (required):
-  ///   SendCallEventRequest
-  Future<Response> sendCallEventWithHttpInfo(
-    String type,
-    String id,
-    SendCallEventRequest sendCallEventRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/event'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = sendCallEventRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Send custom event
-  ///
   /// Sends custom event to the call  Sends events: - custom
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [sendCallEventRequest] - SendCallEventRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [SendCallEventRequest] sendCallEventRequest (required):
-  ///   SendCallEventRequest
-  Future<SendCallEventResponse?> sendCallEvent(
-    String type,
-    String id,
-    SendCallEventRequest sendCallEventRequest,
-  ) async {
-    final response = await sendCallEventWithHttpInfo(
-      type,
-      id,
-      sendCallEventRequest,
+  /// Returns a [Future] containing a [Response] with a [SendCallEventResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<SendCallEventResponse>> sendCallEvent({
+    required String type,
+    required String id,
+    SendCallEventRequest? sendCallEventRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/event'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(SendCallEventRequest);
+      _bodyData =
+          _serializers.serialize(sendCallEventRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'SendCallEventResponse',
-      ) as SendCallEventResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    SendCallEventResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(SendCallEventResponse),
+            ) as SendCallEventResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<SendCallEventResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Send reaction to the call
-  ///
-  /// Sends reaction to the call  Sends events: - call.reaction_new
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<Response> sendVideoReactionWithHttpInfo(
-    String type,
-    String id,
-    SendReactionRequest sendReactionRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/reaction'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = sendReactionRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Send reaction to the call
-  ///
   /// Sends reaction to the call  Sends events: - call.reaction_new
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [sendReactionRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<SendReactionResponse?> sendVideoReaction(
-    String type,
-    String id,
-    SendReactionRequest sendReactionRequest,
-  ) async {
-    final response = await sendVideoReactionWithHttpInfo(
-      type,
-      id,
-      sendReactionRequest,
+  /// Returns a [Future] containing a [Response] with a [SendReactionResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<SendReactionResponse>> sendVideoReaction({
+    required String type,
+    required String id,
+    SendReactionRequest? sendReactionRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/reaction'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(SendReactionRequest);
+      _bodyData =
+          _serializers.serialize(sendReactionRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'SendReactionResponse',
-      ) as SendReactionResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    SendReactionResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(SendReactionResponse),
+            ) as SendReactionResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<SendReactionResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Start closed captions
-  ///
-  /// Starts closed captions
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartClosedCaptionsRequest] startClosedCaptionsRequest (required):
-  Future<Response> startClosedCaptionsWithHttpInfo(
-    String type,
-    String id,
-    StartClosedCaptionsRequest startClosedCaptionsRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/start_closed_captions'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = startClosedCaptionsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start closed captions
-  ///
   /// Starts closed captions
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [startClosedCaptionsRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartClosedCaptionsRequest] startClosedCaptionsRequest (required):
-  Future<StartClosedCaptionsResponse?> startClosedCaptions(
-    String type,
-    String id,
-    StartClosedCaptionsRequest startClosedCaptionsRequest,
-  ) async {
-    final response = await startClosedCaptionsWithHttpInfo(
-      type,
-      id,
-      startClosedCaptionsRequest,
+  /// Returns a [Future] containing a [Response] with a [StartClosedCaptionsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StartClosedCaptionsResponse>> startClosedCaptions({
+    required String type,
+    required String id,
+    StartClosedCaptionsRequest? startClosedCaptionsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/start_closed_captions'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StartClosedCaptionsRequest);
+      _bodyData = _serializers.serialize(startClosedCaptionsRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StartClosedCaptionsResponse',
-      ) as StartClosedCaptionsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StartClosedCaptionsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StartClosedCaptionsResponse),
+            ) as StartClosedCaptionsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StartClosedCaptionsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Start frame recording
-  ///
-  /// Starts frame by frame recording  Sends events: - call.frame_recording_started
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartFrameRecordingRequest] startFrameRecordingRequest (required):
-  ///   StartFrameRecordingRequest
-  Future<Response> startFrameRecordingWithHttpInfo(
-    String type,
-    String id,
-    StartFrameRecordingRequest startFrameRecordingRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/start_frame_recording'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = startFrameRecordingRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start frame recording
-  ///
   /// Starts frame by frame recording  Sends events: - call.frame_recording_started
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [startFrameRecordingRequest] - StartFrameRecordingRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartFrameRecordingRequest] startFrameRecordingRequest (required):
-  ///   StartFrameRecordingRequest
-  Future<StartFrameRecordingResponse?> startFrameRecording(
-    String type,
-    String id,
-    StartFrameRecordingRequest startFrameRecordingRequest,
-  ) async {
-    final response = await startFrameRecordingWithHttpInfo(
-      type,
-      id,
-      startFrameRecordingRequest,
+  /// Returns a [Future] containing a [Response] with a [StartFrameRecordingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StartFrameRecordingResponse>> startFrameRecording({
+    required String type,
+    required String id,
+    StartFrameRecordingRequest? startFrameRecordingRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/start_frame_recording'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StartFrameRecordingRequest);
+      _bodyData = _serializers.serialize(startFrameRecordingRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StartFrameRecordingResponse',
-      ) as StartFrameRecordingResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StartFrameRecordingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StartFrameRecordingResponse),
+            ) as StartFrameRecordingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StartFrameRecordingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Start HLS broadcasting
-  ///
-  /// Starts HLS broadcasting
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> startHLSBroadcastingWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/start_broadcasting'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start HLS broadcasting
-  ///
   /// Starts HLS broadcasting
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StartHLSBroadcastingResponse?> startHLSBroadcasting(
-    String type,
-    String id,
-  ) async {
-    final response = await startHLSBroadcastingWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [StartHLSBroadcastingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StartHLSBroadcastingResponse>> startHLSBroadcasting({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/start_broadcasting'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StartHLSBroadcastingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StartHLSBroadcastingResponse),
+            ) as StartHLSBroadcastingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StartHLSBroadcastingResponse',
-      ) as StartHLSBroadcastingResponse;
-    }
-    return null;
-  }
 
-  /// Start RTMP broadcasts
-  ///
-  /// Starts RTMP broadcasts for the provided RTMP destinations
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartRTMPBroadcastsRequest] startRTMPBroadcastsRequest (required):
-  ///   StartRTMPBroadcastsRequest
-  Future<Response> startRTMPBroadcastsWithHttpInfo(
-    String type,
-    String id,
-    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/rtmp_broadcasts'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = startRTMPBroadcastsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<StartHLSBroadcastingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Start RTMP broadcasts
-  ///
   /// Starts RTMP broadcasts for the provided RTMP destinations
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [startRTMPBroadcastsRequest] - StartRTMPBroadcastsRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartRTMPBroadcastsRequest] startRTMPBroadcastsRequest (required):
-  ///   StartRTMPBroadcastsRequest
-  Future<StartRTMPBroadcastsResponse?> startRTMPBroadcasts(
-    String type,
-    String id,
-    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
-  ) async {
-    final response = await startRTMPBroadcastsWithHttpInfo(
-      type,
-      id,
-      startRTMPBroadcastsRequest,
+  /// Returns a [Future] containing a [Response] with a [StartRTMPBroadcastsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StartRTMPBroadcastsResponse>> startRTMPBroadcasts({
+    required String type,
+    required String id,
+    StartRTMPBroadcastsRequest? startRTMPBroadcastsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/rtmp_broadcasts'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StartRTMPBroadcastsRequest);
+      _bodyData = _serializers.serialize(startRTMPBroadcastsRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StartRTMPBroadcastsResponse',
-      ) as StartRTMPBroadcastsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StartRTMPBroadcastsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StartRTMPBroadcastsResponse),
+            ) as StartRTMPBroadcastsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StartRTMPBroadcastsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Start recording
-  ///
-  /// Starts recording  Sends events: - call.recording_started
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartRecordingRequest] startRecordingRequest (required):
-  ///   StartRecordingRequest
-  Future<Response> startRecordingWithHttpInfo(
-    String type,
-    String id,
-    StartRecordingRequest startRecordingRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/start_recording'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = startRecordingRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start recording
-  ///
   /// Starts recording  Sends events: - call.recording_started
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [startRecordingRequest] - StartRecordingRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartRecordingRequest] startRecordingRequest (required):
-  ///   StartRecordingRequest
-  Future<StartRecordingResponse?> startRecording(
-    String type,
-    String id,
-    StartRecordingRequest startRecordingRequest,
-  ) async {
-    final response = await startRecordingWithHttpInfo(
-      type,
-      id,
-      startRecordingRequest,
+  /// Returns a [Future] containing a [Response] with a [StartRecordingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StartRecordingResponse>> startRecording({
+    required String type,
+    required String id,
+    StartRecordingRequest? startRecordingRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/start_recording'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StartRecordingRequest);
+      _bodyData =
+          _serializers.serialize(startRecordingRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StartRecordingResponse',
-      ) as StartRecordingResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StartRecordingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StartRecordingResponse),
+            ) as StartRecordingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StartRecordingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Start transcription
-  ///
-  /// Starts transcription
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartTranscriptionRequest] startTranscriptionRequest (required):
-  Future<Response> startTranscriptionWithHttpInfo(
-    String type,
-    String id,
-    StartTranscriptionRequest startTranscriptionRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/start_transcription'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = startTranscriptionRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start transcription
-  ///
   /// Starts transcription
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [startTranscriptionRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StartTranscriptionRequest] startTranscriptionRequest (required):
-  Future<StartTranscriptionResponse?> startTranscription(
-    String type,
-    String id,
-    StartTranscriptionRequest startTranscriptionRequest,
-  ) async {
-    final response = await startTranscriptionWithHttpInfo(
-      type,
-      id,
-      startTranscriptionRequest,
+  /// Returns a [Future] containing a [Response] with a [StartTranscriptionResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StartTranscriptionResponse>> startTranscription({
+    required String type,
+    required String id,
+    StartTranscriptionRequest? startTranscriptionRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/start_transcription'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StartTranscriptionRequest);
+      _bodyData = _serializers.serialize(startTranscriptionRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StartTranscriptionResponse',
-      ) as StartTranscriptionResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StartTranscriptionResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StartTranscriptionResponse),
+            ) as StartTranscriptionResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StartTranscriptionResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Stop all RTMP broadcasts for a call
-  ///
-  /// Stop all RTMP broadcasts for the provided call
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopAllRTMPBroadcastsWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/rtmp_broadcasts/stop'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Stop all RTMP broadcasts for a call
-  ///
   /// Stop all RTMP broadcasts for the provided call
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StopAllRTMPBroadcastsResponse?> stopAllRTMPBroadcasts(
-    String type,
-    String id,
-  ) async {
-    final response = await stopAllRTMPBroadcastsWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [StopAllRTMPBroadcastsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopAllRTMPBroadcastsResponse>> stopAllRTMPBroadcasts({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/rtmp_broadcasts/stop'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopAllRTMPBroadcastsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopAllRTMPBroadcastsResponse),
+            ) as StopAllRTMPBroadcastsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopAllRTMPBroadcastsResponse',
-      ) as StopAllRTMPBroadcastsResponse;
-    }
-    return null;
-  }
 
-  /// Stop closed captions
-  ///
-  /// Stops closed captions  Sends events: - call.transcription_stopped
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StopClosedCaptionsRequest] stopClosedCaptionsRequest (required):
-  Future<Response> stopClosedCaptionsWithHttpInfo(
-    String type,
-    String id,
-    StopClosedCaptionsRequest stopClosedCaptionsRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_closed_captions'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = stopClosedCaptionsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<StopAllRTMPBroadcastsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Stop closed captions
-  ///
   /// Stops closed captions  Sends events: - call.transcription_stopped
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [stopClosedCaptionsRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StopClosedCaptionsRequest] stopClosedCaptionsRequest (required):
-  Future<StopClosedCaptionsResponse?> stopClosedCaptions(
-    String type,
-    String id,
-    StopClosedCaptionsRequest stopClosedCaptionsRequest,
-  ) async {
-    final response = await stopClosedCaptionsWithHttpInfo(
-      type,
-      id,
-      stopClosedCaptionsRequest,
+  /// Returns a [Future] containing a [Response] with a [StopClosedCaptionsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopClosedCaptionsResponse>> stopClosedCaptions({
+    required String type,
+    required String id,
+    StopClosedCaptionsRequest? stopClosedCaptionsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/stop_closed_captions'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StopClosedCaptionsRequest);
+      _bodyData = _serializers.serialize(stopClosedCaptionsRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopClosedCaptionsResponse',
-      ) as StopClosedCaptionsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopClosedCaptionsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopClosedCaptionsResponse),
+            ) as StopClosedCaptionsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StopClosedCaptionsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Stop frame recording
-  ///
-  /// Stops frame recording  Sends events: - call.frame_recording_stopped
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopFrameRecordingWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_frame_recording'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Stop frame recording
-  ///
   /// Stops frame recording  Sends events: - call.frame_recording_stopped
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StopFrameRecordingResponse?> stopFrameRecording(
-    String type,
-    String id,
-  ) async {
-    final response = await stopFrameRecordingWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [StopFrameRecordingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopFrameRecordingResponse>> stopFrameRecording({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/stop_frame_recording'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopFrameRecordingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopFrameRecordingResponse),
+            ) as StopFrameRecordingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopFrameRecordingResponse',
-      ) as StopFrameRecordingResponse;
-    }
-    return null;
-  }
 
-  /// Stop HLS broadcasting
-  ///
-  /// Stops HLS broadcasting
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopHLSBroadcastingWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_broadcasting'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<StopFrameRecordingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Stop HLS broadcasting
-  ///
   /// Stops HLS broadcasting
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StopHLSBroadcastingResponse?> stopHLSBroadcasting(
-    String type,
-    String id,
-  ) async {
-    final response = await stopHLSBroadcastingWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [StopHLSBroadcastingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopHLSBroadcastingResponse>> stopHLSBroadcasting({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/stop_broadcasting'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopHLSBroadcastingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopHLSBroadcastingResponse),
+            ) as StopHLSBroadcastingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopHLSBroadcastingResponse',
-      ) as StopHLSBroadcastingResponse;
-    }
-    return null;
+
+    return Response<StopHLSBroadcastingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Set call as not live
-  ///
-  ///   Sends events: - call.updated
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StopLiveRequest] stopLiveRequest (required):
-  ///   StopLiveRequest
-  Future<Response> stopLiveWithHttpInfo(
-    String type,
-    String id,
-    StopLiveRequest stopLiveRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_live'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = stopLiveRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Set call as not live
-  ///
   ///   Sends events: - call.updated
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [stopLiveRequest] - StopLiveRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StopLiveRequest] stopLiveRequest (required):
-  ///   StopLiveRequest
-  Future<StopLiveResponse?> stopLive(
-    String type,
-    String id,
-    StopLiveRequest stopLiveRequest,
-  ) async {
-    final response = await stopLiveWithHttpInfo(
-      type,
-      id,
-      stopLiveRequest,
+  /// Returns a [Future] containing a [Response] with a [StopLiveResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopLiveResponse>> stopLive({
+    required String type,
+    required String id,
+    StopLiveRequest? stopLiveRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/stop_live'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StopLiveRequest);
+      _bodyData = _serializers.serialize(stopLiveRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopLiveResponse',
-      ) as StopLiveResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopLiveResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopLiveResponse),
+            ) as StopLiveResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
-  }
 
-  /// Stop RTMP broadcasts
-  ///
-  /// Stop RTMP broadcasts for the provided RTMP destinations
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] name (required):
-  ///
-  /// * [Object] body (required):
-  ///   StopRTMPBroadcastsRequest
-  Future<Response> stopRTMPBroadcastWithHttpInfo(
-    String type,
-    String id,
-    String name,
-    Object body,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id)
-        .replaceAll('{name}', name);
-
-    // ignore: prefer_final_locals
-    Object? postBody = body;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<StopLiveResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Stop RTMP broadcasts
-  ///
   /// Stop RTMP broadcasts for the provided RTMP destinations
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [name]
+  /// * [body] - StopRTMPBroadcastsRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] name (required):
-  ///
-  /// * [Object] body (required):
-  ///   StopRTMPBroadcastsRequest
-  Future<StopRTMPBroadcastsResponse?> stopRTMPBroadcast(
-    String type,
-    String id,
-    String name,
-    Object body,
-  ) async {
-    final response = await stopRTMPBroadcastWithHttpInfo(
-      type,
-      id,
-      name,
-      body,
+  /// Returns a [Future] containing a [Response] with a [StopRTMPBroadcastsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopRTMPBroadcastsResponse>> stopRTMPBroadcast({
+    required String type,
+    required String id,
+    required String name,
+    JsonObject? body,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'name' '}',
+            encodeQueryParameter(_serializers, name, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = body;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopRTMPBroadcastsResponse',
-      ) as StopRTMPBroadcastsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopRTMPBroadcastsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopRTMPBroadcastsResponse),
+            ) as StopRTMPBroadcastsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StopRTMPBroadcastsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Stop recording
-  ///
-  /// Stops recording  Sends events: - call.recording_stopped
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopRecordingWithHttpInfo(
-    String type,
-    String id,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_recording'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Stop recording
-  ///
   /// Stops recording  Sends events: - call.recording_stopped
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StopRecordingResponse?> stopRecording(
-    String type,
-    String id,
-  ) async {
-    final response = await stopRecordingWithHttpInfo(
-      type,
-      id,
+  /// Returns a [Future] containing a [Response] with a [StopRecordingResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopRecordingResponse>> stopRecording({
+    required String type,
+    required String id,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/stop_recording'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopRecordingResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopRecordingResponse),
+            ) as StopRecordingResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopRecordingResponse',
-      ) as StopRecordingResponse;
-    }
-    return null;
-  }
 
-  /// Stop transcription
-  ///
-  /// Stops transcription  Sends events: - call.transcription_stopped
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StopTranscriptionRequest] stopTranscriptionRequest (required):
-  Future<Response> stopTranscriptionWithHttpInfo(
-    String type,
-    String id,
-    StopTranscriptionRequest stopTranscriptionRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_transcription'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = stopTranscriptionRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+    return Response<StopRecordingResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
     );
   }
 
   /// Stop transcription
-  ///
   /// Stops transcription  Sends events: - call.transcription_stopped
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [stopTranscriptionRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [StopTranscriptionRequest] stopTranscriptionRequest (required):
-  Future<StopTranscriptionResponse?> stopTranscription(
-    String type,
-    String id,
-    StopTranscriptionRequest stopTranscriptionRequest,
-  ) async {
-    final response = await stopTranscriptionWithHttpInfo(
-      type,
-      id,
-      stopTranscriptionRequest,
+  /// Returns a [Future] containing a [Response] with a [StopTranscriptionResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<StopTranscriptionResponse>> stopTranscription({
+    required String type,
+    required String id,
+    StopTranscriptionRequest? stopTranscriptionRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/stop_transcription'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(StopTranscriptionRequest);
+      _bodyData = _serializers.serialize(stopTranscriptionRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'StopTranscriptionResponse',
-      ) as StopTranscriptionResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    StopTranscriptionResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(StopTranscriptionResponse),
+            ) as StopTranscriptionResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<StopTranscriptionResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Unblocks user on a call
-  ///
-  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UnblockUserRequest] unblockUserRequest (required):
-  ///   UnblockUserRequest
-  Future<Response> unblockUserWithHttpInfo(
-    String type,
-    String id,
-    UnblockUserRequest unblockUserRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/unblock'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = unblockUserRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Unblocks user on a call
-  ///
   /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [unblockUserRequest] - UnblockUserRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UnblockUserRequest] unblockUserRequest (required):
-  ///   UnblockUserRequest
-  Future<UnblockUserResponse?> unblockUser(
-    String type,
-    String id,
-    UnblockUserRequest unblockUserRequest,
-  ) async {
-    final response = await unblockUserWithHttpInfo(
-      type,
-      id,
-      unblockUserRequest,
+  /// Returns a [Future] containing a [Response] with a [UnblockUserResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<UnblockUserResponse>> unblockUser({
+    required String type,
+    required String id,
+    UnblockUserRequest? unblockUserRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/unblock'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UnblockUserRequest);
+      _bodyData =
+          _serializers.serialize(unblockUserRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'UnblockUserResponse',
-      ) as UnblockUserResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    UnblockUserResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(UnblockUserResponse),
+            ) as UnblockUserResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<UnblockUserResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Update Call
-  ///
-  ///   Sends events: - call.updated
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UpdateCallRequest] updateCallRequest (required):
-  ///   UpdateCallRequest
-  Future<Response> updateCallWithHttpInfo(
-    String type,
-    String id,
-    UpdateCallRequest updateCallRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = updateCallRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'PATCH',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Update Call
-  ///
   ///   Sends events: - call.updated
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [updateCallRequest] - UpdateCallRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UpdateCallRequest] updateCallRequest (required):
-  ///   UpdateCallRequest
-  Future<UpdateCallResponse?> updateCall(
-    String type,
-    String id,
-    UpdateCallRequest updateCallRequest,
-  ) async {
-    final response = await updateCallWithHttpInfo(
-      type,
-      id,
-      updateCallRequest,
+  /// Returns a [Future] containing a [Response] with a [UpdateCallResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<UpdateCallResponse>> updateCall({
+    required String type,
+    required String id,
+    UpdateCallRequest? updateCallRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UpdateCallRequest);
+      _bodyData =
+          _serializers.serialize(updateCallRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'UpdateCallResponse',
-      ) as UpdateCallResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    UpdateCallResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(UpdateCallResponse),
+            ) as UpdateCallResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<UpdateCallResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Update Call Member
-  ///
-  ///   Sends events: - call.member_added - call.member_removed - call.member_updated
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UpdateCallMembersRequest] updateCallMembersRequest (required):
-  ///   UpdateCallMembersRequest
-  Future<Response> updateCallMembersWithHttpInfo(
-    String type,
-    String id,
-    UpdateCallMembersRequest updateCallMembersRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/members'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = updateCallMembersRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Update Call Member
-  ///
   ///   Sends events: - call.member_added - call.member_removed - call.member_updated
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [updateCallMembersRequest] - UpdateCallMembersRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UpdateCallMembersRequest] updateCallMembersRequest (required):
-  ///   UpdateCallMembersRequest
-  Future<UpdateCallMembersResponse?> updateCallMembers(
-    String type,
-    String id,
-    UpdateCallMembersRequest updateCallMembersRequest,
-  ) async {
-    final response = await updateCallMembersWithHttpInfo(
-      type,
-      id,
-      updateCallMembersRequest,
+  /// Returns a [Future] containing a [Response] with a [UpdateCallMembersResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<UpdateCallMembersResponse>> updateCallMembers({
+    required String type,
+    required String id,
+    UpdateCallMembersRequest? updateCallMembersRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/members'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UpdateCallMembersRequest);
+      _bodyData = _serializers.serialize(updateCallMembersRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'UpdateCallMembersResponse',
-      ) as UpdateCallMembersResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    UpdateCallMembersResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(UpdateCallMembersResponse),
+            ) as UpdateCallMembersResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<UpdateCallMembersResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Update user permissions
-  ///
-  /// Updates user permissions  Sends events: - call.permissions_updated
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UpdateUserPermissionsRequest] updateUserPermissionsRequest (required):
-  Future<Response> updateUserPermissionsWithHttpInfo(
-    String type,
-    String id,
-    UpdateUserPermissionsRequest updateUserPermissionsRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/user_permissions'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = updateUserPermissionsRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Update user permissions
-  ///
   /// Updates user permissions  Sends events: - call.permissions_updated
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [updateUserPermissionsRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UpdateUserPermissionsRequest] updateUserPermissionsRequest (required):
-  Future<UpdateUserPermissionsResponse?> updateUserPermissions(
-    String type,
-    String id,
-    UpdateUserPermissionsRequest updateUserPermissionsRequest,
-  ) async {
-    final response = await updateUserPermissionsWithHttpInfo(
-      type,
-      id,
-      updateUserPermissionsRequest,
+  /// Returns a [Future] containing a [Response] with a [UpdateUserPermissionsResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<UpdateUserPermissionsResponse>> updateUserPermissions({
+    required String type,
+    required String id,
+    UpdateUserPermissionsRequest? updateUserPermissionsRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/user_permissions'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UpdateUserPermissionsRequest);
+      _bodyData = _serializers.serialize(updateUserPermissionsRequest,
+          specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'UpdateUserPermissionsResponse',
-      ) as UpdateUserPermissionsResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    UpdateUserPermissionsResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(UpdateUserPermissionsResponse),
+            ) as UpdateUserPermissionsResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<UpdateUserPermissionsResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Video Connect (WebSocket)
-  ///
   /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok
   ///
-  /// Note: This method returns the HTTP [Response].
-  Future<Response> videoConnectWithHttpInfo() async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/longpoll';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
+  /// Parameters:
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> videoConnect({
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/longpoll';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
     );
-  }
 
-  /// Video Connect (WebSocket)
-  ///
-  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok
-  Future<void> videoConnect() async {
-    final response = await videoConnectWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
   }
 
   /// Pin
-  ///
-  /// Pins a track for all users in the call.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [PinRequest] pinRequest (required):
-  ///   PinRequest
-  Future<Response> videoPinWithHttpInfo(
-    String type,
-    String id,
-    PinRequest pinRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/pin'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = pinRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Pin
-  ///
   /// Pins a track for all users in the call.
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [pinRequest] - PinRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [PinRequest] pinRequest (required):
-  ///   PinRequest
-  Future<PinResponse?> videoPin(
-    String type,
-    String id,
-    PinRequest pinRequest,
-  ) async {
-    final response = await videoPinWithHttpInfo(
-      type,
-      id,
-      pinRequest,
+  /// Returns a [Future] containing a [Response] with a [PinResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<PinResponse>> videoPin({
+    required String type,
+    required String id,
+    PinRequest? pinRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/pin'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(PinRequest);
+      _bodyData = _serializers.serialize(pinRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'PinResponse',
-      ) as PinResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    PinResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(PinResponse),
+            ) as PinResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<PinResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Unpin
-  ///
-  /// Unpins a track for all users in the call.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UnpinRequest] unpinRequest (required):
-  ///   UnpinRequest
-  Future<Response> videoUnpinWithHttpInfo(
-    String type,
-    String id,
-    UnpinRequest unpinRequest,
-  ) async {
-    // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/unpin'
-        .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = unpinRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Unpin
-  ///
   /// Unpins a track for all users in the call.
   ///
   /// Parameters:
+  /// * [type]
+  /// * [id]
+  /// * [unpinRequest] - UnpinRequest
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [UnpinRequest] unpinRequest (required):
-  ///   UnpinRequest
-  Future<UnpinResponse?> videoUnpin(
-    String type,
-    String id,
-    UnpinRequest unpinRequest,
-  ) async {
-    final response = await videoUnpinWithHttpInfo(
-      type,
-      id,
-      unpinRequest,
+  /// Returns a [Future] containing a [Response] with a [UnpinResponse] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<UnpinResponse>> videoUnpin({
+    required String type,
+    required String id,
+    UnpinRequest? unpinRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/video/call/{type}/{id}/unpin'
+        .replaceAll(
+            '{' r'type' '}',
+            encodeQueryParameter(_serializers, type, const FullType(String))
+                .toString())
+        .replaceAll(
+            '{' r'id' '}',
+            encodeQueryParameter(_serializers, id, const FullType(String))
+                .toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'stream-auth-type',
+            'keyName': 'Stream-Auth-Type',
+            'where': 'header',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'keyName': 'api_key',
+            'where': 'query',
+          },
+          {
+            'type': 'apiKey',
+            'name': 'JWT',
+            'keyName': 'Authorization',
+            'where': 'header',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(UnpinRequest);
+      _bodyData = _serializers.serialize(unpinRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(
-        await _decodeBodyBytes(response),
-        'UnpinResponse',
-      ) as UnpinResponse;
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    UnpinResponse? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(UnpinResponse),
+            ) as UnpinResponse;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    return null;
+
+    return Response<UnpinResponse>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 }

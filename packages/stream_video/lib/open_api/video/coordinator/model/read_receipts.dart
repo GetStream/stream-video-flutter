@@ -1,120 +1,108 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'read_receipts.g.dart';
 
-class ReadReceipts {
-  /// Returns a new [ReadReceipts] instance.
-  ReadReceipts({
-    required this.enabled,
-  });
+/// ReadReceipts
+///
+/// Properties:
+/// * [enabled]
+@BuiltValue()
+abstract class ReadReceipts
+    implements Built<ReadReceipts, ReadReceiptsBuilder> {
+  @BuiltValueField(wireName: r'enabled')
+  bool get enabled;
 
-  bool enabled;
+  ReadReceipts._();
+
+  factory ReadReceipts([void updates(ReadReceiptsBuilder b)]) = _$ReadReceipts;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(ReadReceiptsBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<ReadReceipts> get serializer => _$ReadReceiptsSerializer();
+}
+
+class _$ReadReceiptsSerializer implements PrimitiveSerializer<ReadReceipts> {
+  @override
+  final Iterable<Type> types = const [ReadReceipts, _$ReadReceipts];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ReadReceipts && other.enabled == enabled;
+  final String wireName = r'ReadReceipts';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (enabled.hashCode);
-
-  @override
-  String toString() => 'ReadReceipts[enabled=$enabled]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'enabled'] = this.enabled;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    ReadReceipts object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'enabled';
+    yield serializers.serialize(
+      object.enabled,
+      specifiedType: const FullType(bool),
+    );
   }
 
-  /// Returns a new [ReadReceipts] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ReadReceipts? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ReadReceipts[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ReadReceipts[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ReadReceipts(
-        enabled: mapValueOfType<bool>(json, r'enabled')!,
-      );
-    }
-    return null;
-  }
-
-  static List<ReadReceipts> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    ReadReceipts object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <ReadReceipts>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = ReadReceipts.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, ReadReceipts> mapFromJson(dynamic json) {
-    final map = <String, ReadReceipts>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = ReadReceipts.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of ReadReceipts-objects as value to a dart map
-  static Map<String, List<ReadReceipts>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required ReadReceiptsBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<ReadReceipts>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ReadReceipts.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enabled = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'enabled',
-  };
+  @override
+  ReadReceipts deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = ReadReceiptsBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

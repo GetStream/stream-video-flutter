@@ -1,120 +1,115 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/rtmp_ingress.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_ingress_response.g.dart';
 
-class CallIngressResponse {
-  /// Returns a new [CallIngressResponse] instance.
-  CallIngressResponse({
-    required this.rtmp,
-  });
+/// CallIngressResponse is the payload for ingress settings
+///
+/// Properties:
+/// * [rtmp]
+@BuiltValue()
+abstract class CallIngressResponse
+    implements Built<CallIngressResponse, CallIngressResponseBuilder> {
+  @BuiltValueField(wireName: r'rtmp')
+  RTMPIngress get rtmp;
 
-  RTMPIngress rtmp;
+  CallIngressResponse._();
+
+  factory CallIngressResponse([void updates(CallIngressResponseBuilder b)]) =
+      _$CallIngressResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallIngressResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallIngressResponse> get serializer =>
+      _$CallIngressResponseSerializer();
+}
+
+class _$CallIngressResponseSerializer
+    implements PrimitiveSerializer<CallIngressResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallIngressResponse,
+    _$CallIngressResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallIngressResponse && other.rtmp == rtmp;
+  final String wireName = r'CallIngressResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (rtmp.hashCode);
-
-  @override
-  String toString() => 'CallIngressResponse[rtmp=$rtmp]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'rtmp'] = this.rtmp;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallIngressResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'rtmp';
+    yield serializers.serialize(
+      object.rtmp,
+      specifiedType: const FullType(RTMPIngress),
+    );
   }
 
-  /// Returns a new [CallIngressResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallIngressResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallIngressResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallIngressResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallIngressResponse(
-        rtmp: RTMPIngress.fromJson(json[r'rtmp'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallIngressResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallIngressResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallIngressResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallIngressResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallIngressResponse> mapFromJson(dynamic json) {
-    final map = <String, CallIngressResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallIngressResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallIngressResponse-objects as value to a dart map
-  static Map<String, List<CallIngressResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallIngressResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallIngressResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallIngressResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'rtmp':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RTMPIngress),
+          ) as RTMPIngress;
+          result.rtmp.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'rtmp',
-  };
+  @override
+  CallIngressResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallIngressResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

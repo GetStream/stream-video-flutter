@@ -1,309 +1,245 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/noise_cancellation_settings.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'audio_settings_request.g.dart';
 
-class AudioSettingsRequest {
-  /// Returns a new [AudioSettingsRequest] instance.
-  AudioSettingsRequest({
-    this.accessRequestEnabled,
-    required this.defaultDevice,
-    this.micDefaultOn,
-    this.noiseCancellation,
-    this.opusDtxEnabled,
-    this.redundantCodingEnabled,
-    this.speakerDefaultOn,
-  });
+/// AudioSettingsRequest
+///
+/// Properties:
+/// * [accessRequestEnabled]
+/// * [defaultDevice]
+/// * [micDefaultOn]
+/// * [noiseCancellation]
+/// * [opusDtxEnabled]
+/// * [redundantCodingEnabled]
+/// * [speakerDefaultOn]
+@BuiltValue()
+abstract class AudioSettingsRequest
+    implements Built<AudioSettingsRequest, AudioSettingsRequestBuilder> {
+  @BuiltValueField(wireName: r'access_request_enabled')
+  bool? get accessRequestEnabled;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? accessRequestEnabled;
+  @BuiltValueField(wireName: r'default_device')
+  AudioSettingsRequestDefaultDeviceEnum get defaultDevice;
+  // enum defaultDeviceEnum {  speaker,  earpiece,  };
 
-  AudioSettingsRequestDefaultDeviceEnum defaultDevice;
+  @BuiltValueField(wireName: r'mic_default_on')
+  bool? get micDefaultOn;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? micDefaultOn;
+  @BuiltValueField(wireName: r'noise_cancellation')
+  NoiseCancellationSettings? get noiseCancellation;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  NoiseCancellationSettings? noiseCancellation;
+  @BuiltValueField(wireName: r'opus_dtx_enabled')
+  bool? get opusDtxEnabled;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? opusDtxEnabled;
+  @BuiltValueField(wireName: r'redundant_coding_enabled')
+  bool? get redundantCodingEnabled;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? redundantCodingEnabled;
+  @BuiltValueField(wireName: r'speaker_default_on')
+  bool? get speakerDefaultOn;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? speakerDefaultOn;
+  AudioSettingsRequest._();
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AudioSettingsRequest &&
-          other.accessRequestEnabled == accessRequestEnabled &&
-          other.defaultDevice == defaultDevice &&
-          other.micDefaultOn == micDefaultOn &&
-          other.noiseCancellation == noiseCancellation &&
-          other.opusDtxEnabled == opusDtxEnabled &&
-          other.redundantCodingEnabled == redundantCodingEnabled &&
-          other.speakerDefaultOn == speakerDefaultOn;
+  factory AudioSettingsRequest([void updates(AudioSettingsRequestBuilder b)]) =
+      _$AudioSettingsRequest;
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (accessRequestEnabled == null ? 0 : accessRequestEnabled!.hashCode) +
-      (defaultDevice.hashCode) +
-      (micDefaultOn == null ? 0 : micDefaultOn!.hashCode) +
-      (noiseCancellation == null ? 0 : noiseCancellation!.hashCode) +
-      (opusDtxEnabled == null ? 0 : opusDtxEnabled!.hashCode) +
-      (redundantCodingEnabled == null ? 0 : redundantCodingEnabled!.hashCode) +
-      (speakerDefaultOn == null ? 0 : speakerDefaultOn!.hashCode);
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(AudioSettingsRequestBuilder b) => b;
 
-  @override
-  String toString() =>
-      'AudioSettingsRequest[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.accessRequestEnabled != null) {
-      json[r'access_request_enabled'] = this.accessRequestEnabled;
-    } else {
-      json[r'access_request_enabled'] = null;
-    }
-    json[r'default_device'] = this.defaultDevice;
-    if (this.micDefaultOn != null) {
-      json[r'mic_default_on'] = this.micDefaultOn;
-    } else {
-      json[r'mic_default_on'] = null;
-    }
-    if (this.noiseCancellation != null) {
-      json[r'noise_cancellation'] = this.noiseCancellation;
-    } else {
-      json[r'noise_cancellation'] = null;
-    }
-    if (this.opusDtxEnabled != null) {
-      json[r'opus_dtx_enabled'] = this.opusDtxEnabled;
-    } else {
-      json[r'opus_dtx_enabled'] = null;
-    }
-    if (this.redundantCodingEnabled != null) {
-      json[r'redundant_coding_enabled'] = this.redundantCodingEnabled;
-    } else {
-      json[r'redundant_coding_enabled'] = null;
-    }
-    if (this.speakerDefaultOn != null) {
-      json[r'speaker_default_on'] = this.speakerDefaultOn;
-    } else {
-      json[r'speaker_default_on'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [AudioSettingsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static AudioSettingsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "AudioSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "AudioSettingsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return AudioSettingsRequest(
-        accessRequestEnabled:
-            mapValueOfType<bool>(json, r'access_request_enabled'),
-        defaultDevice: AudioSettingsRequestDefaultDeviceEnum.fromJson(
-            json[r'default_device'])!,
-        micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on'),
-        noiseCancellation:
-            NoiseCancellationSettings.fromJson(json[r'noise_cancellation']),
-        opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled'),
-        redundantCodingEnabled:
-            mapValueOfType<bool>(json, r'redundant_coding_enabled'),
-        speakerDefaultOn: mapValueOfType<bool>(json, r'speaker_default_on'),
-      );
-    }
-    return null;
-  }
-
-  static List<AudioSettingsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <AudioSettingsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = AudioSettingsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-
-  static Map<String, AudioSettingsRequest> mapFromJson(dynamic json) {
-    final map = <String, AudioSettingsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = AudioSettingsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of AudioSettingsRequest-objects as value to a dart map
-  static Map<String, List<AudioSettingsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<AudioSettingsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = AudioSettingsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'default_device',
-  };
+  @BuiltValueSerializer(custom: true)
+  static Serializer<AudioSettingsRequest> get serializer =>
+      _$AudioSettingsRequestSerializer();
 }
 
-class AudioSettingsRequestDefaultDeviceEnum {
-  /// Instantiate a new enum with the provided [value].
-  const AudioSettingsRequestDefaultDeviceEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
+class _$AudioSettingsRequestSerializer
+    implements PrimitiveSerializer<AudioSettingsRequest> {
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const speaker = AudioSettingsRequestDefaultDeviceEnum._(r'speaker');
-  static const earpiece = AudioSettingsRequestDefaultDeviceEnum._(r'earpiece');
-
-  /// List of all possible values in this [enum][AudioSettingsRequestDefaultDeviceEnum].
-  static const values = <AudioSettingsRequestDefaultDeviceEnum>[
-    speaker,
-    earpiece,
+  final Iterable<Type> types = const [
+    AudioSettingsRequest,
+    _$AudioSettingsRequest
   ];
 
-  static AudioSettingsRequestDefaultDeviceEnum? fromJson(dynamic value) =>
-      AudioSettingsRequestDefaultDeviceEnumTypeTransformer().decode(value);
+  @override
+  final String wireName = r'AudioSettingsRequest';
 
-  static List<AudioSettingsRequestDefaultDeviceEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    AudioSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.accessRequestEnabled != null) {
+      yield r'access_request_enabled';
+      yield serializers.serialize(
+        object.accessRequestEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    yield r'default_device';
+    yield serializers.serialize(
+      object.defaultDevice,
+      specifiedType: const FullType(AudioSettingsRequestDefaultDeviceEnum),
+    );
+    if (object.micDefaultOn != null) {
+      yield r'mic_default_on';
+      yield serializers.serialize(
+        object.micDefaultOn,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.noiseCancellation != null) {
+      yield r'noise_cancellation';
+      yield serializers.serialize(
+        object.noiseCancellation,
+        specifiedType: const FullType(NoiseCancellationSettings),
+      );
+    }
+    if (object.opusDtxEnabled != null) {
+      yield r'opus_dtx_enabled';
+      yield serializers.serialize(
+        object.opusDtxEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.redundantCodingEnabled != null) {
+      yield r'redundant_coding_enabled';
+      yield serializers.serialize(
+        object.redundantCodingEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.speakerDefaultOn != null) {
+      yield r'speaker_default_on';
+      yield serializers.serialize(
+        object.speakerDefaultOn,
+        specifiedType: const FullType(bool),
+      );
+    }
+  }
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    AudioSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <AudioSettingsRequestDefaultDeviceEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = AudioSettingsRequestDefaultDeviceEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
+  }
+
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required AudioSettingsRequestBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'access_request_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.accessRequestEnabled = valueDes;
+          break;
+        case r'default_device':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(AudioSettingsRequestDefaultDeviceEnum),
+          ) as AudioSettingsRequestDefaultDeviceEnum;
+          result.defaultDevice = valueDes;
+          break;
+        case r'mic_default_on':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.micDefaultOn = valueDes;
+          break;
+        case r'noise_cancellation':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(NoiseCancellationSettings),
+          ) as NoiseCancellationSettings;
+          result.noiseCancellation.replace(valueDes);
+          break;
+        case r'opus_dtx_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.opusDtxEnabled = valueDes;
+          break;
+        case r'redundant_coding_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.redundantCodingEnabled = valueDes;
+          break;
+        case r'speaker_default_on':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.speakerDefaultOn = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return result.toList(growable: growable);
+  }
+
+  @override
+  AudioSettingsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = AudioSettingsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
   }
 }
 
-/// Transformation class that can [encode] an instance of [AudioSettingsRequestDefaultDeviceEnum] to String,
-/// and [decode] dynamic data back to [AudioSettingsRequestDefaultDeviceEnum].
-class AudioSettingsRequestDefaultDeviceEnumTypeTransformer {
-  factory AudioSettingsRequestDefaultDeviceEnumTypeTransformer() =>
-      _instance ??=
-          const AudioSettingsRequestDefaultDeviceEnumTypeTransformer._();
+class AudioSettingsRequestDefaultDeviceEnum extends EnumClass {
+  @BuiltValueEnumConst(wireName: r'speaker')
+  static const AudioSettingsRequestDefaultDeviceEnum speaker =
+      _$audioSettingsRequestDefaultDeviceEnum_speaker;
+  @BuiltValueEnumConst(wireName: r'earpiece')
+  static const AudioSettingsRequestDefaultDeviceEnum earpiece =
+      _$audioSettingsRequestDefaultDeviceEnum_earpiece;
 
-  const AudioSettingsRequestDefaultDeviceEnumTypeTransformer._();
+  static Serializer<AudioSettingsRequestDefaultDeviceEnum> get serializer =>
+      _$audioSettingsRequestDefaultDeviceEnumSerializer;
 
-  String encode(AudioSettingsRequestDefaultDeviceEnum data) => data.value;
+  const AudioSettingsRequestDefaultDeviceEnum._(String name) : super(name);
 
-  /// Decodes a [dynamic value][data] to a AudioSettingsRequestDefaultDeviceEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  AudioSettingsRequestDefaultDeviceEnum? decode(dynamic data,
-      {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'speaker':
-          return AudioSettingsRequestDefaultDeviceEnum.speaker;
-        case r'earpiece':
-          return AudioSettingsRequestDefaultDeviceEnum.earpiece;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
-
-  /// Singleton [AudioSettingsRequestDefaultDeviceEnumTypeTransformer] instance.
-  static AudioSettingsRequestDefaultDeviceEnumTypeTransformer? _instance;
+  static BuiltSet<AudioSettingsRequestDefaultDeviceEnum> get values =>
+      _$audioSettingsRequestDefaultDeviceEnumValues;
+  static AudioSettingsRequestDefaultDeviceEnum valueOf(String name) =>
+      _$audioSettingsRequestDefaultDeviceEnumValueOf(name);
 }

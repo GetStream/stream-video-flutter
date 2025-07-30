@@ -1,158 +1,156 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'query_aggregate_call_stats_request.g.dart';
 
-class QueryAggregateCallStatsRequest {
-  /// Returns a new [QueryAggregateCallStatsRequest] instance.
-  QueryAggregateCallStatsRequest({
-    this.from,
-    this.reportTypes = const [],
-    this.to,
-  });
+/// QueryAggregateCallStatsRequest
+///
+/// Properties:
+/// * [from]
+/// * [reportTypes]
+/// * [to]
+@BuiltValue()
+abstract class QueryAggregateCallStatsRequest
+    implements
+        Built<QueryAggregateCallStatsRequest,
+            QueryAggregateCallStatsRequestBuilder> {
+  @BuiltValueField(wireName: r'from')
+  String? get from;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? from;
+  @BuiltValueField(wireName: r'report_types')
+  BuiltList<String>? get reportTypes;
 
-  List<String> reportTypes;
+  @BuiltValueField(wireName: r'to')
+  String? get to;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? to;
+  QueryAggregateCallStatsRequest._();
+
+  factory QueryAggregateCallStatsRequest(
+          [void updates(QueryAggregateCallStatsRequestBuilder b)]) =
+      _$QueryAggregateCallStatsRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(QueryAggregateCallStatsRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<QueryAggregateCallStatsRequest> get serializer =>
+      _$QueryAggregateCallStatsRequestSerializer();
+}
+
+class _$QueryAggregateCallStatsRequestSerializer
+    implements PrimitiveSerializer<QueryAggregateCallStatsRequest> {
+  @override
+  final Iterable<Type> types = const [
+    QueryAggregateCallStatsRequest,
+    _$QueryAggregateCallStatsRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is QueryAggregateCallStatsRequest &&
-          other.from == from &&
-          _deepEquality.equals(other.reportTypes, reportTypes) &&
-          other.to == to;
+  final String wireName = r'QueryAggregateCallStatsRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (from == null ? 0 : from!.hashCode) +
-      (reportTypes.hashCode) +
-      (to == null ? 0 : to!.hashCode);
-
-  @override
-  String toString() =>
-      'QueryAggregateCallStatsRequest[from=$from, reportTypes=$reportTypes, to=$to]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.from != null) {
-      json[r'from'] = this.from;
-    } else {
-      json[r'from'] = null;
-    }
-    json[r'report_types'] = this.reportTypes;
-    if (this.to != null) {
-      json[r'to'] = this.to;
-    } else {
-      json[r'to'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [QueryAggregateCallStatsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static QueryAggregateCallStatsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryAggregateCallStatsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryAggregateCallStatsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return QueryAggregateCallStatsRequest(
-        from: mapValueOfType<String>(json, r'from'),
-        reportTypes: json[r'report_types'] is Iterable
-            ? (json[r'report_types'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        to: mapValueOfType<String>(json, r'to'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    QueryAggregateCallStatsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.from != null) {
+      yield r'from';
+      yield serializers.serialize(
+        object.from,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
+    if (object.reportTypes != null) {
+      yield r'report_types';
+      yield serializers.serialize(
+        object.reportTypes,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
+    if (object.to != null) {
+      yield r'to';
+      yield serializers.serialize(
+        object.to,
+        specifiedType: const FullType(String),
+      );
+    }
   }
 
-  static List<QueryAggregateCallStatsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    QueryAggregateCallStatsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <QueryAggregateCallStatsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = QueryAggregateCallStatsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, QueryAggregateCallStatsRequest> mapFromJson(dynamic json) {
-    final map = <String, QueryAggregateCallStatsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = QueryAggregateCallStatsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of QueryAggregateCallStatsRequest-objects as value to a dart map
-  static Map<String, List<QueryAggregateCallStatsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required QueryAggregateCallStatsRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<QueryAggregateCallStatsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = QueryAggregateCallStatsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'from':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.from = valueDes;
+          break;
+        case r'report_types':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.reportTypes.replace(valueDes);
+          break;
+        case r'to':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.to = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  QueryAggregateCallStatsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = QueryAggregateCallStatsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

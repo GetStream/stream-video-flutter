@@ -1,183 +1,173 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'network_metrics_report_response.g.dart';
 
-class NetworkMetricsReportResponse {
-  /// Returns a new [NetworkMetricsReportResponse] instance.
-  NetworkMetricsReportResponse({
-    this.averageConnectionTime,
-    this.averageJitter,
-    this.averageLatency,
-    this.averageTimeToReconnect,
-  });
+/// NetworkMetricsReportResponse
+///
+/// Properties:
+/// * [averageConnectionTime]
+/// * [averageJitter]
+/// * [averageLatency]
+/// * [averageTimeToReconnect]
+@BuiltValue()
+abstract class NetworkMetricsReportResponse
+    implements
+        Built<NetworkMetricsReportResponse,
+            NetworkMetricsReportResponseBuilder> {
+  @BuiltValueField(wireName: r'average_connection_time')
+  double? get averageConnectionTime;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  double? averageConnectionTime;
+  @BuiltValueField(wireName: r'average_jitter')
+  double? get averageJitter;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  double? averageJitter;
+  @BuiltValueField(wireName: r'average_latency')
+  double? get averageLatency;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  double? averageLatency;
+  @BuiltValueField(wireName: r'average_time_to_reconnect')
+  double? get averageTimeToReconnect;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  double? averageTimeToReconnect;
+  NetworkMetricsReportResponse._();
+
+  factory NetworkMetricsReportResponse(
+          [void updates(NetworkMetricsReportResponseBuilder b)]) =
+      _$NetworkMetricsReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(NetworkMetricsReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<NetworkMetricsReportResponse> get serializer =>
+      _$NetworkMetricsReportResponseSerializer();
+}
+
+class _$NetworkMetricsReportResponseSerializer
+    implements PrimitiveSerializer<NetworkMetricsReportResponse> {
+  @override
+  final Iterable<Type> types = const [
+    NetworkMetricsReportResponse,
+    _$NetworkMetricsReportResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is NetworkMetricsReportResponse &&
-          other.averageConnectionTime == averageConnectionTime &&
-          other.averageJitter == averageJitter &&
-          other.averageLatency == averageLatency &&
-          other.averageTimeToReconnect == averageTimeToReconnect;
+  final String wireName = r'NetworkMetricsReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (averageConnectionTime == null ? 0 : averageConnectionTime!.hashCode) +
-      (averageJitter == null ? 0 : averageJitter!.hashCode) +
-      (averageLatency == null ? 0 : averageLatency!.hashCode) +
-      (averageTimeToReconnect == null ? 0 : averageTimeToReconnect!.hashCode);
-
-  @override
-  String toString() =>
-      'NetworkMetricsReportResponse[averageConnectionTime=$averageConnectionTime, averageJitter=$averageJitter, averageLatency=$averageLatency, averageTimeToReconnect=$averageTimeToReconnect]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.averageConnectionTime != null) {
-      json[r'average_connection_time'] = this.averageConnectionTime;
-    } else {
-      json[r'average_connection_time'] = null;
-    }
-    if (this.averageJitter != null) {
-      json[r'average_jitter'] = this.averageJitter;
-    } else {
-      json[r'average_jitter'] = null;
-    }
-    if (this.averageLatency != null) {
-      json[r'average_latency'] = this.averageLatency;
-    } else {
-      json[r'average_latency'] = null;
-    }
-    if (this.averageTimeToReconnect != null) {
-      json[r'average_time_to_reconnect'] = this.averageTimeToReconnect;
-    } else {
-      json[r'average_time_to_reconnect'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [NetworkMetricsReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static NetworkMetricsReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "NetworkMetricsReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "NetworkMetricsReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return NetworkMetricsReportResponse(
-        averageConnectionTime:
-            mapValueOfType<double>(json, r'average_connection_time'),
-        averageJitter: mapValueOfType<double>(json, r'average_jitter'),
-        averageLatency: mapValueOfType<double>(json, r'average_latency'),
-        averageTimeToReconnect:
-            mapValueOfType<double>(json, r'average_time_to_reconnect'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    NetworkMetricsReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.averageConnectionTime != null) {
+      yield r'average_connection_time';
+      yield serializers.serialize(
+        object.averageConnectionTime,
+        specifiedType: const FullType(double),
       );
     }
-    return null;
+    if (object.averageJitter != null) {
+      yield r'average_jitter';
+      yield serializers.serialize(
+        object.averageJitter,
+        specifiedType: const FullType(double),
+      );
+    }
+    if (object.averageLatency != null) {
+      yield r'average_latency';
+      yield serializers.serialize(
+        object.averageLatency,
+        specifiedType: const FullType(double),
+      );
+    }
+    if (object.averageTimeToReconnect != null) {
+      yield r'average_time_to_reconnect';
+      yield serializers.serialize(
+        object.averageTimeToReconnect,
+        specifiedType: const FullType(double),
+      );
+    }
   }
 
-  static List<NetworkMetricsReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    NetworkMetricsReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <NetworkMetricsReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = NetworkMetricsReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, NetworkMetricsReportResponse> mapFromJson(dynamic json) {
-    final map = <String, NetworkMetricsReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = NetworkMetricsReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of NetworkMetricsReportResponse-objects as value to a dart map
-  static Map<String, List<NetworkMetricsReportResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required NetworkMetricsReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<NetworkMetricsReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = NetworkMetricsReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'average_connection_time':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.averageConnectionTime = valueDes;
+          break;
+        case r'average_jitter':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.averageJitter = valueDes;
+          break;
+        case r'average_latency':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.averageLatency = valueDes;
+          break;
+        case r'average_time_to_reconnect':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.averageTimeToReconnect = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  NetworkMetricsReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = NetworkMetricsReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

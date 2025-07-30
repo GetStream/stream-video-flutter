@@ -1,172 +1,184 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/bound.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'report_by_histogram_bucket.g.dart';
 
-class ReportByHistogramBucket {
-  /// Returns a new [ReportByHistogramBucket] instance.
-  ReportByHistogramBucket({
-    required this.category,
-    required this.count,
-    this.lowerBound,
-    required this.sum,
-    this.upperBound,
-  });
+/// ReportByHistogramBucket
+///
+/// Properties:
+/// * [category]
+/// * [count]
+/// * [lowerBound]
+/// * [sum]
+/// * [upperBound]
+@BuiltValue()
+abstract class ReportByHistogramBucket
+    implements Built<ReportByHistogramBucket, ReportByHistogramBucketBuilder> {
+  @BuiltValueField(wireName: r'category')
+  String get category;
 
-  String category;
+  @BuiltValueField(wireName: r'count')
+  int get count;
 
-  int count;
+  @BuiltValueField(wireName: r'lower_bound')
+  Bound? get lowerBound;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  Bound? lowerBound;
+  @BuiltValueField(wireName: r'sum')
+  double get sum;
 
-  double sum;
+  @BuiltValueField(wireName: r'upper_bound')
+  Bound? get upperBound;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  Bound? upperBound;
+  ReportByHistogramBucket._();
+
+  factory ReportByHistogramBucket(
+          [void updates(ReportByHistogramBucketBuilder b)]) =
+      _$ReportByHistogramBucket;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(ReportByHistogramBucketBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<ReportByHistogramBucket> get serializer =>
+      _$ReportByHistogramBucketSerializer();
+}
+
+class _$ReportByHistogramBucketSerializer
+    implements PrimitiveSerializer<ReportByHistogramBucket> {
+  @override
+  final Iterable<Type> types = const [
+    ReportByHistogramBucket,
+    _$ReportByHistogramBucket
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ReportByHistogramBucket &&
-          other.category == category &&
-          other.count == count &&
-          other.lowerBound == lowerBound &&
-          other.sum == sum &&
-          other.upperBound == upperBound;
+  final String wireName = r'ReportByHistogramBucket';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (category.hashCode) +
-      (count.hashCode) +
-      (lowerBound == null ? 0 : lowerBound!.hashCode) +
-      (sum.hashCode) +
-      (upperBound == null ? 0 : upperBound!.hashCode);
-
-  @override
-  String toString() =>
-      'ReportByHistogramBucket[category=$category, count=$count, lowerBound=$lowerBound, sum=$sum, upperBound=$upperBound]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'category'] = this.category;
-    json[r'count'] = this.count;
-    if (this.lowerBound != null) {
-      json[r'lower_bound'] = this.lowerBound;
-    } else {
-      json[r'lower_bound'] = null;
-    }
-    json[r'sum'] = this.sum;
-    if (this.upperBound != null) {
-      json[r'upper_bound'] = this.upperBound;
-    } else {
-      json[r'upper_bound'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [ReportByHistogramBucket] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static ReportByHistogramBucket? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ReportByHistogramBucket[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ReportByHistogramBucket[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return ReportByHistogramBucket(
-        category: mapValueOfType<String>(json, r'category')!,
-        count: mapValueOfType<int>(json, r'count')!,
-        lowerBound: Bound.fromJson(json[r'lower_bound']),
-        sum: mapValueOfType<double>(json, r'sum')!,
-        upperBound: Bound.fromJson(json[r'upper_bound']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    ReportByHistogramBucket object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'category';
+    yield serializers.serialize(
+      object.category,
+      specifiedType: const FullType(String),
+    );
+    yield r'count';
+    yield serializers.serialize(
+      object.count,
+      specifiedType: const FullType(int),
+    );
+    if (object.lowerBound != null) {
+      yield r'lower_bound';
+      yield serializers.serialize(
+        object.lowerBound,
+        specifiedType: const FullType(Bound),
       );
     }
-    return null;
+    yield r'sum';
+    yield serializers.serialize(
+      object.sum,
+      specifiedType: const FullType(double),
+    );
+    if (object.upperBound != null) {
+      yield r'upper_bound';
+      yield serializers.serialize(
+        object.upperBound,
+        specifiedType: const FullType(Bound),
+      );
+    }
   }
 
-  static List<ReportByHistogramBucket> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    ReportByHistogramBucket object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <ReportByHistogramBucket>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = ReportByHistogramBucket.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, ReportByHistogramBucket> mapFromJson(dynamic json) {
-    final map = <String, ReportByHistogramBucket>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = ReportByHistogramBucket.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of ReportByHistogramBucket-objects as value to a dart map
-  static Map<String, List<ReportByHistogramBucket>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required ReportByHistogramBucketBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<ReportByHistogramBucket>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = ReportByHistogramBucket.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'category':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.category = valueDes;
+          break;
+        case r'count':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.count = valueDes;
+          break;
+        case r'lower_bound':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(Bound),
+          ) as Bound;
+          result.lowerBound.replace(valueDes);
+          break;
+        case r'sum':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.sum = valueDes;
+          break;
+        case r'upper_bound':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(Bound),
+          ) as Bound;
+          result.upperBound.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'category',
-    'count',
-    'sum',
-  };
+  @override
+  ReportByHistogramBucket deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = ReportByHistogramBucketBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

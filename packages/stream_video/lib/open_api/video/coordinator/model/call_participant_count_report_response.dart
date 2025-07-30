@@ -1,123 +1,121 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/daily_aggregate_call_participant_count_report_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_participant_count_report_response.g.dart';
 
-class CallParticipantCountReportResponse {
-  /// Returns a new [CallParticipantCountReportResponse] instance.
-  CallParticipantCountReportResponse({
-    this.daily = const [],
-  });
+/// CallParticipantCountReportResponse
+///
+/// Properties:
+/// * [daily]
+@BuiltValue()
+abstract class CallParticipantCountReportResponse
+    implements
+        Built<CallParticipantCountReportResponse,
+            CallParticipantCountReportResponseBuilder> {
+  @BuiltValueField(wireName: r'daily')
+  BuiltList<DailyAggregateCallParticipantCountReportResponse> get daily;
 
-  List<DailyAggregateCallParticipantCountReportResponse> daily;
+  CallParticipantCountReportResponse._();
+
+  factory CallParticipantCountReportResponse(
+          [void updates(CallParticipantCountReportResponseBuilder b)]) =
+      _$CallParticipantCountReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallParticipantCountReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallParticipantCountReportResponse> get serializer =>
+      _$CallParticipantCountReportResponseSerializer();
+}
+
+class _$CallParticipantCountReportResponseSerializer
+    implements PrimitiveSerializer<CallParticipantCountReportResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallParticipantCountReportResponse,
+    _$CallParticipantCountReportResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallParticipantCountReportResponse &&
-          _deepEquality.equals(other.daily, daily);
+  final String wireName = r'CallParticipantCountReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (daily.hashCode);
-
-  @override
-  String toString() => 'CallParticipantCountReportResponse[daily=$daily]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'daily'] = this.daily;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallParticipantCountReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'daily';
+    yield serializers.serialize(
+      object.daily,
+      specifiedType: const FullType(BuiltList,
+          [FullType(DailyAggregateCallParticipantCountReportResponse)]),
+    );
   }
 
-  /// Returns a new [CallParticipantCountReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallParticipantCountReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallParticipantCountReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallParticipantCountReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallParticipantCountReportResponse(
-        daily: DailyAggregateCallParticipantCountReportResponse.listFromJson(
-            json[r'daily']),
-      );
-    }
-    return null;
-  }
-
-  static List<CallParticipantCountReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallParticipantCountReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallParticipantCountReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallParticipantCountReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallParticipantCountReportResponse> mapFromJson(
-      dynamic json) {
-    final map = <String, CallParticipantCountReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallParticipantCountReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallParticipantCountReportResponse-objects as value to a dart map
-  static Map<String, List<CallParticipantCountReportResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallParticipantCountReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallParticipantCountReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallParticipantCountReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'daily':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList,
+                [FullType(DailyAggregateCallParticipantCountReportResponse)]),
+          ) as BuiltList<DailyAggregateCallParticipantCountReportResponse>;
+          result.daily.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'daily',
-  };
+  @override
+  CallParticipantCountReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallParticipantCountReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

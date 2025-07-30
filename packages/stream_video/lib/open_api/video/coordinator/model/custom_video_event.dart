@@ -1,156 +1,182 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'custom_video_event.g.dart';
 
-class CustomVideoEvent {
-  /// Returns a new [CustomVideoEvent] instance.
-  CustomVideoEvent({
-    required this.callCid,
-    required this.createdAt,
-    this.custom = const {},
-    this.type = 'custom',
-    required this.user,
-  });
+/// A custom event, this event is used to send custom events to other participants in the call.
+///
+/// Properties:
+/// * [callCid]
+/// * [createdAt]
+/// * [custom] - Custom data for this object
+/// * [type] - The type of event, \"custom\" in this case
+/// * [user]
+@BuiltValue()
+abstract class CustomVideoEvent
+    implements Built<CustomVideoEvent, CustomVideoEventBuilder> {
+  @BuiltValueField(wireName: r'call_cid')
+  String get callCid;
 
-  String callCid;
-
-  DateTime createdAt;
+  @BuiltValueField(wireName: r'created_at')
+  DateTime get createdAt;
 
   /// Custom data for this object
-  Map<String, Object> custom;
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?> get custom;
 
   /// The type of event, \"custom\" in this case
-  String type;
+  @BuiltValueField(wireName: r'type')
+  String get type;
 
-  UserResponse user;
+  @BuiltValueField(wireName: r'user')
+  UserResponse get user;
+
+  CustomVideoEvent._();
+
+  factory CustomVideoEvent([void updates(CustomVideoEventBuilder b)]) =
+      _$CustomVideoEvent;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CustomVideoEventBuilder b) => b..type = 'custom';
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CustomVideoEvent> get serializer =>
+      _$CustomVideoEventSerializer();
+}
+
+class _$CustomVideoEventSerializer
+    implements PrimitiveSerializer<CustomVideoEvent> {
+  @override
+  final Iterable<Type> types = const [CustomVideoEvent, _$CustomVideoEvent];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CustomVideoEvent &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.type == type &&
-          other.user == user;
+  final String wireName = r'CustomVideoEvent';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (custom.hashCode) +
-      (type.hashCode) +
-      (user.hashCode);
-
-  @override
-  String toString() =>
-      'CustomVideoEvent[callCid=$callCid, createdAt=$createdAt, custom=$custom, type=$type, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom'] = this.custom;
-    json[r'type'] = this.type;
-    json[r'user'] = this.user;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CustomVideoEvent object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'call_cid';
+    yield serializers.serialize(
+      object.callCid,
+      specifiedType: const FullType(String),
+    );
+    yield r'created_at';
+    yield serializers.serialize(
+      object.createdAt,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'custom';
+    yield serializers.serialize(
+      object.custom,
+      specifiedType: const FullType(
+          BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+    );
+    yield r'type';
+    yield serializers.serialize(
+      object.type,
+      specifiedType: const FullType(String),
+    );
+    yield r'user';
+    yield serializers.serialize(
+      object.user,
+      specifiedType: const FullType(UserResponse),
+    );
   }
 
-  /// Returns a new [CustomVideoEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CustomVideoEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CustomVideoEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CustomVideoEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CustomVideoEvent(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
-        type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<CustomVideoEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CustomVideoEvent object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CustomVideoEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CustomVideoEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CustomVideoEvent> mapFromJson(dynamic json) {
-    final map = <String, CustomVideoEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CustomVideoEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CustomVideoEvent-objects as value to a dart map
-  static Map<String, List<CustomVideoEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CustomVideoEventBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CustomVideoEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CustomVideoEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'call_cid':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.callCid = valueDes;
+          break;
+        case r'created_at':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.createdAt = valueDes;
+          break;
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        case r'type':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.type = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'call_cid',
-    'created_at',
-    'custom',
-    'type',
-    'user',
-  };
+  @override
+  CustomVideoEvent deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CustomVideoEventBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,302 +1,84 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+import 'package:dio/dio.dart';
+import 'package:built_value/serializer.dart';
+import 'package:stream_video/open_api/video/coordinator/src/serializers.dart';
+import 'package:stream_video/open_api/video/coordinator/src/auth/api_key_auth.dart';
+import 'package:stream_video/open_api/video/coordinator/src/auth/basic_auth.dart';
+import 'package:stream_video/open_api/video/coordinator/src/auth/bearer_auth.dart';
+import 'package:stream_video/open_api/video/coordinator/src/auth/oauth.dart';
+import 'package:stream_video/open_api/video/coordinator/src/api/product_video_api.dart';
 
-library openapi.api;
+class Openapi {
+  static const String basePath = r'https://chat.stream-io-api.com';
 
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+  final Dio dio;
+  final Serializers serializers;
 
-import 'package:collection/collection.dart';
-import 'package:http/http.dart';
-import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
+  Openapi({
+    Dio? dio,
+    Serializers? serializers,
+    String? basePathOverride,
+    List<Interceptor>? interceptors,
+  })  : this.serializers = serializers ?? standardSerializers,
+        this.dio = dio ??
+            Dio(BaseOptions(
+              baseUrl: basePathOverride ?? basePath,
+              connectTimeout: const Duration(milliseconds: 5000),
+              receiveTimeout: const Duration(milliseconds: 3000),
+            )) {
+    if (interceptors == null) {
+      this.dio.interceptors.addAll([
+        OAuthInterceptor(),
+        BasicAuthInterceptor(),
+        BearerAuthInterceptor(),
+        ApiKeyAuthInterceptor(),
+      ]);
+    } else {
+      this.dio.interceptors.addAll(interceptors);
+    }
+  }
 
-part 'api_client.dart';
-part 'api_helper.dart';
-part 'api_exception.dart';
-part 'auth/authentication.dart';
-part 'auth/api_key_auth.dart';
-part 'auth/oauth.dart';
-part 'auth/http_basic_auth.dart';
-part 'auth/http_bearer_auth.dart';
+  void setOAuthToken(String name, String token) {
+    if (this.dio.interceptors.any((i) => i is OAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((i) => i is OAuthInterceptor)
+              as OAuthInterceptor)
+          .tokens[name] = token;
+    }
+  }
 
-part 'api/product_video_api.dart';
+  void setBearerAuth(String name, String token) {
+    if (this.dio.interceptors.any((i) => i is BearerAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((i) => i is BearerAuthInterceptor)
+              as BearerAuthInterceptor)
+          .tokens[name] = token;
+    }
+  }
 
-part 'model/api_error.dart';
-part 'model/accept_call_response.dart';
-part 'model/app_event_response.dart';
-part 'model/app_updated_event.dart';
-part 'model/audio_settings_request.dart';
-part 'model/audio_settings_response.dart';
-part 'model/backstage_settings_request.dart';
-part 'model/backstage_settings_response.dart';
-part 'model/block_user_request.dart';
-part 'model/block_user_response.dart';
-part 'model/blocked_user_event.dart';
-part 'model/bound.dart';
-part 'model/broadcast_settings_request.dart';
-part 'model/broadcast_settings_response.dart';
-part 'model/call_accepted_event.dart';
-part 'model/call_closed_caption.dart';
-part 'model/call_closed_captions_failed_event.dart';
-part 'model/call_closed_captions_started_event.dart';
-part 'model/call_closed_captions_stopped_event.dart';
-part 'model/call_created_event.dart';
-part 'model/call_deleted_event.dart';
-part 'model/call_duration_report.dart';
-part 'model/call_duration_report_response.dart';
-part 'model/call_ended_event.dart';
-part 'model/call_frame_recording_failed_event.dart';
-part 'model/call_frame_recording_frame_ready_event.dart';
-part 'model/call_frame_recording_started_event.dart';
-part 'model/call_frame_recording_stopped_event.dart';
-part 'model/call_hls_broadcasting_failed_event.dart';
-part 'model/call_hls_broadcasting_started_event.dart';
-part 'model/call_hls_broadcasting_stopped_event.dart';
-part 'model/call_ingress_response.dart';
-part 'model/call_live_started_event.dart';
-part 'model/call_member_added_event.dart';
-part 'model/call_member_removed_event.dart';
-part 'model/call_member_updated_event.dart';
-part 'model/call_member_updated_permission_event.dart';
-part 'model/call_missed_event.dart';
-part 'model/call_moderation_blur_event.dart';
-part 'model/call_moderation_warning_event.dart';
-part 'model/call_notification_event.dart';
-part 'model/call_participant_count_report.dart';
-part 'model/call_participant_count_report_response.dart';
-part 'model/call_participant_response.dart';
-part 'model/call_reaction_event.dart';
-part 'model/call_recording.dart';
-part 'model/call_recording_failed_event.dart';
-part 'model/call_recording_ready_event.dart';
-part 'model/call_recording_started_event.dart';
-part 'model/call_recording_stopped_event.dart';
-part 'model/call_rejected_event.dart';
-part 'model/call_report_response.dart';
-part 'model/call_request.dart';
-part 'model/call_response.dart';
-part 'model/call_ring_event.dart';
-part 'model/call_rtmp_broadcast_failed_event.dart';
-part 'model/call_rtmp_broadcast_started_event.dart';
-part 'model/call_rtmp_broadcast_stopped_event.dart';
-part 'model/call_session_ended_event.dart';
-part 'model/call_session_participant_counts_updated_event.dart';
-part 'model/call_session_participant_joined_event.dart';
-part 'model/call_session_participant_left_event.dart';
-part 'model/call_session_response.dart';
-part 'model/call_session_started_event.dart';
-part 'model/call_settings_request.dart';
-part 'model/call_settings_response.dart';
-part 'model/call_state_response_fields.dart';
-part 'model/call_stats_report_ready_event.dart';
-part 'model/call_stats_report_summary_response.dart';
-part 'model/call_transcription.dart';
-part 'model/call_transcription_failed_event.dart';
-part 'model/call_transcription_ready_event.dart';
-part 'model/call_transcription_started_event.dart';
-part 'model/call_transcription_stopped_event.dart';
-part 'model/call_updated_event.dart';
-part 'model/call_user_muted_event.dart';
-part 'model/calls_per_day_report.dart';
-part 'model/calls_per_day_report_response.dart';
-part 'model/chat_activity_stats_response.dart';
-part 'model/closed_caption_event.dart';
-part 'model/collect_user_feedback_request.dart';
-part 'model/collect_user_feedback_response.dart';
-part 'model/connect_user_details_request.dart';
-part 'model/connected_event.dart';
-part 'model/connection_error_event.dart';
-part 'model/count_by_minute_response.dart';
-part 'model/create_device_request.dart';
-part 'model/create_guest_request.dart';
-part 'model/create_guest_response.dart';
-part 'model/credentials.dart';
-part 'model/custom_video_event.dart';
-part 'model/daily_aggregate_call_duration_report_response.dart';
-part 'model/daily_aggregate_call_participant_count_report_response.dart';
-part 'model/daily_aggregate_calls_per_day_report_response.dart';
-part 'model/daily_aggregate_quality_score_report_response.dart';
-part 'model/daily_aggregate_sdk_usage_report_response.dart';
-part 'model/daily_aggregate_user_feedback_report_response.dart';
-part 'model/delete_call_request.dart';
-part 'model/delete_call_response.dart';
-part 'model/delete_recording_response.dart';
-part 'model/delete_transcription_response.dart';
-part 'model/device_response.dart';
-part 'model/edge_response.dart';
-part 'model/egress_hls_response.dart';
-part 'model/egress_rtmp_response.dart';
-part 'model/egress_response.dart';
-part 'model/end_call_response.dart';
-part 'model/file_upload_config.dart';
-part 'model/frame_recording_response.dart';
-part 'model/frame_recording_settings_request.dart';
-part 'model/frame_recording_settings_response.dart';
-part 'model/geofence_settings_request.dart';
-part 'model/geofence_settings_response.dart';
-part 'model/get_call_report_response.dart';
-part 'model/get_call_response.dart';
-part 'model/get_edges_response.dart';
-part 'model/get_or_create_call_request.dart';
-part 'model/get_or_create_call_response.dart';
-part 'model/go_live_request.dart';
-part 'model/go_live_response.dart';
-part 'model/grouped_stats_response.dart';
-part 'model/hls_settings_request.dart';
-part 'model/hls_settings_response.dart';
-part 'model/health_check_event.dart';
-part 'model/ice_server.dart';
-part 'model/join_call_request.dart';
-part 'model/join_call_response.dart';
-part 'model/layout_settings_request.dart';
-part 'model/limits_settings_request.dart';
-part 'model/limits_settings_response.dart';
-part 'model/list_devices_response.dart';
-part 'model/list_recordings_response.dart';
-part 'model/list_transcriptions_response.dart';
-part 'model/member_request.dart';
-part 'model/member_response.dart';
-part 'model/message_stats_response.dart';
-part 'model/mute_users_request.dart';
-part 'model/mute_users_response.dart';
-part 'model/network_metrics_report_response.dart';
-part 'model/noise_cancellation_settings.dart';
-part 'model/own_capability.dart';
-part 'model/own_user_response.dart';
-part 'model/participant_count_by_minute_response.dart';
-part 'model/participant_count_over_time_response.dart';
-part 'model/participant_report_response.dart';
-part 'model/per_sdk_usage_report.dart';
-part 'model/permission_request_event.dart';
-part 'model/pin_request.dart';
-part 'model/pin_response.dart';
-part 'model/privacy_settings.dart';
-part 'model/publisher_stats_response.dart';
-part 'model/push_preferences.dart';
-part 'model/quality_score_report.dart';
-part 'model/quality_score_report_response.dart';
-part 'model/query_aggregate_call_stats_request.dart';
-part 'model/query_aggregate_call_stats_response.dart';
-part 'model/query_call_members_request.dart';
-part 'model/query_call_members_response.dart';
-part 'model/query_call_participants_request.dart';
-part 'model/query_call_participants_response.dart';
-part 'model/query_call_stats_request.dart';
-part 'model/query_call_stats_response.dart';
-part 'model/query_calls_request.dart';
-part 'model/query_calls_response.dart';
-part 'model/rtmp_broadcast_request.dart';
-part 'model/rtmp_ingress.dart';
-part 'model/rtmp_settings_request.dart';
-part 'model/rtmp_settings_response.dart';
-part 'model/reaction_response.dart';
-part 'model/read_receipts.dart';
-part 'model/record_settings_request.dart';
-part 'model/record_settings_response.dart';
-part 'model/reject_call_request.dart';
-part 'model/reject_call_response.dart';
-part 'model/report_by_histogram_bucket.dart';
-part 'model/report_response.dart';
-part 'model/request_permission_request.dart';
-part 'model/request_permission_response.dart';
-part 'model/response.dart';
-part 'model/ring_settings_request.dart';
-part 'model/ring_settings_response.dart';
-part 'model/sdk_usage_report.dart';
-part 'model/sdk_usage_report_response.dart';
-part 'model/sfu_response.dart';
-part 'model/screensharing_settings_request.dart';
-part 'model/screensharing_settings_response.dart';
-part 'model/send_call_event_request.dart';
-part 'model/send_call_event_response.dart';
-part 'model/send_reaction_request.dart';
-part 'model/send_reaction_response.dart';
-part 'model/session_settings_request.dart';
-part 'model/session_settings_response.dart';
-part 'model/sort_param_request.dart';
-part 'model/start_closed_captions_request.dart';
-part 'model/start_closed_captions_response.dart';
-part 'model/start_frame_recording_request.dart';
-part 'model/start_frame_recording_response.dart';
-part 'model/start_hls_broadcasting_response.dart';
-part 'model/start_rtmp_broadcasts_request.dart';
-part 'model/start_rtmp_broadcasts_response.dart';
-part 'model/start_recording_request.dart';
-part 'model/start_recording_response.dart';
-part 'model/start_transcription_request.dart';
-part 'model/start_transcription_response.dart';
-part 'model/stats_options.dart';
-part 'model/stop_all_rtmp_broadcasts_response.dart';
-part 'model/stop_closed_captions_request.dart';
-part 'model/stop_closed_captions_response.dart';
-part 'model/stop_frame_recording_response.dart';
-part 'model/stop_hls_broadcasting_response.dart';
-part 'model/stop_live_request.dart';
-part 'model/stop_live_response.dart';
-part 'model/stop_rtmp_broadcasts_response.dart';
-part 'model/stop_recording_response.dart';
-part 'model/stop_transcription_request.dart';
-part 'model/stop_transcription_response.dart';
-part 'model/subscriber_stats_response.dart';
-part 'model/target_resolution.dart';
-part 'model/thumbnail_response.dart';
-part 'model/thumbnails_settings_request.dart';
-part 'model/thumbnails_settings_response.dart';
-part 'model/track_stats_response.dart';
-part 'model/transcription_settings_request.dart';
-part 'model/transcription_settings_response.dart';
-part 'model/typing_indicators.dart';
-part 'model/unblock_user_request.dart';
-part 'model/unblock_user_response.dart';
-part 'model/unblocked_user_event.dart';
-part 'model/unpin_request.dart';
-part 'model/unpin_response.dart';
-part 'model/update_call_members_request.dart';
-part 'model/update_call_members_response.dart';
-part 'model/update_call_request.dart';
-part 'model/update_call_response.dart';
-part 'model/update_user_permissions_request.dart';
-part 'model/update_user_permissions_response.dart';
-part 'model/updated_call_permissions_event.dart';
-part 'model/user.dart';
-part 'model/user_banned_event.dart';
-part 'model/user_deactivated_event.dart';
-part 'model/user_feedback_report.dart';
-part 'model/user_feedback_report_response.dart';
-part 'model/user_muted_event.dart';
-part 'model/user_rating_report_response.dart';
-part 'model/user_reactivated_event.dart';
-part 'model/user_request.dart';
-part 'model/user_response.dart';
-part 'model/user_response_privacy_fields.dart';
-part 'model/user_updated_event.dart';
-part 'model/video_event.dart';
-part 'model/video_reaction_over_time_response.dart';
-part 'model/video_reactions_response.dart';
-part 'model/video_settings_request.dart';
-part 'model/video_settings_response.dart';
-part 'model/ws_auth_message.dart';
+  void setBasicAuth(String name, String username, String password) {
+    if (this.dio.interceptors.any((i) => i is BasicAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((i) => i is BasicAuthInterceptor)
+              as BasicAuthInterceptor)
+          .authInfo[name] = BasicAuthInfo(username, password);
+    }
+  }
 
-/// An [ApiClient] instance that uses the default values obtained from
-/// the OpenAPI specification file.
-var defaultApiClient = ApiClient();
+  void setApiKey(String name, String apiKey) {
+    if (this.dio.interceptors.any((i) => i is ApiKeyAuthInterceptor)) {
+      (this
+                  .dio
+                  .interceptors
+                  .firstWhere((element) => element is ApiKeyAuthInterceptor)
+              as ApiKeyAuthInterceptor)
+          .apiKeys[name] = apiKey;
+    }
+  }
 
-const _delimiters = {'csv': ',', 'ssv': ' ', 'tsv': '\t', 'pipes': '|'};
-const _dateEpochMarker = 'epoch';
-const _deepEquality = DeepCollectionEquality();
-final _dateFormatter = DateFormat('yyyy-MM-dd');
-final _regList = RegExp(r'^List<(.*)>$');
-final _regSet = RegExp(r'^Set<(.*)>$');
-final _regMap = RegExp(r'^Map<String,(.*)>$');
-
-bool _isEpochMarker(String? pattern) =>
-    pattern == _dateEpochMarker || pattern == '/$_dateEpochMarker/';
+  /// Get ProductVideoApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  ProductVideoApi getProductVideoApi() {
+    return ProductVideoApi(dio, serializers);
+  }
+}

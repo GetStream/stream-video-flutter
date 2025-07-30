@@ -1,125 +1,115 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'session_settings_request.g.dart';
 
-class SessionSettingsRequest {
-  /// Returns a new [SessionSettingsRequest] instance.
-  SessionSettingsRequest({
-    required this.inactivityTimeoutSeconds,
-  });
+/// SessionSettingsRequest
+///
+/// Properties:
+/// * [inactivityTimeoutSeconds]
+@BuiltValue()
+abstract class SessionSettingsRequest
+    implements Built<SessionSettingsRequest, SessionSettingsRequestBuilder> {
+  @BuiltValueField(wireName: r'inactivity_timeout_seconds')
+  int get inactivityTimeoutSeconds;
 
-  /// Minimum value: 5
-  /// Maximum value: 900
-  int inactivityTimeoutSeconds;
+  SessionSettingsRequest._();
+
+  factory SessionSettingsRequest(
+          [void updates(SessionSettingsRequestBuilder b)]) =
+      _$SessionSettingsRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(SessionSettingsRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<SessionSettingsRequest> get serializer =>
+      _$SessionSettingsRequestSerializer();
+}
+
+class _$SessionSettingsRequestSerializer
+    implements PrimitiveSerializer<SessionSettingsRequest> {
+  @override
+  final Iterable<Type> types = const [
+    SessionSettingsRequest,
+    _$SessionSettingsRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SessionSettingsRequest &&
-          other.inactivityTimeoutSeconds == inactivityTimeoutSeconds;
+  final String wireName = r'SessionSettingsRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (inactivityTimeoutSeconds.hashCode);
-
-  @override
-  String toString() =>
-      'SessionSettingsRequest[inactivityTimeoutSeconds=$inactivityTimeoutSeconds]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'inactivity_timeout_seconds'] = this.inactivityTimeoutSeconds;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    SessionSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'inactivity_timeout_seconds';
+    yield serializers.serialize(
+      object.inactivityTimeoutSeconds,
+      specifiedType: const FullType(int),
+    );
   }
 
-  /// Returns a new [SessionSettingsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static SessionSettingsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SessionSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SessionSettingsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return SessionSettingsRequest(
-        inactivityTimeoutSeconds:
-            mapValueOfType<int>(json, r'inactivity_timeout_seconds')!,
-      );
-    }
-    return null;
-  }
-
-  static List<SessionSettingsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    SessionSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <SessionSettingsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = SessionSettingsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, SessionSettingsRequest> mapFromJson(dynamic json) {
-    final map = <String, SessionSettingsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = SessionSettingsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of SessionSettingsRequest-objects as value to a dart map
-  static Map<String, List<SessionSettingsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required SessionSettingsRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<SessionSettingsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = SessionSettingsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'inactivity_timeout_seconds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.inactivityTimeoutSeconds = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'inactivity_timeout_seconds',
-  };
+  @override
+  SessionSettingsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = SessionSettingsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

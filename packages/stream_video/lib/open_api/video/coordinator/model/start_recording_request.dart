@@ -1,133 +1,116 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'start_recording_request.g.dart';
 
-class StartRecordingRequest {
-  /// Returns a new [StartRecordingRequest] instance.
-  StartRecordingRequest({
-    this.recordingExternalStorage,
-  });
+/// StartRecordingRequest
+///
+/// Properties:
+/// * [recordingExternalStorage]
+@BuiltValue()
+abstract class StartRecordingRequest
+    implements Built<StartRecordingRequest, StartRecordingRequestBuilder> {
+  @BuiltValueField(wireName: r'recording_external_storage')
+  String? get recordingExternalStorage;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? recordingExternalStorage;
+  StartRecordingRequest._();
+
+  factory StartRecordingRequest(
+      [void updates(StartRecordingRequestBuilder b)]) = _$StartRecordingRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(StartRecordingRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<StartRecordingRequest> get serializer =>
+      _$StartRecordingRequestSerializer();
+}
+
+class _$StartRecordingRequestSerializer
+    implements PrimitiveSerializer<StartRecordingRequest> {
+  @override
+  final Iterable<Type> types = const [
+    StartRecordingRequest,
+    _$StartRecordingRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StartRecordingRequest &&
-          other.recordingExternalStorage == recordingExternalStorage;
+  final String wireName = r'StartRecordingRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (recordingExternalStorage == null
-          ? 0
-          : recordingExternalStorage!.hashCode);
-
-  @override
-  String toString() =>
-      'StartRecordingRequest[recordingExternalStorage=$recordingExternalStorage]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.recordingExternalStorage != null) {
-      json[r'recording_external_storage'] = this.recordingExternalStorage;
-    } else {
-      json[r'recording_external_storage'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [StartRecordingRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static StartRecordingRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StartRecordingRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StartRecordingRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return StartRecordingRequest(
-        recordingExternalStorage:
-            mapValueOfType<String>(json, r'recording_external_storage'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    StartRecordingRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.recordingExternalStorage != null) {
+      yield r'recording_external_storage';
+      yield serializers.serialize(
+        object.recordingExternalStorage,
+        specifiedType: const FullType(String),
       );
     }
-    return null;
   }
 
-  static List<StartRecordingRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    StartRecordingRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <StartRecordingRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = StartRecordingRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, StartRecordingRequest> mapFromJson(dynamic json) {
-    final map = <String, StartRecordingRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = StartRecordingRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of StartRecordingRequest-objects as value to a dart map
-  static Map<String, List<StartRecordingRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required StartRecordingRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<StartRecordingRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = StartRecordingRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'recording_external_storage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.recordingExternalStorage = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  StartRecordingRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = StartRecordingRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

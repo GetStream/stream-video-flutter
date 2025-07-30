@@ -1,195 +1,252 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'edge_response.g.dart';
 
-class EdgeResponse {
-  /// Returns a new [EdgeResponse] instance.
-  EdgeResponse({
-    required this.continentCode,
-    required this.countryIsoCode,
-    required this.green,
-    required this.id,
-    required this.latencyTestUrl,
-    required this.latitude,
-    required this.longitude,
-    required this.red,
-    required this.subdivisionIsoCode,
-    required this.yellow,
-  });
+/// EdgeResponse
+///
+/// Properties:
+/// * [continentCode]
+/// * [countryIsoCode]
+/// * [green]
+/// * [id]
+/// * [latencyTestUrl]
+/// * [latitude]
+/// * [longitude]
+/// * [red]
+/// * [subdivisionIsoCode]
+/// * [yellow]
+@BuiltValue()
+abstract class EdgeResponse
+    implements Built<EdgeResponse, EdgeResponseBuilder> {
+  @BuiltValueField(wireName: r'continent_code')
+  String get continentCode;
 
-  String continentCode;
+  @BuiltValueField(wireName: r'country_iso_code')
+  String get countryIsoCode;
 
-  String countryIsoCode;
+  @BuiltValueField(wireName: r'green')
+  int get green;
 
-  int green;
+  @BuiltValueField(wireName: r'id')
+  String get id;
 
-  String id;
+  @BuiltValueField(wireName: r'latency_test_url')
+  String get latencyTestUrl;
 
-  String latencyTestUrl;
+  @BuiltValueField(wireName: r'latitude')
+  double get latitude;
 
-  double latitude;
+  @BuiltValueField(wireName: r'longitude')
+  double get longitude;
 
-  double longitude;
+  @BuiltValueField(wireName: r'red')
+  int get red;
 
-  int red;
+  @BuiltValueField(wireName: r'subdivision_iso_code')
+  String get subdivisionIsoCode;
 
-  String subdivisionIsoCode;
+  @BuiltValueField(wireName: r'yellow')
+  int get yellow;
 
-  int yellow;
+  EdgeResponse._();
+
+  factory EdgeResponse([void updates(EdgeResponseBuilder b)]) = _$EdgeResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(EdgeResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<EdgeResponse> get serializer => _$EdgeResponseSerializer();
+}
+
+class _$EdgeResponseSerializer implements PrimitiveSerializer<EdgeResponse> {
+  @override
+  final Iterable<Type> types = const [EdgeResponse, _$EdgeResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is EdgeResponse &&
-          other.continentCode == continentCode &&
-          other.countryIsoCode == countryIsoCode &&
-          other.green == green &&
-          other.id == id &&
-          other.latencyTestUrl == latencyTestUrl &&
-          other.latitude == latitude &&
-          other.longitude == longitude &&
-          other.red == red &&
-          other.subdivisionIsoCode == subdivisionIsoCode &&
-          other.yellow == yellow;
+  final String wireName = r'EdgeResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (continentCode.hashCode) +
-      (countryIsoCode.hashCode) +
-      (green.hashCode) +
-      (id.hashCode) +
-      (latencyTestUrl.hashCode) +
-      (latitude.hashCode) +
-      (longitude.hashCode) +
-      (red.hashCode) +
-      (subdivisionIsoCode.hashCode) +
-      (yellow.hashCode);
-
-  @override
-  String toString() =>
-      'EdgeResponse[continentCode=$continentCode, countryIsoCode=$countryIsoCode, green=$green, id=$id, latencyTestUrl=$latencyTestUrl, latitude=$latitude, longitude=$longitude, red=$red, subdivisionIsoCode=$subdivisionIsoCode, yellow=$yellow]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'continent_code'] = this.continentCode;
-    json[r'country_iso_code'] = this.countryIsoCode;
-    json[r'green'] = this.green;
-    json[r'id'] = this.id;
-    json[r'latency_test_url'] = this.latencyTestUrl;
-    json[r'latitude'] = this.latitude;
-    json[r'longitude'] = this.longitude;
-    json[r'red'] = this.red;
-    json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
-    json[r'yellow'] = this.yellow;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    EdgeResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'continent_code';
+    yield serializers.serialize(
+      object.continentCode,
+      specifiedType: const FullType(String),
+    );
+    yield r'country_iso_code';
+    yield serializers.serialize(
+      object.countryIsoCode,
+      specifiedType: const FullType(String),
+    );
+    yield r'green';
+    yield serializers.serialize(
+      object.green,
+      specifiedType: const FullType(int),
+    );
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(String),
+    );
+    yield r'latency_test_url';
+    yield serializers.serialize(
+      object.latencyTestUrl,
+      specifiedType: const FullType(String),
+    );
+    yield r'latitude';
+    yield serializers.serialize(
+      object.latitude,
+      specifiedType: const FullType(double),
+    );
+    yield r'longitude';
+    yield serializers.serialize(
+      object.longitude,
+      specifiedType: const FullType(double),
+    );
+    yield r'red';
+    yield serializers.serialize(
+      object.red,
+      specifiedType: const FullType(int),
+    );
+    yield r'subdivision_iso_code';
+    yield serializers.serialize(
+      object.subdivisionIsoCode,
+      specifiedType: const FullType(String),
+    );
+    yield r'yellow';
+    yield serializers.serialize(
+      object.yellow,
+      specifiedType: const FullType(int),
+    );
   }
 
-  /// Returns a new [EdgeResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static EdgeResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "EdgeResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "EdgeResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return EdgeResponse(
-        continentCode: mapValueOfType<String>(json, r'continent_code')!,
-        countryIsoCode: mapValueOfType<String>(json, r'country_iso_code')!,
-        green: mapValueOfType<int>(json, r'green')!,
-        id: mapValueOfType<String>(json, r'id')!,
-        latencyTestUrl: mapValueOfType<String>(json, r'latency_test_url')!,
-        latitude: mapValueOfType<double>(json, r'latitude')!,
-        longitude: mapValueOfType<double>(json, r'longitude')!,
-        red: mapValueOfType<int>(json, r'red')!,
-        subdivisionIsoCode:
-            mapValueOfType<String>(json, r'subdivision_iso_code')!,
-        yellow: mapValueOfType<int>(json, r'yellow')!,
-      );
-    }
-    return null;
-  }
-
-  static List<EdgeResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    EdgeResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <EdgeResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = EdgeResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, EdgeResponse> mapFromJson(dynamic json) {
-    final map = <String, EdgeResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = EdgeResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of EdgeResponse-objects as value to a dart map
-  static Map<String, List<EdgeResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required EdgeResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<EdgeResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = EdgeResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'continent_code':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.continentCode = valueDes;
+          break;
+        case r'country_iso_code':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.countryIsoCode = valueDes;
+          break;
+        case r'green':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.green = valueDes;
+          break;
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.id = valueDes;
+          break;
+        case r'latency_test_url':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.latencyTestUrl = valueDes;
+          break;
+        case r'latitude':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.latitude = valueDes;
+          break;
+        case r'longitude':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(double),
+          ) as double;
+          result.longitude = valueDes;
+          break;
+        case r'red':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.red = valueDes;
+          break;
+        case r'subdivision_iso_code':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.subdivisionIsoCode = valueDes;
+          break;
+        case r'yellow':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.yellow = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'continent_code',
-    'country_iso_code',
-    'green',
-    'id',
-    'latency_test_url',
-    'latitude',
-    'longitude',
-    'red',
-    'subdivision_iso_code',
-    'yellow',
-  };
+  @override
+  EdgeResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = EdgeResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

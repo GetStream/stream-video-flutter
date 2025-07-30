@@ -1,385 +1,357 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'start_closed_captions_request.g.dart';
 
-class StartClosedCaptionsRequest {
-  /// Returns a new [StartClosedCaptionsRequest] instance.
-  StartClosedCaptionsRequest({
-    this.enableTranscription,
-    this.externalStorage,
-    this.language,
-  });
-
+/// StartClosedCaptionsRequest
+///
+/// Properties:
+/// * [enableTranscription] - Enable transcriptions along with closed captions
+/// * [externalStorage] - Which external storage to use for transcriptions (only applicable if enable_transcription is true)
+/// * [language] - The spoken language in the call, if not provided the language defined in the transcription settings will be used
+@BuiltValue()
+abstract class StartClosedCaptionsRequest
+    implements
+        Built<StartClosedCaptionsRequest, StartClosedCaptionsRequestBuilder> {
   /// Enable transcriptions along with closed captions
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? enableTranscription;
+  @BuiltValueField(wireName: r'enable_transcription')
+  bool? get enableTranscription;
 
   /// Which external storage to use for transcriptions (only applicable if enable_transcription is true)
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? externalStorage;
+  @BuiltValueField(wireName: r'external_storage')
+  String? get externalStorage;
 
   /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
-  StartClosedCaptionsRequestLanguageEnum? language;
+  @BuiltValueField(wireName: r'language')
+  StartClosedCaptionsRequestLanguageEnum? get language;
+  // enum languageEnum {  auto,  en,  fr,  es,  de,  it,  nl,  pt,  pl,  ca,  cs,  da,  el,  fi,  id,  ja,  ru,  sv,  ta,  th,  tr,  hu,  ro,  zh,  ar,  tl,  he,  hi,  hr,  ko,  ms,  no,  uk,  bg,  et,  sl,  sk,  };
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StartClosedCaptionsRequest &&
-          other.enableTranscription == enableTranscription &&
-          other.externalStorage == externalStorage &&
-          other.language == language;
+  StartClosedCaptionsRequest._();
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (enableTranscription == null ? 0 : enableTranscription!.hashCode) +
-      (externalStorage == null ? 0 : externalStorage!.hashCode) +
-      (language == null ? 0 : language!.hashCode);
+  factory StartClosedCaptionsRequest(
+          [void updates(StartClosedCaptionsRequestBuilder b)]) =
+      _$StartClosedCaptionsRequest;
 
-  @override
-  String toString() =>
-      'StartClosedCaptionsRequest[enableTranscription=$enableTranscription, externalStorage=$externalStorage, language=$language]';
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(StartClosedCaptionsRequestBuilder b) => b;
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.enableTranscription != null) {
-      json[r'enable_transcription'] = this.enableTranscription;
-    } else {
-      json[r'enable_transcription'] = null;
-    }
-    if (this.externalStorage != null) {
-      json[r'external_storage'] = this.externalStorage;
-    } else {
-      json[r'external_storage'] = null;
-    }
-    if (this.language != null) {
-      json[r'language'] = this.language;
-    } else {
-      json[r'language'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [StartClosedCaptionsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static StartClosedCaptionsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StartClosedCaptionsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StartClosedCaptionsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return StartClosedCaptionsRequest(
-        enableTranscription:
-            mapValueOfType<bool>(json, r'enable_transcription'),
-        externalStorage: mapValueOfType<String>(json, r'external_storage'),
-        language:
-            StartClosedCaptionsRequestLanguageEnum.fromJson(json[r'language']),
-      );
-    }
-    return null;
-  }
-
-  static List<StartClosedCaptionsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <StartClosedCaptionsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = StartClosedCaptionsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-
-  static Map<String, StartClosedCaptionsRequest> mapFromJson(dynamic json) {
-    final map = <String, StartClosedCaptionsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = StartClosedCaptionsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of StartClosedCaptionsRequest-objects as value to a dart map
-  static Map<String, List<StartClosedCaptionsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<StartClosedCaptionsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = StartClosedCaptionsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @BuiltValueSerializer(custom: true)
+  static Serializer<StartClosedCaptionsRequest> get serializer =>
+      _$StartClosedCaptionsRequestSerializer();
 }
 
-/// The spoken language in the call, if not provided the language defined in the transcription settings will be used
-class StartClosedCaptionsRequestLanguageEnum {
-  /// Instantiate a new enum with the provided [value].
-  const StartClosedCaptionsRequestLanguageEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
+class _$StartClosedCaptionsRequestSerializer
+    implements PrimitiveSerializer<StartClosedCaptionsRequest> {
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const auto = StartClosedCaptionsRequestLanguageEnum._(r'auto');
-  static const en = StartClosedCaptionsRequestLanguageEnum._(r'en');
-  static const fr = StartClosedCaptionsRequestLanguageEnum._(r'fr');
-  static const es = StartClosedCaptionsRequestLanguageEnum._(r'es');
-  static const de = StartClosedCaptionsRequestLanguageEnum._(r'de');
-  static const it = StartClosedCaptionsRequestLanguageEnum._(r'it');
-  static const nl = StartClosedCaptionsRequestLanguageEnum._(r'nl');
-  static const pt = StartClosedCaptionsRequestLanguageEnum._(r'pt');
-  static const pl = StartClosedCaptionsRequestLanguageEnum._(r'pl');
-  static const ca = StartClosedCaptionsRequestLanguageEnum._(r'ca');
-  static const cs = StartClosedCaptionsRequestLanguageEnum._(r'cs');
-  static const da = StartClosedCaptionsRequestLanguageEnum._(r'da');
-  static const el = StartClosedCaptionsRequestLanguageEnum._(r'el');
-  static const fi = StartClosedCaptionsRequestLanguageEnum._(r'fi');
-  static const id = StartClosedCaptionsRequestLanguageEnum._(r'id');
-  static const ja = StartClosedCaptionsRequestLanguageEnum._(r'ja');
-  static const ru = StartClosedCaptionsRequestLanguageEnum._(r'ru');
-  static const sv = StartClosedCaptionsRequestLanguageEnum._(r'sv');
-  static const ta = StartClosedCaptionsRequestLanguageEnum._(r'ta');
-  static const th = StartClosedCaptionsRequestLanguageEnum._(r'th');
-  static const tr = StartClosedCaptionsRequestLanguageEnum._(r'tr');
-  static const hu = StartClosedCaptionsRequestLanguageEnum._(r'hu');
-  static const ro = StartClosedCaptionsRequestLanguageEnum._(r'ro');
-  static const zh = StartClosedCaptionsRequestLanguageEnum._(r'zh');
-  static const ar = StartClosedCaptionsRequestLanguageEnum._(r'ar');
-  static const tl = StartClosedCaptionsRequestLanguageEnum._(r'tl');
-  static const he = StartClosedCaptionsRequestLanguageEnum._(r'he');
-  static const hi = StartClosedCaptionsRequestLanguageEnum._(r'hi');
-  static const hr = StartClosedCaptionsRequestLanguageEnum._(r'hr');
-  static const ko = StartClosedCaptionsRequestLanguageEnum._(r'ko');
-  static const ms = StartClosedCaptionsRequestLanguageEnum._(r'ms');
-  static const no = StartClosedCaptionsRequestLanguageEnum._(r'no');
-  static const uk = StartClosedCaptionsRequestLanguageEnum._(r'uk');
-  static const bg = StartClosedCaptionsRequestLanguageEnum._(r'bg');
-  static const et = StartClosedCaptionsRequestLanguageEnum._(r'et');
-  static const sl = StartClosedCaptionsRequestLanguageEnum._(r'sl');
-  static const sk = StartClosedCaptionsRequestLanguageEnum._(r'sk');
-
-  /// List of all possible values in this [enum][StartClosedCaptionsRequestLanguageEnum].
-  static const values = <StartClosedCaptionsRequestLanguageEnum>[
-    auto,
-    en,
-    fr,
-    es,
-    de,
-    it,
-    nl,
-    pt,
-    pl,
-    ca,
-    cs,
-    da,
-    el,
-    fi,
-    id,
-    ja,
-    ru,
-    sv,
-    ta,
-    th,
-    tr,
-    hu,
-    ro,
-    zh,
-    ar,
-    tl,
-    he,
-    hi,
-    hr,
-    ko,
-    ms,
-    no,
-    uk,
-    bg,
-    et,
-    sl,
-    sk,
+  final Iterable<Type> types = const [
+    StartClosedCaptionsRequest,
+    _$StartClosedCaptionsRequest
   ];
 
-  static StartClosedCaptionsRequestLanguageEnum? fromJson(dynamic value) =>
-      StartClosedCaptionsRequestLanguageEnumTypeTransformer().decode(value);
+  @override
+  final String wireName = r'StartClosedCaptionsRequest';
 
-  static List<StartClosedCaptionsRequestLanguageEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    StartClosedCaptionsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.enableTranscription != null) {
+      yield r'enable_transcription';
+      yield serializers.serialize(
+        object.enableTranscription,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.externalStorage != null) {
+      yield r'external_storage';
+      yield serializers.serialize(
+        object.externalStorage,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.language != null) {
+      yield r'language';
+      yield serializers.serialize(
+        object.language,
+        specifiedType: const FullType(StartClosedCaptionsRequestLanguageEnum),
+      );
+    }
+  }
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    StartClosedCaptionsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <StartClosedCaptionsRequestLanguageEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = StartClosedCaptionsRequestLanguageEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
+  }
+
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required StartClosedCaptionsRequestBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'enable_transcription':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enableTranscription = valueDes;
+          break;
+        case r'external_storage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.externalStorage = valueDes;
+          break;
+        case r'language':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(StartClosedCaptionsRequestLanguageEnum),
+          ) as StartClosedCaptionsRequestLanguageEnum;
+          result.language = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return result.toList(growable: growable);
+  }
+
+  @override
+  StartClosedCaptionsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = StartClosedCaptionsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
   }
 }
 
-/// Transformation class that can [encode] an instance of [StartClosedCaptionsRequestLanguageEnum] to String,
-/// and [decode] dynamic data back to [StartClosedCaptionsRequestLanguageEnum].
-class StartClosedCaptionsRequestLanguageEnumTypeTransformer {
-  factory StartClosedCaptionsRequestLanguageEnumTypeTransformer() =>
-      _instance ??=
-          const StartClosedCaptionsRequestLanguageEnumTypeTransformer._();
+class StartClosedCaptionsRequestLanguageEnum extends EnumClass {
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'auto')
+  static const StartClosedCaptionsRequestLanguageEnum auto =
+      _$startClosedCaptionsRequestLanguageEnum_auto;
 
-  const StartClosedCaptionsRequestLanguageEnumTypeTransformer._();
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'en')
+  static const StartClosedCaptionsRequestLanguageEnum en =
+      _$startClosedCaptionsRequestLanguageEnum_en;
 
-  String encode(StartClosedCaptionsRequestLanguageEnum data) => data.value;
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'fr')
+  static const StartClosedCaptionsRequestLanguageEnum fr =
+      _$startClosedCaptionsRequestLanguageEnum_fr;
 
-  /// Decodes a [dynamic value][data] to a StartClosedCaptionsRequestLanguageEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  StartClosedCaptionsRequestLanguageEnum? decode(dynamic data,
-      {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'auto':
-          return StartClosedCaptionsRequestLanguageEnum.auto;
-        case r'en':
-          return StartClosedCaptionsRequestLanguageEnum.en;
-        case r'fr':
-          return StartClosedCaptionsRequestLanguageEnum.fr;
-        case r'es':
-          return StartClosedCaptionsRequestLanguageEnum.es;
-        case r'de':
-          return StartClosedCaptionsRequestLanguageEnum.de;
-        case r'it':
-          return StartClosedCaptionsRequestLanguageEnum.it;
-        case r'nl':
-          return StartClosedCaptionsRequestLanguageEnum.nl;
-        case r'pt':
-          return StartClosedCaptionsRequestLanguageEnum.pt;
-        case r'pl':
-          return StartClosedCaptionsRequestLanguageEnum.pl;
-        case r'ca':
-          return StartClosedCaptionsRequestLanguageEnum.ca;
-        case r'cs':
-          return StartClosedCaptionsRequestLanguageEnum.cs;
-        case r'da':
-          return StartClosedCaptionsRequestLanguageEnum.da;
-        case r'el':
-          return StartClosedCaptionsRequestLanguageEnum.el;
-        case r'fi':
-          return StartClosedCaptionsRequestLanguageEnum.fi;
-        case r'id':
-          return StartClosedCaptionsRequestLanguageEnum.id;
-        case r'ja':
-          return StartClosedCaptionsRequestLanguageEnum.ja;
-        case r'ru':
-          return StartClosedCaptionsRequestLanguageEnum.ru;
-        case r'sv':
-          return StartClosedCaptionsRequestLanguageEnum.sv;
-        case r'ta':
-          return StartClosedCaptionsRequestLanguageEnum.ta;
-        case r'th':
-          return StartClosedCaptionsRequestLanguageEnum.th;
-        case r'tr':
-          return StartClosedCaptionsRequestLanguageEnum.tr;
-        case r'hu':
-          return StartClosedCaptionsRequestLanguageEnum.hu;
-        case r'ro':
-          return StartClosedCaptionsRequestLanguageEnum.ro;
-        case r'zh':
-          return StartClosedCaptionsRequestLanguageEnum.zh;
-        case r'ar':
-          return StartClosedCaptionsRequestLanguageEnum.ar;
-        case r'tl':
-          return StartClosedCaptionsRequestLanguageEnum.tl;
-        case r'he':
-          return StartClosedCaptionsRequestLanguageEnum.he;
-        case r'hi':
-          return StartClosedCaptionsRequestLanguageEnum.hi;
-        case r'hr':
-          return StartClosedCaptionsRequestLanguageEnum.hr;
-        case r'ko':
-          return StartClosedCaptionsRequestLanguageEnum.ko;
-        case r'ms':
-          return StartClosedCaptionsRequestLanguageEnum.ms;
-        case r'no':
-          return StartClosedCaptionsRequestLanguageEnum.no;
-        case r'uk':
-          return StartClosedCaptionsRequestLanguageEnum.uk;
-        case r'bg':
-          return StartClosedCaptionsRequestLanguageEnum.bg;
-        case r'et':
-          return StartClosedCaptionsRequestLanguageEnum.et;
-        case r'sl':
-          return StartClosedCaptionsRequestLanguageEnum.sl;
-        case r'sk':
-          return StartClosedCaptionsRequestLanguageEnum.sk;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'es')
+  static const StartClosedCaptionsRequestLanguageEnum es =
+      _$startClosedCaptionsRequestLanguageEnum_es;
 
-  /// Singleton [StartClosedCaptionsRequestLanguageEnumTypeTransformer] instance.
-  static StartClosedCaptionsRequestLanguageEnumTypeTransformer? _instance;
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'de')
+  static const StartClosedCaptionsRequestLanguageEnum de =
+      _$startClosedCaptionsRequestLanguageEnum_de;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'it')
+  static const StartClosedCaptionsRequestLanguageEnum it =
+      _$startClosedCaptionsRequestLanguageEnum_it;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'nl')
+  static const StartClosedCaptionsRequestLanguageEnum nl =
+      _$startClosedCaptionsRequestLanguageEnum_nl;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'pt')
+  static const StartClosedCaptionsRequestLanguageEnum pt =
+      _$startClosedCaptionsRequestLanguageEnum_pt;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'pl')
+  static const StartClosedCaptionsRequestLanguageEnum pl =
+      _$startClosedCaptionsRequestLanguageEnum_pl;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ca')
+  static const StartClosedCaptionsRequestLanguageEnum ca =
+      _$startClosedCaptionsRequestLanguageEnum_ca;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'cs')
+  static const StartClosedCaptionsRequestLanguageEnum cs =
+      _$startClosedCaptionsRequestLanguageEnum_cs;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'da')
+  static const StartClosedCaptionsRequestLanguageEnum da =
+      _$startClosedCaptionsRequestLanguageEnum_da;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'el')
+  static const StartClosedCaptionsRequestLanguageEnum el =
+      _$startClosedCaptionsRequestLanguageEnum_el;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'fi')
+  static const StartClosedCaptionsRequestLanguageEnum fi =
+      _$startClosedCaptionsRequestLanguageEnum_fi;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'id')
+  static const StartClosedCaptionsRequestLanguageEnum id =
+      _$startClosedCaptionsRequestLanguageEnum_id;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ja')
+  static const StartClosedCaptionsRequestLanguageEnum ja =
+      _$startClosedCaptionsRequestLanguageEnum_ja;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ru')
+  static const StartClosedCaptionsRequestLanguageEnum ru =
+      _$startClosedCaptionsRequestLanguageEnum_ru;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'sv')
+  static const StartClosedCaptionsRequestLanguageEnum sv =
+      _$startClosedCaptionsRequestLanguageEnum_sv;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ta')
+  static const StartClosedCaptionsRequestLanguageEnum ta =
+      _$startClosedCaptionsRequestLanguageEnum_ta;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'th')
+  static const StartClosedCaptionsRequestLanguageEnum th =
+      _$startClosedCaptionsRequestLanguageEnum_th;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'tr')
+  static const StartClosedCaptionsRequestLanguageEnum tr =
+      _$startClosedCaptionsRequestLanguageEnum_tr;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'hu')
+  static const StartClosedCaptionsRequestLanguageEnum hu =
+      _$startClosedCaptionsRequestLanguageEnum_hu;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ro')
+  static const StartClosedCaptionsRequestLanguageEnum ro =
+      _$startClosedCaptionsRequestLanguageEnum_ro;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'zh')
+  static const StartClosedCaptionsRequestLanguageEnum zh =
+      _$startClosedCaptionsRequestLanguageEnum_zh;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ar')
+  static const StartClosedCaptionsRequestLanguageEnum ar =
+      _$startClosedCaptionsRequestLanguageEnum_ar;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'tl')
+  static const StartClosedCaptionsRequestLanguageEnum tl =
+      _$startClosedCaptionsRequestLanguageEnum_tl;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'he')
+  static const StartClosedCaptionsRequestLanguageEnum he =
+      _$startClosedCaptionsRequestLanguageEnum_he;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'hi')
+  static const StartClosedCaptionsRequestLanguageEnum hi =
+      _$startClosedCaptionsRequestLanguageEnum_hi;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'hr')
+  static const StartClosedCaptionsRequestLanguageEnum hr =
+      _$startClosedCaptionsRequestLanguageEnum_hr;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ko')
+  static const StartClosedCaptionsRequestLanguageEnum ko =
+      _$startClosedCaptionsRequestLanguageEnum_ko;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'ms')
+  static const StartClosedCaptionsRequestLanguageEnum ms =
+      _$startClosedCaptionsRequestLanguageEnum_ms;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'no')
+  static const StartClosedCaptionsRequestLanguageEnum no =
+      _$startClosedCaptionsRequestLanguageEnum_no;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'uk')
+  static const StartClosedCaptionsRequestLanguageEnum uk =
+      _$startClosedCaptionsRequestLanguageEnum_uk;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'bg')
+  static const StartClosedCaptionsRequestLanguageEnum bg =
+      _$startClosedCaptionsRequestLanguageEnum_bg;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'et')
+  static const StartClosedCaptionsRequestLanguageEnum et =
+      _$startClosedCaptionsRequestLanguageEnum_et;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'sl')
+  static const StartClosedCaptionsRequestLanguageEnum sl =
+      _$startClosedCaptionsRequestLanguageEnum_sl;
+
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  @BuiltValueEnumConst(wireName: r'sk')
+  static const StartClosedCaptionsRequestLanguageEnum sk =
+      _$startClosedCaptionsRequestLanguageEnum_sk;
+
+  static Serializer<StartClosedCaptionsRequestLanguageEnum> get serializer =>
+      _$startClosedCaptionsRequestLanguageEnumSerializer;
+
+  const StartClosedCaptionsRequestLanguageEnum._(String name) : super(name);
+
+  static BuiltSet<StartClosedCaptionsRequestLanguageEnum> get values =>
+      _$startClosedCaptionsRequestLanguageEnumValues;
+  static StartClosedCaptionsRequestLanguageEnum valueOf(String name) =>
+      _$startClosedCaptionsRequestLanguageEnumValueOf(name);
 }

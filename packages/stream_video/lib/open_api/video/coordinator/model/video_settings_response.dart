@@ -1,242 +1,204 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/target_resolution.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'video_settings_response.g.dart';
 
-class VideoSettingsResponse {
-  /// Returns a new [VideoSettingsResponse] instance.
-  VideoSettingsResponse({
-    required this.accessRequestEnabled,
-    required this.cameraDefaultOn,
-    required this.cameraFacing,
-    required this.enabled,
-    required this.targetResolution,
-  });
+/// VideoSettingsResponse
+///
+/// Properties:
+/// * [accessRequestEnabled]
+/// * [cameraDefaultOn]
+/// * [cameraFacing]
+/// * [enabled]
+/// * [targetResolution]
+@BuiltValue()
+abstract class VideoSettingsResponse
+    implements Built<VideoSettingsResponse, VideoSettingsResponseBuilder> {
+  @BuiltValueField(wireName: r'access_request_enabled')
+  bool get accessRequestEnabled;
 
-  bool accessRequestEnabled;
+  @BuiltValueField(wireName: r'camera_default_on')
+  bool get cameraDefaultOn;
 
-  bool cameraDefaultOn;
+  @BuiltValueField(wireName: r'camera_facing')
+  VideoSettingsResponseCameraFacingEnum get cameraFacing;
+  // enum cameraFacingEnum {  front,  back,  external,  };
 
-  VideoSettingsResponseCameraFacingEnum cameraFacing;
+  @BuiltValueField(wireName: r'enabled')
+  bool get enabled;
 
-  bool enabled;
+  @BuiltValueField(wireName: r'target_resolution')
+  TargetResolution get targetResolution;
 
-  TargetResolution targetResolution;
+  VideoSettingsResponse._();
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoSettingsResponse &&
-          other.accessRequestEnabled == accessRequestEnabled &&
-          other.cameraDefaultOn == cameraDefaultOn &&
-          other.cameraFacing == cameraFacing &&
-          other.enabled == enabled &&
-          other.targetResolution == targetResolution;
+  factory VideoSettingsResponse(
+      [void updates(VideoSettingsResponseBuilder b)]) = _$VideoSettingsResponse;
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (accessRequestEnabled.hashCode) +
-      (cameraDefaultOn.hashCode) +
-      (cameraFacing.hashCode) +
-      (enabled.hashCode) +
-      (targetResolution.hashCode);
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(VideoSettingsResponseBuilder b) => b;
 
-  @override
-  String toString() =>
-      'VideoSettingsResponse[accessRequestEnabled=$accessRequestEnabled, cameraDefaultOn=$cameraDefaultOn, cameraFacing=$cameraFacing, enabled=$enabled, targetResolution=$targetResolution]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'access_request_enabled'] = this.accessRequestEnabled;
-    json[r'camera_default_on'] = this.cameraDefaultOn;
-    json[r'camera_facing'] = this.cameraFacing;
-    json[r'enabled'] = this.enabled;
-    json[r'target_resolution'] = this.targetResolution;
-    return json;
-  }
-
-  /// Returns a new [VideoSettingsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static VideoSettingsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoSettingsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return VideoSettingsResponse(
-        accessRequestEnabled:
-            mapValueOfType<bool>(json, r'access_request_enabled')!,
-        cameraDefaultOn: mapValueOfType<bool>(json, r'camera_default_on')!,
-        cameraFacing: VideoSettingsResponseCameraFacingEnum.fromJson(
-            json[r'camera_facing'])!,
-        enabled: mapValueOfType<bool>(json, r'enabled')!,
-        targetResolution:
-            TargetResolution.fromJson(json[r'target_resolution'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<VideoSettingsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <VideoSettingsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = VideoSettingsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-
-  static Map<String, VideoSettingsResponse> mapFromJson(dynamic json) {
-    final map = <String, VideoSettingsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = VideoSettingsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of VideoSettingsResponse-objects as value to a dart map
-  static Map<String, List<VideoSettingsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<VideoSettingsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = VideoSettingsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'access_request_enabled',
-    'camera_default_on',
-    'camera_facing',
-    'enabled',
-    'target_resolution',
-  };
+  @BuiltValueSerializer(custom: true)
+  static Serializer<VideoSettingsResponse> get serializer =>
+      _$VideoSettingsResponseSerializer();
 }
 
-class VideoSettingsResponseCameraFacingEnum {
-  /// Instantiate a new enum with the provided [value].
-  const VideoSettingsResponseCameraFacingEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
+class _$VideoSettingsResponseSerializer
+    implements PrimitiveSerializer<VideoSettingsResponse> {
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const front = VideoSettingsResponseCameraFacingEnum._(r'front');
-  static const back = VideoSettingsResponseCameraFacingEnum._(r'back');
-  static const external_ = VideoSettingsResponseCameraFacingEnum._(r'external');
-
-  /// List of all possible values in this [enum][VideoSettingsResponseCameraFacingEnum].
-  static const values = <VideoSettingsResponseCameraFacingEnum>[
-    front,
-    back,
-    external_,
+  final Iterable<Type> types = const [
+    VideoSettingsResponse,
+    _$VideoSettingsResponse
   ];
 
-  static VideoSettingsResponseCameraFacingEnum? fromJson(dynamic value) =>
-      VideoSettingsResponseCameraFacingEnumTypeTransformer().decode(value);
+  @override
+  final String wireName = r'VideoSettingsResponse';
 
-  static List<VideoSettingsResponseCameraFacingEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    VideoSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'access_request_enabled';
+    yield serializers.serialize(
+      object.accessRequestEnabled,
+      specifiedType: const FullType(bool),
+    );
+    yield r'camera_default_on';
+    yield serializers.serialize(
+      object.cameraDefaultOn,
+      specifiedType: const FullType(bool),
+    );
+    yield r'camera_facing';
+    yield serializers.serialize(
+      object.cameraFacing,
+      specifiedType: const FullType(VideoSettingsResponseCameraFacingEnum),
+    );
+    yield r'enabled';
+    yield serializers.serialize(
+      object.enabled,
+      specifiedType: const FullType(bool),
+    );
+    yield r'target_resolution';
+    yield serializers.serialize(
+      object.targetResolution,
+      specifiedType: const FullType(TargetResolution),
+    );
+  }
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    VideoSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <VideoSettingsResponseCameraFacingEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = VideoSettingsResponseCameraFacingEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
+  }
+
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required VideoSettingsResponseBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'access_request_enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.accessRequestEnabled = valueDes;
+          break;
+        case r'camera_default_on':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.cameraDefaultOn = valueDes;
+          break;
+        case r'camera_facing':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(VideoSettingsResponseCameraFacingEnum),
+          ) as VideoSettingsResponseCameraFacingEnum;
+          result.cameraFacing = valueDes;
+          break;
+        case r'enabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.enabled = valueDes;
+          break;
+        case r'target_resolution':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(TargetResolution),
+          ) as TargetResolution;
+          result.targetResolution.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return result.toList(growable: growable);
+  }
+
+  @override
+  VideoSettingsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = VideoSettingsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
   }
 }
 
-/// Transformation class that can [encode] an instance of [VideoSettingsResponseCameraFacingEnum] to String,
-/// and [decode] dynamic data back to [VideoSettingsResponseCameraFacingEnum].
-class VideoSettingsResponseCameraFacingEnumTypeTransformer {
-  factory VideoSettingsResponseCameraFacingEnumTypeTransformer() =>
-      _instance ??=
-          const VideoSettingsResponseCameraFacingEnumTypeTransformer._();
+class VideoSettingsResponseCameraFacingEnum extends EnumClass {
+  @BuiltValueEnumConst(wireName: r'front')
+  static const VideoSettingsResponseCameraFacingEnum front =
+      _$videoSettingsResponseCameraFacingEnum_front;
+  @BuiltValueEnumConst(wireName: r'back')
+  static const VideoSettingsResponseCameraFacingEnum back =
+      _$videoSettingsResponseCameraFacingEnum_back;
+  @BuiltValueEnumConst(wireName: r'external')
+  static const VideoSettingsResponseCameraFacingEnum external_ =
+      _$videoSettingsResponseCameraFacingEnum_external_;
 
-  const VideoSettingsResponseCameraFacingEnumTypeTransformer._();
+  static Serializer<VideoSettingsResponseCameraFacingEnum> get serializer =>
+      _$videoSettingsResponseCameraFacingEnumSerializer;
 
-  String encode(VideoSettingsResponseCameraFacingEnum data) => data.value;
+  const VideoSettingsResponseCameraFacingEnum._(String name) : super(name);
 
-  /// Decodes a [dynamic value][data] to a VideoSettingsResponseCameraFacingEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  VideoSettingsResponseCameraFacingEnum? decode(dynamic data,
-      {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'front':
-          return VideoSettingsResponseCameraFacingEnum.front;
-        case r'back':
-          return VideoSettingsResponseCameraFacingEnum.back;
-        case r'external':
-          return VideoSettingsResponseCameraFacingEnum.external_;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
-
-  /// Singleton [VideoSettingsResponseCameraFacingEnumTypeTransformer] instance.
-  static VideoSettingsResponseCameraFacingEnumTypeTransformer? _instance;
+  static BuiltSet<VideoSettingsResponseCameraFacingEnum> get values =>
+      _$videoSettingsResponseCameraFacingEnumValues;
+  static VideoSettingsResponseCameraFacingEnum valueOf(String name) =>
+      _$videoSettingsResponseCameraFacingEnumValueOf(name);
 }

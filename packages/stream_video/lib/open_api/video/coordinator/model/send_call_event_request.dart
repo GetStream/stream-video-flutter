@@ -1,119 +1,120 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'send_call_event_request.g.dart';
 
-class SendCallEventRequest {
-  /// Returns a new [SendCallEventRequest] instance.
-  SendCallEventRequest({
-    this.custom = const {},
-  });
+/// Send a call event to the other user
+///
+/// Properties:
+/// * [custom]
+@BuiltValue()
+abstract class SendCallEventRequest
+    implements Built<SendCallEventRequest, SendCallEventRequestBuilder> {
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?>? get custom;
 
-  Map<String, Object> custom;
+  SendCallEventRequest._();
+
+  factory SendCallEventRequest([void updates(SendCallEventRequestBuilder b)]) =
+      _$SendCallEventRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(SendCallEventRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<SendCallEventRequest> get serializer =>
+      _$SendCallEventRequestSerializer();
+}
+
+class _$SendCallEventRequestSerializer
+    implements PrimitiveSerializer<SendCallEventRequest> {
+  @override
+  final Iterable<Type> types = const [
+    SendCallEventRequest,
+    _$SendCallEventRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SendCallEventRequest &&
-          _deepEquality.equals(other.custom, custom);
+  final String wireName = r'SendCallEventRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (custom.hashCode);
-
-  @override
-  String toString() => 'SendCallEventRequest[custom=$custom]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'custom'] = this.custom;
-    return json;
-  }
-
-  /// Returns a new [SendCallEventRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static SendCallEventRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SendCallEventRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SendCallEventRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return SendCallEventRequest(
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    SendCallEventRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.custom != null) {
+      yield r'custom';
+      yield serializers.serialize(
+        object.custom,
+        specifiedType: const FullType(
+            BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
       );
     }
-    return null;
   }
 
-  static List<SendCallEventRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    SendCallEventRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <SendCallEventRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = SendCallEventRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, SendCallEventRequest> mapFromJson(dynamic json) {
-    final map = <String, SendCallEventRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = SendCallEventRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of SendCallEventRequest-objects as value to a dart map
-  static Map<String, List<SendCallEventRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required SendCallEventRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<SendCallEventRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = SendCallEventRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  SendCallEventRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = SendCallEventRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,120 +1,111 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'calls_per_day_report.g.dart';
 
-class CallsPerDayReport {
-  /// Returns a new [CallsPerDayReport] instance.
-  CallsPerDayReport({
-    required this.count,
-  });
+/// CallsPerDayReport
+///
+/// Properties:
+/// * [count]
+@BuiltValue()
+abstract class CallsPerDayReport
+    implements Built<CallsPerDayReport, CallsPerDayReportBuilder> {
+  @BuiltValueField(wireName: r'count')
+  int get count;
 
-  int count;
+  CallsPerDayReport._();
+
+  factory CallsPerDayReport([void updates(CallsPerDayReportBuilder b)]) =
+      _$CallsPerDayReport;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallsPerDayReportBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallsPerDayReport> get serializer =>
+      _$CallsPerDayReportSerializer();
+}
+
+class _$CallsPerDayReportSerializer
+    implements PrimitiveSerializer<CallsPerDayReport> {
+  @override
+  final Iterable<Type> types = const [CallsPerDayReport, _$CallsPerDayReport];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallsPerDayReport && other.count == count;
+  final String wireName = r'CallsPerDayReport';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (count.hashCode);
-
-  @override
-  String toString() => 'CallsPerDayReport[count=$count]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'count'] = this.count;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallsPerDayReport object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'count';
+    yield serializers.serialize(
+      object.count,
+      specifiedType: const FullType(int),
+    );
   }
 
-  /// Returns a new [CallsPerDayReport] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallsPerDayReport? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallsPerDayReport[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallsPerDayReport[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallsPerDayReport(
-        count: mapValueOfType<int>(json, r'count')!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallsPerDayReport> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallsPerDayReport object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallsPerDayReport>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallsPerDayReport.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallsPerDayReport> mapFromJson(dynamic json) {
-    final map = <String, CallsPerDayReport>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallsPerDayReport.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallsPerDayReport-objects as value to a dart map
-  static Map<String, List<CallsPerDayReport>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallsPerDayReportBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallsPerDayReport>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallsPerDayReport.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'count':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.count = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'count',
-  };
+  @override
+  CallsPerDayReport deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallsPerDayReportBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,130 +1,136 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/member_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'update_call_members_response.g.dart';
 
-class UpdateCallMembersResponse {
-  /// Returns a new [UpdateCallMembersResponse] instance.
-  UpdateCallMembersResponse({
-    required this.duration,
-    this.members = const [],
-  });
-
+/// Basic response information
+///
+/// Properties:
+/// * [duration] - Duration of the request in milliseconds
+/// * [members]
+@BuiltValue()
+abstract class UpdateCallMembersResponse
+    implements
+        Built<UpdateCallMembersResponse, UpdateCallMembersResponseBuilder> {
   /// Duration of the request in milliseconds
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
-  List<MemberResponse> members;
+  @BuiltValueField(wireName: r'members')
+  BuiltList<MemberResponse> get members;
+
+  UpdateCallMembersResponse._();
+
+  factory UpdateCallMembersResponse(
+          [void updates(UpdateCallMembersResponseBuilder b)]) =
+      _$UpdateCallMembersResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UpdateCallMembersResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UpdateCallMembersResponse> get serializer =>
+      _$UpdateCallMembersResponseSerializer();
+}
+
+class _$UpdateCallMembersResponseSerializer
+    implements PrimitiveSerializer<UpdateCallMembersResponse> {
+  @override
+  final Iterable<Type> types = const [
+    UpdateCallMembersResponse,
+    _$UpdateCallMembersResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UpdateCallMembersResponse &&
-          other.duration == duration &&
-          _deepEquality.equals(other.members, members);
+  final String wireName = r'UpdateCallMembersResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (duration.hashCode) + (members.hashCode);
-
-  @override
-  String toString() =>
-      'UpdateCallMembersResponse[duration=$duration, members=$members]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'duration'] = this.duration;
-    json[r'members'] = this.members;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UpdateCallMembersResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    yield r'members';
+    yield serializers.serialize(
+      object.members,
+      specifiedType: const FullType(BuiltList, [FullType(MemberResponse)]),
+    );
   }
 
-  /// Returns a new [UpdateCallMembersResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UpdateCallMembersResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UpdateCallMembersResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UpdateCallMembersResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UpdateCallMembersResponse(
-        duration: mapValueOfType<String>(json, r'duration')!,
-        members: MemberResponse.listFromJson(json[r'members']),
-      );
-    }
-    return null;
-  }
-
-  static List<UpdateCallMembersResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UpdateCallMembersResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UpdateCallMembersResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UpdateCallMembersResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UpdateCallMembersResponse> mapFromJson(dynamic json) {
-    final map = <String, UpdateCallMembersResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UpdateCallMembersResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UpdateCallMembersResponse-objects as value to a dart map
-  static Map<String, List<UpdateCallMembersResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UpdateCallMembersResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UpdateCallMembersResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UpdateCallMembersResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'members':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(MemberResponse)]),
+          ) as BuiltList<MemberResponse>;
+          result.members.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'duration',
-    'members',
-  };
+  @override
+  UpdateCallMembersResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UpdateCallMembersResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

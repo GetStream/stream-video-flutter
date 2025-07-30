@@ -1,136 +1,147 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'record_settings_response.g.dart';
 
-class RecordSettingsResponse {
-  /// Returns a new [RecordSettingsResponse] instance.
-  RecordSettingsResponse({
-    required this.audioOnly,
-    required this.mode,
-    required this.quality,
-  });
+/// RecordSettings is the payload for recording settings
+///
+/// Properties:
+/// * [audioOnly]
+/// * [mode]
+/// * [quality]
+@BuiltValue()
+abstract class RecordSettingsResponse
+    implements Built<RecordSettingsResponse, RecordSettingsResponseBuilder> {
+  @BuiltValueField(wireName: r'audio_only')
+  bool get audioOnly;
 
-  bool audioOnly;
+  @BuiltValueField(wireName: r'mode')
+  String get mode;
 
-  String mode;
+  @BuiltValueField(wireName: r'quality')
+  String get quality;
 
-  String quality;
+  RecordSettingsResponse._();
+
+  factory RecordSettingsResponse(
+          [void updates(RecordSettingsResponseBuilder b)]) =
+      _$RecordSettingsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(RecordSettingsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<RecordSettingsResponse> get serializer =>
+      _$RecordSettingsResponseSerializer();
+}
+
+class _$RecordSettingsResponseSerializer
+    implements PrimitiveSerializer<RecordSettingsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    RecordSettingsResponse,
+    _$RecordSettingsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RecordSettingsResponse &&
-          other.audioOnly == audioOnly &&
-          other.mode == mode &&
-          other.quality == quality;
+  final String wireName = r'RecordSettingsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (audioOnly.hashCode) + (mode.hashCode) + (quality.hashCode);
-
-  @override
-  String toString() =>
-      'RecordSettingsResponse[audioOnly=$audioOnly, mode=$mode, quality=$quality]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'audio_only'] = this.audioOnly;
-    json[r'mode'] = this.mode;
-    json[r'quality'] = this.quality;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    RecordSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'audio_only';
+    yield serializers.serialize(
+      object.audioOnly,
+      specifiedType: const FullType(bool),
+    );
+    yield r'mode';
+    yield serializers.serialize(
+      object.mode,
+      specifiedType: const FullType(String),
+    );
+    yield r'quality';
+    yield serializers.serialize(
+      object.quality,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [RecordSettingsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static RecordSettingsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RecordSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RecordSettingsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return RecordSettingsResponse(
-        audioOnly: mapValueOfType<bool>(json, r'audio_only')!,
-        mode: mapValueOfType<String>(json, r'mode')!,
-        quality: mapValueOfType<String>(json, r'quality')!,
-      );
-    }
-    return null;
-  }
-
-  static List<RecordSettingsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    RecordSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <RecordSettingsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = RecordSettingsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, RecordSettingsResponse> mapFromJson(dynamic json) {
-    final map = <String, RecordSettingsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = RecordSettingsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of RecordSettingsResponse-objects as value to a dart map
-  static Map<String, List<RecordSettingsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required RecordSettingsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<RecordSettingsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = RecordSettingsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'audio_only':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.audioOnly = valueDes;
+          break;
+        case r'mode':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.mode = valueDes;
+          break;
+        case r'quality':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.quality = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'audio_only',
-    'mode',
-    'quality',
-  };
+  @override
+  RecordSettingsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = RecordSettingsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

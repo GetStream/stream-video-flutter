@@ -1,154 +1,176 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/user_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_closed_caption.g.dart';
 
-class CallClosedCaption {
-  /// Returns a new [CallClosedCaption] instance.
-  CallClosedCaption({
-    required this.endTime,
-    required this.speakerId,
-    required this.startTime,
-    required this.text,
-    required this.user,
-  });
+/// CallClosedCaption represents a closed caption of a call.
+///
+/// Properties:
+/// * [endTime]
+/// * [speakerId]
+/// * [startTime]
+/// * [text]
+/// * [user]
+@BuiltValue()
+abstract class CallClosedCaption
+    implements Built<CallClosedCaption, CallClosedCaptionBuilder> {
+  @BuiltValueField(wireName: r'end_time')
+  DateTime get endTime;
 
-  DateTime endTime;
+  @BuiltValueField(wireName: r'speaker_id')
+  String get speakerId;
 
-  String speakerId;
+  @BuiltValueField(wireName: r'start_time')
+  DateTime get startTime;
 
-  DateTime startTime;
+  @BuiltValueField(wireName: r'text')
+  String get text;
 
-  String text;
+  @BuiltValueField(wireName: r'user')
+  UserResponse get user;
 
-  UserResponse user;
+  CallClosedCaption._();
+
+  factory CallClosedCaption([void updates(CallClosedCaptionBuilder b)]) =
+      _$CallClosedCaption;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallClosedCaptionBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallClosedCaption> get serializer =>
+      _$CallClosedCaptionSerializer();
+}
+
+class _$CallClosedCaptionSerializer
+    implements PrimitiveSerializer<CallClosedCaption> {
+  @override
+  final Iterable<Type> types = const [CallClosedCaption, _$CallClosedCaption];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallClosedCaption &&
-          other.endTime == endTime &&
-          other.speakerId == speakerId &&
-          other.startTime == startTime &&
-          other.text == text &&
-          other.user == user;
+  final String wireName = r'CallClosedCaption';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (endTime.hashCode) +
-      (speakerId.hashCode) +
-      (startTime.hashCode) +
-      (text.hashCode) +
-      (user.hashCode);
-
-  @override
-  String toString() =>
-      'CallClosedCaption[endTime=$endTime, speakerId=$speakerId, startTime=$startTime, text=$text, user=$user]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'end_time'] = this.endTime.toUtc().toIso8601String();
-    json[r'speaker_id'] = this.speakerId;
-    json[r'start_time'] = this.startTime.toUtc().toIso8601String();
-    json[r'text'] = this.text;
-    json[r'user'] = this.user;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallClosedCaption object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'end_time';
+    yield serializers.serialize(
+      object.endTime,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'speaker_id';
+    yield serializers.serialize(
+      object.speakerId,
+      specifiedType: const FullType(String),
+    );
+    yield r'start_time';
+    yield serializers.serialize(
+      object.startTime,
+      specifiedType: const FullType(DateTime),
+    );
+    yield r'text';
+    yield serializers.serialize(
+      object.text,
+      specifiedType: const FullType(String),
+    );
+    yield r'user';
+    yield serializers.serialize(
+      object.user,
+      specifiedType: const FullType(UserResponse),
+    );
   }
 
-  /// Returns a new [CallClosedCaption] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallClosedCaption? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallClosedCaption[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallClosedCaption[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallClosedCaption(
-        endTime: mapDateTime(json, r'end_time', r'')!,
-        speakerId: mapValueOfType<String>(json, r'speaker_id')!,
-        startTime: mapDateTime(json, r'start_time', r'')!,
-        text: mapValueOfType<String>(json, r'text')!,
-        user: UserResponse.fromJson(json[r'user'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallClosedCaption> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallClosedCaption object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallClosedCaption>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallClosedCaption.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallClosedCaption> mapFromJson(dynamic json) {
-    final map = <String, CallClosedCaption>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallClosedCaption.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallClosedCaption-objects as value to a dart map
-  static Map<String, List<CallClosedCaption>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallClosedCaptionBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallClosedCaption>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallClosedCaption.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'end_time':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.endTime = valueDes;
+          break;
+        case r'speaker_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.speakerId = valueDes;
+          break;
+        case r'start_time':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DateTime),
+          ) as DateTime;
+          result.startTime = valueDes;
+          break;
+        case r'text':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.text = valueDes;
+          break;
+        case r'user':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(UserResponse),
+          ) as UserResponse;
+          result.user.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'end_time',
-    'speaker_id',
-    'start_time',
-    'text',
-    'user',
-  };
+  @override
+  CallClosedCaption deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallClosedCaptionBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,165 +1,168 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/frame_recording_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/egress_rtmp_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/egress_hls_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'egress_response.g.dart';
 
-class EgressResponse {
-  /// Returns a new [EgressResponse] instance.
-  EgressResponse({
-    required this.broadcasting,
-    this.frameRecording,
-    this.hls,
-    this.rtmps = const [],
-  });
+/// EgressResponse
+///
+/// Properties:
+/// * [broadcasting]
+/// * [frameRecording]
+/// * [hls]
+/// * [rtmps]
+@BuiltValue()
+abstract class EgressResponse
+    implements Built<EgressResponse, EgressResponseBuilder> {
+  @BuiltValueField(wireName: r'broadcasting')
+  bool get broadcasting;
 
-  bool broadcasting;
+  @BuiltValueField(wireName: r'frame_recording')
+  FrameRecordingResponse? get frameRecording;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  FrameRecordingResponse? frameRecording;
+  @BuiltValueField(wireName: r'hls')
+  EgressHLSResponse? get hls;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  EgressHLSResponse? hls;
+  @BuiltValueField(wireName: r'rtmps')
+  BuiltList<EgressRTMPResponse> get rtmps;
 
-  List<EgressRTMPResponse> rtmps;
+  EgressResponse._();
+
+  factory EgressResponse([void updates(EgressResponseBuilder b)]) =
+      _$EgressResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(EgressResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<EgressResponse> get serializer =>
+      _$EgressResponseSerializer();
+}
+
+class _$EgressResponseSerializer
+    implements PrimitiveSerializer<EgressResponse> {
+  @override
+  final Iterable<Type> types = const [EgressResponse, _$EgressResponse];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is EgressResponse &&
-          other.broadcasting == broadcasting &&
-          other.frameRecording == frameRecording &&
-          other.hls == hls &&
-          _deepEquality.equals(other.rtmps, rtmps);
+  final String wireName = r'EgressResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (broadcasting.hashCode) +
-      (frameRecording == null ? 0 : frameRecording!.hashCode) +
-      (hls == null ? 0 : hls!.hashCode) +
-      (rtmps.hashCode);
-
-  @override
-  String toString() =>
-      'EgressResponse[broadcasting=$broadcasting, frameRecording=$frameRecording, hls=$hls, rtmps=$rtmps]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'broadcasting'] = this.broadcasting;
-    if (this.frameRecording != null) {
-      json[r'frame_recording'] = this.frameRecording;
-    } else {
-      json[r'frame_recording'] = null;
-    }
-    if (this.hls != null) {
-      json[r'hls'] = this.hls;
-    } else {
-      json[r'hls'] = null;
-    }
-    json[r'rtmps'] = this.rtmps;
-    return json;
-  }
-
-  /// Returns a new [EgressResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static EgressResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "EgressResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "EgressResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return EgressResponse(
-        broadcasting: mapValueOfType<bool>(json, r'broadcasting')!,
-        frameRecording:
-            FrameRecordingResponse.fromJson(json[r'frame_recording']),
-        hls: EgressHLSResponse.fromJson(json[r'hls']),
-        rtmps: EgressRTMPResponse.listFromJson(json[r'rtmps']),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    EgressResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'broadcasting';
+    yield serializers.serialize(
+      object.broadcasting,
+      specifiedType: const FullType(bool),
+    );
+    if (object.frameRecording != null) {
+      yield r'frame_recording';
+      yield serializers.serialize(
+        object.frameRecording,
+        specifiedType: const FullType(FrameRecordingResponse),
       );
     }
-    return null;
+    if (object.hls != null) {
+      yield r'hls';
+      yield serializers.serialize(
+        object.hls,
+        specifiedType: const FullType(EgressHLSResponse),
+      );
+    }
+    yield r'rtmps';
+    yield serializers.serialize(
+      object.rtmps,
+      specifiedType: const FullType(BuiltList, [FullType(EgressRTMPResponse)]),
+    );
   }
 
-  static List<EgressResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    EgressResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <EgressResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = EgressResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, EgressResponse> mapFromJson(dynamic json) {
-    final map = <String, EgressResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = EgressResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of EgressResponse-objects as value to a dart map
-  static Map<String, List<EgressResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required EgressResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<EgressResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = EgressResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'broadcasting':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.broadcasting = valueDes;
+          break;
+        case r'frame_recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(FrameRecordingResponse),
+          ) as FrameRecordingResponse;
+          result.frameRecording.replace(valueDes);
+          break;
+        case r'hls':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(EgressHLSResponse),
+          ) as EgressHLSResponse;
+          result.hls.replace(valueDes);
+          break;
+        case r'rtmps':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltList, [FullType(EgressRTMPResponse)]),
+          ) as BuiltList<EgressRTMPResponse>;
+          result.rtmps.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'broadcasting',
-    'rtmps',
-  };
+  @override
+  EgressResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = EgressResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

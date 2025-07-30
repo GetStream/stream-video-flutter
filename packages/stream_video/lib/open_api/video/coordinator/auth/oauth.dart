@@ -1,27 +1,27 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+import 'package:dio/dio.dart';
+import 'package:stream_video/open_api/video/coordinator/src/auth/auth.dart';
 
-part of openapi.api;
-
-class OAuth implements Authentication {
-  OAuth({this.accessToken = ''});
-
-  String accessToken;
+class OAuthInterceptor extends AuthInterceptor {
+  final Map<String, String> tokens = {};
 
   @override
-  Future<void> applyToParams(
-    List<QueryParam> queryParams,
-    Map<String, String> headerParams,
-  ) async {
-    if (accessToken.isNotEmpty) {
-      headerParams['Authorization'] = 'Bearer $accessToken';
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) {
+    final authInfo = getAuthInfo(options,
+        (secure) => secure['type'] == 'oauth' || secure['type'] == 'oauth2');
+    for (final info in authInfo) {
+      final token = tokens[info['name']];
+      if (token != null) {
+        options.headers['Authorization'] = 'Bearer ${token}';
+        break;
+      }
     }
+    super.onRequest(options, handler);
   }
 }

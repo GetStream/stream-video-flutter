@@ -1,136 +1,142 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/sfu_response.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:stream_video/open_api/video/coordinator/model/ice_server.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'credentials.g.dart';
 
-class Credentials {
-  /// Returns a new [Credentials] instance.
-  Credentials({
-    this.iceServers = const [],
-    required this.server,
-    required this.token,
-  });
+/// Credentials
+///
+/// Properties:
+/// * [iceServers]
+/// * [server]
+/// * [token]
+@BuiltValue()
+abstract class Credentials implements Built<Credentials, CredentialsBuilder> {
+  @BuiltValueField(wireName: r'ice_servers')
+  BuiltList<ICEServer> get iceServers;
 
-  List<ICEServer> iceServers;
+  @BuiltValueField(wireName: r'server')
+  SFUResponse get server;
 
-  SFUResponse server;
+  @BuiltValueField(wireName: r'token')
+  String get token;
 
-  String token;
+  Credentials._();
+
+  factory Credentials([void updates(CredentialsBuilder b)]) = _$Credentials;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CredentialsBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<Credentials> get serializer => _$CredentialsSerializer();
+}
+
+class _$CredentialsSerializer implements PrimitiveSerializer<Credentials> {
+  @override
+  final Iterable<Type> types = const [Credentials, _$Credentials];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Credentials &&
-          _deepEquality.equals(other.iceServers, iceServers) &&
-          other.server == server &&
-          other.token == token;
+  final String wireName = r'Credentials';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (iceServers.hashCode) + (server.hashCode) + (token.hashCode);
-
-  @override
-  String toString() =>
-      'Credentials[iceServers=$iceServers, server=$server, token=$token]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'ice_servers'] = this.iceServers;
-    json[r'server'] = this.server;
-    json[r'token'] = this.token;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    Credentials object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'ice_servers';
+    yield serializers.serialize(
+      object.iceServers,
+      specifiedType: const FullType(BuiltList, [FullType(ICEServer)]),
+    );
+    yield r'server';
+    yield serializers.serialize(
+      object.server,
+      specifiedType: const FullType(SFUResponse),
+    );
+    yield r'token';
+    yield serializers.serialize(
+      object.token,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [Credentials] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static Credentials? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "Credentials[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "Credentials[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return Credentials(
-        iceServers: ICEServer.listFromJson(json[r'ice_servers']),
-        server: SFUResponse.fromJson(json[r'server'])!,
-        token: mapValueOfType<String>(json, r'token')!,
-      );
-    }
-    return null;
-  }
-
-  static List<Credentials> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    Credentials object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <Credentials>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = Credentials.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, Credentials> mapFromJson(dynamic json) {
-    final map = <String, Credentials>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = Credentials.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of Credentials-objects as value to a dart map
-  static Map<String, List<Credentials>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CredentialsBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<Credentials>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = Credentials.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'ice_servers':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(ICEServer)]),
+          ) as BuiltList<ICEServer>;
+          result.iceServers.replace(valueDes);
+          break;
+        case r'server':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(SFUResponse),
+          ) as SFUResponse;
+          result.server.replace(valueDes);
+          break;
+        case r'token':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.token = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'ice_servers',
-    'server',
-    'token',
-  };
+  @override
+  Credentials deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CredentialsBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

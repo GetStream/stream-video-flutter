@@ -1,201 +1,192 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/call_request.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'get_or_create_call_request.g.dart';
 
-class GetOrCreateCallRequest {
-  /// Returns a new [GetOrCreateCallRequest] instance.
-  GetOrCreateCallRequest({
-    this.data,
-    this.membersLimit,
-    this.notify,
-    this.ring,
-    this.video,
-  });
+/// GetOrCreateCallRequest
+///
+/// Properties:
+/// * [data]
+/// * [membersLimit]
+/// * [notify] - if provided it sends a notification event to the members for this call
+/// * [ring] - if provided it sends a ring event to the members for this call
+/// * [video]
+@BuiltValue()
+abstract class GetOrCreateCallRequest
+    implements Built<GetOrCreateCallRequest, GetOrCreateCallRequestBuilder> {
+  @BuiltValueField(wireName: r'data')
+  CallRequest? get data;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallRequest? data;
-
-  /// Maximum value: 100
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? membersLimit;
+  @BuiltValueField(wireName: r'members_limit')
+  int? get membersLimit;
 
   /// if provided it sends a notification event to the members for this call
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? notify;
+  @BuiltValueField(wireName: r'notify')
+  bool? get notify;
 
   /// if provided it sends a ring event to the members for this call
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? ring;
+  @BuiltValueField(wireName: r'ring')
+  bool? get ring;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? video;
+  @BuiltValueField(wireName: r'video')
+  bool? get video;
+
+  GetOrCreateCallRequest._();
+
+  factory GetOrCreateCallRequest(
+          [void updates(GetOrCreateCallRequestBuilder b)]) =
+      _$GetOrCreateCallRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(GetOrCreateCallRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<GetOrCreateCallRequest> get serializer =>
+      _$GetOrCreateCallRequestSerializer();
+}
+
+class _$GetOrCreateCallRequestSerializer
+    implements PrimitiveSerializer<GetOrCreateCallRequest> {
+  @override
+  final Iterable<Type> types = const [
+    GetOrCreateCallRequest,
+    _$GetOrCreateCallRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GetOrCreateCallRequest &&
-          other.data == data &&
-          other.membersLimit == membersLimit &&
-          other.notify == notify &&
-          other.ring == ring &&
-          other.video == video;
+  final String wireName = r'GetOrCreateCallRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (data == null ? 0 : data!.hashCode) +
-      (membersLimit == null ? 0 : membersLimit!.hashCode) +
-      (notify == null ? 0 : notify!.hashCode) +
-      (ring == null ? 0 : ring!.hashCode) +
-      (video == null ? 0 : video!.hashCode);
-
-  @override
-  String toString() =>
-      'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, notify=$notify, ring=$ring, video=$video]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.data != null) {
-      json[r'data'] = this.data;
-    } else {
-      json[r'data'] = null;
-    }
-    if (this.membersLimit != null) {
-      json[r'members_limit'] = this.membersLimit;
-    } else {
-      json[r'members_limit'] = null;
-    }
-    if (this.notify != null) {
-      json[r'notify'] = this.notify;
-    } else {
-      json[r'notify'] = null;
-    }
-    if (this.ring != null) {
-      json[r'ring'] = this.ring;
-    } else {
-      json[r'ring'] = null;
-    }
-    if (this.video != null) {
-      json[r'video'] = this.video;
-    } else {
-      json[r'video'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [GetOrCreateCallRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static GetOrCreateCallRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GetOrCreateCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GetOrCreateCallRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return GetOrCreateCallRequest(
-        data: CallRequest.fromJson(json[r'data']),
-        membersLimit: mapValueOfType<int>(json, r'members_limit'),
-        notify: mapValueOfType<bool>(json, r'notify'),
-        ring: mapValueOfType<bool>(json, r'ring'),
-        video: mapValueOfType<bool>(json, r'video'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    GetOrCreateCallRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.data != null) {
+      yield r'data';
+      yield serializers.serialize(
+        object.data,
+        specifiedType: const FullType(CallRequest),
       );
     }
-    return null;
+    if (object.membersLimit != null) {
+      yield r'members_limit';
+      yield serializers.serialize(
+        object.membersLimit,
+        specifiedType: const FullType(int),
+      );
+    }
+    if (object.notify != null) {
+      yield r'notify';
+      yield serializers.serialize(
+        object.notify,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.ring != null) {
+      yield r'ring';
+      yield serializers.serialize(
+        object.ring,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.video != null) {
+      yield r'video';
+      yield serializers.serialize(
+        object.video,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
-  static List<GetOrCreateCallRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    GetOrCreateCallRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <GetOrCreateCallRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = GetOrCreateCallRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, GetOrCreateCallRequest> mapFromJson(dynamic json) {
-    final map = <String, GetOrCreateCallRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = GetOrCreateCallRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of GetOrCreateCallRequest-objects as value to a dart map
-  static Map<String, List<GetOrCreateCallRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required GetOrCreateCallRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<GetOrCreateCallRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = GetOrCreateCallRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'data':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CallRequest),
+          ) as CallRequest;
+          result.data.replace(valueDes);
+          break;
+        case r'members_limit':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.membersLimit = valueDes;
+          break;
+        case r'notify':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.notify = valueDes;
+          break;
+        case r'ring':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.ring = valueDes;
+          break;
+        case r'video':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.video = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  GetOrCreateCallRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = GetOrCreateCallRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

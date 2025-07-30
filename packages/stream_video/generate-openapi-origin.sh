@@ -16,7 +16,7 @@ docker pull openapitools/openapi-generator-cli
 docker run --rm \
   -v "${TEMP_OUTPUT_DIR}:/local" openapitools/openapi-generator-cli generate \
   -i "$OPENAPI_SPEC_PATH" \
-  -g dart \
+  -g dart-dio \
   -o /local
 
 

@@ -1,258 +1,204 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'create_device_request.g.dart';
 
-class CreateDeviceRequest {
-  /// Returns a new [CreateDeviceRequest] instance.
-  CreateDeviceRequest({
-    required this.id,
-    required this.pushProvider,
-    this.pushProviderName,
-    this.voipToken,
-  });
-
+/// Create device request
+///
+/// Properties:
+/// * [id] - Device ID
+/// * [pushProvider] - Push provider
+/// * [pushProviderName] - Push provider name
+/// * [voipToken] - When true the token is for Apple VoIP push notifications
+@BuiltValue()
+abstract class CreateDeviceRequest
+    implements Built<CreateDeviceRequest, CreateDeviceRequestBuilder> {
   /// Device ID
-  String id;
+  @BuiltValueField(wireName: r'id')
+  String get id;
 
   /// Push provider
-  CreateDeviceRequestPushProviderEnum pushProvider;
+  @BuiltValueField(wireName: r'push_provider')
+  CreateDeviceRequestPushProviderEnum get pushProvider;
+  // enum pushProviderEnum {  firebase,  apn,  huawei,  xiaomi,  };
 
   /// Push provider name
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? pushProviderName;
+  @BuiltValueField(wireName: r'push_provider_name')
+  String? get pushProviderName;
 
   /// When true the token is for Apple VoIP push notifications
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? voipToken;
+  @BuiltValueField(wireName: r'voip_token')
+  bool? get voipToken;
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CreateDeviceRequest &&
-          other.id == id &&
-          other.pushProvider == pushProvider &&
-          other.pushProviderName == pushProviderName &&
-          other.voipToken == voipToken;
+  CreateDeviceRequest._();
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (id.hashCode) +
-      (pushProvider.hashCode) +
-      (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
-      (voipToken == null ? 0 : voipToken!.hashCode);
+  factory CreateDeviceRequest([void updates(CreateDeviceRequestBuilder b)]) =
+      _$CreateDeviceRequest;
 
-  @override
-  String toString() =>
-      'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voipToken=$voipToken]';
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CreateDeviceRequestBuilder b) => b;
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'id'] = this.id;
-    json[r'push_provider'] = this.pushProvider;
-    if (this.pushProviderName != null) {
-      json[r'push_provider_name'] = this.pushProviderName;
-    } else {
-      json[r'push_provider_name'] = null;
-    }
-    if (this.voipToken != null) {
-      json[r'voip_token'] = this.voipToken;
-    } else {
-      json[r'voip_token'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [CreateDeviceRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CreateDeviceRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CreateDeviceRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CreateDeviceRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CreateDeviceRequest(
-        id: mapValueOfType<String>(json, r'id')!,
-        pushProvider: CreateDeviceRequestPushProviderEnum.fromJson(
-            json[r'push_provider'])!,
-        pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
-        voipToken: mapValueOfType<bool>(json, r'voip_token'),
-      );
-    }
-    return null;
-  }
-
-  static List<CreateDeviceRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <CreateDeviceRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CreateDeviceRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-
-  static Map<String, CreateDeviceRequest> mapFromJson(dynamic json) {
-    final map = <String, CreateDeviceRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CreateDeviceRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CreateDeviceRequest-objects as value to a dart map
-  static Map<String, List<CreateDeviceRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<CreateDeviceRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CreateDeviceRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
-  }
-
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'id',
-    'push_provider',
-  };
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CreateDeviceRequest> get serializer =>
+      _$CreateDeviceRequestSerializer();
 }
 
-/// Push provider
-class CreateDeviceRequestPushProviderEnum {
-  /// Instantiate a new enum with the provided [value].
-  const CreateDeviceRequestPushProviderEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
+class _$CreateDeviceRequestSerializer
+    implements PrimitiveSerializer<CreateDeviceRequest> {
   @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const firebase = CreateDeviceRequestPushProviderEnum._(r'firebase');
-  static const apn = CreateDeviceRequestPushProviderEnum._(r'apn');
-  static const huawei = CreateDeviceRequestPushProviderEnum._(r'huawei');
-  static const xiaomi = CreateDeviceRequestPushProviderEnum._(r'xiaomi');
-
-  /// List of all possible values in this [enum][CreateDeviceRequestPushProviderEnum].
-  static const values = <CreateDeviceRequestPushProviderEnum>[
-    firebase,
-    apn,
-    huawei,
-    xiaomi,
+  final Iterable<Type> types = const [
+    CreateDeviceRequest,
+    _$CreateDeviceRequest
   ];
 
-  static CreateDeviceRequestPushProviderEnum? fromJson(dynamic value) =>
-      CreateDeviceRequestPushProviderEnumTypeTransformer().decode(value);
+  @override
+  final String wireName = r'CreateDeviceRequest';
 
-  static List<CreateDeviceRequestPushProviderEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CreateDeviceRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'id';
+    yield serializers.serialize(
+      object.id,
+      specifiedType: const FullType(String),
+    );
+    yield r'push_provider';
+    yield serializers.serialize(
+      object.pushProvider,
+      specifiedType: const FullType(CreateDeviceRequestPushProviderEnum),
+    );
+    if (object.pushProviderName != null) {
+      yield r'push_provider_name';
+      yield serializers.serialize(
+        object.pushProviderName,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.voipToken != null) {
+      yield r'voip_token';
+      yield serializers.serialize(
+        object.voipToken,
+        specifiedType: const FullType(bool),
+      );
+    }
+  }
+
+  @override
+  Object serialize(
+    Serializers serializers,
+    CreateDeviceRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CreateDeviceRequestPushProviderEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CreateDeviceRequestPushProviderEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
+  }
+
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CreateDeviceRequestBuilder result,
+    required List<Object?> unhandled,
+  }) {
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.id = valueDes;
+          break;
+        case r'push_provider':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(CreateDeviceRequestPushProviderEnum),
+          ) as CreateDeviceRequestPushProviderEnum;
+          result.pushProvider = valueDes;
+          break;
+        case r'push_provider_name':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.pushProviderName = valueDes;
+          break;
+        case r'voip_token':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.voipToken = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return result.toList(growable: growable);
+  }
+
+  @override
+  CreateDeviceRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CreateDeviceRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
   }
 }
 
-/// Transformation class that can [encode] an instance of [CreateDeviceRequestPushProviderEnum] to String,
-/// and [decode] dynamic data back to [CreateDeviceRequestPushProviderEnum].
-class CreateDeviceRequestPushProviderEnumTypeTransformer {
-  factory CreateDeviceRequestPushProviderEnumTypeTransformer() => _instance ??=
-      const CreateDeviceRequestPushProviderEnumTypeTransformer._();
+class CreateDeviceRequestPushProviderEnum extends EnumClass {
+  /// Push provider
+  @BuiltValueEnumConst(wireName: r'firebase')
+  static const CreateDeviceRequestPushProviderEnum firebase =
+      _$createDeviceRequestPushProviderEnum_firebase;
 
-  const CreateDeviceRequestPushProviderEnumTypeTransformer._();
+  /// Push provider
+  @BuiltValueEnumConst(wireName: r'apn')
+  static const CreateDeviceRequestPushProviderEnum apn =
+      _$createDeviceRequestPushProviderEnum_apn;
 
-  String encode(CreateDeviceRequestPushProviderEnum data) => data.value;
+  /// Push provider
+  @BuiltValueEnumConst(wireName: r'huawei')
+  static const CreateDeviceRequestPushProviderEnum huawei =
+      _$createDeviceRequestPushProviderEnum_huawei;
 
-  /// Decodes a [dynamic value][data] to a CreateDeviceRequestPushProviderEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  CreateDeviceRequestPushProviderEnum? decode(dynamic data,
-      {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'firebase':
-          return CreateDeviceRequestPushProviderEnum.firebase;
-        case r'apn':
-          return CreateDeviceRequestPushProviderEnum.apn;
-        case r'huawei':
-          return CreateDeviceRequestPushProviderEnum.huawei;
-        case r'xiaomi':
-          return CreateDeviceRequestPushProviderEnum.xiaomi;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
+  /// Push provider
+  @BuiltValueEnumConst(wireName: r'xiaomi')
+  static const CreateDeviceRequestPushProviderEnum xiaomi =
+      _$createDeviceRequestPushProviderEnum_xiaomi;
 
-  /// Singleton [CreateDeviceRequestPushProviderEnumTypeTransformer] instance.
-  static CreateDeviceRequestPushProviderEnumTypeTransformer? _instance;
+  static Serializer<CreateDeviceRequestPushProviderEnum> get serializer =>
+      _$createDeviceRequestPushProviderEnumSerializer;
+
+  const CreateDeviceRequestPushProviderEnum._(String name) : super(name);
+
+  static BuiltSet<CreateDeviceRequestPushProviderEnum> get values =>
+      _$createDeviceRequestPushProviderEnumValues;
+  static CreateDeviceRequestPushProviderEnum valueOf(String name) =>
+      _$createDeviceRequestPushProviderEnumValueOf(name);
 }

@@ -1,120 +1,115 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'frame_recording_response.g.dart';
 
-class FrameRecordingResponse {
-  /// Returns a new [FrameRecordingResponse] instance.
-  FrameRecordingResponse({
-    required this.status,
-  });
+/// FrameRecordingResponse
+///
+/// Properties:
+/// * [status]
+@BuiltValue()
+abstract class FrameRecordingResponse
+    implements Built<FrameRecordingResponse, FrameRecordingResponseBuilder> {
+  @BuiltValueField(wireName: r'status')
+  String get status;
 
-  String status;
+  FrameRecordingResponse._();
+
+  factory FrameRecordingResponse(
+          [void updates(FrameRecordingResponseBuilder b)]) =
+      _$FrameRecordingResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(FrameRecordingResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<FrameRecordingResponse> get serializer =>
+      _$FrameRecordingResponseSerializer();
+}
+
+class _$FrameRecordingResponseSerializer
+    implements PrimitiveSerializer<FrameRecordingResponse> {
+  @override
+  final Iterable<Type> types = const [
+    FrameRecordingResponse,
+    _$FrameRecordingResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FrameRecordingResponse && other.status == status;
+  final String wireName = r'FrameRecordingResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (status.hashCode);
-
-  @override
-  String toString() => 'FrameRecordingResponse[status=$status]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'status'] = this.status;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    FrameRecordingResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'status';
+    yield serializers.serialize(
+      object.status,
+      specifiedType: const FullType(String),
+    );
   }
 
-  /// Returns a new [FrameRecordingResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static FrameRecordingResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "FrameRecordingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "FrameRecordingResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return FrameRecordingResponse(
-        status: mapValueOfType<String>(json, r'status')!,
-      );
-    }
-    return null;
-  }
-
-  static List<FrameRecordingResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    FrameRecordingResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <FrameRecordingResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = FrameRecordingResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, FrameRecordingResponse> mapFromJson(dynamic json) {
-    final map = <String, FrameRecordingResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = FrameRecordingResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of FrameRecordingResponse-objects as value to a dart map
-  static Map<String, List<FrameRecordingResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required FrameRecordingResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<FrameRecordingResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = FrameRecordingResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'status':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.status = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'status',
-  };
+  @override
+  FrameRecordingResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = FrameRecordingResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

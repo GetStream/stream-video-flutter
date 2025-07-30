@@ -1,182 +1,171 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'limits_settings_request.g.dart';
 
-class LimitsSettingsRequest {
-  /// Returns a new [LimitsSettingsRequest] instance.
-  LimitsSettingsRequest({
-    this.maxDurationSeconds,
-    this.maxParticipants,
-    this.maxParticipantsExcludeOwner,
-    this.maxParticipantsExcludeRoles = const [],
-  });
+/// LimitsSettingsRequest
+///
+/// Properties:
+/// * [maxDurationSeconds]
+/// * [maxParticipants]
+/// * [maxParticipantsExcludeOwner]
+/// * [maxParticipantsExcludeRoles]
+@BuiltValue()
+abstract class LimitsSettingsRequest
+    implements Built<LimitsSettingsRequest, LimitsSettingsRequestBuilder> {
+  @BuiltValueField(wireName: r'max_duration_seconds')
+  int? get maxDurationSeconds;
 
-  /// Minimum value: 0
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? maxDurationSeconds;
+  @BuiltValueField(wireName: r'max_participants')
+  int? get maxParticipants;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? maxParticipants;
+  @BuiltValueField(wireName: r'max_participants_exclude_owner')
+  bool? get maxParticipantsExcludeOwner;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? maxParticipantsExcludeOwner;
+  @BuiltValueField(wireName: r'max_participants_exclude_roles')
+  BuiltList<String>? get maxParticipantsExcludeRoles;
 
-  List<String> maxParticipantsExcludeRoles;
+  LimitsSettingsRequest._();
+
+  factory LimitsSettingsRequest(
+      [void updates(LimitsSettingsRequestBuilder b)]) = _$LimitsSettingsRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(LimitsSettingsRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<LimitsSettingsRequest> get serializer =>
+      _$LimitsSettingsRequestSerializer();
+}
+
+class _$LimitsSettingsRequestSerializer
+    implements PrimitiveSerializer<LimitsSettingsRequest> {
+  @override
+  final Iterable<Type> types = const [
+    LimitsSettingsRequest,
+    _$LimitsSettingsRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is LimitsSettingsRequest &&
-          other.maxDurationSeconds == maxDurationSeconds &&
-          other.maxParticipants == maxParticipants &&
-          other.maxParticipantsExcludeOwner == maxParticipantsExcludeOwner &&
-          _deepEquality.equals(
-              other.maxParticipantsExcludeRoles, maxParticipantsExcludeRoles);
+  final String wireName = r'LimitsSettingsRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (maxDurationSeconds == null ? 0 : maxDurationSeconds!.hashCode) +
-      (maxParticipants == null ? 0 : maxParticipants!.hashCode) +
-      (maxParticipantsExcludeOwner == null
-          ? 0
-          : maxParticipantsExcludeOwner!.hashCode) +
-      (maxParticipantsExcludeRoles.hashCode);
-
-  @override
-  String toString() =>
-      'LimitsSettingsRequest[maxDurationSeconds=$maxDurationSeconds, maxParticipants=$maxParticipants, maxParticipantsExcludeOwner=$maxParticipantsExcludeOwner, maxParticipantsExcludeRoles=$maxParticipantsExcludeRoles]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    if (this.maxDurationSeconds != null) {
-      json[r'max_duration_seconds'] = this.maxDurationSeconds;
-    } else {
-      json[r'max_duration_seconds'] = null;
-    }
-    if (this.maxParticipants != null) {
-      json[r'max_participants'] = this.maxParticipants;
-    } else {
-      json[r'max_participants'] = null;
-    }
-    if (this.maxParticipantsExcludeOwner != null) {
-      json[r'max_participants_exclude_owner'] =
-          this.maxParticipantsExcludeOwner;
-    } else {
-      json[r'max_participants_exclude_owner'] = null;
-    }
-    json[r'max_participants_exclude_roles'] = this.maxParticipantsExcludeRoles;
-    return json;
-  }
-
-  /// Returns a new [LimitsSettingsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static LimitsSettingsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "LimitsSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "LimitsSettingsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return LimitsSettingsRequest(
-        maxDurationSeconds: mapValueOfType<int>(json, r'max_duration_seconds'),
-        maxParticipants: mapValueOfType<int>(json, r'max_participants'),
-        maxParticipantsExcludeOwner:
-            mapValueOfType<bool>(json, r'max_participants_exclude_owner'),
-        maxParticipantsExcludeRoles:
-            json[r'max_participants_exclude_roles'] is Iterable
-                ? (json[r'max_participants_exclude_roles'] as Iterable)
-                    .cast<String>()
-                    .toList(growable: false)
-                : const [],
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    LimitsSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.maxDurationSeconds != null) {
+      yield r'max_duration_seconds';
+      yield serializers.serialize(
+        object.maxDurationSeconds,
+        specifiedType: const FullType(int),
       );
     }
-    return null;
+    if (object.maxParticipants != null) {
+      yield r'max_participants';
+      yield serializers.serialize(
+        object.maxParticipants,
+        specifiedType: const FullType(int),
+      );
+    }
+    if (object.maxParticipantsExcludeOwner != null) {
+      yield r'max_participants_exclude_owner';
+      yield serializers.serialize(
+        object.maxParticipantsExcludeOwner,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.maxParticipantsExcludeRoles != null) {
+      yield r'max_participants_exclude_roles';
+      yield serializers.serialize(
+        object.maxParticipantsExcludeRoles,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
   }
 
-  static List<LimitsSettingsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    LimitsSettingsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <LimitsSettingsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = LimitsSettingsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, LimitsSettingsRequest> mapFromJson(dynamic json) {
-    final map = <String, LimitsSettingsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = LimitsSettingsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of LimitsSettingsRequest-objects as value to a dart map
-  static Map<String, List<LimitsSettingsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required LimitsSettingsRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<LimitsSettingsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = LimitsSettingsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'max_duration_seconds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.maxDurationSeconds = valueDes;
+          break;
+        case r'max_participants':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.maxParticipants = valueDes;
+          break;
+        case r'max_participants_exclude_owner':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.maxParticipantsExcludeOwner = valueDes;
+          break;
+        case r'max_participants_exclude_roles':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.maxParticipantsExcludeRoles.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{};
+  @override
+  LimitsSettingsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = LimitsSettingsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

@@ -1,147 +1,151 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/json_object.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'member_request.g.dart';
 
-class MemberRequest {
-  /// Returns a new [MemberRequest] instance.
-  MemberRequest({
-    this.custom = const {},
-    this.role,
-    required this.userId,
-  });
-
+/// MemberRequest is the payload for adding a member to a call.
+///
+/// Properties:
+/// * [custom] - Custom data for this object
+/// * [role]
+/// * [userId]
+@BuiltValue()
+abstract class MemberRequest
+    implements Built<MemberRequest, MemberRequestBuilder> {
   /// Custom data for this object
-  Map<String, Object> custom;
+  @BuiltValueField(wireName: r'custom')
+  BuiltMap<String, JsonObject?>? get custom;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? role;
+  @BuiltValueField(wireName: r'role')
+  String? get role;
 
-  String userId;
+  @BuiltValueField(wireName: r'user_id')
+  String get userId;
+
+  MemberRequest._();
+
+  factory MemberRequest([void updates(MemberRequestBuilder b)]) =
+      _$MemberRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(MemberRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<MemberRequest> get serializer =>
+      _$MemberRequestSerializer();
+}
+
+class _$MemberRequestSerializer implements PrimitiveSerializer<MemberRequest> {
+  @override
+  final Iterable<Type> types = const [MemberRequest, _$MemberRequest];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MemberRequest &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.role == role &&
-          other.userId == userId;
+  final String wireName = r'MemberRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (custom.hashCode) +
-      (role == null ? 0 : role!.hashCode) +
-      (userId.hashCode);
-
-  @override
-  String toString() =>
-      'MemberRequest[custom=$custom, role=$role, userId=$userId]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'custom'] = this.custom;
-    if (this.role != null) {
-      json[r'role'] = this.role;
-    } else {
-      json[r'role'] = null;
-    }
-    json[r'user_id'] = this.userId;
-    return json;
-  }
-
-  /// Returns a new [MemberRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static MemberRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "MemberRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "MemberRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return MemberRequest(
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        role: mapValueOfType<String>(json, r'role'),
-        userId: mapValueOfType<String>(json, r'user_id')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    MemberRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.custom != null) {
+      yield r'custom';
+      yield serializers.serialize(
+        object.custom,
+        specifiedType: const FullType(
+            BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
       );
     }
-    return null;
+    if (object.role != null) {
+      yield r'role';
+      yield serializers.serialize(
+        object.role,
+        specifiedType: const FullType(String),
+      );
+    }
+    yield r'user_id';
+    yield serializers.serialize(
+      object.userId,
+      specifiedType: const FullType(String),
+    );
   }
 
-  static List<MemberRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    MemberRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <MemberRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = MemberRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, MemberRequest> mapFromJson(dynamic json) {
-    final map = <String, MemberRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = MemberRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of MemberRequest-objects as value to a dart map
-  static Map<String, List<MemberRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required MemberRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<MemberRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = MemberRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'custom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(
+                BuiltMap, [FullType(String), FullType.nullable(JsonObject)]),
+          ) as BuiltMap<String, JsonObject?>;
+          result.custom.replace(valueDes);
+          break;
+        case r'role':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.role = valueDes;
+          break;
+        case r'user_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.userId = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'user_id',
-  };
+  @override
+  MemberRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = MemberRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

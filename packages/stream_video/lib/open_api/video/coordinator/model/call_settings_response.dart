@@ -1,222 +1,319 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/broadcast_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/session_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/transcription_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/audio_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/geofence_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/record_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/video_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/limits_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/backstage_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/screensharing_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/thumbnails_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/ring_settings_response.dart';
+import 'package:stream_video/open_api/video/coordinator/model/frame_recording_settings_response.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'call_settings_response.g.dart';
 
-class CallSettingsResponse {
-  /// Returns a new [CallSettingsResponse] instance.
-  CallSettingsResponse({
-    required this.audio,
-    required this.backstage,
-    required this.broadcasting,
-    required this.frameRecording,
-    required this.geofencing,
-    required this.limits,
-    required this.recording,
-    required this.ring,
-    required this.screensharing,
-    required this.session,
-    required this.thumbnails,
-    required this.transcription,
-    required this.video,
-  });
+/// CallSettingsResponse
+///
+/// Properties:
+/// * [audio]
+/// * [backstage]
+/// * [broadcasting]
+/// * [frameRecording]
+/// * [geofencing]
+/// * [limits]
+/// * [recording]
+/// * [ring]
+/// * [screensharing]
+/// * [session]
+/// * [thumbnails]
+/// * [transcription]
+/// * [video]
+@BuiltValue()
+abstract class CallSettingsResponse
+    implements Built<CallSettingsResponse, CallSettingsResponseBuilder> {
+  @BuiltValueField(wireName: r'audio')
+  AudioSettingsResponse get audio;
 
-  AudioSettingsResponse audio;
+  @BuiltValueField(wireName: r'backstage')
+  BackstageSettingsResponse get backstage;
 
-  BackstageSettingsResponse backstage;
+  @BuiltValueField(wireName: r'broadcasting')
+  BroadcastSettingsResponse get broadcasting;
 
-  BroadcastSettingsResponse broadcasting;
+  @BuiltValueField(wireName: r'frame_recording')
+  FrameRecordingSettingsResponse get frameRecording;
 
-  FrameRecordingSettingsResponse frameRecording;
+  @BuiltValueField(wireName: r'geofencing')
+  GeofenceSettingsResponse get geofencing;
 
-  GeofenceSettingsResponse geofencing;
+  @BuiltValueField(wireName: r'limits')
+  LimitsSettingsResponse get limits;
 
-  LimitsSettingsResponse limits;
+  @BuiltValueField(wireName: r'recording')
+  RecordSettingsResponse get recording;
 
-  RecordSettingsResponse recording;
+  @BuiltValueField(wireName: r'ring')
+  RingSettingsResponse get ring;
 
-  RingSettingsResponse ring;
+  @BuiltValueField(wireName: r'screensharing')
+  ScreensharingSettingsResponse get screensharing;
 
-  ScreensharingSettingsResponse screensharing;
+  @BuiltValueField(wireName: r'session')
+  SessionSettingsResponse get session;
 
-  SessionSettingsResponse session;
+  @BuiltValueField(wireName: r'thumbnails')
+  ThumbnailsSettingsResponse get thumbnails;
 
-  ThumbnailsSettingsResponse thumbnails;
+  @BuiltValueField(wireName: r'transcription')
+  TranscriptionSettingsResponse get transcription;
 
-  TranscriptionSettingsResponse transcription;
+  @BuiltValueField(wireName: r'video')
+  VideoSettingsResponse get video;
 
-  VideoSettingsResponse video;
+  CallSettingsResponse._();
+
+  factory CallSettingsResponse([void updates(CallSettingsResponseBuilder b)]) =
+      _$CallSettingsResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(CallSettingsResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<CallSettingsResponse> get serializer =>
+      _$CallSettingsResponseSerializer();
+}
+
+class _$CallSettingsResponseSerializer
+    implements PrimitiveSerializer<CallSettingsResponse> {
+  @override
+  final Iterable<Type> types = const [
+    CallSettingsResponse,
+    _$CallSettingsResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallSettingsResponse &&
-          other.audio == audio &&
-          other.backstage == backstage &&
-          other.broadcasting == broadcasting &&
-          other.frameRecording == frameRecording &&
-          other.geofencing == geofencing &&
-          other.limits == limits &&
-          other.recording == recording &&
-          other.ring == ring &&
-          other.screensharing == screensharing &&
-          other.session == session &&
-          other.thumbnails == thumbnails &&
-          other.transcription == transcription &&
-          other.video == video;
+  final String wireName = r'CallSettingsResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (audio.hashCode) +
-      (backstage.hashCode) +
-      (broadcasting.hashCode) +
-      (frameRecording.hashCode) +
-      (geofencing.hashCode) +
-      (limits.hashCode) +
-      (recording.hashCode) +
-      (ring.hashCode) +
-      (screensharing.hashCode) +
-      (session.hashCode) +
-      (thumbnails.hashCode) +
-      (transcription.hashCode) +
-      (video.hashCode);
-
-  @override
-  String toString() =>
-      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'audio'] = this.audio;
-    json[r'backstage'] = this.backstage;
-    json[r'broadcasting'] = this.broadcasting;
-    json[r'frame_recording'] = this.frameRecording;
-    json[r'geofencing'] = this.geofencing;
-    json[r'limits'] = this.limits;
-    json[r'recording'] = this.recording;
-    json[r'ring'] = this.ring;
-    json[r'screensharing'] = this.screensharing;
-    json[r'session'] = this.session;
-    json[r'thumbnails'] = this.thumbnails;
-    json[r'transcription'] = this.transcription;
-    json[r'video'] = this.video;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    CallSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'audio';
+    yield serializers.serialize(
+      object.audio,
+      specifiedType: const FullType(AudioSettingsResponse),
+    );
+    yield r'backstage';
+    yield serializers.serialize(
+      object.backstage,
+      specifiedType: const FullType(BackstageSettingsResponse),
+    );
+    yield r'broadcasting';
+    yield serializers.serialize(
+      object.broadcasting,
+      specifiedType: const FullType(BroadcastSettingsResponse),
+    );
+    yield r'frame_recording';
+    yield serializers.serialize(
+      object.frameRecording,
+      specifiedType: const FullType(FrameRecordingSettingsResponse),
+    );
+    yield r'geofencing';
+    yield serializers.serialize(
+      object.geofencing,
+      specifiedType: const FullType(GeofenceSettingsResponse),
+    );
+    yield r'limits';
+    yield serializers.serialize(
+      object.limits,
+      specifiedType: const FullType(LimitsSettingsResponse),
+    );
+    yield r'recording';
+    yield serializers.serialize(
+      object.recording,
+      specifiedType: const FullType(RecordSettingsResponse),
+    );
+    yield r'ring';
+    yield serializers.serialize(
+      object.ring,
+      specifiedType: const FullType(RingSettingsResponse),
+    );
+    yield r'screensharing';
+    yield serializers.serialize(
+      object.screensharing,
+      specifiedType: const FullType(ScreensharingSettingsResponse),
+    );
+    yield r'session';
+    yield serializers.serialize(
+      object.session,
+      specifiedType: const FullType(SessionSettingsResponse),
+    );
+    yield r'thumbnails';
+    yield serializers.serialize(
+      object.thumbnails,
+      specifiedType: const FullType(ThumbnailsSettingsResponse),
+    );
+    yield r'transcription';
+    yield serializers.serialize(
+      object.transcription,
+      specifiedType: const FullType(TranscriptionSettingsResponse),
+    );
+    yield r'video';
+    yield serializers.serialize(
+      object.video,
+      specifiedType: const FullType(VideoSettingsResponse),
+    );
   }
 
-  /// Returns a new [CallSettingsResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static CallSettingsResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSettingsResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return CallSettingsResponse(
-        audio: AudioSettingsResponse.fromJson(json[r'audio'])!,
-        backstage: BackstageSettingsResponse.fromJson(json[r'backstage'])!,
-        broadcasting:
-            BroadcastSettingsResponse.fromJson(json[r'broadcasting'])!,
-        frameRecording:
-            FrameRecordingSettingsResponse.fromJson(json[r'frame_recording'])!,
-        geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
-        limits: LimitsSettingsResponse.fromJson(json[r'limits'])!,
-        recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
-        ring: RingSettingsResponse.fromJson(json[r'ring'])!,
-        screensharing:
-            ScreensharingSettingsResponse.fromJson(json[r'screensharing'])!,
-        session: SessionSettingsResponse.fromJson(json[r'session'])!,
-        thumbnails: ThumbnailsSettingsResponse.fromJson(json[r'thumbnails'])!,
-        transcription:
-            TranscriptionSettingsResponse.fromJson(json[r'transcription'])!,
-        video: VideoSettingsResponse.fromJson(json[r'video'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<CallSettingsResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    CallSettingsResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <CallSettingsResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = CallSettingsResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, CallSettingsResponse> mapFromJson(dynamic json) {
-    final map = <String, CallSettingsResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = CallSettingsResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of CallSettingsResponse-objects as value to a dart map
-  static Map<String, List<CallSettingsResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required CallSettingsResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<CallSettingsResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = CallSettingsResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'audio':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(AudioSettingsResponse),
+          ) as AudioSettingsResponse;
+          result.audio.replace(valueDes);
+          break;
+        case r'backstage':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BackstageSettingsResponse),
+          ) as BackstageSettingsResponse;
+          result.backstage.replace(valueDes);
+          break;
+        case r'broadcasting':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BroadcastSettingsResponse),
+          ) as BroadcastSettingsResponse;
+          result.broadcasting.replace(valueDes);
+          break;
+        case r'frame_recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(FrameRecordingSettingsResponse),
+          ) as FrameRecordingSettingsResponse;
+          result.frameRecording.replace(valueDes);
+          break;
+        case r'geofencing':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(GeofenceSettingsResponse),
+          ) as GeofenceSettingsResponse;
+          result.geofencing.replace(valueDes);
+          break;
+        case r'limits':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(LimitsSettingsResponse),
+          ) as LimitsSettingsResponse;
+          result.limits.replace(valueDes);
+          break;
+        case r'recording':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RecordSettingsResponse),
+          ) as RecordSettingsResponse;
+          result.recording.replace(valueDes);
+          break;
+        case r'ring':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(RingSettingsResponse),
+          ) as RingSettingsResponse;
+          result.ring.replace(valueDes);
+          break;
+        case r'screensharing':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ScreensharingSettingsResponse),
+          ) as ScreensharingSettingsResponse;
+          result.screensharing.replace(valueDes);
+          break;
+        case r'session':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(SessionSettingsResponse),
+          ) as SessionSettingsResponse;
+          result.session.replace(valueDes);
+          break;
+        case r'thumbnails':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(ThumbnailsSettingsResponse),
+          ) as ThumbnailsSettingsResponse;
+          result.thumbnails.replace(valueDes);
+          break;
+        case r'transcription':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(TranscriptionSettingsResponse),
+          ) as TranscriptionSettingsResponse;
+          result.transcription.replace(valueDes);
+          break;
+        case r'video':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(VideoSettingsResponse),
+          ) as VideoSettingsResponse;
+          result.video.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'audio',
-    'backstage',
-    'broadcasting',
-    'frame_recording',
-    'geofencing',
-    'limits',
-    'recording',
-    'ring',
-    'screensharing',
-    'session',
-    'thumbnails',
-    'transcription',
-    'video',
-  };
+  @override
+  CallSettingsResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = CallSettingsResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

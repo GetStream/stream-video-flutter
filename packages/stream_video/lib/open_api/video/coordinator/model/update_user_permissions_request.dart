@@ -1,144 +1,154 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'update_user_permissions_request.g.dart';
 
-class UpdateUserPermissionsRequest {
-  /// Returns a new [UpdateUserPermissionsRequest] instance.
-  UpdateUserPermissionsRequest({
-    this.grantPermissions = const [],
-    this.revokePermissions = const [],
-    required this.userId,
-  });
+/// UpdateUserPermissionsRequest
+///
+/// Properties:
+/// * [grantPermissions]
+/// * [revokePermissions]
+/// * [userId]
+@BuiltValue()
+abstract class UpdateUserPermissionsRequest
+    implements
+        Built<UpdateUserPermissionsRequest,
+            UpdateUserPermissionsRequestBuilder> {
+  @BuiltValueField(wireName: r'grant_permissions')
+  BuiltList<String>? get grantPermissions;
 
-  List<String> grantPermissions;
+  @BuiltValueField(wireName: r'revoke_permissions')
+  BuiltList<String>? get revokePermissions;
 
-  List<String> revokePermissions;
+  @BuiltValueField(wireName: r'user_id')
+  String get userId;
 
-  String userId;
+  UpdateUserPermissionsRequest._();
+
+  factory UpdateUserPermissionsRequest(
+          [void updates(UpdateUserPermissionsRequestBuilder b)]) =
+      _$UpdateUserPermissionsRequest;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(UpdateUserPermissionsRequestBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<UpdateUserPermissionsRequest> get serializer =>
+      _$UpdateUserPermissionsRequestSerializer();
+}
+
+class _$UpdateUserPermissionsRequestSerializer
+    implements PrimitiveSerializer<UpdateUserPermissionsRequest> {
+  @override
+  final Iterable<Type> types = const [
+    UpdateUserPermissionsRequest,
+    _$UpdateUserPermissionsRequest
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UpdateUserPermissionsRequest &&
-          _deepEquality.equals(other.grantPermissions, grantPermissions) &&
-          _deepEquality.equals(other.revokePermissions, revokePermissions) &&
-          other.userId == userId;
+  final String wireName = r'UpdateUserPermissionsRequest';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (grantPermissions.hashCode) +
-      (revokePermissions.hashCode) +
-      (userId.hashCode);
-
-  @override
-  String toString() =>
-      'UpdateUserPermissionsRequest[grantPermissions=$grantPermissions, revokePermissions=$revokePermissions, userId=$userId]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'grant_permissions'] = this.grantPermissions;
-    json[r'revoke_permissions'] = this.revokePermissions;
-    json[r'user_id'] = this.userId;
-    return json;
-  }
-
-  /// Returns a new [UpdateUserPermissionsRequest] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static UpdateUserPermissionsRequest? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UpdateUserPermissionsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UpdateUserPermissionsRequest[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return UpdateUserPermissionsRequest(
-        grantPermissions: json[r'grant_permissions'] is Iterable
-            ? (json[r'grant_permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        revokePermissions: json[r'revoke_permissions'] is Iterable
-            ? (json[r'revoke_permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        userId: mapValueOfType<String>(json, r'user_id')!,
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    UpdateUserPermissionsRequest object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    if (object.grantPermissions != null) {
+      yield r'grant_permissions';
+      yield serializers.serialize(
+        object.grantPermissions,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
       );
     }
-    return null;
+    if (object.revokePermissions != null) {
+      yield r'revoke_permissions';
+      yield serializers.serialize(
+        object.revokePermissions,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
+    yield r'user_id';
+    yield serializers.serialize(
+      object.userId,
+      specifiedType: const FullType(String),
+    );
   }
 
-  static List<UpdateUserPermissionsRequest> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    UpdateUserPermissionsRequest object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <UpdateUserPermissionsRequest>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = UpdateUserPermissionsRequest.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, UpdateUserPermissionsRequest> mapFromJson(dynamic json) {
-    final map = <String, UpdateUserPermissionsRequest>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = UpdateUserPermissionsRequest.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of UpdateUserPermissionsRequest-objects as value to a dart map
-  static Map<String, List<UpdateUserPermissionsRequest>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required UpdateUserPermissionsRequestBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<UpdateUserPermissionsRequest>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = UpdateUserPermissionsRequest.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'grant_permissions':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.grantPermissions.replace(valueDes);
+          break;
+        case r'revoke_permissions':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.revokePermissions.replace(valueDes);
+          break;
+        case r'user_id':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.userId = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'user_id',
-  };
+  @override
+  UpdateUserPermissionsRequest deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = UpdateUserPermissionsRequestBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

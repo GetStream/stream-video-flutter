@@ -1,198 +1,234 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'api_error.g.dart';
 
-class APIError {
-  /// Returns a new [APIError] instance.
-  APIError({
-    required this.statusCode,
-    required this.code,
-    this.details = const [],
-    required this.duration,
-    this.exceptionFields = const {},
-    required this.message,
-    required this.moreInfo,
-    this.unrecoverable,
-  });
-
+/// APIError
+///
+/// Properties:
+/// * [statusCode] - Response HTTP status code
+/// * [code] - API error code
+/// * [details] - Additional error-specific information
+/// * [duration] - Request duration
+/// * [exceptionFields] - Additional error info
+/// * [message] - Message describing an error
+/// * [moreInfo] - URL with additional information
+/// * [unrecoverable] - Flag that indicates if the error is unrecoverable, requests that return unrecoverable errors should not be retried, this error only applies to the request that caused it
+@BuiltValue()
+abstract class APIError implements Built<APIError, APIErrorBuilder> {
   /// Response HTTP status code
-  int statusCode;
+  @BuiltValueField(wireName: r'StatusCode')
+  int get statusCode;
 
   /// API error code
-  int code;
+  @BuiltValueField(wireName: r'code')
+  int get code;
 
   /// Additional error-specific information
-  List<int> details;
+  @BuiltValueField(wireName: r'details')
+  BuiltList<int> get details;
 
   /// Request duration
-  String duration;
+  @BuiltValueField(wireName: r'duration')
+  String get duration;
 
   /// Additional error info
-  Map<String, String> exceptionFields;
+  @BuiltValueField(wireName: r'exception_fields')
+  BuiltMap<String, String>? get exceptionFields;
 
   /// Message describing an error
-  String message;
+  @BuiltValueField(wireName: r'message')
+  String get message;
 
   /// URL with additional information
-  String moreInfo;
+  @BuiltValueField(wireName: r'more_info')
+  String get moreInfo;
 
   /// Flag that indicates if the error is unrecoverable, requests that return unrecoverable errors should not be retried, this error only applies to the request that caused it
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? unrecoverable;
+  @BuiltValueField(wireName: r'unrecoverable')
+  bool? get unrecoverable;
+
+  APIError._();
+
+  factory APIError([void updates(APIErrorBuilder b)]) = _$APIError;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(APIErrorBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<APIError> get serializer => _$APIErrorSerializer();
+}
+
+class _$APIErrorSerializer implements PrimitiveSerializer<APIError> {
+  @override
+  final Iterable<Type> types = const [APIError, _$APIError];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is APIError &&
-          other.statusCode == statusCode &&
-          other.code == code &&
-          _deepEquality.equals(other.details, details) &&
-          other.duration == duration &&
-          _deepEquality.equals(other.exceptionFields, exceptionFields) &&
-          other.message == message &&
-          other.moreInfo == moreInfo &&
-          other.unrecoverable == unrecoverable;
+  final String wireName = r'APIError';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (statusCode.hashCode) +
-      (code.hashCode) +
-      (details.hashCode) +
-      (duration.hashCode) +
-      (exceptionFields.hashCode) +
-      (message.hashCode) +
-      (moreInfo.hashCode) +
-      (unrecoverable == null ? 0 : unrecoverable!.hashCode);
-
-  @override
-  String toString() =>
-      'APIError[statusCode=$statusCode, code=$code, details=$details, duration=$duration, exceptionFields=$exceptionFields, message=$message, moreInfo=$moreInfo, unrecoverable=$unrecoverable]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'StatusCode'] = this.statusCode;
-    json[r'code'] = this.code;
-    json[r'details'] = this.details;
-    json[r'duration'] = this.duration;
-    json[r'exception_fields'] = this.exceptionFields;
-    json[r'message'] = this.message;
-    json[r'more_info'] = this.moreInfo;
-    if (this.unrecoverable != null) {
-      json[r'unrecoverable'] = this.unrecoverable;
-    } else {
-      json[r'unrecoverable'] = null;
-    }
-    return json;
-  }
-
-  /// Returns a new [APIError] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static APIError? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "APIError[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "APIError[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return APIError(
-        statusCode: mapValueOfType<int>(json, r'StatusCode')!,
-        code: mapValueOfType<int>(json, r'code')!,
-        details: json[r'details'] is Iterable
-            ? (json[r'details'] as Iterable).cast<int>().toList(growable: false)
-            : const [],
-        duration: mapValueOfType<String>(json, r'duration')!,
-        exceptionFields:
-            mapCastOfType<String, String>(json, r'exception_fields') ??
-                const {},
-        message: mapValueOfType<String>(json, r'message')!,
-        moreInfo: mapValueOfType<String>(json, r'more_info')!,
-        unrecoverable: mapValueOfType<bool>(json, r'unrecoverable'),
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    APIError object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'StatusCode';
+    yield serializers.serialize(
+      object.statusCode,
+      specifiedType: const FullType(int),
+    );
+    yield r'code';
+    yield serializers.serialize(
+      object.code,
+      specifiedType: const FullType(int),
+    );
+    yield r'details';
+    yield serializers.serialize(
+      object.details,
+      specifiedType: const FullType(BuiltList, [FullType(int)]),
+    );
+    yield r'duration';
+    yield serializers.serialize(
+      object.duration,
+      specifiedType: const FullType(String),
+    );
+    if (object.exceptionFields != null) {
+      yield r'exception_fields';
+      yield serializers.serialize(
+        object.exceptionFields,
+        specifiedType:
+            const FullType(BuiltMap, [FullType(String), FullType(String)]),
       );
     }
-    return null;
+    yield r'message';
+    yield serializers.serialize(
+      object.message,
+      specifiedType: const FullType(String),
+    );
+    yield r'more_info';
+    yield serializers.serialize(
+      object.moreInfo,
+      specifiedType: const FullType(String),
+    );
+    if (object.unrecoverable != null) {
+      yield r'unrecoverable';
+      yield serializers.serialize(
+        object.unrecoverable,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
-  static List<APIError> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    APIError object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <APIError>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = APIError.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, APIError> mapFromJson(dynamic json) {
-    final map = <String, APIError>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = APIError.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of APIError-objects as value to a dart map
-  static Map<String, List<APIError>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required APIErrorBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<APIError>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = APIError.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'StatusCode':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.statusCode = valueDes;
+          break;
+        case r'code':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.code = valueDes;
+          break;
+        case r'details':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(int)]),
+          ) as BuiltList<int>;
+          result.details.replace(valueDes);
+          break;
+        case r'duration':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.duration = valueDes;
+          break;
+        case r'exception_fields':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType(BuiltMap, [FullType(String), FullType(String)]),
+          ) as BuiltMap<String, String>;
+          result.exceptionFields.replace(valueDes);
+          break;
+        case r'message':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.message = valueDes;
+          break;
+        case r'more_info':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.moreInfo = valueDes;
+          break;
+        case r'unrecoverable':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.unrecoverable = valueDes;
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'StatusCode',
-    'code',
-    'details',
-    'duration',
-    'message',
-    'more_info',
-  };
+  @override
+  APIError deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = APIErrorBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }

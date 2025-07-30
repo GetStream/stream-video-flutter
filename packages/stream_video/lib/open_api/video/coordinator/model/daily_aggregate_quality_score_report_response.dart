@@ -1,132 +1,134 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: unused_element
+import 'package:stream_video/open_api/video/coordinator/model/quality_score_report.dart';
+import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
-part of openapi.api;
+part 'daily_aggregate_quality_score_report_response.g.dart';
 
-class DailyAggregateQualityScoreReportResponse {
-  /// Returns a new [DailyAggregateQualityScoreReportResponse] instance.
-  DailyAggregateQualityScoreReportResponse({
-    required this.date,
-    required this.report,
-  });
+/// DailyAggregateQualityScoreReportResponse
+///
+/// Properties:
+/// * [date]
+/// * [report]
+@BuiltValue()
+abstract class DailyAggregateQualityScoreReportResponse
+    implements
+        Built<DailyAggregateQualityScoreReportResponse,
+            DailyAggregateQualityScoreReportResponseBuilder> {
+  @BuiltValueField(wireName: r'date')
+  String get date;
 
-  String date;
+  @BuiltValueField(wireName: r'report')
+  QualityScoreReport get report;
 
-  QualityScoreReport report;
+  DailyAggregateQualityScoreReportResponse._();
+
+  factory DailyAggregateQualityScoreReportResponse(
+          [void updates(DailyAggregateQualityScoreReportResponseBuilder b)]) =
+      _$DailyAggregateQualityScoreReportResponse;
+
+  @BuiltValueHook(initializeBuilder: true)
+  static void _defaults(DailyAggregateQualityScoreReportResponseBuilder b) => b;
+
+  @BuiltValueSerializer(custom: true)
+  static Serializer<DailyAggregateQualityScoreReportResponse> get serializer =>
+      _$DailyAggregateQualityScoreReportResponseSerializer();
+}
+
+class _$DailyAggregateQualityScoreReportResponseSerializer
+    implements PrimitiveSerializer<DailyAggregateQualityScoreReportResponse> {
+  @override
+  final Iterable<Type> types = const [
+    DailyAggregateQualityScoreReportResponse,
+    _$DailyAggregateQualityScoreReportResponse
+  ];
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DailyAggregateQualityScoreReportResponse &&
-          other.date == date &&
-          other.report == report;
+  final String wireName = r'DailyAggregateQualityScoreReportResponse';
 
-  @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (date.hashCode) + (report.hashCode);
-
-  @override
-  String toString() =>
-      'DailyAggregateQualityScoreReportResponse[date=$date, report=$report]';
-
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'date'] = this.date;
-    json[r'report'] = this.report;
-    return json;
+  Iterable<Object?> _serializeProperties(
+    Serializers serializers,
+    DailyAggregateQualityScoreReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
+  }) sync* {
+    yield r'date';
+    yield serializers.serialize(
+      object.date,
+      specifiedType: const FullType(String),
+    );
+    yield r'report';
+    yield serializers.serialize(
+      object.report,
+      specifiedType: const FullType(QualityScoreReport),
+    );
   }
 
-  /// Returns a new [DailyAggregateQualityScoreReportResponse] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static DailyAggregateQualityScoreReportResponse? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
-
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "DailyAggregateQualityScoreReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "DailyAggregateQualityScoreReportResponse[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
-
-      return DailyAggregateQualityScoreReportResponse(
-        date: mapValueOfType<String>(json, r'date')!,
-        report: QualityScoreReport.fromJson(json[r'report'])!,
-      );
-    }
-    return null;
-  }
-
-  static List<DailyAggregateQualityScoreReportResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
+  @override
+  Object serialize(
+    Serializers serializers,
+    DailyAggregateQualityScoreReportResponse object, {
+    FullType specifiedType = FullType.unspecified,
   }) {
-    final result = <DailyAggregateQualityScoreReportResponse>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = DailyAggregateQualityScoreReportResponse.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+    return _serializeProperties(serializers, object,
+            specifiedType: specifiedType)
+        .toList();
   }
 
-  static Map<String, DailyAggregateQualityScoreReportResponse> mapFromJson(
-      dynamic json) {
-    final map = <String, DailyAggregateQualityScoreReportResponse>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value =
-            DailyAggregateQualityScoreReportResponse.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
-  }
-
-  // maps a json object with a list of DailyAggregateQualityScoreReportResponse-objects as value to a dart map
-  static Map<String, List<DailyAggregateQualityScoreReportResponse>>
-      mapListFromJson(
-    dynamic json, {
-    bool growable = false,
+  void _deserializeProperties(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+    required List<Object?> serializedList,
+    required DailyAggregateQualityScoreReportResponseBuilder result,
+    required List<Object?> unhandled,
   }) {
-    final map = <String, List<DailyAggregateQualityScoreReportResponse>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = DailyAggregateQualityScoreReportResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+    for (var i = 0; i < serializedList.length; i += 2) {
+      final key = serializedList[i] as String;
+      final value = serializedList[i + 1];
+      switch (key) {
+        case r'date':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.date = valueDes;
+          break;
+        case r'report':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(QualityScoreReport),
+          ) as QualityScoreReport;
+          result.report.replace(valueDes);
+          break;
+        default:
+          unhandled.add(key);
+          unhandled.add(value);
+          break;
       }
     }
-    return map;
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'date',
-    'report',
-  };
+  @override
+  DailyAggregateQualityScoreReportResponse deserialize(
+    Serializers serializers,
+    Object serialized, {
+    FullType specifiedType = FullType.unspecified,
+  }) {
+    final result = DailyAggregateQualityScoreReportResponseBuilder();
+    final serializedList = (serialized as Iterable<Object?>).toList();
+    final unhandled = <Object?>[];
+    _deserializeProperties(
+      serializers,
+      serialized,
+      specifiedType: specifiedType,
+      serializedList: serializedList,
+      unhandled: unhandled,
+      result: result,
+    );
+    return result.build();
+  }
 }
