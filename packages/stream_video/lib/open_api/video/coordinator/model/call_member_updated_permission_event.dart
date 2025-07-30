@@ -95,13 +95,10 @@ class CallMemberUpdatedPermissionEvent {
       return CallMemberUpdatedPermissionEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        //MANUAL_EDIT mapCast
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
-            : mapCastOfType<String, List<String>>(
-                    json, r'capabilities_by_role') ??
-                const {},
-        createdAt: mapDateTime(json, r'created_at', '')!,
+            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         members: MemberResponse.listFromJson(json[r'members']),
         type: mapValueOfType<String>(json, r'type')!,
       );

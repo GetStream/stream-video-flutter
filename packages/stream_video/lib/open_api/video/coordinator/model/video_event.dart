@@ -434,12 +434,9 @@ class VideoEvent {
         url: mapValueOfType<String>(json, r'url')!,
         users: UserResponse.mapFromJson(json[r'users']),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        //MANUAL_EDIT mapCast
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
-            : mapCastOfType<String, List<String>>(
-                    json, r'capabilities_by_role') ??
-                const {},
+            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
         notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
         userId: mapValueOfType<String>(json, r'user_id')!,
         message: mapValueOfType<String>(json, r'message')!,

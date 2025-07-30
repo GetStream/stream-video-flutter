@@ -177,25 +177,19 @@ class CallSessionResponse {
       }());
 
       return CallSessionResponse(
-        // MANUAL_EDIT: mapCastOfType().convertValueToDateTime() instead of mapFromJson()
-        acceptedBy: mapCastOfType<String, String>(json, r'accepted_by')!
-            .convertValueToDateTime(),
+        acceptedBy: DateTime.mapFromJson(json[r'accepted_by']),
         anonymousParticipantCount:
             mapValueOfType<int>(json, r'anonymous_participant_count')!,
         endedAt: mapDateTime(json, r'ended_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
         liveEndedAt: mapDateTime(json, r'live_ended_at', r''),
         liveStartedAt: mapDateTime(json, r'live_started_at', r''),
-        // MANUAL_EDIT: mapCastOfType().convertValueToDateTime() instead of mapFromJson()
-        missedBy: mapCastOfType<String, String>(json, r'missed_by')!
-            .convertValueToDateTime(),
+        missedBy: DateTime.mapFromJson(json[r'missed_by']),
         participants:
             CallParticipantResponse.listFromJson(json[r'participants']),
         participantsCountByRole:
             mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        // MANUAL_EDIT: mapCastOfType().convertValueToDateTime() instead of mapFromJson()
-        rejectedBy: mapCastOfType<String, String>(json, r'rejected_by')!
-            .convertValueToDateTime(),
+        rejectedBy: DateTime.mapFromJson(json[r'rejected_by']),
         startedAt: mapDateTime(json, r'started_at', r''),
         timerEndsAt: mapDateTime(json, r'timer_ends_at', r''),
       );

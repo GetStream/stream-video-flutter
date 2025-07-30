@@ -36,8 +36,7 @@ class UserResponse {
   DateTime createdAt;
 
   /// Custom data for this object
-  // MANUAL_EDIT: allow null values
-  Map<String, Object?> custom;
+  Map<String, Object> custom;
 
   /// Date of deactivation
   ///
@@ -226,8 +225,7 @@ class UserResponse {
                 .toList(growable: false)
             : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        // MANUAL_EDIT: allow null values
-        custom: mapCastOfType<String, Object?>(json, r'custom')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         id: mapValueOfType<String>(json, r'id')!,

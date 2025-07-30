@@ -73,10 +73,8 @@ class TranscriptionSettingsResponse {
         closedCaptionMode:
             TranscriptionSettingsResponseClosedCaptionModeEnum.fromJson(
                 json[r'closed_caption_mode'])!,
-        //MANUAL_EDIT: default value added since sometimes language came as an empty string
         language: TranscriptionSettingsResponseLanguageEnum.fromJson(
-                json[r'language']) ??
-            TranscriptionSettingsResponseLanguageEnum.auto,
+            json[r'language'])!,
         mode: TranscriptionSettingsResponseModeEnum.fromJson(json[r'mode'])!,
       );
     }

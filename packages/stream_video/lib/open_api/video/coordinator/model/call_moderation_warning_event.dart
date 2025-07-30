@@ -10,65 +10,69 @@
 
 part of openapi.api;
 
-class CallUpdatedEvent {
-  /// Returns a new [CallUpdatedEvent] instance.
-  CallUpdatedEvent({
-    required this.call,
+class CallModerationWarningEvent {
+  /// Returns a new [CallModerationWarningEvent] instance.
+  CallModerationWarningEvent({
     required this.callCid,
-    this.capabilitiesByRole = const {},
     required this.createdAt,
-    this.type = 'call.updated',
+    this.custom = const {},
+    required this.message,
+    this.type = 'call.moderation_warning',
+    required this.userId,
   });
-
-  CallResponse call;
 
   String callCid;
 
-  /// The capabilities by role for this call
-  Map<String, List<String>> capabilitiesByRole;
-
   DateTime createdAt;
 
-  /// The type of event: \"call.ended\" in this case
+  Map<String, Object> custom;
+
+  String message;
+
   String type;
+
+  String userId;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CallUpdatedEvent &&
-          other.call == call &&
+      other is CallModerationWarningEvent &&
           other.callCid == callCid &&
-          _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
           other.createdAt == createdAt &&
-          other.type == type;
+          _deepEquality.equals(other.custom, custom) &&
+          other.message == message &&
+          other.type == type &&
+          other.userId == userId;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (call.hashCode) +
       (callCid.hashCode) +
-      (capabilitiesByRole.hashCode) +
       (createdAt.hashCode) +
-      (type.hashCode);
+      (custom.hashCode) +
+      (message.hashCode) +
+      (type.hashCode) +
+      (userId.hashCode);
 
   @override
   String toString() =>
-      'CallUpdatedEvent[call=$call, callCid=$callCid, capabilitiesByRole=$capabilitiesByRole, createdAt=$createdAt, type=$type]';
+      'CallModerationWarningEvent[callCid=$callCid, createdAt=$createdAt, custom=$custom, message=$message, type=$type, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'call'] = this.call;
     json[r'call_cid'] = this.callCid;
-    json[r'capabilities_by_role'] = this.capabilitiesByRole;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'custom'] = this.custom;
+    json[r'message'] = this.message;
     json[r'type'] = this.type;
+    json[r'user_id'] = this.userId;
     return json;
   }
 
-  /// Returns a new [CallUpdatedEvent] instance and imports its values from
+  /// Returns a new [CallModerationWarningEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallUpdatedEvent? fromJson(dynamic value) {
+  static CallModerationWarningEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -78,34 +82,33 @@ class CallUpdatedEvent {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "CallUpdatedEvent[$key]" is missing from JSON.');
+              'Required key "CallModerationWarningEvent[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "CallUpdatedEvent[$key]" has a null value in JSON.');
+              'Required key "CallModerationWarningEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallUpdatedEvent(
-        call: CallResponse.fromJson(json[r'call'])!,
+      return CallModerationWarningEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        capabilitiesByRole: json[r'capabilities_by_role'] == null
-            ? const {}
-            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        message: mapValueOfType<String>(json, r'message')!,
         type: mapValueOfType<String>(json, r'type')!,
+        userId: mapValueOfType<String>(json, r'user_id')!,
       );
     }
     return null;
   }
 
-  static List<CallUpdatedEvent> listFromJson(
+  static List<CallModerationWarningEvent> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <CallUpdatedEvent>[];
+    final result = <CallModerationWarningEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallUpdatedEvent.fromJson(row);
+        final value = CallModerationWarningEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -114,12 +117,12 @@ class CallUpdatedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallUpdatedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallUpdatedEvent>{};
+  static Map<String, CallModerationWarningEvent> mapFromJson(dynamic json) {
+    final map = <String, CallModerationWarningEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallUpdatedEvent.fromJson(entry.value);
+        final value = CallModerationWarningEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -128,17 +131,17 @@ class CallUpdatedEvent {
     return map;
   }
 
-  // maps a json object with a list of CallUpdatedEvent-objects as value to a dart map
-  static Map<String, List<CallUpdatedEvent>> mapListFromJson(
+  // maps a json object with a list of CallModerationWarningEvent-objects as value to a dart map
+  static Map<String, List<CallModerationWarningEvent>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<CallUpdatedEvent>>{};
+    final map = <String, List<CallModerationWarningEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallUpdatedEvent.listFromJson(
+        map[entry.key] = CallModerationWarningEvent.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -149,10 +152,11 @@ class CallUpdatedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call',
     'call_cid',
-    'capabilities_by_role',
     'created_at',
+    'custom',
+    'message',
     'type',
+    'user_id',
   };
 }

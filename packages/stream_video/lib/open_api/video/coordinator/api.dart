@@ -28,7 +28,7 @@ part 'auth/oauth.dart';
 part 'auth/http_basic_auth.dart';
 part 'auth/http_bearer_auth.dart';
 
-part 'api/productvideo_api.dart';
+part 'api/product_video_api.dart';
 
 part 'model/api_error.dart';
 part 'model/accept_call_response.dart';
@@ -68,6 +68,8 @@ part 'model/call_member_removed_event.dart';
 part 'model/call_member_updated_event.dart';
 part 'model/call_member_updated_permission_event.dart';
 part 'model/call_missed_event.dart';
+part 'model/call_moderation_blur_event.dart';
+part 'model/call_moderation_warning_event.dart';
 part 'model/call_notification_event.dart';
 part 'model/call_participant_count_report.dart';
 part 'model/call_participant_count_report_response.dart';
@@ -277,7 +279,6 @@ part 'model/user_request.dart';
 part 'model/user_response.dart';
 part 'model/user_response_privacy_fields.dart';
 part 'model/user_updated_event.dart';
-part 'model/video_dimension.dart';
 part 'model/video_event.dart';
 part 'model/video_reaction_over_time_response.dart';
 part 'model/video_reactions_response.dart';

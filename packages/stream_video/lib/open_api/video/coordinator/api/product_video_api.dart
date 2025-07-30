@@ -10,8 +10,8 @@
 
 part of openapi.api;
 
-class ProductvideoApi {
-  ProductvideoApi([ApiClient? apiClient])
+class ProductVideoApi {
+  ProductVideoApi([ApiClient? apiClient])
       : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
@@ -295,8 +295,7 @@ class ProductvideoApi {
   ///
   /// * [CreateDeviceRequest] createDeviceRequest (required):
   ///   CreateDeviceRequest
-  // MANUAL_EDIT Response -> DurationResponse
-  Future<DurationResponse?> createDevice(
+  Future<Response?> createDevice(
     CreateDeviceRequest createDeviceRequest,
   ) async {
     final response = await createDeviceWithHttpInfo(
@@ -312,8 +311,8 @@ class ProductvideoApi {
         response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
-        'DurationResponse',
-      ) as DurationResponse;
+        'Response',
+      ) as Response;
     }
     return null;
   }
@@ -508,8 +507,7 @@ class ProductvideoApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  // MANUAL_EDIT Response -> DurationResponse
-  Future<DurationResponse?> deleteDevice(
+  Future<Response?> deleteDevice(
     String id,
   ) async {
     final response = await deleteDeviceWithHttpInfo(
@@ -525,8 +523,8 @@ class ProductvideoApi {
         response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
-        'DurationResponse',
-      ) as DurationResponse;
+        'Response',
+      ) as Response;
     }
     return null;
   }
