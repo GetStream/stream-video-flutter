@@ -13,6 +13,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import com.hiennv.flutter_callkit_incoming.CallkitNotificationManager
+import com.hiennv.flutter_callkit_incoming.FlutterCallkitIncomingPlugin
 
 /** StreamVideoPushNotificationPlugin */
 class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -27,7 +28,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "stream_video_push_notification")
     channel.setMethodCallHandler(this)
 
-    callkitNotificationManager = CallkitNotificationManager(flutterPluginBinding.applicationContext)
+    callkitNotificationManager = FlutterCallkitIncomingPlugin.getInstance()?.getCallkitNotificationManager() ?: CallkitNotificationManager(flutterPluginBinding.applicationContext, null)
   }
 
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
