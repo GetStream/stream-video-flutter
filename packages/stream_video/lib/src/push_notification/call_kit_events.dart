@@ -131,6 +131,17 @@ class ActionCallCallback extends CallKitEvent {
   List<Object?> get props => [data];
 }
 
+class ActionCallConnected extends CallKitEvent {
+  /// Creates an [ActionCallConnected] event instance with the specified [data].
+  const ActionCallConnected({required this.data});
+
+  /// The call data associated with the call that was called back.
+  final CallData data;
+
+  @override
+  List<Object?> get props => [data];
+}
+
 /// Represents a call toggle hold event.
 ///
 /// Note: This event is only available on iOS.

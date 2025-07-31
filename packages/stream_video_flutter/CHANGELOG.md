@@ -6,6 +6,13 @@
 ✅ Added
 * Added support for setting video filters before the video track is created by listening for local participant state changes and applying the filters once the video is enabled.
 * Added support for setting video filters on a specific video track before the local participant is available — useful for scenarios like lobby previews with a temporary video track.
+* Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+
+🔄 Changed
+* Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
+
+🔄 Dependency updates
+* Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
 
 ## 0.10.1
 
