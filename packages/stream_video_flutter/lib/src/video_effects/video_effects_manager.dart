@@ -99,6 +99,8 @@ class StreamVideoEffectsManager {
     List<String> names, {
     RtcLocalTrack? track,
   }) async {
+    _appliedVideoEffects = names;
+
     await _localVideoTrackSubscription?.cancel();
     _localVideoTrackSubscription =
         call.partialState((s) => s.localParticipant?.isVideoEnabled).listen(
@@ -112,8 +114,6 @@ class StreamVideoEffectsManager {
         }
       },
     );
-
-    _appliedVideoEffects = names;
 
     final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {
@@ -156,6 +156,9 @@ class StreamVideoEffectsManager {
       return;
     }
 
+    _appliedVideoEffects = [];
+    await _localVideoTrackSubscription?.cancel();
+
     final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {
       return;
@@ -165,9 +168,6 @@ class StreamVideoEffectsManager {
       trackId,
       names: [],
     );
-
-    _appliedVideoEffects = [];
-    await _localVideoTrackSubscription?.cancel();
   }
 
   Future<String?> _getTrackId() async {
