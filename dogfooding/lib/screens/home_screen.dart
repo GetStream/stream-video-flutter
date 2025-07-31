@@ -116,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
               CallRoute($extra: (
                 call: _call!,
                 connectOptions: null,
+                effectsManager: null,
               )).push(context);
             } else {
               LobbyRoute($extra: _call!).push(context);

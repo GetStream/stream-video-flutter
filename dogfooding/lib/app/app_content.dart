@@ -154,6 +154,7 @@ class _StreamDogFoodingAppContentState
             final extra = (
               call: call,
               connectOptions: null,
+              effectsManager: null,
             );
 
             _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -179,6 +180,7 @@ class _StreamDogFoodingAppContentState
             final extra = (
               call: callToJoin,
               connectOptions: null,
+              effectsManager: null,
             );
 
             _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -193,6 +195,7 @@ class _StreamDogFoodingAppContentState
         final extra = (
           call: call,
           connectOptions: null,
+          effectsManager: null,
         );
 
         _router.push(CallRoute($extra: extra).location, extra: extra);

@@ -45,12 +45,13 @@ class LobbyRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) {
     return LobbyScreen(
       call: $extra,
-      onJoinCallPressed: (connectOptions) {
+      onJoinCallPressed: (connectOptions, effectsManager) {
         // Navigate to the call screen.
         CallRoute(
           $extra: (
             call: $extra,
             connectOptions: connectOptions,
+            effectsManager: effectsManager,
           ),
         ).replace(context);
       },
@@ -79,6 +80,7 @@ class CallRoute extends GoRouteData {
   final ({
     Call call,
     CallConnectOptions? connectOptions,
+    StreamVideoEffectsManager? effectsManager,
   }) $extra;
 
   @override
@@ -86,6 +88,7 @@ class CallRoute extends GoRouteData {
     return CallScreen(
       call: $extra.call,
       connectOptions: $extra.connectOptions,
+      videoEffectsManager: $extra.effectsManager,
     );
   }
 }

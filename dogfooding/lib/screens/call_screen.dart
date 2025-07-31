@@ -31,10 +31,12 @@ class CallScreen extends StatefulWidget {
     super.key,
     required this.call,
     this.connectOptions,
+    this.videoEffectsManager,
   });
 
   final Call call;
   final CallConnectOptions? connectOptions;
+  final StreamVideoEffectsManager? videoEffectsManager;
 
   @override
   State<CallScreen> createState() => _CallScreenState();
@@ -42,7 +44,8 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
-  late final _videoEffectsManager = StreamVideoEffectsManager(widget.call);
+  late final _videoEffectsManager =
+      widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
@@ -58,6 +61,7 @@ class _CallScreenState extends State<CallScreen> {
   void dispose() {
     widget.call.leave();
     _userChatRepo.disconnectUser();
+    _videoEffectsManager.dispose();
     super.dispose();
   }
 

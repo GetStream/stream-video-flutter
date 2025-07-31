@@ -70,34 +70,6 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   bool get hasMicrophoneEnabled => _microphoneTrack != null;
 
-  Future<void> toggleCamera() async {
-    if (hasCameraEnabled) {
-      await _cameraTrack?.stop();
-      return setState(() => _cameraTrack = null);
-    }
-
-    try {
-      final cameraTrack = await RtcLocalTrack.camera();
-      return setState(() => _cameraTrack = cameraTrack);
-    } catch (e) {
-      _logger.w(() => 'Error creating camera track: $e');
-    }
-  }
-
-  Future<void> toggleMicrophone() async {
-    if (hasMicrophoneEnabled) {
-      await _microphoneTrack?.stop();
-      return setState(() => _microphoneTrack = null);
-    }
-
-    try {
-      final microphoneTrack = await RtcLocalTrack.audio();
-      return setState(() => _microphoneTrack = microphoneTrack);
-    } catch (e) {
-      _logger.w(() => 'Error creating microphone track: $e');
-    }
-  }
-
   void onJoinCallPressed() {
     var options = const CallConnectOptions();
 
