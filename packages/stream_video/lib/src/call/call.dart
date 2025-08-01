@@ -963,6 +963,7 @@ class Call {
 
     if (credentials == null ||
         _sfuStatsOptions == null ||
+        forceMigratingFrom != null ||
         _reconnectStrategy == SfuReconnectionStrategy.rejoin ||
         _reconnectStrategy == SfuReconnectionStrategy.migrate) {
       _logger.d(() => '[joinIfNeeded] joining');
