@@ -135,7 +135,7 @@ class StreamVideo extends Disposable {
   }
 
   StreamVideo._(
-    String apiKey, {
+    this.apiKey, {
     required User user,
     required StreamVideoOptions options,
     String? userToken,
@@ -244,6 +244,7 @@ class StreamVideo extends Disposable {
   final _logger = taggedLogger(tag: _tag);
 
   final StreamVideoOptions _options;
+  final String apiKey;
 
   @Deprecated('Use options.muteVideoWhenInBackground instead')
   bool get muteVideoWhenInBackground => _options.muteVideoWhenInBackground;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 
 import '../errors/video_error.dart';
@@ -196,3 +198,13 @@ extension PatternMatching<T> on Result<T> {
 }
 
 T _identity<T>(T x) => x;
+
+Future<Result<T>> runCatchingResult<T>(
+  FutureOr<Result<T>> Function() fn,
+) async {
+  try {
+    return fn();
+  } catch (e, stackTrace) {
+    return Result.errorWithCause(e.toString(), e, stackTrace);
+  }
+}
