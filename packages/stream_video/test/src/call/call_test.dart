@@ -26,6 +26,76 @@ void main() {
       expect(result, isA<Result<None>>());
       expect(result.isSuccess, isTrue);
     });
+
+    test(
+        'join call should migrate to new SFU after 2 failures, and make 3 attempts to join the call',
+        () async {
+      final mockCallSession = setupMockCallSession();
+      final mockSessionFactory =
+          setupMockSessionFactory(callSession: mockCallSession);
+
+      final coordinatorClient = setupMockCoordinatorClient();
+
+      when(
+        () => mockCallSession.start(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          onRtcManagerCreatedCallback:
+              any(named: 'onRtcManagerCreatedCallback'),
+          isAnonymousUser: any(named: 'isAnonymousUser'),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.failure(
+          VideoError(message: 'Failed to start session'),
+        ),
+      );
+
+      final call = createTestCall(
+        sessionFactory: mockSessionFactory,
+        coordinatorClient: coordinatorClient,
+      );
+
+      await call.join();
+
+      // Migrate to new SFU after 2 failures
+      // Make 3 attempts to join the call (start the session)
+      verifyInOrder([
+        () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              ringing: any(named: 'ringing'),
+              create: any(named: 'create'),
+              migratingFrom: null,
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+            ),
+        () => mockCallSession.start(
+              reconnectDetails: any(named: 'reconnectDetails'),
+              onRtcManagerCreatedCallback:
+                  any(named: 'onRtcManagerCreatedCallback'),
+              isAnonymousUser: any(named: 'isAnonymousUser'),
+            ),
+        () => mockCallSession.start(
+              reconnectDetails: any(named: 'reconnectDetails'),
+              onRtcManagerCreatedCallback:
+                  any(named: 'onRtcManagerCreatedCallback'),
+              isAnonymousUser: any(named: 'isAnonymousUser'),
+            ),
+        () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              ringing: any(named: 'ringing'),
+              create: any(named: 'create'),
+              migratingFrom: defaultCredentials.sfuServer.name,
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+            ),
+        () => mockCallSession.start(
+              reconnectDetails: any(named: 'reconnectDetails'),
+              onRtcManagerCreatedCallback:
+                  any(named: 'onRtcManagerCreatedCallback'),
+              isAnonymousUser: any(named: 'isAnonymousUser'),
+            ),
+      ]);
+    });
+
     test('should reconnect when internet connection is lost and recovered',
         () async {
       final internetStatusController =
