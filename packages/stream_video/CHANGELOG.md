@@ -6,6 +6,9 @@
 🔄 Changed
 * Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
 
+🐞 Fixed
+* Sorting of participants after screen sharing stopped.s
+
 🔄 Dependency updates
 * Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
 
