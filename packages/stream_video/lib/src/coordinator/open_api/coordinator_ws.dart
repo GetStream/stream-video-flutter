@@ -5,13 +5,13 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 
 import '../../../globals.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
+import '../../core/network_monitor_flutter.dart';
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
-import '../../types/other.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../ws/health/health_monitor.dart';
@@ -34,9 +34,7 @@ String _buildUrl(String baseUrl, String apiKey) {
       '&X-Stream-Client=$xStreamClientHeader';
 }
 
-class CoordinatorWebSocket extends StreamWebSocket
-    with ConnectionStateMixin
-    implements HealthListener {
+class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   CoordinatorWebSocket(
     String url, {
     Iterable<String>? protocols,
@@ -50,14 +48,27 @@ class CoordinatorWebSocket extends StreamWebSocket
           _buildUrl(url, apiKey),
           protocols: protocols,
           tag: '$_tag-${++_seq}',
+        ) {
+    onConnectionStateUpdated = (event) {
+      if (event.oldState == ConnectionState.reconnecting &&
+          event.newState == ConnectionState.connected) {
+        _events.emit(
+          CoordinatorReconnectedEvent(
+            userId: userId,
+            connectionId: connectionId,
+          ),
         );
+      }
+    };
+  }
 
   late final _logger = taggedLogger(tag: '$_tag-$_seq');
 
   late final HealthMonitor healthMonitor = HealthMonitorImpl(
     'Coord',
     this,
-    networkMonitor: networkMonitor,
+    networkMonitor:
+        NetworkMonitorFlutter.fromInternetConnection(networkMonitor),
   );
 
   /// The API key used to authenticate the user.

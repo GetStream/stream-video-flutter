@@ -13,7 +13,6 @@ import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_error.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/state_emitter.dart';
@@ -37,6 +36,13 @@ const defaultCredentials = CallCredentials(
   ),
 );
 
+const defaultMediaDevice = RtcMediaDevice(
+  id: 'fallback-device',
+  label: 'Fallback Device',
+  kind: RtcMediaDeviceKind.audioInput,
+  groupId: 'fallback-group',
+);
+
 const defaultUserInfo = UserInfo(id: 'testUserId');
 
 void registerMockFallbackValues() {
@@ -52,6 +58,7 @@ void registerMockFallbackValues() {
     StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
   );
   registerFallbackValue(SfuReconnectionStrategy.fast);
+  registerFallbackValue(defaultMediaDevice);
 }
 
 Call createStubCall({

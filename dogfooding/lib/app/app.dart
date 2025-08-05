@@ -10,8 +10,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
 import 'package:flutter_dogfooding/screens/splash_screen.dart';
 import 'package:flutter_dogfooding/utils/consts.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart'
-    hide ConnectionState;
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../firebase_options.dart';

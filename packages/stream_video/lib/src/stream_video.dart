@@ -453,6 +453,15 @@ class StreamVideo extends Disposable {
         event.metadata.details.createdBy.id != currentUserId &&
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
+
+      // In a edge case where call with the same CID as the incoming call is also an outgoing call
+      // we want to use the same Call instance.
+      if (state.outgoingCall.valueOrNull?.callCid.value ==
+          event.data.callCid.value) {
+        _state.incomingCall.value = state.outgoingCall.valueOrNull;
+        return;
+      }
+
       final call = _makeCallFromRinging(data: event.data);
       _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
@@ -465,6 +474,30 @@ class StreamVideo extends Disposable {
       _connectionState = ConnectionState.disconnected(
         _state.currentUser.id,
       );
+    } else if (event is CoordinatorReconnectedEvent) {
+      _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
+      if (state.watchedCalls.value.isNotEmpty) {
+        // Re-watch the previously watched calls.
+        unawaited(
+          queryCalls(
+            watch: true,
+            filterConditions: {
+              'cid': {
+                r'$in': state.watchedCalls.value
+                    .map((call) => call.callCid.value)
+                    .toList(),
+              },
+            },
+          ).onError(
+            (error, stackTrace) {
+              _logger.e(
+                () => '[onCoordinatorEvent] re-watching calls failed: $error',
+              );
+              return Result.failure(VideoErrors.compose(error, stackTrace));
+            },
+          ),
+        );
+      }
     }
   }
 
@@ -887,6 +920,8 @@ class StreamVideo extends Disposable {
 
     final createdById = payload['created_by_id'] as String?;
     final createdByName = payload['created_by_display_name'] as String?;
+    final callDisplayName = payload['call_display_name'] as String?;
+
     final hasVideo = payload['video'] as String?;
 
     final type = payload['type'] as String?;
@@ -895,7 +930,9 @@ class StreamVideo extends Disposable {
         manager.showMissedCall(
           uuid: callUUID,
           handle: createdById,
-          nameCaller: createdByName,
+          nameCaller: (callDisplayName?.isNotEmpty ?? false)
+              ? callDisplayName
+              : createdByName,
           callCid: callCid,
         ),
       );
@@ -916,7 +953,9 @@ class StreamVideo extends Disposable {
           manager.showIncomingCall(
             uuid: callUUID,
             handle: createdById,
-            nameCaller: createdByName,
+            nameCaller: (callDisplayName?.isNotEmpty ?? false)
+                ? callDisplayName
+                : createdByName,
             callCid: callCid,
             hasVideo: hasVideo != 'false',
           ),

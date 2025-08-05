@@ -265,25 +265,27 @@ struct PictureInPictureOverlayView: View {
             VStack {
                 Spacer()
                 HStack {
-                    HStack(spacing: 4) {
-                        if showParticipantName {
-                            Text(name)
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.leading)
-                                .lineLimit(1)
-                                .font(Font.caption)
-                                .minimumScaleFactor(0.7)
-                        }
+                    if showParticipantName || showMicrophoneIndicator {
+                        HStack(spacing: 4) {
+                            if showParticipantName {
+                                Text(name)
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(1)
+                                    .font(Font.caption)
+                                    .minimumScaleFactor(0.7)
+                            }
 
-                        if showMicrophoneIndicator {
-                            SoundIndicator(isMuted: isMuted)
+                            if showMicrophoneIndicator {
+                                SoundIndicator(isMuted: isMuted)
+                            }
                         }
+                        .padding(.horizontal, 4)
+                        .frame(height: 28)
+                        .padding(4)
+                        .background(Color.black.opacity(0.6))
+                        .cornerRadius(8)
                     }
-                    .padding(.horizontal, 4)
-                    .frame(height: 28)
-                    .padding(4)
-                    .background(Color.black.opacity(0.6))
-                    .cornerRadius(8)
 
                     Spacer()
 
@@ -413,7 +415,5 @@ public struct SoundIndicator: View {
             .aspectRatio(contentMode: .fit)
             .frame(width: 12, height: 12)
             .foregroundColor(!isMuted ? .white : Color(red: 1.0, green: 0.216, blue: 0.259))
-            .accessibility(identifier: "participantMic")
-            .accessibilityValue(!isMuted ? "1" : "0")
     }
 }

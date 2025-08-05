@@ -1,7 +1,7 @@
 name: stream_video
 description: The Official Low-level Client for Stream Video, a service for
   building video calls, audio rooms, and live-streaming applications.
-version: 0.9.6
+version: 0.10.1
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
@@ -31,7 +31,7 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^1.0.7
+  stream_webrtc_flutter: ^1.0.9
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1

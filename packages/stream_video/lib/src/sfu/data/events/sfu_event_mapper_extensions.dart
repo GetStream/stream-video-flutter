@@ -250,7 +250,7 @@ extension SfuConnectionQualityExtension on sfu_models.ConnectionQuality {
       case sfu_models.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED:
         return SfuConnectionQuality.unspecified;
       default:
-        throw StateError('unexpected quality: $this');
+        return SfuConnectionQuality.unspecified;
     }
   }
 }
@@ -265,7 +265,7 @@ extension SfuGoAwayReasonExtension on sfu_models.GoAwayReason {
       case sfu_models.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED:
         return SfuGoAwayReason.unspecified;
       default:
-        throw StateError('unexpected go away reason: $this');
+        return SfuGoAwayReason.unspecified;
     }
   }
 }
@@ -284,7 +284,7 @@ extension SfuCallEndedReasonExtension on sfu_models.CallEndedReason {
       case sfu_models.CallEndedReason.CALL_ENDED_REASON_SESSION_ENDED:
         return SfuCallEndedReason.sessionEnded;
       default:
-        throw StateError('unexpected call ended reason: $this');
+        return SfuCallEndedReason.unspecified;
     }
   }
 }
@@ -303,7 +303,7 @@ extension SfuTrackTypeExtension on sfu_models.TrackType {
       case sfu_models.TrackType.TRACK_TYPE_UNSPECIFIED:
         return SfuTrackType.unspecified;
       default:
-        throw StateError('unexpected track type: $this');
+        return SfuTrackType.unspecified;
     }
   }
 }

@@ -1,5 +1,32 @@
 ## Unreleased
 
+✅ Added
+* Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+
+🔄 Changed
+* Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
+
+🔄 Dependency updates
+* Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
+
+🐞 Fixed
+* (Android) CircleTransform Argument type mismatch on Bitmap.Config?
+
+## 0.10.1
+
+🐞 Fixed
+* (iOS) Fixed Picture-in-Picture (PiP) issue where remote participants joining during active PiP mode would not have their video tracks displayed properly.
+* (iOS) Fixed a visual issue where the Picture-in-Picture view displayed an empty container when participant name and microphone indicator settings were disabled.
+* Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
+* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash.
+* Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
+* Fixed an issue where changing the audio input device while muted from the start of a call would not apply the new device when unmuting. The selected device will now be correctly set upon unmuting.
+
+✅ Added
+* Added support for customization of display name for ringing notifications by providing `display_name` custom data to the call. See the [documentation](https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization) for details.
+
+## 0.10.0
+
 🚧 (Android) Picture-in-Picture (PiP) Improvements - Breaking Change
 * **Simplified Setup:** Introduced `StreamFlutterActivity` - extend it instead of `FlutterActivity` for automatic PiP support.
 * **Automatic Activation:** PiP now triggers automatically when users press home button or background the app during calls.
@@ -8,11 +35,24 @@
 * **Removed Deprecated Methods:** Removed the deprecated `setPictureInPictureEnabled` method from `StreamVideoFlutterPlatform`, `StreamVideoFlutterBackground`, and `MethodChannelStreamVideoFlutter` classes, and the deprecated `enterPictureInPictureIfInCall` method from `PictureInPictureHelper` (Android). PiP is now handled automatically by `StreamPictureInPictureAndroidView`.
 
 🔄 Partial State Updates:
+
+For a more detailed explanation check [the dedicated documentation](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video_flutter/docs/partial_state_update_changes.md).
 * Added `call.partialState` for more specific and efficient state updates.
 * Added callbacks in `StreamCallContainer`, `StreamCallContent`, `StreamIncomingCallContent`, and others that no longer return a state.
 By (only) using these callbacks the root widgets will use more efficient partial state updates.
 * Added `PartialCallStateBuilder` to help with making widgets that depend on `partialState`.
 * Deprecated old callbacks
+
+✅ Added
+* Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
+* Added `maxParticipantsExcludeOwner` and `maxParticipantsExcludeRoles` to Call limits settings, providing finer control over participant limits by allowing exclusion of call owners and specific roles from the maximum count.
+
+🐞 Fixed
+* Improved SFU error handling in Call flow and disconnect reason handling. The disconnected call state now accurately reflects the original cause of disconnection.
+* Fixed an issue where rejecting a ringing call on one device would incorrectly end the call for all already connected participants.
+* Enhanced fast reconnect mechanism with improved PeerConnection issue detection and recovery. The system now attempts multiple fast reconnects before falling back to a full call rejoin.
+* Fixed simulcast video quality by correcting resolution calculations and layer selection for optimal video track display.
+* Fixed an edge case where a call with the same CID as an incoming call is also an outgoing call to ensure the same Call instance is used.
 
 ## 0.9.6
 

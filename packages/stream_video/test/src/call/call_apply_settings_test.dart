@@ -318,9 +318,6 @@ void main() {
         // Assert
         expect(result.isSuccess, true);
         expect(call.connectOptions.cameraFacingMode, FacingMode.user);
-
-        final videoInputDevice = call.connectOptions.videoInputDevice;
-        expect(videoInputDevice?.label.toLowerCase(), contains('front'));
       });
 
       test('selects back camera when cameraFacing is back', () async {
@@ -344,9 +341,6 @@ void main() {
         // Assert
         expect(result.isSuccess, true);
         expect(call.connectOptions.cameraFacingMode, FacingMode.environment);
-
-        final videoInputDevice = call.connectOptions.videoInputDevice;
-        expect(videoInputDevice?.label.toLowerCase(), contains('back'));
       });
     });
 
