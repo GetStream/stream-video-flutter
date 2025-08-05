@@ -2,6 +2,7 @@
 
 ✅ Added
 * Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+* Added tracking for failed SFU join attempts. If a client fails to connect to the same SFU twice, it will now request a new SFU from the Coordinator. Also added max join retries counter (default to 3) to improve call connection reliability - it can be configured by providing `maxJoinRetries` parameter in `join()` method.
 
 🔄 Changed
 * Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.

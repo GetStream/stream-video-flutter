@@ -2,6 +2,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:uuid/uuid.dart';
 
 import '../../../open_api/video/coordinator/api.dart';
+import '../../../stream_video.dart';
 import '../../core/utils.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -36,6 +37,7 @@ class CallSessionFactory {
     required OnReconnectionNeeded onReconnectionNeeded,
     required InternetConnection networkMonitor,
     required StatsOptions statsOptions,
+    required StreamVideo streamVideo,
     ClientPublishOptions? clientPublishOptions,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
@@ -73,6 +75,7 @@ class CallSessionFactory {
       clientPublishOptions: clientPublishOptions,
       networkMonitor: networkMonitor,
       statsOptions: statsOptions,
+      streamVideo: streamVideo,
       tracer: tracer,
     );
   }
