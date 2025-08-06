@@ -2856,12 +2856,21 @@ class Call {
     required String sessionId,
     required String userId,
     required ViewportVisibility visibility,
+    required SfuTrackTypeVideo trackType,
   }) async {
     final change = VisibilityChange(
       sessionId: sessionId,
       userId: userId,
       visibility: visibility,
     );
+    if (trackType.isScreenShare) {
+      _stateManager.participantUpdateScreenShareViewportVisibility(
+        sessionId: sessionId,
+        userId: userId,
+        visibility: visibility,
+      );
+      return const Result.success(none);
+    }
 
     final result = await _session?.updateViewportVisibility(change) ??
         Result.error('Session is null');
