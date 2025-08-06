@@ -2,6 +2,7 @@
 
 ✅ Added
 * Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+* `SpeakingWhileMutedRecognition` to notify users when there is audio input, but microphone is muted.
 * Added tracking for failed SFU join attempts. If a client fails to connect to the same SFU twice, it will now request a new SFU from the Coordinator. Also added max join retries counter (default to 3) to improve call connection reliability - it can be configured by providing `maxJoinRetries` parameter in `join()` method.
 
 🔄 Changed
@@ -31,6 +32,7 @@
 ✅ Added
 * Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
 * Added `call.partialState` for more specific and efficient state updates.
+
 * Added `maxParticipantsExcludeOwner` and `maxParticipantsExcludeRoles` to Call limits settings, providing finer control over participant limits by allowing exclusion of call owners and specific roles from the maximum count.
 
 🐞 Fixed

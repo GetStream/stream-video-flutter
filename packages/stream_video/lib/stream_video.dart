@@ -2,6 +2,8 @@ library stream_video;
 
 export 'open_api/video/coordinator/api.dart' hide User;
 export 'src/audio_processing/audio_processor.dart';
+export 'src/audio_processing/audio_recognition.dart';
+export 'src/audio_processing/speaking_while_muted_recognition.dart';
 export 'src/call/call.dart' hide BaseCallFactory;
 export 'src/call/call_connect_options.dart';
 export 'src/call/call_events.dart';
