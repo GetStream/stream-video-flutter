@@ -15,6 +15,7 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../stream_video.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -67,6 +68,7 @@ class CallSession extends Disposable {
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
+    required StreamVideo streamVideo,
     required Tracer tracer,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
@@ -82,6 +84,9 @@ class CallSession extends Disposable {
           sfuUrl: config.sfuUrl,
           sfuWsEndpoint: config.sfuWsEndpoint,
           sessionId: sessionId,
+          cid: callCid.value,
+          userId: streamVideo.currentUser.id,
+          apiKey: streamVideo.apiKey,
           networkMonitor: networkMonitor,
         ),
         rtcManagerFactory = RtcManagerFactory(

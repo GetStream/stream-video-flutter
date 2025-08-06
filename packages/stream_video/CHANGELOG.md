@@ -3,9 +3,13 @@
 ✅ Added
 * Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
 * `SpeakingWhileMutedRecognition` to notify users when there is audio input, but microphone is muted.
+* Added tracking for failed SFU join attempts. If a client fails to connect to the same SFU twice, it will now request a new SFU from the Coordinator. Also added max join retries counter (default to 3) to improve call connection reliability - it can be configured by providing `maxJoinRetries` parameter in `join()` method.
 
 🔄 Changed
 * Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
+
+🐞 Fixed
+* Sorting of participants after screen sharing stopped.s
 
 🔄 Dependency updates
 * Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
