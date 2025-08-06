@@ -53,6 +53,25 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     );
   }
 
+  void participantUpdateScreenShareViewportVisibility({
+    required String sessionId,
+    required String userId,
+    required ViewportVisibility visibility,
+  }) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == sessionId &&
+            participant.userId == userId) {
+          return participant.copyWith(
+            screenShareViewportVisibility: visibility,
+          );
+        }
+
+        return participant;
+      }).toList(),
+    );
+  }
+
   void participantUpdateSubscription({
     required String userId,
     required String sessionId,
