@@ -16,7 +16,8 @@ class LobbyScreen extends StatefulWidget {
     required this.call,
   });
 
-  final ValueChanged<CallConnectOptions> onJoinCallPressed;
+  final Function(CallConnectOptions, StreamVideoEffectsManager)
+      onJoinCallPressed;
   final Call call;
 
   @override
@@ -26,8 +27,16 @@ class LobbyScreen extends StatefulWidget {
 class _LobbyScreenState extends State<LobbyScreen> {
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
+  bool _blurEnabled = false;
 
   final _userAuthController = locator.get<UserAuthController>();
+  late StreamVideoEffectsManager _videoEffectsManager;
+
+  @override
+  void initState() {
+    super.initState();
+    _videoEffectsManager = StreamVideoEffectsManager(widget.call);
+  }
 
   void joinCallPressed() {
     var options = const CallConnectOptions();
@@ -46,7 +55,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       );
     }
 
-    widget.onJoinCallPressed(options);
+    widget.onJoinCallPressed(options, _videoEffectsManager);
   }
 
   @override
@@ -115,7 +124,41 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 StreamLobbyVideo(
                   call: widget.call,
                   onMicrophoneTrackSet: (track) => _microphoneTrack = track,
-                  onCameraTrackSet: (track) => _cameraTrack = track,
+                  onCameraTrackSet: (track) {
+                    _cameraTrack = track;
+
+                    if (track != null && _blurEnabled) {
+                      _videoEffectsManager.applyBackgroundBlurFilter(
+                        BlurIntensity.medium,
+                        track: track,
+                      );
+                    }
+                  },
+                  additionalActionsBuilder: (context, call) {
+                    return [
+                      CallControlOption(
+                        icon: _blurEnabled
+                            ? const Icon(Icons.blur_on)
+                            : const Icon(Icons.blur_off),
+                        onPressed: () async {
+                          setState(() {
+                            _blurEnabled = !_blurEnabled;
+                          });
+
+                          if (_blurEnabled) {
+                            _videoEffectsManager.applyBackgroundBlurFilter(
+                              BlurIntensity.medium,
+                              track: _cameraTrack,
+                            );
+                          } else {
+                            _videoEffectsManager.disableAllFilters(
+                              track: _cameraTrack,
+                            );
+                          }
+                        },
+                      ),
+                    ];
+                  },
                 ),
                 const SizedBox(height: 24),
                 Container(

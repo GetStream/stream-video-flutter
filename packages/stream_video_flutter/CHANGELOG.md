@@ -1,6 +1,11 @@
 ## Unreleased
 
+🐞 Fixed
+* Fixed an issue where video filters were cleared after toggling the camera.
+
 ✅ Added
+* Added support for setting video filters before the video track is created by listening for local participant state changes and applying the filters once the video is enabled.
+* Added support for setting video filters on a specific video track before the local participant is available — useful for scenarios like lobby previews with a temporary video track.
 * Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
 
 🔄 Changed
