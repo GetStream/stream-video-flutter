@@ -36,6 +36,13 @@ const defaultCredentials = CallCredentials(
   ),
 );
 
+const defaultMediaDevice = RtcMediaDevice(
+  id: 'fallback-device',
+  label: 'Fallback Device',
+  kind: RtcMediaDeviceKind.audioInput,
+  groupId: 'fallback-group',
+);
+
 const defaultUserInfo = UserInfo(id: 'testUserId');
 
 void registerMockFallbackValues() {
@@ -51,6 +58,8 @@ void registerMockFallbackValues() {
     StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
   );
   registerFallbackValue(SfuReconnectionStrategy.fast);
+  registerFallbackValue(defaultMediaDevice);
+  registerFallbackValue(MockStreamVideo());
 }
 
 Call createStubCall({
@@ -356,6 +365,7 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
       statsOptions: any(named: 'statsOptions'),
       onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
       clientPublishOptions: any(named: 'clientPublishOptions'),
+      streamVideo: any(named: 'streamVideo'),
     ),
   ).thenAnswer(
     (_) => Future.value(callSession ?? setupMockCallSession()),

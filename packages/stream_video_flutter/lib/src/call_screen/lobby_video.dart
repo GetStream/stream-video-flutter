@@ -18,6 +18,7 @@ class StreamLobbyVideo extends StatefulWidget {
     this.onMicrophoneTrackSet,
     this.onCameraTrackSet,
     this.streamVideo,
+    this.additionalActionsBuilder,
   });
 
   /// Represents a call.
@@ -31,6 +32,8 @@ class StreamLobbyVideo extends StatefulWidget {
 
   final FutureOr<void> Function(RtcLocalAudioTrack?)? onMicrophoneTrackSet;
   final FutureOr<void> Function(RtcLocalCameraTrack?)? onCameraTrackSet;
+
+  final List<Widget> Function(BuildContext, Call)? additionalActionsBuilder;
 
   /// An instance of [StreamVideo].
   ///
@@ -188,6 +191,8 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
                     cameraEnabled ? null : theme.optionOffBackgroundColor,
                 onPressed: toggleCamera,
               ),
+              if (widget.additionalActionsBuilder != null)
+                ...widget.additionalActionsBuilder!(context, widget.call),
             ],
           ),
         ],

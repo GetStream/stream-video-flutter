@@ -22,6 +22,9 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
   factory SfuWebSocket({
     required int sessionSeq,
     required String sessionId,
+    required String cid,
+    required String userId,
+    required String apiKey,
     required String sfuUrl,
     required String sfuWsEndpoint,
     required InternetConnection networkMonitor,
@@ -45,10 +48,11 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
           .toString();
     }
     final finalWsEndpoint =
-        '$sfuWsEndpoint?X-Stream-Client=$xStreamClientHeader';
+        '$sfuWsEndpoint?X-Stream-Client=$xStreamClientHeader&attempt=${++sessionSeq}&cid=$cid&user_id=$userId&api_key=$apiKey&user_session_id=$sessionId';
     streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     streamLog.i(tag, () => '<factory> sfuWsEndpoint: $sfuWsEndpoint');
     streamLog.i(tag, () => '<factory> finalWsEndpoint: $finalWsEndpoint');
+
     return SfuWebSocket._(
       finalWsEndpoint,
       protocols: protocols,

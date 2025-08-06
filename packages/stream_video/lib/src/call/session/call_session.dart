@@ -15,6 +15,7 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../stream_video.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -67,6 +68,7 @@ class CallSession extends Disposable {
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
+    required StreamVideo streamVideo,
     required Tracer tracer,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
@@ -82,6 +84,9 @@ class CallSession extends Disposable {
           sfuUrl: config.sfuUrl,
           sfuWsEndpoint: config.sfuWsEndpoint,
           sessionId: sessionId,
+          cid: callCid.value,
+          userId: streamVideo.currentUser.id,
+          apiKey: streamVideo.apiKey,
           networkMonitor: networkMonitor,
         ),
         rtcManagerFactory = RtcManagerFactory(
@@ -348,9 +353,21 @@ class CallSession extends Disposable {
       );
 
       _logger.v(() => '[start] wait for SfuJoinResponseEvent');
-      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
+      final joinResponseFuture = sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: joinResponseTimeout,
       );
+
+      final sfuErrorFuture =
+          sfuWS.events.waitFor<SfuErrorEvent>(timeLimit: joinResponseTimeout);
+
+      final event = await Future.any([joinResponseFuture, sfuErrorFuture]);
+
+      if (event is SfuErrorEvent) {
+        _logger.e(() => '[start] sfu error: ${event.error}');
+        return Result.errorWithCause(event.error.message, event.error);
+      }
+
+      final joinResponseEvent = event as SfuJoinResponseEvent;
 
       _logger.v(() => '[start] sfu joined: $event');
 
@@ -367,7 +384,8 @@ class CallSession extends Disposable {
           ..onRemoteTrackReceived = _onRemoteTrackReceived;
       } else {
         final currentUserId = stateManager.callState.currentUserId;
-        final localParticipant = event.callState.participants.firstWhere(
+        final localParticipant =
+            joinResponseEvent.callState.participants.firstWhere(
           (it) => it.userId == currentUserId && it.sessionId == sessionId,
         );
         final localTrackId = localParticipant.trackLookupPrefix;
@@ -377,7 +395,7 @@ class CallSession extends Disposable {
         rtcManager = await rtcManagerFactory.makeRtcManager(
           sfuClient: sfuClient,
           publisherId: localTrackId,
-          publishOptions: event.publishOptions,
+          publishOptions: joinResponseEvent.publishOptions,
           clientDetails: _clientDetails,
           sessionSequence: sessionSeq,
           statsOptions: statsOptions,

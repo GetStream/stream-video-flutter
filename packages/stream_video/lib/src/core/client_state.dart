@@ -22,6 +22,9 @@ abstract class ClientState {
   /// Emits a list of active calls.
   StateEmitter<List<Call>> get activeCalls;
 
+  /// Emits a list of watched calls.
+  StateEmitter<List<Call>> get watchedCalls;
+
   /// Emits an active call.
   /// Will only emit if options.allowMultipleActiveCalls is set to false, use activeCalls otherwise.
   StateEmitter<Call?> get activeCall;
@@ -40,6 +43,9 @@ abstract class ClientState {
   /// Otherwise the call is added to the list of active calls.
   Future<void> setActiveCall(Call? call);
 
+  /// Adds the call to the list of watched calls.
+  void setWatchedCall(Call call);
+
   /// Removes the call from the list of active calls.
   /// It won't `leave` the call, just removes it from the list.
   Future<void> removeActiveCall(Call call);
@@ -50,6 +56,7 @@ class MutableClientState implements ClientState {
       : user = MutableStateEmitterImpl(user),
         activeCalls = MutableStateEmitterImpl([]),
         activeCall = MutableStateEmitterImpl(null),
+        watchedCalls = MutableStateEmitterImpl([]),
         incomingCall = MutableStateEmitterImpl(null),
         outgoingCall = MutableStateEmitterImpl(null),
         connection = MutableStateEmitterImpl(
@@ -63,6 +70,9 @@ class MutableClientState implements ClientState {
 
   @override
   final MutableStateEmitter<List<Call>> activeCalls;
+
+  @override
+  final MutableStateEmitter<List<Call>> watchedCalls;
 
   @override
   final MutableStateEmitter<Call?> activeCall;
@@ -111,6 +121,10 @@ class MutableClientState implements ClientState {
     } else if (call != null) {
       activeCalls.value = [...activeCalls.value, call];
     }
+
+    if (call != null) {
+      setWatchedCall(call);
+    }
   }
 
   @override
@@ -124,6 +138,19 @@ class MutableClientState implements ClientState {
     activeCalls.value = [
       ...activeCalls.value.where((it) => it.callCid != call.callCid),
     ];
+
+    watchedCalls.value = [
+      ...watchedCalls.value.where((it) => it.callCid != call.callCid),
+    ];
+  }
+
+  @override
+  void setWatchedCall(Call call) {
+    if (watchedCalls.value.any((it) => it.callCid == call.callCid)) {
+      return;
+    }
+
+    watchedCalls.value = [...watchedCalls.value, call];
   }
 
   @override

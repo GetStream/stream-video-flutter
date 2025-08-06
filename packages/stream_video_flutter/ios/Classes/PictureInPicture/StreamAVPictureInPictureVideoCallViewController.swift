@@ -415,7 +415,5 @@ public struct SoundIndicator: View {
             .aspectRatio(contentMode: .fit)
             .frame(width: 12, height: 12)
             .foregroundColor(!isMuted ? .white : Color(red: 1.0, green: 0.216, blue: 0.259))
-            .accessibility(identifier: "participantMic")
-            .accessibilityValue(!isMuted ? "1" : "0")
     }
 }

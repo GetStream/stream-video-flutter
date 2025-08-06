@@ -135,7 +135,7 @@ class StreamVideo extends Disposable {
   }
 
   StreamVideo._(
-    String apiKey, {
+    this.apiKey, {
     required User user,
     required StreamVideoOptions options,
     String? userToken,
@@ -244,6 +244,7 @@ class StreamVideo extends Disposable {
   final _logger = taggedLogger(tag: _tag);
 
   final StreamVideoOptions _options;
+  final String apiKey;
 
   @Deprecated('Use options.muteVideoWhenInBackground instead')
   bool get muteVideoWhenInBackground => _options.muteVideoWhenInBackground;
@@ -474,6 +475,30 @@ class StreamVideo extends Disposable {
       _connectionState = ConnectionState.disconnected(
         _state.currentUser.id,
       );
+    } else if (event is CoordinatorReconnectedEvent) {
+      _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
+      if (state.watchedCalls.value.isNotEmpty) {
+        // Re-watch the previously watched calls.
+        unawaited(
+          queryCalls(
+            watch: true,
+            filterConditions: {
+              'cid': {
+                r'$in': state.watchedCalls.value
+                    .map((call) => call.callCid.value)
+                    .toList(),
+              },
+            },
+          ).onError(
+            (error, stackTrace) {
+              _logger.e(
+                () => '[onCoordinatorEvent] re-watching calls failed: $error',
+              );
+              return Result.failure(VideoErrors.compose(error, stackTrace));
+            },
+          ),
+        );
+      }
     }
   }
 
@@ -906,7 +931,9 @@ class StreamVideo extends Disposable {
         manager.showMissedCall(
           uuid: callUUID,
           handle: createdById,
-          nameCaller: callDisplayName ?? createdByName,
+          nameCaller: (callDisplayName?.isNotEmpty ?? false)
+              ? callDisplayName
+              : createdByName,
           callCid: callCid,
         ),
       );
@@ -927,7 +954,9 @@ class StreamVideo extends Disposable {
           manager.showIncomingCall(
             uuid: callUUID,
             handle: createdById,
-            nameCaller: callDisplayName ?? createdByName,
+            nameCaller: (callDisplayName?.isNotEmpty ?? false)
+                ? callDisplayName
+                : createdByName,
             callCid: callCid,
             hasVideo: hasVideo != 'false',
           ),

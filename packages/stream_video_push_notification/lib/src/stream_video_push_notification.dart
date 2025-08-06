@@ -557,6 +557,7 @@ extension on CallEvent {
       Event.actionCallEnded => ActionCallEnded(data: toCallData()),
       Event.actionCallTimeout => ActionCallTimeout(data: toCallData()),
       Event.actionCallCallback => ActionCallCallback(data: toCallData()),
+      Event.actionCallConnected => ActionCallConnected(data: toCallData()),
       Event.actionDidUpdateDevicePushTokenVoip =>
         ActionDidUpdateDevicePushTokenVoip(
           token: body['deviceTokenVoIP'] as String,

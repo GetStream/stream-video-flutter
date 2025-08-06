@@ -34,6 +34,7 @@ class CallParticipantState
     this.pin,
     this.reaction,
     this.viewportVisibility = ViewportVisibility.unknown,
+    this.screenShareViewportVisibility = ViewportVisibility.unknown,
   }) : audioLevels = audioLevels ?? [audioLevel];
 
   /// Internal constructor to be used with copyWith methods
@@ -56,6 +57,7 @@ class CallParticipantState
     required this.pin,
     required this.reaction,
     required this.viewportVisibility,
+    required this.screenShareViewportVisibility,
   });
 
   final String userId;
@@ -81,6 +83,7 @@ class CallParticipantState
   final CallParticipantPin? pin;
   final CallReaction? reaction;
   final ViewportVisibility viewportVisibility;
+  final ViewportVisibility screenShareViewportVisibility;
 
   bool get isPinned => pin != null;
   String get uniqueParticipantKey => '$userId-$sessionId';
@@ -108,6 +111,7 @@ class CallParticipantState
     CallParticipantPin? pin,
     CallReaction? reaction,
     ViewportVisibility? viewportVisibility,
+    ViewportVisibility? screenShareViewportVisibility,
   }) {
     return CallParticipantState._(
       userId: userId ?? this.userId,
@@ -128,6 +132,8 @@ class CallParticipantState
       pin: pin ?? this.pin,
       reaction: reaction ?? this.reaction,
       viewportVisibility: viewportVisibility ?? this.viewportVisibility,
+      screenShareViewportVisibility:
+          screenShareViewportVisibility ?? this.screenShareViewportVisibility,
     );
   }
 
@@ -171,6 +177,7 @@ class CallParticipantState
       pin: participantPin,
       reaction: reaction,
       viewportVisibility: viewportVisibility,
+      screenShareViewportVisibility: screenShareViewportVisibility,
     );
   }
 
@@ -200,6 +207,7 @@ class CallParticipantState
       pin: pin,
       reaction: reaction,
       viewportVisibility: viewportVisibility,
+      screenShareViewportVisibility: screenShareViewportVisibility,
     );
   }
 

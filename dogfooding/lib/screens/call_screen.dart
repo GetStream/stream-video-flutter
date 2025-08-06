@@ -31,10 +31,12 @@ class CallScreen extends StatefulWidget {
     super.key,
     required this.call,
     this.connectOptions,
+    this.videoEffectsManager,
   });
 
   final Call call;
   final CallConnectOptions? connectOptions;
+  final StreamVideoEffectsManager? videoEffectsManager;
 
   @override
   State<CallScreen> createState() => _CallScreenState();
@@ -42,22 +44,44 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
-  late final _videoEffectsManager = StreamVideoEffectsManager(widget.call);
+  late final _videoEffectsManager =
+      widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
+  late StreamSubscription<SpeakingWhileMutedState> _speechSubscription;
 
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
   bool _moreMenuVisible = false;
+  late SpeakingWhileMutedRecognition _speakingWhileMutedRecognition;
 
   @override
   void initState() {
     super.initState();
     _connectChatChannel();
+    _speakingWhileMutedRecognition =
+        SpeakingWhileMutedRecognition(call: widget.call);
+    _speechSubscription = _speakingWhileMutedRecognition.stream.listen((state) {
+      final context = this.context;
+      if (state.isSpeakingWhileMuted && context.mounted) {
+        final colorTheme = StreamVideoTheme.of(context).colorTheme;
+
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: const Text('You are speaking while muted'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: colorTheme.accentPrimary,
+          ),
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _speechSubscription.cancel();
+    _speakingWhileMutedRecognition.dispose();
     widget.call.leave();
     _userChatRepo.disconnectUser();
+    _videoEffectsManager.dispose();
     super.dispose();
   }
 

@@ -1,9 +1,31 @@
 ## Unreleased
 
 🐞 Fixed
+* Fixed an issue where video filters were cleared after toggling the camera.
+
+✅ Added
+* Added support for setting video filters before the video track is created by listening for local participant state changes and applying the filters once the video is enabled.
+* Added support for setting video filters on a specific video track before the local participant is available — useful for scenarios like lobby previews with a temporary video track.
+* Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+
+🔄 Changed
+* Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
+
+🔄 Dependency updates
+* Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
+
+🐞 Fixed
+* (Android) CircleTransform Argument type mismatch on Bitmap.Config?
+
+## 0.10.1
+
+🐞 Fixed
 * (iOS) Fixed Picture-in-Picture (PiP) issue where remote participants joining during active PiP mode would not have their video tracks displayed properly.
 * (iOS) Fixed a visual issue where the Picture-in-Picture view displayed an empty container when participant name and microphone indicator settings were disabled.
-* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash
+* Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
+* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash.
+* Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
+* Fixed an issue where changing the audio input device while muted from the start of a call would not apply the new device when unmuting. The selected device will now be correctly set upon unmuting.
 
 ✅ Added
 * Added support for customization of display name for ringing notifications by providing `display_name` custom data to the call. See the [documentation](https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization) for details.

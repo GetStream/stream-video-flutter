@@ -1,19 +1,39 @@
 ## Unreleased
 
 ✅ Added
+* Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
+* `SpeakingWhileMutedRecognition` to notify users when there is audio input, but microphone is muted.
+* Added tracking for failed SFU join attempts. If a client fails to connect to the same SFU twice, it will now request a new SFU from the Coordinator. Also added max join retries counter (default to 3) to improve call connection reliability - it can be configured by providing `maxJoinRetries` parameter in `join()` method.
+
+🔄 Changed
+* Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
+
+🐞 Fixed
+* Sorting of participants after screen sharing stopped.
+* Fixed `DtlsSrtpKeyAgreement` audio constraint parameter mapping
+
+🔄 Dependency updates
+* Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
+
+## 0.10.1
+
+✅ Added
 * Added support for customization of display name for ringing notifications by providing `display_name` custom data to the call. See the [documentation](https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization) for details.
 
 🐞 Fixed
 * Fixed an issue where the last reaction was removed too fast when a user sends multiple reactions quickly after each other.
-* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash
+* Fixed an issue where toggling camera enabled quickly could cause AVCaptureMultiCamSession to crash.
 * Fixed an issue where the default camera selection would occasionally be incorrect even when properly configured.
-* Fixed `DtlsSrtpKeyAgreement` audio constraint parameter mapping
+* Fixed an issue where changing the audio input device while muted from the start of a call would not apply the new device when unmuting. The selected device will now be correctly set upon unmuting.
+* Fixed an issue where coordinator events were not listened to after a fast reconnect in a Call.
+* Fixes an issue with `muteUsers` method when called for all tracks.
 
 ## 0.10.0
 
 ✅ Added
 * Added `setMirrorVideo` method to `Call` class to control video mirroring for participants.
 * Added `call.partialState` for more specific and efficient state updates.
+
 * Added `maxParticipantsExcludeOwner` and `maxParticipantsExcludeRoles` to Call limits settings, providing finer control over participant limits by allowing exclusion of call owners and specific roles from the maximum count.
 
 🐞 Fixed

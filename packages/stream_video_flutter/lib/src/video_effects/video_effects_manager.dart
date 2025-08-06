@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -29,6 +31,7 @@ class StreamVideoEffectsManager {
 
   final _logger = taggedLogger(tag: _tag);
   List<String>? _appliedVideoEffects;
+  StreamSubscription<bool?>? _localVideoTrackSubscription;
 
   /// Checks if the background effect is supported on the current device.
   Future<bool> isSupported() async {
@@ -43,24 +46,30 @@ class StreamVideoEffectsManager {
 
   /// Applies a background blur filter to the local participant video stream.
   /// The [blurIntensity] parameter specifies the intensity of the blur effect.
-  Future<void> applyBackgroundBlurFilter(BlurIntensity blurIntensity) async {
+  Future<void> applyBackgroundBlurFilter(
+    BlurIntensity blurIntensity, {
+    RtcLocalTrack? track,
+  }) async {
     if (!(await isSupported())) {
       return;
     }
 
     await ensureBlurEffectRegistered();
-    await applyVideoEffects([blurIntensity.name]);
+    await applyVideoEffects([blurIntensity.name], track: track);
   }
 
   /// Applies a background image filter to the local participant video stream.
   /// The [imageUrl] parameter specifies the path to the image asset file or an URL to the image.
-  Future<void> applyBackgroundImageFilter(String imageUrl) async {
+  Future<void> applyBackgroundImageFilter(
+    String imageUrl, {
+    RtcLocalTrack? track,
+  }) async {
     if (!(await isSupported())) {
       return;
     }
 
     await ensureImageEffectRegistered(imageUrl);
-    await applyVideoEffects(['VirtualBackground-$imageUrl']);
+    await applyVideoEffects(['VirtualBackground-$imageUrl'], track: track);
   }
 
   /// Applies a custom effect to the local participant video stream.
@@ -86,9 +95,32 @@ class StreamVideoEffectsManager {
   /// Applies a list of video effects to the local participant video stream.
   /// The [names] parameter specifies the list of effect names.
   /// Make sure to register the effect processors before applying the effects.
-  Future<void> applyVideoEffects(List<String> names) async {
-    final trackId = await _getTrackId();
+  Future<void> applyVideoEffects(
+    List<String> names, {
+    RtcLocalTrack? track,
+  }) async {
+    _appliedVideoEffects = names;
+
+    await _localVideoTrackSubscription?.cancel();
+    _localVideoTrackSubscription =
+        call.partialState((s) => s.localParticipant?.isVideoEnabled).listen(
+      (enabled) async {
+        final trackId = await _getTrackId();
+        if (trackId != null) {
+          await rtc.setVideoEffects(
+            trackId,
+            names: names,
+          );
+        }
+      },
+    );
+
+    final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {
+      _logger.w(
+        () =>
+            'Could not apply video effects, could not find video track for localParticipant. Effects will be applied when the track is available.',
+      );
       return;
     }
 
@@ -96,7 +128,6 @@ class StreamVideoEffectsManager {
       trackId,
       names: names,
     );
-    _appliedVideoEffects = names;
   }
 
   /// Ensures that the blur effect processor is registered.
@@ -118,12 +149,17 @@ class StreamVideoEffectsManager {
   }
 
   /// Disables all video filters applied to the local participant video stream.
-  Future<void> disableAllFilters() async {
+  Future<void> disableAllFilters({
+    RtcLocalTrack? track,
+  }) async {
     if (!(await isSupported())) {
       return;
     }
 
-    final trackId = await _getTrackId();
+    _appliedVideoEffects = [];
+    await _localVideoTrackSubscription?.cancel();
+
+    final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {
       return;
     }
@@ -132,13 +168,12 @@ class StreamVideoEffectsManager {
       trackId,
       names: [],
     );
-    _appliedVideoEffects = [];
   }
 
   Future<String?> _getTrackId() async {
     final trackPrefix = call.state.value.localParticipant?.trackIdPrefix;
     if (trackPrefix == null) {
-      _logger.e(
+      _logger.d(
         () =>
             'Could not apply background image filter, trackPrefix is null for localParticipant',
       );
@@ -149,7 +184,7 @@ class StreamVideoEffectsManager {
     final trackId = track?.mediaTrack.id;
 
     if (trackId == null) {
-      _logger.e(
+      _logger.d(
         () =>
             'Could not apply background image filter, could not find video track for localParticipant',
       );
@@ -157,5 +192,10 @@ class StreamVideoEffectsManager {
     }
 
     return trackId;
+  }
+
+  Future<void> dispose() async {
+    await _localVideoTrackSubscription?.cancel();
+    _localVideoTrackSubscription = null;
   }
 }
