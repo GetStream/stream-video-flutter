@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
 
-class MockCall extends Mock implements Call {}
+import '../../test_helpers.dart';
 
 void main() {
   group('StreamVideo - allowMultipleActiveCalls', () {
