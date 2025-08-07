@@ -64,7 +64,8 @@ final class StreamTokenProvider {
   static Future<String?> getVoIPToken() async {
     if (!CurrentPlatform.isIos) return null;
 
-    final token = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+    final token = await StreamVideoPushNotificationPlatform.instance
+        .getDevicePushTokenVoIP();
     if (token is! String || token.isEmpty) return null;
 
     return token;
@@ -74,9 +75,10 @@ final class StreamTokenProvider {
   static Stream<String> get onVoIPTokenRefresh {
     if (!CurrentPlatform.isIos) return const Stream.empty();
 
-    return StreamCallKit().onEvent.where((it) {
-      return it.event == Event.actionDidUpdateDevicePushTokenVoip;
-    }).map((event) => event.body['deviceTokenVoIP']);
+    return StreamCallKit()
+        .onEvent
+        .whereType<ActionDidUpdateDevicePushTokenVoip>()
+        .map((event) => event.token);
   }
 
   static Future<String?> getAPNToken() async {

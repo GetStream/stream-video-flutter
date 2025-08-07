@@ -1,16 +1,34 @@
 import Flutter
 import UIKit
-import flutter_callkit_incoming
 
 public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
+    private let devicePushTokenVoIP = "DevicePushTokenVoIP"
+
     let persistentState: UserDefaults = UserDefaults.standard
+
+    @objc public private(set) static var sharedInstance: StreamVideoPushNotificationPlugin!
+
+    private var callKitManager: StreamVideoCallkitManager
+
+    public init(callKitManager: StreamVideoCallkitManager) {
+        self.callKitManager = callKitManager
+        super.init()
+    }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let mainChannel = FlutterMethodChannel(
             name: "stream_video_push_notification", binaryMessenger: registrar.messenger())
-        let instance = StreamVideoPushNotificationPlugin()
+        let eventChannel = FlutterEventChannel(
+            name: "stream_video_push_notification_events", binaryMessenger: registrar.messenger())
 
-        registrar.addMethodCallDelegate(instance, channel: mainChannel)
+        let eventsHandler = EventCallbackHandler()
+        eventChannel.setStreamHandler(eventsHandler)
+
+        let callKitManager = StreamVideoCallkitManager(eventHandler: eventsHandler)
+        sharedInstance = StreamVideoPushNotificationPlugin(callKitManager: callKitManager)
+
+        registrar.addMethodCallDelegate(sharedInstance, channel: mainChannel)
+
         StreamVideoPKDelegateManager.shared.initChannel(mainChannel: mainChannel)
     }
 
@@ -25,37 +43,76 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 }
 
                 StreamVideoPKDelegateManager.shared.initData(data: arguments)
+                callKitManager.initCallkitProvider(data: arguments)
                 result(nil)
             } else {
                 result(
                     FlutterError(
                         code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil))
             }
+        case "getDevicePushTokenVoIP":
+            result(self.getDevicePushTokenVoIP())
+            break
         default:
-            result(FlutterMethodNotImplemented)
+            callKitManager.handle(call, result: result)
         }
     }
 
     @objc public static func setDevicePushTokenVoIP(deviceToken: String) {
-        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
+        sharedInstance.setDevicePushTokenVoIP(deviceToken: deviceToken)
+        //TODO: send event? //ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP
     }
 
     @objc public static func startOutgoingCall(
-        data: flutter_callkit_incoming.Data,
+        data: Data,
         fromPushKit: Bool
     ) {
-        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.startCall(data, fromPushKit: fromPushKit)
+        sharedInstance.callKitManager.startCall(data, fromPushKit: fromPushKit)
     }
 
     @objc public static func showIncomingCall(
-        data: flutter_callkit_incoming.Data,
+        data: Data,
         fromPushKit: Bool
     ) {
-        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(
+        sharedInstance.callKitManager.showCallkitIncoming(
             data, fromPushKit: fromPushKit)
     }
 
     @objc public static func activeCalls() -> [[String: Any]]? {
-        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.activeCalls()
+        sharedInstance.callKitManager.activeCalls()
+    }
+
+    @objc public func setDevicePushTokenVoIP(deviceToken: String) {
+        persistentState.set(deviceToken, forKey: devicePushTokenVoIP)
+    }
+
+    @objc public func getDevicePushTokenVoIP() -> String {
+        return persistentState.string(forKey: devicePushTokenVoIP) ?? ""
+    }
+}
+
+public class EventCallbackHandler: NSObject, FlutterStreamHandler {
+    private var eventSink: FlutterEventSink?
+
+    public func send(_ event: String, _ body: Any) {
+        let data: [String: Any] = [
+            "event": event,
+            "body": body,
+        ]
+        eventSink?(data)
+    }
+
+    public func onListen(
+        withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink
+    )
+        -> FlutterError?
+    {
+        self.eventSink = events
+        return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.eventSink = nil
+        return nil
     }
 }

@@ -27,8 +27,8 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
+import coil.ImageLoader
+import coil.request.ImageRequest
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.R
@@ -39,7 +39,6 @@ import io.getstream.video.flutter.stream_video_flutter.service.notification.imag
 import io.getstream.video.flutter.stream_video_flutter.service.utils.applicationName
 import io.getstream.video.flutter.stream_video_flutter.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.Headers
 import okhttp3.OkHttpClient
 
 private const val TAG = "StreamNtfBuilder"
@@ -163,10 +162,7 @@ internal class StreamNotificationBuilderImpl(
         if (!avatarUrl.isNullOrEmpty()) {
             logger.i { "[loadAvatar] avatarUrl: $avatarUrl" }
             val headers = payload.options.avatar.httpHeaders
-            context.getPicassoInstance(headers)
-                .load(avatarUrl)
-                .transform(CircleTransform())
-                .into(defaultTarget(builder = this))
+            context.loadImageWithCoil(avatarUrl, headers, defaultTarget(builder = this))
         } 
     }
 
@@ -213,16 +209,15 @@ internal class StreamNotificationBuilderImpl(
         if (!avatarUrl.isNullOrEmpty()) {
             logger.i { "[loadAvatar] avatarUrl: $avatarUrl" }
             val headers = payload.options.avatar.httpHeaders
-            context.getPicassoInstance(headers)
-                .load(avatarUrl)
-                .transform(CircleTransform())
-                .into(
-                    customTarget(
-                        builder = this,
-                        notificationLargeLayout = notificationLargeLayout,
-                        notificationSmallLayout = notificationSmallLayout
-                    )
+            context.loadImageWithCoil(
+                avatarUrl, 
+                headers,
+                customTarget(
+                    builder = this,
+                    notificationLargeLayout = notificationLargeLayout,
+                    notificationSmallLayout = notificationSmallLayout
                 )
+            )
         } 
     }
 
@@ -274,9 +269,7 @@ internal class StreamNotificationBuilderImpl(
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
             val headers = payload.options.avatar.httpHeaders
-            context.getPicassoInstance(headers).load(avatarUrl)
-                .transform(CircleTransform())
-                .into(customTarget)
+            context.loadImageWithCoil(avatarUrl, headers, customTarget)
         }
 
         return this
@@ -292,21 +285,31 @@ private fun useSmallExLayout(): Boolean {
     ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S || isCustomSmallExNotification
 }
 
-private fun Context.getPicassoInstance(headers: Map<String, String>): Picasso {
-    StreamLog.d(TAG) { "[interceptRequest] headers: $headers" }
+private fun Context.loadImageWithCoil(url: String, headers: Map<String, String>, target: coil.target.Target) {
+    StreamLog.d(TAG) { "[loadImageWithCoil] headers: $headers" }
     val client = OkHttpClient.Builder()
         .addInterceptor { chain ->
             StreamLog.v(TAG) { "[interceptRequest] request: ${chain.request()}" }
             val newRequest = chain.request()
                 .newBuilder()
-                .headers(Headers.of(headers))
-                .build()
-            chain.proceed(newRequest)
+            headers.forEach { (key, value) ->
+                newRequest.addHeader(key, value)
+            }
+            chain.proceed(newRequest.build())
         }
         .build()
-    return Picasso.Builder(this)
-        .downloader(OkHttp3Downloader(client))
+    
+    val imageLoader = ImageLoader.Builder(this)
+        .okHttpClient(client)
         .build()
+    
+    val request = ImageRequest.Builder(this)
+        .data(url)
+        .transformations(CircleTransform())
+        .target(target)
+        .build()
+    
+    imageLoader.enqueue(request)
 }
 
 class NotificationLayout(

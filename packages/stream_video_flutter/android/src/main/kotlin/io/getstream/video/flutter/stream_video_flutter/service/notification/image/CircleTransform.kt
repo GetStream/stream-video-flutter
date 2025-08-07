@@ -1,23 +1,28 @@
 package io.getstream.video.flutter.stream_video_flutter.service.notification.image
 
-import android.graphics.Bitmap
-import android.graphics.BitmapShader
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Shader
-import com.squareup.picasso.Transformation
+import android.graphics.*
+import coil.bitmap.BitmapPool
+import coil.size.Size
+import coil.transform.Transformation
+import kotlin.math.min
+
 
 class CircleTransform : Transformation {
-    override fun transform(source: Bitmap): Bitmap {
-        val size = minOf(source.width, source.height)
-        val x = (source.width - size) / 2
-        val y = (source.height - size) / 2
-        val squaredBitmap = Bitmap.createBitmap(source, x, y, size, size)
-        if (squaredBitmap != source) {
-            source.recycle()
+
+    override fun key(): String {
+        return "circle"
+    }
+
+    override suspend fun transform(pool: BitmapPool, input: Bitmap, size: Size): Bitmap {
+        val sizeImage = min(input.width, input.height)
+        val x = (input.width - sizeImage) / 2
+        val y = (input.height - sizeImage) / 2
+        val squaredBitmap = Bitmap.createBitmap(input, x, y, sizeImage, sizeImage)
+        if (squaredBitmap != input) {
+            input.recycle()
         }
-        val config = source.config ?: Bitmap.Config.ARGB_8888
-        val bitmap = Bitmap.createBitmap(size, size, config)
+        val config = input.config ?: Bitmap.Config.ARGB_8888
+        val bitmap = Bitmap.createBitmap(sizeImage, sizeImage, config)
         val canvas = Canvas(bitmap)
         val paint = Paint()
         val shader = BitmapShader(
@@ -26,13 +31,9 @@ class CircleTransform : Transformation {
         )
         paint.shader = shader
         paint.isAntiAlias = true
-        val r = size / 2f
+        val r = sizeImage / 2f
         canvas.drawCircle(r, r, r, paint)
         squaredBitmap.recycle()
         return bitmap
-    }
-
-    override fun key(): String {
-        return "circle"
     }
 }
