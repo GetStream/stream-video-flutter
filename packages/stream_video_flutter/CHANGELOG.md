@@ -1,7 +1,4 @@
-## Unreleased
-
-🐞 Fixed
-* Fixed an issue where video filters were cleared after toggling the camera.
+## 0.10.2
 
 ✅ Added
 * Added support for setting video filters before the video track is created by listening for local participant state changes and applying the filters once the video is enabled.
@@ -12,10 +9,13 @@
 * Deprecated `callRejoinTimeout` in `RetryConfig`, instead added `networkAvailabilityTimeout` to `CallPreferences` to control how long the SDK waits for network connectivity to be restored during reconnection attempts before timing out.
 
 🔄 Dependency updates
-* Updated `flutter_callkit_incoming` dependency to the latests (2.5.5) version. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
+* Updated `flutter_callkit_incoming` dependency to version 2.5.7. That version contains Android 14 compatibility fixes for ringing notifications and lock screen handling.
 
 🐞 Fixed
 * (Android) CircleTransform Argument type mismatch on Bitmap.Config?
+* Sorting of participants after screen sharing stopped.
+* Fixed an issue where video filters were cleared after toggling the camera.
+* (Windows) Fixed `DtlsSrtpKeyAgreement` audio constraint parameter mapping
 
 ## 0.10.1
 
