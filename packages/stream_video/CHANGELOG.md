@@ -1,4 +1,4 @@
-## Unreleased
+## 0.10.2
 
 ✅ Added
 * Introduced the `reconnectTimeout` option in `CallPreferences`, allowing you to set the maximum duration the SDK will attempt to reconnect to a call before giving up.
