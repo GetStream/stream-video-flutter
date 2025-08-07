@@ -53,7 +53,7 @@ class AudioConstraints extends MediaConstraints {
         {'googAutoGainControl': autoGainControl},
         {'googHighpassFilter': highPassFilter},
         {'googTypingNoiseDetection': typingNoiseDetection},
-        {'DtlsSrtpKeyAgreement': 'true'},
+        {'DtlsSrtpKeyAgreement': true},
       ];
     }
 
