@@ -1,7 +1,6 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -305,6 +304,10 @@ class ApiClient {
           return CallMemberUpdatedPermissionEvent.fromJson(value);
         case 'CallMissedEvent':
           return CallMissedEvent.fromJson(value);
+        case 'CallModerationBlurEvent':
+          return CallModerationBlurEvent.fromJson(value);
+        case 'CallModerationWarningEvent':
+          return CallModerationWarningEvent.fromJson(value);
         case 'CallNotificationEvent':
           return CallNotificationEvent.fromJson(value);
         case 'CallParticipantCountReport':
@@ -430,6 +433,8 @@ class ApiClient {
           return DeleteTranscriptionResponse.fromJson(value);
         case 'DeviceResponse':
           return DeviceResponse.fromJson(value);
+        case 'DurationResponse':
+          return DurationResponse.fromJson(value);
         case 'EdgeResponse':
           return EdgeResponse.fromJson(value);
         case 'EgressHLSResponse':
@@ -507,7 +512,7 @@ class ApiClient {
         case 'NoiseCancellationSettings':
           return NoiseCancellationSettings.fromJson(value);
         case 'OwnCapability':
-          return OwnCapabilityTypeTransformer().decode(value);
+          return OwnCapability.fromJson(value);
         case 'OwnUserResponse':
           return OwnUserResponse.fromJson(value);
         case 'ParticipantCountByMinuteResponse':
@@ -582,8 +587,6 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
-        case 'DurationResponse':
-          return DurationResponse.fromJson(value);
         case 'RingSettingsRequest':
           return RingSettingsRequest.fromJson(value);
         case 'RingSettingsResponse':

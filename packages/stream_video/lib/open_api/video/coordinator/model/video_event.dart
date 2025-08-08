@@ -1,585 +1,1149 @@
-//
-// AUTO-GENERATED FILE, DO NOT MODIFY!
-//
-// @dart=2.18
-
-// ignore_for_file: unused_element, unused_import
-// ignore_for_file: always_put_required_named_parameters_first
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: lines_longer_than_80_chars
-
 part of openapi.api;
 
-class VideoEvent {
-  /// Returns a new [VideoEvent] instance.
-  VideoEvent({
-    required this.app,
-    required this.createdAt,
-    this.custom = const {},
-    this.receivedAt,
-    this.type = 'user.updated',
-    this.blockedByUser,
-    required this.callCid,
-    required this.user,
-    required this.call,
-    this.members = const [],
-    this.reason,
-    required this.egressId,
-    required this.capturedAt,
-    required this.sessionId,
-    required this.trackType,
-    required this.url,
-    this.users = const {},
-    required this.hlsPlaylistUrl,
-    this.capabilitiesByRole = const {},
-    required this.notifyUser,
-    required this.userId,
-    required this.message,
-    required this.reaction,
-    required this.callRecording,
-    required this.video,
-    required this.name,
-    required this.anonymousParticipantCount,
-    this.participantsCountByRole = const {},
-    required this.participant,
-    required this.durationSeconds,
-    required this.error,
-    required this.callTranscription,
-    required this.fromUserId,
-    this.mutedUserIds = const [],
-    required this.closedCaption,
-    required this.connectionId,
-    required this.me,
-    required this.cid,
-    this.permissions = const [],
-    this.ownCapabilities = const [],
-    required this.channelId,
-    required this.channelType,
-    required this.createdBy,
-    this.expiration,
-    required this.shadow,
-    this.team,
-    this.targetUser,
-    this.targetUsers = const [],
-  });
+@immutable
+sealed class VideoEvent {
+  const VideoEvent();
 
-  AppEventResponse app;
+  // String get callCid;
+  String get type;
 
-  /// Date/time of creation
-  DateTime createdAt;
+  static VideoEvent fromJson(Map<String, dynamic> json) {
+    switch (json['type']) {
+      case "app.updated":
+        return TypeAppUpdatedEvent.fromJson(json);
+      case "call.accepted":
+        return TypeCallAcceptedEvent.fromJson(json);
+      case "call.blocked_user":
+        return TypeBlockedUserEvent.fromJson(json);
+      case "call.closed_caption":
+        return TypeClosedCaptionEvent.fromJson(json);
+      case "call.closed_captions_failed":
+        return TypeCallClosedCaptionsFailedEvent.fromJson(json);
+      case "call.closed_captions_started":
+        return TypeCallClosedCaptionsStartedEvent.fromJson(json);
+      case "call.closed_captions_stopped":
+        return TypeCallClosedCaptionsStoppedEvent.fromJson(json);
+      case "call.created":
+        return TypeCallCreatedEvent.fromJson(json);
+      case "call.deleted":
+        return TypeCallDeletedEvent.fromJson(json);
+      case "call.ended":
+        return TypeCallEndedEvent.fromJson(json);
+      case "call.frame_recording_failed":
+        return TypeCallFrameRecordingFailedEvent.fromJson(json);
+      case "call.frame_recording_ready":
+        return TypeCallFrameRecordingFrameReadyEvent.fromJson(json);
+      case "call.frame_recording_started":
+        return TypeCallFrameRecordingStartedEvent.fromJson(json);
+      case "call.frame_recording_stopped":
+        return TypeCallFrameRecordingStoppedEvent.fromJson(json);
+      case "call.hls_broadcasting_failed":
+        return TypeCallHLSBroadcastingFailedEvent.fromJson(json);
+      case "call.hls_broadcasting_started":
+        return TypeCallHLSBroadcastingStartedEvent.fromJson(json);
+      case "call.hls_broadcasting_stopped":
+        return TypeCallHLSBroadcastingStoppedEvent.fromJson(json);
+      case "call.live_started":
+        return TypeCallLiveStartedEvent.fromJson(json);
+      case "call.member_added":
+        return TypeCallMemberAddedEvent.fromJson(json);
+      case "call.member_removed":
+        return TypeCallMemberRemovedEvent.fromJson(json);
+      case "call.member_updated":
+        return TypeCallMemberUpdatedEvent.fromJson(json);
+      case "call.member_updated_permission":
+        return TypeCallMemberUpdatedPermissionEvent.fromJson(json);
+      case "call.missed":
+        return TypeCallMissedEvent.fromJson(json);
+      case "call.moderation_blur":
+        return TypeCallModerationBlurEvent.fromJson(json);
+      case "call.moderation_warning":
+        return TypeCallModerationWarningEvent.fromJson(json);
+      case "call.notification":
+        return TypeCallNotificationEvent.fromJson(json);
+      case "call.permission_request":
+        return TypePermissionRequestEvent.fromJson(json);
+      case "call.permissions_updated":
+        return TypeUpdatedCallPermissionsEvent.fromJson(json);
+      case "call.reaction_new":
+        return TypeCallReactionEvent.fromJson(json);
+      case "call.recording_failed":
+        return TypeCallRecordingFailedEvent.fromJson(json);
+      case "call.recording_ready":
+        return TypeCallRecordingReadyEvent.fromJson(json);
+      case "call.recording_started":
+        return TypeCallRecordingStartedEvent.fromJson(json);
+      case "call.recording_stopped":
+        return TypeCallRecordingStoppedEvent.fromJson(json);
+      case "call.rejected":
+        return TypeCallRejectedEvent.fromJson(json);
+      case "call.ring":
+        return TypeCallRingEvent.fromJson(json);
+      case "call.rtmp_broadcast_failed":
+        return TypeCallRtmpBroadcastFailedEvent.fromJson(json);
+      case "call.rtmp_broadcast_started":
+        return TypeCallRtmpBroadcastStartedEvent.fromJson(json);
+      case "call.rtmp_broadcast_stopped":
+        return TypeCallRtmpBroadcastStoppedEvent.fromJson(json);
+      case "call.session_ended":
+        return TypeCallSessionEndedEvent.fromJson(json);
+      case "call.session_participant_count_updated":
+        return TypeCallSessionParticipantCountsUpdatedEvent.fromJson(json);
+      case "call.session_participant_joined":
+        return TypeCallSessionParticipantJoinedEvent.fromJson(json);
+      case "call.session_participant_left":
+        return TypeCallSessionParticipantLeftEvent.fromJson(json);
+      case "call.session_started":
+        return TypeCallSessionStartedEvent.fromJson(json);
+      case "call.stats_report_ready":
+        return TypeCallStatsReportReadyEvent.fromJson(json);
+      case "call.transcription_failed":
+        return TypeCallTranscriptionFailedEvent.fromJson(json);
+      case "call.transcription_ready":
+        return TypeCallTranscriptionReadyEvent.fromJson(json);
+      case "call.transcription_started":
+        return TypeCallTranscriptionStartedEvent.fromJson(json);
+      case "call.transcription_stopped":
+        return TypeCallTranscriptionStoppedEvent.fromJson(json);
+      case "call.unblocked_user":
+        return TypeUnblockedUserEvent.fromJson(json);
+      case "call.updated":
+        return TypeCallUpdatedEvent.fromJson(json);
+      case "call.user_muted":
+        return TypeCallUserMutedEvent.fromJson(json);
+      case "connection.error":
+        return TypeConnectionErrorEvent.fromJson(json);
+      case "connection.ok":
+        return TypeConnectedEvent.fromJson(json);
+      case "custom":
+        return TypeCustomVideoEvent.fromJson(json);
+      case "health.check":
+        return TypeHealthCheckEvent.fromJson(json);
+      case "user.banned":
+        return TypeUserBannedEvent.fromJson(json);
+      case "user.deactivated":
+        return TypeUserDeactivatedEvent.fromJson(json);
+      case "user.muted":
+        return TypeUserMutedEvent.fromJson(json);
+      case "user.reactivated":
+        return TypeUserReactivatedEvent.fromJson(json);
+      case "user.updated":
+        return TypeUserUpdatedEvent.fromJson(json);
+      default:
+        throw Exception('Unknown video event type: ${json['type']}');
+    }
+  }
+}
 
-  Map<String, Object> custom;
+class TypeAppUpdatedEvent extends VideoEvent {
+  const TypeAppUpdatedEvent(this.appUpdatedEvent);
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? receivedAt;
+  factory TypeAppUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeAppUpdatedEvent(AppUpdatedEvent.fromJson(json)!);
+  }
 
-  /// The type of event: \"user.updated\" in this case
-  String type;
+  final AppUpdatedEvent appUpdatedEvent;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  UserResponse? blockedByUser;
-
-  String callCid;
-
-  UserResponsePrivacyFields user;
-
-  CallResponse call;
-
-  /// Call members
-  List<MemberResponse> members;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
-
-  String egressId;
-
-  /// The time the frame was captured
-  DateTime capturedAt;
-
-  /// Call session ID
-  String sessionId;
-
-  /// The type of the track frame was captured from (TRACK_TYPE_VIDEO|TRACK_TYPE_SCREEN_SHARE)
-  String trackType;
-
-  /// The URL of the frame
-  String url;
-
-  /// The users in the frame
-  Map<String, UserResponse> users;
-
-  String hlsPlaylistUrl;
-
-  /// The capabilities by role for this call
-  Map<String, List<String>> capabilitiesByRole;
-
-  bool notifyUser;
-
-  String userId;
-
-  String message;
-
-  ReactionResponse reaction;
-
-  CallRecording callRecording;
-
-  bool video;
-
-  /// Name of the given RTMP broadcast
-  String name;
-
-  int anonymousParticipantCount;
-
-  Map<String, int> participantsCountByRole;
-
-  CallParticipantResponse participant;
-
-  /// The duration participant was in the session in seconds
-  int durationSeconds;
-
-  APIError error;
-
-  CallTranscription callTranscription;
-
-  String fromUserId;
-
-  List<String> mutedUserIds;
-
-  CallClosedCaption closedCaption;
-
-  String connectionId;
-
-  OwnUserResponse me;
-
-  String cid;
-
-  /// The list of permissions requested by the user
-  List<String> permissions;
-
-  /// The capabilities of the current user
-  List<OwnCapability> ownCapabilities;
-
-  String channelId;
-
-  String channelType;
-
-  User createdBy;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DateTime? expiration;
-
-  bool shadow;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? team;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? targetUser;
-
-  List<String> targetUsers;
+  // @override
+  // String get callCid => appUpdatedEvent.callCid;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoEvent &&
-          other.app == app &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.receivedAt == receivedAt &&
-          other.type == type &&
-          other.blockedByUser == blockedByUser &&
-          other.callCid == callCid &&
-          other.user == user &&
-          other.call == call &&
-          _deepEquality.equals(other.members, members) &&
-          other.reason == reason &&
-          other.egressId == egressId &&
-          other.capturedAt == capturedAt &&
-          other.sessionId == sessionId &&
-          other.trackType == trackType &&
-          other.url == url &&
-          _deepEquality.equals(other.users, users) &&
-          other.hlsPlaylistUrl == hlsPlaylistUrl &&
-          _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
-          other.notifyUser == notifyUser &&
-          other.userId == userId &&
-          other.message == message &&
-          other.reaction == reaction &&
-          other.callRecording == callRecording &&
-          other.video == video &&
-          other.name == name &&
-          other.anonymousParticipantCount == anonymousParticipantCount &&
-          _deepEquality.equals(
-              other.participantsCountByRole, participantsCountByRole) &&
-          other.participant == participant &&
-          other.durationSeconds == durationSeconds &&
-          other.error == error &&
-          other.callTranscription == callTranscription &&
-          other.fromUserId == fromUserId &&
-          _deepEquality.equals(other.mutedUserIds, mutedUserIds) &&
-          other.closedCaption == closedCaption &&
-          other.connectionId == connectionId &&
-          other.me == me &&
-          other.cid == cid &&
-          _deepEquality.equals(other.permissions, permissions) &&
-          _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
-          other.channelId == channelId &&
-          other.channelType == channelType &&
-          other.createdBy == createdBy &&
-          other.expiration == expiration &&
-          other.shadow == shadow &&
-          other.team == team &&
-          other.targetUser == targetUser &&
-          _deepEquality.equals(other.targetUsers, targetUsers);
+  String get type => appUpdatedEvent.type;
+}
+
+class TypeCallAcceptedEvent extends VideoEvent {
+  const TypeCallAcceptedEvent(this.callAcceptedEvent);
+
+  factory TypeCallAcceptedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallAcceptedEvent(CallAcceptedEvent.fromJson(json)!);
+  }
+
+  final CallAcceptedEvent callAcceptedEvent;
+
+  // @override
+  // String get callCid => callAcceptedEvent.callCid;
 
   @override
-  int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (app.hashCode) +
-      (createdAt.hashCode) +
-      (custom.hashCode) +
-      (receivedAt == null ? 0 : receivedAt!.hashCode) +
-      (type.hashCode) +
-      (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
-      (callCid.hashCode) +
-      (user.hashCode) +
-      (call.hashCode) +
-      (members.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
-      (egressId.hashCode) +
-      (capturedAt.hashCode) +
-      (sessionId.hashCode) +
-      (trackType.hashCode) +
-      (url.hashCode) +
-      (users.hashCode) +
-      (hlsPlaylistUrl.hashCode) +
-      (capabilitiesByRole.hashCode) +
-      (notifyUser.hashCode) +
-      (userId.hashCode) +
-      (message.hashCode) +
-      (reaction.hashCode) +
-      (callRecording.hashCode) +
-      (video.hashCode) +
-      (name.hashCode) +
-      (anonymousParticipantCount.hashCode) +
-      (participantsCountByRole.hashCode) +
-      (participant.hashCode) +
-      (durationSeconds.hashCode) +
-      (error.hashCode) +
-      (callTranscription.hashCode) +
-      (fromUserId.hashCode) +
-      (mutedUserIds.hashCode) +
-      (closedCaption.hashCode) +
-      (connectionId.hashCode) +
-      (me.hashCode) +
-      (cid.hashCode) +
-      (permissions.hashCode) +
-      (ownCapabilities.hashCode) +
-      (channelId.hashCode) +
-      (channelType.hashCode) +
-      (createdBy.hashCode) +
-      (expiration == null ? 0 : expiration!.hashCode) +
-      (shadow.hashCode) +
-      (team == null ? 0 : team!.hashCode) +
-      (targetUser == null ? 0 : targetUser!.hashCode) +
-      (targetUsers.hashCode);
+  String get type => callAcceptedEvent.type;
+}
+
+class TypeBlockedUserEvent extends VideoEvent {
+  const TypeBlockedUserEvent(this.blockedUserEvent);
+
+  factory TypeBlockedUserEvent.fromJson(Map<String, dynamic> json) {
+    return TypeBlockedUserEvent(BlockedUserEvent.fromJson(json)!);
+  }
+
+  final BlockedUserEvent blockedUserEvent;
+
+  // @override
+  // String get callCid => blockedUserEvent.callCid;
 
   @override
-  String toString() =>
-      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, error=$error, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
+  String get type => blockedUserEvent.type;
+}
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json[r'app'] = this.app;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom'] = this.custom;
-    if (this.receivedAt != null) {
-      json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
-    } else {
-      json[r'received_at'] = null;
-    }
-    json[r'type'] = this.type;
-    if (this.blockedByUser != null) {
-      json[r'blocked_by_user'] = this.blockedByUser;
-    } else {
-      json[r'blocked_by_user'] = null;
-    }
-    json[r'call_cid'] = this.callCid;
-    json[r'user'] = this.user;
-    json[r'call'] = this.call;
-    json[r'members'] = this.members;
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
-    }
-    json[r'egress_id'] = this.egressId;
-    json[r'captured_at'] = this.capturedAt.toUtc().toIso8601String();
-    json[r'session_id'] = this.sessionId;
-    json[r'track_type'] = this.trackType;
-    json[r'url'] = this.url;
-    json[r'users'] = this.users;
-    json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
-    json[r'capabilities_by_role'] = this.capabilitiesByRole;
-    json[r'notify_user'] = this.notifyUser;
-    json[r'user_id'] = this.userId;
-    json[r'message'] = this.message;
-    json[r'reaction'] = this.reaction;
-    json[r'call_recording'] = this.callRecording;
-    json[r'video'] = this.video;
-    json[r'name'] = this.name;
-    json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
-    json[r'participants_count_by_role'] = this.participantsCountByRole;
-    json[r'participant'] = this.participant;
-    json[r'duration_seconds'] = this.durationSeconds;
-    json[r'error'] = this.error;
-    json[r'call_transcription'] = this.callTranscription;
-    json[r'from_user_id'] = this.fromUserId;
-    json[r'muted_user_ids'] = this.mutedUserIds;
-    json[r'closed_caption'] = this.closedCaption;
-    json[r'connection_id'] = this.connectionId;
-    json[r'me'] = this.me;
-    json[r'cid'] = this.cid;
-    json[r'permissions'] = this.permissions;
-    json[r'own_capabilities'] = this.ownCapabilities;
-    json[r'channel_id'] = this.channelId;
-    json[r'channel_type'] = this.channelType;
-    json[r'created_by'] = this.createdBy;
-    if (this.expiration != null) {
-      json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
-    } else {
-      json[r'expiration'] = null;
-    }
-    json[r'shadow'] = this.shadow;
-    if (this.team != null) {
-      json[r'team'] = this.team;
-    } else {
-      json[r'team'] = null;
-    }
-    if (this.targetUser != null) {
-      json[r'target_user'] = this.targetUser;
-    } else {
-      json[r'target_user'] = null;
-    }
-    json[r'target_users'] = this.targetUsers;
-    return json;
+class TypeClosedCaptionEvent extends VideoEvent {
+  const TypeClosedCaptionEvent(this.closedCaptionEvent);
+
+  factory TypeClosedCaptionEvent.fromJson(Map<String, dynamic> json) {
+    return TypeClosedCaptionEvent(ClosedCaptionEvent.fromJson(json)!);
   }
 
-  /// Returns a new [VideoEvent] instance and imports its values from
-  /// [value] if it's a [Map], null otherwise.
-  // ignore: prefer_constructors_over_static_methods
-  static VideoEvent? fromJson(dynamic value) {
-    if (value is Map) {
-      final json = value.cast<String, dynamic>();
+  final ClosedCaptionEvent closedCaptionEvent;
 
-      // Ensure that the map contains the required keys.
-      // Note 1: the values aren't checked for validity beyond being non-null.
-      // Note 2: this code is stripped in release mode!
-      assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoEvent[$key]" has a null value in JSON.');
-        });
-        return true;
-      }());
+  // @override
+  // String get callCid => closedCaptionEvent.callCid;
 
-      return VideoEvent(
-        app: AppEventResponse.fromJson(json[r'app'])!,
-        createdAt: mapDateTime(json, r'created_at', r'')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
-        receivedAt: mapDateTime(json, r'received_at', r''),
-        type: mapValueOfType<String>(json, r'type')!,
-        blockedByUser: UserResponse.fromJson(json[r'blocked_by_user']),
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
-        user: UserResponsePrivacyFields.fromJson(json[r'user'])!,
-        call: CallResponse.fromJson(json[r'call'])!,
-        members: MemberResponse.listFromJson(json[r'members']),
-        reason: mapValueOfType<String>(json, r'reason'),
-        egressId: mapValueOfType<String>(json, r'egress_id')!,
-        capturedAt: mapDateTime(json, r'captured_at', r'')!,
-        sessionId: mapValueOfType<String>(json, r'session_id')!,
-        trackType: mapValueOfType<String>(json, r'track_type')!,
-        url: mapValueOfType<String>(json, r'url')!,
-        users: UserResponse.mapFromJson(json[r'users']),
-        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        //MANUAL_EDIT mapCast
-        capabilitiesByRole: json[r'capabilities_by_role'] == null
-            ? const {}
-            : mapCastOfType<String, List<String>>(
-                    json, r'capabilities_by_role') ??
-                const {},
-        notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
-        userId: mapValueOfType<String>(json, r'user_id')!,
-        message: mapValueOfType<String>(json, r'message')!,
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
-        callRecording: CallRecording.fromJson(json[r'call_recording'])!,
-        video: mapValueOfType<bool>(json, r'video')!,
-        name: mapValueOfType<String>(json, r'name')!,
-        anonymousParticipantCount:
-            mapValueOfType<int>(json, r'anonymous_participant_count')!,
-        participantsCountByRole:
-            mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        participant: CallParticipantResponse.fromJson(json[r'participant'])!,
-        durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
-        error: APIError.fromJson(json[r'error'])!,
-        callTranscription:
-            CallTranscription.fromJson(json[r'call_transcription'])!,
-        fromUserId: mapValueOfType<String>(json, r'from_user_id')!,
-        mutedUserIds: json[r'muted_user_ids'] is Iterable
-            ? (json[r'muted_user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        closedCaption: CallClosedCaption.fromJson(json[r'closed_caption'])!,
-        connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        me: OwnUserResponse.fromJson(json[r'me'])!,
-        cid: mapValueOfType<String>(json, r'cid')!,
-        permissions: json[r'permissions'] is Iterable
-            ? (json[r'permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
-        channelId: mapValueOfType<String>(json, r'channel_id')!,
-        channelType: mapValueOfType<String>(json, r'channel_type')!,
-        createdBy: User.fromJson(json[r'created_by'])!,
-        expiration: mapDateTime(json, r'expiration', r''),
-        shadow: mapValueOfType<bool>(json, r'shadow')!,
-        team: mapValueOfType<String>(json, r'team'),
-        targetUser: mapValueOfType<String>(json, r'target_user'),
-        targetUsers: json[r'target_users'] is Iterable
-            ? (json[r'target_users'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-      );
-    }
-    return null;
+  @override
+  String get type => closedCaptionEvent.type;
+}
+
+class TypeCallClosedCaptionsFailedEvent extends VideoEvent {
+  const TypeCallClosedCaptionsFailedEvent(this.callClosedCaptionsFailedEvent);
+
+  factory TypeCallClosedCaptionsFailedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallClosedCaptionsFailedEvent(
+        CallClosedCaptionsFailedEvent.fromJson(json)!);
   }
 
-  static List<VideoEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final result = <VideoEvent>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = VideoEvent.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
+  final CallClosedCaptionsFailedEvent callClosedCaptionsFailedEvent;
+
+  // @override
+  // String get callCid => callClosedCaptionsFailedEvent.callCid;
+
+  @override
+  String get type => callClosedCaptionsFailedEvent.type;
+}
+
+class TypeCallClosedCaptionsStartedEvent extends VideoEvent {
+  const TypeCallClosedCaptionsStartedEvent(this.callClosedCaptionsStartedEvent);
+
+  factory TypeCallClosedCaptionsStartedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallClosedCaptionsStartedEvent(
+        CallClosedCaptionsStartedEvent.fromJson(json)!);
   }
 
-  static Map<String, VideoEvent> mapFromJson(dynamic json) {
-    final map = <String, VideoEvent>{};
-    if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
-      for (final entry in json.entries) {
-        final value = VideoEvent.fromJson(entry.value);
-        if (value != null) {
-          map[entry.key] = value;
-        }
-      }
-    }
-    return map;
+  final CallClosedCaptionsStartedEvent callClosedCaptionsStartedEvent;
+
+  // @override
+  // String get callCid => callClosedCaptionsStartedEvent.callCid;
+
+  @override
+  String get type => callClosedCaptionsStartedEvent.type;
+}
+
+class TypeCallClosedCaptionsStoppedEvent extends VideoEvent {
+  const TypeCallClosedCaptionsStoppedEvent(this.callClosedCaptionsStoppedEvent);
+
+  factory TypeCallClosedCaptionsStoppedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallClosedCaptionsStoppedEvent(
+        CallClosedCaptionsStoppedEvent.fromJson(json)!);
   }
 
-  // maps a json object with a list of VideoEvent-objects as value to a dart map
-  static Map<String, List<VideoEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<VideoEvent>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        map[entry.key] = VideoEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
-      }
-    }
-    return map;
+  final CallClosedCaptionsStoppedEvent callClosedCaptionsStoppedEvent;
+
+  // @override
+  // String get callCid => callClosedCaptionsStoppedEvent.callCid;
+
+  @override
+  String get type => callClosedCaptionsStoppedEvent.type;
+}
+
+class TypeCallCreatedEvent extends VideoEvent {
+  const TypeCallCreatedEvent(this.callCreatedEvent);
+
+  factory TypeCallCreatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallCreatedEvent(CallCreatedEvent.fromJson(json)!);
   }
 
-  /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'app',
-    'created_at',
-    'custom',
-    'type',
-    'call_cid',
-    'user',
-    'call',
-    'members',
-    'egress_id',
-    'captured_at',
-    'session_id',
-    'track_type',
-    'url',
-    'users',
-    'hls_playlist_url',
-    'capabilities_by_role',
-    'notify_user',
-    'user_id',
-    'message',
-    'reaction',
-    'call_recording',
-    'video',
-    'name',
-    'anonymous_participant_count',
-    'participants_count_by_role',
-    'participant',
-    'duration_seconds',
-    'error',
-    'call_transcription',
-    'from_user_id',
-    'muted_user_ids',
-    'closed_caption',
-    'connection_id',
-    'me',
-    'cid',
-    'permissions',
-    'own_capabilities',
-    'channel_id',
-    'channel_type',
-    'created_by',
-    'shadow',
-  };
+  final CallCreatedEvent callCreatedEvent;
+
+  // @override
+  // String get callCid => callCreatedEvent.callCid;
+
+  @override
+  String get type => callCreatedEvent.type;
+}
+
+class TypeCallDeletedEvent extends VideoEvent {
+  const TypeCallDeletedEvent(this.callDeletedEvent);
+
+  factory TypeCallDeletedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallDeletedEvent(CallDeletedEvent.fromJson(json)!);
+  }
+
+  final CallDeletedEvent callDeletedEvent;
+
+  // @override
+  // String get callCid => callDeletedEvent.callCid;
+
+  @override
+  String get type => callDeletedEvent.type;
+}
+
+class TypeCallEndedEvent extends VideoEvent {
+  const TypeCallEndedEvent(this.callEndedEvent);
+
+  factory TypeCallEndedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallEndedEvent(CallEndedEvent.fromJson(json)!);
+  }
+
+  final CallEndedEvent callEndedEvent;
+
+  // @override
+  // String get callCid => callEndedEvent.callCid;
+
+  @override
+  String get type => callEndedEvent.type;
+}
+
+class TypeCallFrameRecordingFailedEvent extends VideoEvent {
+  const TypeCallFrameRecordingFailedEvent(this.callFrameRecordingFailedEvent);
+
+  factory TypeCallFrameRecordingFailedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallFrameRecordingFailedEvent(
+        CallFrameRecordingFailedEvent.fromJson(json)!);
+  }
+
+  final CallFrameRecordingFailedEvent callFrameRecordingFailedEvent;
+
+  // @override
+  // String get callCid => callFrameRecordingFailedEvent.callCid;
+
+  @override
+  String get type => callFrameRecordingFailedEvent.type;
+}
+
+class TypeCallFrameRecordingFrameReadyEvent extends VideoEvent {
+  const TypeCallFrameRecordingFrameReadyEvent(
+      this.callFrameRecordingFrameReadyEvent);
+
+  factory TypeCallFrameRecordingFrameReadyEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallFrameRecordingFrameReadyEvent(
+        CallFrameRecordingFrameReadyEvent.fromJson(json)!);
+  }
+
+  final CallFrameRecordingFrameReadyEvent callFrameRecordingFrameReadyEvent;
+
+  // @override
+  // String get callCid => callFrameRecordingFrameReadyEvent.callCid;
+
+  @override
+  String get type => callFrameRecordingFrameReadyEvent.type;
+}
+
+class TypeCallFrameRecordingStartedEvent extends VideoEvent {
+  const TypeCallFrameRecordingStartedEvent(this.callFrameRecordingStartedEvent);
+
+  factory TypeCallFrameRecordingStartedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallFrameRecordingStartedEvent(
+        CallFrameRecordingStartedEvent.fromJson(json)!);
+  }
+
+  final CallFrameRecordingStartedEvent callFrameRecordingStartedEvent;
+
+  // @override
+  // String get callCid => callFrameRecordingStartedEvent.callCid;
+
+  @override
+  String get type => callFrameRecordingStartedEvent.type;
+}
+
+class TypeCallFrameRecordingStoppedEvent extends VideoEvent {
+  const TypeCallFrameRecordingStoppedEvent(this.callFrameRecordingStoppedEvent);
+
+  factory TypeCallFrameRecordingStoppedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallFrameRecordingStoppedEvent(
+        CallFrameRecordingStoppedEvent.fromJson(json)!);
+  }
+
+  final CallFrameRecordingStoppedEvent callFrameRecordingStoppedEvent;
+
+  // @override
+  // String get callCid => callFrameRecordingStoppedEvent.callCid;
+
+  @override
+  String get type => callFrameRecordingStoppedEvent.type;
+}
+
+class TypeCallHLSBroadcastingFailedEvent extends VideoEvent {
+  const TypeCallHLSBroadcastingFailedEvent(this.callHLSBroadcastingFailedEvent);
+
+  factory TypeCallHLSBroadcastingFailedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallHLSBroadcastingFailedEvent(
+        CallHLSBroadcastingFailedEvent.fromJson(json)!);
+  }
+
+  final CallHLSBroadcastingFailedEvent callHLSBroadcastingFailedEvent;
+
+  // @override
+  // String get callCid => callHLSBroadcastingFailedEvent.callCid;
+
+  @override
+  String get type => callHLSBroadcastingFailedEvent.type;
+}
+
+class TypeCallHLSBroadcastingStartedEvent extends VideoEvent {
+  const TypeCallHLSBroadcastingStartedEvent(
+      this.callHLSBroadcastingStartedEvent);
+
+  factory TypeCallHLSBroadcastingStartedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallHLSBroadcastingStartedEvent(
+        CallHLSBroadcastingStartedEvent.fromJson(json)!);
+  }
+
+  final CallHLSBroadcastingStartedEvent callHLSBroadcastingStartedEvent;
+
+  // @override
+  // String get callCid => callHLSBroadcastingStartedEvent.callCid;
+
+  @override
+  String get type => callHLSBroadcastingStartedEvent.type;
+}
+
+class TypeCallHLSBroadcastingStoppedEvent extends VideoEvent {
+  const TypeCallHLSBroadcastingStoppedEvent(
+      this.callHLSBroadcastingStoppedEvent);
+
+  factory TypeCallHLSBroadcastingStoppedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallHLSBroadcastingStoppedEvent(
+        CallHLSBroadcastingStoppedEvent.fromJson(json)!);
+  }
+
+  final CallHLSBroadcastingStoppedEvent callHLSBroadcastingStoppedEvent;
+
+  // @override
+  // String get callCid => callHLSBroadcastingStoppedEvent.callCid;
+
+  @override
+  String get type => callHLSBroadcastingStoppedEvent.type;
+}
+
+class TypeCallLiveStartedEvent extends VideoEvent {
+  const TypeCallLiveStartedEvent(this.callLiveStartedEvent);
+
+  factory TypeCallLiveStartedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallLiveStartedEvent(CallLiveStartedEvent.fromJson(json)!);
+  }
+
+  final CallLiveStartedEvent callLiveStartedEvent;
+
+  // @override
+  // String get callCid => callLiveStartedEvent.callCid;
+
+  @override
+  String get type => callLiveStartedEvent.type;
+}
+
+class TypeCallMemberAddedEvent extends VideoEvent {
+  const TypeCallMemberAddedEvent(this.callMemberAddedEvent);
+
+  factory TypeCallMemberAddedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallMemberAddedEvent(CallMemberAddedEvent.fromJson(json)!);
+  }
+
+  final CallMemberAddedEvent callMemberAddedEvent;
+
+  // @override
+  // String get callCid => callMemberAddedEvent.callCid;
+
+  @override
+  String get type => callMemberAddedEvent.type;
+}
+
+class TypeCallMemberRemovedEvent extends VideoEvent {
+  const TypeCallMemberRemovedEvent(this.callMemberRemovedEvent);
+
+  factory TypeCallMemberRemovedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallMemberRemovedEvent(CallMemberRemovedEvent.fromJson(json)!);
+  }
+
+  final CallMemberRemovedEvent callMemberRemovedEvent;
+
+  // @override
+  // String get callCid => callMemberRemovedEvent.callCid;
+
+  @override
+  String get type => callMemberRemovedEvent.type;
+}
+
+class TypeCallMemberUpdatedEvent extends VideoEvent {
+  const TypeCallMemberUpdatedEvent(this.callMemberUpdatedEvent);
+
+  factory TypeCallMemberUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallMemberUpdatedEvent(CallMemberUpdatedEvent.fromJson(json)!);
+  }
+
+  final CallMemberUpdatedEvent callMemberUpdatedEvent;
+
+  // @override
+  // String get callCid => callMemberUpdatedEvent.callCid;
+
+  @override
+  String get type => callMemberUpdatedEvent.type;
+}
+
+class TypeCallMemberUpdatedPermissionEvent extends VideoEvent {
+  const TypeCallMemberUpdatedPermissionEvent(
+      this.callMemberUpdatedPermissionEvent);
+
+  factory TypeCallMemberUpdatedPermissionEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallMemberUpdatedPermissionEvent(
+        CallMemberUpdatedPermissionEvent.fromJson(json)!);
+  }
+
+  final CallMemberUpdatedPermissionEvent callMemberUpdatedPermissionEvent;
+
+  // @override
+  // String get callCid => callMemberUpdatedPermissionEvent.callCid;
+
+  @override
+  String get type => callMemberUpdatedPermissionEvent.type;
+}
+
+class TypeCallMissedEvent extends VideoEvent {
+  const TypeCallMissedEvent(this.callMissedEvent);
+
+  factory TypeCallMissedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallMissedEvent(CallMissedEvent.fromJson(json)!);
+  }
+
+  final CallMissedEvent callMissedEvent;
+
+  // @override
+  // String get callCid => callMissedEvent.callCid;
+
+  @override
+  String get type => callMissedEvent.type;
+}
+
+class TypeCallModerationBlurEvent extends VideoEvent {
+  const TypeCallModerationBlurEvent(this.callModerationBlurEvent);
+
+  factory TypeCallModerationBlurEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallModerationBlurEvent(CallModerationBlurEvent.fromJson(json)!);
+  }
+
+  final CallModerationBlurEvent callModerationBlurEvent;
+
+  // @override
+  // String get callCid => callModerationBlurEvent.callCid;
+
+  @override
+  String get type => callModerationBlurEvent.type;
+}
+
+class TypeCallModerationWarningEvent extends VideoEvent {
+  const TypeCallModerationWarningEvent(this.callModerationWarningEvent);
+
+  factory TypeCallModerationWarningEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallModerationWarningEvent(
+        CallModerationWarningEvent.fromJson(json)!);
+  }
+
+  final CallModerationWarningEvent callModerationWarningEvent;
+
+  // @override
+  // String get callCid => callModerationWarningEvent.callCid;
+
+  @override
+  String get type => callModerationWarningEvent.type;
+}
+
+class TypeCallNotificationEvent extends VideoEvent {
+  const TypeCallNotificationEvent(this.callNotificationEvent);
+
+  factory TypeCallNotificationEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallNotificationEvent(CallNotificationEvent.fromJson(json)!);
+  }
+
+  final CallNotificationEvent callNotificationEvent;
+
+  // @override
+  // String get callCid => callNotificationEvent.callCid;
+
+  @override
+  String get type => callNotificationEvent.type;
+}
+
+class TypePermissionRequestEvent extends VideoEvent {
+  const TypePermissionRequestEvent(this.permissionRequestEvent);
+
+  factory TypePermissionRequestEvent.fromJson(Map<String, dynamic> json) {
+    return TypePermissionRequestEvent(PermissionRequestEvent.fromJson(json)!);
+  }
+
+  final PermissionRequestEvent permissionRequestEvent;
+
+  // @override
+  // String get callCid => permissionRequestEvent.callCid;
+
+  @override
+  String get type => permissionRequestEvent.type;
+}
+
+class TypeUpdatedCallPermissionsEvent extends VideoEvent {
+  const TypeUpdatedCallPermissionsEvent(this.updatedCallPermissionsEvent);
+
+  factory TypeUpdatedCallPermissionsEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUpdatedCallPermissionsEvent(
+        UpdatedCallPermissionsEvent.fromJson(json)!);
+  }
+
+  final UpdatedCallPermissionsEvent updatedCallPermissionsEvent;
+
+  // @override
+  // String get callCid => updatedCallPermissionsEvent.callCid;
+
+  @override
+  String get type => updatedCallPermissionsEvent.type;
+}
+
+class TypeCallReactionEvent extends VideoEvent {
+  const TypeCallReactionEvent(this.callReactionEvent);
+
+  factory TypeCallReactionEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallReactionEvent(CallReactionEvent.fromJson(json)!);
+  }
+
+  final CallReactionEvent callReactionEvent;
+
+  // @override
+  // String get callCid => callReactionEvent.callCid;
+
+  @override
+  String get type => callReactionEvent.type;
+}
+
+class TypeCallRecordingFailedEvent extends VideoEvent {
+  const TypeCallRecordingFailedEvent(this.callRecordingFailedEvent);
+
+  factory TypeCallRecordingFailedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRecordingFailedEvent(
+        CallRecordingFailedEvent.fromJson(json)!);
+  }
+
+  final CallRecordingFailedEvent callRecordingFailedEvent;
+
+  // @override
+  // String get callCid => callRecordingFailedEvent.callCid;
+
+  @override
+  String get type => callRecordingFailedEvent.type;
+}
+
+class TypeCallRecordingReadyEvent extends VideoEvent {
+  const TypeCallRecordingReadyEvent(this.callRecordingReadyEvent);
+
+  factory TypeCallRecordingReadyEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRecordingReadyEvent(CallRecordingReadyEvent.fromJson(json)!);
+  }
+
+  final CallRecordingReadyEvent callRecordingReadyEvent;
+
+  // @override
+  // String get callCid => callRecordingReadyEvent.callCid;
+
+  @override
+  String get type => callRecordingReadyEvent.type;
+}
+
+class TypeCallRecordingStartedEvent extends VideoEvent {
+  const TypeCallRecordingStartedEvent(this.callRecordingStartedEvent);
+
+  factory TypeCallRecordingStartedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRecordingStartedEvent(
+        CallRecordingStartedEvent.fromJson(json)!);
+  }
+
+  final CallRecordingStartedEvent callRecordingStartedEvent;
+
+  // @override
+  // String get callCid => callRecordingStartedEvent.callCid;
+
+  @override
+  String get type => callRecordingStartedEvent.type;
+}
+
+class TypeCallRecordingStoppedEvent extends VideoEvent {
+  const TypeCallRecordingStoppedEvent(this.callRecordingStoppedEvent);
+
+  factory TypeCallRecordingStoppedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRecordingStoppedEvent(
+        CallRecordingStoppedEvent.fromJson(json)!);
+  }
+
+  final CallRecordingStoppedEvent callRecordingStoppedEvent;
+
+  // @override
+  // String get callCid => callRecordingStoppedEvent.callCid;
+
+  @override
+  String get type => callRecordingStoppedEvent.type;
+}
+
+class TypeCallRejectedEvent extends VideoEvent {
+  const TypeCallRejectedEvent(this.callRejectedEvent);
+
+  factory TypeCallRejectedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRejectedEvent(CallRejectedEvent.fromJson(json)!);
+  }
+
+  final CallRejectedEvent callRejectedEvent;
+
+  // @override
+  // String get callCid => callRejectedEvent.callCid;
+
+  @override
+  String get type => callRejectedEvent.type;
+}
+
+class TypeCallRingEvent extends VideoEvent {
+  const TypeCallRingEvent(this.callRingEvent);
+
+  factory TypeCallRingEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRingEvent(CallRingEvent.fromJson(json)!);
+  }
+
+  final CallRingEvent callRingEvent;
+
+  // @override
+  // String get callCid => callRingEvent.callCid;
+
+  @override
+  String get type => callRingEvent.type;
+}
+
+class TypeCallRtmpBroadcastFailedEvent extends VideoEvent {
+  const TypeCallRtmpBroadcastFailedEvent(this.callRtmpBroadcastFailedEvent);
+
+  factory TypeCallRtmpBroadcastFailedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallRtmpBroadcastFailedEvent(
+        CallRtmpBroadcastFailedEvent.fromJson(json)!);
+  }
+
+  final CallRtmpBroadcastFailedEvent callRtmpBroadcastFailedEvent;
+
+  // @override
+  // String get callCid => callRtmpBroadcastFailedEvent.callCid;
+
+  @override
+  String get type => callRtmpBroadcastFailedEvent.type;
+}
+
+class TypeCallRtmpBroadcastStartedEvent extends VideoEvent {
+  const TypeCallRtmpBroadcastStartedEvent(this.callRtmpBroadcastStartedEvent);
+
+  factory TypeCallRtmpBroadcastStartedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallRtmpBroadcastStartedEvent(
+        CallRtmpBroadcastStartedEvent.fromJson(json)!);
+  }
+
+  final CallRtmpBroadcastStartedEvent callRtmpBroadcastStartedEvent;
+
+  // @override
+  // String get callCid => callRtmpBroadcastStartedEvent.callCid;
+
+  @override
+  String get type => callRtmpBroadcastStartedEvent.type;
+}
+
+class TypeCallRtmpBroadcastStoppedEvent extends VideoEvent {
+  const TypeCallRtmpBroadcastStoppedEvent(this.callRtmpBroadcastStoppedEvent);
+
+  factory TypeCallRtmpBroadcastStoppedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallRtmpBroadcastStoppedEvent(
+        CallRtmpBroadcastStoppedEvent.fromJson(json)!);
+  }
+
+  final CallRtmpBroadcastStoppedEvent callRtmpBroadcastStoppedEvent;
+
+  // @override
+  // String get callCid => callRtmpBroadcastStoppedEvent.callCid;
+
+  @override
+  String get type => callRtmpBroadcastStoppedEvent.type;
+}
+
+class TypeCallSessionEndedEvent extends VideoEvent {
+  const TypeCallSessionEndedEvent(this.callSessionEndedEvent);
+
+  factory TypeCallSessionEndedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallSessionEndedEvent(CallSessionEndedEvent.fromJson(json)!);
+  }
+
+  final CallSessionEndedEvent callSessionEndedEvent;
+
+  // @override
+  // String get callCid => callSessionEndedEvent.callCid;
+
+  @override
+  String get type => callSessionEndedEvent.type;
+}
+
+class TypeCallSessionParticipantCountsUpdatedEvent extends VideoEvent {
+  const TypeCallSessionParticipantCountsUpdatedEvent(
+      this.callSessionParticipantCountsUpdatedEvent);
+
+  factory TypeCallSessionParticipantCountsUpdatedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallSessionParticipantCountsUpdatedEvent(
+        CallSessionParticipantCountsUpdatedEvent.fromJson(json)!);
+  }
+
+  final CallSessionParticipantCountsUpdatedEvent
+      callSessionParticipantCountsUpdatedEvent;
+
+  // @override
+  // String get callCid => callSessionParticipantCountsUpdatedEvent.callCid;
+
+  @override
+  String get type => callSessionParticipantCountsUpdatedEvent.type;
+}
+
+class TypeCallSessionParticipantJoinedEvent extends VideoEvent {
+  const TypeCallSessionParticipantJoinedEvent(
+      this.callSessionParticipantJoinedEvent);
+
+  factory TypeCallSessionParticipantJoinedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallSessionParticipantJoinedEvent(
+        CallSessionParticipantJoinedEvent.fromJson(json)!);
+  }
+
+  final CallSessionParticipantJoinedEvent callSessionParticipantJoinedEvent;
+
+  // @override
+  // String get callCid => callSessionParticipantJoinedEvent.callCid;
+
+  @override
+  String get type => callSessionParticipantJoinedEvent.type;
+}
+
+class TypeCallSessionParticipantLeftEvent extends VideoEvent {
+  const TypeCallSessionParticipantLeftEvent(
+      this.callSessionParticipantLeftEvent);
+
+  factory TypeCallSessionParticipantLeftEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallSessionParticipantLeftEvent(
+        CallSessionParticipantLeftEvent.fromJson(json)!);
+  }
+
+  final CallSessionParticipantLeftEvent callSessionParticipantLeftEvent;
+
+  // @override
+  // String get callCid => callSessionParticipantLeftEvent.callCid;
+
+  @override
+  String get type => callSessionParticipantLeftEvent.type;
+}
+
+class TypeCallSessionStartedEvent extends VideoEvent {
+  const TypeCallSessionStartedEvent(this.callSessionStartedEvent);
+
+  factory TypeCallSessionStartedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallSessionStartedEvent(CallSessionStartedEvent.fromJson(json)!);
+  }
+
+  final CallSessionStartedEvent callSessionStartedEvent;
+
+  // @override
+  // String get callCid => callSessionStartedEvent.callCid;
+
+  @override
+  String get type => callSessionStartedEvent.type;
+}
+
+class TypeCallStatsReportReadyEvent extends VideoEvent {
+  const TypeCallStatsReportReadyEvent(this.callStatsReportReadyEvent);
+
+  factory TypeCallStatsReportReadyEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallStatsReportReadyEvent(
+        CallStatsReportReadyEvent.fromJson(json)!);
+  }
+
+  final CallStatsReportReadyEvent callStatsReportReadyEvent;
+
+  // @override
+  // String get callCid => callStatsReportReadyEvent.callCid;
+
+  @override
+  String get type => callStatsReportReadyEvent.type;
+}
+
+class TypeCallTranscriptionFailedEvent extends VideoEvent {
+  const TypeCallTranscriptionFailedEvent(this.callTranscriptionFailedEvent);
+
+  factory TypeCallTranscriptionFailedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallTranscriptionFailedEvent(
+        CallTranscriptionFailedEvent.fromJson(json)!);
+  }
+
+  final CallTranscriptionFailedEvent callTranscriptionFailedEvent;
+
+  // @override
+  // String get callCid => callTranscriptionFailedEvent.callCid;
+
+  @override
+  String get type => callTranscriptionFailedEvent.type;
+}
+
+class TypeCallTranscriptionReadyEvent extends VideoEvent {
+  const TypeCallTranscriptionReadyEvent(this.callTranscriptionReadyEvent);
+
+  factory TypeCallTranscriptionReadyEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallTranscriptionReadyEvent(
+        CallTranscriptionReadyEvent.fromJson(json)!);
+  }
+
+  final CallTranscriptionReadyEvent callTranscriptionReadyEvent;
+
+  // @override
+  // String get callCid => callTranscriptionReadyEvent.callCid;
+
+  @override
+  String get type => callTranscriptionReadyEvent.type;
+}
+
+class TypeCallTranscriptionStartedEvent extends VideoEvent {
+  const TypeCallTranscriptionStartedEvent(this.callTranscriptionStartedEvent);
+
+  factory TypeCallTranscriptionStartedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallTranscriptionStartedEvent(
+        CallTranscriptionStartedEvent.fromJson(json)!);
+  }
+
+  final CallTranscriptionStartedEvent callTranscriptionStartedEvent;
+
+  // @override
+  // String get callCid => callTranscriptionStartedEvent.callCid;
+
+  @override
+  String get type => callTranscriptionStartedEvent.type;
+}
+
+class TypeCallTranscriptionStoppedEvent extends VideoEvent {
+  const TypeCallTranscriptionStoppedEvent(this.callTranscriptionStoppedEvent);
+
+  factory TypeCallTranscriptionStoppedEvent.fromJson(
+      Map<String, dynamic> json) {
+    return TypeCallTranscriptionStoppedEvent(
+        CallTranscriptionStoppedEvent.fromJson(json)!);
+  }
+
+  final CallTranscriptionStoppedEvent callTranscriptionStoppedEvent;
+
+  // @override
+  // String get callCid => callTranscriptionStoppedEvent.callCid;
+
+  @override
+  String get type => callTranscriptionStoppedEvent.type;
+}
+
+class TypeUnblockedUserEvent extends VideoEvent {
+  const TypeUnblockedUserEvent(this.unblockedUserEvent);
+
+  factory TypeUnblockedUserEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUnblockedUserEvent(UnblockedUserEvent.fromJson(json)!);
+  }
+
+  final UnblockedUserEvent unblockedUserEvent;
+
+  // @override
+  // String get callCid => unblockedUserEvent.callCid;
+
+  @override
+  String get type => unblockedUserEvent.type;
+}
+
+class TypeCallUpdatedEvent extends VideoEvent {
+  const TypeCallUpdatedEvent(this.callUpdatedEvent);
+
+  factory TypeCallUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallUpdatedEvent(CallUpdatedEvent.fromJson(json)!);
+  }
+
+  final CallUpdatedEvent callUpdatedEvent;
+
+  // @override
+  // String get callCid => callUpdatedEvent.callCid;
+
+  @override
+  String get type => callUpdatedEvent.type;
+}
+
+class TypeCallUserMutedEvent extends VideoEvent {
+  const TypeCallUserMutedEvent(this.callUserMutedEvent);
+
+  factory TypeCallUserMutedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCallUserMutedEvent(CallUserMutedEvent.fromJson(json)!);
+  }
+
+  final CallUserMutedEvent callUserMutedEvent;
+
+  // @override
+  // String get callCid => callUserMutedEvent.callCid;
+
+  @override
+  String get type => callUserMutedEvent.type;
+}
+
+class TypeConnectionErrorEvent extends VideoEvent {
+  const TypeConnectionErrorEvent(this.connectionErrorEvent);
+
+  factory TypeConnectionErrorEvent.fromJson(Map<String, dynamic> json) {
+    return TypeConnectionErrorEvent(ConnectionErrorEvent.fromJson(json)!);
+  }
+
+  final ConnectionErrorEvent connectionErrorEvent;
+
+  // @override
+  // String get callCid => connectionErrorEvent.callCid;
+
+  @override
+  String get type => connectionErrorEvent.type;
+}
+
+class TypeConnectedEvent extends VideoEvent {
+  const TypeConnectedEvent(this.connectedEvent);
+
+  factory TypeConnectedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeConnectedEvent(ConnectedEvent.fromJson(json)!);
+  }
+
+  final ConnectedEvent connectedEvent;
+
+  // @override
+  // String get callCid => connectedEvent.callCid;
+
+  @override
+  String get type => connectedEvent.type;
+}
+
+class TypeCustomVideoEvent extends VideoEvent {
+  const TypeCustomVideoEvent(this.customVideoEvent);
+
+  factory TypeCustomVideoEvent.fromJson(Map<String, dynamic> json) {
+    return TypeCustomVideoEvent(CustomVideoEvent.fromJson(json)!);
+  }
+
+  final CustomVideoEvent customVideoEvent;
+
+  // @override
+  // String get callCid => customVideoEvent.callCid;
+
+  @override
+  String get type => customVideoEvent.type;
+}
+
+class TypeHealthCheckEvent extends VideoEvent {
+  const TypeHealthCheckEvent(this.healthCheckEvent);
+
+  factory TypeHealthCheckEvent.fromJson(Map<String, dynamic> json) {
+    return TypeHealthCheckEvent(HealthCheckEvent.fromJson(json)!);
+  }
+
+  final HealthCheckEvent healthCheckEvent;
+
+  // @override
+  // String get callCid => healthCheckEvent.callCid;
+
+  @override
+  String get type => healthCheckEvent.type;
+}
+
+class TypeUserBannedEvent extends VideoEvent {
+  const TypeUserBannedEvent(this.userBannedEvent);
+
+  factory TypeUserBannedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUserBannedEvent(UserBannedEvent.fromJson(json)!);
+  }
+
+  final UserBannedEvent userBannedEvent;
+
+  // @override
+  // String get callCid => userBannedEvent.callCid;
+
+  @override
+  String get type => userBannedEvent.type;
+}
+
+class TypeUserDeactivatedEvent extends VideoEvent {
+  const TypeUserDeactivatedEvent(this.userDeactivatedEvent);
+
+  factory TypeUserDeactivatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUserDeactivatedEvent(UserDeactivatedEvent.fromJson(json)!);
+  }
+
+  final UserDeactivatedEvent userDeactivatedEvent;
+
+  // @override
+  // String get callCid => userDeactivatedEvent.callCid;
+
+  @override
+  String get type => userDeactivatedEvent.type;
+}
+
+class TypeUserMutedEvent extends VideoEvent {
+  const TypeUserMutedEvent(this.userMutedEvent);
+
+  factory TypeUserMutedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUserMutedEvent(UserMutedEvent.fromJson(json)!);
+  }
+
+  final UserMutedEvent userMutedEvent;
+
+  // @override
+  // String get callCid => userMutedEvent.callCid;
+
+  @override
+  String get type => userMutedEvent.type;
+}
+
+class TypeUserReactivatedEvent extends VideoEvent {
+  const TypeUserReactivatedEvent(this.userReactivatedEvent);
+
+  factory TypeUserReactivatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUserReactivatedEvent(UserReactivatedEvent.fromJson(json)!);
+  }
+
+  final UserReactivatedEvent userReactivatedEvent;
+
+  // @override
+  // String get callCid => userReactivatedEvent.callCid;
+
+  @override
+  String get type => userReactivatedEvent.type;
+}
+
+class TypeUserUpdatedEvent extends VideoEvent {
+  const TypeUserUpdatedEvent(this.userUpdatedEvent);
+
+  factory TypeUserUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    return TypeUserUpdatedEvent(UserUpdatedEvent.fromJson(json)!);
+  }
+
+  final UserUpdatedEvent userUpdatedEvent;
+
+  // @override
+  // String get callCid => userUpdatedEvent.callCid;
+
+  @override
+  String get type => userUpdatedEvent.type;
 }

@@ -75,7 +75,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       getConnectionId: () => _ws?.connectionId,
     ),
   );
-  late final _defaultApi = open.ProductvideoApi(_apiClient);
+  late final _defaultApi = open.DefaultApi(_apiClient);
   // ignore: unused_field
   //late final _serverSideApi = open.ServerSideApi(_apiClient);
   late final _locationService = LocationService();
@@ -410,10 +410,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.getCall(
         callCid.type.value,
         callCid.id,
-        membersLimit: membersLimit,
-        ring: ringing,
-        notify: notify,
-        video: video,
+        membersLimit,
+        ringing,
+        notify,
+        video,
       );
       _logger.v(() => '[getCall] completed: $result');
       if (result == null) {
@@ -1383,7 +1383,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[loadGuest] id: $id');
-      final defaultApi = open.ProductvideoApi(
+      final defaultApi = open.DefaultApi(
         open.ApiClient(
           basePath: _rpcUrl,
           authentication: _Authentication(
