@@ -1,21 +1,14 @@
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../open_api/video/coordinator/api.dart';
 import '../../../stream_video.dart';
 import '../../core/utils.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/call_cid.dart';
-import '../../models/call_client_publish_options.dart';
-import '../../models/call_credentials.dart';
-import '../../types/other.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/tracer.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
-import 'dynascale_manager.dart';
 
 class CallSessionFactory {
   CallSessionFactory({

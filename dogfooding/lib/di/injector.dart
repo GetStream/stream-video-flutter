@@ -18,7 +18,6 @@ import '../core/repos/custom_environment_loader.dart';
 import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
 import '../log_config.dart';
-import '../utils/consts.dart';
 
 GetIt locator = GetIt.instance;
 
@@ -178,9 +177,8 @@ StreamVideo _initStreamVideo(
       androidPushProvider: const StreamVideoPushProvider.firebase(
         name: 'flutter-firebase',
       ),
-      pushParams: const StreamVideoPushParams(
-        appName: kAppName,
-        ios: IOSParams(iconName: 'IconMask'),
+      pushConfiguration: const StreamVideoPushConfiguration(
+        ios: IOSPushConfiguration(iconName: 'IconMask'),
       ),
       registerApnDeviceToken: true,
     ),
