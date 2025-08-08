@@ -1,4 +1,3 @@
-// import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_video_push_notification/src/stream_video_push_configuration.dart';

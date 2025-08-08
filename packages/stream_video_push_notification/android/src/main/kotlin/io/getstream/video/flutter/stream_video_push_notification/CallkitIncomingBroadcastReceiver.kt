@@ -166,8 +166,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
 
             "${context.packageName}.${CallkitConstants.ACTION_CALL_CONNECTED}" -> {
                 try {
-                    // update notification on going connected
-                    callkitNotificationManager?.showOngoingCallNotification(data, true)
                     sendEventFlutter(CallkitConstants.ACTION_CALL_CONNECTED, data)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
@@ -224,13 +222,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
             "callbackText" to data.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_TEXT),
             "isShowCallback" to data.getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW),
         )
-        val callingNotification = mapOf(
-            "id" to data.getString(CallkitConstants.EXTRA_CALLKIT_CALLING_ID),
-            "showNotification" to data.getBoolean(CallkitConstants.EXTRA_CALLKIT_CALLING_SHOW),
-            "subtitle" to data.getString(CallkitConstants.EXTRA_CALLKIT_CALLING_SUBTITLE),
-            "callbackText" to data.getString(CallkitConstants.EXTRA_CALLKIT_CALLING_HANG_UP_TEXT),
-            "isShowCallback" to data.getBoolean(CallkitConstants.EXTRA_CALLKIT_CALLING_HANG_UP_SHOW),
-        )
         val forwardData = mapOf(
             "id" to data.getString(CallkitConstants.EXTRA_CALLKIT_ID, ""),
             "callerName" to data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, ""),
@@ -242,7 +233,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
             "textDecline" to data.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_DECLINE, ""),
             "extra" to data.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA),
             "missedCallNotification" to missedCallNotification,
-            "callingNotification" to callingNotification,
             "android" to android
         )
         StreamVideoPushNotificationPlugin.sendEvent(event, forwardData)

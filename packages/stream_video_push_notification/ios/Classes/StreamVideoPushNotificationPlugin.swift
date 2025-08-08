@@ -43,7 +43,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 }
 
                 StreamVideoPKDelegateManager.shared.initData(data: arguments)
-                callKitManager.initCallkitProvider(data: arguments)
+                callKitManager.initCallkitProvider(Data(args: arguments))
                 result(nil)
             } else {
                 result(

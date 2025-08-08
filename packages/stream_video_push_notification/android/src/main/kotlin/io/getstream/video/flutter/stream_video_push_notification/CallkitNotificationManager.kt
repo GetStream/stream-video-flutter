@@ -644,17 +644,6 @@ class CallkitNotificationManager(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    fun showOngoingCallNotification(data: Bundle, isConnected: Boolean?) {
-        val callkitNotification = getOnGoingCallNotification(data, isConnected)
-        callkitNotification?.let {
-            getNotificationManager().notify(
-                callkitNotification.id, it.notification
-            )
-        }
-    }
-
-
     fun requestNotificationPermission(activity: Activity?, map: Map<String, Any>) {
         this.dataNotificationPermission = map
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

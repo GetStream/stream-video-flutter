@@ -15,7 +15,7 @@ Official Push Notification Plugin for Stream Video.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'flutter_callkit_incoming'
+  s.dependency 'CryptoSwift'
   s.platform = :ios, '14'
 
   # Flutter.framework does not contain a i386 slice.
