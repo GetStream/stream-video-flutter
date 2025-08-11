@@ -40,7 +40,6 @@ class CallkitNotificationManager(
         const val EXTRA_TIME_START_CALL = "EXTRA_TIME_START_CALL"
 
         const val NOTIFICATION_CHANNEL_ID_INCOMING = "callkit_incoming_channel_id"
-        const val NOTIFICATION_CHANNEL_ID_ONGOING = "callkit_ongoing_channel_id"
         const val NOTIFICATION_CHANNEL_ID_MISSED = "callkit_missed_channel_id"
 
     }
@@ -236,7 +235,16 @@ class CallkitNotificationManager(
                     )
                 )
             }
+
+            var defaultAvatar = data.getString(
+                CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""
+            )
             var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+
+            if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
+                avatarUrl = defaultAvatar
+            }
+
             if (!avatarUrl.isNullOrEmpty()) {
                 if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith(
                         "https://",
@@ -318,7 +326,16 @@ class CallkitNotificationManager(
             R.id.tvAccept,
             if (TextUtils.isEmpty(textAccept)) context.getString(R.string.text_accept) else textAccept
         )
+
+        var defaultAvatar = data.getString(
+            CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""
+        )
         var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+         
+        if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
+            avatarUrl = defaultAvatar
+        }
+
         if (!avatarUrl.isNullOrEmpty()) {
             if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith("https://", true)) {
                 avatarUrl = String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
@@ -427,7 +444,15 @@ class CallkitNotificationManager(
             if (TextUtils.isEmpty(textCallback)) context.getString(R.string.text_call_back) else textCallback
         )
 
+        var defaultAvatar = data.getString(
+            CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""
+        )
         var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+
+        if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
+            avatarUrl = defaultAvatar
+        }
+
         if (!avatarUrl.isNullOrEmpty()) {
             if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith(
                     "https://",
@@ -564,13 +589,6 @@ class CallkitNotificationManager(
                 }
                 channelMissedCall.importance = NotificationManager.IMPORTANCE_HIGH
                 createNotificationChannel(channelMissedCall)
-
-                val channelOngoingCall = NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID_ONGOING,
-                    ongoingCallChannelName,
-                    NotificationManager.IMPORTANCE_LOW // disables notification popup for ongoing call
-                )
-                createNotificationChannel(channelOngoingCall)
             }
         }
     }

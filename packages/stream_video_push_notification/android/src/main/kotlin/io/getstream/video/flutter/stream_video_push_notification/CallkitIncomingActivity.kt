@@ -195,7 +195,13 @@ class CallkitIncomingActivity : Activity() {
             ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, logoUrl, headers, R.drawable.transparent, ivLogo)
         }
 
+        var defaultAvatar = data?.getString(CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, "")
         var avatarUrl = data?.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+
+        if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
+            avatarUrl = defaultAvatar
+        }
+
         if (!avatarUrl.isNullOrEmpty()) {
             ivAvatar.visibility = View.VISIBLE
             if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith("https://", true)) {

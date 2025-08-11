@@ -122,6 +122,7 @@ class AndroidParams {
     this.isCustomSmallExNotification,
     this.isShowLogo,
     this.logoUrl,
+    this.defaultAvatar,
     this.isShowCallID,
     this.ringtonePath,
     this.backgroundColor,
@@ -148,6 +149,9 @@ class AndroidParams {
 
   /// Logo aoo inside full screen, example: http://... https://... or "assets/abc.png"
   final String? logoUrl;
+
+  /// Default avatar for call, example: http://... https://... or "assets/abc.png"
+  final String? defaultAvatar;
 
   /// Show call id app inside full screen.
   final bool? isShowCallID;
@@ -188,10 +192,10 @@ class AndroidParams {
     AndroidPushConfiguration configuration,
   ) =>
       AndroidParams(
-        avatar: configuration.logoUrl,
         isCustomSmallExNotification: configuration.isCustomSmallExNotification,
         isShowLogo: configuration.isShowLogo,
         logoUrl: configuration.logoUrl,
+        defaultAvatar: configuration.defaultAvatar,
         isShowCallID: configuration.isShowCallID,
         ringtonePath: configuration.ringtonePath,
         backgroundColor: configuration.backgroundColor,
@@ -203,10 +207,13 @@ class AndroidParams {
         missedCallNotificationChannelName:
             configuration.missedCallNotificationChannelName,
         isShowFullLockedScreen: configuration.isShowFullLockedScreen,
+        missedCallNotification: configuration.missedCallNotification,
       );
 
   AndroidParams copyWith({
     String? avatar,
+    String? logoUrl,
+    String? defaultAvatar,
     bool? isCustomSmallExNotification,
     bool? isShowLogo,
     String? ringtonePath,
@@ -224,6 +231,8 @@ class AndroidParams {
       isCustomSmallExNotification:
           isCustomSmallExNotification ?? this.isCustomSmallExNotification,
       isShowLogo: isShowLogo ?? this.isShowLogo,
+      logoUrl: logoUrl ?? this.logoUrl,
+      defaultAvatar: defaultAvatar ?? this.defaultAvatar,
       ringtonePath: ringtonePath ?? this.ringtonePath,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundUrl: backgroundUrl ?? this.backgroundUrl,
@@ -247,6 +256,8 @@ class AndroidParams {
       avatar: other.avatar,
       isCustomSmallExNotification: other.isCustomSmallExNotification,
       isShowLogo: other.isShowLogo,
+      logoUrl: other.logoUrl,
+      defaultAvatar: other.defaultAvatar,
       ringtonePath: other.ringtonePath,
       backgroundColor: other.backgroundColor,
       backgroundUrl: other.backgroundUrl,

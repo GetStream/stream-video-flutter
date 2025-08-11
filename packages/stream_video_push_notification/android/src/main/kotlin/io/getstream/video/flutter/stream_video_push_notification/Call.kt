@@ -8,7 +8,6 @@ data class Data(val args: Map<String, Any?>) {
 
     constructor() : this(emptyMap())
 
-
     @JsonProperty("id")
     var id: String = (args["id"] as? String) ?: ""
 
@@ -44,6 +43,9 @@ data class Data(val args: Map<String, Any?>) {
 
     @JsonProperty("avatar")
     var avatar: String = ""
+
+    @JsonProperty("defaultAvatar")
+    var defaultAvatar: String = ""
 
     @JsonProperty("from")
     var from: String = ""
@@ -139,6 +141,7 @@ data class Data(val args: Map<String, Any?>) {
         var android: Map<String, Any?>? = args["android"] as? HashMap<String, Any?>?
         android = android ?: args
         avatar = android["avatar"] as? String ?: ""
+        defaultAvatar = android["defaultAvatar"] as? String ?: ""
         isCustomSmallExNotification = android["isCustomSmallExNotification"] as? Boolean ?: false
         isShowLogo = android["isShowLogo"] as? Boolean ?: false
         logoUrl = android["logoUrl"] as? String ?: ""
@@ -192,6 +195,7 @@ data class Data(val args: Map<String, Any?>) {
         bundle.putString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, callerName)
         bundle.putString(CallkitConstants.EXTRA_CALLKIT_HANDLE, handle)
         bundle.putString(CallkitConstants.EXTRA_CALLKIT_AVATAR, avatar)
+        bundle.putString(CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, defaultAvatar)
         bundle.putInt(CallkitConstants.EXTRA_CALLKIT_TYPE, type)
         bundle.putLong(CallkitConstants.EXTRA_CALLKIT_DURATION, duration)
         bundle.putString(CallkitConstants.EXTRA_CALLKIT_TEXT_ACCEPT, textAccept)
@@ -289,6 +293,8 @@ data class Data(val args: Map<String, Any?>) {
                 bundle.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
             data.avatar =
                 bundle.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+            data.defaultAvatar =
+                bundle.getString(CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, "")
             data.type = bundle.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, 0)
             data.duration =
                 bundle.getLong(CallkitConstants.EXTRA_CALLKIT_DURATION, 30000L)

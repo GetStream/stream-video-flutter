@@ -51,6 +51,7 @@ class AndroidPushConfiguration {
     this.isCustomSmallExNotification,
     this.isShowLogo,
     this.logoUrl,
+    this.defaultAvatar,
     this.isShowCallID,
     this.ringtonePath,
     this.backgroundColor,
@@ -72,6 +73,9 @@ class AndroidPushConfiguration {
 
   /// Logo aoo inside full screen, example: http://... https://... or "assets/abc.png"
   final String? logoUrl;
+
+  /// Default avatar for call, example: http://... https://... or "assets/abc.png"
+  final String? defaultAvatar;
 
   /// Show call id app inside full screen.
   final bool? isShowCallID;
@@ -105,6 +109,7 @@ class AndroidPushConfiguration {
     bool? isCustomSmallExNotification,
     bool? isShowLogo,
     String? logoUrl,
+    String? defaultAvatar,
     bool? isShowCallID,
     String? ringtonePath,
     String? backgroundColor,
@@ -122,6 +127,7 @@ class AndroidPushConfiguration {
           isCustomSmallExNotification ?? this.isCustomSmallExNotification,
       isShowLogo: isShowLogo ?? this.isShowLogo,
       logoUrl: logoUrl ?? this.logoUrl,
+      defaultAvatar: defaultAvatar ?? this.defaultAvatar,
       isShowCallID: isShowCallID ?? this.isShowCallID,
       ringtonePath: ringtonePath ?? this.ringtonePath,
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -146,6 +152,7 @@ class AndroidPushConfiguration {
       isCustomSmallExNotification: other.isCustomSmallExNotification,
       isShowLogo: other.isShowLogo,
       logoUrl: other.logoUrl,
+      defaultAvatar: other.defaultAvatar,
       isShowCallID: other.isShowCallID,
       ringtonePath: other.ringtonePath,
       backgroundColor: other.backgroundColor,

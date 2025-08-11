@@ -226,6 +226,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
             "id" to data.getString(CallkitConstants.EXTRA_CALLKIT_ID, ""),
             "callerName" to data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, ""),
             "avatar" to data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, ""),
+            "defaultAvatar" to data.getString(CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""),
             "number" to data.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, ""),
             "type" to data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, 0),
             "duration" to data.getLong(CallkitConstants.EXTRA_CALLKIT_DURATION, 0L),

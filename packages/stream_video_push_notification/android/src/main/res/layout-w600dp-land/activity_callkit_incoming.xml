@@ -40,7 +40,6 @@
                 android:visibility="invisible"
                 android:scaleType="fitCenter"
                 android:layout_marginBottom="@dimen/base_margin_x5"
-                android:src="@drawable/ic_logo"
                 tools:ignore="ContentDescription" />
 
 
