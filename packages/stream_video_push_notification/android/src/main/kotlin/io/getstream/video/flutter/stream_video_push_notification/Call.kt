@@ -191,92 +191,92 @@ data class Data(val args: Map<String, Any?>) {
 
     fun toBundle(): Bundle {
         val bundle = Bundle()
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_ID, id)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, callerName)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_HANDLE, handle)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_AVATAR, avatar)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, defaultAvatar)
-        bundle.putInt(CallkitConstants.EXTRA_CALLKIT_TYPE, type)
-        bundle.putLong(CallkitConstants.EXTRA_CALLKIT_DURATION, duration)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_TEXT_ACCEPT, textAccept)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_TEXT_DECLINE, textDecline)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_ID, id)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, callerName)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_HANDLE, handle)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_AVATAR, avatar)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, defaultAvatar)
+        bundle.putInt(IncomingCallConstants.EXTRA_CALL_TYPE, type)
+        bundle.putLong(IncomingCallConstants.EXTRA_CALL_DURATION, duration)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, textAccept)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, textDecline)
 
         missedNotificationId?.let {
             bundle.putInt(
-                CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID,
+                IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID,
                 it
             )
         }
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SHOW,
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW,
             isShowMissedCallNotification
         )
         bundle.putInt(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_COUNT,
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT,
             missedNotificationCount
         )
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SUBTITLE,
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE,
             missedNotificationSubtitle
         )
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW,
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW,
             isShowCallback
         )
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_TEXT,
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT,
             missedNotificationCallbackText
         )
 
-        bundle.putSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA, extra)
-        bundle.putSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS, headers)
+        bundle.putSerializable(IncomingCallConstants.EXTRA_CALL_EXTRA, extra)
+        bundle.putSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS, headers)
 
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION,
+            IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION,
             isCustomSmallExNotification
         )
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_IS_SHOW_LOGO,
+            IncomingCallConstants.EXTRA_CALL_IS_SHOW_LOGO,
             isShowLogo
         )
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_LOGO_URL,
+            IncomingCallConstants.EXTRA_CALL_LOGO_URL,
             logoUrl
         )
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID,
+            IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID,
             isShowCallID
         )
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_RINGTONE_PATH, ringtonePath)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH, ringtonePath)
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_BACKGROUND_COLOR,
+            IncomingCallConstants.EXTRA_CALL_BACKGROUND_COLOR,
             backgroundColor
         )
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_BACKGROUND_URL,
+            IncomingCallConstants.EXTRA_CALL_BACKGROUND_URL,
             backgroundUrl
         )
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_TEXT_COLOR, textColor)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_ACTION_COLOR, actionColor)
-        bundle.putString(CallkitConstants.EXTRA_CALLKIT_ACTION_FROM, from)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_TEXT_COLOR, textColor)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, actionColor)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM, from)
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME,
+            IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME,
             incomingCallNotificationChannelName
         )
         bundle.putString(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME,
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME,
             missedCallNotificationChannelName
         )
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_IS_SHOW_FULL_LOCKED_SCREEN,
+            IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN,
             isShowFullLockedScreen
         )
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_IS_IMPORTANT,
+            IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT,
             isImportant,
         )
         bundle.putBoolean(
-            CallkitConstants.EXTRA_CALLKIT_IS_BOT,
+            IncomingCallConstants.EXTRA_CALL_IS_BOT,
             isBot,
         )
         return bundle
@@ -286,88 +286,88 @@ data class Data(val args: Map<String, Any?>) {
 
         fun fromBundle(bundle: Bundle): Data {
             val data = Data(emptyMap())
-            data.id = bundle.getString(CallkitConstants.EXTRA_CALLKIT_ID, "")
+            data.id = bundle.getString(IncomingCallConstants.EXTRA_CALL_ID, "")
             data.callerName =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
             data.handle =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             data.avatar =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, "")
             data.defaultAvatar =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, "")
-            data.type = bundle.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, 0)
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, "")
+            data.type = bundle.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0)
             data.duration =
-                bundle.getLong(CallkitConstants.EXTRA_CALLKIT_DURATION, 30000L)
+                bundle.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 30000L)
             data.textAccept =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_ACCEPT, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, "")
             data.textDecline =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_DECLINE, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, "")
             data.isImportant =
-                bundle.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_IMPORTANT, false)
+                bundle.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT, false)
             data.isBot =
-                bundle.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_BOT, false)
+                bundle.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_BOT, false)
 
             data.missedNotificationId =
-                bundle.getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID)
+                bundle.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID)
             data.isShowMissedCallNotification =
-                bundle.getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SHOW, true)
+                bundle.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW, true)
             data.missedNotificationCount =
-                bundle.getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_COUNT, 1)
+                bundle.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT, 1)
             data.missedNotificationSubtitle =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SUBTITLE, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE, "")
             data.isShowCallback =
-                bundle.getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW, false)
+                bundle.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW, false)
             data.missedNotificationCallbackText =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_TEXT, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT, "")
 
             data.extra =
-                bundle.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA) as HashMap<String, Any?>
+                bundle.getSerializable(IncomingCallConstants.EXTRA_CALL_EXTRA) as HashMap<String, Any?>
             data.headers =
-                bundle.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                bundle.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
 
             data.isCustomSmallExNotification = bundle.getBoolean(
-                CallkitConstants.EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION,
+                IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION,
                 false
             )
             data.isShowLogo = bundle.getBoolean(
-                CallkitConstants.EXTRA_CALLKIT_IS_SHOW_LOGO,
+                IncomingCallConstants.EXTRA_CALL_IS_SHOW_LOGO,
                 false
             )
             data.logoUrl =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_LOGO_URL, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_LOGO_URL, "")
             data.isShowCallID = bundle.getBoolean(
-                CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID,
+                IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID,
                 false
             )
             data.ringtonePath = bundle.getString(
-                CallkitConstants.EXTRA_CALLKIT_RINGTONE_PATH,
+                IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH,
                 ""
             )
             data.backgroundColor = bundle.getString(
-                CallkitConstants.EXTRA_CALLKIT_BACKGROUND_COLOR,
+                IncomingCallConstants.EXTRA_CALL_BACKGROUND_COLOR,
                 "#0955fa"
             )
             data.backgroundUrl =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_URL, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_BACKGROUND_URL, "")
             data.actionColor = bundle.getString(
-                CallkitConstants.EXTRA_CALLKIT_ACTION_COLOR,
+                IncomingCallConstants.EXTRA_CALL_ACTION_COLOR,
                 "#4CAF50"
             )
             data.textColor = bundle.getString(
-                CallkitConstants.EXTRA_CALLKIT_TEXT_COLOR,
+                IncomingCallConstants.EXTRA_CALL_TEXT_COLOR,
                 "#FFFFFF"
             )
             data.from =
-                bundle.getString(CallkitConstants.EXTRA_CALLKIT_ACTION_FROM, "")
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM, "")
 
             data.incomingCallNotificationChannelName = bundle.getString(
-                CallkitConstants.EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME
+                IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME
             )
             data.missedCallNotificationChannelName = bundle.getString(
-                CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME
+                IncomingCallConstants.EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME
             )
             data.isShowFullLockedScreen = bundle.getBoolean(
-                CallkitConstants.EXTRA_CALLKIT_IS_SHOW_FULL_LOCKED_SCREEN,
+                IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN,
                 true
             )
             return data

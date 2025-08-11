@@ -5,6 +5,6 @@ import android.telecom.ConnectionService
 import androidx.annotation.RequiresApi
 
 @RequiresApi(Build.VERSION_CODES.M)
-class CallkitConnectionService: ConnectionService() {
+class IncomingCallConnectionService: ConnectionService() {
     //not need overridesss
 }

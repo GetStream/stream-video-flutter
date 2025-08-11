@@ -316,7 +316,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     );
 
     return StreamVideoPushNotificationPlatform.instance
-        .showCallkitIncoming(params);
+        .showIncomingCall(params);
   }
 
   @override
@@ -405,7 +405,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         .toList();
 
     // This is a workaround for the issue in flutter_callkit_incoming
-    // where second CallKit call overrides data in showCallkitIncoming native method
+    // where second CallKit call overrides data in showIncomingCall native method
     // and it's not possible to end the call by callCid
     if (activeCalls.length == calls.length) {
       await endAllCalls();

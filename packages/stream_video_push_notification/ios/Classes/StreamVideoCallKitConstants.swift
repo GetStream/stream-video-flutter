@@ -2,7 +2,7 @@ import Foundation
 
 /// Constants for Stream Video CallKit actions and events
 @available(iOS 10.0, *)
-public struct StreamVideoCallKitConstants {
+public struct StreamVideoIncomingCallConstants {
 
     // MARK: - Push Token Events
     static let ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP =

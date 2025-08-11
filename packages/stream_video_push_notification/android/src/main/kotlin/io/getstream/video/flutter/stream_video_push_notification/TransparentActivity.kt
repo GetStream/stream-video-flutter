@@ -32,7 +32,7 @@ class TransparentActivity : Activity() {
 
         val data = intent.getBundleExtra("data")
 
-        val broadcastIntent = CallkitIncomingBroadcastReceiver.getIntent(this, intent.action!!, data)
+        val broadcastIntent = IncomingCallBroadcastReceiver.getIntent(this, intent.action!!, data)
         broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         sendBroadcast(broadcastIntent)
 

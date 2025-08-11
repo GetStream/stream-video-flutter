@@ -29,9 +29,9 @@ import androidx.core.app.Person
 import java.util.Date
 
 
-class CallkitNotificationManager(
+class IncomingCallNotificationManager(
     private val context: Context,
-    private val callkitSoundPlayerManager: CallkitSoundPlayerManager?
+    private val incomingCallSoundPlayerManager: IncomingCallSoundPlayerManager?
 ) {
 
     companion object {
@@ -39,8 +39,8 @@ class CallkitNotificationManager(
 
         const val EXTRA_TIME_START_CALL = "EXTRA_TIME_START_CALL"
 
-        const val NOTIFICATION_CHANNEL_ID_INCOMING = "callkit_incoming_channel_id"
-        const val NOTIFICATION_CHANNEL_ID_MISSED = "callkit_missed_channel_id"
+        const val NOTIFICATION_CHANNEL_ID_INCOMING = "incoming_call_channel_id"
+        const val NOTIFICATION_CHANNEL_ID_MISSED = "incoming_call_missed_channel_id"
 
     }
 
@@ -163,11 +163,12 @@ class CallkitNotificationManager(
     }
 
     @SuppressLint("MissingPermission")
-    fun getIncomingNotification(data: Bundle): CallkitNotification? {
+    fun getIncomingNotification(data: Bundle): IncomingCallNotification? {
         data.putLong(EXTRA_TIME_START_CALL, System.currentTimeMillis())
 
         val notificationId =
-            data.getString(CallkitConstants.EXTRA_CALLKIT_ID, "callkit_incoming").hashCode()
+            data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call").hashCode()
+
         createNotificationChanel(data)
 
         notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_INCOMING)
@@ -183,7 +184,7 @@ class CallkitNotificationManager(
         notificationBuilder?.setWhen(System.currentTimeMillis())
         notificationBuilder?.setTimeoutAfter(
             data.getLong(
-                CallkitConstants.EXTRA_CALLKIT_DURATION, 0L
+                IncomingCallConstants.EXTRA_CALL_DURATION, 0L
             )
         )
         notificationBuilder?.setOnlyAlertOnce(true)
@@ -193,7 +194,7 @@ class CallkitNotificationManager(
         )
         notificationBuilder?.setContentIntent(getActivityPendingIntent(notificationId, data))
         notificationBuilder?.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
-        val typeCall = data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
+        val typeCall = data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, -1)
         var smallIcon = context.applicationInfo.icon
         if (typeCall > 0) {
             smallIcon = R.drawable.ic_video
@@ -203,7 +204,7 @@ class CallkitNotificationManager(
             }
         }
         notificationBuilder?.setSmallIcon(smallIcon)
-        val actionColor = data.getString(CallkitConstants.EXTRA_CALLKIT_ACTION_COLOR, "#4CAF50")
+        val actionColor = data.getString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, "#4CAF50")
         try {
             notificationBuilder?.color = Color.parseColor(actionColor)
         } catch (_: Exception) {
@@ -211,14 +212,14 @@ class CallkitNotificationManager(
         notificationBuilder?.setChannelId(NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder?.priority = NotificationCompat.PRIORITY_MAX
         val isCustomSmallExNotification =
-            data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION, false)
+            data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION, false)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
 
-            val caller = data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
+            val caller = data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
             val person = Person.Builder().setName(caller).setImportant(
-                data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_IMPORTANT, true)
-            ).setBot(data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_BOT, false)).build()
+                data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT, true)
+            ).setBot(data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_BOT, false)).build()
             notificationBuilder?.setStyle(
                 NotificationCompat.CallStyle.forIncomingCall(
                     person,
@@ -227,19 +228,19 @@ class CallkitNotificationManager(
                 ).setIsVideo(typeCall > 0)
             )
             val isShowCallID =
-                data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
+                data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
             if (isShowCallID) {
                 notificationBuilder?.setContentText(
                     data.getString(
-                        CallkitConstants.EXTRA_CALLKIT_HANDLE, ""
+                        IncomingCallConstants.EXTRA_CALL_HANDLE, ""
                     )
                 )
             }
 
             var defaultAvatar = data.getString(
-                CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""
+                IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""
             )
-            var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+            var avatarUrl = data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, "")
 
             if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
                 avatarUrl = defaultAvatar
@@ -255,7 +256,7 @@ class CallkitNotificationManager(
                         String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
                 }
                 val headers =
-                    data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                    data.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
                 if (targetInComingAvatarCustom == null) targetInComingAvatarCustom =
                     createInComingAvatarTargetCustom(notificationId, true)
 
@@ -295,25 +296,25 @@ class CallkitNotificationManager(
         notificationBuilder?.setOngoing(true)
         val notification = notificationBuilder?.build()
 
-        return notification?.let { CallkitNotification(notificationId, it) }
+        return notification?.let { IncomingCallNotification(notificationId, it) }
     }
 
     private fun initInComingNotificationViews(
         notificationId: Int, remoteViews: RemoteViews, data: Bundle
     ) {
         remoteViews.setTextViewText(
-            R.id.tvCallerName, data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
+            R.id.tvCallerName, data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         )
-        val isShowCallID = data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
+        val isShowCallID = data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
         if (isShowCallID) {
             remoteViews.setTextViewText(
-                R.id.tvNumber, data.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
+                R.id.tvNumber, data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             )
         }
         remoteViews.setOnClickPendingIntent(
             R.id.llDecline, getDeclinePendingIntent(notificationId, data)
         )
-        val textDecline = data.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_DECLINE, "")
+        val textDecline = data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, "")
         remoteViews.setTextViewText(
             R.id.tvDecline,
             if (TextUtils.isEmpty(textDecline)) context.getString(R.string.text_decline) else textDecline
@@ -321,16 +322,16 @@ class CallkitNotificationManager(
         remoteViews.setOnClickPendingIntent(
             R.id.llAccept, getAcceptPendingIntent(notificationId, data)
         )
-        val textAccept = data.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_ACCEPT, "")
+        val textAccept = data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, "")
         remoteViews.setTextViewText(
             R.id.tvAccept,
             if (TextUtils.isEmpty(textAccept)) context.getString(R.string.text_accept) else textAccept
         )
 
         var defaultAvatar = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""
+            IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""
         )
-        var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+        var avatarUrl = data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, "")
          
         if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
             avatarUrl = defaultAvatar
@@ -341,7 +342,7 @@ class CallkitNotificationManager(
                 avatarUrl = String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
             }
             val headers =
-                data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                data.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
 
             if (targetInComingAvatarCustom == null) targetInComingAvatarCustom =
                 createInComingAvatarTargetCustom(notificationId, false)
@@ -361,19 +362,19 @@ class CallkitNotificationManager(
     fun showMissCallNotification(data: Bundle) {
 
         val isMissedCallShow =
-            data.getBoolean(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SHOW, true)
+            data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW, true)
         if (!isMissedCallShow) return
 
 
         val missingId = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID,
-            data.getString(CallkitConstants.EXTRA_CALLKIT_ID, "callkit_incoming")
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID,
+            data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call")
         )
         val missedNotificationId = ("missing_$missingId").hashCode()
 
         createNotificationChanel(data);
         val missedCallSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val typeCall = data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)
+        val typeCall = data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, -1)
         var smallIcon = context.applicationInfo.icon
         if (typeCall > 0) {
             smallIcon = R.drawable.ic_video_missed
@@ -391,7 +392,7 @@ class CallkitNotificationManager(
             }
         }
         notificationMissingBuilder?.setWhen(System.currentTimeMillis())
-        val textMissedCall = data.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_SUBTITLE, "")
+        val textMissedCall = data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE, "")
         notificationMissingBuilder?.setSubText(
             if (TextUtils.isEmpty(textMissedCall)) context.getString(
                 R.string.text_missed_call
@@ -400,7 +401,7 @@ class CallkitNotificationManager(
         notificationMissingBuilder?.setSmallIcon(smallIcon)
         notificationMissingBuilder?.setOnlyAlertOnce(true)
 
-        val count = data.getInt(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_COUNT, 1)
+        val count = data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT, 1)
         if (count > 1) {
             notificationMissingBuilder?.setNumber(count)
         }
@@ -410,44 +411,44 @@ class CallkitNotificationManager(
         notificationMissingSmallViews =
             RemoteViews(context.packageName, R.layout.layout_custom_miss_small_notification)
         notificationMissingViews?.setTextViewText(
-            R.id.tvCallerName, data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
+            R.id.tvCallerName, data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         )
         notificationMissingSmallViews?.setTextViewText(
-            R.id.tvCallerName, data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
+            R.id.tvCallerName, data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         )
         notificationMissingSmallViews?.setTextViewText(
             R.id.tvTime, getSystemFormattedTime(context)
         )
         val isShowCallID =
-            data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
+            data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
         if (isShowCallID) {
             notificationMissingViews?.setTextViewText(
-                R.id.tvNumber, data.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
+                R.id.tvNumber, data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             )
             notificationMissingSmallViews?.setTextViewText(
-                R.id.tvNumber, data.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
+                R.id.tvNumber, data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             )
         }
         notificationMissingViews?.setOnClickPendingIntent(
             R.id.llCallback, getCallbackPendingIntent(missedNotificationId, data)
         )
         val isShowCallback = data.getBoolean(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW, true
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW, true
         )
         notificationMissingViews?.setViewVisibility(
             R.id.llCallback, if (isShowCallback) View.VISIBLE else View.GONE
         )
         val textCallback =
-            data.getString(CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_TEXT, "")
+            data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT, "")
         notificationMissingViews?.setTextViewText(
             R.id.tvCallback,
             if (TextUtils.isEmpty(textCallback)) context.getString(R.string.text_call_back) else textCallback
         )
 
         var defaultAvatar = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_DEFAULT_AVATAR, ""
+            IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""
         )
-        var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
+        var avatarUrl = data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, "")
 
         if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
             avatarUrl = defaultAvatar
@@ -462,7 +463,7 @@ class CallkitNotificationManager(
                 avatarUrl = String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
             }
             val headers =
-                data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                data.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
 
             if (targetMissingAvatarCustom == null) targetMissingAvatarCustom =
                 createMissingAvatarTargetCustom(missedNotificationId)
@@ -488,7 +489,7 @@ class CallkitNotificationManager(
                 missedNotificationId, data
             )
         )
-        val actionColor = data.getString(CallkitConstants.EXTRA_CALLKIT_ACTION_COLOR, "#4CAF50")
+        val actionColor = data.getString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, "#4CAF50")
         try {
             notificationMissingBuilder?.color = Color.parseColor(actionColor)
         } catch (_: Exception) {
@@ -500,11 +501,11 @@ class CallkitNotificationManager(
     }
 
     fun clearIncomingNotification(data: Bundle, isAccepted: Boolean) {
-        callkitSoundPlayerManager?.stop()
+        incomingCallSoundPlayerManager?.stop()
 
-        context.sendBroadcast(CallkitIncomingActivity.getIntentEnded(context, isAccepted))
+        context.sendBroadcast(IncomingCallActivity.getIntentEnded(context, isAccepted))
         val notificationId =
-            data.getString(CallkitConstants.EXTRA_CALLKIT_ID, "callkit_incoming").hashCode()
+            data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call").hashCode()
         getNotificationManager().cancel(notificationId)
         targetInComingAvatarDefault?.let {
             targetInComingAvatarDefault?.isCancelled = true
@@ -518,8 +519,8 @@ class CallkitNotificationManager(
 
     fun clearMissCallNotification(data: Bundle) {
         val missingId = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID,
-            data.getString(CallkitConstants.EXTRA_CALLKIT_ID, "callkit_incoming")
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID,
+            data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call")
         )
         val missedNotificationId = ("missing_$missingId").hashCode()
 
@@ -542,13 +543,13 @@ class CallkitNotificationManager(
 
     fun createNotificationChanel(data: Bundle) {
         val incomingCallChannelName = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME, "Incoming Call"
+            IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME, "Incoming Call"
         )
         val missedCallChannelName = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME, "Missed Call"
+            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME, "Missed Call"
         )
         val ongoingCallChannelName = data.getString(
-            CallkitConstants.EXTRA_CALLKIT_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME, "Ongoing Call"
+            IncomingCallConstants.EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME, "Ongoing Call"
         );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -595,30 +596,30 @@ class CallkitNotificationManager(
 
     private fun getAcceptPendingIntent(id: Int, data: Bundle): PendingIntent {
         val intentTransparent = TransparentActivity.getIntent(
-            context, CallkitConstants.ACTION_CALL_ACCEPT, data
+            context, IncomingCallConstants.ACTION_CALL_ACCEPT, data
         )
         return PendingIntent.getActivity(context, id, intentTransparent, getFlagPendingIntent())
     }
 
     private fun getDeclinePendingIntent(id: Int, data: Bundle): PendingIntent {
-        val declineIntent = CallkitIncomingBroadcastReceiver.getIntentDecline(context, data)
+        val declineIntent = IncomingCallBroadcastReceiver.getIntentDecline(context, data)
         return PendingIntent.getBroadcast(context, id, declineIntent, getFlagPendingIntent())
     }
 
     private fun getTimeOutPendingIntent(id: Int, data: Bundle): PendingIntent {
-        val timeOutIntent = CallkitIncomingBroadcastReceiver.getIntentTimeout(context, data)
+        val timeOutIntent = IncomingCallBroadcastReceiver.getIntentTimeout(context, data)
         return PendingIntent.getBroadcast(context, id, timeOutIntent, getFlagPendingIntent())
     }
 
     private fun getCallbackPendingIntent(id: Int, data: Bundle): PendingIntent {
         val intentTransparent = TransparentActivity.getIntent(
-            context, CallkitConstants.ACTION_CALL_CALLBACK, data
+            context, IncomingCallConstants.ACTION_CALL_CALLBACK, data
         )
         return PendingIntent.getActivity(context, id, intentTransparent, getFlagPendingIntent())
     }
 
     private fun getActivityPendingIntent(id: Int, data: Bundle): PendingIntent {
-        val intent = CallkitIncomingActivity.getIntent(context, data)
+        val intent = IncomingCallActivity.getIntent(context, data)
         return PendingIntent.getActivity(context, id, intent, getFlagPendingIntent())
     }
 
@@ -629,7 +630,7 @@ class CallkitNotificationManager(
 
 
     private fun getHangupPendingIntent(notificationId: Int, data: Bundle): PendingIntent {
-        val endedIntent = CallkitIncomingBroadcastReceiver.getIntentEnded(context, data)
+        val endedIntent = IncomingCallBroadcastReceiver.getIntentEnded(context, data)
         return PendingIntent.getBroadcast(
             context, notificationId, endedIntent, getFlagPendingIntent()
         )
@@ -651,13 +652,13 @@ class CallkitNotificationManager(
 
     @SuppressLint("MissingPermission")
     fun showIncomingNotification(data: Bundle) {
-        val callkitNotification = getIncomingNotification(data)
+        val incomingCallNotification = getIncomingNotification(data)
         if (incomingChannelEnabled()) {
-            callkitSoundPlayerManager?.play(data)
+            incomingCallSoundPlayerManager?.play(data)
         }
-        callkitNotification?.let {
+        incomingCallNotification?.let {
             getNotificationManager().notify(
-                it.id, callkitNotification.notification
+                it.id, incomingCallNotification.notification
             )
         }
     }
@@ -781,11 +782,11 @@ class CallkitNotificationManager(
 
     fun destroy() {
 
-        callkitSoundPlayerManager?.destroy()
+        incomingCallSoundPlayerManager?.destroy()
     }
 
 }
 
-data class CallkitNotification(val id: Int, val notification: Notification)
+data class IncomingCallNotification(val id: Int, val notification: Notification)
 
 

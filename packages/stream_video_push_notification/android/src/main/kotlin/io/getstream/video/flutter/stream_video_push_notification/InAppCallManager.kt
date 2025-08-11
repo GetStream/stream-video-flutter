@@ -21,7 +21,7 @@ class InAppCallManager(private val context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        val componentName = ComponentName(context, CallkitConnectionService::class.java)
+        val componentName = ComponentName(context, IncomingCallConnectionService::class.java)
         val handle = PhoneAccountHandle(componentName, ACCOUNT_ID)
 
         val phoneAccount = PhoneAccount.builder(handle, "Stream Video In-App Call")
@@ -34,7 +34,7 @@ class InAppCallManager(private val context: Context) {
 
     fun unregisterPhoneAccount() {
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        val componentName = ComponentName(context, CallkitConnectionService::class.java)
+        val componentName = ComponentName(context, IncomingCallConnectionService::class.java)
         val handle = PhoneAccountHandle(componentName, ACCOUNT_ID)
 
         telecomManager.unregisterPhoneAccount(handle)
@@ -43,7 +43,7 @@ class InAppCallManager(private val context: Context) {
 
     fun getPhoneAccountHandle(): PhoneAccountHandle {
         return PhoneAccountHandle(
-            ComponentName(context, CallkitConnectionService::class.java),
+            ComponentName(context, IncomingCallConnectionService::class.java),
             ACCOUNT_ID
         )
     }

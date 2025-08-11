@@ -17,12 +17,12 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.getstream.video.flutter.stream_video_push_notification.CallkitNotificationManager
+import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.Utils.Companion.reapCollection
 
 class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
   companion object {
-        const val EXTRA_CALLKIT_CALL_DATA = "EXTRA_CALLKIT_CALL_DATA"
+        const val EXTRA_CALL_CALL_DATA = "EXTRA_CALL_CALL_DATA"
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var instance: StreamVideoPushNotificationPlugin
@@ -65,8 +65,8 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
         fun initSharedInstance(context: Context, binaryMessenger: BinaryMessenger) {
             if (!::instance.isInitialized) {
                 instance = StreamVideoPushNotificationPlugin()
-                instance.callkitSoundPlayerManager = CallkitSoundPlayerManager(context)
-                instance.callkitNotificationManager = CallkitNotificationManager(context, instance.callkitSoundPlayerManager)
+                instance.incomingCallSoundPlayerManager = IncomingCallSoundPlayerManager(context)
+                instance.incomingCallNotificationManager = IncomingCallNotificationManager(context, instance.incomingCallSoundPlayerManager)
                 instance.context = context
             }
 
@@ -88,15 +88,15 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
   private var activity: Activity? = null
   private var context: Context? = null
 
-      private var callkitNotificationManager: CallkitNotificationManager? = null
-    private var callkitSoundPlayerManager: CallkitSoundPlayerManager? = null
+      private var incomingCallNotificationManager: IncomingCallNotificationManager? = null
+    private var incomingCallSoundPlayerManager: IncomingCallSoundPlayerManager? = null
 
-    fun getCallkitNotificationManager(): CallkitNotificationManager? {
-        return callkitNotificationManager
+    fun getIncomingCallNotificationManager(): IncomingCallNotificationManager? {
+        return incomingCallNotificationManager
     }
 
-    fun getCallkitSoundPlayerManager(): CallkitSoundPlayerManager? {
-        return callkitSoundPlayerManager
+    fun getIncomingCallSoundPlayerManager(): IncomingCallSoundPlayerManager? {
+        return incomingCallSoundPlayerManager
     }
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -111,7 +111,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
         data.from = "notification"
         //send BroadcastReceiver
         context?.sendBroadcast(
-            CallkitIncomingBroadcastReceiver.getIntentIncoming(
+            IncomingCallBroadcastReceiver.getIntentIncoming(
                 requireNotNull(context),
                 data.toBundle()
             )
@@ -119,12 +119,12 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     }
 
     public fun showMissCallNotification(data: Data) {
-        callkitNotificationManager?.showMissCallNotification(data.toBundle())
+        incomingCallNotificationManager?.showMissCallNotification(data.toBundle())
     }
 
     public fun startCall(data: Data) {
         context?.sendBroadcast(
-            CallkitIncomingBroadcastReceiver.getIntentStart(
+            IncomingCallBroadcastReceiver.getIntentStart(
                 requireNotNull(context),
                 data.toBundle()
             )
@@ -133,7 +133,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
     public fun endCall(data: Data) {
         context?.sendBroadcast(
-            CallkitIncomingBroadcastReceiver.getIntentEnded(
+            IncomingCallBroadcastReceiver.getIntentEnded(
                 requireNotNull(context),
                 data.toBundle()
             )
@@ -144,7 +144,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
         val calls = getDataActiveCalls(context)
         calls.forEach {
             context?.sendBroadcast(
-                CallkitIncomingBroadcastReceiver.getIntentEnded(
+                IncomingCallBroadcastReceiver.getIntentEnded(
                     requireNotNull(context),
                     it.toBundle()
                 )
@@ -155,7 +155,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
     public fun sendEventCustom(body: Map<String, Any>) {
         eventHandlers.reapCollection().forEach {
-            it.get()?.send(CallkitConstants.ACTION_CALL_CUSTOM, body)
+            it.get()?.send(IncomingCallConstants.ACTION_CALL_CUSTOM, body)
         }
     }
 
@@ -164,12 +164,12 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
      try {
             when (call.method) {
-                "showCallkitIncoming" -> {
+                "showIncomingCall" -> {
                     val data = Data(call.arguments() ?: HashMap())
                     data.from = "notification"
                     //send BroadcastReceiver
                     context?.sendBroadcast(
-                        CallkitIncomingBroadcastReceiver.getIntentIncoming(
+                        IncomingCallBroadcastReceiver.getIntentIncoming(
                             requireNotNull(context),
                             data.toBundle()
                         )
@@ -178,7 +178,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     result.success(true)
                 }
 
-                "showCallkitIncomingSilently" -> {
+                "showIncomingCallSilently" -> {
                     val data = Data(call.arguments() ?: HashMap())
                     data.from = "notification"
 
@@ -188,14 +188,14 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 "showMissCallNotification" -> {
                     val data = Data(call.arguments() ?: HashMap())
                     data.from = "notification"
-                    callkitNotificationManager?.showMissCallNotification(data.toBundle())
+                    incomingCallNotificationManager?.showMissCallNotification(data.toBundle())
                     result.success(true)
                 }
 
                 "startCall" -> {
                     val data = Data(call.arguments() ?: HashMap())
                     context?.sendBroadcast(
-                        CallkitIncomingBroadcastReceiver.getIntentStart(
+                        IncomingCallBroadcastReceiver.getIntentStart(
                             requireNotNull(context),
                             data.toBundle()
                         )
@@ -211,7 +211,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             putAll(args as Map<String, Any>)
                         }
                     }
-                    sendEvent(CallkitConstants.ACTION_CALL_TOGGLE_MUTE, map)
+                    sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_MUTE, map)
 
                     result.success(true)
                 }
@@ -223,7 +223,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             putAll(args as Map<String, Any>)
                         }
                     }
-                    sendEvent(CallkitConstants.ACTION_CALL_TOGGLE_HOLD, map)
+                    sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, map)
 
                     result.success(true)
                 }
@@ -239,14 +239,14 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     if (currentCall != null && context != null) {
                         if(currentCall.isAccepted) {
                             context?.sendBroadcast(
-                                CallkitIncomingBroadcastReceiver.getIntentEnded(
+                                IncomingCallBroadcastReceiver.getIntentEnded(
                                     requireNotNull(context),
                                     currentCall.toBundle()
                                 )
                             )
                         }else {
                             context?.sendBroadcast(
-                                CallkitIncomingBroadcastReceiver.getIntentDecline(
+                                IncomingCallBroadcastReceiver.getIntentDecline(
                                     requireNotNull(context),
                                     currentCall.toBundle()
                                 )
@@ -262,7 +262,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     val currentCall = calls.firstOrNull { it.id == data.id }
                     if (currentCall != null && context != null) {
                         context?.sendBroadcast(
-                            CallkitIncomingBroadcastReceiver.getIntentConnected(
+                            IncomingCallBroadcastReceiver.getIntentConnected(
                                 requireNotNull(context),
                                 currentCall.toBundle()
                             )
@@ -276,14 +276,14 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     calls.forEach {
                         if (it.isAccepted) {
                             context?.sendBroadcast(
-                                CallkitIncomingBroadcastReceiver.getIntentEnded(
+                                IncomingCallBroadcastReceiver.getIntentEnded(
                                     requireNotNull(context),
                                     it.toBundle()
                                 )
                             )
                         } else {
                             context?.sendBroadcast(
-                                CallkitIncomingBroadcastReceiver.getIntentDecline(
+                                IncomingCallBroadcastReceiver.getIntentDecline(
                                     requireNotNull(context),
                                     it.toBundle()
                                 )
@@ -304,7 +304,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
                 "silenceEvents" -> {
                     val silence = call.arguments as? Boolean ?: false
-                    CallkitIncomingBroadcastReceiver.silenceEvents = silence
+                    IncomingCallBroadcastReceiver.silenceEvents = silence
                     result.success(true)
                 }
 
@@ -315,19 +315,19 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             putAll(args as Map<String, Any>)
                         }
                     }
-                    callkitNotificationManager?.requestNotificationPermission(activity, map)
+                    incomingCallNotificationManager?.requestNotificationPermission(activity, map)
                     result.success(true)
                 }
 
                 "canUseFullScreenIntent" -> {
-                    result.success(callkitNotificationManager?.canUseFullScreenIntent() ?: true)
+                    result.success(incomingCallNotificationManager?.canUseFullScreenIntent() ?: true)
                 }
 
                 // EDIT - clear the incoming notification/ring (after accept/decline/timeout)
-                "hideCallkitIncoming" -> {
+                "hideIncomingCall" -> {
                     val data = Data(call.arguments() ?: HashMap())
-                    callkitSoundPlayerManager?.stop()
-                    callkitNotificationManager?.clearIncomingNotification(data.toBundle(), false)
+                    incomingCallSoundPlayerManager?.stop()
+                    incomingCallNotificationManager?.clearIncomingNotification(data.toBundle(), false)
                     result.success(true)
                 }
 
@@ -335,7 +335,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     if (Build.VERSION.SDK_INT >= 34) {
                         if (!notificationManager.canUseFullScreenIntent()) {
-                            callkitNotificationManager?.requestFullIntentPermission(activity)
+                            incomingCallNotificationManager?.requestFullIntentPermission(activity)
                         }
                     }
                     result.success(true)
@@ -351,10 +351,10 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
      methodChannels.remove(binding.binaryMessenger)?.setMethodCallHandler(null)
         eventChannels.remove(binding.binaryMessenger)?.setStreamHandler(null)
-        instance.callkitSoundPlayerManager?.destroy()
-        instance.callkitNotificationManager?.destroy()
-        instance.callkitSoundPlayerManager = null
-        instance.callkitNotificationManager = null
+        instance.incomingCallSoundPlayerManager?.destroy()
+        instance.incomingCallNotificationManager?.destroy()
+        instance.incomingCallSoundPlayerManager = null
+        instance.incomingCallNotificationManager = null
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -405,7 +405,7 @@ override fun onDetachedFromActivityForConfigChanges() {
         permissions: Array<out String>,
         grantResults: IntArray
     ): Boolean {
-        instance.callkitNotificationManager?.onRequestPermissionsResult(
+        instance.incomingCallNotificationManager?.onRequestPermissionsResult(
             instance.activity,
             requestCode,
             grantResults

@@ -45,8 +45,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   /// Show Callkit Incoming.
   /// On iOS, using Callkit. On Android, using a custom UI.
-  Future showCallkitIncoming(StreamVideoPushParams params) {
-    throw UnimplementedError('showCallkitIncoming() has not been implemented.');
+  Future showIncomingCall(StreamVideoPushParams params) {
+    throw UnimplementedError('showIncomingCall() has not been implemented.');
   }
 
   /// Show Miss Call Notification.
@@ -58,8 +58,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   /// Hide notification call for Android.
   /// Only Android
-  Future hideCallkitIncoming(StreamVideoPushParams params) {
-    throw UnimplementedError('hideCallkitIncoming() has not been implemented.');
+  Future hideIncomingCall(StreamVideoPushParams params) {
+    throw UnimplementedError('hideIncomingCall() has not been implemented.');
   }
 
   /// Start an Outgoing call.

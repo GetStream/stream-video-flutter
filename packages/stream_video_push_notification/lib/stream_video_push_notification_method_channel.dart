@@ -44,8 +44,8 @@ class MethodChannelStreamVideoPushNotification
   /// Show Callkit Incoming.
   /// On iOS, using Callkit. On Android, using a custom UI.
   @override
-  Future showCallkitIncoming(StreamVideoPushParams params) async {
-    await methodChannel.invokeMethod("showCallkitIncoming", params.toJson());
+  Future showIncomingCall(StreamVideoPushParams params) async {
+    await methodChannel.invokeMethod("showIncomingCall", params.toJson());
   }
 
   /// Show Miss Call Notification.
@@ -63,12 +63,12 @@ class MethodChannelStreamVideoPushNotification
   /// Hide notification call for Android.
   /// Only Android
   @override
-  Future hideCallkitIncoming(StreamVideoPushParams params) async {
+  Future hideIncomingCall(StreamVideoPushParams params) async {
     if (!CurrentPlatform.isAndroid) {
       return;
     }
 
-    await methodChannel.invokeMethod("hideCallkitIncoming", params.toJson());
+    await methodChannel.invokeMethod("hideIncomingCall", params.toJson());
   }
 
   /// Start an Outgoing call.

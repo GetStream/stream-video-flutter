@@ -74,7 +74,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         data: Data,
         fromPushKit: Bool
     ) {
-        sharedInstance.callKitManager.showCallkitIncoming(
+        sharedInstance.callKitManager.showIncomingCall(
             data, fromPushKit: fromPushKit)
     }
 

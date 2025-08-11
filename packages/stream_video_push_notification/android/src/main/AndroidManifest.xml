@@ -18,7 +18,7 @@
 
     <application>
         <activity
-            android:name="io.getstream.video.flutter.stream_video_push_notification.CallkitIncomingActivity"
+            android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallActivity"
             android:taskAffinity="io.getstream.video.INCOMING_CALL_AFFINITY"
             android:excludeFromRecents="true"
             android:noHistory="true"
@@ -27,7 +27,7 @@
             android:exported="true"
             android:launchMode="singleInstance"
             android:allowTaskReparenting="false"
-            android:theme="@style/CallkitIncomingTheme"
+            android:theme="@style/IncomingCallTheme"
             android:permission="${applicationId}.PERMISSION_CALL">
             <intent-filter>
                 <action android:name="${applicationId}.io.getstream.video.ACTION_CALL_INCOMING" />
@@ -40,7 +40,7 @@
             android:name="io.getstream.video.flutter.stream_video_push_notification.TransparentActivity"/>
 
         <receiver
-            android:name="io.getstream.video.flutter.stream_video_push_notification.CallkitIncomingBroadcastReceiver"
+            android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="${applicationId}.PERMISSION_CALL">
@@ -58,11 +58,11 @@
             android:exported="true"
             android:foregroundServiceType="phoneCall"
             android:permission="${applicationId}.PERMISSION_CALL"
-            android:name="io.getstream.video.flutter.stream_video_push_notification.CallkitNotificationService">
+            android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService">
         </service>
 
         <service
-            android:name="io.getstream.video.flutter.stream_video_push_notification.CallkitConnectionService"
+            android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallConnectionService"
             android:permission="android.permission.BIND_CONNECTION_SERVICE"
             android:exported="true">
             <intent-filter>

@@ -6,12 +6,12 @@ import android.util.Log
 import com.fasterxml.jackson.core.type.TypeReference
 
 
-private const val CALLKIT_PREFERENCES_FILE_NAME = "stream_video_callkit_preferences"
+private const val INCOMING_CALL_PREFERENCES_FILE_NAME = "stream_video_incoming_call_preferences"
 private var prefs: SharedPreferences? = null
 private var editor: SharedPreferences.Editor? = null
 
 private fun initInstance(context: Context) {
-    prefs = context.getSharedPreferences(CALLKIT_PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
+    prefs = context.getSharedPreferences(INCOMING_CALL_PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
     editor = prefs?.edit()
 }
 

@@ -44,14 +44,14 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "showCallkitIncoming":
+        case "showIncomingCall":
             guard let args = call.arguments else {
                 result(true)
                 return
             }
             if let getArgs = args as? [String: Any] {
                 self.data = Data(args: getArgs)
-                showCallkitIncoming(self.data!, fromPushKit: false)
+                showIncomingCall(self.data!, fromPushKit: false)
             }
             result(true)
             break
@@ -171,7 +171,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         return nil
     }
 
-    @objc public func showCallkitIncoming(_ data: Data, fromPushKit: Bool) {
+    @objc public func showIncomingCall(_ data: Data, fromPushKit: Bool) {
         self.isFromPushKit = fromPushKit
         if fromPushKit {
             self.data = data
@@ -204,13 +204,13 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 call.handle = data.handle
                 self.callController.addCall(call)
                 self.sendEvent(
-                    StreamVideoCallKitConstants.ACTION_CALL_INCOMING, data.toJSON())
+                    StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING, data.toJSON())
                 self.endCallNotExist(data)
             }
         }
     }
 
-    @objc public func showCallkitIncoming(
+    @objc public func showIncomingCall(
         _ data: Data, fromPushKit: Bool, completion: @escaping () -> Void
     ) {
         self.isFromPushKit = fromPushKit
@@ -241,7 +241,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 call.handle = data.handle
                 self.callController.addCall(call)
                 self.sendEvent(
-                    StreamVideoCallKitConstants.ACTION_CALL_INCOMING, data.toJSON())
+                    StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING, data.toJSON())
                 self.endCallNotExist(data)
             }
             completion()
@@ -288,7 +288,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         if self.isFromPushKit {
             call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
             self.isFromPushKit = false
-            self.sendEvent(StreamVideoCallKitConstants.ACTION_CALL_ENDED, data.toJSON())
+            self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
         } else {
             call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
         }
@@ -360,7 +360,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         guard let call = self.callController.callWithUUID(uuid: UUID(uuidString: data.uuid)!) else {
             return
         }
-        sendEvent(StreamVideoCallKitConstants.ACTION_CALL_TIMEOUT, data.toJSON())
+        sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, data.toJSON())
     }
 
     func getHandleType(_ handleType: String?) -> CXHandle.HandleType {
@@ -504,7 +504,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
         self.outgoingCall = call
         self.callController.addCall(call)
-        self.sendEvent(StreamVideoCallKitConstants.ACTION_CALL_START, self.data?.toJSON())
+        self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_START, self.data?.toJSON())
         action.fulfill()
     }
 
@@ -524,7 +524,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
         self.data?.isAccepted = true
         self.answerCall = call
-        sendEvent(StreamVideoCallKitConstants.ACTION_CALL_ACCEPT, self.data?.toJSON())
+        sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT, self.data?.toJSON())
         action.fulfill()
     }
 
@@ -532,9 +532,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         guard let call = self.callController.callWithUUID(uuid: action.callUUID) else {
             if self.answerCall == nil && self.outgoingCall == nil {
                 sendEvent(
-                    StreamVideoCallKitConstants.ACTION_CALL_TIMEOUT, self.data?.toJSON())
+                    StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, self.data?.toJSON())
             } else {
-                sendEvent(StreamVideoCallKitConstants.ACTION_CALL_ENDED, self.data?.toJSON())
+                sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, self.data?.toJSON())
             }
             action.fail()
             return
@@ -542,11 +542,11 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         call.endCall()
         self.callController.removeCall(call)
         if self.answerCall == nil && self.outgoingCall == nil {
-            sendEvent(StreamVideoCallKitConstants.ACTION_CALL_DECLINE, self.data?.toJSON())
+            sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE, self.data?.toJSON())
             action.fulfill()
         } else {
             self.answerCall = nil
-            sendEvent(StreamVideoCallKitConstants.ACTION_CALL_ENDED, call.data.toJSON())
+            sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, call.data.toJSON())
             action.fulfill()
         }
     }
@@ -579,7 +579,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         self.sendEvent(
-            StreamVideoCallKitConstants.ACTION_CALL_TOGGLE_GROUP,
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_GROUP,
             [
                 "id": action.callUUID.uuidString,
                 "callUUIDToGroupWith": action.callUUIDToGroupWith?.uuidString,
@@ -593,7 +593,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         self.sendEvent(
-            StreamVideoCallKitConstants.ACTION_CALL_TOGGLE_DMTF,
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_DMTF,
             [
                 "id": action.callUUID.uuidString, "digits": action.digits,
                 "type": action.type.rawValue,
@@ -606,7 +606,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             action.fail()
             return
         }
-        sendEvent(StreamVideoCallKitConstants.ACTION_CALL_TIMEOUT, self.data?.toJSON())
+        sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, self.data?.toJSON())
         action.fulfill()
     }
 
@@ -634,7 +634,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         configureAudioSession()
 
         self.sendEvent(
-            StreamVideoCallKitConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION, ["isActivate": true]
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION, ["isActivate": true]
         )
     }
 
@@ -645,19 +645,19 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
 
         self.sendEvent(
-            StreamVideoCallKitConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
             ["isActivate": false])
     }
 
     private func sendMuteEvent(_ id: String, _ isMuted: Bool) {
         self.sendEvent(
-            StreamVideoCallKitConstants.ACTION_CALL_TOGGLE_MUTE,
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_MUTE,
             ["id": id, "isMuted": isMuted])
     }
 
     private func sendHoldEvent(_ id: String, _ isOnHold: Bool) {
         self.sendEvent(
-            StreamVideoCallKitConstants.ACTION_CALL_TOGGLE_HOLD,
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
             ["id": id, "isOnHold": isOnHold])
     }
 

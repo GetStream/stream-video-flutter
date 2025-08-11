@@ -12,7 +12,7 @@ import android.net.Uri
 import android.os.*
 import android.text.TextUtils
 
-class CallkitSoundPlayerManager(private val context: Context) {
+class IncomingCallSoundPlayerManager(private val context: Context) {
 
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
@@ -22,7 +22,7 @@ class CallkitSoundPlayerManager(private val context: Context) {
     private var isPlaying: Boolean = false
 
 
-    inner class ScreenOffCallkitIncomingBroadcastReceiver : BroadcastReceiver() {
+    inner class ScreenOffIncomingCallBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (isPlaying){
                 stop()
@@ -30,7 +30,7 @@ class CallkitSoundPlayerManager(private val context: Context) {
         }
     }
 
-    private var screenOffCallkitIncomingBroadcastReceiver = ScreenOffCallkitIncomingBroadcastReceiver()
+    private var screenOffIncomingCallBroadcastReceiver = ScreenOffIncomingCallBroadcastReceiver()
 
 
     fun play(data: Bundle) {
@@ -40,7 +40,7 @@ class CallkitSoundPlayerManager(private val context: Context) {
         this.playVibrator()
 
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
-        context.registerReceiver(screenOffCallkitIncomingBroadcastReceiver, filter)
+        context.registerReceiver(screenOffIncomingCallBroadcastReceiver, filter)
     }
 
     fun stop() {
@@ -51,7 +51,7 @@ class CallkitSoundPlayerManager(private val context: Context) {
         ringtone = null
         vibrator = null
         try {
-            context.unregisterReceiver(screenOffCallkitIncomingBroadcastReceiver)
+            context.unregisterReceiver(screenOffIncomingCallBroadcastReceiver)
         }catch (_: Exception){}
     }
 
@@ -63,7 +63,7 @@ class CallkitSoundPlayerManager(private val context: Context) {
         ringtone = null
         vibrator = null
         try {
-            context.unregisterReceiver(screenOffCallkitIncomingBroadcastReceiver)
+            context.unregisterReceiver(screenOffIncomingCallBroadcastReceiver)
         }catch (_: Exception){}
     }
 
@@ -102,7 +102,7 @@ class CallkitSoundPlayerManager(private val context: Context) {
 
     private fun playSound(data: Bundle?) {
         val sound = data?.getString(
-            CallkitConstants.EXTRA_CALLKIT_RINGTONE_PATH,
+            IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH,
             ""
         )
         val uri = sound?.let { getRingtoneUri(it) }

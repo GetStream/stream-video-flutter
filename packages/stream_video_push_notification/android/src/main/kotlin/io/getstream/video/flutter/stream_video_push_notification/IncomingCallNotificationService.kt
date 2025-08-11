@@ -10,19 +10,19 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 
-class CallkitNotificationService : Service() {
+class IncomingCallNotificationService : Service() {
 
     companion object {
 
         private val ActionForeground = listOf(
-            CallkitConstants.ACTION_CALL_START,
-            CallkitConstants.ACTION_CALL_ACCEPT
+            IncomingCallConstants.ACTION_CALL_START,
+            IncomingCallConstants.ACTION_CALL_ACCEPT
         )
 
         fun startServiceWithAction(context: Context, action: String, data: Bundle?) {
-            val intent = Intent(context, CallkitNotificationService::class.java).apply {
+            val intent = Intent(context, IncomingCallNotificationService::class.java).apply {
                 this.action = action
-                putExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA, data)
+                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && intent.action in ActionForeground) {
                 data?.let {
@@ -34,14 +34,14 @@ class CallkitNotificationService : Service() {
         }
 
         fun stopService(context: Context) {
-            val intent = Intent(context, CallkitNotificationService::class.java)
+            val intent = Intent(context, IncomingCallNotificationService::class.java)
             context.stopService(intent)
         }
 
     }
 
-    private val callkitNotificationManager: CallkitNotificationManager? =
-        StreamVideoPushNotificationPlugin.getInstance()?.getCallkitNotificationManager()
+    private val incomingCallNotificationManager: IncomingCallNotificationManager? =
+        StreamVideoPushNotificationPlugin.getInstance()?.getIncomingCallNotificationManager()
 
 
     override fun onCreate() {
@@ -49,16 +49,16 @@ class CallkitNotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action === CallkitConstants.ACTION_CALL_START) {
-            intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
+        if (intent?.action === IncomingCallConstants.ACTION_CALL_START) {
+            intent.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
                 ?.let {
                     stopSelf()
                 }
         }
-        if (intent?.action === CallkitConstants.ACTION_CALL_ACCEPT) {
-            intent.getBundleExtra(CallkitConstants.EXTRA_CALLKIT_INCOMING_DATA)
+        if (intent?.action === IncomingCallConstants.ACTION_CALL_ACCEPT) {
+            intent.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
                 ?.let {
-                    callkitNotificationManager?.clearIncomingNotification(it, true)
+                    incomingCallNotificationManager?.clearIncomingNotification(it, true)
                     stopSelf()
                 }
         }
@@ -67,7 +67,7 @@ class CallkitNotificationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        callkitNotificationManager?.destroy()
+        incomingCallNotificationManager?.destroy()
     }
 
     override fun onBind(p0: Intent?): IBinder? {
