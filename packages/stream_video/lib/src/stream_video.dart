@@ -176,12 +176,14 @@ class StreamVideo extends Disposable {
 
     _state.user.value = user;
 
-    rtc.WebRTC.initialize(
-      options: {
-        if (CurrentPlatform.isAndroid)
-          'androidAudioConfiguration':
-              options.androidAudioConfiguration!.toMap(),
-      },
+    unawaited(
+      rtc.WebRTC.initialize(
+        options: {
+          if (CurrentPlatform.isAndroid)
+            'androidAudioConfiguration':
+                options.androidAudioConfiguration!.toMap(),
+        },
+      ),
     );
 
     final tokenProvider = switch (user.type) {

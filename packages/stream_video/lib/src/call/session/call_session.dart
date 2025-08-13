@@ -891,10 +891,19 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
 
-    if (_streamVideo.options.androidAudioConfiguration != null) {
-      await rtc.Helper.setAndroidAudioConfiguration(
-        _streamVideo.options.androidAudioConfiguration!,
-      );
+    if (CurrentPlatform.isAndroid &&
+        remoteTrack.isAudioTrack &&
+        _streamVideo.options.androidAudioConfiguration != null) {
+      try {
+        await rtc.Helper.setAndroidAudioConfiguration(
+          _streamVideo.options.androidAudioConfiguration!,
+        );
+      } catch (e) {
+        _logger.w(
+          () =>
+              '[onRemoteTrackReceived] Failed to apply Android audio configuration: $e',
+        );
+      }
     }
 
     // Start the track.
