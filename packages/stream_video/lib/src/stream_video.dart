@@ -7,6 +7,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
@@ -174,6 +175,14 @@ class StreamVideo extends Disposable {
         pushNotificationManagerProvider?.call(_client, this);
 
     _state.user.value = user;
+
+    rtc.WebRTC.initialize(
+      options: {
+        if (CurrentPlatform.isAndroid)
+          'androidAudioConfiguration':
+              options.androidAudioConfiguration!.toMap(),
+      },
+    );
 
     final tokenProvider = switch (user.type) {
       UserType.authenticated => TokenProvider.from(
@@ -1195,6 +1204,7 @@ class StreamVideoOptions {
     this.keepConnectionsAliveWhenInBackground = false,
     this.networkMonitorSettings = const NetworkMonitorSettings(),
     this.allowMultipleActiveCalls = false,
+    this.androidAudioConfiguration,
   });
 
   final String coordinatorRpcUrl;
@@ -1222,4 +1232,6 @@ class StreamVideoOptions {
 
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;
+
+  final rtc.AndroidAudioConfiguration? androidAudioConfiguration;
 }

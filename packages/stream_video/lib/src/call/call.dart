@@ -2640,6 +2640,21 @@ class Call {
         await setAudioInputDevice(_connectOptions.audioInputDevice!);
       }
 
+      if (enabled && CurrentPlatform.isAndroid) {
+        try {
+          if (_streamVideo.options.androidAudioConfiguration != null) {
+            await rtc.Helper.setAndroidAudioConfiguration(
+              _streamVideo.options.androidAudioConfiguration!,
+            );
+          }
+        } catch (e) {
+          _logger.w(
+            () =>
+                '[setMicrophoneEnabled] Failed to set Android audio configuration: $e',
+          );
+        }
+      }
+
       _sfuStatsTimers.add(
         Future<void>.delayed(const Duration(seconds: 3)).then((_) {
           if (result.getDataOrNull()!.mediaTrack.enabled) {
