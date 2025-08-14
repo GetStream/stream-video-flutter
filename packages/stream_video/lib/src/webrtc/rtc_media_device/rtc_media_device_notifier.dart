@@ -32,6 +32,8 @@ class RtcMediaDeviceNotifier {
   /// [onInterruptionStart] is called when the call interruption begins.
   /// [onInterruptionEnd] is called when the call interruption ends.
   /// [androidInterruptionSource] specifies the source of the interruption on Android.
+  /// [androidAudioAttributesUsageType] and [androidAudioAttributesContentType] allow you to specify
+  /// the audio attributes that will be used when requesting audio focus.
   ///
   /// On iOS, interruptions can occur due to:
   /// - Incoming phone calls
@@ -57,11 +59,15 @@ class RtcMediaDeviceNotifier {
     void Function()? onInterruptionEnd,
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
+    rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
+    rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
   }) {
     return rtc.handleCallInterruptionCallbacks(
       onInterruptionStart,
       onInterruptionEnd,
       androidInterruptionSource: androidInterruptionSource,
+      androidAudioAttributesUsageType: androidAudioAttributesUsageType,
+      androidAudioAttributesContentType: androidAudioAttributesContentType,
     );
   }
 
