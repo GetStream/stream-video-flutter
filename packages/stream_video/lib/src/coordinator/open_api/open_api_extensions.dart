@@ -232,7 +232,7 @@ extension on open.VideoSettingsResponseCameraFacingEnum {
     } else if (this == open.VideoSettingsResponseCameraFacingEnum.back) {
       return VideoSettingsRequestCameraFacingEnum.back;
     } else {
-      return VideoSettingsRequestCameraFacingEnum.external_;
+      return VideoSettingsRequestCameraFacingEnum.external;
     }
   }
 }

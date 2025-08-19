@@ -1,7 +1,6 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -66,7 +65,7 @@ String parameterToString(dynamic value) {
     return value.toUtc().toIso8601String();
   }
   if (value is OwnCapability) {
-    return OwnCapabilityTypeTransformer().encode(value).toString();
+    return value.value;
   }
   return value.toString();
 }
@@ -84,12 +83,15 @@ Future<String> _decodeBodyBytes(Response response) async {
 }
 
 /// Returns a valid [T] value found at the specified Map [key], null otherwise.
-T? mapValueOfType<T>(dynamic map, String key) {
+T? mapValueOfType<T>(dynamic map, String key, [T? defaultValue]) {
   final dynamic value = map is Map ? map[key] : null;
   if (T == double && value is int) {
     return value.toDouble() as T;
   }
-  return value is T ? value : null;
+  if (T == DateTime) {
+    return mapDateTime(map, key) as T?;
+  }
+  return value is T ? value : defaultValue;
 }
 
 /// Returns a valid Map<K, V> found at the specified Map [key], null otherwise.
