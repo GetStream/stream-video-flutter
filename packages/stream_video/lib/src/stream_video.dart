@@ -180,7 +180,8 @@ class StreamVideo extends Disposable {
       unawaited(
         rtc.WebRTC.initialize(
           options: {
-            if (CurrentPlatform.isAndroid)
+            if (CurrentPlatform.isAndroid &&
+                options.androidAudioConfiguration != null)
               'androidAudioConfiguration':
                   options.androidAudioConfiguration!.toMap(),
           },
