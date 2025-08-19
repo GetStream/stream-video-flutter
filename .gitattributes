@@ -1,0 +1,8 @@
+# Skip generated files from showing up in diffs.
+**/*.g.dart linguist-generated=true
+**/*.freezed.dart linguist-generated=true
+**/*.pb.dart linguist-generated=true
+**/*.pbenum.dart linguist-generated=true
+**/*.pbjson.dart linguist-generated=true
+**/*.pbserver.dart linguist-generated=true
+**/*.pbtwirp.dart linguist-generated=true
