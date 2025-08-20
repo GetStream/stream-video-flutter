@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:collection/collection.dart';
+import 'package:state_notifier/state_notifier.dart';
+import 'package:thermal/thermal.dart';
 
 import '../../models/models.dart';
 import '../../webrtc/model/stats/rtc_codec.dart';
@@ -10,35 +13,43 @@ import '../../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../../webrtc/model/stats/rtc_printable_stats.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
-import '../state/call_state_notifier.dart';
 
-class StatsReporter {
+class StatsReporter extends StateNotifier<CallMetrics?> {
   StatsReporter({
     required this.rtcManager,
-    required this.stateManager,
-  });
+    required this.clientEnvironment,
+  }) : super(null);
 
   final RtcManager rtcManager;
-  final CallStateNotifier stateManager;
+  final ClientEnvironment clientEnvironment;
 
-  Stream<({CallStats publisherStats, CallStats subscriberStats})> run({
+  CallMetrics? get currentMetrics => state;
+
+  Stream<
+      ({
+        PeerConnectionStatsBundle publisherStatsBundle,
+        PeerConnectionStatsBundle subscriberStatsBundle,
+      })> run({
     Duration interval = const Duration(seconds: 10),
   }) {
-    return Stream.periodic(interval, (_) => collectStats()).asyncMap(
-      (event) async {
-        final stats = await event;
-        _processStats(stats);
-        return event;
+    return Stream.periodic(interval, (tick) => (collectStats(), tick)).asyncMap(
+      (data) async {
+        final stats = await data.$1;
+        unawaited(_processStats(stats, data.$2));
+        return stats;
       },
     );
   }
 
-  Future<({CallStats publisherStats, CallStats subscriberStats})>
-      collectStats() async {
+  Future<
+      ({
+        PeerConnectionStatsBundle publisherStatsBundle,
+        PeerConnectionStatsBundle subscriberStatsBundle
+      })> collectStats() async {
     final publisherStatsBundle = await rtcManager.publisher?.getStats();
     final subscriberStatsBundle = await rtcManager.subscriber.getStats();
 
-    final publisherStats = CallStats(
+    final publisherStats = PeerConnectionStatsBundle(
       peerType: StreamPeerType.publisher,
       stats: publisherStatsBundle?.rtcStats ?? [],
       printable: publisherStatsBundle?.printable ??
@@ -46,25 +57,30 @@ class StatsReporter {
       raw: publisherStatsBundle?.rawStats ?? [],
     );
 
-    final subscriberStats = CallStats(
+    final subscriberStats = PeerConnectionStatsBundle(
       peerType: StreamPeerType.subscriber,
       stats: subscriberStatsBundle.rtcStats,
       printable: subscriberStatsBundle.printable,
       raw: subscriberStatsBundle.rawStats,
     );
 
-    return (publisherStats: publisherStats, subscriberStats: subscriberStats);
+    return (
+      publisherStatsBundle: publisherStats,
+      subscriberStatsBundle: subscriberStats
+    );
   }
 
-  void _processStats(
-    ({CallStats publisherStats, CallStats subscriberStats}) stats,
-  ) {
-    final state = stateManager.callState;
+  Future<void> _processStats(
+    ({
+      PeerConnectionStatsBundle publisherStatsBundle,
+      PeerConnectionStatsBundle subscriberStatsBundle
+    }) stats,
+    int tick,
+  ) async {
+    var publisherStats = state?.publisher ?? PeerConnectionStats.empty();
+    var subscriberStats = state?.subscriber ?? PeerConnectionStats.empty();
 
-    var publisherStats = state.publisherStats ?? PeerConnectionStats.empty();
-    var subscriberStats = state.subscriberStats ?? PeerConnectionStats.empty();
-
-    final allStats = stats.publisherStats.stats
+    final allStats = stats.publisherStatsBundle.stats
         .whereType<RtcOutboundRtpVideoStream>()
         .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream);
 
@@ -92,7 +108,7 @@ class StatsReporter {
           .toList();
     }
 
-    final codec = stats.publisherStats.stats
+    final codec = stats.publisherStatsBundle.stats
         .whereType<RtcCodec>()
         .where((c) => c.mimeType?.startsWith('video') ?? false)
         .where((c) => activeOutbound.any((s) => s.videoCodecId == c.id))
@@ -109,7 +125,7 @@ class StatsReporter {
       outboundMediaStats: allStats.toList(),
     );
 
-    final inboudRtpVideo = stats.subscriberStats.stats
+    final inboudRtpVideo = stats.subscriberStatsBundle.stats
         .whereType<RtcInboundRtpVideoStream>()
         .firstOrNull;
 
@@ -121,7 +137,7 @@ class StatsReporter {
           ? '${inboudRtpVideo.frameWidth} x ${inboudRtpVideo.frameHeight} @ ${inboudRtpVideo.framesPerSecond}fps'
           : null;
 
-      final codecStats = stats.subscriberStats.stats
+      final codecStats = stats.subscriberStatsBundle.stats
           .whereType<RtcCodec>()
           .where((c) => c.mimeType?.startsWith('video') ?? false)
           .firstOrNull;
@@ -135,7 +151,7 @@ class StatsReporter {
       );
     }
 
-    final subscriberCandidatePair = stats.subscriberStats.stats
+    final subscriberCandidatePair = stats.subscriberStatsBundle.stats
         .whereType<RtcIceCandidatePair>()
         .firstOrNull;
     if (subscriberCandidatePair != null) {
@@ -146,7 +162,7 @@ class StatsReporter {
       );
     }
 
-    final publisherCandidatePair = stats.subscriberStats.stats
+    final publisherCandidatePair = stats.publisherStatsBundle.stats
         .whereType<RtcIceCandidatePair>()
         .firstOrNull;
     if (publisherCandidatePair != null) {
@@ -159,18 +175,50 @@ class StatsReporter {
       );
     }
 
-    var latencyHistory = state.latencyHistory;
+    var latencyHistory = state?.latencyHistory;
     if (publisherStats.latency != null) {
       latencyHistory = [
-        ...state.latencyHistory.reversed.take(19).toList().reversed,
+        ...state?.latencyHistory.reversed.take(19).toList().reversed ?? [],
         publisherStats.latency!,
       ];
     }
 
-    stateManager.lifecycleCallStats(
-      publisherStats: publisherStats,
-      subscriberStats: subscriberStats,
-      latencyHistory: latencyHistory,
-    );
+    var batteryLevelHistory = state?.batteryLevelHistory;
+    var thermalStatusHistory = state?.thermalStatusHistory;
+    var batteryLevel = 0;
+
+    // check battery and thermal state every 10th tick (by default every 100s)
+    if (tick % 10 == 0) {
+      batteryLevel = await Battery().batteryLevel;
+      batteryLevelHistory = <int>[
+        ...state?.batteryLevelHistory.reversed.take(49).toList().reversed ?? [],
+        batteryLevel,
+      ];
+
+      final thermalStatus = await Thermal().thermalStatus;
+      thermalStatusHistory = <int>[
+        ...state?.thermalStatusHistory.reversed.take(49).toList().reversed ??
+            [],
+        ThermalStatus.values.indexOf(thermalStatus),
+      ];
+    }
+
+    state = state?.copyWith(
+          publisher: publisherStats,
+          subscriber: subscriberStats,
+          latencyHistory: latencyHistory ?? [],
+          batteryLevelHistory: batteryLevelHistory,
+          thermalStatusHistory: thermalStatusHistory,
+          clientEnvironment: clientEnvironment,
+        ) ??
+        CallMetrics(
+          publisher: publisherStats,
+          subscriber: subscriberStats,
+          clientEnvironment: clientEnvironment,
+          latencyHistory: latencyHistory ?? [],
+          batteryLevelHistory: batteryLevelHistory ?? [],
+          thermalStatusHistory: thermalStatusHistory ?? [],
+          initialBatteryLevel: batteryLevel,
+        );
   }
 }

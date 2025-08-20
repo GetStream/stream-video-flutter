@@ -10,7 +10,6 @@ import 'package:synchronized/synchronized.dart';
 import 'package:system_info2/system_info2.dart';
 
 import '../../../globals.dart';
-import '../../../open_api/video/coordinator/api.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pbenum.dart';
@@ -19,37 +18,26 @@ import '../../../stream_video.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/models.dart';
-import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
-import '../../sfu/data/models/sfu_error.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_extensions.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../../webrtc/media/media_constraints.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
-import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
-import '../../webrtc/rtc_media_device/rtc_media_device.dart';
-import '../../webrtc/rtc_track/rtc_track.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/stats_reporter.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
-import 'dynascale_manager.dart';
 
 const _tag = 'SV:CallSession';
 
@@ -130,6 +118,8 @@ class CallSession extends Disposable {
   StreamSubscription<SfuEvent>? _eventsSubscription;
   StreamSubscription<InternetStatus>? _networkStatusSubscription;
 
+  StatsReporter? statsReporter;
+
   Timer? _peerConnectionCheckTimer;
 
   sfu_models.ClientDetails? _clientDetails;
@@ -148,6 +138,10 @@ class CallSession extends Disposable {
 
   void setTraceEnabled(bool enabled) {
     _tracer.setEnabled(enabled);
+  }
+
+  void trace(String tag, dynamic data) {
+    _tracer.trace(tag, data);
   }
 
   void _observeNetworkStatus() {
@@ -416,6 +410,21 @@ class CallSession extends Disposable {
       _rtcManagerSubject!.add(rtcManager!);
 
       stateManager.sfuPinsUpdated(event.callState.pins);
+
+      final environment = ClientEnvironment(
+        sfu: config.sfuUrl,
+        sdkVersion: streamVideoVersion,
+        webRtcVersion: switch (CurrentPlatform.type) {
+          PlatformType.android => androidWebRTCVersion,
+          PlatformType.ios => iosWebRTCVersion,
+          _ => '',
+        },
+      );
+
+      statsReporter = StatsReporter(
+        rtcManager: rtcManager!,
+        clientEnvironment: environment,
+      );
 
       _logger.d(() => '[start] completed');
       return Result.success(
@@ -728,7 +737,7 @@ class CallSession extends Disposable {
     _logger.d(() => '[onPublishQualityChanged] event: $event');
 
     final usedCodec =
-        stateManager.callState.publisherStats?.videoCodec?.firstOrNull;
+        statsReporter?.currentMetrics?.publisher?.videoCodec?.firstOrNull;
 
     for (final videoSender in event.videoSenders) {
       await rtcManager?.onPublishQualityChanged(videoSender, usedCodec);
