@@ -126,7 +126,11 @@ class AudioRecognitionWebRTC implements AudioRecognition {
         if (!speechDetected) {
           speechDetected = true;
           onSoundStateChanged(
-              SoundState(isSpeaking: true, audioLevel: averageAudioLevel));
+            SoundState(
+              isSpeaking: true,
+              audioLevel: averageAudioLevel,
+            ),
+          );
         }
 
         speechTimer?.cancel();

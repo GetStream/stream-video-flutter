@@ -779,7 +779,7 @@ extension PublisherRtcManager on RtcManager {
         scaleResolutionDownBy: highestLayer.scaleResolutionDownBy,
         ssrc: highestLayer.ssrc,
         scalabilityMode: highestLayer.scalabilityMode,
-      )
+      ),
     ];
   }
 
