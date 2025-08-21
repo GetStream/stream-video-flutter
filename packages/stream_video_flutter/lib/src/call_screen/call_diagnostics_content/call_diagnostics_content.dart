@@ -52,8 +52,8 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
 
   @override
   Future<void> dispose() async {
-    super.dispose();
     await _subscription?.cancel();
+    super.dispose();
   }
 
   @override

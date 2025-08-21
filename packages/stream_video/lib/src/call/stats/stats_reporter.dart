@@ -6,6 +6,7 @@ import 'package:state_notifier/state_notifier.dart';
 import 'package:thermal/thermal.dart';
 
 import '../../models/models.dart';
+import '../../platform_detector/platform_detector.dart';
 import '../../webrtc/model/stats/rtc_codec.dart';
 import '../../webrtc/model/stats/rtc_ice_candidate_pair.dart';
 import '../../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
@@ -189,18 +190,42 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
     // check battery and thermal state every 10th tick (by default every 100s)
     if (tick % 10 == 0) {
-      batteryLevel = await Battery().batteryLevel;
-      batteryLevelHistory = <int>[
-        ...state?.batteryLevelHistory.reversed.take(49).toList().reversed ?? [],
-        batteryLevel,
-      ];
+      final batteryCheckAvailable = CurrentPlatform.isAndroid ||
+          CurrentPlatform.isIos ||
+          CurrentPlatform.isMacOS ||
+          CurrentPlatform.isWindows;
 
-      final thermalStatus = await Thermal().thermalStatus;
-      thermalStatusHistory = <int>[
-        ...state?.thermalStatusHistory.reversed.take(49).toList().reversed ??
-            [],
-        ThermalStatus.values.indexOf(thermalStatus),
-      ];
+      try {
+        if (batteryCheckAvailable) {
+          batteryLevel = await Battery().batteryLevel;
+          batteryLevelHistory = <int>[
+            ...state?.batteryLevelHistory.reversed.take(49).toList().reversed ??
+                [],
+            batteryLevel,
+          ];
+        }
+      } catch (_) {
+        // Ignore battery read failures
+      }
+
+      final thermalStatusAvailable =
+          CurrentPlatform.isAndroid || CurrentPlatform.isIos;
+
+      try {
+        if (thermalStatusAvailable) {
+          final thermalStatus = await Thermal().thermalStatus;
+          thermalStatusHistory = <int>[
+            ...state?.thermalStatusHistory.reversed
+                    .take(49)
+                    .toList()
+                    .reversed ??
+                [],
+            ThermalStatus.values.indexOf(thermalStatus),
+          ];
+        }
+      } catch (_) {
+        // Ignore thermal read failures
+      }
     }
 
     state = state?.copyWith(

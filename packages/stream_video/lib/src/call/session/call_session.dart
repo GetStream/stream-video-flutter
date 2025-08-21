@@ -563,6 +563,9 @@ class CallSession extends Disposable {
       'dart-client: $closeReason',
     );
 
+    statsReporter?.dispose();
+    statsReporter = null;
+
     await rtcManager?.dispose();
     rtcManager = null;
     _tracer.dispose();
