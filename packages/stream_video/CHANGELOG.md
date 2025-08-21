@@ -1,7 +1,4 @@
-## 0.10.3
-
-🐞 Fixed
-* Handled SFU stats reporting failures gracefully
+## Unreleased
 
 🚧 Breaking changes
 * `Call.stats` payload changed. It now emits
@@ -14,12 +11,19 @@
   - Access `call.statsReporter?.currentMetrics` for the latest aggregated metrics instead.
 
 ✅ Added
-* Added option to configure android audio configuration when initializing `StreamVideo` instance by providing `androidAudioConfiguration` to `StreamVideoOptions`.
 * `StatsReporter` is now exposed on `Call` as `call.statsReporter`, providing `currentMetrics` — a consolidated view of publisher/subscriber WebRTC quality, client environment, and rolling histories (latency, battery level, thermal status).
 * Battery level and device thermal status are now tracked and available via `call.statsReporter?.currentMetrics`.
 
 🔄 Changed
 * `Call.stats` continues to emit periodically, but the record field names/types changed as noted under breaking changes.
+
+## 0.10.3
+
+🐞 Fixed
+* Handled SFU stats reporting failures gracefully
+
+✅ Added
+* Added option to configure android audio configuration when initializing `StreamVideo` instance by providing `androidAudioConfiguration` to `StreamVideoOptions`.
 
 ## 0.10.2
 
