@@ -1,4 +1,4 @@
-## Unreleased
+## 0.10.3
 
 🐞 Fixed
 * Handled SFU stats reporting failures gracefully
