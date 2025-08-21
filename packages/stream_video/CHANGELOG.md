@@ -1,3 +1,11 @@
+## 0.10.3
+
+🐞 Fixed
+* Handled SFU stats reporting failures gracefully
+
+✅ Added
+* Added option to configure android audio configuration when initializing `StreamVideo` instance by providing `androidAudioConfiguration` to `StreamVideoOptions`.
+
 ## 0.10.2
 
 ✅ Added

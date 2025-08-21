@@ -758,23 +758,29 @@ extension PublisherRtcManager on RtcManager {
   /// this layer will have the additional spatial and temporal layers
   /// defined via the scalabilityMode property.
   List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
-    // We take the `f` layer, and we rename it to `q`.
-    return layers
-        .where((layer) => layer.rid == 'f')
-        .map(
-          (layer) => rtc.RTCRtpEncoding(
-            rid: 'q',
-            active: layer.active,
-            maxBitrate: layer.maxBitrate,
-            maxFramerate: layer.maxFramerate,
-            minBitrate: layer.minBitrate,
-            numTemporalLayers: layer.numTemporalLayers,
-            scaleResolutionDownBy: layer.scaleResolutionDownBy,
-            ssrc: layer.ssrc,
-            scalabilityMode: layer.scalabilityMode,
-          ),
-        )
-        .toList();
+    rtc.RTCRtpEncoding? findByRid(String rid) {
+      for (final layer in layers) {
+        if (layer.rid == rid) return layer;
+      }
+      return null;
+    }
+
+    final highestLayer = findByRid('f') ?? findByRid('h') ?? findByRid('q');
+    if (highestLayer == null) return [];
+
+    return [
+      rtc.RTCRtpEncoding(
+        rid: 'q',
+        active: highestLayer.active,
+        maxBitrate: highestLayer.maxBitrate,
+        maxFramerate: highestLayer.maxFramerate,
+        minBitrate: highestLayer.minBitrate,
+        numTemporalLayers: highestLayer.numTemporalLayers,
+        scaleResolutionDownBy: highestLayer.scaleResolutionDownBy,
+        ssrc: highestLayer.ssrc,
+        scalabilityMode: highestLayer.scalabilityMode,
+      ),
+    ];
   }
 
   Future<

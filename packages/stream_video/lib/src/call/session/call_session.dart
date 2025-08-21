@@ -60,6 +60,7 @@ class CallSession extends Disposable {
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
   })  : _tracer = tracer,
+        _streamVideo = streamVideo,
         sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
@@ -102,6 +103,7 @@ class CallSession extends Disposable {
   final InternetConnection networkMonitor;
   final StatsOptions statsOptions;
   final Tracer _tracer;
+  final StreamVideo _streamVideo;
 
   final Duration joinResponseTimeout;
 
@@ -875,6 +877,21 @@ class CallSession extends Disposable {
     RtcRemoteTrack remoteTrack,
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
+
+    if (CurrentPlatform.isAndroid &&
+        remoteTrack.isAudioTrack &&
+        _streamVideo.options.androidAudioConfiguration != null) {
+      try {
+        await rtc.Helper.setAndroidAudioConfiguration(
+          _streamVideo.options.androidAudioConfiguration!,
+        );
+      } catch (e) {
+        _logger.w(
+          () =>
+              '[onRemoteTrackReceived] Failed to apply Android audio configuration: $e',
+        );
+      }
+    }
 
     // Start the track.
     await remoteTrack.start();

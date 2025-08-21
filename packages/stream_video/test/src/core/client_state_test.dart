@@ -15,6 +15,8 @@ void main() {
     late MockCall mockCall3;
 
     setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+
       user = User.regular(
         userId: 'test-user',
         name: 'Test User',
