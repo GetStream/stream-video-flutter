@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/user_auth_controller.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
 import 'package:flutter_dogfooding/screens/stats_latency_chart.dart';
+import 'package:flutter_dogfooding/screens/stats_battery_chart.dart';
+import 'package:flutter_dogfooding/screens/stats_thermal_chart.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -21,12 +25,23 @@ class CallStatsScreen extends StatelessWidget {
     final textTheme = streamVideoTheme.textTheme;
     final currentUser = _userAuthController.currentUser;
 
-    return StreamBuilder<CallState>(
-        stream: call.state.asStream(),
+    return StreamBuilder<CallMetrics?>(
+        stream: call.statsReporter?.stream,
+        initialData: call.statsReporter?.currentMetrics,
         builder: (context, snapshot) {
           final state = snapshot.data;
-          final subscriberBitrate = state?.subscriberStats?.bitrateKbps;
-          final publisherBitrate = state?.publisherStats?.bitrateKbps;
+
+          if (state == null) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final subscriberBitrate = state.subscriber?.bitrateKbps;
+          final publisherBitrate = state.publisher?.bitrateKbps;
+
+          final batteryDrained = (state.initialBatteryLevel ?? 0) -
+              (state.batteryLevelHistory.lastOrNull ?? 0);
 
           return SafeArea(
             top: false,
@@ -93,8 +108,74 @@ class CallStatsScreen extends StatelessWidget {
                       SizedBox(
                         height: 200,
                         child: StatsLatencyChart(
-                          latencyHistory: state!.latencyHistory,
+                          latencyHistory: state.latencyHistory,
                         ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.whatshot, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Thermal state',
+                              style:
+                                  textTheme.title3.apply(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Device thermal state history. Higher bars indicate more severe states.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 200,
+                        child: StatsThermalChart(
+                          thermalSeverityHistory: state.thermalStatusHistory,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.battery_full, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Battery level',
+                              style:
+                                  textTheme.title3.apply(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Track device battery level throughout the call.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 200,
+                        child: StatsBatteryChart(
+                          batteryLevelHistory: state.batteryLevelHistory,
+                        ),
+                      ),
+                      Text(
+                        'Battery percentage consumed during call: $batteryDrained%',
+                        style: const TextStyle(color: Colors.white),
                       ),
                       const SizedBox(
                         height: 16,
@@ -128,7 +209,7 @@ class CallStatsScreen extends StatelessWidget {
                           Expanded(
                             child: LatencyOrJitterItem(
                               title: 'Latency',
-                              value: state.publisherStats?.latency ?? 0,
+                              value: state.publisher?.latency ?? 0,
                             ),
                           ),
                         ],
@@ -138,13 +219,13 @@ class CallStatsScreen extends StatelessWidget {
                           Expanded(
                             child: LatencyOrJitterItem(
                               title: 'Receive jitter',
-                              value: state.subscriberStats?.jitterInMs,
+                              value: state.subscriber?.jitterInMs,
                             ),
                           ),
                           Expanded(
                             child: LatencyOrJitterItem(
                               title: 'Publish jitter',
-                              value: state.publisherStats?.jitterInMs,
+                              value: state.publisher?.jitterInMs,
                             ),
                           ),
                         ],
@@ -156,7 +237,7 @@ class CallStatsScreen extends StatelessWidget {
                               title: 'Publish bitrate',
                               value: publisherBitrate == null
                                   ? '--'
-                                  : '${state.publisherStats?.bitrateKbps} Kbps',
+                                  : '${state.publisher?.bitrateKbps} Kbps',
                             ),
                           ),
                           Expanded(
@@ -164,7 +245,7 @@ class CallStatsScreen extends StatelessWidget {
                               title: 'Receive bitrate',
                               value: subscriberBitrate == null
                                   ? '--'
-                                  : '${state.subscriberStats?.bitrateKbps} Kbps',
+                                  : '${state.subscriber?.bitrateKbps} Kbps',
                             ),
                           ),
                         ],
@@ -175,29 +256,29 @@ class CallStatsScreen extends StatelessWidget {
                             child: StatsItem(
                               title: 'Publish resolution',
                               value:
-                                  "${state.publisherStats?.resolution} | ${state.publisherStats?.videoCodec?.join('+')}",
+                                  "${state.publisher?.resolution} | ${state.publisher?.videoCodec?.join('+')}",
                             ),
                           ),
                           Expanded(
                             child: StatsItem(
-                              title: 'Reveive resolution',
+                              title: 'Receive resolution',
                               value:
-                                  "${state.subscriberStats?.resolution} | ${state.subscriberStats?.videoCodec?.join('+')}",
+                                  "${state.subscriber?.resolution} | ${state.subscriber?.videoCodec?.join('+')}",
                             ),
                           ),
                         ],
                       ),
                       StatsItem(
                         title: 'Region',
-                        value: state.localStats?.sfu,
+                        value: state.clientEnvironment.sfu,
                       ),
                       StatsItem(
                         title: 'SDK Version',
-                        value: state.localStats?.sdkVersion,
+                        value: state.clientEnvironment.sdkVersion,
                       ),
                       StatsItem(
                         title: 'WebRTC Version',
-                        value: state.localStats?.webRtcVersion,
+                        value: state.clientEnvironment.webRtcVersion,
                       ),
                     ]
                   ],

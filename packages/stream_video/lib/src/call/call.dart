@@ -301,15 +301,22 @@ class Call {
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
+  StatsReporter? get statsReporter => _session?.statsReporter;
 
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
   }
 
-  SharedEmitter<({CallStats publisherStats, CallStats subscriberStats})>
-      get stats => _stats;
+  SharedEmitter<
+      ({
+        PeerConnectionStatsBundle publisherStatsBundle,
+        PeerConnectionStatsBundle subscriberStatsBundle
+      })> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<
-      ({CallStats publisherStats, CallStats subscriberStats})>();
+      ({
+        PeerConnectionStatsBundle publisherStatsBundle,
+        PeerConnectionStatsBundle subscriberStatsBundle
+      })>();
 
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
   final _callEvents = MutableSharedEmitterImpl<StreamCallEvent>();
@@ -856,7 +863,13 @@ class Call {
         networkMonitor: networkMonitor,
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
-        onReconnectionNeeded: (pc, strategy) => _reconnect(strategy),
+        onReconnectionNeeded: (pc, strategy) {
+          _session?.trace('pc_reconnection_needed', {
+            'peerConnectionId': pc.type,
+            'reconnectionStrategy': strategy.name,
+          });
+          _reconnect(strategy);
+        },
         clientPublishOptions:
             _stateManager.callState.preferences.clientPublishOptions,
       );
@@ -1157,20 +1170,8 @@ class Call {
       }),
     );
 
-    var localStats = state.value.localStats ?? LocalStats.empty();
-    localStats = localStats.copyWith(
-      sfu: session.config.sfuUrl,
-      sdkVersion: streamVideoVersion,
-      webRtcVersion: switch (CurrentPlatform.type) {
-        PlatformType.android => androidWebRTCVersion,
-        PlatformType.ios => iosWebRTCVersion,
-        _ => null,
-      },
-    );
-
     _stateManager.lifecycleCallSessionStart(
       sessionId: session.sessionId,
-      localStats: localStats,
     );
 
     if (_callLifecycleCompleter.isCompleted) {
@@ -1188,20 +1189,19 @@ class Call {
           _streamVideo.state.currentUser.type == UserType.anonymous,
     );
 
-    if (session.rtcManager != null) {
+    if (session.statsReporter != null) {
       _subscriptions.add(
         _idSessionStats,
-        StatsReporter(
-          rtcManager: session.rtcManager!,
-          stateManager: _stateManager,
-        )
+        session.statsReporter!
             .run(
           interval:
               _stateManager.callState.preferences.callStatsReportingInterval,
         )
-            .listen((stats) {
-          _stats.emit(stats);
-        }),
+            .listen(
+          (stats) {
+            _stats.emit(stats);
+          },
+        ),
       );
     }
 
@@ -1267,6 +1267,11 @@ class Call {
             sfuEvent.reason.closeCode,
           )) {
         _logger.w(() => '[onSfuEvent] socket disconnected');
+
+        _session?.trace('sfu_socket_disconnected', {
+          'closeCode': sfuEvent.reason.closeCode,
+          'closeReason': sfuEvent.reason.closeReason,
+        });
         await _reconnect(SfuReconnectionStrategy.fast);
       } else if (_leaveCallTriggered) {
         _logger.d(
@@ -1276,9 +1281,15 @@ class Call {
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
+      _session?.trace('sfu_socket_failed', {
+        'error': sfuEvent.error.message,
+      });
       await _reconnect(SfuReconnectionStrategy.fast);
     } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
+      _session?.trace('sfu_go_away', {
+        'reason': sfuEvent.goAwayReason.name,
+      });
       await _reconnect(SfuReconnectionStrategy.migrate);
     }
     // error event
@@ -1291,6 +1302,9 @@ class Call {
             () =>
                 '[onSfuEvent] SFU error: ${sfuEvent.error}, reconnect strategy: ${sfuEvent.error.reconnectStrategy}',
           );
+          _session?.trace('sfu_error', {
+            'error': sfuEvent.error.message,
+          });
           await _reconnect(sfuEvent.error.reconnectStrategy);
           break;
         case SfuReconnectionStrategy.disconnect:
@@ -1324,6 +1338,10 @@ class Call {
       );
       return;
     }
+
+    _session?.trace('call_reconnect', {
+      'strategy': strategy.name,
+    });
 
     await _callReconnectLock.synchronized(() async {
       _reconnectStrategy = strategy;
@@ -1389,12 +1407,22 @@ class Call {
               _logger.v(() => '[reconnect] migrate');
               await _reconnectMigrate();
           }
+
+          _session?.trace('call_reconnect_success', {
+            'strategy': strategy.name,
+          });
         } catch (error) {
           switch (error) {
             case OpenApiError() when error.apiError.unrecoverable ?? false:
             case APIError() when error.unrecoverable ?? false:
               _logger.w(() => '[reconnect] unrecoverable error');
               _stateManager.lifecycleCallReconnectingFailed();
+
+              _session?.trace('call_reconnect_failed', {
+                'strategy': strategy.name,
+                'error': error.toString(),
+              });
+
               return;
             default:
               _logger.w(
