@@ -265,7 +265,7 @@ class CallData with EquatableMixin {
     this.callCid,
     this.avatar,
     this.handle,
-    this.nameCaller,
+    this.callerName,
     this.hasVideo,
     this.extraData,
   });
@@ -283,7 +283,7 @@ class CallData with EquatableMixin {
   final String? handle;
 
   /// Name of the caller.
-  final String? nameCaller;
+  final String? callerName;
 
   /// Indicates whether the call has video.
   final bool? hasVideo;
@@ -300,7 +300,7 @@ class CallData with EquatableMixin {
         callCid,
         avatar,
         handle,
-        nameCaller,
+        callerName,
         hasVideo,
         extraData,
       ];

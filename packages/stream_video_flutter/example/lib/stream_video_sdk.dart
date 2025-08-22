@@ -28,9 +28,8 @@ class StreamVideoSdk {
         androidPushProvider: const StreamVideoPushProvider.firebase(
           name: 'flutter-firebase',
         ),
-        pushParams: const StreamVideoPushParams(
-          appName: 'Stream Example',
-          ios: IOSParams(iconName: 'IconMask'),
+        pushConfiguration: const StreamVideoPushConfiguration(
+          ios: IOSPushConfiguration(iconName: 'IconMask'),
         ),
       ),
       options: options,

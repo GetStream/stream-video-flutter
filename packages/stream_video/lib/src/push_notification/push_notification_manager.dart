@@ -32,14 +32,14 @@ abstract class PushNotificationManager {
   /// [callCid] is the call's unique identifier.
   /// [avatar] is the avatar of the caller.
   /// [handle] is the handle of the caller.
-  /// [nameCaller] is the name of the caller.
+  /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
   Future<void> showIncomingCall({
     required String uuid,
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   });
 
@@ -49,14 +49,14 @@ abstract class PushNotificationManager {
   /// [callCid] is the call's unique identifier.
   /// [avatar] is the avatar of the caller.
   /// [handle] is the handle of the caller.
-  /// [nameCaller] is the name of the caller.
+  /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
   Future<void> showMissedCall({
     required String uuid,
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   });
 
@@ -66,14 +66,14 @@ abstract class PushNotificationManager {
   /// [callCid] is the call's unique identifier.
   /// [avatar] is the avatar of the caller.
   /// [handle] is the handle of the caller.
-  /// [nameCaller] is the name of the caller.
+  /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
   Future<void> startOutgoingCall({
     required String uuid,
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   });
 
