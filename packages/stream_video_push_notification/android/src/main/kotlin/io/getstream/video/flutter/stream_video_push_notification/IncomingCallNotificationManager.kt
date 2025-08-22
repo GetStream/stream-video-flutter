@@ -204,15 +204,8 @@ class IncomingCallNotificationManager(
             }
         }
         notificationBuilder?.setSmallIcon(smallIcon)
-        val actionColor = data.getString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, "#4CAF50")
-        try {
-            notificationBuilder?.color = Color.parseColor(actionColor)
-        } catch (_: Exception) {
-        }
         notificationBuilder?.setChannelId(NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder?.priority = NotificationCompat.PRIORITY_MAX
-        val isCustomSmallExNotification =
-            data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION, false)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
 
@@ -227,9 +220,9 @@ class IncomingCallNotificationManager(
                     getAcceptPendingIntent(notificationId, data),
                 ).setIsVideo(typeCall > 0)
             )
-            val isShowCallID =
-                data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
-            if (isShowCallID) {
+            val showCallHandle =
+                data.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
+            if (showCallHandle) {
                 notificationBuilder?.setContentText(
                     data.getString(
                         IncomingCallConstants.EXTRA_CALL_HANDLE, ""
@@ -275,7 +268,7 @@ class IncomingCallNotificationManager(
 
             if ((Build.MANUFACTURER.equals(
                     "Samsung", ignoreCase = true
-                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) || isCustomSmallExNotification
+                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             ) {
                 notificationSmallViews = RemoteViews(
                     context.packageName, R.layout.layout_custom_small_ex_notification
@@ -305,8 +298,8 @@ class IncomingCallNotificationManager(
         remoteViews.setTextViewText(
             R.id.tvCallerName, data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         )
-        val isShowCallID = data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
-        if (isShowCallID) {
+        val showCallHandle = data.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
+        if (showCallHandle) {
             remoteViews.setTextViewText(
                 R.id.tvNumber, data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             )
@@ -419,9 +412,9 @@ class IncomingCallNotificationManager(
         notificationMissingSmallViews?.setTextViewText(
             R.id.tvTime, getSystemFormattedTime(context)
         )
-        val isShowCallID =
-            data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
-        if (isShowCallID) {
+        val showCallHandle =
+            data.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
+        if (showCallHandle) {
             notificationMissingViews?.setTextViewText(
                 R.id.tvNumber, data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             )
@@ -489,11 +482,7 @@ class IncomingCallNotificationManager(
                 missedNotificationId, data
             )
         )
-        val actionColor = data.getString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, "#4CAF50")
-        try {
-            notificationMissingBuilder?.color = Color.parseColor(actionColor)
-        } catch (_: Exception) {
-        }
+       
         val notification = notificationMissingBuilder?.build()
         if (notification != null) {
             getNotificationManager().notify(missedNotificationId, notification)

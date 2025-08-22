@@ -478,18 +478,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
 const _defaultPushConfiguration = StreamVideoPushConfiguration(
   android: AndroidPushConfiguration(
-    isShowLogo: false,
-    ringtonePath: 'system_ringtone_default',
-    backgroundColor: '#0955fa',
-    actionColor: '#4CAF50',
-    incomingCallNotificationChannelName: "Incoming Call",
-    missedCallNotification: NotificationParams(
-      showNotification: true,
-      isShowCallback: true,
-      subtitle: 'Missed call',
-      callbackText: 'Call back',
-    ),
-  ),
+      ringtonePath: 'system_ringtone_default',
+      incomingCallNotificationChannelName: "Incoming Call",
+      missedCallNotification: MissedCallNotificationParams(
+        showNotification: true,
+        isShowCallback: true,
+        subtitle: 'Missed call',
+        callbackText: 'Call back',
+      ),
+      incomingCallNotification: IncomingCallNotificationParams(
+        fullScreenShowLogo: false,
+        fullScreenBackgroundColor: '#0955fa',
+      )),
   ios: IOSPushConfiguration(
     handleType: 'generic',
     supportsVideo: true,

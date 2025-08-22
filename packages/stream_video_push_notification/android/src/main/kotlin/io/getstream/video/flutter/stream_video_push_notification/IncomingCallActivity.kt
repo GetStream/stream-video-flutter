@@ -171,11 +171,11 @@ class IncomingCallActivity : Activity() {
             }
         }
 
-        val textColor = data?.getString(IncomingCallConstants.EXTRA_CALL_TEXT_COLOR, "#ffffff")
-        val isShowCallID = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID, false)
+        val textColor = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR, "#ffffff")
+        val showCallHandle = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
         tvCallerName.text = data?.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         tvNumber.text = data?.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
-        tvNumber.visibility = if (isShowCallID == true) View.VISIBLE else View.INVISIBLE
+        tvNumber.visibility = if (showCallHandle == true) View.VISIBLE else View.INVISIBLE
 
         try {
             tvCallerName.setTextColor(Color.parseColor(textColor))
@@ -183,9 +183,9 @@ class IncomingCallActivity : Activity() {
         } catch (error: Exception) {
         }
 
-        val isShowLogo = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_LOGO, false)
-        ivLogo.visibility = if (isShowLogo == true) View.VISIBLE else View.INVISIBLE
-        var logoUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_LOGO_URL, "")
+        val showLogo = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false)
+        ivLogo.visibility = if (showLogo == true) View.VISIBLE else View.INVISIBLE
+        var logoUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, "")
         if (!logoUrl.isNullOrEmpty()) {
             if (!logoUrl.startsWith("http://", true) && !logoUrl.startsWith("https://", true)) {
                 logoUrl = String.format("file:///android_asset/flutter_assets/%s", logoUrl)
@@ -235,12 +235,12 @@ class IncomingCallActivity : Activity() {
         }
 
         val backgroundColor =
-            data?.getString(IncomingCallConstants.EXTRA_CALL_BACKGROUND_COLOR, "#0955fa")
+            data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR, "#0955fa")
         try {
             ivBackground.setBackgroundColor(Color.parseColor(backgroundColor))
         } catch (error: Exception) {
         }
-        var backgroundUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_BACKGROUND_URL, "")
+        var backgroundUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, "")
         if (!backgroundUrl.isNullOrEmpty()) {
             if (!backgroundUrl.startsWith("http://", true) && !backgroundUrl.startsWith(
                     "https://",

@@ -190,19 +190,30 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
     private fun sendEventFlutter(event: String, data: Bundle) {
         if (silenceEvents) return
 
+        val missedCallNotification = mapOf(
+            "id" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID),
+            "showNotification" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW),
+            "count" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT),
+            "subtitle" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE),
+            "callbackText" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT),
+            "isShowCallback" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW),
+        )
+
+        val incomingCallNotification = mapOf(
+            "fullScreenShowLogo" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false),
+            "fullScreenLogoUrl" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, ""),
+            "fullScreenBackgroundColor" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR, ""),
+            "fullScreenBackgroundUrl" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, ""),
+            "fullScreenTextColor" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR, ""),
+            "textAccept" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, ""),
+            "textDecline" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, ""),
+        )
+
         val android = mapOf(
-            "isCustomSmallExNotification" to data.getBoolean(
-                IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION,
-                false
-            ),
             "ringtonePath" to data.getString(IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH, ""),
-            "backgroundColor" to data.getString(
-                IncomingCallConstants.EXTRA_CALL_BACKGROUND_COLOR,
-                ""
-            ),
-            "backgroundUrl" to data.getString(IncomingCallConstants.EXTRA_CALL_BACKGROUND_URL, ""),
-            "actionColor" to data.getString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, ""),
-            "textColor" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_COLOR, ""),
+            "defaultAvatar" to data.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""),
+            "missedCallNotification" to missedCallNotification,
+            "incomingCallNotification" to incomingCallNotification,
             "incomingCallNotificationChannelName" to data.getString(
                 IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME,
                 ""
@@ -214,28 +225,18 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
             "isImportant" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT, true),
             "isBot" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_BOT, false),
         )
-        val missedCallNotification = mapOf(
-            "id" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID),
-            "showNotification" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW),
-            "count" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT),
-            "subtitle" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE),
-            "callbackText" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT),
-            "isShowCallback" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW),
-        )
+
         val forwardData = mapOf(
             "id" to data.getString(IncomingCallConstants.EXTRA_CALL_ID, ""),
             "callerName" to data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, ""),
             "avatar" to data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, ""),
-            "defaultAvatar" to data.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""),
             "number" to data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, ""),
             "type" to data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0),
             "duration" to data.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 0L),
-            "textAccept" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, ""),
-            "textDecline" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, ""),
             "extra" to data.getSerializable(IncomingCallConstants.EXTRA_CALL_EXTRA),
-            "missedCallNotification" to missedCallNotification,
             "android" to android
         )
+        
         StreamVideoPushNotificationPlugin.sendEvent(event, forwardData)
     }
 }

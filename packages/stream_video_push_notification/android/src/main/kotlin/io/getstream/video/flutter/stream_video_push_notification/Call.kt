@@ -50,32 +50,26 @@ data class Data(val args: Map<String, Any?>) {
     @JsonProperty("from")
     var from: String = ""
 
-    @JsonProperty("isCustomSmallExNotification")
-    var isCustomSmallExNotification: Boolean = false
+    @JsonProperty("fullScreenShowLogo")
+    var fullScreenShowLogo: Boolean = false
 
-    @JsonProperty("isShowLogo")
-    var isShowLogo: Boolean = false
+    @JsonProperty("fullScreenLogoUrl")
+    var fullScreenLogoUrl: String = ""
 
-    @JsonProperty("logoUrl")
-    var logoUrl: String
-
-    @JsonProperty("isShowCallID")
-    var isShowCallID: Boolean = false
+    @JsonProperty("showCallHandle")
+    var showCallHandle: Boolean = false
 
     @JsonProperty("ringtonePath")
     var ringtonePath: String
 
-    @JsonProperty("backgroundColor")
-    var backgroundColor: String
+    @JsonProperty("fullScreenBackgroundColor")
+    var fullScreenBackgroundColor: String = "#0955fa"
 
-    @JsonProperty("backgroundUrl")
-    var backgroundUrl: String
+    @JsonProperty("fullScreenBackgroundUrl")
+    var fullScreenBackgroundUrl: String = ""
 
-    @JsonProperty("textColor")
-    var textColor: String
-
-    @JsonProperty("actionColor")
-    var actionColor: String
+    @JsonProperty("fullScreenTextColor")
+    var fullScreenTextColor: String = "#FFFFFF"
 
     @JsonProperty("incomingCallNotificationChannelName")
     var incomingCallNotificationChannelName: String? = null
@@ -142,15 +136,7 @@ data class Data(val args: Map<String, Any?>) {
         android = android ?: args
         avatar = android["avatar"] as? String ?: ""
         defaultAvatar = android["defaultAvatar"] as? String ?: ""
-        isCustomSmallExNotification = android["isCustomSmallExNotification"] as? Boolean ?: false
-        isShowLogo = android["isShowLogo"] as? Boolean ?: false
-        logoUrl = android["logoUrl"] as? String ?: ""
-        isShowCallID = android["isShowCallID"] as? Boolean ?: false
         ringtonePath = android["ringtonePath"] as? String ?: ""
-        backgroundColor = android["backgroundColor"] as? String ?: "#0955fa"
-        backgroundUrl = android["backgroundUrl"] as? String ?: ""
-        actionColor = android["actionColor"] as? String ?: "#4CAF50"
-        textColor = android["textColor"] as? String ?: "#ffffff"
         incomingCallNotificationChannelName =
             android["incomingCallNotificationChannelName"] as? String
         missedCallNotificationChannelName = android["missedCallNotificationChannelName"] as? String
@@ -169,12 +155,20 @@ data class Data(val args: Map<String, Any?>) {
             isShowCallback = missedNotification["isShowCallback"] as? Boolean ?: true
             isShowMissedCallNotification =
                 missedNotification["showNotification"] as? Boolean ?: true
-        } else {
-            missedNotificationSubtitle = args["textMissedCall"] as? String ?: ""
-            missedNotificationCallbackText = args["textCallback"] as? String ?: ""
-            isShowCallback = android["isShowCallback"] as? Boolean ?: true
-            isShowMissedCallNotification =
-                android["isShowMissedCallNotification"] as? Boolean ?: true
+        } 
+
+        val incomingNotification: Map<String, Any?>? =
+            android["incomingCallNotification"] as? Map<String, Any?>?
+
+        if (incomingNotification != null) {
+            fullScreenShowLogo = incomingNotification["fullScreenShowLogo"] as? Boolean ?: false
+            fullScreenLogoUrl = incomingNotification["fullScreenLogoUrl"] as? String? ?: ""
+            fullScreenBackgroundColor = incomingNotification["fullScreenBackgroundColor"] as? String ?: "#0955fa"
+            fullScreenBackgroundUrl = incomingNotification["fullScreenBackgroundUrl"] as? String ?: ""
+            fullScreenTextColor = incomingNotification["fullScreenTextColor"] as? String ?: "#ffffff"
+            textAccept = incomingNotification["textAccept"] as? String ?: ""
+            textDecline = incomingNotification["textDecline"] as? String ?: ""
+            showCallHandle = incomingNotification["showCallHandle"] as? Boolean ?: false
         }
     }
 
@@ -232,32 +226,27 @@ data class Data(val args: Map<String, Any?>) {
         bundle.putSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS, headers)
 
         bundle.putBoolean(
-            IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION,
-            isCustomSmallExNotification
-        )
-        bundle.putBoolean(
-            IncomingCallConstants.EXTRA_CALL_IS_SHOW_LOGO,
-            isShowLogo
+            IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO,
+            fullScreenShowLogo
         )
         bundle.putString(
-            IncomingCallConstants.EXTRA_CALL_LOGO_URL,
-            logoUrl
+            IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL,
+            fullScreenLogoUrl
         )
         bundle.putBoolean(
-            IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID,
-            isShowCallID
+            IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE,
+            showCallHandle
         )
         bundle.putString(IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH, ringtonePath)
         bundle.putString(
-            IncomingCallConstants.EXTRA_CALL_BACKGROUND_COLOR,
-            backgroundColor
+            IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR,
+            fullScreenBackgroundColor
         )
         bundle.putString(
-            IncomingCallConstants.EXTRA_CALL_BACKGROUND_URL,
-            backgroundUrl
+            IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL,
+            fullScreenBackgroundUrl
         )
-        bundle.putString(IncomingCallConstants.EXTRA_CALL_TEXT_COLOR, textColor)
-        bundle.putString(IncomingCallConstants.EXTRA_CALL_ACTION_COLOR, actionColor)
+        bundle.putString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR, fullScreenTextColor)
         bundle.putString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM, from)
         bundle.putString(
             IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME,
@@ -325,36 +314,29 @@ data class Data(val args: Map<String, Any?>) {
             data.headers =
                 bundle.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
 
-            data.isCustomSmallExNotification = bundle.getBoolean(
-                IncomingCallConstants.EXTRA_CALL_IS_CUSTOM_SMALL_EX_NOTIFICATION,
+            data.fullScreenShowLogo = bundle.getBoolean(
+                IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO,
                 false
             )
-            data.isShowLogo = bundle.getBoolean(
-                IncomingCallConstants.EXTRA_CALL_IS_SHOW_LOGO,
-                false
-            )
-            data.logoUrl =
-                bundle.getString(IncomingCallConstants.EXTRA_CALL_LOGO_URL, "")
-            data.isShowCallID = bundle.getBoolean(
-                IncomingCallConstants.EXTRA_CALL_IS_SHOW_CALL_ID,
+            data.fullScreenLogoUrl =
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, "")
+            data.showCallHandle = bundle.getBoolean(
+                IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE,
                 false
             )
             data.ringtonePath = bundle.getString(
                 IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH,
                 ""
             )
-            data.backgroundColor = bundle.getString(
-                IncomingCallConstants.EXTRA_CALL_BACKGROUND_COLOR,
+            data.fullScreenBackgroundColor = bundle.getString(
+                IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR,
                 "#0955fa"
             )
-            data.backgroundUrl =
-                bundle.getString(IncomingCallConstants.EXTRA_CALL_BACKGROUND_URL, "")
-            data.actionColor = bundle.getString(
-                IncomingCallConstants.EXTRA_CALL_ACTION_COLOR,
-                "#4CAF50"
-            )
-            data.textColor = bundle.getString(
-                IncomingCallConstants.EXTRA_CALL_TEXT_COLOR,
+            data.fullScreenBackgroundUrl =
+                bundle.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, "")
+
+            data.fullScreenTextColor = bundle.getString(
+                IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR,
                 "#FFFFFF"
             )
             data.from =

@@ -278,11 +278,10 @@ internal class StreamNotificationBuilderImpl(
 }
 
 private fun useSmallExLayout(): Boolean {
-    val isCustomSmallExNotification = false
     return Build.MANUFACTURER.equals(
         "Samsung",
         ignoreCase = true
-    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S || isCustomSmallExNotification
+    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 }
 
 private fun Context.loadImageWithCoil(url: String, headers: Map<String, String>, target: coil.target.Target) {

@@ -13,8 +13,6 @@ class StreamVideoPushParams {
     this.handle,
     this.type,
     this.duration,
-    this.textAccept,
-    this.textDecline,
     this.extra,
     this.headers,
     this.android,
@@ -27,8 +25,6 @@ class StreamVideoPushParams {
     this.handle,
     this.type,
     this.duration,
-    this.textAccept,
-    this.textDecline,
     this.extra,
     this.headers,
     this.android,
@@ -40,8 +36,6 @@ class StreamVideoPushParams {
   final String? handle;
   final int? type;
   final int? duration;
-  final String? textAccept;
-  final String? textDecline;
   final Map<String, dynamic>? extra;
   final Map<String, dynamic>? headers;
   final AndroidParams? android;
@@ -68,8 +62,6 @@ class StreamVideoPushParams {
     String? handle,
     int? type,
     int? duration,
-    String? textAccept,
-    String? textDecline,
     Map<String, dynamic>? extra,
     Map<String, dynamic>? headers,
     AndroidParams? android,
@@ -81,8 +73,6 @@ class StreamVideoPushParams {
       handle: handle ?? this.handle,
       type: type ?? this.type,
       duration: duration ?? this.duration,
-      textAccept: textAccept ?? this.textAccept,
-      textDecline: textDecline ?? this.textDecline,
       extra: extra ?? this.extra,
       headers: headers ?? this.headers,
       android: android ?? this.android,
@@ -100,8 +90,6 @@ class StreamVideoPushParams {
       handle: other.handle,
       type: other.type,
       duration: other.duration,
-      textAccept: other.textAccept,
-      textDecline: other.textDecline,
       extra: other.extra,
       headers: other.headers,
       android: android?.merge(other.android),
@@ -119,57 +107,28 @@ class StreamVideoPushParams {
 class AndroidParams {
   const AndroidParams({
     this.avatar,
-    this.isCustomSmallExNotification,
-    this.isShowLogo,
-    this.logoUrl,
     this.defaultAvatar,
-    this.isShowCallID,
     this.ringtonePath,
-    this.backgroundColor,
-    this.backgroundUrl,
-    this.actionColor,
-    this.textColor,
     this.incomingCallNotificationChannelName,
     this.missedCallNotificationChannelName,
     this.isShowFullLockedScreen,
     this.isImportant,
     this.isBot,
     this.missedCallNotification,
+    this.incomingCallNotification,
   });
 
-  final NotificationParams? missedCallNotification;
+  final MissedCallNotificationParams? missedCallNotification;
+
+  final IncomingCallNotificationParams? incomingCallNotification;
 
   final String? avatar;
-
-  /// Using custom notification small on some devices clipped out in android.
-  final bool? isCustomSmallExNotification;
-
-  /// Show logo app inside full screen.
-  final bool? isShowLogo;
-
-  /// Logo aoo inside full screen, example: http://... https://... or "assets/abc.png"
-  final String? logoUrl;
 
   /// Default avatar for call, example: http://... https://... or "assets/abc.png"
   final String? defaultAvatar;
 
-  /// Show call id app inside full screen.
-  final bool? isShowCallID;
-
   /// File name ringtone, put file into /android/app/src/main/res/raw/ringtone_default.mp3 -> value: `ringtone_default`
   final String? ringtonePath;
-
-  /// Incoming call screen background color.
-  final String? backgroundColor;
-
-  /// Using image background for Incoming call screen. example: http://... https://... or "assets/abc.png"
-  final String? backgroundUrl;
-
-  /// Color used in button/text on notification.
-  final String? actionColor;
-
-  /// Color used for the text in the full screen notification
-  final String? textColor;
 
   /// Notification channel name of incoming call.
   final String? incomingCallNotificationChannelName;
@@ -192,51 +151,33 @@ class AndroidParams {
     AndroidPushConfiguration configuration,
   ) =>
       AndroidParams(
-        isCustomSmallExNotification: configuration.isCustomSmallExNotification,
-        isShowLogo: configuration.isShowLogo,
-        logoUrl: configuration.logoUrl,
         defaultAvatar: configuration.defaultAvatar,
-        isShowCallID: configuration.isShowCallID,
         ringtonePath: configuration.ringtonePath,
-        backgroundColor: configuration.backgroundColor,
-        backgroundUrl: configuration.backgroundUrl,
-        actionColor: configuration.actionColor,
-        textColor: configuration.textColor,
         incomingCallNotificationChannelName:
             configuration.incomingCallNotificationChannelName,
         missedCallNotificationChannelName:
             configuration.missedCallNotificationChannelName,
         isShowFullLockedScreen: configuration.isShowFullLockedScreen,
         missedCallNotification: configuration.missedCallNotification,
+        incomingCallNotification: configuration.incomingCallNotification,
       );
 
   AndroidParams copyWith({
     String? avatar,
-    String? logoUrl,
     String? defaultAvatar,
-    bool? isCustomSmallExNotification,
-    bool? isShowLogo,
     String? ringtonePath,
-    String? backgroundColor,
-    String? backgroundUrl,
-    String? actionColor,
     String? incomingCallNotificationChannelName,
     String? missedCallNotificationChannelName,
     bool? isShowFullLockedScreen,
     bool? isImportant,
     bool? isBot,
+    IncomingCallNotificationParams? incomingCallNotification,
+    MissedCallNotificationParams? missedCallNotification,
   }) {
     return AndroidParams(
       avatar: avatar ?? this.avatar,
-      isCustomSmallExNotification:
-          isCustomSmallExNotification ?? this.isCustomSmallExNotification,
-      isShowLogo: isShowLogo ?? this.isShowLogo,
-      logoUrl: logoUrl ?? this.logoUrl,
       defaultAvatar: defaultAvatar ?? this.defaultAvatar,
       ringtonePath: ringtonePath ?? this.ringtonePath,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      backgroundUrl: backgroundUrl ?? this.backgroundUrl,
-      actionColor: actionColor ?? this.actionColor,
       incomingCallNotificationChannelName:
           incomingCallNotificationChannelName ??
               this.incomingCallNotificationChannelName,
@@ -246,6 +187,10 @@ class AndroidParams {
           isShowFullLockedScreen ?? this.isShowFullLockedScreen,
       isImportant: isImportant ?? this.isImportant,
       isBot: isBot ?? this.isBot,
+      incomingCallNotification:
+          incomingCallNotification ?? this.incomingCallNotification,
+      missedCallNotification:
+          missedCallNotification ?? this.missedCallNotification,
     );
   }
 
@@ -254,14 +199,8 @@ class AndroidParams {
 
     return copyWith(
       avatar: other.avatar,
-      isCustomSmallExNotification: other.isCustomSmallExNotification,
-      isShowLogo: other.isShowLogo,
-      logoUrl: other.logoUrl,
       defaultAvatar: other.defaultAvatar,
       ringtonePath: other.ringtonePath,
-      backgroundColor: other.backgroundColor,
-      backgroundUrl: other.backgroundUrl,
-      actionColor: other.actionColor,
       incomingCallNotificationChannelName:
           other.incomingCallNotificationChannelName,
       missedCallNotificationChannelName:
@@ -269,6 +208,8 @@ class AndroidParams {
       isShowFullLockedScreen: other.isShowFullLockedScreen,
       isImportant: other.isImportant,
       isBot: other.isBot,
+      incomingCallNotification: other.incomingCallNotification,
+      missedCallNotification: other.missedCallNotification,
     );
   }
 
@@ -419,8 +360,8 @@ class IOSParams {
 }
 
 @JsonSerializable(explicitToJson: true)
-class NotificationParams {
-  const NotificationParams({
+class MissedCallNotificationParams {
+  const MissedCallNotificationParams({
     this.id,
     this.showNotification,
     this.subtitle,
@@ -436,7 +377,35 @@ class NotificationParams {
   final bool? isShowCallback;
   final int? count;
 
-  factory NotificationParams.fromJson(Map<String, dynamic> json) =>
-      _$NotificationParamsFromJson(json);
-  Map<String, dynamic> toJson() => _$NotificationParamsToJson(this);
+  factory MissedCallNotificationParams.fromJson(Map<String, dynamic> json) =>
+      _$MissedCallNotificationParamsFromJson(json);
+  Map<String, dynamic> toJson() => _$MissedCallNotificationParamsToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class IncomingCallNotificationParams {
+  const IncomingCallNotificationParams({
+    this.fullScreenShowLogo,
+    this.fullScreenLogoUrl,
+    this.fullScreenBackgroundColor,
+    this.fullScreenBackgroundUrl,
+    this.fullScreenTextColor,
+    this.textAccept,
+    this.textDecline,
+    this.showCallHandle,
+  });
+
+  final bool? fullScreenShowLogo;
+  final String? fullScreenLogoUrl;
+  final String? fullScreenBackgroundColor;
+  final String? fullScreenBackgroundUrl;
+  final String? fullScreenTextColor;
+
+  final String? textAccept;
+  final String? textDecline;
+  final bool? showCallHandle;
+
+  factory IncomingCallNotificationParams.fromJson(Map<String, dynamic> json) =>
+      _$IncomingCallNotificationParamsFromJson(json);
+  Map<String, dynamic> toJson() => _$IncomingCallNotificationParamsToJson(this);
 }

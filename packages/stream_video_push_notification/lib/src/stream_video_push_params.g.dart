@@ -14,8 +14,6 @@ StreamVideoPushParams _$StreamVideoPushParamsFromJson(
       handle: json['handle'] as String?,
       type: (json['type'] as num?)?.toInt(),
       duration: (json['duration'] as num?)?.toInt(),
-      textAccept: json['textAccept'] as String?,
-      textDecline: json['textDecline'] as String?,
       extra: json['extra'] as Map<String, dynamic>?,
       headers: json['headers'] as Map<String, dynamic>?,
       android: json['android'] == null
@@ -34,8 +32,6 @@ Map<String, dynamic> _$StreamVideoPushParamsToJson(
       'handle': instance.handle,
       'type': instance.type,
       'duration': instance.duration,
-      'textAccept': instance.textAccept,
-      'textDecline': instance.textDecline,
       'extra': instance.extra,
       'headers': instance.headers,
       'android': instance.android?.toJson(),
@@ -45,16 +41,8 @@ Map<String, dynamic> _$StreamVideoPushParamsToJson(
 AndroidParams _$AndroidParamsFromJson(Map<String, dynamic> json) =>
     AndroidParams(
       avatar: json['avatar'] as String?,
-      isCustomSmallExNotification: json['isCustomSmallExNotification'] as bool?,
-      isShowLogo: json['isShowLogo'] as bool?,
-      logoUrl: json['logoUrl'] as String?,
       defaultAvatar: json['defaultAvatar'] as String?,
-      isShowCallID: json['isShowCallID'] as bool?,
       ringtonePath: json['ringtonePath'] as String?,
-      backgroundColor: json['backgroundColor'] as String?,
-      backgroundUrl: json['backgroundUrl'] as String?,
-      actionColor: json['actionColor'] as String?,
-      textColor: json['textColor'] as String?,
       incomingCallNotificationChannelName:
           json['incomingCallNotificationChannelName'] as String?,
       missedCallNotificationChannelName:
@@ -64,24 +52,21 @@ AndroidParams _$AndroidParamsFromJson(Map<String, dynamic> json) =>
       isBot: json['isBot'] as bool?,
       missedCallNotification: json['missedCallNotification'] == null
           ? null
-          : NotificationParams.fromJson(
+          : MissedCallNotificationParams.fromJson(
               json['missedCallNotification'] as Map<String, dynamic>),
+      incomingCallNotification: json['incomingCallNotification'] == null
+          ? null
+          : IncomingCallNotificationParams.fromJson(
+              json['incomingCallNotification'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AndroidParamsToJson(AndroidParams instance) =>
     <String, dynamic>{
       'missedCallNotification': instance.missedCallNotification?.toJson(),
+      'incomingCallNotification': instance.incomingCallNotification?.toJson(),
       'avatar': instance.avatar,
-      'isCustomSmallExNotification': instance.isCustomSmallExNotification,
-      'isShowLogo': instance.isShowLogo,
-      'logoUrl': instance.logoUrl,
       'defaultAvatar': instance.defaultAvatar,
-      'isShowCallID': instance.isShowCallID,
       'ringtonePath': instance.ringtonePath,
-      'backgroundColor': instance.backgroundColor,
-      'backgroundUrl': instance.backgroundUrl,
-      'actionColor': instance.actionColor,
-      'textColor': instance.textColor,
       'incomingCallNotificationChannelName':
           instance.incomingCallNotificationChannelName,
       'missedCallNotificationChannelName':
@@ -134,8 +119,9 @@ Map<String, dynamic> _$IOSParamsToJson(IOSParams instance) => <String, dynamic>{
       'ringtonePath': instance.ringtonePath,
     };
 
-NotificationParams _$NotificationParamsFromJson(Map<String, dynamic> json) =>
-    NotificationParams(
+MissedCallNotificationParams _$MissedCallNotificationParamsFromJson(
+        Map<String, dynamic> json) =>
+    MissedCallNotificationParams(
       id: (json['id'] as num?)?.toInt(),
       showNotification: json['showNotification'] as bool?,
       subtitle: json['subtitle'] as String?,
@@ -144,7 +130,8 @@ NotificationParams _$NotificationParamsFromJson(Map<String, dynamic> json) =>
       count: (json['count'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$NotificationParamsToJson(NotificationParams instance) =>
+Map<String, dynamic> _$MissedCallNotificationParamsToJson(
+        MissedCallNotificationParams instance) =>
     <String, dynamic>{
       'id': instance.id,
       'showNotification': instance.showNotification,
@@ -152,4 +139,30 @@ Map<String, dynamic> _$NotificationParamsToJson(NotificationParams instance) =>
       'callbackText': instance.callbackText,
       'isShowCallback': instance.isShowCallback,
       'count': instance.count,
+    };
+
+IncomingCallNotificationParams _$IncomingCallNotificationParamsFromJson(
+        Map<String, dynamic> json) =>
+    IncomingCallNotificationParams(
+      fullScreenShowLogo: json['fullScreenShowLogo'] as bool?,
+      fullScreenLogoUrl: json['fullScreenLogoUrl'] as String?,
+      fullScreenBackgroundColor: json['fullScreenBackgroundColor'] as String?,
+      fullScreenBackgroundUrl: json['fullScreenBackgroundUrl'] as String?,
+      fullScreenTextColor: json['fullScreenTextColor'] as String?,
+      textAccept: json['textAccept'] as String?,
+      textDecline: json['textDecline'] as String?,
+      showCallHandle: json['showCallHandle'] as bool?,
+    );
+
+Map<String, dynamic> _$IncomingCallNotificationParamsToJson(
+        IncomingCallNotificationParams instance) =>
+    <String, dynamic>{
+      'fullScreenShowLogo': instance.fullScreenShowLogo,
+      'fullScreenLogoUrl': instance.fullScreenLogoUrl,
+      'fullScreenBackgroundColor': instance.fullScreenBackgroundColor,
+      'fullScreenBackgroundUrl': instance.fullScreenBackgroundUrl,
+      'fullScreenTextColor': instance.fullScreenTextColor,
+      'textAccept': instance.textAccept,
+      'textDecline': instance.textDecline,
+      'showCallHandle': instance.showCallHandle,
     };

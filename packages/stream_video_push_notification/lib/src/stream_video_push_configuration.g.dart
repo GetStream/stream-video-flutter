@@ -32,18 +32,14 @@ AndroidPushConfiguration _$AndroidPushConfigurationFromJson(
     AndroidPushConfiguration(
       missedCallNotification: json['missedCallNotification'] == null
           ? null
-          : NotificationParams.fromJson(
+          : MissedCallNotificationParams.fromJson(
               json['missedCallNotification'] as Map<String, dynamic>),
-      isCustomSmallExNotification: json['isCustomSmallExNotification'] as bool?,
-      isShowLogo: json['isShowLogo'] as bool?,
-      logoUrl: json['logoUrl'] as String?,
+      incomingCallNotification: json['incomingCallNotification'] == null
+          ? null
+          : IncomingCallNotificationParams.fromJson(
+              json['incomingCallNotification'] as Map<String, dynamic>),
       defaultAvatar: json['defaultAvatar'] as String?,
-      isShowCallID: json['isShowCallID'] as bool?,
       ringtonePath: json['ringtonePath'] as String?,
-      backgroundColor: json['backgroundColor'] as String?,
-      backgroundUrl: json['backgroundUrl'] as String?,
-      actionColor: json['actionColor'] as String?,
-      textColor: json['textColor'] as String?,
       incomingCallNotificationChannelName:
           json['incomingCallNotificationChannelName'] as String?,
       missedCallNotificationChannelName:
@@ -55,16 +51,9 @@ Map<String, dynamic> _$AndroidPushConfigurationToJson(
         AndroidPushConfiguration instance) =>
     <String, dynamic>{
       'missedCallNotification': instance.missedCallNotification?.toJson(),
-      'isCustomSmallExNotification': instance.isCustomSmallExNotification,
-      'isShowLogo': instance.isShowLogo,
-      'logoUrl': instance.logoUrl,
+      'incomingCallNotification': instance.incomingCallNotification?.toJson(),
       'defaultAvatar': instance.defaultAvatar,
-      'isShowCallID': instance.isShowCallID,
       'ringtonePath': instance.ringtonePath,
-      'backgroundColor': instance.backgroundColor,
-      'backgroundUrl': instance.backgroundUrl,
-      'actionColor': instance.actionColor,
-      'textColor': instance.textColor,
       'incomingCallNotificationChannelName':
           instance.incomingCallNotificationChannelName,
       'missedCallNotificationChannelName':

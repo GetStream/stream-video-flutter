@@ -48,52 +48,23 @@ class StreamVideoPushConfiguration {
 class AndroidPushConfiguration {
   const AndroidPushConfiguration({
     this.missedCallNotification,
-    this.isCustomSmallExNotification,
-    this.isShowLogo,
-    this.logoUrl,
+    this.incomingCallNotification,
     this.defaultAvatar,
-    this.isShowCallID,
     this.ringtonePath,
-    this.backgroundColor,
-    this.backgroundUrl,
-    this.actionColor,
-    this.textColor,
     this.incomingCallNotificationChannelName,
     this.missedCallNotificationChannelName,
     this.isShowFullLockedScreen,
   });
 
-  final NotificationParams? missedCallNotification;
+  final MissedCallNotificationParams? missedCallNotification;
 
-  /// Using custom notification small on some devices clipped out in android.
-  final bool? isCustomSmallExNotification;
-
-  /// Show logo app inside full screen.
-  final bool? isShowLogo;
-
-  /// Logo aoo inside full screen, example: http://... https://... or "assets/abc.png"
-  final String? logoUrl;
+  final IncomingCallNotificationParams? incomingCallNotification;
 
   /// Default avatar for call, example: http://... https://... or "assets/abc.png"
   final String? defaultAvatar;
 
-  /// Show call id app inside full screen.
-  final bool? isShowCallID;
-
   /// File name ringtone, put file into /android/app/src/main/res/raw/ringtone_default.mp3 -> value: `ringtone_default`
   final String? ringtonePath;
-
-  /// Incoming call screen background color.
-  final String? backgroundColor;
-
-  /// Using image background for Incoming call screen. example: http://... https://... or "assets/abc.png"
-  final String? backgroundUrl;
-
-  /// Color used in button/text on notification.
-  final String? actionColor;
-
-  /// Color used for the text in the full screen notification
-  final String? textColor;
 
   /// Notification channel name of incoming call.
   final String? incomingCallNotificationChannelName;
@@ -105,17 +76,10 @@ class AndroidPushConfiguration {
   final bool? isShowFullLockedScreen;
 
   AndroidPushConfiguration copyWith({
-    NotificationParams? missedCallNotification,
-    bool? isCustomSmallExNotification,
-    bool? isShowLogo,
-    String? logoUrl,
+    MissedCallNotificationParams? missedCallNotification,
+    IncomingCallNotificationParams? incomingCallNotification,
     String? defaultAvatar,
-    bool? isShowCallID,
     String? ringtonePath,
-    String? backgroundColor,
-    String? backgroundUrl,
-    String? actionColor,
-    String? textColor,
     String? incomingCallNotificationChannelName,
     String? missedCallNotificationChannelName,
     bool? isShowFullLockedScreen,
@@ -123,17 +87,10 @@ class AndroidPushConfiguration {
     return AndroidPushConfiguration(
       missedCallNotification:
           missedCallNotification ?? this.missedCallNotification,
-      isCustomSmallExNotification:
-          isCustomSmallExNotification ?? this.isCustomSmallExNotification,
-      isShowLogo: isShowLogo ?? this.isShowLogo,
-      logoUrl: logoUrl ?? this.logoUrl,
+      incomingCallNotification:
+          incomingCallNotification ?? this.incomingCallNotification,
       defaultAvatar: defaultAvatar ?? this.defaultAvatar,
-      isShowCallID: isShowCallID ?? this.isShowCallID,
       ringtonePath: ringtonePath ?? this.ringtonePath,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      backgroundUrl: backgroundUrl ?? this.backgroundUrl,
-      actionColor: actionColor ?? this.actionColor,
-      textColor: textColor ?? this.textColor,
       incomingCallNotificationChannelName:
           incomingCallNotificationChannelName ??
               this.incomingCallNotificationChannelName,
@@ -149,16 +106,9 @@ class AndroidPushConfiguration {
 
     return copyWith(
       missedCallNotification: other.missedCallNotification,
-      isCustomSmallExNotification: other.isCustomSmallExNotification,
-      isShowLogo: other.isShowLogo,
-      logoUrl: other.logoUrl,
+      incomingCallNotification: other.incomingCallNotification,
       defaultAvatar: other.defaultAvatar,
-      isShowCallID: other.isShowCallID,
       ringtonePath: other.ringtonePath,
-      backgroundColor: other.backgroundColor,
-      backgroundUrl: other.backgroundUrl,
-      actionColor: other.actionColor,
-      textColor: other.textColor,
       incomingCallNotificationChannelName:
           other.incomingCallNotificationChannelName,
       missedCallNotificationChannelName:
