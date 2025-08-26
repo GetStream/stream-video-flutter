@@ -60,6 +60,12 @@ class AudioRecognitionWebRTC implements AudioRecognition {
       _pc1.onIceCandidate = _pc2.addCandidate;
       _pc2.onIceCandidate = _pc1.addCandidate;
 
+      _pc2.onTrack = (RTCTrackEvent e) {
+        e.streams[0]
+            .getTracks()
+            .forEach((track) => rtc.Helper.setVolume(0, track));
+      };
+
       audioStream.getAudioTracks().forEach((track) {
         _pc1.addTrack(track, audioStream);
       });
