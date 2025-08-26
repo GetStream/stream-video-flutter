@@ -1,4 +1,6 @@
 
+package io.getstream.video.flutter.stream_video_push_notification
+
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
