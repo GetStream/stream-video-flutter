@@ -188,6 +188,8 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 "showMissCallNotification" -> {
                     val data = Data(call.arguments() ?: HashMap())
                     data.from = "notification"
+                    
+                    incomingCallNotificationManager?.clearIncomingNotification(data.toBundle(), false)
                     incomingCallNotificationManager?.showMissCallNotification(data.toBundle())
                     result.success(true)
                 }

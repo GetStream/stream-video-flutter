@@ -1,4 +1,3 @@
-package io.getstream.video.flutter.stream_video_push_notification
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -154,9 +153,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
 
             "${context.packageName}.${IncomingCallConstants.ACTION_CALL_TIMEOUT}" -> {
                 try {
-                    // clear notification and show miss notification
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
-                    incomingCallNotificationManager?.showMissCallNotification(data)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_TIMEOUT, data)
                     removeCall(context, Data.fromBundle(data))
                 } catch (error: Exception) {

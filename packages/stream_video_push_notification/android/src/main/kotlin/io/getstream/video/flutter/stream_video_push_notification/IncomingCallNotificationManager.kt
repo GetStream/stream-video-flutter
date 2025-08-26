@@ -21,6 +21,7 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.RemoteViews
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -39,9 +40,9 @@ class IncomingCallNotificationManager(
 
         const val EXTRA_TIME_START_CALL = "EXTRA_TIME_START_CALL"
 
-        const val NOTIFICATION_CHANNEL_ID_INCOMING = "incoming_call_channel_id"
-        const val NOTIFICATION_CHANNEL_ID_MISSED = "incoming_call_missed_channel_id"
-
+        const val NOTIFICATION_CHANNEL_ID_INCOMING = "io.getstream.video_incoming_call_channel_id"
+        const val NOTIFICATION_CHANNEL_ID_MISSED = "io.getstream.video_missed_call_channel_id"
+        const val MISSED_GROUP_KEY = "io.getstream.video.flutter.missed_calls"
     }
 
     private var dataNotificationPermission: Map<String, Any> = HashMap()
@@ -54,28 +55,11 @@ class IncomingCallNotificationManager(
     private var notificationMissingViews: RemoteViews? = null
     private var notificationMissingSmallViews: RemoteViews? = null
 
-    private var notificationOngoingBuilder: NotificationCompat.Builder? = null
-    private var notificationOngoingViews: RemoteViews? = null
-    private var notificationOngoingSmallViews: RemoteViews? = null
-
-
     private var targetInComingAvatarDefault: SafeTarget? = null
     private var targetInComingAvatarCustom: SafeTarget? = null
 
     private var targetMissingAvatarDefault: SafeTarget? = null
     private var targetMissingAvatarCustom: SafeTarget? = null
-
-    private var targetOnGoingAvatarDefault: SafeTarget? = null
-    private var targetOnGoingAvatarCustom: SafeTarget? = null
-
-
-    @SuppressLint("MissingPermission")
-    private fun createInComingAvatarTargetDefault(notificationId: Int): SafeTarget {
-        return object : SafeTarget(notificationId, onLoaded = { bitmap ->
-            notificationBuilder?.setLargeIcon(bitmap)
-            notificationBuilder?.let { getNotificationManager().notify(notificationId, it.build()) }
-        }) {}
-    }
 
     @SuppressLint("MissingPermission")
     private fun createInComingAvatarTargetCustom(
@@ -93,72 +77,18 @@ class IncomingCallNotificationManager(
     }
 
     @SuppressLint("MissingPermission")
-    private fun createMissingAvatarTargetDefault(notificationId: Int): SafeTarget {
-        return object : SafeTarget(notificationId, onLoaded = { bitmap ->
-            notificationMissingBuilder?.setLargeIcon(bitmap)
-            notificationMissingBuilder?.priority =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    NotificationManager.IMPORTANCE_LOW
-                } else {
-                    Notification.PRIORITY_LOW
-                }
-            notificationMissingBuilder?.let {
-                getNotificationManager().notify(
-                    notificationId, it.build()
-                )
-            }
-        }) {}
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun createMissingAvatarTargetCustom(notificationId: Int): SafeTarget {
-        return object : SafeTarget(notificationId, onLoaded = { bitmap ->
-            notificationMissingViews?.setImageViewBitmap(R.id.ivAvatar, bitmap)
-            notificationMissingViews?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
-            notificationMissingSmallViews?.setImageViewBitmap(R.id.ivAvatar, bitmap)
-            notificationMissingSmallViews?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
-            notificationMissingBuilder?.priority =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    NotificationManager.IMPORTANCE_LOW
-                } else {
-                    Notification.PRIORITY_LOW
-                }
-            notificationMissingBuilder?.let {
-                getNotificationManager().notify(
-                    notificationId, it.build()
-                )
-            }
-        }) {}
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun createOnGoingAvatarTargetDefault(notificationId: Int): SafeTarget {
-        return object : SafeTarget(notificationId, onLoaded = { bitmap ->
-            notificationOngoingBuilder?.setLargeIcon(bitmap)
-            notificationOngoingBuilder?.let {
-                getNotificationManager().notify(
-                    notificationId, it.build()
-                )
-            }
-        }) {}
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun createOnGoingAvatarTargetCustom(
+    private fun createMissingAvatarTargetCustom(
         notificationId: Int,
-        isCallStyle: Boolean = false
+        builder: NotificationCompat.Builder,
+        bigViews: RemoteViews?,
+        smallViews: RemoteViews?
     ): SafeTarget {
         return object : SafeTarget(notificationId, onLoaded = { bitmap ->
-            notificationOngoingViews?.setImageViewBitmap(R.id.ivAvatar, bitmap)
-            notificationOngoingViews?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
-            notificationOngoingSmallViews?.setImageViewBitmap(R.id.ivAvatar, bitmap)
-            notificationOngoingSmallViews?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
-            if (isCallStyle) notificationOngoingBuilder?.setLargeIcon(bitmap)
-            notificationOngoingBuilder?.let {
-                getNotificationManager().notify(
-                    notificationId, it.build()
-                )
-            }
+            bigViews?.setImageViewBitmap(R.id.ivAvatar, bitmap)
+            bigViews?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
+            smallViews?.setImageViewBitmap(R.id.ivAvatar, bitmap)
+            smallViews?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
+            getNotificationManager().notify(notificationId, builder.build())
         }) {}
     }
 
@@ -169,15 +99,17 @@ class IncomingCallNotificationManager(
         val notificationId =
             data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call").hashCode()
 
-        createNotificationChanel(data)
+        ensureNotificationChannelsCreated(data)
 
         notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder?.setChannelId(NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder?.setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBuilder?.setCategory(NotificationCompat.CATEGORY_CALL)
             notificationBuilder?.priority = NotificationCompat.PRIORITY_MAX
         }
+
         notificationBuilder?.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         notificationBuilder?.setOngoing(true)
         notificationBuilder?.setAutoCancel(false)
@@ -193,9 +125,10 @@ class IncomingCallNotificationManager(
             getActivityPendingIntent(notificationId, data), true
         )
         notificationBuilder?.setContentIntent(getActivityPendingIntent(notificationId, data))
-        notificationBuilder?.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
+
         val typeCall = data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, -1)
         var smallIcon = context.applicationInfo.icon
+
         if (typeCall > 0) {
             smallIcon = R.drawable.ic_video
         } else {
@@ -203,16 +136,17 @@ class IncomingCallNotificationManager(
                 smallIcon = R.drawable.ic_accept
             }
         }
+
         notificationBuilder?.setSmallIcon(smallIcon)
         notificationBuilder?.setChannelId(NOTIFICATION_CHANNEL_ID_INCOMING)
         notificationBuilder?.priority = NotificationCompat.PRIORITY_MAX
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-
             val caller = data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
             val person = Person.Builder().setName(caller).setImportant(
                 data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT, true)
             ).setBot(data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_BOT, false)).build()
+
             notificationBuilder?.setStyle(
                 NotificationCompat.CallStyle.forIncomingCall(
                     person,
@@ -220,6 +154,7 @@ class IncomingCallNotificationManager(
                     getAcceptPendingIntent(notificationId, data),
                 ).setIsVideo(typeCall > 0)
             )
+
             val showCallHandle =
                 data.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
             if (showCallHandle) {
@@ -353,21 +288,27 @@ class IncomingCallNotificationManager(
 
     @SuppressLint("MissingPermission")
     fun showMissCallNotification(data: Bundle) {
-
         val isMissedCallShow =
             data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW, true)
         if (!isMissedCallShow) return
 
+        // Use explicit integer ID if provided; otherwise derive a stable hash from call ID
+        val hasExplicitMissedId = data.containsKey(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID)
+        val missedNotificationId = if (hasExplicitMissedId) {
+            data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID).hashCode()
+        } else {
+            val fallbackId = data.getString(
+                IncomingCallConstants.EXTRA_CALL_ID,
+                "stream_video_call"
+            )
+            ("missing_$fallbackId").hashCode()
+        }
 
-        val missingId = data.getString(
-            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID,
-            data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call")
-        )
-        val missedNotificationId = ("missing_$missingId").hashCode()
+        ensureNotificationChannelsCreated(data);
 
-        createNotificationChanel(data);
         val missedCallSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val typeCall = data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, -1)
+
         var smallIcon = context.applicationInfo.icon
         if (typeCall > 0) {
             smallIcon = R.drawable.ic_video_missed
@@ -376,39 +317,40 @@ class IncomingCallNotificationManager(
                 smallIcon = R.drawable.ic_call_missed
             }
         }
-        notificationMissingBuilder =
-            NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_MISSED)
-        notificationMissingBuilder?.setChannelId(NOTIFICATION_CHANNEL_ID_MISSED)
+
+        val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_MISSED)
+        builder.setChannelId(NOTIFICATION_CHANNEL_ID_MISSED)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                notificationMissingBuilder?.setCategory(Notification.CATEGORY_MISSED_CALL)
+                builder.setCategory(Notification.CATEGORY_MISSED_CALL)
             }
         }
-        notificationMissingBuilder?.setWhen(System.currentTimeMillis())
+
+        builder.setWhen(System.currentTimeMillis())
+
         val textMissedCall = data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE, "")
-        notificationMissingBuilder?.setSubText(
+        builder.setSubText(
             if (TextUtils.isEmpty(textMissedCall)) context.getString(
                 R.string.text_missed_call
             ) else textMissedCall
         )
-        notificationMissingBuilder?.setSmallIcon(smallIcon)
-        notificationMissingBuilder?.setOnlyAlertOnce(true)
 
-        val count = data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT, 1)
-        if (count > 1) {
-            notificationMissingBuilder?.setNumber(count)
-        }
+        builder.setSmallIcon(smallIcon)
+        builder.setOnlyAlertOnce(true)
 
         notificationMissingViews =
             RemoteViews(context.packageName, R.layout.layout_custom_miss_notification)
         notificationMissingSmallViews =
             RemoteViews(context.packageName, R.layout.layout_custom_miss_small_notification)
+            
         notificationMissingViews?.setTextViewText(
             R.id.tvCallerName, data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         )
         notificationMissingSmallViews?.setTextViewText(
             R.id.tvCallerName, data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         )
+        
         notificationMissingSmallViews?.setTextViewText(
             R.id.tvTime, getSystemFormattedTime(context)
         )
@@ -422,9 +364,11 @@ class IncomingCallNotificationManager(
                 R.id.tvNumber, data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
             )
         }
+
         notificationMissingViews?.setOnClickPendingIntent(
             R.id.llCallback, getCallbackPendingIntent(missedNotificationId, data)
         )
+
         val isShowCallback = data.getBoolean(
             IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW, true
         )
@@ -458,8 +402,13 @@ class IncomingCallNotificationManager(
             val headers =
                 data.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
 
-            if (targetMissingAvatarCustom == null) targetMissingAvatarCustom =
-                createMissingAvatarTargetCustom(missedNotificationId)
+            targetMissingAvatarCustom =
+                createMissingAvatarTargetCustom(
+                    missedNotificationId,
+                    builder,
+                    notificationMissingViews,
+                    notificationMissingSmallViews
+                )
             ImageLoaderProvider.loadImage(
                 context,
                 avatarUrl,
@@ -467,23 +416,28 @@ class IncomingCallNotificationManager(
                 targetMissingAvatarCustom
             )
         }
-        notificationMissingBuilder?.setStyle(NotificationCompat.DecoratedCustomViewStyle())
-        notificationMissingBuilder?.setCustomContentView(notificationMissingSmallViews)
-        notificationMissingBuilder?.setCustomBigContentView(notificationMissingViews)
-        
-        notificationMissingBuilder?.priority = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            NotificationManager.IMPORTANCE_HIGH
-        } else {
-            Notification.PRIORITY_HIGH
-        }
-        notificationMissingBuilder?.setSound(missedCallSound)
-        notificationMissingBuilder?.setContentIntent(
+
+        // Ensure collapsed (system) view also shows content when the custom view isn't used
+        val callerName = data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
+        builder.setContentTitle(callerName)
+        builder.setContentText(
+            if (TextUtils.isEmpty(textMissedCall)) context.getString(R.string.text_missed_call) else textMissedCall
+        )
+        builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+        builder.setCustomContentView(notificationMissingSmallViews)
+        builder.setCustomBigContentView(notificationMissingViews)
+        builder.setGroup(MISSED_GROUP_KEY)
+
+        builder.priority = NotificationCompat.PRIORITY_HIGH
+
+        builder.setSound(missedCallSound)
+        builder.setContentIntent(
             getAppPendingIntent(
                 missedNotificationId, data
             )
         )
        
-        val notification = notificationMissingBuilder?.build()
+        val notification = builder.build()
         if (notification != null) {
             getNotificationManager().notify(missedNotificationId, notification)
         }
@@ -493,8 +447,10 @@ class IncomingCallNotificationManager(
         incomingCallSoundPlayerManager?.stop()
 
         context.sendBroadcast(IncomingCallActivity.getIntentEnded(context, isAccepted))
+
         val notificationId =
             data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call").hashCode()
+
         getNotificationManager().cancel(notificationId)
         targetInComingAvatarDefault?.let {
             targetInComingAvatarDefault?.isCancelled = true
@@ -507,13 +463,20 @@ class IncomingCallNotificationManager(
     }
 
     fun clearMissCallNotification(data: Bundle) {
-        val missingId = data.getString(
-            IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID,
-            data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call")
-        )
-        val missedNotificationId = ("missing_$missingId").hashCode()
+        // Support both int and string ID styles
+        val hasExplicitMissedId = data.containsKey(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID)
+        val missedNotificationId = if (hasExplicitMissedId) {
+            data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID)
+        } else {
+            val missingId = data.getString(
+                IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID,
+                data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call")
+            )
+            ("missing_$missingId").hashCode()
+        }
 
         getNotificationManager().cancel(missedNotificationId)
+
         targetMissingAvatarDefault?.let {
             targetMissingAvatarDefault?.isCancelled = true
             targetMissingAvatarDefault = null
@@ -530,16 +493,13 @@ class IncomingCallNotificationManager(
         return areNotificationsEnabled() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && channel != null && channel.importance > NotificationManagerCompat.IMPORTANCE_NONE) || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
     }
 
-    fun createNotificationChanel(data: Bundle) {
+    fun ensureNotificationChannelsCreated(data: Bundle) {
         val incomingCallChannelName = data.getString(
             IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME, "Incoming Call"
         )
         val missedCallChannelName = data.getString(
             IncomingCallConstants.EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME, "Missed Call"
         )
-        val ongoingCallChannelName = data.getString(
-            IncomingCallConstants.EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME, "Ongoing Call"
-        );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getNotificationManager().apply {
@@ -560,23 +520,27 @@ class IncomingCallNotificationManager(
                         setSound(null, null)
                     }
                 }
-                channelCall.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 
+                channelCall.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 channelCall.importance = NotificationManager.IMPORTANCE_HIGH
 
                 createNotificationChannel(channelCall)
 
-                val channelMissedCall = NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID_MISSED,
-                    missedCallChannelName,
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    description = ""
-                    vibrationPattern = longArrayOf(0, 1000)
-                    lightColor = Color.RED
-                    enableLights(true)
-                    enableVibration(true)
+                var channelMissedCall = getNotificationChannel(NOTIFICATION_CHANNEL_ID_MISSED)
+                if (channelMissedCall == null) {
+                    channelMissedCall = NotificationChannel(
+                        NOTIFICATION_CHANNEL_ID_MISSED,
+                        missedCallChannelName,
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = ""
+                        vibrationPattern = longArrayOf(0, 1000)
+                        lightColor = Color.RED
+                        enableLights(true)
+                        enableVibration(true)
+                    }
                 }
+
                 channelMissedCall.importance = NotificationManager.IMPORTANCE_HIGH
                 createNotificationChannel(channelMissedCall)
             }
@@ -625,7 +589,6 @@ class IncomingCallNotificationManager(
         )
     }
 
-
     private fun getFlagPendingIntent(): Int {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -633,7 +596,6 @@ class IncomingCallNotificationManager(
             PendingIntent.FLAG_UPDATE_CURRENT
         }
     }
-
 
     private fun getNotificationManager(): NotificationManagerCompat {
         return NotificationManagerCompat.from(context)
