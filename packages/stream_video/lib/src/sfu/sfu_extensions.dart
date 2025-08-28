@@ -481,6 +481,9 @@ extension JoinRequestX on sfu_events.JoinRequest {
           preferredPublishOptions.map((option) => option.toJson()).toList(),
       'preferred_subscribe_options':
           preferredSubscribeOptions.map((option) => option.toJson()).toList(),
+      'source': source.toString(),
+      if (capabilities.isNotEmpty)
+        'capabilities': capabilities.map((c) => c.toString()).toList(),
     };
   }
 }

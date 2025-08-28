@@ -246,7 +246,9 @@ class CallParticipantState
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, audioLevels: $audioLevels, isSpeaking: $isSpeaking, '
         'isDominantSpeaker: $isDominantSpeaker, isPinned: $isPinned, '
-        'reaction: $reaction, viewportVisibility: $viewportVisibility}';
+        'reaction: $reaction, viewportVisibility: $viewportVisibility, '
+        'screenShareViewportVisibility: $screenShareViewportVisibility, '
+        'participantSource: $participantSource}';
   }
 
   @override
