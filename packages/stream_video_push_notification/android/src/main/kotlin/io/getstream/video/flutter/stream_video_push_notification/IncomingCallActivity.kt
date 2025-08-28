@@ -161,9 +161,9 @@ class IncomingCallActivity : Activity() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
         if (data == null) finish()
 
-        val isShowFullLockedScreen =
+        val showFullScreenOnLockScreen =
             data?.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN, true)
-        if (isShowFullLockedScreen == true) {
+        if (showFullScreenOnLockScreen == true) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 setShowWhenLocked(true)
             } else {

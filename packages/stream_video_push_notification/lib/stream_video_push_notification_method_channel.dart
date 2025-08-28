@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/src/entities/call_event.dart';
+import 'package:stream_video_push_notification/src/stream_video_call_event.dart';
 import 'package:stream_video_push_notification/src/stream_video_push_params.dart';
 import 'stream_video_push_notification_platform_interface.dart';
 
@@ -14,12 +14,6 @@ class MethodChannelStreamVideoPushNotification
   final methodChannel = const MethodChannel('stream_video_push_notification');
   final eventChannel =
       const EventChannel('stream_video_push_notification_events');
-
-  MethodChannelStreamVideoPushNotification() {
-    methodChannel.setMethodCallHandler((call) async {
-      // TODO: remove?
-    });
-  }
 
   @override
   Future<void> init(
@@ -38,10 +32,10 @@ class MethodChannelStreamVideoPushNotification
   }
 
   @override
-  Stream<CallKitEvent?> get onEvent =>
-      eventChannel.receiveBroadcastStream().map(_receiveCallEvent);
+  Stream<RingingEvent?> get onEvent =>
+      eventChannel.receiveBroadcastStream().map(_receiveRingingEvent);
 
-  /// Show Callkit Incoming.
+  /// Show Incoming ringing call.
   /// On iOS, using Callkit. On Android, using a custom UI.
   @override
   Future showIncomingCall(StreamVideoPushParams params) async {
@@ -144,13 +138,13 @@ class MethodChannelStreamVideoPushNotification
     return await methodChannel.invokeMethod("getDevicePushTokenVoIP");
   }
 
-  /// Silence CallKit events
+  /// Silence Ringing events
   @override
   Future silenceEvents() async {
     return await methodChannel.invokeMethod("silenceEvents", true);
   }
 
-  /// Unsilence CallKit events
+  /// Unsilence Ringing events
   @override
   Future unsilenceEvents() async {
     return await methodChannel.invokeMethod("silenceEvents", false);
@@ -193,7 +187,7 @@ class MethodChannelStreamVideoPushNotification
     );
   }
 
-  CallKitEvent? _receiveCallEvent(dynamic data) {
+  RingingEvent? _receiveRingingEvent(dynamic data) {
     if (data is Map) {
       final event = Event.values.firstWhere((e) => e.name == data['event']);
       final body = Map<String, dynamic>.from(data['body']);

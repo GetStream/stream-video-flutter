@@ -115,7 +115,7 @@ class _StreamDogFoodingAppContentState
     if (!locator.isRegistered<StreamVideo>()) return;
 
     // Observe call kit events.
-    _observeCallKitEvents();
+    _observeRingingEvents();
     // Observes deep links.
     _observeDeepLinks();
     // Observe FCM messages.
@@ -166,7 +166,7 @@ class _StreamDogFoodingAppContentState
     }
   }
 
-  void _observeCallKitEvents() {
+  void _observeRingingEvents() {
     final streamVideo = locator.get<StreamVideo>();
 
     // On mobile we depend on call kit notifications.
@@ -174,7 +174,7 @@ class _StreamDogFoodingAppContentState
     // websocket which can receive a call when the app is open.
     if (CurrentPlatform.isMobile) {
       _compositeSubscription.add(
-        streamVideo.observeCoreCallKitEvents(
+        streamVideo.observeCoreRingingEvents(
           onCallAccepted: (callToJoin) {
             // Navigate to the call screen.
             final extra = (

@@ -53,7 +53,7 @@ class AndroidPushConfiguration {
     this.ringtonePath,
     this.incomingCallNotificationChannelName,
     this.missedCallNotificationChannelName,
-    this.isShowFullLockedScreen,
+    this.showFullScreenOnLockScreen,
   });
 
   final MissedCallNotificationParams? missedCallNotification;
@@ -73,7 +73,7 @@ class AndroidPushConfiguration {
   final String? missedCallNotificationChannelName;
 
   /// Show full locked screen.
-  final bool? isShowFullLockedScreen;
+  final bool? showFullScreenOnLockScreen;
 
   AndroidPushConfiguration copyWith({
     MissedCallNotificationParams? missedCallNotification,
@@ -82,7 +82,7 @@ class AndroidPushConfiguration {
     String? ringtonePath,
     String? incomingCallNotificationChannelName,
     String? missedCallNotificationChannelName,
-    bool? isShowFullLockedScreen,
+    bool? showFullScreenOnLockScreen,
   }) {
     return AndroidPushConfiguration(
       missedCallNotification:
@@ -96,8 +96,8 @@ class AndroidPushConfiguration {
               this.incomingCallNotificationChannelName,
       missedCallNotificationChannelName: missedCallNotificationChannelName ??
           this.missedCallNotificationChannelName,
-      isShowFullLockedScreen:
-          isShowFullLockedScreen ?? this.isShowFullLockedScreen,
+      showFullScreenOnLockScreen:
+          showFullScreenOnLockScreen ?? this.showFullScreenOnLockScreen,
     );
   }
 
@@ -113,7 +113,7 @@ class AndroidPushConfiguration {
           other.incomingCallNotificationChannelName,
       missedCallNotificationChannelName:
           other.missedCallNotificationChannelName,
-      isShowFullLockedScreen: other.isShowFullLockedScreen,
+      showFullScreenOnLockScreen: other.showFullScreenOnLockScreen,
     );
   }
 

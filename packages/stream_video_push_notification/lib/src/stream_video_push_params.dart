@@ -111,7 +111,7 @@ class AndroidParams {
     this.ringtonePath,
     this.incomingCallNotificationChannelName,
     this.missedCallNotificationChannelName,
-    this.isShowFullLockedScreen,
+    this.showFullScreenOnLockScreen,
     this.isImportant,
     this.isBot,
     this.missedCallNotification,
@@ -137,7 +137,7 @@ class AndroidParams {
   final String? missedCallNotificationChannelName;
 
   /// Show full locked screen.
-  final bool? isShowFullLockedScreen;
+  final bool? showFullScreenOnLockScreen;
 
   /// Caller is important to the user of this device with regards to how frequently they interact.
   /// https://developer.android.com/reference/androidx/core/app/Person#isImportant()
@@ -157,7 +157,7 @@ class AndroidParams {
             configuration.incomingCallNotificationChannelName,
         missedCallNotificationChannelName:
             configuration.missedCallNotificationChannelName,
-        isShowFullLockedScreen: configuration.isShowFullLockedScreen,
+        showFullScreenOnLockScreen: configuration.showFullScreenOnLockScreen,
         missedCallNotification: configuration.missedCallNotification,
         incomingCallNotification: configuration.incomingCallNotification,
       );
@@ -168,7 +168,7 @@ class AndroidParams {
     String? ringtonePath,
     String? incomingCallNotificationChannelName,
     String? missedCallNotificationChannelName,
-    bool? isShowFullLockedScreen,
+    bool? showFullScreenOnLockScreen,
     bool? isImportant,
     bool? isBot,
     IncomingCallNotificationParams? incomingCallNotification,
@@ -183,8 +183,8 @@ class AndroidParams {
               this.incomingCallNotificationChannelName,
       missedCallNotificationChannelName: missedCallNotificationChannelName ??
           this.missedCallNotificationChannelName,
-      isShowFullLockedScreen:
-          isShowFullLockedScreen ?? this.isShowFullLockedScreen,
+      showFullScreenOnLockScreen:
+          showFullScreenOnLockScreen ?? this.showFullScreenOnLockScreen,
       isImportant: isImportant ?? this.isImportant,
       isBot: isBot ?? this.isBot,
       incomingCallNotification:
@@ -205,7 +205,7 @@ class AndroidParams {
           other.incomingCallNotificationChannelName,
       missedCallNotificationChannelName:
           other.missedCallNotificationChannelName,
-      isShowFullLockedScreen: other.isShowFullLockedScreen,
+      showFullScreenOnLockScreen: other.showFullScreenOnLockScreen,
       isImportant: other.isImportant,
       isBot: other.isBot,
       incomingCallNotification: other.incomingCallNotification,
@@ -366,7 +366,7 @@ class MissedCallNotificationParams {
     this.showNotification,
     this.subtitle,
     this.callbackText,
-    this.isShowCallback,
+    this.showCallbackButton,
     this.count,
   });
 
@@ -374,7 +374,7 @@ class MissedCallNotificationParams {
   final bool? showNotification;
   final String? subtitle;
   final String? callbackText;
-  final bool? isShowCallback;
+  final bool? showCallbackButton;
   final int? count;
 
   factory MissedCallNotificationParams.fromJson(Map<String, dynamic> json) =>

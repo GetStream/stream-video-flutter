@@ -11,7 +11,7 @@ import 'package:stream_video_push_notification/stream_video_push_notification_pl
 part 'stream_video_push_provider.dart';
 
 const _idToken = 1;
-const _idCallKit = 2;
+const _idRinging = 2;
 const _idCallEnded = 3;
 const _idCallAccepted = 4;
 const _idCallRejected = 6;
@@ -145,7 +145,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               await endCallByCid(event.callCid.toString());
             }
 
-            // If the call was accepted on this device, end the CallKit call silently
+            // If the call was accepted on this device, end the Ringing call silently
             // (useful if the call was accepted via the app instead of the CallKit UI)
             else {
               _logger.v(() =>
@@ -170,7 +170,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     });
 
     _subscriptions.add(
-      _idCallKit,
+      _idRinging,
       onCallEvent.listen(
         (event) {
           if (event is ActionCallToggleMute) {
@@ -288,10 +288,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
-  Stream<CallKitEvent> get onCallEvent {
-    return StreamCallKit()
+  Stream<RingingEvent> get onCallEvent {
+    return RingingEventBroadcaster()
         .onEvent
-        .doOnData((event) => _logger.v(() => '[onCallKitEvent] event: $event'));
+        .doOnData((event) => _logger.v(() => '[onCallEvent] event: $event'));
   }
 
   @override
@@ -482,7 +482,7 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
       incomingCallNotificationChannelName: "Incoming Call",
       missedCallNotification: MissedCallNotificationParams(
         showNotification: true,
-        isShowCallback: true,
+        showCallbackButton: true,
         subtitle: 'Missed call',
         callbackText: 'Call back',
       ),
@@ -519,26 +519,27 @@ CallData _callDataFromJson(Map<String, dynamic> json) {
 }
 
 /// Wrapper class to support multiple subscriptions to the
-/// [FlutterCallkitIncoming.onEvent] stream.
-final class StreamCallKit {
-  factory StreamCallKit() => _singleton ??= StreamCallKit._();
+/// [StreamVideoPushNotificationPlatform.onEvent] stream.
+final class RingingEventBroadcaster {
+  factory RingingEventBroadcaster() =>
+      _singleton ??= RingingEventBroadcaster._();
 
-  StreamCallKit._();
+  RingingEventBroadcaster._();
 
-  static StreamCallKit? _singleton;
+  static RingingEventBroadcaster? _singleton;
 
-  StreamController<CallKitEvent>? _controller;
+  StreamController<RingingEvent>? _controller;
 
-  /// Returns a Stream of [CallKitEvent].
-  Stream<CallKitEvent> get onEvent {
-    _controller ??= StreamController<CallKitEvent>.broadcast(
+  /// Returns a Stream of [RingingEvent].
+  Stream<RingingEvent> get onEvent {
+    _controller ??= StreamController<RingingEvent>.broadcast(
       onListen: _startListenEvent,
       onCancel: _stopListenEvent,
     );
     return _controller!.stream;
   }
 
-  StreamSubscription<CallKitEvent?>? _eventSubscription;
+  StreamSubscription<RingingEvent?>? _eventSubscription;
 
   Future<void> _startListenEvent() async {
     _eventSubscription ??=

@@ -92,8 +92,8 @@ data class Data(val args: Map<String, Any?>) {
     @JsonProperty("missedNotificationCallbackText")
     var missedNotificationCallbackText: String? = null
 
-    @JsonProperty("isShowCallback")
-    var isShowCallback: Boolean = true
+    @JsonProperty("showCallbackButton")
+    var showCallbackButton: Boolean = true
 
     @JsonProperty("isAccepted")
     var isAccepted: Boolean = false
@@ -122,8 +122,8 @@ data class Data(val args: Map<String, Any?>) {
     @JsonProperty("isMuted")
     var isMuted: Boolean = (args["isMuted"] as? Boolean) ?: false
 
-    @JsonProperty("isShowFullLockedScreen")
-    var isShowFullLockedScreen: Boolean = true
+    @JsonProperty("showFullScreenOnLockScreen")
+    var showFullScreenOnLockScreen: Boolean = true
 
     @JsonProperty("isImportant")
     var isImportant: Boolean = false
@@ -140,7 +140,7 @@ data class Data(val args: Map<String, Any?>) {
         incomingCallNotificationChannelName =
             android["incomingCallNotificationChannelName"] as? String
         missedCallNotificationChannelName = android["missedCallNotificationChannelName"] as? String
-        isShowFullLockedScreen = android["isShowFullLockedScreen"] as? Boolean ?: true
+        showFullScreenOnLockScreen = android["showFullScreenOnLockScreen"] as? Boolean ?: true
         isImportant = android["isImportant"] as? Boolean ?: false
         isBot = android["isBot"] as? Boolean ?: false
 
@@ -152,7 +152,7 @@ data class Data(val args: Map<String, Any?>) {
             missedNotificationSubtitle = missedNotification["subtitle"] as? String?
             missedNotificationCount = missedNotification["count"] as? Int? ?: 1
             missedNotificationCallbackText = missedNotification["callbackText"] as? String?
-            isShowCallback = missedNotification["isShowCallback"] as? Boolean ?: true
+            showCallbackButton = missedNotification["showCallbackButton"] as? Boolean ?: true
             isShowMissedCallNotification =
                 missedNotification["showNotification"] as? Boolean ?: true
         } 
@@ -215,7 +215,7 @@ data class Data(val args: Map<String, Any?>) {
         )
         bundle.putBoolean(
             IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW,
-            isShowCallback
+            showCallbackButton
         )
         bundle.putString(
             IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT,
@@ -258,7 +258,7 @@ data class Data(val args: Map<String, Any?>) {
         )
         bundle.putBoolean(
             IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN,
-            isShowFullLockedScreen
+            showFullScreenOnLockScreen
         )
         bundle.putBoolean(
             IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT,
@@ -304,7 +304,7 @@ data class Data(val args: Map<String, Any?>) {
                 bundle.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT, 1)
             data.missedNotificationSubtitle =
                 bundle.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE, "")
-            data.isShowCallback =
+            data.showCallbackButton =
                 bundle.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW, false)
             data.missedNotificationCallbackText =
                 bundle.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT, "")
@@ -348,7 +348,7 @@ data class Data(val args: Map<String, Any?>) {
             data.missedCallNotificationChannelName = bundle.getString(
                 IncomingCallConstants.EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME
             )
-            data.isShowFullLockedScreen = bundle.getBoolean(
+            data.showFullScreenOnLockScreen = bundle.getBoolean(
                 IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN,
                 true
             )

@@ -47,7 +47,7 @@ AndroidParams _$AndroidParamsFromJson(Map<String, dynamic> json) =>
           json['incomingCallNotificationChannelName'] as String?,
       missedCallNotificationChannelName:
           json['missedCallNotificationChannelName'] as String?,
-      isShowFullLockedScreen: json['isShowFullLockedScreen'] as bool?,
+      showFullScreenOnLockScreen: json['showFullScreenOnLockScreen'] as bool?,
       isImportant: json['isImportant'] as bool?,
       isBot: json['isBot'] as bool?,
       missedCallNotification: json['missedCallNotification'] == null
@@ -71,7 +71,7 @@ Map<String, dynamic> _$AndroidParamsToJson(AndroidParams instance) =>
           instance.incomingCallNotificationChannelName,
       'missedCallNotificationChannelName':
           instance.missedCallNotificationChannelName,
-      'isShowFullLockedScreen': instance.isShowFullLockedScreen,
+      'showFullScreenOnLockScreen': instance.showFullScreenOnLockScreen,
       'isImportant': instance.isImportant,
       'isBot': instance.isBot,
     };
@@ -126,7 +126,7 @@ MissedCallNotificationParams _$MissedCallNotificationParamsFromJson(
       showNotification: json['showNotification'] as bool?,
       subtitle: json['subtitle'] as String?,
       callbackText: json['callbackText'] as String?,
-      isShowCallback: json['isShowCallback'] as bool?,
+      showCallbackButton: json['showCallbackButton'] as bool?,
       count: (json['count'] as num?)?.toInt(),
     );
 
@@ -137,7 +137,7 @@ Map<String, dynamic> _$MissedCallNotificationParamsToJson(
       'showNotification': instance.showNotification,
       'subtitle': instance.subtitle,
       'callbackText': instance.callbackText,
-      'isShowCallback': instance.isShowCallback,
+      'showCallbackButton': instance.showCallbackButton,
       'count': instance.count,
     };
 

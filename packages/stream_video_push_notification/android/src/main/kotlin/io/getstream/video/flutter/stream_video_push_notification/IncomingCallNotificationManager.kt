@@ -369,11 +369,11 @@ class IncomingCallNotificationManager(
             R.id.llCallback, getCallbackPendingIntent(missedNotificationId, data)
         )
 
-        val isShowCallback = data.getBoolean(
+        val showCallbackButton = data.getBoolean(
             IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW, true
         )
         notificationMissingViews?.setViewVisibility(
-            R.id.llCallback, if (isShowCallback) View.VISIBLE else View.GONE
+            R.id.llCallback, if (showCallbackButton) View.VISIBLE else View.GONE
         )
         val textCallback =
             data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT, "")

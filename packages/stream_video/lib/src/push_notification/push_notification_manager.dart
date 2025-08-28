@@ -17,8 +17,8 @@ typedef PNManagerProvider = PushNotificationManager Function(
 
 /// Interface for managing push notifications related to call events.
 abstract class PushNotificationManager {
-  /// Stream of [CallKitEvent] for call-related events.
-  Stream<CallKitEvent> get onCallEvent;
+  /// Stream of [RingingEvent] for call-related events.
+  Stream<RingingEvent> get onCallEvent;
 
   /// Registers the device for push notifications.
   void registerDevice();
@@ -121,7 +121,7 @@ abstract class PushNotificationManager {
 }
 
 extension NotificationManagerExtension on PushNotificationManager {
-  StreamSubscription<T> on<T extends CallKitEvent>(
+  StreamSubscription<T> on<T extends RingingEvent>(
     void Function(T event)? onEvent,
   ) {
     return onCallEvent.whereType<T>().listen(onEvent);

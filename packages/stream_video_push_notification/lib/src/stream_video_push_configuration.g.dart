@@ -44,7 +44,7 @@ AndroidPushConfiguration _$AndroidPushConfigurationFromJson(
           json['incomingCallNotificationChannelName'] as String?,
       missedCallNotificationChannelName:
           json['missedCallNotificationChannelName'] as String?,
-      isShowFullLockedScreen: json['isShowFullLockedScreen'] as bool?,
+      showFullScreenOnLockScreen: json['showFullScreenOnLockScreen'] as bool?,
     );
 
 Map<String, dynamic> _$AndroidPushConfigurationToJson(
@@ -58,7 +58,7 @@ Map<String, dynamic> _$AndroidPushConfigurationToJson(
           instance.incomingCallNotificationChannelName,
       'missedCallNotificationChannelName':
           instance.missedCallNotificationChannelName,
-      'isShowFullLockedScreen': instance.isShowFullLockedScreen,
+      'showFullScreenOnLockScreen': instance.showFullScreenOnLockScreen,
     };
 
 IOSPushConfiguration _$IOSPushConfigurationFromJson(

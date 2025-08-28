@@ -38,12 +38,12 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
         'ensureFullScreenIntentPermission() has not been implemented.');
   }
 
-  /// Listen to event callback from CallKit.
-  Stream<CallKitEvent?> get onEvent {
+  /// Listen to event callback from Ringing flow.
+  Stream<RingingEvent?> get onEvent {
     throw UnimplementedError('onEvent has not been implemented.');
   }
 
-  /// Show Callkit Incoming.
+  /// Show Incoming ringing call.
   /// On iOS, using Callkit. On Android, using a custom UI.
   Future showIncomingCall(StreamVideoPushParams params) {
     throw UnimplementedError('showIncomingCall() has not been implemented.');

@@ -156,7 +156,7 @@ public class Call: NSObject {
         self.duration = 30000
         self.isAccepted = false
         self.extra = [:]
-        self.iconName = "CallKitLogo"
+        self.iconName = "AppLogo"
         self.handleType = ""
         self.supportsVideo = true
         self.maximumCallGroups = 2
@@ -192,7 +192,7 @@ public class Call: NSObject {
         self.extra = args["extra"] as? NSDictionary ?? [:]
 
         if let ios = args["ios"] as? [String: Any] {
-            self.iconName = ios["iconName"] as? String ?? "CallKitLogo"
+            self.iconName = ios["iconName"] as? String ?? "AppLogo"
             self.handleType = ios["handleType"] as? String ?? ""
             self.useComplexHandle = ios["useComplexHandle"] as? Bool ?? false
             self.supportsVideo = ios["supportsVideo"] as? Bool ?? true
@@ -212,7 +212,7 @@ public class Call: NSObject {
             self.audioSessionPreferredIOBufferDuration =
                 ios["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
         } else {
-            self.iconName = args["iconName"] as? String ?? "CallKitLogo"
+            self.iconName = args["iconName"] as? String ?? "AppLogo"
             self.handleType = args["handleType"] as? String ?? ""
             self.useComplexHandle = args["useComplexHandle"] as? Bool ?? false
             self.supportsVideo = args["supportsVideo"] as? Bool ?? true

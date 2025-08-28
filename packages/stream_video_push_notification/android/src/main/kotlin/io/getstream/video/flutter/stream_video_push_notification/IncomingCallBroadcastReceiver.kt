@@ -195,7 +195,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
             "count" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT),
             "subtitle" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE),
             "callbackText" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT),
-            "isShowCallback" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW),
+            "showCallbackButton" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW),
         )
 
         val incomingCallNotification = mapOf(
