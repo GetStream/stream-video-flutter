@@ -13,6 +13,7 @@ import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_model_mapper_extensions.dart';
 import '../models/sfu_participant.dart';
+import '../models/sfu_participant_source.dart';
 import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
 import '../models/sfu_track_type.dart';
@@ -212,7 +213,6 @@ extension on sfu_models.ParticipantCount {
   }
 }
 
-/// TODO
 extension SfuParticipantExtension on sfu_models.Participant {
   SfuParticipant toDomain() {
     return SfuParticipant(
@@ -233,7 +233,7 @@ extension SfuParticipantExtension on sfu_models.Participant {
       isDominantSpeaker: isDominantSpeaker,
       audioLevel: audioLevel,
       roles: roles,
-      //TODO custom: custom.toDomain(),
+      participantSource: source.toDomain(),
     );
   }
 }
@@ -251,6 +251,27 @@ extension SfuConnectionQualityExtension on sfu_models.ConnectionQuality {
         return SfuConnectionQuality.unspecified;
       default:
         return SfuConnectionQuality.unspecified;
+    }
+  }
+}
+
+extension SfuParticipantSourceExtension on sfu_models.ParticipantSource {
+  SfuParticipantSource toDomain() {
+    switch (this) {
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_RTMP:
+        return SfuParticipantSource.rtmp;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WHIP:
+        return SfuParticipantSource.whip;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_SIP:
+        return SfuParticipantSource.sip;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_RTSP:
+        return SfuParticipantSource.rtsp;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_SRT:
+        return SfuParticipantSource.srt;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED:
+        return SfuParticipantSource.webrtc;
+      default:
+        return SfuParticipantSource.webrtc;
     }
   }
 }

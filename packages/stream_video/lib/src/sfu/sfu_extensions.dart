@@ -60,6 +60,7 @@ extension SfuParticipantX on SfuParticipant {
       isSpeaking: isSpeaking,
       audioLevel: audioLevel,
       isDominantSpeaker: isDominantSpeaker,
+      participantSource: participantSource,
     );
   }
 }

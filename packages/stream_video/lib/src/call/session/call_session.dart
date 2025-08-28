@@ -331,6 +331,8 @@ class CallSession extends Disposable {
         reconnectDetails: reconnectDetails,
         preferredPublishOptions: preferredPublishOptions,
         preferredSubscribeOptions: preferredSubscribeOptions,
+        source:
+            sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
       );
 
       _tracer.trace('joinRequest', joinRequest.toJson());

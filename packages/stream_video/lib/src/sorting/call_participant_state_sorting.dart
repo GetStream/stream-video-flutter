@@ -1,5 +1,6 @@
 import '../models/call_participant_state.dart';
 import '../models/viewport_visibility.dart';
+import '../sfu/data/models/sfu_participant_source.dart';
 
 /// A comparator which sorts participants by the fact that they are the
 /// dominant speaker or not.
@@ -51,6 +52,24 @@ int pinned(CallParticipantState a, CallParticipantState b) {
   if (a.pin == null && b.pin != null) return 1;
 
   return 0;
+}
+
+/// A comparator factory which creates a comparator which prioritizes
+/// participants who are from a specific source (e.g., WebRTC, RTMP, WHIP...).
+Comparator<CallParticipantState> byParticipantSource(
+  SfuParticipantSource source,
+) {
+  return (CallParticipantState a, CallParticipantState b) {
+    if (a.participantSource == source && b.participantSource != source) {
+      return -1;
+    }
+
+    if (a.participantSource != source && b.participantSource == source) {
+      return 1;
+    }
+
+    return 0;
+  };
 }
 
 /// A comparator creator which will set up a comparator which prioritizes

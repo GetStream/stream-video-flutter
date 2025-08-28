@@ -109,6 +109,38 @@ class TrackType extends $pb.ProtobufEnum {
   const TrackType._(super.v, super.n);
 }
 
+/// must be aligned with kit
+class ParticipantSource extends $pb.ProtobufEnum {
+  static const ParticipantSource PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED =
+      ParticipantSource._(
+          0, _omitEnumNames ? '' : 'PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED');
+  static const ParticipantSource PARTICIPANT_SOURCE_RTMP =
+      ParticipantSource._(1, _omitEnumNames ? '' : 'PARTICIPANT_SOURCE_RTMP');
+  static const ParticipantSource PARTICIPANT_SOURCE_WHIP =
+      ParticipantSource._(2, _omitEnumNames ? '' : 'PARTICIPANT_SOURCE_WHIP');
+  static const ParticipantSource PARTICIPANT_SOURCE_SIP =
+      ParticipantSource._(3, _omitEnumNames ? '' : 'PARTICIPANT_SOURCE_SIP');
+  static const ParticipantSource PARTICIPANT_SOURCE_RTSP =
+      ParticipantSource._(4, _omitEnumNames ? '' : 'PARTICIPANT_SOURCE_RTSP');
+  static const ParticipantSource PARTICIPANT_SOURCE_SRT =
+      ParticipantSource._(5, _omitEnumNames ? '' : 'PARTICIPANT_SOURCE_SRT');
+
+  static const $core.List<ParticipantSource> values = <ParticipantSource>[
+    PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+    PARTICIPANT_SOURCE_RTMP,
+    PARTICIPANT_SOURCE_WHIP,
+    PARTICIPANT_SOURCE_SIP,
+    PARTICIPANT_SOURCE_RTSP,
+    PARTICIPANT_SOURCE_SRT,
+  ];
+
+  static final $core.Map<$core.int, ParticipantSource> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
+  static ParticipantSource? valueOf($core.int value) => _byValue[value];
+
+  const ParticipantSource._(super.v, super.n);
+}
+
 class ErrorCode extends $pb.ProtobufEnum {
   static const ErrorCode ERROR_CODE_UNSPECIFIED =
       ErrorCode._(0, _omitEnumNames ? '' : 'ERROR_CODE_UNSPECIFIED');
@@ -454,6 +486,29 @@ class AppleThermalState extends $pb.ProtobufEnum {
   static AppleThermalState? valueOf($core.int value) => _byValue[value];
 
   const AppleThermalState._(super.v, super.n);
+}
+
+/// ClientCapability defines a feature that client supports
+class ClientCapability extends $pb.ProtobufEnum {
+  static const ClientCapability CLIENT_CAPABILITY_UNSPECIFIED =
+      ClientCapability._(
+          0, _omitEnumNames ? '' : 'CLIENT_CAPABILITY_UNSPECIFIED');
+
+  /// Enables SFU pausing inbound video
+  static const ClientCapability CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE =
+      ClientCapability._(
+          1, _omitEnumNames ? '' : 'CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE');
+
+  static const $core.List<ClientCapability> values = <ClientCapability>[
+    CLIENT_CAPABILITY_UNSPECIFIED,
+    CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE,
+  ];
+
+  static final $core.Map<$core.int, ClientCapability> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
+  static ClientCapability? valueOf($core.int value) => _byValue[value];
+
+  const ClientCapability._(super.v, super.n);
 }
 
 const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');
