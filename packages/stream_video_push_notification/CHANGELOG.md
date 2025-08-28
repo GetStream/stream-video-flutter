@@ -6,7 +6,9 @@ In this release, we removed the dependency on `flutter_callkit_incoming`, which 
 
 * **CallKit/ringing configuration:** The setup flow has changed. Replace the `pushParams` parameter in `StreamVideoPushNotificationManager` with `pushConfiguration` (`StreamVideoPushConfiguration`). Refer to the documentation for detailed parameter mapping.
 * **Parameter renaming:** The `nameCaller` parameter has been renamed to `callerName` in various places.
-* **Removed properties:** The deprecated `callerCustomizationCallback` and `backgroundVoipCallHandler` have been removed from `StreamVideoPushNotificationManager`.
+* **Removed properties:**
+    * The deprecated `callerCustomizationCallback` and `backgroundVoipCallHandler` have been removed from `StreamVideoPushNotificationManager`.
+    * The `appName` previously used in `pushParams` configuration is now removed as it’s deprecated. The `ProductName` from build settings will be used instead (iOS only).
 
 ### API renames and type changes
 
