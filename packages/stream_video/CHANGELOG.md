@@ -1,3 +1,16 @@
+## Unreleased
+
+🚧 Breaking changes
+
+### API renames and type changes
+
+- `onCallKitEvent` → `onRingingEvent`
+- `observeCoreCallKitEvents` → `observeCoreRingingEvents`
+- `observeCallAcceptCallKitEvent` → `observeCallAcceptRingingEvent`
+- `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
+- `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
+- `CallKitEvent` (type) → `RingingEvent`
+
 ## 0.10.3
 
 🐞 Fixed
