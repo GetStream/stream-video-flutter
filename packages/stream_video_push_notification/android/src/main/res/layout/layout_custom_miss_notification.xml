@@ -21,7 +21,6 @@
                 android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
                 android:textSize="@dimen/size_text_action" />
 
-
             <TextView
                 android:id="@+id/tvNumber"
                 android:layout_width="wrap_content"
@@ -30,7 +29,6 @@
                 android:textSize="@dimen/size_text_action" />
 
         </LinearLayout>
-
 
         <ImageView
             android:id="@+id/ivAvatar"
@@ -48,12 +46,10 @@
         android:baselineAligned="false"
         android:orientation="horizontal">
 
-
         <LinearLayout
             android:id="@+id/llCallback"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
             android:background="@drawable/rounded_button_accept"
             android:clickable="true"
             android:focusable="true"
@@ -72,19 +68,6 @@
 
         </LinearLayout>
 
-<!--        <LinearLayout-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="0.5"-->
-<!--            android:background="@drawable/rounded_button_accept"-->
-<!--            android:clickable="true"-->
-<!--            android:focusable="true"-->
-<!--            android:gravity="center"-->
-<!--            android:orientation="horizontal"/>-->
-
     </LinearLayout>
 
-
 </LinearLayout>
-
-    <!--style="@style/Widget.Compat.NotificationActionText"-->

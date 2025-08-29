@@ -181,10 +181,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
 
         let callUpdate = CXCallUpdate()
-        if data.supportsVideo {
-            callUpdate.remoteHandle = handle
-        }
-
+        callUpdate.remoteHandle = handle
         callUpdate.supportsDTMF = data.supportsDTMF
         callUpdate.supportsHolding = data.supportsHolding
         callUpdate.supportsGrouping = data.supportsGrouping
@@ -194,13 +191,13 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         initCallkitProvider(data)
 
-        let uuid = UUID(uuidString: data.uuid)
+        guard let uuid = UUID(uuidString: data.uuid) else { return }
 
         self.configureAudioSession()
-        self.sharedProvider?.reportNewIncomingCall(with: uuid!, update: callUpdate) { error in
+        self.sharedProvider?.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if error == nil {
                 self.configureAudioSession()
-                let call = Call(uuid: uuid!, data: data)
+                let call = Call(uuid: uuid, data: data)
                 call.handle = data.handle
                 self.callController.addCall(call)
                 self.sendEvent(
@@ -232,12 +229,12 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         initCallkitProvider(data)
 
-        let uuid = UUID(uuidString: data.uuid)
+        guard let uuid = UUID(uuidString: data.uuid) else { return }
 
-        self.sharedProvider?.reportNewIncomingCall(with: uuid!, update: callUpdate) { error in
+        self.sharedProvider?.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if error == nil {
                 self.configureAudioSession()
-                let call = Call(uuid: uuid!, data: data)
+                let call = Call(uuid: uuid, data: data)
                 call.handle = data.handle
                 self.callController.addCall(call)
                 self.sendEvent(
@@ -277,7 +274,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isOnHold == onHold {
-            self.sendMuteEvent(callId.uuidString, onHold)
+            self.sendHoldEvent(callId.uuidString, onHold)
         } else {
             self.callController.holdCall(call: call, onHold: onHold)
         }
@@ -406,7 +403,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 print("Unable to load icon \(data.iconName).")
             }
         }
-        if !data.ringtonePath.isEmpty || data.ringtonePath != "system_ringtone_default" {
+        if !data.ringtonePath.isEmpty && data.ringtonePath != "system_ringtone_default" {
             configuration.ringtoneSound = data.ringtonePath
         }
         return configuration
@@ -593,7 +590,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         self.sendEvent(
-            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_DMTF,
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_DTMF,
             [
                 "id": action.callUUID.uuidString, "digits": action.digits,
                 "type": action.type.rawValue,

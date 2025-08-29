@@ -20,7 +20,7 @@ enum Event {
   actionCallCallback,
   actionCallToggleHold,
   actionCallToggleMute,
-  actionCallToggleDmtf,
+  actionCallToggleDtmf,
   actionCallToggleGroup,
   actionCallToggleAudioSession,
   actionCallCustom,
@@ -52,8 +52,8 @@ extension EventX on Event {
         return 'io.getstream.video.ACTION_CALL_TOGGLE_HOLD';
       case Event.actionCallToggleMute:
         return 'io.getstream.video.ACTION_CALL_TOGGLE_MUTE';
-      case Event.actionCallToggleDmtf:
-        return 'io.getstream.video.ACTION_CALL_TOGGLE_DMTF';
+      case Event.actionCallToggleDtmf:
+        return 'io.getstream.video.ACTION_CALL_TOGGLE_DTMF';
       case Event.actionCallToggleGroup:
         return 'io.getstream.video.ACTION_CALL_TOGGLE_GROUP';
       case Event.actionCallToggleAudioSession:

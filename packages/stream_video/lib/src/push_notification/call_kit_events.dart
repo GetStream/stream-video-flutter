@@ -187,13 +187,13 @@ class ActionCallToggleMute extends RingingEvent {
   List<Object?> get props => [uuid, isMuted];
 }
 
-/// Represents a call toggle DMTF event.
+/// Represents a call toggle DTMF event.
 ///
 /// Note: This event is only available on iOS.
-class ActionCallToggleDmtf extends RingingEvent {
-  /// Creates an [ActionCallToggleDmtf] event instance with the specified [uuid]
+class ActionCallToggleDtmf extends RingingEvent {
+  /// Creates an [ActionCallToggleDtmf] event instance with the specified [uuid]
   /// and [digits].
-  const ActionCallToggleDmtf({
+  const ActionCallToggleDtmf({
     required this.uuid,
     required this.digits,
   });

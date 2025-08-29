@@ -214,7 +214,7 @@ class MethodChannelStreamVideoPushNotification
             uuid: body['id'] as String,
             isMuted: body['isMuted'] as bool,
           ),
-        Event.actionCallToggleDmtf => ActionCallToggleDmtf(
+        Event.actionCallToggleDtmf => ActionCallToggleDtmf(
             uuid: body['id'] as String,
             digits: body['digits'] as String,
           ),

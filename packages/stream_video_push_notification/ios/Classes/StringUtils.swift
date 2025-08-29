@@ -39,13 +39,13 @@ extension String {
     public func encryptHandle(
         encryptionKey: String = "xrBixqjjMhHifSDgSJ8O4QJYMZ1UHs45", iv: String = "lmYSgP3vixDAiBzW"
     ) -> String {
-        return self.encrypt().toBase64()
+        return self.encrypt(encryptionKey: encryptionKey, iv: iv).toBase64()
     }
 
     public func decryptHandle(
         encryptionKey: String = "xrBixqjjMhHifSDgSJ8O4QJYMZ1UHs45", iv: String = "lmYSgP3vixDAiBzW"
     ) -> String {
-        return self.fromBase64().decrypt()
+        return self.fromBase64().decrypt(encryptionKey: encryptionKey, iv: iv)
     }
 
     public func getDecryptHandle() -> [String: Any] {

@@ -21,7 +21,7 @@ public struct StreamVideoIncomingCallConstants {
     // MARK: - Call Control Events
     static let ACTION_CALL_TOGGLE_HOLD = "io.getstream.video.ACTION_CALL_TOGGLE_HOLD"
     static let ACTION_CALL_TOGGLE_MUTE = "io.getstream.video.ACTION_CALL_TOGGLE_MUTE"
-    static let ACTION_CALL_TOGGLE_DMTF = "io.getstream.video.ACTION_CALL_TOGGLE_DMTF"
+    static let ACTION_CALL_TOGGLE_DTMF = "io.getstream.video.ACTION_CALL_TOGGLE_DTMF"
     static let ACTION_CALL_TOGGLE_GROUP = "io.getstream.video.ACTION_CALL_TOGGLE_GROUP"
     static let ACTION_CALL_TOGGLE_AUDIO_SESSION =
         "io.getstream.video.ACTION_CALL_TOGGLE_AUDIO_SESSION"

@@ -176,8 +176,9 @@ public class Call: NSObject {
 
     @objc public convenience init(args: NSDictionary) {
         var argsConvert = [String: Any?]()
-        for (key, value) in args {
-            argsConvert[key as! String] = value
+        for (k, v) in args {
+            guard let key = k as? String else { continue }
+            argsConvert[key] = v
         }
         self.init(args: argsConvert)
     }
@@ -278,16 +279,14 @@ public class Call: NSObject {
             map["callerName"] = callerName
             map["handle"] = handle
 
-            var mapExtras = extra as? [String: Any]
-
-            if mapExtras == nil {
+            if let mapExtras = extra as? [String: Any] {
+                for (key, value) in mapExtras {
+                    map[key] = value
+                }
+            } else {
                 return String(
                     format: "{\"callerName\":\"%@\", \"handle\":\"%@\"}", callerName, handle
                 ).encryptHandle()
-            }
-
-            for (key, value) in mapExtras! {
-                map[key] = value
             }
 
             let mapData = try JSONSerialization.data(withJSONObject: map, options: .prettyPrinted)

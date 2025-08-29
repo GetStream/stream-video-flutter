@@ -36,8 +36,8 @@
                 android:singleLine="true"
                 android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
-                android:textSize="@dimen/size_text_action" />
-
+                android:textSize="@dimen/size_text_action"
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/tvNumber"
@@ -46,20 +46,16 @@
                 android:singleLine="true"
                 android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.Compat.Notification.Line2"
-                android:textSize="@dimen/size_text_action" />
-
-
-
+                android:textSize="@dimen/size_text_action"
+                android:ellipsize="end" />
 
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal">
-
 
             <LinearLayout
                 android:id="@+id/llDecline"
