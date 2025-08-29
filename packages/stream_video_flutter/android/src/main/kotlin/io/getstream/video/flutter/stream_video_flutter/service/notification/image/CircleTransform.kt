@@ -14,26 +14,37 @@ class CircleTransform : Transformation {
     }
 
     override suspend fun transform(pool: BitmapPool, input: Bitmap, size: Size): Bitmap {
+        if (input.isRecycled) return input
+    
         val sizeImage = min(input.width, input.height)
+        if (sizeImage <= 0) return input
+        
         val x = (input.width - sizeImage) / 2
         val y = (input.height - sizeImage) / 2
-        val squaredBitmap = Bitmap.createBitmap(input, x, y, sizeImage, sizeImage)
-        if (squaredBitmap != input) {
-            input.recycle()
+        
+        val squaredBitmap = if (x != 0 || y != 0 || sizeImage != input.width || sizeImage != input.height) {
+            Bitmap.createBitmap(input, x, y, sizeImage, sizeImage).also {
+                input.recycle()
+            }
+        } else {
+            input
         }
-        val config = input.config ?: Bitmap.Config.ARGB_8888
-        val bitmap = Bitmap.createBitmap(sizeImage, sizeImage, config)
-        val canvas = Canvas(bitmap)
-        val paint = Paint()
-        val shader = BitmapShader(
-            squaredBitmap,
-            Shader.TileMode.CLAMP, Shader.TileMode.CLAMP
-        )
-        paint.shader = shader
-        paint.isAntiAlias = true
-        val r = sizeImage / 2f
-        canvas.drawCircle(r, r, r, paint)
-        squaredBitmap.recycle()
-        return bitmap
+        
+        val config = squaredBitmap.config ?: Bitmap.Config.ARGB_8888
+        val output = pool.get(sizeImage, sizeImage, config)
+        
+        val canvas = Canvas(output)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = BitmapShader(squaredBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+        }
+        
+        val radius = sizeImage / 2f
+        canvas.drawCircle(radius, radius, radius, paint)
+        
+        if (squaredBitmap != input) {
+            squaredBitmap.recycle()
+        }
+        
+        return output
     }
 }

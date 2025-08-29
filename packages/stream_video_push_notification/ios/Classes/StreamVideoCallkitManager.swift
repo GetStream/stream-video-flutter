@@ -17,7 +17,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     private var outgoingCall: Call?
     private var answerCall: Call?
 
-    private var data: Data?
+    private var data: CallData?
     private var isFromPushKit: Bool = false
     private var silenceEvents: Bool = false
 
@@ -50,7 +50,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 return
             }
             if let getArgs = args as? [String: Any] {
-                self.data = Data(args: getArgs)
+                self.data = CallData(args: getArgs)
                 showIncomingCall(self.data!, fromPushKit: false)
             }
             result(true)
@@ -64,7 +64,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 return
             }
             if let getArgs = args as? [String: Any] {
-                self.data = Data(args: getArgs)
+                self.data = CallData(args: getArgs)
                 self.startCall(self.data!, fromPushKit: false)
             }
             result(true)
@@ -78,7 +78,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.endCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = Data(args: getArgs)
+                    self.data = CallData(args: getArgs)
                     self.endCall(self.data!)
                 }
             }
@@ -131,7 +131,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.connectedCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = Data(args: getArgs)
+                    self.data = CallData(args: getArgs)
                     self.connectedCall(self.data!)
                 }
             }
@@ -161,7 +161,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func getAcceptedCall() -> Data? {
+    @objc public func getAcceptedCall() -> CallData? {
         NSLog(
             "Call data ids \(String(describing: data?.uuid)) \(String(describing: answerCall?.uuid.uuidString))"
         )
@@ -171,7 +171,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         return nil
     }
 
-    @objc public func showIncomingCall(_ data: Data, fromPushKit: Bool) {
+    @objc public func showIncomingCall(_ data: CallData, fromPushKit: Bool) {
         self.isFromPushKit = fromPushKit
         if fromPushKit {
             self.data = data
@@ -211,7 +211,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     @objc public func showIncomingCall(
-        _ data: Data, fromPushKit: Bool, completion: @escaping () -> Void
+        _ data: CallData, fromPushKit: Bool, completion: @escaping () -> Void
     ) {
         self.isFromPushKit = fromPushKit
         if fromPushKit {
@@ -248,7 +248,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func startCall(_ data: Data, fromPushKit: Bool) {
+    @objc public func startCall(_ data: CallData, fromPushKit: Bool) {
         self.isFromPushKit = fromPushKit
         if fromPushKit {
             self.data = data
@@ -283,7 +283,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func endCall(_ data: Data) {
+    @objc public func endCall(_ data: CallData) {
         var call: Call? = nil
         if self.isFromPushKit {
             call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
@@ -295,7 +295,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.callController.endCall(call: call!)
     }
 
-    @objc public func connectedCall(_ data: Data) {
+    @objc public func connectedCall(_ data: CallData) {
         var call: Call? = nil
         if self.isFromPushKit {
             call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
@@ -346,7 +346,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    func endCallNotExist(_ data: Data) {
+    func endCallNotExist(_ data: CallData) {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(data.duration)) {
             let call = self.callController.callWithUUID(uuid: UUID(uuidString: data.uuid)!)
             if call != nil && self.answerCall == nil && self.outgoingCall == nil {
@@ -355,7 +355,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    func callEndTimeout(_ data: Data) {
+    func callEndTimeout(_ data: CallData) {
         self.saveEndCall(data.uuid, 3)
         guard let call = self.callController.callWithUUID(uuid: UUID(uuidString: data.uuid)!) else {
             return
@@ -377,7 +377,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         return typeDefault
     }
 
-    @objc public func initCallkitProvider(_ data: Data) {
+    @objc public func initCallkitProvider(_ data: CallData) {
         if self.sharedProvider == nil {
             self.sharedProvider = CXProvider(configuration: createConfiguration(data))
             self.sharedProvider?.setDelegate(self, queue: nil)
@@ -385,7 +385,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.callController.setSharedProvider(self.sharedProvider!)
     }
 
-    func createConfiguration(_ data: Data) -> CXProviderConfiguration {
+    func createConfiguration(_ data: CallData) -> CXProviderConfiguration {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = data.supportsVideo
         configuration.maximumCallGroups = data.maximumCallGroups

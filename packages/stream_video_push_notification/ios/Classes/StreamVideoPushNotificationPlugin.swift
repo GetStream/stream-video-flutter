@@ -43,7 +43,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 }
 
                 StreamVideoPKDelegateManager.shared.initData(data: arguments)
-                callKitManager.initCallkitProvider(Data(args: arguments))
+                callKitManager.initCallkitProvider(CallData(args: arguments))
                 result(nil)
             } else {
                 result(
@@ -64,14 +64,14 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     }
 
     @objc public static func startOutgoingCall(
-        data: Data,
+        data: CallData,
         fromPushKit: Bool
     ) {
         sharedInstance.callKitManager.startCall(data, fromPushKit: fromPushKit)
     }
 
     @objc public static func showIncomingCall(
-        data: Data,
+        data: CallData,
         fromPushKit: Bool
     ) {
         sharedInstance.callKitManager.showIncomingCall(

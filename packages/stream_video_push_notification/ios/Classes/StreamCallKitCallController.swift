@@ -12,7 +12,7 @@ class StreamCallKitCallController: NSObject {
         self.sharedProvider = sharedProvider
     }
 
-    func startCall(_ data: Data) {
+    func startCall(_ data: CallData) {
         let handle = CXHandle(
             type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
         let uuid = UUID(uuidString: data.uuid)

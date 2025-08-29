@@ -73,11 +73,11 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
 
         var callUUID = UUID().uuidString
 
-        let data: Data
+        let data: CallData
         if let configuration = self.defaultConfiguration {
-            data = Data.init(args: configuration.toJSON())
+            data = CallData.init(args: configuration.toJSON())
         } else {
-            data = Data.init(args: [String: Any]())
+            data = CallData.init(args: [String: Any]())
         }
 
         let nonEmptyString: (String?) -> String? = { str in

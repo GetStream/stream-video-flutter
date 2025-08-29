@@ -92,8 +92,8 @@ class StreamVideoPushParams {
       duration: other.duration,
       extra: other.extra,
       headers: other.headers,
-      android: android?.merge(other.android),
-      ios: ios?.merge(other.ios),
+      android: android?.merge(other.android) ?? other.android,
+      ios: ios?.merge(other.ios) ?? other.ios,
     );
   }
 
