@@ -27,6 +27,7 @@ export 'src/retry/retry_policy.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
 export 'src/sfu/data/models/sfu_error.dart';
 export 'src/sfu/data/models/sfu_goaway_reason.dart';
+export 'src/sfu/data/models/sfu_participant_source.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/sorting/call_participant_sorting_presets.dart';
 export 'src/sorting/call_participant_state_sorting.dart';
