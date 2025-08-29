@@ -24,8 +24,10 @@ class IncomingCallSoundPlayerManager(private val context: Context) {
 
     inner class ScreenOffIncomingCallBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (isPlaying){
-                stop()
+            synchronized(this@IncomingCallSoundPlayerManager) {
+                if (isPlaying) {
+                    stop()
+                }
             }
         }
     }
@@ -113,12 +115,13 @@ class IncomingCallSoundPlayerManager(private val context: Context) {
         try {
             ringtone = RingtoneManager.getRingtone(context, uri)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val attribution = AudioAttributes.Builder()
+                val attributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                 .setLegacyStreamType(AudioManager.STREAM_RING)
                 .build()
-                ringtone?.setAudioAttributes(attribution)
+                
+                ringtone?.setAudioAttributes(attributes)
             }else {
                 ringtone?.streamType = AudioManager.STREAM_RING
             }

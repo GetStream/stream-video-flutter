@@ -654,7 +654,7 @@ class IncomingCallNotificationManager(
     fun onRequestPermissionsResult(activity: Activity?, requestCode: Int, grantResults: IntArray) {
         when (requestCode) {
             PERMISSION_NOTIFICATION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] === PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // allow
                 } else {
                     //deny

@@ -542,8 +542,9 @@ final class RingingEventBroadcaster {
   StreamSubscription<RingingEvent?>? _eventSubscription;
 
   Future<void> _startListenEvent() async {
-    _eventSubscription ??=
-        StreamVideoPushNotificationPlatform.instance.onEvent.listen((event) {
+    _eventSubscription ??= StreamVideoPushNotificationPlatform.instance.onEvent
+        .distinct()
+        .listen((event) {
       if (event != null) _controller?.add(event);
     });
   }

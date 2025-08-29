@@ -30,10 +30,17 @@ class StreamVideoPushConfiguration {
   StreamVideoPushConfiguration merge(StreamVideoPushConfiguration? other) {
     if (other == null) return this;
 
-    return copyWith(
-      headers: other.headers,
-      android: android?.merge(other.android),
-      ios: ios?.merge(other.ios),
+    final mergedHeaders = {
+      if (headers != null) ...headers!,
+      if (other.headers != null) ...other.headers!,
+    };
+
+    return StreamVideoPushConfiguration(
+      headers: mergedHeaders.isEmpty ? null : mergedHeaders,
+      android: other.android != null
+          ? (android?.merge(other.android) ?? other.android)
+          : android,
+      ios: other.ios != null ? (ios?.merge(other.ios) ?? other.ios) : ios,
     );
   }
 

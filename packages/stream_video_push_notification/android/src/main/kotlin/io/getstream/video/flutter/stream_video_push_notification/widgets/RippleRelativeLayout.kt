@@ -112,7 +112,7 @@ class RippleRelativeLayout : RelativeLayout {
     private inner class RippleView(context: Context?) : View(context) {
         override fun onDraw(canvas: Canvas) {
             val radius = min(width, height) / 2f
-            canvas.drawCircle(radius, radius, radius, paint!!)
+            canvas.drawCircle(radius, radius, radius, paint)
         }
 
         init {

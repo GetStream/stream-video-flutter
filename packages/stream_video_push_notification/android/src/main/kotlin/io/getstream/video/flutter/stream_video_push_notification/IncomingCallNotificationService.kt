@@ -49,13 +49,13 @@ class IncomingCallNotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action === IncomingCallConstants.ACTION_CALL_START) {
+        if (intent?.action == IncomingCallConstants.ACTION_CALL_START) {
             intent.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
                 ?.let {
                     stopSelf()
                 }
         }
-        if (intent?.action === IncomingCallConstants.ACTION_CALL_ACCEPT) {
+        if (intent?.action == IncomingCallConstants.ACTION_CALL_ACCEPT) {
             intent.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
                 ?.let {
                     incomingCallNotificationManager?.clearIncomingNotification(it, true)

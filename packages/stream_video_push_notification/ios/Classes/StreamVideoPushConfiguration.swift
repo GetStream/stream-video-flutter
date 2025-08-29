@@ -44,9 +44,12 @@ import Foundation
     }
 
     @objc public convenience init(args: NSDictionary) {
+
         var argsConvert = [String: Any?]()
         for (key, value) in args {
-            argsConvert[key as! String] = value
+            if let keyString = key as? String {
+                argsConvert[keyString] = value
+            }
         }
         self.init(args: argsConvert)
     }

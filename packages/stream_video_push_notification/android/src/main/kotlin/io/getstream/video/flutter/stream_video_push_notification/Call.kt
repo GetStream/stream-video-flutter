@@ -98,21 +98,6 @@ data class Data(val args: Map<String, Any?>) {
     @JsonProperty("isAccepted")
     var isAccepted: Boolean = false
 
-    @JsonProperty("callingNotificationId")
-    var callingNotificationId: String? = null
-
-    @JsonProperty("isShowCallingNotification")
-    var isShowCallingNotification: Boolean = true
-
-    @JsonProperty("callingNotificationSubtitle")
-    var callingNotificationSubtitle: String? = null
-
-    @JsonProperty("callingNotificationCallbackText")
-    var callingNotificationHangupText: String? = null
-
-    @JsonProperty("isShowHangup")
-    var isShowHangup: Boolean = true
-
     @JsonProperty("isOnHold")
     var isOnHold: Boolean = (args["isOnHold"] as? Boolean) ?: false
 

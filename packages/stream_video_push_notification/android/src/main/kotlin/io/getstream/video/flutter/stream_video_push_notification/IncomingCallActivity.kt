@@ -78,6 +78,8 @@ class IncomingCallActivity : Activity() {
     private lateinit var ivDeclineCall: ImageView
     private lateinit var tvDecline: TextView
 
+    private var wakeLock: PowerManager.WakeLock? = null
+
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,11 +118,11 @@ class IncomingCallActivity : Activity() {
 
     private fun wakeLockRequest(duration: Long) {
         val pm = applicationContext.getSystemService(POWER_SERVICE) as PowerManager
-        val wakeLock = pm.newWakeLock(
+        wakeLock = pm.newWakeLock(
             PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "IncomingCall:PowerManager"
         )
-        wakeLock.acquire(duration)
+        wakeLock?.acquire(duration)
     }
 
     private fun transparentStatusAndNavigation() {
@@ -356,6 +358,8 @@ class IncomingCallActivity : Activity() {
     }
 
     override fun onDestroy() {
+        wakeLock?.release()
+        wakeLock = null
         unregisterReceiver(endedIncomingCallBroadcastReceiver)
         super.onDestroy()
     }
