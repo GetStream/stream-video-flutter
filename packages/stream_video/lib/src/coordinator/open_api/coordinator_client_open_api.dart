@@ -1160,6 +1160,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> kickUser({
     required StreamCallCid callCid,
     required String userId,
+    bool block = false,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1170,7 +1171,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.kickUser(
         callCid.type.value,
         callCid.id,
-        open.KickUserRequest(userId: userId),
+        open.KickUserRequest(userId: userId, block: block),
       );
       if (result == null) {
         return Result.error('kickUser result is null');

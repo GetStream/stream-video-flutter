@@ -129,7 +129,10 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> kickUser(String userId) async {
+  Future<Result<None>> kickUser(
+    String userId, {
+    bool block = false,
+  }) async {
     if (!hasPermission(CallPermission.kickUser)) {
       _logger.w(() => '[kickUser] rejected (no permission)');
       return Result.error('Cannot kick user (no permission)');
@@ -138,6 +141,7 @@ class PermissionsManager {
     final result = await coordinatorClient.kickUser(
       callCid: callCid,
       userId: userId,
+      block: block,
     );
     _logger.v(() => '[kickUser] result: $result');
     return result;

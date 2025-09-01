@@ -55,11 +55,13 @@ class CoordinatorClientRetry extends CoordinatorClient {
   Future<Result<None>> kickUser({
     required StreamCallCid callCid,
     required String userId,
+    bool block = false,
   }) {
     return _retryManager.execute(
       () => _delegate.kickUser(
         callCid: callCid,
         userId: userId,
+        block: block,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('kickUser', error, nextAttemptDelay);

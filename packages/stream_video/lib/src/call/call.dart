@@ -2226,8 +2226,13 @@ class Call {
     return _permissionsManager.unblockUser(userId);
   }
 
-  Future<Result<None>> kickUser(String userId) {
-    return _permissionsManager.kickUser(userId);
+  /// Kicks a user from the call.
+  /// Set [block] to true to also block the user from rejoining.
+  Future<Result<None>> kickUser(
+    String userId, {
+    bool block = false,
+  }) {
+    return _permissionsManager.kickUser(userId, block: block);
   }
 
   Future<Result<None>> startRecording({

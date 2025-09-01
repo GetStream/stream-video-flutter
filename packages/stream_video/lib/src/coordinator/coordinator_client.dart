@@ -230,6 +230,7 @@ abstract class CoordinatorClient {
   Future<Result<None>> kickUser({
     required StreamCallCid callCid,
     required String userId,
+    bool block = false,
   });
 
   /// Signals other users that I have cancelled my call to them before
