@@ -18,6 +18,7 @@ class CallSettingsResponse {
     required this.broadcasting,
     required this.frameRecording,
     required this.geofencing,
+    this.ingress,
     required this.limits,
     required this.recording,
     required this.ring,
@@ -37,6 +38,14 @@ class CallSettingsResponse {
   FrameRecordingSettingsResponse frameRecording;
 
   GeofenceSettingsResponse geofencing;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  IngressSettingsResponse? ingress;
 
   LimitsSettingsResponse limits;
 
@@ -63,6 +72,7 @@ class CallSettingsResponse {
           other.broadcasting == broadcasting &&
           other.frameRecording == frameRecording &&
           other.geofencing == geofencing &&
+          other.ingress == ingress &&
           other.limits == limits &&
           other.recording == recording &&
           other.ring == ring &&
@@ -80,6 +90,7 @@ class CallSettingsResponse {
       (broadcasting.hashCode) +
       (frameRecording.hashCode) +
       (geofencing.hashCode) +
+      (ingress == null ? 0 : ingress!.hashCode) +
       (limits.hashCode) +
       (recording.hashCode) +
       (ring.hashCode) +
@@ -91,7 +102,7 @@ class CallSettingsResponse {
 
   @override
   String toString() =>
-      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, ingress=$ingress, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -100,6 +111,11 @@ class CallSettingsResponse {
     json[r'broadcasting'] = this.broadcasting;
     json[r'frame_recording'] = this.frameRecording;
     json[r'geofencing'] = this.geofencing;
+    if (this.ingress != null) {
+      json[r'ingress'] = this.ingress;
+    } else {
+      json[r'ingress'] = null;
+    }
     json[r'limits'] = this.limits;
     json[r'recording'] = this.recording;
     json[r'ring'] = this.ring;
@@ -139,6 +155,7 @@ class CallSettingsResponse {
         frameRecording:
             FrameRecordingSettingsResponse.fromJson(json[r'frame_recording'])!,
         geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
+        ingress: IngressSettingsResponse.fromJson(json[r'ingress']),
         limits: LimitsSettingsResponse.fromJson(json[r'limits'])!,
         recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
         ring: RingSettingsResponse.fromJson(json[r'ring'])!,

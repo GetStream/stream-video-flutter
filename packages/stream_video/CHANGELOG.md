@@ -1,3 +1,8 @@
+## Unreleased
+
+✅ Added
+* Added functionality to remove the participant from the call by calling `call.kickUser()` method.
+
 ## 0.10.3
 
 🐞 Fixed

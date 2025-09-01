@@ -227,6 +227,11 @@ abstract class CoordinatorClient {
     required String userId,
   });
 
+  Future<Result<None>> kickUser({
+    required StreamCallCid callCid,
+    required String userId,
+  });
+
   /// Signals other users that I have cancelled my call to them before
   /// they accepted it.
   /// Causes the [CoordinatorCallEndedEvent] event to be emitted
@@ -272,6 +277,7 @@ abstract class CoordinatorClient {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIngressSettings? ingress,
   });
 
   Future<Result<GuestCreatedData>> loadGuest({

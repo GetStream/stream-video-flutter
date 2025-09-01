@@ -33,6 +33,7 @@ class OwnCapability {
   static const joinBackstage = OwnCapability._(r'join-backstage');
   static const joinCall = OwnCapability._(r'join-call');
   static const joinEndedCall = OwnCapability._(r'join-ended-call');
+  static const kickUser = OwnCapability._(r'kick-user');
   static const muteUsers = OwnCapability._(r'mute-users');
   static const pinForEveryone = OwnCapability._(r'pin-for-everyone');
   static const readCall = OwnCapability._(r'read-call');
@@ -72,6 +73,7 @@ class OwnCapability {
     joinBackstage,
     joinCall,
     joinEndedCall,
+    kickUser,
     muteUsers,
     pinForEveryone,
     readCall,
@@ -154,6 +156,8 @@ class OwnCapabilityTypeTransformer {
           return OwnCapability.joinCall;
         case r'join-ended-call':
           return OwnCapability.joinEndedCall;
+        case r'kick-user':
+          return OwnCapability.kickUser;
         case r'mute-users':
           return OwnCapability.muteUsers;
         case r'pin-for-everyone':
