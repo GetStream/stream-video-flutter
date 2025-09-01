@@ -45,7 +45,8 @@ class UserResponse {
   DateTime createdAt;
 
   /// Custom data for this object
-  Map<String, Object> custom;
+  // MANUAL_EDIT: allow null values
+  Map<String, Object?> custom;
 
   /// Date of deactivation
   ///
