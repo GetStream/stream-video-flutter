@@ -119,6 +119,7 @@ class StreamCallKitCallController: NSObject {
 
         let callTransaction = CXTransaction()
         callTransaction.addAction(handleCall)
+        self.requestCall(callTransaction, action: "holdCall")
     }
 
     private func requestCall(

@@ -69,7 +69,7 @@ class RippleRelativeLayout : RelativeLayout {
             typedArray.getFloat(R.styleable.ripple_relativeLayout_ripple_scale, DEFAULT_SCALE)
         typedArray.recycle()
 
-        rippleDelay = rippleDurationTime / rippleAmount
+        rippleDelay = rippleDurationTime / rippleAmount.coerceAtLeast(1)
         paint = Paint()
         paint.isAntiAlias = true
         paint.style = Paint.Style.FILL
@@ -134,6 +134,15 @@ class RippleRelativeLayout : RelativeLayout {
         if (isRippleAnimationRunning) {
             animatorSet!!.end()
             isRippleAnimationRunning = false
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        if (isRippleAnimationRunning) {
+            stopRippleAnimation()
+        } else if (this::animatorSet != null) {
+            animatorSet!!.cancel()
         }
     }
 

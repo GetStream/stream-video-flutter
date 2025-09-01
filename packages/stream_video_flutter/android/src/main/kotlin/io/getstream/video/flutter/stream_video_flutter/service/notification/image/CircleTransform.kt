@@ -23,15 +23,16 @@ class CircleTransform : Transformation {
         val y = (input.height - sizeImage) / 2
         
         val squaredBitmap = if (x != 0 || y != 0 || sizeImage != input.width || sizeImage != input.height) {
-            Bitmap.createBitmap(input, x, y, sizeImage, sizeImage).also {
-                input.recycle()
-            }
+            Bitmap.createBitmap(input, x, y, sizeImage, sizeImage)
         } else {
             input
         }
         
         val config = squaredBitmap.config ?: Bitmap.Config.ARGB_8888
-        val output = pool.get(sizeImage, sizeImage, config)
+        val output = pool.get(sizeImage, sizeImage, config).apply {
+            setHasAlpha(true)
+            eraseColor(Color.TRANSPARENT)
+        }
         
         val canvas = Canvas(output)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -40,10 +41,6 @@ class CircleTransform : Transformation {
         
         val radius = sizeImage / 2f
         canvas.drawCircle(radius, radius, radius, paint)
-        
-        if (squaredBitmap != input) {
-            squaredBitmap.recycle()
-        }
         
         return output
     }

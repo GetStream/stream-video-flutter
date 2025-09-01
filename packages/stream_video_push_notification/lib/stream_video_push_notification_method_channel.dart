@@ -38,14 +38,14 @@ class MethodChannelStreamVideoPushNotification
   /// Show Incoming ringing call.
   /// On iOS, using Callkit. On Android, using a custom UI.
   @override
-  Future showIncomingCall(StreamVideoPushParams params) async {
+  Future<void> showIncomingCall(StreamVideoPushParams params) async {
     await methodChannel.invokeMethod("showIncomingCall", params.toJson());
   }
 
   /// Show Miss Call Notification.
   /// Only Android
   @override
-  Future showMissCallNotification(StreamVideoPushParams params) async {
+  Future<void> showMissCallNotification(StreamVideoPushParams params) async {
     if (!CurrentPlatform.isAndroid) {
       return;
     }
@@ -57,7 +57,7 @@ class MethodChannelStreamVideoPushNotification
   /// Hide notification call for Android.
   /// Only Android
   @override
-  Future hideIncomingCall(StreamVideoPushParams params) async {
+  Future<void> hideIncomingCall(StreamVideoPushParams params) async {
     if (!CurrentPlatform.isAndroid) {
       return;
     }
@@ -69,7 +69,7 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS, using Callkit(create a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
   @override
-  Future startCall(StreamVideoPushParams params) async {
+  Future<void> startCall(StreamVideoPushParams params) async {
     await methodChannel.invokeMethod("startCall", params.toJson());
   }
 
@@ -95,7 +95,7 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS, using Callkit(update the ongoing call ui).
   /// On Android, Nothing(only callback event listener).
   @override
-  Future holdCall(String id, {bool isOnHold = true}) async {
+  Future<void> holdCall(String id, {bool isOnHold = true}) async {
     await methodChannel
         .invokeMethod("holdCall", {'id': id, 'isOnHold': isOnHold});
   }
@@ -104,7 +104,7 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
   @override
-  Future endCall(String id) async {
+  Future<void> endCall(String id) async {
     await methodChannel.invokeMethod("endCall", {'id': id});
   }
 
@@ -112,13 +112,13 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
   @override
-  Future setCallConnected(String id) async {
+  Future<void> setCallConnected(String id) async {
     await methodChannel.invokeMethod("callConnected", {'id': id});
   }
 
   /// End all calls.
   @override
-  Future endAllCalls() async {
+  Future<void> endAllCalls() async {
     await methodChannel.invokeMethod("endAllCalls");
   }
 
@@ -134,26 +134,26 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS: return deviceToken for VoIP.
   /// On Android: return Empty
   @override
-  Future getDevicePushTokenVoIP() async {
+  Future<void> getDevicePushTokenVoIP() async {
     return await methodChannel.invokeMethod("getDevicePushTokenVoIP");
   }
 
   /// Silence Ringing events
   @override
-  Future silenceEvents() async {
+  Future<void> silenceEvents() async {
     return await methodChannel.invokeMethod("silenceEvents", true);
   }
 
   /// Unsilence Ringing events
   @override
-  Future unsilenceEvents() async {
+  Future<void> unsilenceEvents() async {
     return await methodChannel.invokeMethod("silenceEvents", false);
   }
 
   /// Request permission show notification for Android(13)
   /// Only Android: show request permission post notification for Android 13+
   @override
-  Future requestNotificationPermission(dynamic data) async {
+  Future<void> requestNotificationPermission(dynamic data) async {
     if (!CurrentPlatform.isAndroid) {
       throw UnimplementedError(
           'requestNotificationPermission() is only implemented for Android.');
@@ -166,7 +166,7 @@ class MethodChannelStreamVideoPushNotification
   /// Check can use full screen intent for Android(14)+
   /// Only Android: canUseFullScreenIntent permission for ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
   @override
-  Future canUseFullScreenIntent() async {
+  Future<void> canUseFullScreenIntent() async {
     if (!CurrentPlatform.isAndroid) {
       throw UnimplementedError(
           'canUseFullScreenIntent() is only implemented for Android.');
@@ -223,7 +223,7 @@ class MethodChannelStreamVideoPushNotification
             callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
           ),
         Event.actionCallToggleAudioSession => ActionCallToggleAudioSession(
-            isActivate: body['isActivate'] as bool,
+            isActive: body['isActive'] as bool,
           ),
         Event.actionCallCustom => ActionCallCustom(body),
       };

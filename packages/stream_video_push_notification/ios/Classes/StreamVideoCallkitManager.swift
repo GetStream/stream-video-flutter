@@ -631,7 +631,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         configureAudioSession()
 
         self.sendEvent(
-            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION, ["isActivate": true]
+            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION, ["isActive": true]
         )
     }
 
@@ -643,7 +643,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
-            ["isActivate": false])
+            ["isActive": false])
     }
 
     private func sendMuteEvent(_ id: String, _ isMuted: Bool) {

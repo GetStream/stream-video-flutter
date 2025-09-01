@@ -488,9 +488,14 @@ class IncomingCallNotificationManager(
     }
 
     private fun incomingChannelEnabled(): Boolean = getNotificationManager().run {
-        val channel = getNotificationChannel(NOTIFICATION_CHANNEL_ID_INCOMING)
+        if (!areNotificationsEnabled()) return false
 
-        return areNotificationsEnabled() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && channel != null && channel.importance > NotificationManagerCompat.IMPORTANCE_NONE) || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = getNotificationChannel(NOTIFICATION_CHANNEL_ID_INCOMING)
+            return channel != null && channel.importance > NotificationManagerCompat.IMPORTANCE_NONE
+        }
+
+        return true
     }
 
     fun ensureNotificationChannelsCreated(data: Bundle) {

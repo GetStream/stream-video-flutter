@@ -234,14 +234,14 @@ class ActionCallToggleGroup extends RingingEvent {
 /// Note: This event is only available on iOS.
 class ActionCallToggleAudioSession extends RingingEvent {
   /// Creates an [ActionCallToggleAudioSession] event instance with the
-  /// specified [isActivate] flag.
-  const ActionCallToggleAudioSession({required this.isActivate});
+  /// specified [isActive] flag.
+  const ActionCallToggleAudioSession({required this.isActive});
 
   /// Indicates whether the audio session is active.
-  final bool isActivate;
+  final bool isActive;
 
   @override
-  List<Object?> get props => [isActivate];
+  List<Object?> get props => [isActive];
 }
 
 /// Represents a custom call event.

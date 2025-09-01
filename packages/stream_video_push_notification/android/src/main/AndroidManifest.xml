@@ -13,7 +13,7 @@
     <uses-permission android:name="${applicationId}.PERMISSION_CALL" />
     <permission
         android:name="${applicationId}.PERMISSION_CALL"
-        android:protectionLevel="normal" />
+        android:protectionLevel="signature" />
 
     <application>
         <activity
@@ -22,6 +22,7 @@
             android:excludeFromRecents="true"
             android:noHistory="true"
             android:turnScreenOn="true"
+            android:showWhenLocked="true"
             android:configChanges="orientation"
             android:exported="true"
             android:launchMode="singleInstance"

@@ -291,7 +291,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Stream<RingingEvent> get onCallEvent {
     return RingingEventBroadcaster()
         .onEvent
-        .doOnData((event) => _logger.v(() => '[onCallEvent] event: $event'));
+        .doOnData((event) => _logger.v(() => '[onCallEvent] event: $event'))
+        .share();
   }
 
   @override
@@ -404,9 +405,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         .where((call) => call.callCid == cid && call.uuid != null)
         .toList();
 
-    // This is a workaround for the issue in flutter_callkit_incoming
-    // where second CallKit call overrides data in showIncomingCall native method
-    // and it's not possible to end the call by callCid
+    // If multiple native ringing calls are stacked with identical metadata,
+    // ending by callCid may not be sufficient; fall back to endAllCalls.
     if (activeCalls.length == calls.length) {
       await endAllCalls();
     } else {

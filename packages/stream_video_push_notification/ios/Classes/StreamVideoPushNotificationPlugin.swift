@@ -99,7 +99,10 @@ public class EventCallbackHandler: NSObject, FlutterStreamHandler {
             "event": event,
             "body": body,
         ]
-        eventSink?(data)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.eventSink?(data)
+        }
     }
 
     public func onListen(
