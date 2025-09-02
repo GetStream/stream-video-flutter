@@ -470,6 +470,8 @@ class CallSession extends Disposable {
             reconnectDetails: reconnectDetails,
             preferredPublishOptions:
                 rtcManager?.publishOptions.map((o) => o.toDTO()),
+            source: sfu_models
+                .ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
           ),
         ),
       );
