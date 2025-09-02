@@ -134,8 +134,10 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS: return deviceToken for VoIP.
   /// On Android: return Empty
   @override
-  Future<void> getDevicePushTokenVoIP() async {
-    return await methodChannel.invokeMethod("getDevicePushTokenVoIP");
+  Future<String> getDevicePushTokenVoIP() async {
+    if (!CurrentPlatform.isIos) return '';
+    final token = await methodChannel.invokeMethod("getDevicePushTokenVoIP");
+    return token ?? '';
   }
 
   /// Silence Ringing events

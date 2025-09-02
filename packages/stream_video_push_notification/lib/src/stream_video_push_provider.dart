@@ -66,8 +66,8 @@ final class StreamTokenProvider {
 
     final token = await StreamVideoPushNotificationPlatform.instance
         .getDevicePushTokenVoIP();
-    if (token is! String || token.isEmpty) return null;
 
+    if (token.isEmpty) return null;
     return token;
   }
 

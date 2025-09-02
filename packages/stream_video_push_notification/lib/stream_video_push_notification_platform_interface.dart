@@ -119,7 +119,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// Get device push token VoIP.
   /// On iOS: return deviceToken for VoIP.
   /// On Android: return Empty
-  Future getDevicePushTokenVoIP() {
+  Future<String> getDevicePushTokenVoIP() {
     throw UnimplementedError(
         'getDevicePushTokenVoIP() has not been implemented.');
   }
