@@ -748,6 +748,11 @@ class Call {
                 () =>
                     '[join] too many failures for SFU: $sfuName, migrating...',
               );
+
+              _session?.trace('call_join_migrate', {
+                'migrateFrom': sfuName,
+              });
+
               sfuToForceExclude = sfuName;
             }
           }
