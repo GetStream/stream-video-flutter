@@ -168,13 +168,16 @@ class MethodChannelStreamVideoPushNotification
   /// Check can use full screen intent for Android(14)+
   /// Only Android: canUseFullScreenIntent permission for ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
   @override
-  Future<void> canUseFullScreenIntent() async {
+  Future<bool> canUseFullScreenIntent() async {
     if (!CurrentPlatform.isAndroid) {
       throw UnimplementedError(
           'canUseFullScreenIntent() is only implemented for Android.');
     }
 
-    return await methodChannel.invokeMethod("canUseFullScreenIntent");
+    final allowed = await methodChannel.invokeMethod<bool>(
+      "canUseFullScreenIntent",
+    );
+    return allowed ?? false;
   }
 
   CallData _callDataFromJson(Map<String, dynamic> json) {
