@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:thermal/thermal.dart';
 
 import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../webrtc/model/stats/rtc_printable_stats.dart';
@@ -6,8 +7,8 @@ import '../webrtc/model/stats/rtc_stats.dart';
 import '../webrtc/peer_type.dart';
 
 @immutable
-class CallStats {
-  const CallStats({
+class PeerConnectionStatsBundle {
+  const PeerConnectionStatsBundle({
     required this.peerType,
     required this.printable,
     required this.raw,
@@ -27,7 +28,7 @@ class CallStats {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CallStats &&
+      other is PeerConnectionStatsBundle &&
           runtimeType == other.runtimeType &&
           peerType == other.peerType &&
           printable == other.printable &&
@@ -37,6 +38,51 @@ class CallStats {
   @override
   int get hashCode =>
       peerType.hashCode ^ printable.hashCode ^ raw.hashCode ^ stats.hashCode;
+}
+
+class CallMetrics {
+  const CallMetrics({
+    required this.clientEnvironment,
+    this.latencyHistory = const [],
+    this.batteryLevelHistory = const [],
+    this.thermalStatusHistory = const [],
+    this.initialBatteryLevel,
+    this.publisher,
+    this.subscriber,
+  });
+
+  final PeerConnectionStats? publisher;
+  final PeerConnectionStats? subscriber;
+  final ClientEnvironment clientEnvironment;
+  final List<int> latencyHistory;
+  final List<int> batteryLevelHistory;
+  final List<int> thermalStatusHistory;
+  final int? initialBatteryLevel;
+
+  CallMetrics copyWith({
+    PeerConnectionStats? publisher,
+    PeerConnectionStats? subscriber,
+    ClientEnvironment? clientEnvironment,
+    List<int>? latencyHistory,
+    List<int>? batteryLevelHistory,
+    List<int>? thermalStatusHistory,
+    int? initialBatteryLevel,
+  }) {
+    return CallMetrics(
+      publisher: publisher ?? this.publisher,
+      subscriber: subscriber ?? this.subscriber,
+      clientEnvironment: clientEnvironment ?? this.clientEnvironment,
+      latencyHistory: latencyHistory ?? this.latencyHistory,
+      batteryLevelHistory: batteryLevelHistory ?? this.batteryLevelHistory,
+      thermalStatusHistory: thermalStatusHistory ?? this.thermalStatusHistory,
+      initialBatteryLevel: initialBatteryLevel ?? this.initialBatteryLevel,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'CallMetrics{publisher: $publisher, subscriber: $subscriber, clientEnvironment: $clientEnvironment, latencyHistory: $latencyHistory}';
+  }
 }
 
 @immutable
@@ -190,14 +236,14 @@ class MediaStatsInfo {
 }
 
 @immutable
-class LocalStats {
-  const LocalStats({
+class ClientEnvironment {
+  const ClientEnvironment({
     required this.sfu,
     required this.sdkVersion,
     required this.webRtcVersion,
   });
 
-  factory LocalStats.empty() => const LocalStats(
+  factory ClientEnvironment.empty() => const ClientEnvironment(
         sfu: '',
         sdkVersion: '',
         webRtcVersion: '',
@@ -209,15 +255,15 @@ class LocalStats {
 
   @override
   String toString() {
-    return 'LocalStats{sfu: $sfu, sdkVersion: $sdkVersion, webRtcVersion: $webRtcVersion}';
+    return 'ClientEnvironment{sfu: $sfu, sdkVersion: $sdkVersion, webRtcVersion: $webRtcVersion}';
   }
 
-  LocalStats copyWith({
+  ClientEnvironment copyWith({
     String? sfu,
     String? sdkVersion,
     String? webRtcVersion,
   }) {
-    return LocalStats(
+    return ClientEnvironment(
       sfu: sfu ?? this.sfu,
       sdkVersion: sdkVersion ?? this.sdkVersion,
       webRtcVersion: webRtcVersion ?? this.webRtcVersion,
@@ -227,7 +273,7 @@ class LocalStats {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is LocalStats &&
+      other is ClientEnvironment &&
           runtimeType == other.runtimeType &&
           sfu == other.sfu &&
           sdkVersion == other.sdkVersion &&

@@ -26,6 +26,11 @@ class Tracer {
     _buffer = [];
   }
 
+  void traceMultiple(List<TraceRecord> entries) {
+    if (!_enabled) return;
+    _buffer.addAll(entries);
+  }
+
   void trace(String tag, dynamic data) {
     if (!_enabled) return;
 

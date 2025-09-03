@@ -6,6 +6,7 @@ import '../../core/utils.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/trace_record.dart';
 import '../stats/tracer.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
@@ -32,6 +33,7 @@ class CallSessionFactory {
     required StatsOptions statsOptions,
     required StreamVideo streamVideo,
     ClientPublishOptions? clientPublishOptions,
+    List<TraceRecord> leftoverTraceRecords = const [],
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
@@ -54,6 +56,15 @@ class CallSessionFactory {
 
     final tracer = Tracer('$sessionSeq')
       ..setEnabled(statsOptions.enableRtcStats)
+      ..traceMultiple(
+        leftoverTraceRecords
+            .map(
+              (r) => r.copyWith(
+                id: '${sessionSeq - 1}',
+              ),
+            )
+            .toList(),
+      )
       ..trace('create', {'url': sfuName});
 
     return CallSession(
