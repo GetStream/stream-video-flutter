@@ -79,7 +79,7 @@ platform :ios do
         changelog: 'Lots of amazing new features to test out!',
         reject_build_waiting_for_review: false,
         skip_waiting_for_build_processing: true,
-        beta_app_description: 'Beta build of Stream Video Flutter Dogfoofing app for internal and external testers',
+        beta_app_description: 'Beta build of Stream Video Flutter Dogfooding app for internal and external testers',
       )
     rescue Exception => e
       if e.message.include? 'Another build is in review'
