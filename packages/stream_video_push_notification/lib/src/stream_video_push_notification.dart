@@ -2,19 +2,16 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_callkit_incoming/entities/entities.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
-
-import 'stream_video_push_params.dart';
 
 part 'stream_video_push_provider.dart';
 
 const _idToken = 1;
-const _idCallKit = 2;
+const _idRinging = 2;
 const _idCallEnded = 3;
 const _idCallAccepted = 4;
 const _idCallRejected = 6;
@@ -27,29 +24,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   static const userDeviceTokenVoIPKey = 'io.getstream.userDeviceTokenVoIP';
 
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
-  ///   /// Parameters:
-  /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
-    @Deprecated(
-      "Caller customization is deprecated as it was not fully compatible with iOS "
-      "(foreground calls only). Use 'display_name' custom field in the call instead. "
-      "See details: https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization",
-    )
-    CallerCustomizationFunction? callerCustomizationCallback,
-    @Deprecated(
-        'Background handler is no longer needed for terminated state ringing on iOS.')
-    BackgroundVoipCallHandler? backgroundVoipCallHandler,
-    StreamVideoPushParams? pushParams,
+    StreamVideoPushConfiguration? pushConfiguration,
     bool registerApnDeviceToken = false,
   }) {
     return (CoordinatorClient client, StreamVideo streamVideo) {
-      final params = _defaultPushParams.merge(pushParams);
+      final configuration = _defaultPushConfiguration.merge(pushConfiguration);
 
       StreamVideoPushNotificationPlatform.instance.init(
-        params.toJson(),
-        callerCustomizationCallback,
+        configuration.toJson(),
       );
 
       return StreamVideoPushNotificationManager._(
@@ -57,8 +42,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         streamVideo: streamVideo,
         iosPushProvider: iosPushProvider,
         androidPushProvider: androidPushProvider,
-        pushParams: params,
-        callerCustomizationCallback: callerCustomizationCallback,
+        pushConfiguration: configuration,
         registerApnDeviceToken: registerApnDeviceToken,
       );
     };
@@ -69,8 +53,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required StreamVideo streamVideo,
     required this.iosPushProvider,
     required this.androidPushProvider,
-    required this.pushParams,
-    this.callerCustomizationCallback,
+    required this.pushConfiguration,
     this.registerApnDeviceToken = false,
   }) : _client = client {
     if (!CurrentPlatform.isMobile) return;
@@ -162,15 +145,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               await endCallByCid(event.callCid.toString());
             }
 
-            // If the call was accepted on this device, end the CallKit call silently
+            // If the call was accepted on this device, end the Ringing call silently
             // (useful if the call was accepted via the app instead of the CallKit UI)
             else {
               _logger.v(() =>
                   '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}');
-              await FlutterCallkitIncoming.silenceEvents();
+              await StreamVideoPushNotificationPlatform.instance
+                  .silenceEvents();
               await endCallByCid(event.callCid.toString());
               await Future<void>.delayed(const Duration(milliseconds: 300));
-              await FlutterCallkitIncoming.unsilenceEvents();
+              await StreamVideoPushNotificationPlatform.instance
+                  .unsilenceEvents();
             }
           },
         ),
@@ -178,14 +163,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     }
 
     //if there are active calls (for iOS) when connecting, subscribe to events as if the call was incoming
-    FlutterCallkitIncoming.activeCalls().then((value) {
+    StreamVideoPushNotificationPlatform.instance.activeCalls().then((value) {
       if (value is List && value.isNotEmpty) {
         subscribeToEvents();
       }
     });
 
     _subscriptions.add(
-      _idCallKit,
+      _idRinging,
       onCallEvent.listen(
         (event) {
           if (event is ActionCallToggleMute) {
@@ -224,13 +209,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final CoordinatorClient _client;
   final StreamVideoPushProvider iosPushProvider;
   final StreamVideoPushProvider androidPushProvider;
-  final StreamVideoPushParams pushParams;
-  @Deprecated(
-    "Caller customization is deprecated as it was not fully compatible with iOS "
-    "(foreground calls only). Use 'display_name' custom field in the call instead. "
-    "See details: https://getstream.io/video/docs/flutter/advanced/incoming-calls/customization/#display-name-customization",
-  )
-  final CallerCustomizationFunction? callerCustomizationCallback;
+  final StreamVideoPushConfiguration pushConfiguration;
   final bool registerApnDeviceToken;
   late SharedPreferences _sharedPreferences;
 
@@ -309,11 +288,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
-  Stream<CallKitEvent> get onCallEvent {
-    return StreamCallKit()
+  Stream<RingingEvent> get onCallEvent {
+    return RingingEventBroadcaster()
         .onEvent
-        .map((event) => event.toCallKitEvent())
-        .doOnData((event) => _logger.v(() => '[onCallKitEvent] event: $event'));
+        .doOnData((event) => _logger.v(() => '[onCallEvent] event: $event'))
+        .share();
   }
 
   @override
@@ -322,26 +301,23 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   }) {
-    // ignore: deprecated_member_use_from_same_package
-    final customData = callerCustomizationCallback?.call(
-      callCid: callCid,
-      callerName: nameCaller,
-      callerHandle: handle,
-    );
+    final paramsFromConfig =
+        StreamVideoPushParams.fromPushConfiguration(pushConfiguration);
 
-    final params = pushParams.copyWith(
+    final params = paramsFromConfig.copyWith(
       id: uuid,
-      avatar: customData?.avatar ?? avatar,
-      handle: customData?.handle ?? handle,
-      nameCaller: customData?.name ?? nameCaller,
+      handle: handle,
+      callerName: callerName,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
+      android: paramsFromConfig.android?.copyWith(avatar: avatar),
     );
 
-    return FlutterCallkitIncoming.showCallkitIncoming(params);
+    return StreamVideoPushNotificationPlatform.instance
+        .showIncomingCall(params);
   }
 
   @override
@@ -350,26 +326,23 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   }) {
-    // ignore: deprecated_member_use_from_same_package
-    final customData = callerCustomizationCallback?.call(
-      callCid: callCid,
-      callerName: nameCaller,
-      callerHandle: handle,
-    );
+    final paramsFromConfig =
+        StreamVideoPushParams.fromPushConfiguration(pushConfiguration);
 
-    final params = pushParams.copyWith(
+    final params = paramsFromConfig.copyWith(
       id: uuid,
-      avatar: customData?.avatar ?? avatar,
-      handle: customData?.handle ?? handle,
-      nameCaller: customData?.name ?? nameCaller,
+      handle: handle,
+      callerName: callerName,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
+      android: paramsFromConfig.android?.copyWith(avatar: avatar),
     );
 
-    return FlutterCallkitIncoming.showMissCallNotification(params);
+    return StreamVideoPushNotificationPlatform.instance
+        .showMissCallNotification(params);
   }
 
   @override
@@ -378,26 +351,30 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   }) {
-    final params = pushParams.copyWith(
+    final paramsFromConfig =
+        StreamVideoPushParams.fromPushConfiguration(pushConfiguration);
+
+    final params = paramsFromConfig.copyWith(
       id: uuid,
-      avatar: avatar,
       handle: handle,
-      nameCaller: nameCaller,
+      callerName: callerName,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
+      android: paramsFromConfig.android?.copyWith(avatar: avatar),
     );
 
-    return FlutterCallkitIncoming.startCall(params);
+    return StreamVideoPushNotificationPlatform.instance.startCall(params);
   }
 
   @override
   Future<List<CallData>> activeCalls() async {
     if (!CurrentPlatform.isMobile) return [];
 
-    final activeCalls = await FlutterCallkitIncoming.activeCalls();
+    final activeCalls =
+        await StreamVideoPushNotificationPlatform.instance.activeCalls();
     if (activeCalls is! List) return [];
 
     final calls = <CallData>[];
@@ -414,10 +391,12 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
-  Future<void> endAllCalls() => FlutterCallkitIncoming.endAllCalls();
+  Future<void> endAllCalls() =>
+      StreamVideoPushNotificationPlatform.instance.endAllCalls();
 
   @override
-  Future<void> endCall(String uuid) => FlutterCallkitIncoming.endCall(uuid);
+  Future<void> endCall(String uuid) =>
+      StreamVideoPushNotificationPlatform.instance.endCall(uuid);
 
   @override
   Future<void> endCallByCid(String cid) async {
@@ -426,9 +405,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         .where((call) => call.callCid == cid && call.uuid != null)
         .toList();
 
-    // This is a workaround for the issue in flutter_callkit_incoming
-    // where second CallKit call overrides data in showCallkitIncoming native method
-    // and it's not possible to end the call by callCid
+    // If multiple native ringing calls are stacked with identical metadata,
+    // ending by callCid may not be sufficient; fall back to endAllCalls.
     if (activeCalls.length == calls.length) {
       await endAllCalls();
     } else {
@@ -452,9 +430,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
     for (final call in calls) {
       // Silence events to avoid infinite loop
-      FlutterCallkitIncoming.silenceEvents();
-      await FlutterCallkitIncoming.muteCall(call.uuid!, isMuted: isMuted);
-      FlutterCallkitIncoming.unsilenceEvents();
+      StreamVideoPushNotificationPlatform.instance.silenceEvents();
+      await StreamVideoPushNotificationPlatform.instance
+          .muteCall(call.uuid!, isMuted: isMuted);
+      StreamVideoPushNotificationPlatform.instance.unsilenceEvents();
     }
   }
 
@@ -471,17 +450,19 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<void> holdCall(String uuid, {bool isOnHold = true}) {
-    return FlutterCallkitIncoming.holdCall(uuid, isOnHold: isOnHold);
+    return StreamVideoPushNotificationPlatform.instance
+        .holdCall(uuid, isOnHold: isOnHold);
   }
 
   @override
   Future<void> muteCall(String uuid, {bool isMuted = true}) {
-    return FlutterCallkitIncoming.muteCall(uuid, isMuted: isMuted);
+    return StreamVideoPushNotificationPlatform.instance
+        .muteCall(uuid, isMuted: isMuted);
   }
 
   @override
   Future<void> setCallConnected(uuid) {
-    return FlutterCallkitIncoming.setCallConnected(uuid);
+    return StreamVideoPushNotificationPlatform.instance.setCallConnected(uuid);
   }
 
   @override
@@ -495,28 +476,21 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 }
 
-const _defaultPushParams = StreamVideoPushParams(
-  duration: 30000,
-  textAccept: 'Accept',
-  textDecline: 'Decline',
-  missedCallNotification: NotificationParams(
-    showNotification: true,
-    isShowCallback: true,
-    subtitle: 'Missed call',
-    callbackText: 'Call back',
-  ),
-  callingNotification: NotificationParams(
-    showNotification: false,
-  ),
-  android: AndroidParams(
-    isCustomNotification: true,
-    isShowLogo: false,
-    ringtonePath: 'system_ringtone_default',
-    backgroundColor: '#0955fa',
-    actionColor: '#4CAF50',
-    incomingCallNotificationChannelName: "Incoming Call",
-  ),
-  ios: IOSParams(
+const _defaultPushConfiguration = StreamVideoPushConfiguration(
+  android: AndroidPushConfiguration(
+      ringtonePath: 'system_ringtone_default',
+      incomingCallNotificationChannelName: "Incoming Call",
+      missedCallNotification: MissedCallNotificationParams(
+        showNotification: true,
+        showCallbackButton: true,
+        subtitle: 'Missed call',
+        callbackText: 'Call back',
+      ),
+      incomingCallNotification: IncomingCallNotificationParams(
+        fullScreenShowLogo: false,
+        fullScreenBackgroundColor: '#0955fa',
+      )),
+  ios: IOSPushConfiguration(
     handleType: 'generic',
     supportsVideo: true,
     maximumCallGroups: 1,
@@ -537,79 +511,40 @@ CallData _callDataFromJson(Map<String, dynamic> json) {
   return CallData(
     uuid: json['id'] as String?,
     callCid: extraData?['callCid'] as String?,
-    avatar: json['avatar'] as String?,
     handle: json['handle'] as String?,
-    nameCaller: json['nameCaller'] as String?,
+    callerName: json['callerName'] as String?,
     hasVideo: json['type'] == 1,
     extraData: extraData,
   );
 }
 
-extension on CallEvent {
-  CallData toCallData() => _callDataFromJson(body);
-
-  CallKitEvent toCallKitEvent() {
-    return switch (event) {
-      Event.actionCallIncoming => ActionCallIncoming(data: toCallData()),
-      Event.actionCallStart => ActionCallStart(data: toCallData()),
-      Event.actionCallAccept => ActionCallAccept(data: toCallData()),
-      Event.actionCallDecline => ActionCallDecline(data: toCallData()),
-      Event.actionCallEnded => ActionCallEnded(data: toCallData()),
-      Event.actionCallTimeout => ActionCallTimeout(data: toCallData()),
-      Event.actionCallCallback => ActionCallCallback(data: toCallData()),
-      Event.actionCallConnected => ActionCallConnected(data: toCallData()),
-      Event.actionDidUpdateDevicePushTokenVoip =>
-        ActionDidUpdateDevicePushTokenVoip(
-          token: body['deviceTokenVoIP'] as String,
-        ),
-      Event.actionCallToggleHold => ActionCallToggleHold(
-          uuid: body['id'] as String,
-          isOnHold: body['isOnHold'] as bool,
-        ),
-      Event.actionCallToggleMute => ActionCallToggleMute(
-          uuid: body['id'] as String,
-          isMuted: body['isMuted'] as bool,
-        ),
-      Event.actionCallToggleDmtf => ActionCallToggleDmtf(
-          uuid: body['id'] as String,
-          digits: body['digits'] as String,
-        ),
-      Event.actionCallToggleGroup => ActionCallToggleGroup(
-          uuid: body['id'] as String,
-          callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
-        ),
-      Event.actionCallToggleAudioSession => ActionCallToggleAudioSession(
-          isActivate: body['isActivate'] as bool,
-        ),
-      Event.actionCallCustom => ActionCallCustom(body),
-    };
-  }
-}
-
 /// Wrapper class to support multiple subscriptions to the
-/// [FlutterCallkitIncoming.onEvent] stream.
-final class StreamCallKit {
-  factory StreamCallKit() => _singleton ??= StreamCallKit._();
+/// [StreamVideoPushNotificationPlatform.onEvent] stream.
+final class RingingEventBroadcaster {
+  factory RingingEventBroadcaster() =>
+      _singleton ??= RingingEventBroadcaster._();
 
-  StreamCallKit._();
+  RingingEventBroadcaster._();
 
-  static StreamCallKit? _singleton;
+  static RingingEventBroadcaster? _singleton;
 
-  StreamController<CallEvent>? _controller;
+  StreamController<RingingEvent>? _controller;
 
-  /// Returns a Stream of [CallEvent].
-  Stream<CallEvent> get onEvent {
-    _controller ??= StreamController<CallEvent>.broadcast(
+  /// Returns a Stream of [RingingEvent].
+  Stream<RingingEvent> get onEvent {
+    _controller ??= StreamController<RingingEvent>.broadcast(
       onListen: _startListenEvent,
       onCancel: _stopListenEvent,
     );
     return _controller!.stream;
   }
 
-  StreamSubscription<CallEvent?>? _eventSubscription;
+  StreamSubscription<RingingEvent?>? _eventSubscription;
 
   Future<void> _startListenEvent() async {
-    _eventSubscription ??= FlutterCallkitIncoming.onEvent.listen((event) {
+    _eventSubscription ??= StreamVideoPushNotificationPlatform.instance.onEvent
+        .distinct()
+        .listen((event) {
       if (event != null) _controller?.add(event);
     });
   }

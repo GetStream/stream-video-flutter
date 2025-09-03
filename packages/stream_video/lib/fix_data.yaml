@@ -1,0 +1,86 @@
+# Docs on data driven fixes: https://github.com/flutter/flutter/blob/master/docs/contributing/Data-driven-Fixes.md
+
+version: 1
+transforms:
+  - title: "replace CallKitEvent with RingingEvent"
+    date: "2025-08-28"
+    element:
+      uris:
+        [
+          "package:stream_video/src/push_notification/push_notification_manager.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CallKitEvent"
+    changes:
+      - kind: "rename"
+        newName: "RingingEvent"
+
+  - title: "replace observeCallDeclinedCallKitEvent with observeCallDeclinedRingingEvent"
+    date: "2025-08-28"
+    element:
+      uris:
+        [
+          "package:stream_video/src/stream_video.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamVideo"
+      method: "observeCallDeclinedCallKitEvent"
+    changes:
+      - kind: "rename"
+        newName: "observeCallDeclinedRingingEvent"
+
+  - title: "replace onCallKitEvent with onRingingEvent"
+    date: "2025-08-28"
+    element:
+      uris:
+        [
+          "package:stream_video/src/stream_video.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamVideo"
+      method: "onCallKitEvent"
+    changes:
+      - kind: "rename"
+        newName: "onRingingEvent"
+
+  - title: "replace observeCoreCallKitEvents with observeCoreRingingEvents"
+    date: "2025-08-28"
+    element:
+      uris:
+        [
+          "package:stream_video/src/stream_video.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamVideo"
+      method: "observeCoreCallKitEvents"
+    changes:
+      - kind: "rename"
+        newName: "observeCoreRingingEvents"
+
+  - title: "replace observeCallAcceptCallKitEvent with observeCallAcceptRingingEvent"
+    date: "2025-08-28"
+    element:
+      uris:
+        [
+          "package:stream_video/src/stream_video.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamVideo"
+      method: "observeCallAcceptCallKitEvent"
+    changes:
+      - kind: "rename"
+        newName: "observeCallAcceptRingingEvent"
+
+  - title: "replace observeCallEndedCallKitEvent with observeCallEndedRingingEvent"
+    date: "2025-08-28"
+    element:
+      uris:
+        [
+          "package:stream_video/src/stream_video.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamVideo"
+      method: "observeCallEndedCallKitEvent"
+    changes:
+      - kind: "rename"
+        newName: "observeCallEndedRingingEvent"

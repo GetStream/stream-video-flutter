@@ -38,7 +38,7 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
     userToken: credentials.token,
   );
 
-  client.observeCallDeclinedCallKitEvent();
+  client.observeCallDeclinedRingingEvent();
 
   await _handlePushNotification(message);
 
