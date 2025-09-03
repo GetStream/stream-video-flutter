@@ -868,9 +868,10 @@ class Call {
         networkMonitor: networkMonitor,
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
+        leftoverTraceRecords: _previousSession?.getTrace().snapshot ?? [],
         onReconnectionNeeded: (pc, strategy) {
           _session?.trace('pc_reconnection_needed', {
-            'peerConnectionId': pc.type,
+            'peerConnectionId': pc.type.name,
             'reconnectionStrategy': strategy.name,
           });
           _reconnect(strategy);
@@ -1344,10 +1345,6 @@ class Call {
       return;
     }
 
-    _session?.trace('call_reconnect', {
-      'strategy': strategy.name,
-    });
-
     await _callReconnectLock.synchronized(() async {
       _reconnectStrategy = strategy;
       _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
@@ -1369,13 +1366,18 @@ class Call {
           return;
         }
 
+        _session?.trace('call_reconnect', {
+          'strategy': _reconnectStrategy.name,
+        });
+
         _stateManager.lifecycleCallConnecting(
           attempt: _reconnectAttempts,
-          strategy: strategy,
+          strategy: _reconnectStrategy,
         );
 
         _logger.d(
-          () => '[reconnect] strategy: $strategy, attempt: $_reconnectAttempts',
+          () =>
+              '[reconnect] strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
         );
 
         try {
@@ -1414,7 +1416,7 @@ class Call {
           }
 
           _session?.trace('call_reconnect_success', {
-            'strategy': strategy.name,
+            'strategy': _reconnectStrategy.name,
           });
         } catch (error) {
           switch (error) {
@@ -1424,7 +1426,7 @@ class Call {
               _stateManager.lifecycleCallReconnectingFailed();
 
               _session?.trace('call_reconnect_failed', {
-                'strategy': strategy.name,
+                'strategy': _reconnectStrategy.name,
                 'error': error.toString(),
               });
 
