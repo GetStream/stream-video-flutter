@@ -10,7 +10,7 @@ typedef DesktopScreenSelectorBuilder = Future<DesktopCapturerSource?> Function(
 );
 
 /// Default screen selection dialog. This shows a dialog with 2 tabs for screens and windows.
-/// Can be styled using [overlay] from [StreamColorTheme]; [body], [bodyBold] and [tabBar] from [StreamTextTheme].
+/// Can be styled using overlay from [StreamColorTheme]; body, bodyBold and tabBar from [StreamTextTheme].
 ///
 /// For more customizations you can use [TabbedScreenSelectWidget] or [ThumbnailGrid] directly.
 Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(

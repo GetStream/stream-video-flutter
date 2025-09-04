@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loginWithGoogle() async {
     final googleService = locator<GoogleSignIn>();
 
-    final googleUser = await googleService.signIn();
+    final googleUser = await googleService.attemptLightweightAuthentication();
     if (googleUser == null) return debugPrint('Google login cancelled');
 
     final userInfo = UserInfo(

@@ -37,18 +37,16 @@ android {
     }
 
     dependencies {
-        testImplementation 'org.jetbrains.kotlin:kotlin-test'
-        testImplementation 'org.mockito:mockito-core:5.0.0'
-        implementation 'io.getstream:stream-log:1.1.3'
+        implementation 'io.getstream:stream-log:1.3.4'
         implementation 'com.squareup.picasso:picasso:2.71828'
-        implementation 'androidx.core:core:1.3.0'
-        implementation 'androidx.media:media:1.1.0'
-        implementation 'androidx.appcompat:appcompat:1.1.0'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2'
-        implementation "io.github.crow-misia.libyuv:libyuv-android:0.34.0"
-        implementation "androidx.annotation:annotation:1.8.0"
-        implementation 'com.google.mlkit:segmentation-selfie:16.0.0-beta5'
-        implementation "com.github.android:renderscript-intrinsics-replacement-toolkit:344be3f"
+        implementation 'androidx.core:core:1.16.0'
+        implementation 'androidx.media:media:1.7.0'
+        implementation 'androidx.appcompat:appcompat:1.7.0'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+        implementation "io.github.crow-misia.libyuv:libyuv-android:0.43.0"
+        implementation "androidx.annotation:annotation:1.9.0"
+        implementation 'com.google.mlkit:segmentation-selfie:16.0.0-beta6'
+        implementation "com.github.android:renderscript-intrinsics-replacement-toolkit:344be3f6bf03fb"
         implementation 'io.getstream:stream-webrtc-android:1.3.8'
     }
 

@@ -30,9 +30,10 @@ class AppInjector {
     Environment? forceEnvironment,
   }) async {
     // Google sign in
-    locator.registerSingleton<GoogleSignIn>(
-      GoogleSignIn(hostedDomain: 'getstream.io'),
-    );
+    locator.registerSingletonAsync<GoogleSignIn>(() async {
+      await GoogleSignIn.instance.initialize(hostedDomain: 'getstream.io');
+      return GoogleSignIn.instance;
+    });
 
     // App Preferences
     final prefs = await SharedPreferences.getInstance();

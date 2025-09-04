@@ -51,7 +51,7 @@ enum StreamWebSocketCloseCode {
 }
 
 /// Typedef used for connecting to a websocket. Method returns a
-/// [WebSocketChannel] and accepts a connection [url] and an optional
+/// [WebSocketChannel] and accepts a connection url and an optional
 /// [Iterable] of `protocols`.
 typedef WebSocketChannelConnector = Future<WebSocketChannel> Function(
   Uri uri, {

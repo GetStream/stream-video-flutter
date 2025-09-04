@@ -5,7 +5,11 @@ import 'constraints/mirror_mode.dart';
 import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the camera.
-/// [mirror]: Whether the video should be mirrored. If set to null, the default is true when facingMode is user and false when facingMode is environment.
+///
+/// - [mirrorMode]: Controls whether the local video should be mirrored. The
+///   default behavior ([MirrorMode.defaultMode]) mirrors when [facingMode] is
+///   [FacingMode.user] and does not mirror when [facingMode] is
+///   [FacingMode.environment].
 class CameraConstraints extends VideoConstraints {
   const CameraConstraints({
     this.facingMode = FacingMode.user,

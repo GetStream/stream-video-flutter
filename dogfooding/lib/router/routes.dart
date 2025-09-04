@@ -18,7 +18,7 @@ part 'routes.g.dart';
 
 @immutable
 @TypedGoRoute<HomeRoute>(path: '/', name: 'home')
-class HomeRoute extends GoRouteData {
+class HomeRoute extends GoRouteData with $HomeRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const HomeScreen();
@@ -27,7 +27,7 @@ class HomeRoute extends GoRouteData {
 
 @immutable
 @TypedGoRoute<LoginRoute>(path: '/login', name: 'login')
-class LoginRoute extends GoRouteData {
+class LoginRoute extends GoRouteData with $LoginRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const LoginScreen();
@@ -36,7 +36,7 @@ class LoginRoute extends GoRouteData {
 
 @immutable
 @TypedGoRoute<LobbyRoute>(path: '/lobby', name: 'lobby')
-class LobbyRoute extends GoRouteData {
+class LobbyRoute extends GoRouteData with $LobbyRoute {
   const LobbyRoute({required this.$extra});
 
   final Call $extra;
@@ -61,7 +61,7 @@ class LobbyRoute extends GoRouteData {
 
 @immutable
 @TypedGoRoute<LivestreamRoute>(path: '/livestream', name: 'livestream')
-class LivestreamRoute extends GoRouteData {
+class LivestreamRoute extends GoRouteData with $LivestreamRoute {
   const LivestreamRoute({required this.$extra});
 
   final String $extra;
@@ -74,7 +74,7 @@ class LivestreamRoute extends GoRouteData {
 
 @immutable
 @TypedGoRoute<CallRoute>(path: '/call', name: 'call')
-class CallRoute extends GoRouteData {
+class CallRoute extends GoRouteData with $CallRoute {
   const CallRoute({required this.$extra});
 
   final ({
@@ -96,7 +96,7 @@ class CallRoute extends GoRouteData {
 @immutable
 @TypedGoRoute<CallParticipantsRoute>(
     path: '/call/participants', name: 'participants')
-class CallParticipantsRoute extends GoRouteData {
+class CallParticipantsRoute extends GoRouteData with $CallParticipantsRoute {
   const CallParticipantsRoute({required this.$extra});
 
   final Call $extra;
@@ -111,7 +111,7 @@ class CallParticipantsRoute extends GoRouteData {
 
 @immutable
 @TypedGoRoute<CallStatsRoute>(path: '/call/stats', name: 'stats')
-class CallStatsRoute extends GoRouteData {
+class CallStatsRoute extends GoRouteData with $CallStatsRoute {
   const CallStatsRoute({required this.$extra});
 
   final Call $extra;
