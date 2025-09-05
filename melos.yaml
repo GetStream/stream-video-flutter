@@ -12,7 +12,7 @@ command:
   bootstrap:
     # Dart and Flutter environment used in the project.
     environment:
-      sdk: ^3.6.2
+      sdk: ^3.8.0
       # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
       flutter: ">=3.32.0"
 

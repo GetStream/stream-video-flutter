@@ -8,7 +8,7 @@ repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ^3.6.2
+  sdk: ^3.8.0
   flutter: ">=3.32.0"
 
 dependencies:
