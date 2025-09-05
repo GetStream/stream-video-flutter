@@ -1,3 +1,7 @@
+## Unreleased
+
+* Updated minimum Flutter version to 3.32.0
+
 ## 0.10.3
 
 🐞 Fixed

@@ -38,8 +38,24 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loginWithGoogle() async {
     final googleService = locator<GoogleSignIn>();
 
-    final googleUser = await googleService.attemptLightweightAuthentication();
-    if (googleUser == null) return debugPrint('Google login cancelled');
+    GoogleSignInAccount? googleUser;
+    try {
+      googleUser = await googleService.attemptLightweightAuthentication();
+    } catch (e) {
+      debugPrint('Google lightweight auth failed: $e');
+    }
+
+    if (googleUser == null && googleService.supportsAuthenticate()) {
+      try {
+        googleUser = await googleService.authenticate();
+      } catch (e) {
+        return debugPrint('Google sign-in failed: $e');
+      }
+    }
+
+    if (googleUser == null) {
+      return debugPrint('Google login cancelled or unavailable');
+    }
 
     final userInfo = UserInfo(
       role: 'admin',
