@@ -91,7 +91,8 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       updatedAt: data.metadata.details.updatedAt,
       startsAt: data.metadata.details.startsAt,
       endedAt: data.metadata.details.endedAt,
-      startedAt: data.metadata.session.startedAt ??
+      startedAt:
+          data.metadata.session.startedAt ??
           data.metadata.session.liveStartedAt,
       createdByUser: data.metadata.details.createdBy,
       custom: data.metadata.details.custom,

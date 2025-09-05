@@ -74,15 +74,19 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
     } else {
       switch (filter) {
         case _BlurFilterOption():
-          await widget.videoEffectsManager
-              .applyBackgroundBlurFilter(filter.intensity);
+          await widget.videoEffectsManager.applyBackgroundBlurFilter(
+            filter.intensity,
+          );
         case _ImageFilterOption():
-          await widget.videoEffectsManager
-              .applyBackgroundImageFilter(filter.asset);
+          await widget.videoEffectsManager.applyBackgroundImageFilter(
+            filter.asset,
+          );
         case _CustomFilterOption():
-          await widget.videoEffectsManager.applyCustomEffect(filter.name,
-              registerEffectProcessorCallback:
-                  filter.registerEffectProcessorCallback);
+          await widget.videoEffectsManager.applyCustomEffect(
+            filter.name,
+            registerEffectProcessorCallback:
+                filter.registerEffectProcessorCallback,
+          );
       }
     }
 
@@ -149,10 +153,7 @@ class _BlurFilterOption extends _FilterOption {
   String get name => intensity.name;
 
   @override
-  Widget buildIcon(BuildContext context) => const Icon(
-        Icons.blur_on,
-        size: 24,
-      );
+  Widget buildIcon(BuildContext context) => const Icon(Icons.blur_on, size: 24);
 }
 
 class _ImageFilterOption extends _FilterOption {
@@ -165,15 +166,13 @@ class _ImageFilterOption extends _FilterOption {
   @override
   Widget buildIcon(BuildContext context) {
     return Container(
-        height: _iconSize,
-        width: _iconSize,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          image: DecorationImage(
-            fit: BoxFit.fill,
-            image: AssetImage(asset),
-          ),
-        ));
+      height: _iconSize,
+      width: _iconSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(fit: BoxFit.fill, image: AssetImage(asset)),
+      ),
+    );
   }
 }
 
@@ -197,8 +196,6 @@ class _GrayscaleFilterOption extends _CustomFilterOption {
   }
 
   @override
-  Widget buildIcon(BuildContext context) => const Icon(
-        Icons.filter_b_and_w,
-        size: 24,
-      );
+  Widget buildIcon(BuildContext context) =>
+      const Icon(Icons.filter_b_and_w, size: 24);
 }

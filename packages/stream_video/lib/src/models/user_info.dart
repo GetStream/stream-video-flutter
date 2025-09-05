@@ -55,11 +55,11 @@ class UserInfo extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        role,
-        image,
-        teams,
-        extraData,
-      ];
+    id,
+    name,
+    role,
+    image,
+    teams,
+    extraData,
+  ];
 }

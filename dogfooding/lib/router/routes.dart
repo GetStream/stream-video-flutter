@@ -81,7 +81,8 @@ class CallRoute extends GoRouteData with $CallRoute {
     Call call,
     CallConnectOptions? connectOptions,
     StreamVideoEffectsManager? effectsManager,
-  }) $extra;
+  })
+  $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -95,7 +96,9 @@ class CallRoute extends GoRouteData with $CallRoute {
 
 @immutable
 @TypedGoRoute<CallParticipantsRoute>(
-    path: '/call/participants', name: 'participants')
+  path: '/call/participants',
+  name: 'participants',
+)
 class CallParticipantsRoute extends GoRouteData with $CallParticipantsRoute {
   const CallParticipantsRoute({required this.$extra});
 
@@ -103,9 +106,7 @@ class CallParticipantsRoute extends GoRouteData with $CallParticipantsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CallParticipantsList(
-      call: $extra,
-    );
+    return CallParticipantsList(call: $extra);
   }
 }
 
@@ -118,8 +119,6 @@ class CallStatsRoute extends GoRouteData with $CallStatsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CallStatsScreen(
-      call: $extra,
-    );
+    return CallStatsScreen(call: $extra);
   }
 }

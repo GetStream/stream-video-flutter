@@ -16,8 +16,9 @@ void main() {
     final call = MockCall();
 
     when(() => localParticipant.isAudioEnabled).thenReturn(isAudioEnabled);
-    when(() => call.setMicrophoneEnabled(enabled: any(named: 'enabled')))
-        .thenAnswer(
+    when(
+      () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+    ).thenAnswer(
       (invocation) async {
         isAudioEnabled =
             invocation.namedArguments[const Symbol('enabled')] as bool;

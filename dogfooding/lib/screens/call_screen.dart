@@ -134,17 +134,14 @@ class _CallScreenState extends State<CallScreen> {
               showFeedbackDialog(context, call: widget.call);
             }
           },
-          callContentWidgetBuilder: (
-            BuildContext context,
-            Call call,
-          ) {
+          callContentWidgetBuilder: (BuildContext context, Call call) {
             return StreamCallContent(
               call: call,
               layoutMode: _currentLayoutMode,
               pictureInPictureConfiguration:
                   const PictureInPictureConfiguration(
-                enablePictureInPicture: true,
-              ),
+                    enablePictureInPicture: true,
+                  ),
               callParticipantsWidgetBuilder: (context, call) {
                 return Stack(
                   children: [
@@ -177,12 +174,10 @@ class _CallScreenState extends State<CallScreen> {
                               videoEffectsManager: _videoEffectsManager,
                               onReactionSend: (_) =>
                                   setState(() => _moreMenuVisible = false),
-                              onStatsPressed: () => setState(
-                                () {
-                                  showStats(context);
-                                  _moreMenuVisible = false;
-                                },
-                              ),
+                              onStatsPressed: () => setState(() {
+                                showStats(context);
+                                _moreMenuVisible = false;
+                              }),
                               onAudioOutputChange: (_, {closeMenu = true}) {
                                 if (closeMenu) {
                                   setState(() => _moreMenuVisible = false);
@@ -207,7 +202,7 @@ class _CallScreenState extends State<CallScreen> {
                               ? ShareCallWelcomeCard(callId: call.id)
                               : const SizedBox.shrink(),
                         ),
-                      )
+                      ),
                   ],
                 );
               },
@@ -229,77 +224,73 @@ class _CallScreenState extends State<CallScreen> {
                         selector: (state) => state.localParticipant != null,
                         builder: (context, hasLocalParticipant) =>
                             hasLocalParticipant
-                                ? FlipCameraOption(
-                                    call: call,
-                                  )
-                                : const SizedBox.shrink(),
+                            ? FlipCameraOption(call: call)
+                            : const SizedBox.shrink(),
                       ),
                     ],
                   ),
                   title: CallDurationTitle(call: call),
                 );
               },
-              callControlsWidgetBuilder: (
-                BuildContext context,
-                Call call,
-              ) {
+              callControlsWidgetBuilder: (BuildContext context, Call call) {
                 return Container(
-                  padding: const EdgeInsets.only(
-                    top: 16,
-                    left: 8,
-                    bottom: 8,
-                  ),
+                  padding: const EdgeInsets.only(top: 16, left: 8, bottom: 8),
                   color: Colors.black,
                   child: SafeArea(
-                    child: Row(children: [
-                      CallControlOption(
+                    child: Row(
+                      children: [
+                        CallControlOption(
                           icon: const Icon(Icons.more_vert),
                           backgroundColor: _moreMenuVisible
                               ? AppColorPalette.primary
                               : AppColorPalette.buttonSecondary,
                           onPressed: () {
                             toggleMoreMenu(context);
-                          }),
-                      ToggleScreenShareOption(
-                        call: call,
-                        screenShareConstraints: const ScreenShareConstraints(
-                          useiOSBroadcastExtension: true,
+                          },
                         ),
-                        enabledScreenShareBackgroundColor:
-                            AppColorPalette.primary,
-                        disabledScreenShareIcon: Icons.screen_share,
-                        desktopScreenSelectorBuilder:
-                            _useCustomDesktopScreenShareOption
-                                ? _customDesktopScreenShareSelector
-                                : null,
-                      ),
-                      ToggleMicrophoneOption(
-                        call: call,
-                        disabledMicrophoneBackgroundColor:
-                            AppColorPalette.appRed,
-                      ),
-                      ToggleCameraOption(
-                        call: call,
-                        disabledCameraBackgroundColor: AppColorPalette.appRed,
-                      ),
-                      const Spacer(),
-                      PartialCallStateBuilder(
-                        call: call,
-                        selector: (state) => state.callParticipants.length,
-                        builder: (context, length) {
-                          return BadgedCallOption(
-                            callControlOption: CallControlOption(
-                              icon: const Icon(Icons.people),
-                              onPressed: _channel != null //
-                                  ? () => showParticipants(context)
-                                  : null,
-                            ),
-                            badgeCount: length,
-                          );
-                        },
-                      ),
-                      _ShowChatButton(channel: _channel),
-                    ]),
+                        ToggleScreenShareOption(
+                          call: call,
+                          screenShareConstraints: const ScreenShareConstraints(
+                            useiOSBroadcastExtension: true,
+                          ),
+                          enabledScreenShareBackgroundColor:
+                              AppColorPalette.primary,
+                          disabledScreenShareIcon: Icons.screen_share,
+                          desktopScreenSelectorBuilder:
+                              _useCustomDesktopScreenShareOption
+                              ? _customDesktopScreenShareSelector
+                              : null,
+                        ),
+                        ToggleMicrophoneOption(
+                          call: call,
+                          disabledMicrophoneBackgroundColor:
+                              AppColorPalette.appRed,
+                        ),
+                        ToggleCameraOption(
+                          call: call,
+                          disabledCameraBackgroundColor: AppColorPalette.appRed,
+                        ),
+                        const Spacer(),
+                        PartialCallStateBuilder(
+                          call: call,
+                          selector: (state) => state.callParticipants.length,
+                          builder: (context, length) {
+                            return BadgedCallOption(
+                              callControlOption: CallControlOption(
+                                icon: const Icon(Icons.people),
+                                onPressed:
+                                    _channel !=
+                                        null //
+                                    ? () => showParticipants(context)
+                                    : null,
+                              ),
+                              badgeCount: length,
+                            );
+                          },
+                        ),
+                        _ShowChatButton(channel: _channel),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -355,7 +346,9 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
     return BadgedCallOption(
       callControlOption: CallControlOption(
         icon: const Icon(Icons.question_answer),
-        onPressed: widget.channel != null //
+        onPressed:
+            widget.channel !=
+                null //
             ? () => showChat(context)
             : null,
       ),
@@ -369,9 +362,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
       showDragHandle: true,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) {
         final size = MediaQuery.sizeOf(context);
@@ -389,10 +380,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
 }
 
 class ChatBottomSheet extends StatelessWidget {
-  const ChatBottomSheet({
-    super.key,
-    required this.channel,
-  });
+  const ChatBottomSheet({super.key, required this.channel});
 
   final Channel channel;
 
@@ -402,9 +390,7 @@ class ChatBottomSheet extends StatelessWidget {
       channel: channel,
       child: const Column(
         children: <Widget>[
-          Expanded(
-            child: StreamMessageListView(),
-          ),
+          Expanded(child: StreamMessageListView()),
           StreamMessageInput(),
         ],
       ),
@@ -415,9 +401,11 @@ class ChatBottomSheet extends StatelessWidget {
 // This is an example of a bottom sheet that only allows the selection of a screen.
 // After tapping a screen the bottom sheet is directly closed and the screen is shared.
 Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
-    BuildContext context) {
-  final ScreenSelectorStateNotifier stateNotifier =
-      ScreenSelectorStateNotifier(sourceTypes: [SourceType.Screen]);
+  BuildContext context,
+) {
+  final ScreenSelectorStateNotifier stateNotifier = ScreenSelectorStateNotifier(
+    sourceTypes: [SourceType.Screen],
+  );
 
   return showModalBottomSheet<DesktopCapturerSource?>(
     context: context,
@@ -427,13 +415,13 @@ Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
         builder:
             (BuildContext context, ScreenSelectorState value, Widget? child) =>
                 Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: ThumbnailGrid(
-            sources: value.sources.values.toList(),
-            selectedSource: value.selectedSource,
-            onSelectSource: (source) => Navigator.pop(context, source),
-          ),
-        ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ThumbnailGrid(
+                    sources: value.sources.values.toList(),
+                    selectedSource: value.selectedSource,
+                    onSelectSource: (source) => Navigator.pop(context, source),
+                  ),
+                ),
       );
     },
   );

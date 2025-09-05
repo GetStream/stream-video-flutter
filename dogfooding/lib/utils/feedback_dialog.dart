@@ -27,8 +27,10 @@ Future<void> showFeedbackDialog(
             child: Stack(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 32,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black87,
                     borderRadius: BorderRadius.circular(16),
@@ -55,9 +57,7 @@ Future<void> showFeedbackDialog(
 void hideFeedbackDialog(BuildContext context) => context.pop();
 
 class _FeedbackRatingContent extends StatefulWidget {
-  const _FeedbackRatingContent(
-    this.call,
-  );
+  const _FeedbackRatingContent(this.call);
 
   final Call call;
 
@@ -76,10 +76,7 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            streamVideoIconAsset,
-            width: 250,
-          ),
+          Image.asset(streamVideoIconAsset, width: 250),
           const SizedBox(height: 16),
           Text(
             'We Value Your Feedback!',
@@ -90,9 +87,9 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
           Text(
             'Tell us about your video call experience',
             textAlign: TextAlign.center,
-            style: StreamVideoTheme.of(context).textTheme.footnote.apply(
-                  color: AppColorPalette.secondaryText,
-                ),
+            style: StreamVideoTheme.of(
+              context,
+            ).textTheme.footnote.apply(color: AppColorPalette.secondaryText),
           ),
           const SizedBox(height: 32),
           RatingStars(
@@ -102,11 +99,8 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
                 value = max(min(v.round(), 5), 1);
               });
             },
-            starBuilder: (index, color) => Icon(
-              Icons.star,
-              size: 45,
-              color: color,
-            ),
+            starBuilder: (index, color) =>
+                Icon(Icons.star, size: 45, color: color),
             starCount: 5,
             starSize: 45,
             maxValue: 5,
@@ -143,21 +137,24 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
                       reason: textController.text,
                     );
 
-                    result.fold(success: (_) {
-                      hideFeedbackDialog(context);
+                    result.fold(
+                      success: (_) {
+                        hideFeedbackDialog(context);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Thank you for your feedback!'),
-                        ),
-                      );
-                    }, failure: (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to submit feedback: $error'),
-                        ),
-                      );
-                    });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Thank you for your feedback!'),
+                          ),
+                        );
+                      },
+                      failure: (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to submit feedback: $error'),
+                          ),
+                        );
+                      },
+                    );
                   }
                 : null,
           ),

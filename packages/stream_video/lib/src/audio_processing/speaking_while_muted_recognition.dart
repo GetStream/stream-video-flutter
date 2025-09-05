@@ -60,8 +60,8 @@ class SpeakingWhileMutedRecognition
   SpeakingWhileMutedRecognition({
     required this.call,
     AudioRecognition? audioRecognition,
-  })  : _audioRecognition = audioRecognition ?? AudioRecognitionWebRTC(),
-        super(const SpeakingWhileMutedState._(isSpeakingWhileMuted: false)) {
+  }) : _audioRecognition = audioRecognition ?? AudioRecognitionWebRTC(),
+       super(const SpeakingWhileMutedState._(isSpeakingWhileMuted: false)) {
     _init();
   }
 
@@ -73,22 +73,22 @@ class SpeakingWhileMutedRecognition
   void _init() {
     _callStateSubscription = call
         .partialState(
-      (state) => (
-        isAudioEnabled: state.isAudioEnabled,
-        canSendAudio: state.canSendAudio,
-        status: state.status,
-      ),
-    )
+          (state) => (
+            isAudioEnabled: state.isAudioEnabled,
+            canSendAudio: state.canSendAudio,
+            status: state.status,
+          ),
+        )
         .listen((state) {
-      if (state.status.isDisconnected) _stop();
-      if (!(state.status.isJoined || state.status.isConnected)) return;
+          if (state.status.isDisconnected) _stop();
+          if (!(state.status.isJoined || state.status.isConnected)) return;
 
-      if (state.isAudioEnabled) {
-        _stop();
-      } else if (state.canSendAudio) {
-        start();
-      }
-    });
+          if (state.isAudioEnabled) {
+            _stop();
+          } else if (state.canSendAudio) {
+            start();
+          }
+        });
   }
 
   /// Starts the audio detection.

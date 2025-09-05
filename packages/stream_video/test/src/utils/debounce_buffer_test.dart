@@ -43,12 +43,15 @@ Future<void> main() async {
     final futures = <Future<List<int>>>[];
     const number = 7;
     futures.add(
-      buffer.post(number).onError((error, stackTrace) {
-        _logger.e(() => '[alreadyCompleted] failed: $number = $error');
-        return [-1];
-      }).whenComplete(() {
-        _logger.v(() => '[alreadyCompleted] completed: $number');
-      }),
+      buffer
+          .post(number)
+          .onError((error, stackTrace) {
+            _logger.e(() => '[alreadyCompleted] failed: $number = $error');
+            return [-1];
+          })
+          .whenComplete(() {
+            _logger.v(() => '[alreadyCompleted] completed: $number');
+          }),
     );
     _logger.v(() => '[alreadyCompleted] posted: $number');
     await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -119,10 +122,13 @@ Future<void> main() async {
     final futures = <Future<List<int>>>[];
     for (var i = 0; i < 4; i++) {
       futures.add(
-        buffer.post(i).onError((error, stackTrace) {
-          _logger.e(() => '[cFailure] failed: $i = $error');
-          return [-1];
-        }).whenComplete(() => _logger.v(() => '[cFailure] completed: $i')),
+        buffer
+            .post(i)
+            .onError((error, stackTrace) {
+              _logger.e(() => '[cFailure] failed: $i = $error');
+              return [-1];
+            })
+            .whenComplete(() => _logger.v(() => '[cFailure] completed: $i')),
       );
       _logger.v(() => '[cFailure] posted: $i');
       await Future<void>.delayed(const Duration(milliseconds: 100));

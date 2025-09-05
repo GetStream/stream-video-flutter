@@ -40,12 +40,15 @@ void main() {
         StreamCallCid.from(id: 'call3', type: StreamCallType.defaultType()),
       );
 
-      when(() => mockCall1.leave(reason: any(named: 'reason')))
-          .thenAnswer((_) async => const Result.success(none));
-      when(() => mockCall2.leave(reason: any(named: 'reason')))
-          .thenAnswer((_) async => const Result.success(none));
-      when(() => mockCall3.leave(reason: any(named: 'reason')))
-          .thenAnswer((_) async => const Result.success(none));
+      when(
+        () => mockCall1.leave(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => const Result.success(none));
+      when(
+        () => mockCall2.leave(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => const Result.success(none));
+      when(
+        () => mockCall3.leave(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => const Result.success(none));
     });
 
     group('when allowMultipleActiveCalls is false', () {
@@ -67,22 +70,24 @@ void main() {
         await StreamVideo.reset();
       });
 
-      test('activeCalls contains only one call when multiple calls are set',
-          () async {
-        // Arrange - start with an empty list
-        expect(streamVideo.activeCalls, <Call>[]);
+      test(
+        'activeCalls contains only one call when multiple calls are set',
+        () async {
+          // Arrange - start with an empty list
+          expect(streamVideo.activeCalls, <Call>[]);
 
-        // Act - set first call
-        await streamVideo.state.setActiveCall(mockCall1);
-        expect(streamVideo.activeCalls, [mockCall1]);
+          // Act - set first call
+          await streamVideo.state.setActiveCall(mockCall1);
+          expect(streamVideo.activeCalls, [mockCall1]);
 
-        // Act - set second call (should replace first)
-        await streamVideo.state.setActiveCall(mockCall2);
+          // Act - set second call (should replace first)
+          await streamVideo.state.setActiveCall(mockCall2);
 
-        // Assert - only the latest call is active and first call leave was called
-        expect(streamVideo.activeCalls, [mockCall2]);
-        verify(() => mockCall1.leave(reason: any(named: 'reason'))).called(1);
-      });
+          // Assert - only the latest call is active and first call leave was called
+          expect(streamVideo.activeCalls, [mockCall2]);
+          verify(() => mockCall1.leave(reason: any(named: 'reason'))).called(1);
+        },
+      );
 
       test('activeCall tracks single active call', () async {
         // Arrange - start with no active call
@@ -122,19 +127,21 @@ void main() {
         expect(streamVideo.activeCalls, <Call>[]);
       });
 
-      test('removeActiveCall with different call does not change activeCalls',
-          () async {
-        // Arrange - set initial call
-        await streamVideo.state.setActiveCall(mockCall1);
-        expect(streamVideo.activeCalls, [mockCall1]);
+      test(
+        'removeActiveCall with different call does not change activeCalls',
+        () async {
+          // Arrange - set initial call
+          await streamVideo.state.setActiveCall(mockCall1);
+          expect(streamVideo.activeCalls, [mockCall1]);
 
-        // Act - remove a different call
-        await streamVideo.state.removeActiveCall(mockCall2);
+          // Act - remove a different call
+          await streamVideo.state.removeActiveCall(mockCall2);
 
-        // Assert - activeCalls remains unchanged
-        expect(streamVideo.activeCall, mockCall1);
-        expect(streamVideo.activeCalls, [mockCall1]);
-      });
+          // Assert - activeCalls remains unchanged
+          expect(streamVideo.activeCall, mockCall1);
+          expect(streamVideo.activeCalls, [mockCall1]);
+        },
+      );
 
       test('StreamVideo.activeCall getter works in single call mode', () async {
         await streamVideo.state.setActiveCall(mockCall1);
@@ -145,21 +152,23 @@ void main() {
         expect(() => streamVideo.listenActiveCall(null), returnsNormally);
       });
 
-      test('leave method is called with correct reason when call is replaced',
-          () async {
-        // Arrange - set initial call
-        await streamVideo.state.setActiveCall(mockCall1);
+      test(
+        'leave method is called with correct reason when call is replaced',
+        () async {
+          // Arrange - set initial call
+          await streamVideo.state.setActiveCall(mockCall1);
 
-        // Act - replace the call
-        await streamVideo.state.setActiveCall(mockCall2);
+          // Act - replace the call
+          await streamVideo.state.setActiveCall(mockCall2);
 
-        // Assert - leave was called with replaced reason
-        final captured =
-            verify(() => mockCall1.leave(reason: captureAny(named: 'reason')))
-                .captured;
-        expect(captured.length, 1);
-        expect(captured.first, isA<DisconnectReasonReplaced>());
-      });
+          // Assert - leave was called with replaced reason
+          final captured = verify(
+            () => mockCall1.leave(reason: captureAny(named: 'reason')),
+          ).captured;
+          expect(captured.length, 1);
+          expect(captured.first, isA<DisconnectReasonReplaced>());
+        },
+      );
     });
 
     group('when allowMultipleActiveCalls is true', () {
@@ -200,72 +209,79 @@ void main() {
         verifyNever(() => mockCall2.leave(reason: any(named: 'reason')));
       });
 
-      test('removeActiveCall removes specific call from multiple active calls',
-          () async {
-        // Arrange - set multiple calls
-        await streamVideo.state.setActiveCall(mockCall1);
-        await streamVideo.state.setActiveCall(mockCall2);
-        await streamVideo.state.setActiveCall(mockCall3);
-        expect(streamVideo.activeCalls, [mockCall1, mockCall2, mockCall3]);
+      test(
+        'removeActiveCall removes specific call from multiple active calls',
+        () async {
+          // Arrange - set multiple calls
+          await streamVideo.state.setActiveCall(mockCall1);
+          await streamVideo.state.setActiveCall(mockCall2);
+          await streamVideo.state.setActiveCall(mockCall3);
+          expect(streamVideo.activeCalls, [mockCall1, mockCall2, mockCall3]);
 
-        // Act - remove middle call
-        await streamVideo.state.removeActiveCall(mockCall2);
+          // Act - remove middle call
+          await streamVideo.state.removeActiveCall(mockCall2);
 
-        // Assert - only the specific call is removed
-        expect(streamVideo.activeCalls, [mockCall1, mockCall3]);
-        verifyNever(() => mockCall2.leave(reason: any(named: 'reason')));
-      });
+          // Assert - only the specific call is removed
+          expect(streamVideo.activeCalls, [mockCall1, mockCall3]);
+          verifyNever(() => mockCall2.leave(reason: any(named: 'reason')));
+        },
+      );
 
       test(
-          'StreamVideo.activeCall getter throws exception when multiple calls are enabled',
-          () {
-        // Assert - accessing activeCall throws exception
-        expect(
-          () => streamVideo.activeCall,
-          throwsA(
-            isA<Exception>().having(
-              (e) => e.toString(),
-              'message',
-              contains(
-                'Multiple active calls are enabled, use activeCalls instead',
+        'StreamVideo.activeCall getter throws exception when multiple calls are enabled',
+        () {
+          // Assert - accessing activeCall throws exception
+          expect(
+            () => streamVideo.activeCall,
+            throwsA(
+              isA<Exception>().having(
+                (e) => e.toString(),
+                'message',
+                contains(
+                  'Multiple active calls are enabled, use activeCalls instead',
+                ),
               ),
             ),
-          ),
-        );
-      });
-
-      test('listenActiveCall throws exception when multiple calls are enabled',
-          () {
-        // Act & Assert
-        expect(
-          () => streamVideo.listenActiveCall(null),
-          throwsA(
-            isA<Exception>().having(
-              (e) => e.toString(),
-              'message',
-              contains(
-                'Multiple active calls are enabled, use listenActiveCalls instead',
-              ),
-            ),
-          ),
-        );
-      });
+          );
+        },
+      );
 
       test(
-          'stream subscriptions work correctly with allowMultipleActiveCalls option',
-          () async {
-        final activeCallsFromStream = <List<Call>>[];
-        final subscription =
-            streamVideo.listenActiveCalls(activeCallsFromStream.add);
+        'listenActiveCall throws exception when multiple calls are enabled',
+        () {
+          // Act & Assert
+          expect(
+            () => streamVideo.listenActiveCall(null),
+            throwsA(
+              isA<Exception>().having(
+                (e) => e.toString(),
+                'message',
+                contains(
+                  'Multiple active calls are enabled, use listenActiveCalls instead',
+                ),
+              ),
+            ),
+          );
+        },
+      );
 
-        await streamVideo.state.setActiveCall(mockCall1);
-        // await Future.delayed(
-        //     const Duration(milliseconds: 10)); // Allow stream to emit
+      test(
+        'stream subscriptions work correctly with allowMultipleActiveCalls option',
+        () async {
+          final activeCallsFromStream = <List<Call>>[];
+          final subscription = streamVideo.listenActiveCalls(
+            activeCallsFromStream.add,
+          );
 
-        expect(activeCallsFromStream.isNotEmpty, true);
+          await streamVideo.state.setActiveCall(mockCall1);
+          // await Future.delayed(
+          //     const Duration(milliseconds: 10)); // Allow stream to emit
 
-        await subscription.cancel();
-      });
+          expect(activeCallsFromStream.isNotEmpty, true);
+
+          await subscription.cancel();
+        },
+      );
     });
   });
 }

@@ -11,10 +11,7 @@ import '../core/model/environment.dart';
 import '../di/injector.dart';
 
 class EnvironmentSwitcher extends StatefulWidget {
-  const EnvironmentSwitcher({
-    super.key,
-    required this.currentEnvironment,
-  });
+  const EnvironmentSwitcher({super.key, required this.currentEnvironment});
 
   final Environment currentEnvironment;
 
@@ -43,46 +40,43 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
             margin: const EdgeInsets.symmetric(vertical: 4),
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColorPalette.appGreen,
-                width: 0.5,
-              ),
+              border: Border.all(color: AppColorPalette.appGreen, width: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
                 selectedEnvironment.displayName,
-                style: streamVideoTheme.textTheme.footnoteBold
-                    .apply(color: AppColorPalette.appGreen),
+                style: streamVideoTheme.textTheme.footnoteBold.apply(
+                  color: AppColorPalette.appGreen,
+                ),
               ),
             ),
           ),
           MenuAnchor(
             style: const MenuStyle(
               alignment: Alignment.bottomLeft,
-              backgroundColor:
-                  WidgetStatePropertyAll(AppColorPalette.backgroundColor),
+              backgroundColor: WidgetStatePropertyAll(
+                AppColorPalette.backgroundColor,
+              ),
             ),
             alignmentOffset: const Offset(-70, 0),
-            builder: (
-              BuildContext context,
-              MenuController controller,
-              Widget? child,
-            ) {
-              return IconButton(
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
+            builder:
+                (
+                  BuildContext context,
+                  MenuController controller,
+                  Widget? child,
+                ) {
+                  return IconButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    icon: const Icon(Icons.settings, color: Colors.white),
+                  );
                 },
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                ),
-              );
-            },
             menuChildren: [
               ...Environment.values
                   .where((e) => e != Environment.livestream)
@@ -121,7 +115,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                       ),
                     ),
                   )
-                  .toList()
+                  .toList(),
             ],
           ),
         ],
@@ -131,10 +125,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
 }
 
 class EnvironmentBanner extends StatelessWidget {
-  const EnvironmentBanner({
-    super.key,
-    required this.currentEnvironment,
-  });
+  const EnvironmentBanner({super.key, required this.currentEnvironment});
 
   final Environment currentEnvironment;
 
@@ -146,17 +137,15 @@ class EnvironmentBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColorPalette.appGreen,
-          width: 0.5,
-        ),
+        border: Border.all(color: AppColorPalette.appGreen, width: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
         child: Text(
           currentEnvironment.displayName,
-          style: streamVideoTheme.textTheme.footnoteBold
-              .apply(color: AppColorPalette.appGreen),
+          style: streamVideoTheme.textTheme.footnoteBold.apply(
+            color: AppColorPalette.appGreen,
+          ),
         ),
       ),
     );

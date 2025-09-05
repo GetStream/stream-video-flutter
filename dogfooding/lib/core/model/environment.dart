@@ -6,7 +6,7 @@ enum Environment {
     aliases: ['stream-calls-dogfood'],
     baseUrls: [
       'https://pronto.getstream.io',
-      'https://stream-calls-dogfood.vercel.app'
+      'https://stream-calls-dogfood.vercel.app',
     ],
   ),
   prontoStaging(
@@ -34,11 +34,7 @@ enum Environment {
     'pronto.getstream.io',
     baseUrls: ['https://livestream-react-demo.vercel.app'],
   ),
-  custom(
-    'Custom',
-    'custom',
-    '',
-  );
+  custom('Custom', 'custom', '');
 
   final String displayName;
   final String envName;

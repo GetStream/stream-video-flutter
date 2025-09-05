@@ -131,13 +131,13 @@ class RemoteTrackState extends TrackState {
 
   @override
   List<Object?> get props => [
-        subscribed,
-        received,
-        muted,
-        mirrorVideo,
-        audioSinkDevice,
-        videoDimension,
-      ];
+    subscribed,
+    received,
+    muted,
+    mirrorVideo,
+    audioSinkDevice,
+    videoDimension,
+  ];
 
   @override
   String toString() {

@@ -24,8 +24,9 @@ class ClosedCaptionsWidget extends StatelessWidget {
       stream: call.closedCaptions,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          var closedCaptions =
-              (snapshot.data as List<StreamClosedCaption>).reversed.toList();
+          var closedCaptions = (snapshot.data as List<StreamClosedCaption>)
+              .reversed
+              .toList();
 
           if (maxCaptions != null && closedCaptions.length > maxCaptions!) {
             closedCaptions = closedCaptions.sublist(0, maxCaptions!);
@@ -46,22 +47,24 @@ class ClosedCaptionsWidget extends StatelessWidget {
                 return Opacity(
                   opacity: closedCaptions.length >= 3 && index >= 2 ? 0.4 : 1,
                   child: RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text: "${caption.user.name}: ",
-                        style: const TextStyle(
-                          color: AppColorPalette.secondaryText,
-                          fontSize: 16,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "${caption.user.name}: ",
+                          style: const TextStyle(
+                            color: AppColorPalette.secondaryText,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: caption.text.trim(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                        TextSpan(
+                          text: caption.text.trim(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                    ]),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -52,10 +52,9 @@ Future<void> main() async {
       ).thenAnswer((_) => Future.delayed(fetchDuration, () => none));
 
       /* When */
-      final latencies = (await service.measureEdgeLatencies(edges))
-          .values
-          .map((it) => it.measurementsSeconds)
-          .flattened;
+      final latencies = (await service.measureEdgeLatencies(
+        edges,
+      )).values.map((it) => it.measurementsSeconds).flattened;
 
       /* Then */
       verify(() => client.fetch(any())).called(measurementCount);
@@ -78,10 +77,9 @@ Future<void> main() async {
       ).thenThrow(TestFailure('request failed'));
 
       /* When */
-      final latencies = (await service.measureEdgeLatencies(edges))
-          .values
-          .map((it) => it.measurementsSeconds)
-          .flattened;
+      final latencies = (await service.measureEdgeLatencies(
+        edges,
+      )).values.map((it) => it.measurementsSeconds).flattened;
 
       /* Then */
       verify(() => client.fetch(any())).called(measurementCount);
@@ -105,9 +103,9 @@ Future<void> main() async {
       ).thenAnswer((_) => Future.delayed(fetchDuration, () => none));
 
       /* When */
-      final latencies = (await service.measureEdgeLatencies(edges))
-          .values
-          .map((it) => it.measurementsSeconds);
+      final latencies = (await service.measureEdgeLatencies(
+        edges,
+      )).values.map((it) => it.measurementsSeconds);
 
       /* Then */
       expect(latencies.flattened.length, measurementCount);

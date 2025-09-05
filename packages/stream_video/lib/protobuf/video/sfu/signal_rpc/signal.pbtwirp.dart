@@ -11,29 +11,43 @@ import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
 abstract class SignalServer {
   // SetPublisher sends the WebRTC offer for the peer connection used to publish A/V
   Future<SetPublisherResponse> setPublisher(
-      twirp.Context ctx, SetPublisherRequest req);
+    twirp.Context ctx,
+    SetPublisherRequest req,
+  );
   // answer is sent by the client to the SFU after receiving a subscriber_offer.
   Future<SendAnswerResponse> sendAnswer(
-      twirp.Context ctx, SendAnswerRequest req);
+    twirp.Context ctx,
+    SendAnswerRequest req,
+  );
   // SendICECandidate sends an ICE candidate to the client
   Future<ICETrickleResponse> iceTrickle(twirp.Context ctx, ICETrickle req);
   // UpdateSubscribers is used to notify the SFU about the list of video subscriptions// TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
   Future<UpdateSubscriptionsResponse> updateSubscriptions(
-      twirp.Context ctx, UpdateSubscriptionsRequest req);
+    twirp.Context ctx,
+    UpdateSubscriptionsRequest req,
+  );
 
   Future<UpdateMuteStatesResponse> updateMuteStates(
-      twirp.Context ctx, UpdateMuteStatesRequest req);
+    twirp.Context ctx,
+    UpdateMuteStatesRequest req,
+  );
 
   Future<ICERestartResponse> iceRestart(
-      twirp.Context ctx, ICERestartRequest req);
+    twirp.Context ctx,
+    ICERestartRequest req,
+  );
 
   Future<SendStatsResponse> sendStats(twirp.Context ctx, SendStatsRequest req);
 
   Future<StartNoiseCancellationResponse> startNoiseCancellation(
-      twirp.Context ctx, StartNoiseCancellationRequest req);
+    twirp.Context ctx,
+    StartNoiseCancellationRequest req,
+  );
 
   Future<StopNoiseCancellationResponse> stopNoiseCancellation(
-      twirp.Context ctx, StopNoiseCancellationRequest req);
+    twirp.Context ctx,
+    StopNoiseCancellationRequest req,
+  );
 }
 
 class SignalServerJSONClient implements SignalServer {
@@ -42,8 +56,12 @@ class SignalServerJSONClient implements SignalServer {
   late twirp.ClientHooks hooks;
   late twirp.Interceptor interceptor;
 
-  SignalServerJSONClient(this.baseUrl, this.prefix,
-      {twirp.ClientHooks? hooks, twirp.Interceptor? interceptor}) {
+  SignalServerJSONClient(
+    this.baseUrl,
+    this.prefix, {
+    twirp.ClientHooks? hooks,
+    twirp.Interceptor? interceptor,
+  }) {
     if (!baseUrl.endsWith('/')) baseUrl += '/';
     if (!prefix.endsWith('/')) prefix += '/';
     if (prefix.startsWith('/')) prefix = prefix.substring(1);
@@ -54,7 +72,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<SetPublisherResponse> setPublisher(
-      twirp.Context ctx, SetPublisherRequest req) async {
+    twirp.Context ctx,
+    SetPublisherRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SetPublisher');
@@ -64,11 +84,13 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<SetPublisherResponse> callSetPublisher(
-      twirp.Context ctx, SetPublisherRequest req) async {
+    twirp.Context ctx,
+    SetPublisherRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/SetPublisher');
+      Uri url = Uri.parse(
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SetPublisher',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final SetPublisherResponse res = SetPublisherResponse.create();
       res.mergeFromProto3Json(json.decode(data));
@@ -80,7 +102,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<SendAnswerResponse> sendAnswer(
-      twirp.Context ctx, SendAnswerRequest req) async {
+    twirp.Context ctx,
+    SendAnswerRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SendAnswer');
@@ -90,10 +114,13 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<SendAnswerResponse> callSendAnswer(
-      twirp.Context ctx, SendAnswerRequest req) async {
+    twirp.Context ctx,
+    SendAnswerRequest req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendAnswer');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendAnswer',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final SendAnswerResponse res = SendAnswerResponse.create();
       res.mergeFromProto3Json(json.decode(data));
@@ -105,7 +132,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<ICETrickleResponse> iceTrickle(
-      twirp.Context ctx, ICETrickle req) async {
+    twirp.Context ctx,
+    ICETrickle req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'IceTrickle');
@@ -115,10 +144,13 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<ICETrickleResponse> callIceTrickle(
-      twirp.Context ctx, ICETrickle req) async {
+    twirp.Context ctx,
+    ICETrickle req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceTrickle');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceTrickle',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final ICETrickleResponse res = ICETrickleResponse.create();
       res.mergeFromProto3Json(json.decode(data));
@@ -130,7 +162,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<UpdateSubscriptionsResponse> updateSubscriptions(
-      twirp.Context ctx, UpdateSubscriptionsRequest req) async {
+    twirp.Context ctx,
+    UpdateSubscriptionsRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'UpdateSubscriptions');
@@ -140,11 +174,15 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<UpdateSubscriptionsResponse> callUpdateSubscriptions(
-      twirp.Context ctx, UpdateSubscriptionsRequest req) async {
+    twirp.Context ctx,
+    UpdateSubscriptionsRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/UpdateSubscriptions');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/UpdateSubscriptions',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final UpdateSubscriptionsResponse res =
           UpdateSubscriptionsResponse.create();
@@ -157,7 +195,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<UpdateMuteStatesResponse> updateMuteStates(
-      twirp.Context ctx, UpdateMuteStatesRequest req) async {
+    twirp.Context ctx,
+    UpdateMuteStatesRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'UpdateMuteStates');
@@ -167,11 +207,15 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<UpdateMuteStatesResponse> callUpdateMuteStates(
-      twirp.Context ctx, UpdateMuteStatesRequest req) async {
+    twirp.Context ctx,
+    UpdateMuteStatesRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/UpdateMuteStates');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/UpdateMuteStates',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final UpdateMuteStatesResponse res = UpdateMuteStatesResponse.create();
       res.mergeFromProto3Json(json.decode(data));
@@ -183,7 +227,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<ICERestartResponse> iceRestart(
-      twirp.Context ctx, ICERestartRequest req) async {
+    twirp.Context ctx,
+    ICERestartRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'IceRestart');
@@ -193,10 +239,13 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<ICERestartResponse> callIceRestart(
-      twirp.Context ctx, ICERestartRequest req) async {
+    twirp.Context ctx,
+    ICERestartRequest req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceRestart');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceRestart',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final ICERestartResponse res = ICERestartResponse.create();
       res.mergeFromProto3Json(json.decode(data));
@@ -208,7 +257,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<SendStatsResponse> sendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+    twirp.Context ctx,
+    SendStatsRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SendStats');
@@ -218,10 +269,13 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<SendStatsResponse> callSendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+    twirp.Context ctx,
+    SendStatsRequest req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final SendStatsResponse res = SendStatsResponse.create();
       res.mergeFromProto3Json(json.decode(data));
@@ -233,7 +287,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<StartNoiseCancellationResponse> startNoiseCancellation(
-      twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StartNoiseCancellationRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'StartNoiseCancellation');
@@ -243,11 +299,15 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<StartNoiseCancellationResponse> callStartNoiseCancellation(
-      twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StartNoiseCancellationRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/StartNoiseCancellation');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/StartNoiseCancellation',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final StartNoiseCancellationResponse res =
           StartNoiseCancellationResponse.create();
@@ -260,7 +320,9 @@ class SignalServerJSONClient implements SignalServer {
 
   @override
   Future<StopNoiseCancellationResponse> stopNoiseCancellation(
-      twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StopNoiseCancellationRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'StopNoiseCancellation');
@@ -270,11 +332,15 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   Future<StopNoiseCancellationResponse> callStopNoiseCancellation(
-      twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StopNoiseCancellationRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/StopNoiseCancellation');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/StopNoiseCancellation',
+      );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final StopNoiseCancellationResponse res =
           StopNoiseCancellationResponse.create();
@@ -292,8 +358,12 @@ class SignalServerProtobufClient implements SignalServer {
   late twirp.ClientHooks hooks;
   late twirp.Interceptor interceptor;
 
-  SignalServerProtobufClient(this.baseUrl, this.prefix,
-      {twirp.ClientHooks? hooks, twirp.Interceptor? interceptor}) {
+  SignalServerProtobufClient(
+    this.baseUrl,
+    this.prefix, {
+    twirp.ClientHooks? hooks,
+    twirp.Interceptor? interceptor,
+  }) {
     if (!baseUrl.endsWith('/')) baseUrl += '/';
     if (!prefix.endsWith('/')) prefix += '/';
     if (prefix.startsWith('/')) prefix = prefix.substring(1);
@@ -304,7 +374,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<SetPublisherResponse> setPublisher(
-      twirp.Context ctx, SetPublisherRequest req) async {
+    twirp.Context ctx,
+    SetPublisherRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SetPublisher');
@@ -314,11 +386,13 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<SetPublisherResponse> callSetPublisher(
-      twirp.Context ctx, SetPublisherRequest req) async {
+    twirp.Context ctx,
+    SetPublisherRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/SetPublisher');
+      Uri url = Uri.parse(
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SetPublisher',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final SetPublisherResponse res = SetPublisherResponse.create();
       res.mergeFromBuffer(data);
@@ -330,7 +404,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<SendAnswerResponse> sendAnswer(
-      twirp.Context ctx, SendAnswerRequest req) async {
+    twirp.Context ctx,
+    SendAnswerRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SendAnswer');
@@ -340,10 +416,13 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<SendAnswerResponse> callSendAnswer(
-      twirp.Context ctx, SendAnswerRequest req) async {
+    twirp.Context ctx,
+    SendAnswerRequest req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendAnswer');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendAnswer',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final SendAnswerResponse res = SendAnswerResponse.create();
       res.mergeFromBuffer(data);
@@ -355,7 +434,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<ICETrickleResponse> iceTrickle(
-      twirp.Context ctx, ICETrickle req) async {
+    twirp.Context ctx,
+    ICETrickle req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'IceTrickle');
@@ -365,10 +446,13 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<ICETrickleResponse> callIceTrickle(
-      twirp.Context ctx, ICETrickle req) async {
+    twirp.Context ctx,
+    ICETrickle req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceTrickle');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceTrickle',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final ICETrickleResponse res = ICETrickleResponse.create();
       res.mergeFromBuffer(data);
@@ -380,7 +464,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<UpdateSubscriptionsResponse> updateSubscriptions(
-      twirp.Context ctx, UpdateSubscriptionsRequest req) async {
+    twirp.Context ctx,
+    UpdateSubscriptionsRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'UpdateSubscriptions');
@@ -390,11 +476,15 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<UpdateSubscriptionsResponse> callUpdateSubscriptions(
-      twirp.Context ctx, UpdateSubscriptionsRequest req) async {
+    twirp.Context ctx,
+    UpdateSubscriptionsRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/UpdateSubscriptions');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/UpdateSubscriptions',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final UpdateSubscriptionsResponse res =
           UpdateSubscriptionsResponse.create();
@@ -407,7 +497,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<UpdateMuteStatesResponse> updateMuteStates(
-      twirp.Context ctx, UpdateMuteStatesRequest req) async {
+    twirp.Context ctx,
+    UpdateMuteStatesRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'UpdateMuteStates');
@@ -417,11 +509,15 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<UpdateMuteStatesResponse> callUpdateMuteStates(
-      twirp.Context ctx, UpdateMuteStatesRequest req) async {
+    twirp.Context ctx,
+    UpdateMuteStatesRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/UpdateMuteStates');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/UpdateMuteStates',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final UpdateMuteStatesResponse res = UpdateMuteStatesResponse.create();
       res.mergeFromBuffer(data);
@@ -433,7 +529,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<ICERestartResponse> iceRestart(
-      twirp.Context ctx, ICERestartRequest req) async {
+    twirp.Context ctx,
+    ICERestartRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'IceRestart');
@@ -443,10 +541,13 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<ICERestartResponse> callIceRestart(
-      twirp.Context ctx, ICERestartRequest req) async {
+    twirp.Context ctx,
+    ICERestartRequest req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceRestart');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceRestart',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final ICERestartResponse res = ICERestartResponse.create();
       res.mergeFromBuffer(data);
@@ -458,7 +559,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<SendStatsResponse> sendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+    twirp.Context ctx,
+    SendStatsRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SendStats');
@@ -468,10 +571,13 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<SendStatsResponse> callSendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+    twirp.Context ctx,
+    SendStatsRequest req,
+  ) async {
     try {
       Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats');
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final SendStatsResponse res = SendStatsResponse.create();
       res.mergeFromBuffer(data);
@@ -483,7 +589,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<StartNoiseCancellationResponse> startNoiseCancellation(
-      twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StartNoiseCancellationRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'StartNoiseCancellation');
@@ -493,11 +601,15 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<StartNoiseCancellationResponse> callStartNoiseCancellation(
-      twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StartNoiseCancellationRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/StartNoiseCancellation');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/StartNoiseCancellation',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final StartNoiseCancellationResponse res =
           StartNoiseCancellationResponse.create();
@@ -510,7 +622,9 @@ class SignalServerProtobufClient implements SignalServer {
 
   @override
   Future<StopNoiseCancellationResponse> stopNoiseCancellation(
-      twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StopNoiseCancellationRequest req,
+  ) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'StopNoiseCancellation');
@@ -520,11 +634,15 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   Future<StopNoiseCancellationResponse> callStopNoiseCancellation(
-      twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    twirp.Context ctx,
+    StopNoiseCancellationRequest req,
+  ) async {
     try {
-      Uri url = Uri.parse(baseUrl +
-          prefix +
-          'stream.video.sfu.signal.SignalServer/StopNoiseCancellation');
+      Uri url = Uri.parse(
+        baseUrl +
+            prefix +
+            'stream.video.sfu.signal.SignalServer/StopNoiseCancellation',
+      );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final StopNoiseCancellationResponse res =
           StopNoiseCancellationResponse.create();
@@ -536,8 +654,12 @@ class SignalServerProtobufClient implements SignalServer {
   }
 }
 
-Future<List<int>> doProtobufRequest(twirp.Context ctx, Uri url,
-    twirp.ClientHooks hooks, GeneratedMessage msgReq) async {
+Future<List<int>> doProtobufRequest(
+  twirp.Context ctx,
+  Uri url,
+  twirp.ClientHooks hooks,
+  GeneratedMessage msgReq,
+) async {
   // setup http client
   final httpClient = http.Client();
 
@@ -566,7 +688,9 @@ Future<List<int>> doProtobufRequest(twirp.Context ctx, Uri url,
 
     // we received a twirp related error
     throw twirp.TwirpError.fromJson(
-        json.decode(await res.stream.transform(utf8.decoder).join()), ctx);
+      json.decode(await res.stream.transform(utf8.decoder).join()),
+      ctx,
+    );
   } on twirp.TwirpError catch (twirpErr) {
     hooks.onError(ctx, twirpErr);
     rethrow;
@@ -580,8 +704,12 @@ Future<List<int>> doProtobufRequest(twirp.Context ctx, Uri url,
   }
 }
 
-Future<String> doJSONRequest(twirp.Context ctx, Uri url,
-    twirp.ClientHooks hooks, GeneratedMessage msgReq) async {
+Future<String> doJSONRequest(
+  twirp.Context ctx,
+  Uri url,
+  twirp.ClientHooks hooks,
+  GeneratedMessage msgReq,
+) async {
   // setup http client
   final httpClient = http.Client();
 
@@ -609,7 +737,9 @@ Future<String> doJSONRequest(twirp.Context ctx, Uri url,
 
     // we received a twirp related error
     throw twirp.TwirpError.fromJson(
-        json.decode(await res.stream.transform(utf8.decoder).join()), ctx);
+      json.decode(await res.stream.transform(utf8.decoder).join()),
+      ctx,
+    );
   } on twirp.TwirpError catch (twirpErr) {
     hooks.onError(ctx, twirpErr);
     rethrow;
@@ -624,7 +754,10 @@ Future<String> doJSONRequest(twirp.Context ctx, Uri url,
 }
 
 http.Request createRequest(
-    Uri url, twirp.Context ctx, String applicationHeader) {
+  Uri url,
+  twirp.Context ctx,
+  String applicationHeader,
+) {
   // setup request
   final req = http.Request("POST", url);
 

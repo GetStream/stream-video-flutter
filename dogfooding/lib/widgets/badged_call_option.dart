@@ -18,23 +18,14 @@ class BadgedCallOption extends StatelessWidget {
       children: [
         callControlOption,
         if (badgeCount != null)
-          Positioned(
-            top: 0,
-            right: 8,
-            child: Badge(
-              count: badgeCount!,
-            ),
-          )
+          Positioned(top: 0, right: 8, child: Badge(count: badgeCount!)),
       ],
     );
   }
 }
 
 class Badge extends StatelessWidget {
-  const Badge({
-    super.key,
-    required this.count,
-  });
+  const Badge({super.key, required this.count});
 
   final int count;
 
@@ -51,10 +42,7 @@ class Badge extends StatelessWidget {
         child: Text(
           count.toString(),
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 10,
-          ),
+          style: const TextStyle(color: Colors.black, fontSize: 10),
         ),
       ),
     );

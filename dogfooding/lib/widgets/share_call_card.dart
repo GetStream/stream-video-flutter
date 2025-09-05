@@ -9,10 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class ShareCallWelcomeCard extends StatefulWidget {
-  const ShareCallWelcomeCard({
-    required this.callId,
-    super.key,
-  });
+  const ShareCallWelcomeCard({required this.callId, super.key});
 
   final String callId;
 
@@ -54,12 +51,8 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
               color: Colors.white,
             ),
             childrenPadding: const EdgeInsets.all(16),
-            onExpansionChanged: (value) => setState(
-              () => _isExpanded = value,
-            ),
-            children: [
-              _ShareCardContent(callId: widget.callId),
-            ],
+            onExpansionChanged: (value) => setState(() => _isExpanded = value),
+            children: [_ShareCardContent(callId: widget.callId)],
           ),
         ),
       ),
@@ -68,10 +61,7 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
 }
 
 class ShareCallParticipantsCard extends StatelessWidget {
-  const ShareCallParticipantsCard({
-    required this.callId,
-    super.key,
-  });
+  const ShareCallParticipantsCard({required this.callId, super.key});
   final String callId;
 
   @override
@@ -107,10 +97,7 @@ class _ShareCardContent extends StatelessWidget {
       children: [
         if (callUrl != null) ...[
           StreamButton.active(
-            icon: const Icon(
-              Icons.person_add_alt_1,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.person_add_alt_1, color: Colors.white),
             label: 'Share link with others',
             onPressed: () async {
               await SharePlus.instance.share(
@@ -138,10 +125,12 @@ class _ShareCardContent extends StatelessWidget {
                     children: [
                       const Icon(Icons.check, color: AppColorPalette.appGreen),
                       const SizedBox(width: 8),
-                      Text('Call ID copied to clipboard',
-                          style: theme.textTheme.body.copyWith(
-                            color: theme.colorTheme.textHighEmphasis,
-                          )),
+                      Text(
+                        'Call ID copied to clipboard',
+                        style: theme.textTheme.body.copyWith(
+                          color: theme.colorTheme.textHighEmphasis,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -189,7 +178,7 @@ class _ShareCardContent extends StatelessWidget {
               ),
             ),
           ),
-        ]
+        ],
       ],
     );
   }

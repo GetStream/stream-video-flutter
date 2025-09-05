@@ -10,25 +10,28 @@ import 'regular_call_participants_content.dart';
 import 'screen_share_call_participants_content.dart';
 
 /// Builder function used to build a participant item.
-typedef CallParticipantBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef CallParticipantBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// Builder function used to build a screen sharing content.
-typedef ScreenShareContentBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef ScreenShareContentBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// Builder function used to build participant item in screen sharing mode.
-typedef ScreenShareParticipantBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef ScreenShareParticipantBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// A function used to sort the participants.
 typedef Filter<T> = bool Function(T element);
@@ -152,8 +155,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
     final participants = [...newParticipants].where(widget.filter).toList();
 
     for (final participant in participants) {
-      final index =
-          _sortedParticipantKeys.indexOf(participant.uniqueParticipantKey);
+      final index = _sortedParticipantKeys.indexOf(
+        participant.uniqueParticipantKey,
+      );
       if (index == -1) {
         _sortedParticipantKeys.add(participant.uniqueParticipantKey);
       }
@@ -179,8 +183,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
       },
     );
 
-    _sortedParticipantKeys =
-        participants.map((e) => e.uniqueParticipantKey).toList();
+    _sortedParticipantKeys = participants
+        .map((e) => e.uniqueParticipantKey)
+        .toList();
 
     if (mounted) {
       setState(() {

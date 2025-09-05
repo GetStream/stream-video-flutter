@@ -44,8 +44,9 @@ class ToggleRecordingOption extends StatelessWidget {
 
     return CallControlOption(
       icon: enabled ? Icon(enabledRecordingIcon) : Icon(disabledRecordingIcon),
-      iconColor:
-          enabled ? enabledRecordingIconColor : disabledRecordingIconColor,
+      iconColor: enabled
+          ? enabledRecordingIconColor
+          : disabledRecordingIconColor,
       backgroundColor: enabled
           ? enabledRecordingBackgroundColor
           : disabledRecordingBackgroundColor,

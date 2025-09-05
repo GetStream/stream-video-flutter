@@ -2,10 +2,7 @@
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class UserCredentials {
-  const UserCredentials({
-    required this.token,
-    required this.userInfo,
-  });
+  const UserCredentials({required this.token, required this.userInfo});
 
   final UserToken token;
   final UserInfo userInfo;
@@ -18,10 +15,7 @@ class UserCredentials {
   }
 
   Map<String, Object?> toJson() {
-    return {
-      'token': token.rawValue,
-      'user': userInfo.toJson(),
-    };
+    return {'token': token.rawValue, 'user': userInfo.toJson()};
   }
 }
 

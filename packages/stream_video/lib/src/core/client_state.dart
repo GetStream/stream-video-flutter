@@ -53,15 +53,15 @@ abstract class ClientState {
 
 class MutableClientState implements ClientState {
   MutableClientState(User user, this.options)
-      : user = MutableStateEmitterImpl(user),
-        activeCalls = MutableStateEmitterImpl([]),
-        activeCall = MutableStateEmitterImpl(null),
-        watchedCalls = MutableStateEmitterImpl([]),
-        incomingCall = MutableStateEmitterImpl(null),
-        outgoingCall = MutableStateEmitterImpl(null),
-        connection = MutableStateEmitterImpl(
-          ConnectionState.disconnected(user.id),
-        );
+    : user = MutableStateEmitterImpl(user),
+      activeCalls = MutableStateEmitterImpl([]),
+      activeCall = MutableStateEmitterImpl(null),
+      watchedCalls = MutableStateEmitterImpl([]),
+      incomingCall = MutableStateEmitterImpl(null),
+      outgoingCall = MutableStateEmitterImpl(null),
+      connection = MutableStateEmitterImpl(
+        ConnectionState.disconnected(user.id),
+      );
 
   final StreamVideoOptions options;
 

@@ -45,12 +45,12 @@ class PushDevice with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        pushToken,
-        pushProvider,
-        pushProviderName,
-        voip,
-        createdAt,
-        disabled,
-        disabledReason,
-      ];
+    pushToken,
+    pushProvider,
+    pushProviderName,
+    voip,
+    createdAt,
+    disabled,
+    disabledReason,
+  ];
 }

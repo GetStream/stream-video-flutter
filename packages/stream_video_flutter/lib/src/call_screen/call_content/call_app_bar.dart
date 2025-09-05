@@ -60,7 +60,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
 
-    final leadingWidget = leading ??
+    final leadingWidget =
+        leading ??
         (showBackButton
             ? IconButton(
                 icon: Icon(
@@ -83,7 +84,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       leadingWidth: leadingWidth,
       backgroundColor: backgroundColor ?? theme.colorTheme.barsBg,
       centerTitle: true,
-      actions: actions ??
+      actions:
+          actions ??
           <Widget>[
             if (showLeaveCallAction)
               Transform.scale(
@@ -94,7 +96,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
           ],
-      title: title ??
+      title:
+          title ??
           Text(
             _getTitleText(),
             style: theme.textTheme.title3Bold,

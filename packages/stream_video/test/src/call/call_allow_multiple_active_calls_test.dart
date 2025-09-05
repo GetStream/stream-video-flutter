@@ -43,10 +43,12 @@ void main() {
       mockCoordinatorClient = MockCoordinatorClient();
 
       // Mock coordinator client methods and events that might be called
-      when(() => mockCoordinatorClient.events)
-          .thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
-      when(() => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')))
-          .thenAnswer((_) async => const Result.success(none));
+      when(
+        () => mockCoordinatorClient.events,
+      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      when(
+        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+      ).thenAnswer((_) async => const Result.success(none));
       when(
         () => mockCoordinatorClient.rejectCall(
           cid: any(named: 'cid'),
@@ -105,15 +107,17 @@ void main() {
         expect(call2.isActiveCall, false);
       });
 
-      test('isActiveCall returns false when call is not in activeCalls',
-          () async {
-        // Arrange - ensure no active calls
-        expect(streamVideo.activeCalls, <Call>[]);
+      test(
+        'isActiveCall returns false when call is not in activeCalls',
+        () async {
+          // Arrange - ensure no active calls
+          expect(streamVideo.activeCalls, <Call>[]);
 
-        // Assert
-        expect(call1.isActiveCall, false);
-        expect(call2.isActiveCall, false);
-      });
+          // Assert
+          expect(call1.isActiveCall, false);
+          expect(call2.isActiveCall, false);
+        },
+      );
 
       test('call correctly identifies when it becomes inactive', () async {
         // Arrange - set call as active
@@ -127,62 +131,66 @@ void main() {
         expect(call1.isActiveCall, false);
       });
 
-      test('accepting call replaces existing active call when single call mode',
-          () async {
-        // Arrange - create and set a mock call as active first
-        final mockActiveCall = MockCall();
-        when(() => mockActiveCall.callCid).thenReturn(
-          StreamCallCid.from(
-            id: 'active-call',
+      test(
+        'accepting call replaces existing active call when single call mode',
+        () async {
+          // Arrange - create and set a mock call as active first
+          final mockActiveCall = MockCall();
+          when(() => mockActiveCall.callCid).thenReturn(
+            StreamCallCid.from(
+              id: 'active-call',
+              type: StreamCallType.defaultType(),
+            ),
+          );
+          when(
+            () => mockActiveCall.leave(reason: any(named: 'reason')),
+          ).thenAnswer((_) async => const Result.success(none));
+
+          await streamVideo.state.setActiveCall(mockActiveCall);
+          expect(streamVideo.activeCalls, [mockActiveCall]);
+
+          // Create a second call using Call.fromRinging (simulating incoming call)
+          final ringingCallCid = StreamCallCid.from(
+            id: 'ringing-call',
             type: StreamCallType.defaultType(),
-          ),
-        );
-        when(() => mockActiveCall.leave(reason: any(named: 'reason')))
-            .thenAnswer((_) async => const Result.success(none));
+          );
 
-        await streamVideo.state.setActiveCall(mockActiveCall);
-        expect(streamVideo.activeCalls, [mockActiveCall]);
+          final ringingCallMetadata = CallMetadata(
+            cid: ringingCallCid,
+            details: createTestCallDetails(createdByUserId: 'other-user'),
+            settings: const CallSettings(),
+            session: const CallSessionData(),
+            users: const {},
+            members: const {},
+          );
 
-        // Create a second call using Call.fromRinging (simulating incoming call)
-        final ringingCallCid = StreamCallCid.from(
-          id: 'ringing-call',
-          type: StreamCallType.defaultType(),
-        );
+          final ringingData = CallRingingData(
+            callCid: ringingCallCid,
+            ringing: true,
+            metadata: ringingCallMetadata,
+          );
 
-        final ringingCallMetadata = CallMetadata(
-          cid: ringingCallCid,
-          details: createTestCallDetails(createdByUserId: 'other-user'),
-          settings: const CallSettings(),
-          session: const CallSessionData(),
-          users: const {},
-          members: const {},
-        );
+          final ringingCall = Call.fromRinging(
+            data: ringingData,
+            coordinatorClient: mockCoordinatorClient,
+            streamVideo: streamVideo,
+            networkMonitor: InternetConnection.createInstance(),
+          );
 
-        final ringingData = CallRingingData(
-          callCid: ringingCallCid,
-          ringing: true,
-          metadata: ringingCallMetadata,
-        );
+          // Act - accept the ringing call (should remove existing active call but not make ringing call active yet)
+          await ringingCall.accept();
 
-        final ringingCall = Call.fromRinging(
-          data: ringingData,
-          coordinatorClient: mockCoordinatorClient,
-          streamVideo: streamVideo,
-          networkMonitor: InternetConnection.createInstance(),
-        );
+          // Assert - the existing active call was removed and leave was called on it
+          // The ringing call should NOT be active after just accepting (it needs to be joined)
+          expect(streamVideo.activeCalls, <Call>[]);
+          verify(
+            () => mockActiveCall.leave(reason: any(named: 'reason')),
+          ).called(1);
 
-        // Act - accept the ringing call (should remove existing active call but not make ringing call active yet)
-        await ringingCall.accept();
-
-        // Assert - the existing active call was removed and leave was called on it
-        // The ringing call should NOT be active after just accepting (it needs to be joined)
-        expect(streamVideo.activeCalls, <Call>[]);
-        verify(() => mockActiveCall.leave(reason: any(named: 'reason')))
-            .called(1);
-
-        // The ringing call should be in incoming state, not active
-        expect(ringingCall.state.value.status, isA<CallStatusIncoming>());
-      });
+          // The ringing call should be in incoming state, not active
+          expect(ringingCall.state.value.status, isA<CallStatusIncoming>());
+        },
+      );
     });
 
     group('when allowMultipleActiveCalls is true', () {
@@ -266,61 +274,63 @@ void main() {
       });
 
       test(
-          'accepting call does not replace existing active calls when multiple calls enabled',
-          () async {
-        // Arrange - create and set a mock call as active first
-        final mockActiveCall = MockCall();
-        when(() => mockActiveCall.callCid).thenReturn(
-          StreamCallCid.from(
-            id: 'active-call',
+        'accepting call does not replace existing active calls when multiple calls enabled',
+        () async {
+          // Arrange - create and set a mock call as active first
+          final mockActiveCall = MockCall();
+          when(() => mockActiveCall.callCid).thenReturn(
+            StreamCallCid.from(
+              id: 'active-call',
+              type: StreamCallType.defaultType(),
+            ),
+          );
+          when(
+            () => mockActiveCall.leave(reason: any(named: 'reason')),
+          ).thenAnswer((_) async => const Result.success(none));
+
+          await streamVideo.state.setActiveCall(mockActiveCall);
+          expect(streamVideo.activeCalls, [mockActiveCall]);
+
+          // Create a second call using Call.fromRinging (simulating incoming call)
+          final ringingCallCid = StreamCallCid.from(
+            id: 'ringing-call',
             type: StreamCallType.defaultType(),
-          ),
-        );
-        when(() => mockActiveCall.leave(reason: any(named: 'reason')))
-            .thenAnswer((_) async => const Result.success(none));
+          );
 
-        await streamVideo.state.setActiveCall(mockActiveCall);
-        expect(streamVideo.activeCalls, [mockActiveCall]);
+          final ringingCallMetadata = CallMetadata(
+            cid: ringingCallCid,
+            details: createTestCallDetails(createdByUserId: 'other-user'),
+            settings: const CallSettings(),
+            session: const CallSessionData(),
+            users: const {},
+            members: const {},
+          );
 
-        // Create a second call using Call.fromRinging (simulating incoming call)
-        final ringingCallCid = StreamCallCid.from(
-          id: 'ringing-call',
-          type: StreamCallType.defaultType(),
-        );
+          final ringingData = CallRingingData(
+            callCid: ringingCallCid,
+            ringing: true,
+            metadata: ringingCallMetadata,
+          );
 
-        final ringingCallMetadata = CallMetadata(
-          cid: ringingCallCid,
-          details: createTestCallDetails(createdByUserId: 'other-user'),
-          settings: const CallSettings(),
-          session: const CallSessionData(),
-          users: const {},
-          members: const {},
-        );
+          final ringingCall = Call.fromRinging(
+            data: ringingData,
+            coordinatorClient: mockCoordinatorClient,
+            streamVideo: streamVideo,
+            networkMonitor: InternetConnection.createInstance(),
+          );
 
-        final ringingData = CallRingingData(
-          callCid: ringingCallCid,
-          ringing: true,
-          metadata: ringingCallMetadata,
-        );
+          // Act - accept the ringing call (should NOT remove existing active call in multiple calls mode)
+          await ringingCall.accept();
 
-        final ringingCall = Call.fromRinging(
-          data: ringingData,
-          coordinatorClient: mockCoordinatorClient,
-          streamVideo: streamVideo,
-          networkMonitor: InternetConnection.createInstance(),
-        );
+          // Assert - previous active call should still be active (ringing call is not active yet, requires join)
+          expect(streamVideo.activeCalls, contains(mockActiveCall));
+          expect(streamVideo.activeCalls.length, 1);
+          verifyNever(() => mockActiveCall.leave(reason: any(named: 'reason')));
 
-        // Act - accept the ringing call (should NOT remove existing active call in multiple calls mode)
-        await ringingCall.accept();
-
-        // Assert - previous active call should still be active (ringing call is not active yet, requires join)
-        expect(streamVideo.activeCalls, contains(mockActiveCall));
-        expect(streamVideo.activeCalls.length, 1);
-        verifyNever(() => mockActiveCall.leave(reason: any(named: 'reason')));
-
-        // The ringing call should be in incoming state, not joined
-        expect(ringingCall.state.value.status, isA<CallStatusIncoming>());
-      });
+          // The ringing call should be in incoming state, not joined
+          expect(ringingCall.state.value.status, isA<CallStatusIncoming>());
+        },
+      );
     });
   });
 }

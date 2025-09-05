@@ -366,16 +366,20 @@ extension SfuWebsocketReconnectStrategyExtension
   SfuReconnectionStrategy toDomain() {
     switch (this) {
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
         return SfuReconnectionStrategy.disconnect;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_FAST:
         return SfuReconnectionStrategy.fast;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_REJOIN:
         return SfuReconnectionStrategy.rejoin;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
         return SfuReconnectionStrategy.migrate;
       default:
         return SfuReconnectionStrategy.unspecified;

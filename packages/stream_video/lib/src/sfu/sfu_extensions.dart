@@ -255,8 +255,9 @@ extension ReconnectDetailsX on sfu_events.ReconnectDetails {
   Map<String, dynamic> toJson() {
     return {
       'strategy': strategy.toString(),
-      'announced_tracks':
-          announcedTracks.map((track) => track.toJson()).toList(),
+      'announced_tracks': announcedTracks
+          .map((track) => track.toJson())
+          .toList(),
       'subscriptions': subscriptions.map((sub) => sub.toJson()).toList(),
       'reconnect_attempt': reconnectAttempt,
       'from_sfu_id': fromSfuId,
@@ -278,8 +279,9 @@ extension SfuChangePublishQualityEventJsonX on SfuChangePublishQualityEvent {
 extension SfuChangePublishOptionsEventJsonX on SfuChangePublishOptionsEvent {
   Map<String, dynamic> toJson() {
     return {
-      'publish_options':
-          publishOptions.map((option) => option.toJson()).toList(),
+      'publish_options': publishOptions
+          .map((option) => option.toJson())
+          .toList(),
       'reason': reason,
     };
   }
@@ -465,10 +467,12 @@ extension SubscribeOptionX on sfu_models.SubscribeOption {
 
 extension JoinRequestX on sfu_events.JoinRequest {
   Map<String, dynamic> toJson() {
-    final subscriberSdpParsed =
-        subscriberSdp.isNotEmpty ? parse(subscriberSdp) : null;
-    final publisherSdpParsed =
-        publisherSdp.isNotEmpty ? parse(publisherSdp) : null;
+    final subscriberSdpParsed = subscriberSdp.isNotEmpty
+        ? parse(subscriberSdp)
+        : null;
+    final publisherSdpParsed = publisherSdp.isNotEmpty
+        ? parse(publisherSdp)
+        : null;
     return {
       'token': token,
       'session_id': sessionId,
@@ -476,10 +480,12 @@ extension JoinRequestX on sfu_events.JoinRequest {
       'client_details': clientDetails.toJson(),
       'reconnect_details': reconnectDetails.toJson(),
       'publisher_sdp': publisherSdpParsed,
-      'preferred_publish_options':
-          preferredPublishOptions.map((option) => option.toJson()).toList(),
-      'preferred_subscribe_options':
-          preferredSubscribeOptions.map((option) => option.toJson()).toList(),
+      'preferred_publish_options': preferredPublishOptions
+          .map((option) => option.toJson())
+          .toList(),
+      'preferred_subscribe_options': preferredSubscribeOptions
+          .map((option) => option.toJson())
+          .toList(),
     };
   }
 }

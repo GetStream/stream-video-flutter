@@ -16,9 +16,7 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
         () => 'Noise cancellation is not supported on this platform: $e',
       );
     } catch (err) {
-      _logger.e(
-        () => err.toString(),
-      );
+      _logger.e(() => err.toString());
     }
   }
 
@@ -59,7 +57,8 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
   @override
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     try {
-      final result = await StreamVideoNoiseCancellation()
+      final result =
+          await StreamVideoNoiseCancellation()
               .deviceSupportsAdvancedAudioProcessing() ??
           false;
       return Result.success(result);
