@@ -39,6 +39,7 @@ void main() {
       when(
         () => mockCallSession.start(
           reconnectDetails: any(named: 'reconnectDetails'),
+          capabilities: any(named: 'capabilities'),
           onRtcManagerCreatedCallback:
               any(named: 'onRtcManagerCreatedCallback'),
           isAnonymousUser: any(named: 'isAnonymousUser'),
@@ -72,12 +73,14 @@ void main() {
               onRtcManagerCreatedCallback:
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
+              capabilities: any(named: 'capabilities'),
             ),
         () => mockCallSession.start(
               reconnectDetails: any(named: 'reconnectDetails'),
               onRtcManagerCreatedCallback:
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
+              capabilities: any(named: 'capabilities'),
             ),
         () => coordinatorClient.joinCall(
               callCid: any(named: 'callCid'),
@@ -92,6 +95,7 @@ void main() {
               onRtcManagerCreatedCallback:
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
+              capabilities: any(named: 'capabilities'),
             ),
       ]);
     });
