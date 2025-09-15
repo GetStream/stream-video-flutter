@@ -3,6 +3,10 @@
 ✅ Added
 * Extended `CallParticipantState` with `participantSource`. This indicates the participant's source channel (e.g., WebRTC, RTMP, WHIP) and can be used in filtering and sorting criteria.
 * Livestream sorting preset now prioritises RTMP sources in layout sorting.
+* Automatic SFU-driven pausing of inbound video to save bandwidth and prevent visual artifacts:
+  * New `SfuClientCapability.subscriberVideoPause` (on by default). Control via `Call.enableClientCapabilities()` / `Call.disableClientCapabilities()`.
+  * New `SfuInboundStateNotificationEvent` notifies when inbound tracks are paused or resumed.
+  * `CallParticipantState.pausedTracks` and `CallParticipantState.isTrackPaused()` let you check which tracks are currently paused.
 
 ## 0.10.3
 

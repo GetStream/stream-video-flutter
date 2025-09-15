@@ -37,6 +37,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     this.audioLevelIndicatorColor = const Color(0xff005FFF),
     this.enabledMicrophoneColor = Colors.white,
     this.disabledMicrophoneColor = const Color(0xffFF3842),
+    this.pausedVideoIndicatorColor = Colors.white,
     this.showConnectionQualityIndicator = true,
     this.connectionLevelActiveColor = const Color(0xff005FFF),
     this.connectionLevelInactiveColor = Colors.white,
@@ -86,6 +87,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// The color of a disabled microphone icon.
   final Color disabledMicrophoneColor;
 
+  /// The color of a paused video track icon.
+  final Color pausedVideoIndicatorColor;
+
   /// Whether to show the connection quality indicator.
   final bool showConnectionQualityIndicator;
 
@@ -123,6 +127,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     Color? audioLevelIndicatorColor,
     Color? enabledMicrophoneColor,
     Color? disabledMicrophoneColor,
+    Color? pausedVideoIndicatorColor,
     bool? showConnectionQualityIndicator,
     Color? connectionLevelActiveColor,
     Color? connectionLevelInactiveColor,
@@ -151,6 +156,8 @@ class StreamCallParticipantThemeData with Diagnosticable {
           enabledMicrophoneColor ?? this.enabledMicrophoneColor,
       disabledMicrophoneColor:
           disabledMicrophoneColor ?? this.disabledMicrophoneColor,
+      pausedVideoIndicatorColor:
+          pausedVideoIndicatorColor ?? this.pausedVideoIndicatorColor,
       showConnectionQualityIndicator:
           showConnectionQualityIndicator ?? this.showConnectionQualityIndicator,
       connectionLevelActiveColor:
@@ -215,6 +222,11 @@ class StreamCallParticipantThemeData with Diagnosticable {
         other.disabledMicrophoneColor,
         t,
       )!,
+      pausedVideoIndicatorColor: Color.lerp(
+        pausedVideoIndicatorColor,
+        other.pausedVideoIndicatorColor,
+        t,
+      )!,
       showConnectionQualityIndicator: t < 0.5
           ? showConnectionQualityIndicator
           : other.showConnectionQualityIndicator,
@@ -263,16 +275,19 @@ class StreamCallParticipantThemeData with Diagnosticable {
         showParticipantLabel,
         participantLabelTextStyle,
         participantLabelAlignment,
-        audioLevelIndicatorColor,
-        enabledMicrophoneColor,
-        disabledMicrophoneColor,
         showConnectionQualityIndicator,
-        connectionLevelActiveColor,
-        connectionLevelInactiveColor,
         connectionLevelAlignment,
         participantsGridPadding,
         participantsGridMainAxisSpacing,
         participantsGridCrossAxisSpacing,
+        Object.hash(
+          audioLevelIndicatorColor,
+          enabledMicrophoneColor,
+          disabledMicrophoneColor,
+          pausedVideoIndicatorColor,
+          connectionLevelActiveColor,
+          connectionLevelInactiveColor,
+        ),
       );
 
   @override
@@ -297,6 +312,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
         other.audioLevelIndicatorColor == audioLevelIndicatorColor &&
         other.enabledMicrophoneColor == enabledMicrophoneColor &&
         other.disabledMicrophoneColor == disabledMicrophoneColor &&
+        other.pausedVideoIndicatorColor == pausedVideoIndicatorColor &&
         other.showConnectionQualityIndicator ==
             showConnectionQualityIndicator &&
         other.connectionLevelActiveColor == connectionLevelActiveColor &&
@@ -361,6 +377,12 @@ class StreamCallParticipantThemeData with Diagnosticable {
         DiagnosticsProperty(
           'disabledMicrophoneColor',
           disabledMicrophoneColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'pausedVideoIndicatorColor',
+          pausedVideoIndicatorColor,
         ),
       )
       ..add(

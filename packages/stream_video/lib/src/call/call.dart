@@ -29,6 +29,7 @@ import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
+import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../shared_emitter.dart';
@@ -292,6 +293,9 @@ class Call {
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
+  final Set<SfuClientCapability> _sfuClientCapabilities = {
+    SfuClientCapability.subscriberVideoPause, // on by default
+  };
 
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
@@ -548,6 +552,20 @@ class Call {
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
     _stateManager.updateCallPreferences(preferences);
+  }
+
+  void enableClientCapabilities(
+    List<SfuClientCapability> capabilities,
+  ) {
+    _logger.i(() => '[enableClientCapabilities] $capabilities');
+    capabilities.forEach(_sfuClientCapabilities.add);
+  }
+
+  void disableClientCapabilities(
+    List<SfuClientCapability> capabilities,
+  ) {
+    _logger.i(() => '[disableClientCapabilities] $capabilities');
+    capabilities.forEach(_sfuClientCapabilities.remove);
   }
 
   /// Accepts the incoming call.
@@ -1180,6 +1198,7 @@ class Call {
 
     final result = await session.start(
       reconnectDetails: reconnectDetails,
+      capabilities: _sfuClientCapabilities,
       onRtcManagerCreatedCallback: (_) async {
         _logger.v(() => '[startSession] applying connect options');
         await _applyConnectOptions();
