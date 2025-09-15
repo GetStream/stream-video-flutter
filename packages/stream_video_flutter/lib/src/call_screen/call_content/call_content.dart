@@ -12,31 +12,34 @@ import '../call_diagnostics_content/call_diagnostics_content.dart';
 ///
 /// Replaced by the simplified [CallPreferredSizeWidgetBuilder].
 @Deprecated('Use CallPreferredSizeWidgetBuilder instead.')
-typedef CallAppBarBuilder = PreferredSizeWidget? Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef CallAppBarBuilder =
+    PreferredSizeWidget? Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Builder used to create a custom call participants widget.
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef CallParticipantsBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef CallParticipantsBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Builder used to create a custom call controls widget.
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef CallControlsBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef CallControlsBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Represents the UI in an active call that shows participants and their video,
 /// as well as some extra UI features to control the call settings, browse
@@ -127,7 +130,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
   late CallStatus _status;
 
   StreamSubscription<({CallStatus status, bool isScreenShareEnabled})>?
-      _callStateSubscription;
+  _callStateSubscription;
 
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
@@ -149,7 +152,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
         (
           status: widget.callState!.status,
           isScreenShareEnabled:
-              widget.callState!.localParticipant?.isScreenShareEnabled ?? false
+              widget.callState!.localParticipant?.isScreenShareEnabled ?? false,
         ),
       );
     } else if (widget.call != oldWidget.call) {
@@ -180,7 +183,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
           (state) => (
             status: state.status,
             isScreenShareEnabled:
-                state.localParticipant?.isScreenShareEnabled ?? false
+                state.localParticipant?.isScreenShareEnabled ?? false,
           ),
         )
         .listen(_updateCallState);
@@ -200,9 +203,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
     final theme = StreamVideoTheme.of(context);
     final pipEnabled =
         widget.pictureInPictureConfiguration.enablePictureInPicture &&
-            (!widget.pictureInPictureConfiguration
-                    .disablePictureInPictureWhenScreenSharing ||
-                !_isScreenShareEnabled);
+        (!widget
+                .pictureInPictureConfiguration
+                .disablePictureInPictureWhenScreenSharing ||
+            !_isScreenShareEnabled);
 
     final Widget bodyWidget;
     if (_status.isConnected ||
@@ -251,9 +255,13 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
     return Scaffold(
       backgroundColor: theme.callContentTheme.callContentBackgroundColor,
-      appBar: widget.callAppBarWidgetBuilder?.call(context, call) ??
-          widget.callAppBarBuilder
-              ?.call(context, call, _callState ?? call.state.value) ??
+      appBar:
+          widget.callAppBarWidgetBuilder?.call(context, call) ??
+          widget.callAppBarBuilder?.call(
+            context,
+            call,
+            _callState ?? call.state.value,
+          ) ??
           CallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
@@ -293,11 +301,14 @@ class _StreamCallContentState extends State<StreamCallContent> {
         selector: (state) => state.localParticipant,
         builder: (_, localParticipant) => localParticipant != null
             ? widget.callControlsWidgetBuilder?.call(context, call) ??
-                widget.callControlsBuilder
-                    ?.call(context, call, _callState ?? call.state.value) ??
-                StreamCallControls.withDefaultOptions(
-                  call: call,
-                )
+                  widget.callControlsBuilder?.call(
+                    context,
+                    call,
+                    _callState ?? call.state.value,
+                  ) ??
+                  StreamCallControls.withDefaultOptions(
+                    call: call,
+                  )
             : const SizedBox.shrink(),
       ),
     );

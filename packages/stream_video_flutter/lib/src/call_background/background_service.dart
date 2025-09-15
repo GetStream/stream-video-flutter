@@ -11,9 +11,7 @@ import 'model/service_type.dart';
 const _tag = 'SV:Background';
 const _btnCancel = 'cancel';
 
-enum ButtonType {
-  cancel;
-}
+enum ButtonType { cancel }
 
 typedef NotificationOptionsBuilder = NotificationOptions Function(Call);
 
@@ -71,8 +69,9 @@ class StreamBackgroundService {
         return;
       }
 
-      _instance._logger
-          .d(() => '<$callCid> [onNotificationContentClick] handling click');
+      _instance._logger.d(
+        () => '<$callCid> [onNotificationContentClick] handling click',
+      );
       await onNotificationClick?.call(callContext.call);
     });
 
@@ -114,8 +113,9 @@ class StreamBackgroundService {
       }
     });
 
-    StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(
-        (String callCid) async {
+    StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed((
+      String callCid,
+    ) async {
       final context = _instance._managedCalls[callCid];
       if (context == null) {
         _instance._logger.w(
@@ -133,8 +133,9 @@ class StreamBackgroundService {
     });
 
     _activeCalSubscription?.cancel();
-    _activeCalSubscription =
-        streamVideo.listenActiveCalls((List<Call> currentCalls) async {
+    _activeCalSubscription = streamVideo.listenActiveCalls((
+      List<Call> currentCalls,
+    ) async {
       final currentCallCids = currentCalls.map((c) => c.callCid.value).toSet();
       final managedCallCids = _instance._managedCalls.keys.toSet();
 
@@ -225,12 +226,12 @@ class StreamBackgroundService {
             // TODO: That is a lot of service updates. We should only update the service if the options have changed.
             final updateResult =
                 await StreamVideoFlutterBackground.updateService(
-              NotificationPayload(
-                callCid: callCid,
-                options: updateOptions,
-              ),
-              ServiceType.call,
-            );
+                  NotificationPayload(
+                    callCid: callCid,
+                    options: updateOptions,
+                  ),
+                  ServiceType.call,
+                );
             _logger.v(
               () =>
                   '<$callCid> [_startManagingCall] call service update result: $updateResult',
@@ -280,9 +281,9 @@ class StreamBackgroundService {
       // If a call ends, we might also want to stop its associated screen share service.
       final screenShareStopResult =
           await StreamVideoFlutterBackground.stopService(
-        ServiceType.screenSharing,
-        callCid: callCid,
-      );
+            ServiceType.screenSharing,
+            callCid: callCid,
+          );
 
       _logger.d(
         () =>
@@ -304,7 +305,9 @@ class StreamBackgroundService {
 
     final options =
         (_screenShareNotificationOptionsBuilder ?? _screenShareDefaultOptions)
-            .call(call);
+            .call(
+              call,
+            );
 
     final payload = NotificationPayload(
       callCid: callCid,

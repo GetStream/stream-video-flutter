@@ -126,8 +126,17 @@ class UserResponseData with EquatableMixin {
       'UserResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, id=$id, image=$image, name=$name, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   @override
-  List<Object?> get props =>
-      [createdAt, custom, deletedAt, id, image, name, role, teams, updatedAt];
+  List<Object?> get props => [
+    createdAt,
+    custom,
+    deletedAt,
+    id,
+    image,
+    name,
+    role,
+    teams,
+    updatedAt,
+  ];
 }
 
 extension UserResponseDataX on UserResponseData {

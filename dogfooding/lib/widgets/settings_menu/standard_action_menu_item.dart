@@ -24,19 +24,12 @@ class StandardActionMenuItem extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 8),
-          Icon(
-            icon,
-            size: 20,
-            color: color,
-          ),
+          Icon(icon, size: 20, color: color),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: color, fontWeight: FontWeight.bold),
             ),
           ),
           if (trailing != null) trailing!,

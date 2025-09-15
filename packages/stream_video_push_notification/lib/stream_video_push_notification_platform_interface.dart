@@ -9,19 +9,16 @@ class CallerCustomizationResponse {
   CallerCustomizationResponse({this.name, this.handle, this.avatar});
 
   Map<String, dynamic> toJson() {
-    return {
-      "name": name,
-      "handle": handle,
-      "avatar": avatar,
-    };
+    return {"name": name, "handle": handle, "avatar": avatar};
   }
 }
 
-typedef CallerCustomizationFunction = CallerCustomizationResponse Function({
-  required String callCid,
-  String? callerHandle,
-  String? callerName,
-});
+typedef CallerCustomizationFunction =
+    CallerCustomizationResponse Function({
+      required String callCid,
+      String? callerHandle,
+      String? callerName,
+    });
 
 typedef BackgroundVoipCallHandler = Future<void> Function();
 
@@ -55,6 +52,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   Future<void> ensureFullScreenIntentPermission() {
     throw UnimplementedError(
-        'ensureFullScreenIntentPermission() has not been implemented.');
+      'ensureFullScreenIntentPermission() has not been implemented.',
+    );
   }
 }

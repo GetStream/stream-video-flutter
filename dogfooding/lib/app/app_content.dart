@@ -37,7 +37,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     if (credentials == null) return;
 
     final tokenResponse = await locator.get<TokenService>().loadToken(
-        userId: credentials.userInfo.id, environment: prefs.environment);
+      userId: credentials.userInfo.id,
+      environment: prefs.environment,
+    );
 
     // Initialise the video client.
     final streamVideo = AppInjector.registerStreamVideo(
@@ -188,18 +190,20 @@ class _StreamDogFoodingAppContentState
         ),
       );
     } else {
-      _compositeSubscription.add(streamVideo.state.incomingCall.listen((call) {
-        if (call == null) return;
+      _compositeSubscription.add(
+        streamVideo.state.incomingCall.listen((call) {
+          if (call == null) return;
 
-        // Navigate to the call screen.
-        final extra = (
-          call: call,
-          connectOptions: null,
-          effectsManager: null,
-        );
+          // Navigate to the call screen.
+          final extra = (
+            call: call,
+            connectOptions: null,
+            effectsManager: null,
+          );
 
-        _router.push(CallRoute($extra: extra).location, extra: extra);
-      }));
+          _router.push(CallRoute($extra: extra).location, extra: extra);
+        }),
+      );
     }
   }
 
@@ -332,31 +336,19 @@ class _StreamDogFoodingAppContentState
                 emojiCode: ':fireworks:',
                 icon: '🎉',
               ),
-              CallReactionData(
-                type: 'Liked',
-                emojiCode: ':like:',
-                icon: '👍',
-              ),
+              CallReactionData(type: 'Liked', emojiCode: ':like:', icon: '👍'),
               CallReactionData(
                 type: 'Dislike',
                 emojiCode: ':dislike:',
                 icon: '👎',
               ),
-              CallReactionData(
-                type: 'Smile',
-                emojiCode: ':smile:',
-                icon: '😊',
-              ),
-              CallReactionData(
-                type: 'Heart',
-                emojiCode: ':heart:',
-                icon: '♥️',
-              ),
+              CallReactionData(type: 'Smile', emojiCode: ':smile:', icon: '😊'),
+              CallReactionData(type: 'Heart', emojiCode: ':heart:', icon: '♥️'),
               CallReactionData(
                 emojiCode: ':raise-hand:',
                 type: 'Raise hand',
                 icon: '✋',
-              )
+              ),
             ],
             backgroundColor: colorTheme.barsBg,
             elevation: 8,
@@ -375,10 +367,7 @@ class _StreamDogFoodingAppContentState
           ),
           userAvatarTheme: StreamUserAvatarThemeData(
             borderRadius: BorderRadius.circular(20),
-            constraints: const BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
+            constraints: const BoxConstraints.tightFor(height: 40, width: 40),
             initialsTextStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -396,8 +385,9 @@ class _StreamDogFoodingAppContentState
                 width: 100,
               ),
               borderRadius: const BorderRadius.all(Radius.circular(50)),
-              initialsTextStyle:
-                  textTheme.title1.copyWith(color: AppColorPalette.primary),
+              initialsTextStyle: textTheme.title1.copyWith(
+                color: AppColorPalette.primary,
+              ),
               initialsBackground: AppColorPalette.avatarBackground,
               selectionThickness: 4,
             ),
@@ -414,15 +404,17 @@ class _StreamDogFoodingAppContentState
                 width: 100,
               ),
               borderRadius: const BorderRadius.all(Radius.circular(50)),
-              initialsTextStyle:
-                  textTheme.title1.copyWith(color: const Color(0xFF005FFF)),
+              initialsTextStyle: textTheme.title1.copyWith(
+                color: const Color(0xFF005FFF),
+              ),
               initialsBackground: AppColorPalette.avatarBackground,
               selectionColor: colorTheme.accentPrimary,
               selectionThickness: 4,
             ),
             audioLevelIndicatorColor: colorTheme.accentPrimary,
-            participantLabelTextStyle:
-                textTheme.footnote.copyWith(color: Colors.white),
+            participantLabelTextStyle: textTheme.footnote.copyWith(
+              color: Colors.white,
+            ),
             disabledMicrophoneColor: Colors.white,
             enabledMicrophoneColor: Colors.white,
             connectionLevelActiveColor: const Color(0xFF00FF00),
@@ -431,16 +423,14 @@ class _StreamDogFoodingAppContentState
             participantsGridMainAxisSpacing: 4,
             participantsGridCrossAxisSpacing: 4,
           ),
-        )
+        ),
       ],
       textTheme: baseTextTheme.copyWith(
         bodyLarge: baseTextTheme.bodyLarge?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-          color: Colors.white,
-        ),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(color: Colors.white),
       ),
     );
   }

@@ -7,197 +7,222 @@ part of 'routes.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
-      $homeRoute,
-      $loginRoute,
-      $lobbyRoute,
-      $livestreamRoute,
-      $callRoute,
-      $callParticipantsRoute,
-      $callStatsRoute,
-    ];
+  $homeRoute,
+  $loginRoute,
+  $lobbyRoute,
+  $livestreamRoute,
+  $callRoute,
+  $callParticipantsRoute,
+  $callStatsRoute,
+];
 
-RouteBase get $homeRoute => GoRouteData.$route(
-      path: '/',
-      name: 'home',
-      factory: $HomeRouteExtension._fromState,
-    );
+RouteBase get $homeRoute =>
+    GoRouteData.$route(path: '/', name: 'home', factory: $HomeRoute._fromState);
 
-extension $HomeRouteExtension on HomeRoute {
+mixin $HomeRoute on GoRouteData {
   static HomeRoute _fromState(GoRouterState state) => HomeRoute();
 
-  String get location => GoRouteData.$location(
-        '/',
-      );
+  @override
+  String get location => GoRouteData.$location('/');
 
+  @override
   void go(BuildContext context) => context.go(location);
 
+  @override
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
+  @override
   void pushReplacement(BuildContext context) =>
       context.pushReplacement(location);
 
+  @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 RouteBase get $loginRoute => GoRouteData.$route(
-      path: '/login',
-      name: 'login',
-      factory: $LoginRouteExtension._fromState,
-    );
+  path: '/login',
+  name: 'login',
+  factory: $LoginRoute._fromState,
+);
 
-extension $LoginRouteExtension on LoginRoute {
+mixin $LoginRoute on GoRouteData {
   static LoginRoute _fromState(GoRouterState state) => LoginRoute();
 
-  String get location => GoRouteData.$location(
-        '/login',
-      );
+  @override
+  String get location => GoRouteData.$location('/login');
 
+  @override
   void go(BuildContext context) => context.go(location);
 
+  @override
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
+  @override
   void pushReplacement(BuildContext context) =>
       context.pushReplacement(location);
 
+  @override
   void replace(BuildContext context) => context.replace(location);
 }
 
 RouteBase get $lobbyRoute => GoRouteData.$route(
-      path: '/lobby',
-      name: 'lobby',
-      factory: $LobbyRouteExtension._fromState,
-    );
+  path: '/lobby',
+  name: 'lobby',
+  factory: $LobbyRoute._fromState,
+);
 
-extension $LobbyRouteExtension on LobbyRoute {
-  static LobbyRoute _fromState(GoRouterState state) => LobbyRoute(
-        $extra: state.extra as Call,
-      );
+mixin $LobbyRoute on GoRouteData {
+  static LobbyRoute _fromState(GoRouterState state) =>
+      LobbyRoute($extra: state.extra as Call);
 
-  String get location => GoRouteData.$location(
-        '/lobby',
-      );
+  LobbyRoute get _self => this as LobbyRoute;
 
-  void go(BuildContext context) => context.go(location, extra: $extra);
+  @override
+  String get location => GoRouteData.$location('/lobby');
 
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
   Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: $extra);
+      context.push<T>(location, extra: _self.$extra);
 
+  @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: $extra);
+      context.pushReplacement(location, extra: _self.$extra);
 
+  @override
   void replace(BuildContext context) =>
-      context.replace(location, extra: $extra);
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $livestreamRoute => GoRouteData.$route(
-      path: '/livestream',
-      name: 'livestream',
-      factory: $LivestreamRouteExtension._fromState,
-    );
+  path: '/livestream',
+  name: 'livestream',
+  factory: $LivestreamRoute._fromState,
+);
 
-extension $LivestreamRouteExtension on LivestreamRoute {
-  static LivestreamRoute _fromState(GoRouterState state) => LivestreamRoute(
-        $extra: state.extra as String,
-      );
+mixin $LivestreamRoute on GoRouteData {
+  static LivestreamRoute _fromState(GoRouterState state) =>
+      LivestreamRoute($extra: state.extra as String);
 
-  String get location => GoRouteData.$location(
-        '/livestream',
-      );
+  LivestreamRoute get _self => this as LivestreamRoute;
 
-  void go(BuildContext context) => context.go(location, extra: $extra);
+  @override
+  String get location => GoRouteData.$location('/livestream');
 
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
   Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: $extra);
+      context.push<T>(location, extra: _self.$extra);
 
+  @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: $extra);
+      context.pushReplacement(location, extra: _self.$extra);
 
+  @override
   void replace(BuildContext context) =>
-      context.replace(location, extra: $extra);
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $callRoute => GoRouteData.$route(
-      path: '/call',
-      name: 'call',
-      factory: $CallRouteExtension._fromState,
-    );
+  path: '/call',
+  name: 'call',
+  factory: $CallRoute._fromState,
+);
 
-extension $CallRouteExtension on CallRoute {
+mixin $CallRoute on GoRouteData {
   static CallRoute _fromState(GoRouterState state) => CallRoute(
-        $extra: state.extra as ({
-          Call call,
-          CallConnectOptions? connectOptions,
-          StreamVideoEffectsManager? effectsManager
-        }),
-      );
+    $extra:
+        state.extra
+            as ({
+              Call call,
+              CallConnectOptions? connectOptions,
+              StreamVideoEffectsManager? effectsManager,
+            }),
+  );
 
-  String get location => GoRouteData.$location(
-        '/call',
-      );
+  CallRoute get _self => this as CallRoute;
 
-  void go(BuildContext context) => context.go(location, extra: $extra);
+  @override
+  String get location => GoRouteData.$location('/call');
 
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
   Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: $extra);
+      context.push<T>(location, extra: _self.$extra);
 
+  @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: $extra);
+      context.pushReplacement(location, extra: _self.$extra);
 
+  @override
   void replace(BuildContext context) =>
-      context.replace(location, extra: $extra);
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $callParticipantsRoute => GoRouteData.$route(
-      path: '/call/participants',
-      name: 'participants',
-      factory: $CallParticipantsRouteExtension._fromState,
-    );
+  path: '/call/participants',
+  name: 'participants',
+  factory: $CallParticipantsRoute._fromState,
+);
 
-extension $CallParticipantsRouteExtension on CallParticipantsRoute {
+mixin $CallParticipantsRoute on GoRouteData {
   static CallParticipantsRoute _fromState(GoRouterState state) =>
-      CallParticipantsRoute(
-        $extra: state.extra as Call,
-      );
+      CallParticipantsRoute($extra: state.extra as Call);
 
-  String get location => GoRouteData.$location(
-        '/call/participants',
-      );
+  CallParticipantsRoute get _self => this as CallParticipantsRoute;
 
-  void go(BuildContext context) => context.go(location, extra: $extra);
+  @override
+  String get location => GoRouteData.$location('/call/participants');
 
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
   Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: $extra);
+      context.push<T>(location, extra: _self.$extra);
 
+  @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: $extra);
+      context.pushReplacement(location, extra: _self.$extra);
 
+  @override
   void replace(BuildContext context) =>
-      context.replace(location, extra: $extra);
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $callStatsRoute => GoRouteData.$route(
-      path: '/call/stats',
-      name: 'stats',
-      factory: $CallStatsRouteExtension._fromState,
-    );
+  path: '/call/stats',
+  name: 'stats',
+  factory: $CallStatsRoute._fromState,
+);
 
-extension $CallStatsRouteExtension on CallStatsRoute {
-  static CallStatsRoute _fromState(GoRouterState state) => CallStatsRoute(
-        $extra: state.extra as Call,
-      );
+mixin $CallStatsRoute on GoRouteData {
+  static CallStatsRoute _fromState(GoRouterState state) =>
+      CallStatsRoute($extra: state.extra as Call);
 
-  String get location => GoRouteData.$location(
-        '/call/stats',
-      );
+  CallStatsRoute get _self => this as CallStatsRoute;
 
-  void go(BuildContext context) => context.go(location, extra: $extra);
+  @override
+  String get location => GoRouteData.$location('/call/stats');
 
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
   Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: $extra);
+      context.push<T>(location, extra: _self.$extra);
 
+  @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: $extra);
+      context.pushReplacement(location, extra: _self.$extra);
 
+  @override
   void replace(BuildContext context) =>
-      context.replace(location, extra: $extra);
+      context.replace(location, extra: _self.$extra);
 }

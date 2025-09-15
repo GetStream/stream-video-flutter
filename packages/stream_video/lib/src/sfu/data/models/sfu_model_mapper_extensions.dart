@@ -44,7 +44,7 @@ extension RtcVideoQualityMapper on RtcVideoQuality {
         sfu_models.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
       RtcVideoQuality.mid => sfu_models.VideoQuality.VIDEO_QUALITY_MID,
       RtcVideoQuality.high => sfu_models.VideoQuality.VIDEO_QUALITY_HIGH,
-      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF
+      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF,
     };
   }
 }

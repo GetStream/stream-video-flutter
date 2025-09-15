@@ -151,37 +151,43 @@ class StreamCallControlsThemeData with Diagnosticable {
         other.inactiveOptionElevation,
         t,
       )!,
-      optionBackgroundColor:
-          Color.lerp(optionBackgroundColor, other.optionBackgroundColor, t)!,
+      optionBackgroundColor: Color.lerp(
+        optionBackgroundColor,
+        other.optionBackgroundColor,
+        t,
+      )!,
       inactiveOptionBackgroundColor: Color.lerp(
         inactiveOptionBackgroundColor,
         other.inactiveOptionBackgroundColor,
         t,
       )!,
       optionShape: OutlinedBorder.lerp(optionShape, other.optionShape, t)!,
-      optionPadding:
-          EdgeInsetsGeometry.lerp(optionPadding, other.optionPadding, t)!,
+      optionPadding: EdgeInsetsGeometry.lerp(
+        optionPadding,
+        other.optionPadding,
+        t,
+      )!,
       callReactions: other.callReactions,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        borderRadius,
-        backgroundColor,
-        elevation,
-        padding,
-        spacing,
-        optionIconColor,
-        inactiveOptionIconColor,
-        optionElevation,
-        inactiveOptionElevation,
-        optionBackgroundColor,
-        inactiveOptionBackgroundColor,
-        optionShape,
-        optionPadding,
-        callReactions,
-      );
+    borderRadius,
+    backgroundColor,
+    elevation,
+    padding,
+    spacing,
+    optionIconColor,
+    inactiveOptionIconColor,
+    optionElevation,
+    inactiveOptionElevation,
+    optionBackgroundColor,
+    inactiveOptionBackgroundColor,
+    optionShape,
+    optionPadding,
+    callReactions,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -282,8 +288,8 @@ class StreamCallControlsTheme extends InheritedWidget {
   /// [StreamCallControlsTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.callControlsTheme].
   static StreamCallControlsThemeData of(BuildContext context) {
-    final callControlsTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamCallControlsTheme>();
+    final callControlsTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamCallControlsTheme>();
     return callControlsTheme?.data ??
         StreamVideoTheme.of(context).callControlsTheme;
   }

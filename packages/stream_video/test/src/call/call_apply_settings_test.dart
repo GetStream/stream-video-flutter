@@ -40,8 +40,9 @@ void main() {
       mockDeviceNotifier = MockRtcMediaDeviceNotifier();
 
       // Mock coordinator client methods that might be called
-      when(() => mockCoordinatorClient.events)
-          .thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      when(
+        () => mockCoordinatorClient.events,
+      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
 
       // Default device enumeration mocking - returns built-in devices only
       when(mockDeviceNotifier.enumerateDevices).thenAnswer(
@@ -149,39 +150,41 @@ void main() {
         expect(audioOutputDevice?.id.toLowerCase(), contains('speaker'));
       });
 
-      test('defaults to non-speaker device when speaker is not prioritized',
-          () async {
-        // Arrange
-        const callSettings = CallSettings(
-          video: StreamVideoSettings(cameraDefaultOn: false),
-          audio: StreamAudioSettings(
-            speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
-          ),
-        );
+      test(
+        'defaults to non-speaker device when speaker is not prioritized',
+        () async {
+          // Arrange
+          const callSettings = CallSettings(
+            video: StreamVideoSettings(cameraDefaultOn: false),
+            audio: StreamAudioSettings(
+              speakerDefaultOn: false,
+              defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+            ),
+          );
 
-        final call = createCallWithMockedResponse(
-          streamVideo,
-          mockCoordinatorClient,
-          callSettings,
-          rtcMediaDeviceNotifier: mockDeviceNotifier,
-        );
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            callSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
 
-        // Act
-        final result = await call.getOrCreate(watch: false);
+          // Act
+          final result = await call.getOrCreate(watch: false);
 
-        // Assert
-        expect(result.isSuccess, true);
-        expect(call.connectOptions.speakerDefaultOn, false);
+          // Assert
+          expect(result.isSuccess, true);
+          expect(call.connectOptions.speakerDefaultOn, false);
 
-        final audioOutputDevice = call.connectOptions.audioOutputDevice;
+          final audioOutputDevice = call.connectOptions.audioOutputDevice;
 
-        // Should prefer non-speaker device when speaker is not prioritized
-        expect(
-          audioOutputDevice?.id.toLowerCase(),
-          isNot(contains('speaker')),
-        );
-      });
+          // Should prefer non-speaker device when speaker is not prioritized
+          expect(
+            audioOutputDevice?.id.toLowerCase(),
+            isNot(contains('speaker')),
+          );
+        },
+      );
     });
 
     group('External device priority logic', () {
@@ -221,79 +224,83 @@ void main() {
         expect(audioOutputDevice?.kind, RtcMediaDeviceKind.audioOutput);
       });
 
-      test('falls back to built-in device when no external device available',
-          () async {
-        // Arrange
-        const callSettings = CallSettings(
-          video: StreamVideoSettings(cameraDefaultOn: false),
-          audio: StreamAudioSettings(
-            speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
-          ),
-        );
+      test(
+        'falls back to built-in device when no external device available',
+        () async {
+          // Arrange
+          const callSettings = CallSettings(
+            video: StreamVideoSettings(cameraDefaultOn: false),
+            audio: StreamAudioSettings(
+              speakerDefaultOn: false,
+              defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+            ),
+          );
 
-        // Use default device enumeration (built-in devices only) - no need to override
+          // Use default device enumeration (built-in devices only) - no need to override
 
-        final call = createCallWithMockedResponse(
-          streamVideo,
-          mockCoordinatorClient,
-          callSettings,
-          rtcMediaDeviceNotifier: mockDeviceNotifier,
-        );
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            callSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
 
-        // Act
-        final result = await call.getOrCreate(watch: false);
+          // Act
+          final result = await call.getOrCreate(watch: false);
 
-        // Assert
-        expect(result.isSuccess, true);
-        expect(call.connectOptions.speakerDefaultOn, false);
+          // Assert
+          expect(result.isSuccess, true);
+          expect(call.connectOptions.speakerDefaultOn, false);
 
-        final audioOutputDevice = call.connectOptions.audioOutputDevice;
+          final audioOutputDevice = call.connectOptions.audioOutputDevice;
 
-        // Should fall back to earpiece when no external device is available
-        expect(audioOutputDevice?.label, 'Earpiece');
-        expect(audioOutputDevice?.kind, RtcMediaDeviceKind.audioOutput);
-      });
+          // Should fall back to earpiece when no external device is available
+          expect(audioOutputDevice?.label, 'Earpiece');
+          expect(audioOutputDevice?.kind, RtcMediaDeviceKind.audioOutput);
+        },
+      );
 
-      test('external device priority overrides video camera speaker preference',
-          () async {
-        // Arrange
-        const callSettings = CallSettings(
-          video: StreamVideoSettings(
-            cameraDefaultOn: true,
-          ), // This normally enables speaker
-          audio: StreamAudioSettings(
-            speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
-          ),
-        );
+      test(
+        'external device priority overrides video camera speaker preference',
+        () async {
+          // Arrange
+          const callSettings = CallSettings(
+            video: StreamVideoSettings(
+              cameraDefaultOn: true,
+            ), // This normally enables speaker
+            audio: StreamAudioSettings(
+              speakerDefaultOn: false,
+              defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+            ),
+          );
 
-        // Override default device enumeration for this test - add Bluetooth headphones
-        when(mockDeviceNotifier.enumerateDevices).thenAnswer(
-          (_) async =>
-              Result.success(TestDeviceScenarios.withBluetoothHeadphones),
-        );
+          // Override default device enumeration for this test - add Bluetooth headphones
+          when(mockDeviceNotifier.enumerateDevices).thenAnswer(
+            (_) async =>
+                Result.success(TestDeviceScenarios.withBluetoothHeadphones),
+          );
 
-        final call = createCallWithMockedResponse(
-          streamVideo,
-          mockCoordinatorClient,
-          callSettings,
-          rtcMediaDeviceNotifier: mockDeviceNotifier,
-        );
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            callSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
 
-        // Act
-        final result = await call.getOrCreate(watch: false);
+          // Act
+          final result = await call.getOrCreate(watch: false);
 
-        // Assert
-        expect(result.isSuccess, true);
+          // Assert
+          expect(result.isSuccess, true);
 
-        final audioOutputDevice = call.connectOptions.audioOutputDevice;
+          final audioOutputDevice = call.connectOptions.audioOutputDevice;
 
-        // External Bluetooth headphones should be prioritized even when video
-        // camera would normally enable speaker
-        expect(audioOutputDevice?.label, 'Bluetooth Headphones');
-        expect(audioOutputDevice?.kind, RtcMediaDeviceKind.audioOutput);
-      });
+          // External Bluetooth headphones should be prioritized even when video
+          // camera would normally enable speaker
+          expect(audioOutputDevice?.label, 'Bluetooth Headphones');
+          expect(audioOutputDevice?.kind, RtcMediaDeviceKind.audioOutput);
+        },
+      );
     });
 
     group('Video input selection', () {

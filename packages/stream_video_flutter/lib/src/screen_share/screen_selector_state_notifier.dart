@@ -71,8 +71,9 @@ class ScreenSelectorStateNotifier extends ValueNotifier<ScreenSelectorState> {
   Future<void> _getSources() async {
     try {
       _timer?.cancel();
-      final capturerSources =
-          await desktopCapturer.getSources(types: value.sourceTypes);
+      final capturerSources = await desktopCapturer.getSources(
+        types: value.sourceTypes,
+      );
       _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
         desktopCapturer.updateSources(types: value.sourceTypes);
       });

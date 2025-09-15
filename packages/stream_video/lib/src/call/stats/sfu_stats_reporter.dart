@@ -34,8 +34,9 @@ class SfuStatsReporter {
         CurrentPlatform.isAndroid || CurrentPlatform.isIos;
     if (thermalStatusAvailable) {
       try {
-        _thermalStatusSubscription =
-            Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
+        _thermalStatusSubscription = Thermal().onThermalStatusChanged.listen((
+          ThermalStatus status,
+        ) {
           _thermalStatus = status;
         });
       } catch (e) {
@@ -43,20 +44,20 @@ class SfuStatsReporter {
       }
     }
 
-    _mediaDeviceSubscription =
-        RtcMediaDeviceNotifier.instance.onDeviceChange.listen(
-      (devices) {
-        _availableAudioInputs = devices
-            .where((device) => device.kind == RtcMediaDeviceKind.audioInput)
-            .map((device) => device.label)
-            .toList();
+    _mediaDeviceSubscription = RtcMediaDeviceNotifier.instance.onDeviceChange
+        .listen(
+          (devices) {
+            _availableAudioInputs = devices
+                .where((device) => device.kind == RtcMediaDeviceKind.audioInput)
+                .map((device) => device.label)
+                .toList();
 
-        _availableVideoInputs = devices
-            .where((device) => device.kind == RtcMediaDeviceKind.videoInput)
-            .map((device) => device.label)
-            .toList();
-      },
-    );
+            _availableVideoInputs = devices
+                .where((device) => device.kind == RtcMediaDeviceKind.videoInput)
+                .map((device) => device.label)
+                .toList();
+          },
+        );
   }
 
   final CallSession callSession;
@@ -94,16 +95,17 @@ class SfuStatsReporter {
   }) async {
     try {
       await _sfuStatsLock.synchronized(() async {
-        final publisherStatsBundle =
-            await callSession.rtcManager?.publisher?.getStats();
-        final subscriberStatsBundle =
-            await callSession.rtcManager?.subscriber.getStats();
+        final publisherStatsBundle = await callSession.rtcManager?.publisher
+            ?.getStats();
+        final subscriberStatsBundle = await callSession.rtcManager?.subscriber
+            .getStats();
 
         if (publisherStatsBundle == null && subscriberStatsBundle == null) {
           return;
         }
 
-        final batterySaveModeAvailable = CurrentPlatform.isAndroid ||
+        final batterySaveModeAvailable =
+            CurrentPlatform.isAndroid ||
             CurrentPlatform.isIos ||
             CurrentPlatform.isMacOS ||
             CurrentPlatform.isWindows;
@@ -123,17 +125,21 @@ class SfuStatsReporter {
         final audioInputDevices = sfu_models.InputDevices(
           availableDevices: _availableAudioInputs,
           currentDevice: stateManager.callState.audioInputDevice?.label,
-          isPermitted: stateManager.callState.audioInputDevice != null &&
-              stateManager.callState.ownCapabilities
-                  .contains(CallPermission.sendAudio),
+          isPermitted:
+              stateManager.callState.audioInputDevice != null &&
+              stateManager.callState.ownCapabilities.contains(
+                CallPermission.sendAudio,
+              ),
         );
 
         final videoInputDevices = sfu_models.InputDevices(
           availableDevices: _availableVideoInputs,
           currentDevice: stateManager.callState.videoInputDevice?.label,
-          isPermitted: stateManager.callState.videoInputDevice != null &&
-              stateManager.callState.ownCapabilities
-                  .contains(CallPermission.sendVideo),
+          isPermitted:
+              stateManager.callState.videoInputDevice != null &&
+              stateManager.callState.ownCapabilities.contains(
+                CallPermission.sendVideo,
+              ),
         );
 
         if (CurrentPlatform.isAndroid) {
@@ -158,11 +164,11 @@ class SfuStatsReporter {
               publisherStatsBundle.rawStats,
             );
 
-            encodeStats =
-                callSession.rtcManager?.publisher?.getPerformanceStats(
-              publisherStatsBundle.rtcStats,
-              callSession.getTrackType,
-            );
+            encodeStats = callSession.rtcManager?.publisher
+                ?.getPerformanceStats(
+                  publisherStatsBundle.rtcStats,
+                  callSession.getTrackType,
+                );
           }
 
           if (subscriberStatsBundle != null) {
@@ -170,17 +176,17 @@ class SfuStatsReporter {
               subscriberStatsBundle.rawStats,
             );
 
-            decodeStats =
-                callSession.rtcManager?.subscriber.getPerformanceStats(
-              subscriberStatsBundle.rtcStats,
-              callSession.getTrackType,
-            );
+            decodeStats = callSession.rtcManager?.subscriber
+                .getPerformanceStats(
+                  subscriberStatsBundle.rtcStats,
+                  callSession.getTrackType,
+                );
           }
 
-          final subscriberTrace =
-              callSession.rtcManager?.subscriber.tracer.take();
-          final publisherTrace =
-              callSession.rtcManager?.publisher?.tracer.take();
+          final subscriberTrace = callSession.rtcManager?.subscriber.tracer
+              .take();
+          final publisherTrace = callSession.rtcManager?.publisher?.tracer
+              .take();
           final sessionTrace = callSession.getTrace();
 
           traces.addAll([
@@ -210,10 +216,13 @@ class SfuStatsReporter {
               PlatformType.ios => iosWebRTCVersion,
               _ => null,
             },
-            telemetry:
-                _calculateTelemetry(connectionTimeMs, reconnectionStrategy),
-            rtcStats:
-                [...traces.expand((trace) => trace.snapshot)].toJsonString(),
+            telemetry: _calculateTelemetry(
+              connectionTimeMs,
+              reconnectionStrategy,
+            ),
+            rtcStats: [
+              ...traces.expand((trace) => trace.snapshot),
+            ].toJsonString(),
             encodeStats: encodeStats,
             decodeStats: decodeStats,
             unifiedSessionId: unifiedSessionId,

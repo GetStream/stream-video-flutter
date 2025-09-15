@@ -56,9 +56,7 @@ class ToggleAudioOutputMenuItem extends StatelessWidget {
           },
           trailing: Text(
             enabled ? 'On' : 'Off',
-            style: TextStyle(
-              color: enabled ? AppColorPalette.appGreen : null,
-            ),
+            style: TextStyle(color: enabled ? AppColorPalette.appGreen : null),
           ),
         ),
       ],

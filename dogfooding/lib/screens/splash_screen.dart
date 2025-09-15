@@ -21,10 +21,7 @@ class SplashScreen extends StatelessWidget {
           children: [
             Hero(
               tag: 'stream_logo',
-              child: Image.asset(
-                streamVideoIconAsset,
-                width: size.width * 0.5,
-              ),
+              child: Image.asset(streamVideoIconAsset, width: size.width * 0.5),
             ),
             const SizedBox(height: 24),
             Text(

@@ -23,6 +23,5 @@ class CustomVideoLocalizationsDelegate
   @override
   bool shouldReload(
     covariant LocalizationsDelegate<StreamVideoFlutterLocalizations> old,
-  ) =>
-      false;
+  ) => false;
 }

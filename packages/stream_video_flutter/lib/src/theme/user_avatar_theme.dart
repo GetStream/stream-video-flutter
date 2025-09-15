@@ -70,25 +70,34 @@ class StreamUserAvatarThemeData with Diagnosticable {
     return StreamUserAvatarThemeData(
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       constraints: BoxConstraints.lerp(constraints, other.constraints, t)!,
-      initialsTextStyle:
-          TextStyle.lerp(initialsTextStyle, other.initialsTextStyle, t)!,
-      initialsBackground:
-          Color.lerp(initialsBackground, other.initialsBackground, t),
+      initialsTextStyle: TextStyle.lerp(
+        initialsTextStyle,
+        other.initialsTextStyle,
+        t,
+      )!,
+      initialsBackground: Color.lerp(
+        initialsBackground,
+        other.initialsBackground,
+        t,
+      ),
       selectionColor: Color.lerp(selectionColor, other.selectionColor, t)!,
-      selectionThickness:
-          lerpDouble(selectionThickness, other.selectionThickness, t)!,
+      selectionThickness: lerpDouble(
+        selectionThickness,
+        other.selectionThickness,
+        t,
+      )!,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        constraints,
-        borderRadius,
-        initialsTextStyle,
-        initialsBackground,
-        selectionColor,
-        selectionThickness,
-      );
+    constraints,
+    borderRadius,
+    initialsTextStyle,
+    initialsBackground,
+    selectionColor,
+    selectionThickness,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -145,8 +154,8 @@ class StreamUserAvatarTheme extends InheritedWidget {
   /// [StreamUserAvatarTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.userAvatarTheme].
   static StreamUserAvatarThemeData of(BuildContext context) {
-    final userAvatarTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamUserAvatarTheme>();
+    final userAvatarTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamUserAvatarTheme>();
     return userAvatarTheme?.data ??
         StreamVideoTheme.of(context).userAvatarTheme;
   }

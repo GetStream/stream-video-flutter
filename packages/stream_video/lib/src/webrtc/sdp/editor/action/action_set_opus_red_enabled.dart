@@ -90,7 +90,8 @@ class SetOpusRedEnabledAction implements SdpEditAction {
           redIndices.add(index);
           redRtmp = rtpmap;
           final modified = audioDesc.copyWith(
-            fmt: [...audioDesc.fmt]..removeWhere(
+            fmt: [...audioDesc.fmt]
+              ..removeWhere(
                 (payloadType) => payloadType == rtpmap.payloadType,
               ),
           );

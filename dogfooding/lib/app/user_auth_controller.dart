@@ -31,8 +31,8 @@ class UserAuthController extends ChangeNotifier {
   UserAuthController({
     required AppPreferences prefs,
     required TokenService tokenService,
-  })  : _prefs = prefs,
-        _tokenService = tokenService;
+  }) : _prefs = prefs,
+       _tokenService = tokenService;
 
   final AppPreferences _prefs;
   final TokenService _tokenService;
@@ -52,8 +52,10 @@ class UserAuthController extends ChangeNotifier {
     await _prefs.setApiKey(tokenResponse.apiKey);
     await _prefs.setEnvironment(environment);
 
-    _authRepo ??=
-        locator.get<UserAuthRepository>(param1: user, param2: tokenResponse);
+    _authRepo ??= locator.get<UserAuthRepository>(
+      param1: user,
+      param2: tokenResponse,
+    );
     final credentials = await _authRepo!.login();
     _currentUser = credentials.userInfo;
 

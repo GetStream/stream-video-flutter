@@ -5,11 +5,12 @@ import 'stream_video_flutter_platform_interface.dart';
 
 typedef OnNotificationContentClick = void Function(String callCid);
 
-typedef OnNotificationButtonClick = void Function(
-  String buttonType,
-  String callCid,
-  ServiceType serviceType,
-);
+typedef OnNotificationButtonClick =
+    void Function(
+      String buttonType,
+      String callCid,
+      ServiceType serviceType,
+    );
 
 typedef OnPlatformUiLayerDestroyed = void Function(String callCid);
 
@@ -48,8 +49,10 @@ mixin StreamVideoFlutterBackground {
     if (!isAndroid) {
       return false;
     }
-    return StreamVideoFlutterPlatform.instance
-        .stopBackgroundService(type, callCid: callCid);
+    return StreamVideoFlutterPlatform.instance.stopBackgroundService(
+      type,
+      callCid: callCid,
+    );
   }
 
   static Future<bool> isServiceRunning(
@@ -59,8 +62,10 @@ mixin StreamVideoFlutterBackground {
     if (!isAndroid) {
       return false;
     }
-    return StreamVideoFlutterPlatform.instance
-        .isBackgroundServiceRunning(type, callCid: callCid);
+    return StreamVideoFlutterPlatform.instance.isBackgroundServiceRunning(
+      type,
+      callCid: callCid,
+    );
   }
 
   static void setOnNotificationContentClick(
@@ -90,7 +95,9 @@ mixin StreamVideoFlutterBackground {
       return;
     }
     StreamVideoFlutterPlatform
-        .instance.onBackgroundNotificationUiLayerDestroyed = onUiLayerDestroyed;
+            .instance
+            .onBackgroundNotificationUiLayerDestroyed =
+        onUiLayerDestroyed;
   }
 
   static bool get isAndroid {

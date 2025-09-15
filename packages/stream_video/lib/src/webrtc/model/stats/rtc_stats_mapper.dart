@@ -111,8 +111,9 @@ extension StatsReportX on rtc.StatsReport {
     final kind = kindValue != null ? RtcKind.fromAlias(kindValue) : null;
 
     final sourceValue = values[RtcSource.propertyName];
-    final source =
-        sourceValue != null ? RtcSource.fromValue(sourceValue) : null;
+    final source = sourceValue != null
+        ? RtcSource.fromValue(sourceValue)
+        : null;
 
     final json = toJson();
 

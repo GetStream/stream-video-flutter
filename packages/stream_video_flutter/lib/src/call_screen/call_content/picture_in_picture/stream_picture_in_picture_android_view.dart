@@ -147,7 +147,9 @@ class _StreamPictureInPictureAndroidViewState
       builder: (context) => AndroidPipOverlay(
         call: call,
         sort: widget.configuration.sort,
-        customBuilder: widget.configuration.androidPiPConfiguration
+        customBuilder: widget
+            .configuration
+            .androidPiPConfiguration
             .callPictureInPictureWidgetBuilder,
       ),
     );
@@ -180,7 +182,7 @@ class _StreamPictureInPictureAndroidViewState
         callState.localParticipant?.isScreenShareEnabled ?? false;
     final shouldDisableForScreenShare =
         widget.configuration.disablePictureInPictureWhenScreenSharing &&
-            isScreenSharing;
+        isScreenSharing;
 
     return isInCall && !shouldDisableForScreenShare;
   }

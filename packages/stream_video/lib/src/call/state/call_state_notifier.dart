@@ -23,8 +23,10 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateSfuMixin,
         StateCallActionsMixin {
   CallStateNotifier(CallState initialState) : super(initialState) {
-    callStateStream =
-        MutableStateEmitterImpl<CallState>(initialState, sync: true);
+    callStateStream = MutableStateEmitterImpl<CallState>(
+      initialState,
+      sync: true,
+    );
     _durationTimerController = StreamController<Duration>.broadcast();
     _setupDurationTimer();
   }

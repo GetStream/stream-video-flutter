@@ -24,8 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _onIncomingCallSubscription?.cancel();
-    _onIncomingCallSubscription =
-        _streamVideo.state.incomingCall.listen((call) {
+    _onIncomingCallSubscription = _streamVideo.state.incomingCall.listen((
+      call,
+    ) {
       if (call != null) {
         _onNavigateToCall(call);
       }

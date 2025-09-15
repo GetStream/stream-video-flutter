@@ -25,9 +25,9 @@ class StreamParticipantLabel extends StatelessWidget {
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
     this.participantLabelTextStyle,
-  })  : participantName = participant.name,
-        isAudioEnabled = participant.isAudioEnabled,
-        isSpeaking = participant.isSpeaking;
+  }) : participantName = participant.name,
+       isAudioEnabled = participant.isAudioEnabled,
+       isSpeaking = participant.isSpeaking;
 
   /// The name of the participant.
   final String participantName;
@@ -71,7 +71,8 @@ class StreamParticipantLabel extends StatelessWidget {
             Flexible(
               child: Text(
                 participantName,
-                style: participantLabelTextStyle ??
+                style:
+                    participantLabelTextStyle ??
                     theme.participantLabelTextStyle,
                 overflow: TextOverflow.ellipsis,
               ),

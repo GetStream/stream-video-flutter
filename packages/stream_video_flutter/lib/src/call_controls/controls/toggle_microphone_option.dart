@@ -52,8 +52,9 @@ class ToggleMicrophoneOption extends StatelessWidget {
         icon: enabled
             ? Icon(enabledMicrophoneIcon)
             : Icon(disabledMicrophoneIcon),
-        iconColor:
-            enabled ? enabledMicrophoneIconColor : disabledMicrophoneIconColor,
+        iconColor: enabled
+            ? enabledMicrophoneIconColor
+            : disabledMicrophoneIconColor,
         backgroundColor: enabled
             ? enabledMicrophoneBackgroundColor
             : disabledMicrophoneBackgroundColor,

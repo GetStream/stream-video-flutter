@@ -93,29 +93,23 @@ class _SettingsMenuState extends State<SettingsMenu> {
   @override
   void initState() {
     super.initState();
-    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen(
-      (devices) {
-        _audioOutputs = devices
-            .where(
-              (it) => it.kind == RtcMediaDeviceKind.audioOutput,
-            )
-            .toList();
+    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen((
+      devices,
+    ) {
+      _audioOutputs = devices
+          .where((it) => it.kind == RtcMediaDeviceKind.audioOutput)
+          .toList();
 
-        _audioInputs = devices
-            .where(
-              (it) => it.kind == RtcMediaDeviceKind.audioInput,
-            )
-            .toList();
+      _audioInputs = devices
+          .where((it) => it.kind == RtcMediaDeviceKind.audioInput)
+          .toList();
 
-        _videoInputs = devices
-            .where(
-              (it) => it.kind == RtcMediaDeviceKind.videoInput,
-            )
-            .toList();
+      _videoInputs = devices
+          .where((it) => it.kind == RtcMediaDeviceKind.videoInput)
+          .toList();
 
-        if (context.mounted) setState(() {}); // intentionally empty
-      },
-    );
+      if (context.mounted) setState(() {}); // intentionally empty
+    });
     widget.videoEffectsManager.isSupported().then((value) {
       if (context.mounted) setState(() => _backgroundEffectsSupported = value);
     });
@@ -138,50 +132,51 @@ class _SettingsMenuState extends State<SettingsMenu> {
         ),
       ),
       padding: const EdgeInsets.all(16),
-      child: Column(children: [
-        if (showMainSettings) ..._buildMenuItems(),
-        if (showAudioOutputs) ..._buildAudioOutputsMenu(),
-        if (showAudioInputs) ..._buildAudioInputsMenu(),
-        if (showVideoInputs) ..._buildVideoInputsMenu(),
-        if (showIncomingQuality) ..._buildIncomingQualityMenu(),
-        if (showBackgroundEffects) ..._buildBackgroundFiltersMenu(),
-      ]),
+      child: Column(
+        children: [
+          if (showMainSettings) ..._buildMenuItems(),
+          if (showAudioOutputs) ..._buildAudioOutputsMenu(),
+          if (showAudioInputs) ..._buildAudioInputsMenu(),
+          if (showVideoInputs) ..._buildVideoInputsMenu(),
+          if (showIncomingQuality) ..._buildIncomingQualityMenu(),
+          if (showBackgroundEffects) ..._buildBackgroundFiltersMenu(),
+        ],
+      ),
     );
   }
 
   List<Widget> _buildMenuItems() {
     final incomingVideoQuality = getIncomingVideoQuality(
-        widget.call.dynascaleManager.incomingVideoSettings);
+      widget.call.dynascaleManager.incomingVideoSettings,
+    );
 
     return [
       Wrap(
         alignment: WrapAlignment.spaceEvenly,
-        children: StreamVideoTheme.of(context)
-            .callControlsTheme
-            .callReactions
+        children: StreamVideoTheme.of(context).callControlsTheme.callReactions
             .where(
-                (element) => element.emojiCode != _raisedHandReaction.emojiCode)
+              (element) => element.emojiCode != _raisedHandReaction.emojiCode,
+            )
             .map((e) {
-          return InkWell(
-              onTap: () {
-                widget.call.sendReaction(
-                  reactionType: e.type,
-                  emojiCode: e.emojiCode,
-                );
+              return InkWell(
+                onTap: () {
+                  widget.call.sendReaction(
+                    reactionType: e.type,
+                    emojiCode: e.emojiCode,
+                  );
 
-                widget.onReactionSend?.call(e);
-              },
-              child: IgnorePointer(
-                child: CallControlOption(
-                  icon: Text(
-                    e.icon,
-                    textAlign: TextAlign.center,
+                  widget.onReactionSend?.call(e);
+                },
+                child: IgnorePointer(
+                  child: CallControlOption(
+                    icon: Text(e.icon, textAlign: TextAlign.center),
+                    onPressed: () {},
+                    padding: const EdgeInsets.all(0),
                   ),
-                  onPressed: () {},
-                  padding: const EdgeInsets.all(0),
                 ),
-              ));
-        }).toList(),
+              );
+            })
+            .toList(),
       ),
       const SizedBox(height: 8),
       SettingsMenuItem(
@@ -204,18 +199,20 @@ class _SettingsMenuState extends State<SettingsMenu> {
           audioOutputDevice: _audioOutputDevice!,
           audioOutputs: _audioOutputs,
           onPressed: (device) => _setAudioOutput(device, closeMenu: false),
-        )
+        ),
       ] else
-        ChooseAudioOutputMenuItem(onPressed: () {
-          if (CurrentPlatform.isIos) {
-            _deviceNotifier.triggeriOSAudioRouteSelectionUI();
-            return;
-          }
+        ChooseAudioOutputMenuItem(
+          onPressed: () {
+            if (CurrentPlatform.isIos) {
+              _deviceNotifier.triggeriOSAudioRouteSelectionUI();
+              return;
+            }
 
-          setState(() {
-            showAudioOutputs = true;
-          });
-        }),
+            setState(() {
+              showAudioOutputs = true;
+            });
+          },
+        ),
       ClosedCaptionsMenuItem(widget: widget),
       const SizedBox(height: 16),
       StandardActionMenuItem(
@@ -301,20 +298,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
       ),
       const SizedBox(height: 16),
       ..._audioOutputs
-          .map(
-            (device) {
-              return StandardActionMenuItem(
-                icon: Icons.multitrack_audio,
-                label: device.label,
-                color: _audioOutputDevice?.id == device.id
-                    ? AppColorPalette.appGreen
-                    : null,
-                onPressed: () {
-                  _setAudioOutput(device);
-                },
-              );
-            },
-          )
+          .map((device) {
+            return StandardActionMenuItem(
+              icon: Icons.multitrack_audio,
+              label: device.label,
+              color: _audioOutputDevice?.id == device.id
+                  ? AppColorPalette.appGreen
+                  : null,
+              onPressed: () {
+                _setAudioOutput(device);
+              },
+            );
+          })
           .cast()
           .insertBetween(const SizedBox(height: 16)),
     ];
@@ -340,21 +335,19 @@ class _SettingsMenuState extends State<SettingsMenu> {
       ),
       const SizedBox(height: 16),
       ..._audioInputs
-          .map(
-            (device) {
-              return StandardActionMenuItem(
-                icon: Icons.multitrack_audio,
-                label: device.label,
-                color: widget.call.state.value.audioInputDevice?.id == device.id
-                    ? AppColorPalette.appGreen
-                    : null,
-                onPressed: () {
-                  widget.call.setAudioInputDevice(device);
-                  widget.onAudioInputChange?.call(device);
-                },
-              );
-            },
-          )
+          .map((device) {
+            return StandardActionMenuItem(
+              icon: Icons.multitrack_audio,
+              label: device.label,
+              color: widget.call.state.value.audioInputDevice?.id == device.id
+                  ? AppColorPalette.appGreen
+                  : null,
+              onPressed: () {
+                widget.call.setAudioInputDevice(device);
+                widget.onAudioInputChange?.call(device);
+              },
+            );
+          })
           .cast()
           .insertBetween(const SizedBox(height: 16)),
     ];
@@ -375,21 +368,19 @@ class _SettingsMenuState extends State<SettingsMenu> {
       ),
       const SizedBox(height: 16),
       ..._videoInputs
-          .map(
-            (device) {
-              return StandardActionMenuItem(
-                icon: Icons.camera_alt,
-                label: device.label,
-                color: widget.call.state.value.videoInputDevice?.id == device.id
-                    ? AppColorPalette.appGreen
-                    : null,
-                onPressed: () {
-                  widget.call.setVideoInputDevice(device);
-                  widget.onVideoInputChange?.call(device);
-                },
-              );
-            },
-          )
+          .map((device) {
+            return StandardActionMenuItem(
+              icon: Icons.camera_alt,
+              label: device.label,
+              color: widget.call.state.value.videoInputDevice?.id == device.id
+                  ? AppColorPalette.appGreen
+                  : null,
+              onPressed: () {
+                widget.call.setVideoInputDevice(device);
+                widget.onVideoInputChange?.call(device);
+              },
+            );
+          })
           .cast()
           .insertBetween(const SizedBox(height: 16)),
     ];
@@ -416,15 +407,13 @@ class _SettingsMenuState extends State<SettingsMenu> {
             onPressed: () {
               _videoEffectsManager.disableAllFilters();
             },
-          )
+          ),
         ],
       ),
       const SizedBox(height: 16),
       const Text(
         'Background Blur',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
       const SizedBox(height: 8),
       Row(
@@ -436,10 +425,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 height: 60,
                 child: Center(
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.blur_on,
-                      size: 30,
-                    ),
+                    icon: const Icon(Icons.blur_on, size: 30),
                     onPressed: () => _videoEffectsManager
                         .applyBackgroundBlurFilter(BlurIntensity.light),
                   ),
@@ -454,10 +440,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 height: 60,
                 child: Center(
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.blur_on,
-                      size: 40,
-                    ),
+                    icon: const Icon(Icons.blur_on, size: 40),
                     onPressed: () => _videoEffectsManager
                         .applyBackgroundBlurFilter(BlurIntensity.medium),
                   ),
@@ -472,10 +455,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 height: 60,
                 child: Center(
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.blur_on,
-                      size: 50,
-                    ),
+                    icon: const Icon(Icons.blur_on, size: 50),
                     onPressed: () => _videoEffectsManager
                         .applyBackgroundBlurFilter(BlurIntensity.heavy),
                   ),
@@ -483,23 +463,22 @@ class _SettingsMenuState extends State<SettingsMenu> {
               ),
               const Text('Heavy'),
             ],
-          )
+          ),
         ],
       ),
       const SizedBox(height: 16),
       const Text(
         'Image Background',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
       const SizedBox(height: 16),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           InkWell(
-            onTap: () => _videoEffectsManager
-                .applyBackgroundImageFilter('assets/bg1.jpg'),
+            onTap: () => _videoEffectsManager.applyBackgroundImageFilter(
+              'assets/bg1.jpg',
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.asset(
@@ -511,8 +490,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
             ),
           ),
           InkWell(
-            onTap: () => _videoEffectsManager
-                .applyBackgroundImageFilter('assets/bg2.jpg'),
+            onTap: () => _videoEffectsManager.applyBackgroundImageFilter(
+              'assets/bg2.jpg',
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.asset(
@@ -524,8 +504,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
             ),
           ),
           InkWell(
-            onTap: () => _videoEffectsManager
-                .applyBackgroundImageFilter('assets/bg3.jpg'),
+            onTap: () => _videoEffectsManager.applyBackgroundImageFilter(
+              'assets/bg3.jpg',
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.asset(
@@ -535,15 +516,13 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 height: 102,
               ),
             ),
-          )
+          ),
         ],
       ),
       const SizedBox(height: 16),
       const Text(
         'Custom Filters',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
       const SizedBox(height: 8),
       Row(
@@ -555,10 +534,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 height: 60,
                 child: Center(
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.filter_b_and_w,
-                      size: 40,
-                    ),
+                    icon: const Icon(Icons.filter_b_and_w, size: 40),
                     onPressed: () => _videoEffectsManager.applyCustomEffect(
                       'grayscale',
                       registerEffectProcessorCallback: () async {
@@ -591,27 +567,28 @@ class _SettingsMenuState extends State<SettingsMenu> {
       ),
       const SizedBox(height: 16),
       ...IncomingVideoQuality.values
-          .map(
-            (quality) {
-              return StandardActionMenuItem(
-                icon: Icons.video_settings,
-                label: quality.name,
-                color: getIncomingVideoQuality(widget
-                            .call.dynascaleManager.incomingVideoSettings) ==
-                        quality
-                    ? AppColorPalette.appGreen
-                    : null,
-                onPressed: () {
-                  if (quality == IncomingVideoQuality.off) {
-                    widget.call.setIncomingVideoEnabled(false);
-                  } else {
-                    widget.call.setPreferredIncomingVideoResolution(
-                        getIncomingVideoResolution(quality));
-                  }
-                },
-              );
-            },
-          )
+          .map((quality) {
+            return StandardActionMenuItem(
+              icon: Icons.video_settings,
+              label: quality.name,
+              color:
+                  getIncomingVideoQuality(
+                        widget.call.dynascaleManager.incomingVideoSettings,
+                      ) ==
+                      quality
+                  ? AppColorPalette.appGreen
+                  : null,
+              onPressed: () {
+                if (quality == IncomingVideoQuality.off) {
+                  widget.call.setIncomingVideoEnabled(false);
+                } else {
+                  widget.call.setPreferredIncomingVideoResolution(
+                    getIncomingVideoResolution(quality),
+                  );
+                }
+              },
+            );
+          })
           .cast()
           .insertBetween(const SizedBox(height: 16)),
     ];

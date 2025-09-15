@@ -38,6 +38,7 @@ abstract class StreamVideoNoiseCancellationPlatform extends PlatformInterface {
 
   Future<bool?> deviceSupportsAdvancedAudioProcessing() {
     throw UnimplementedError(
-        'deviceSupportsAdvancedAudioProcessing() has not been implemented.');
+      'deviceSupportsAdvancedAudioProcessing() has not been implemented.',
+    );
   }
 }

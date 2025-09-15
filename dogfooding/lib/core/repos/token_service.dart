@@ -30,15 +30,13 @@ class TokenService {
     if (environment == Environment.custom) {
       if (customEnvironmentLoader == null) {
         throw Exception(
-            'Custom environment is not configured. Provide customEnvironmentLoader to AppInjector.init method to use it.');
+          'Custom environment is not configured. Provide customEnvironmentLoader to AppInjector.init method to use it.',
+        );
       }
 
       final userToken = await customEnvironmentLoader!.tokenLoader(userId);
 
-      return TokenResponse(
-        userToken,
-        customEnvironmentLoader!.apiKey,
-      );
+      return TokenResponse(userToken, customEnvironmentLoader!.apiKey);
     }
 
     final queryParameters = <String, dynamic>{

@@ -72,9 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  Future<void> _getOrCreateCall({
-    List<String> memberIds = const [],
-  }) async {
+  Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
     var callId = _callIdController.text;
 
     // Always generate a new call id for ringing
@@ -89,15 +87,12 @@ class _HomeScreenState extends State<HomeScreen> {
       preferences: DefaultCallPreferences(
         closedCaptionsVisibleCaptions: 3,
         closedCaptionsVisibilityDurationMs: 5000,
+        // clientPublishOptions: ClientPublishOptions(
+        // preferredCodec: PreferredCodec.h264,
+        // fmtpLine: 'a=fmtp:96max-fr=60;max-fs=12288', <-- VP8
+        // fmtpLine: 'level-idx=5;profile=0;tier=0', <-- AV1
+        // ),
       ),
-
-      // Uncomment to force a specific codec when publishing video track
-      // preferences: DefaultCallPreferences(
-      //   clientPublishOptions: ClientPublishOptions(
-      //     preferredCodec: PreferredCodec.av1,
-      //     fmtpLine: 'level-idx=5;profile=0;tier=0',
-      //   ),
-      // ),
     );
 
     bool isRinging = memberIds.isNotEmpty;
@@ -113,11 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
         success: (success) {
           if (mounted) {
             if (isRinging) {
-              CallRoute($extra: (
-                call: _call!,
-                connectOptions: null,
-                effectsManager: null,
-              )).push(context);
+              CallRoute(
+                $extra: (
+                  call: _call!,
+                  connectOptions: null,
+                  effectsManager: null,
+                ),
+              ).push(context);
             } else {
               LobbyRoute($extra: _call!).push(context);
             }
@@ -147,52 +144,52 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
 
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: theme.scaffoldBackgroundColor,
-            title: Text(
-              'Enter the IDs of users you want to call (separated by commas)',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                      hintText: "User ID",
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
-                      )),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          title: Text(
+            'Enter the IDs of users you want to call (separated by commas)',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  hintText: "User ID",
+                  hintStyle: TextStyle(color: Colors.white30),
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: SizedBox(
-                    width: 150,
-                    child: StreamButton.active(
-                      label: 'Call',
-                      icon: const Icon(Icons.video_camera_front,
-                          color: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _getOrCreateCall(
-                          memberIds: controller.text
-                              .split(',')
-                              .map((e) => e.trim())
-                              .toList(),
-                        );
-                      },
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: 150,
+                  child: StreamButton.active(
+                    label: 'Call',
+                    icon: const Icon(
+                      Icons.video_camera_front,
+                      color: Colors.white,
                     ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _getOrCreateCall(
+                        memberIds: controller.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .toList(),
+                      );
+                    },
                   ),
-                )
-              ],
-            ),
-          );
-        });
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -216,10 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
       constraints: const BoxConstraints(maxWidth: 220),
       child: Hero(
         tag: 'stream_logo',
-        child: Image.asset(
-          streamVideoIconAsset,
-          width: width * 0.6,
-        ),
+        child: Image.asset(streamVideoIconAsset, width: width * 0.6),
       ),
     );
 
@@ -237,28 +231,21 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: theme.scaffoldBackgroundColor,
-        leading: UserActionsAvatar(
-          currentUser: currentUser,
-        ),
+        leading: UserActionsAvatar(currentUser: currentUser),
         titleSpacing: 4,
         centerTitle: false,
-        title: Text(
-          name,
-          style: theme.textTheme.bodyMedium,
-        ),
+        title: Text(name, style: theme.textTheme.bodyMedium),
         actions: [
           Row(
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: EnvironmentBanner(
-                    currentEnvironment: _appPreferences.environment),
+                  currentEnvironment: _appPreferences.environment,
+                ),
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.logout,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.logout, color: Colors.white),
                 onPressed: _userAuthController.logout,
               ),
             ],
@@ -278,9 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Expanded(child: logo),
                       const SizedBox(width: 24),
-                      Column(
-                        children: appTitle,
-                      )
+                      Column(children: appTitle),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -369,8 +354,9 @@ class _JoinForm extends StatelessWidget {
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   isDense: true,
-                  hintStyle:
-                      const TextStyle(color: AppColorPalette.secondaryText),
+                  hintStyle: const TextStyle(
+                    color: AppColorPalette.secondaryText,
+                  ),
                   hintText: 'Enter call id',
                   // suffix button to generate a random call id
                   suffixIcon: CurrentPlatform.isMobile
@@ -385,9 +371,10 @@ class _JoinForm extends StatelessWidget {
               builder: (context, value, __) {
                 final hasText = value.text.isNotEmpty;
                 return StreamButton.active(
-                    label: 'Join call',
-                    icon: const Icon(Icons.login, color: Colors.white),
-                    onPressed: hasText ? onJoinPressed : () {});
+                  label: 'Join call',
+                  icon: const Icon(Icons.login, color: Colors.white),
+                  onPressed: hasText ? onJoinPressed : () {},
+                );
               },
             ),
           ],
@@ -397,33 +384,31 @@ class _JoinForm extends StatelessWidget {
   }
 
   Widget _refreshIconButton() => IconButton(
-        icon: const Icon(Icons.refresh),
-        color: Colors.white,
-        padding: EdgeInsets.zero,
-        onPressed: () {
-          // generate a 10 character nanoId for call id
-          final callId = generateAlphanumericString(10);
-          callIdController.value = TextEditingValue(
-            text: callId,
-            selection: TextSelection.collapsed(
-              offset: callId.length,
-            ),
-          );
-        },
+    icon: const Icon(Icons.refresh),
+    color: Colors.white,
+    padding: EdgeInsets.zero,
+    onPressed: () {
+      // generate a 10 character nanoId for call id
+      final callId = generateAlphanumericString(10);
+      callIdController.value = TextEditingValue(
+        text: callId,
+        selection: TextSelection.collapsed(offset: callId.length),
       );
+    },
+  );
 
   Widget _scanQRButton(BuildContext context) => IconButton(
-        icon: const Icon(Icons.qr_code),
-        color: Colors.white,
-        padding: EdgeInsets.zero,
-        onPressed: () async {
-          final result = await QrCodeScanner.scan(context);
+    icon: const Icon(Icons.qr_code),
+    color: Colors.white,
+    padding: EdgeInsets.zero,
+    onPressed: () async {
+      final result = await QrCodeScanner.scan(context);
 
-          if (context.mounted && result != null) {
-            _handleJoinUrl(context, result);
-          }
-        },
-      );
+      if (context.mounted && result != null) {
+        _handleJoinUrl(context, result);
+      }
+    },
+  );
 
   Future<void> _handleJoinUrl(BuildContext context, String url) async {
     Uri uri;
@@ -483,7 +468,8 @@ class _JoinForm extends StatelessWidget {
     // Fetch the callId from the path components
     // e.g https://getstream.io/join/path-call-id
     final pathSegmentsLength = uri.pathSegments.length;
-    final callPathId = pathSegmentsLength >= 2 &&
+    final callPathId =
+        pathSegmentsLength >= 2 &&
             uri.pathSegments[pathSegmentsLength - 2] == 'join'
         ? uri.pathSegments.last
         : null;

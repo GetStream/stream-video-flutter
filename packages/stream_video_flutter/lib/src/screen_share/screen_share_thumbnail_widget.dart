@@ -88,8 +88,9 @@ class _ScreenShareThumbnailWidgetState
                 : const BoxDecoration(),
             child: InkWell(
               onTap: () {
-                screenShareLogger
-                    .d(() => 'Selected source id => ${widget.source.id}');
+                screenShareLogger.d(
+                  () => 'Selected source id => ${widget.source.id}',
+                );
                 widget.onTap(widget.source);
               },
               child: _thumbnail != null

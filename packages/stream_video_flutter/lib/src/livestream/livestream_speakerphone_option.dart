@@ -74,8 +74,9 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
   @override
   void initState() {
     super.initState();
-    _deviceChangeSubscription =
-        _deviceNotifier.onDeviceChange.listen((devices) {
+    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen((
+      devices,
+    ) {
       final audioOutputs = devices.where(
         (it) => it.kind == RtcMediaDeviceKind.audioOutput,
       );

@@ -67,10 +67,7 @@ class StreamButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4),
         shape: RoundedRectangleBorder(
           side: borderColor != null
-              ? BorderSide(
-                  color: borderColor!,
-                  width: 1,
-                )
+              ? BorderSide(color: borderColor!, width: 1)
               : BorderSide.none,
           borderRadius: BorderRadius.circular(36),
         ),
@@ -81,10 +78,7 @@ class StreamButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[
-              icon!,
-              const SizedBox(width: 12),
-            ],
+            if (icon != null) ...[icon!, const SizedBox(width: 12)],
             Text(
               label,
               style: const TextStyle(

@@ -18,7 +18,7 @@ Future<void> showLoadingIndicator(BuildContext context) async {
             child: CircularProgressIndicator(
               color: StreamVideoTheme.of(context).colorTheme.accentPrimary,
             ),
-          )
+          ),
         ],
       );
     },

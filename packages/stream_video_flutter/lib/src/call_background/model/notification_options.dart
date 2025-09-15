@@ -24,10 +24,10 @@ class NotificationOptions with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        content,
-        avatar,
-        useCustomLayout,
-      ];
+    content,
+    avatar,
+    useCustomLayout,
+  ];
 }
 
 class NotificationContent with EquatableMixin {

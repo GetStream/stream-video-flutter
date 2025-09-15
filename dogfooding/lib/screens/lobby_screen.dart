@@ -17,7 +17,7 @@ class LobbyScreen extends StatefulWidget {
   });
 
   final Function(CallConnectOptions, StreamVideoEffectsManager)
-      onJoinCallPressed;
+  onJoinCallPressed;
   final Call call;
 
   @override
@@ -43,16 +43,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     final cameraTrack = _cameraTrack;
     if (cameraTrack != null) {
-      options = options.copyWith(
-        camera: TrackOption.enabled(),
-      );
+      options = options.copyWith(camera: TrackOption.enabled());
     }
 
     final microphoneTrack = _microphoneTrack;
     if (microphoneTrack != null) {
-      options = options.copyWith(
-        microphone: TrackOption.enabled(),
-      );
+      options = options.copyWith(microphone: TrackOption.enabled());
     }
 
     widget.onJoinCallPressed(options, _videoEffectsManager);
@@ -87,16 +83,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
         ),
         titleSpacing: 4,
         centerTitle: false,
-        title: Text(
-          currentUser.name,
-          style: textTheme.body,
-        ),
+        title: Text(currentUser.name, style: textTheme.body),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.close,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.close, color: Colors.white),
             onPressed: () => Navigator.maybePop(context),
           ),
         ],
@@ -107,10 +97,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
-                SvgPicture.asset(
-                  globalNetworkAssest,
-                  width: 35,
-                ),
+                SvgPicture.asset(globalNetworkAssest, width: 35),
                 const SizedBox(height: 8),
                 Text(
                   'Set up your call\nbefore joining',
@@ -186,13 +173,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
                                       color: colorTheme.textLowEmphasis,
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
                             StreamButton.active(
-                                label: 'Start a test call',
-                                onPressed: joinCallPressed)
+                              label: 'Start a test call',
+                              onPressed: joinCallPressed,
+                            ),
                           ],
                         ),
                       ),

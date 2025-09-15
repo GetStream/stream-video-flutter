@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../stream_video_flutter.dart';
 
-typedef CallPictureInPictureBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef CallPictureInPictureBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Configuration for picture-in-picture mode.
 class PictureInPictureConfiguration {

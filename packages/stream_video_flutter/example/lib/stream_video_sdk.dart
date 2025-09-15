@@ -22,17 +22,17 @@ class StreamVideoSdk {
       userToken: userToken.rawValue,
       pushNotificationManagerProvider:
           StreamVideoPushNotificationManager.create(
-        iosPushProvider: const StreamVideoPushProvider.apn(
-          name: 'flutter-apn',
-        ),
-        androidPushProvider: const StreamVideoPushProvider.firebase(
-          name: 'flutter-firebase',
-        ),
-        pushParams: const StreamVideoPushParams(
-          appName: 'Stream Example',
-          ios: IOSParams(iconName: 'IconMask'),
-        ),
-      ),
+            iosPushProvider: const StreamVideoPushProvider.apn(
+              name: 'flutter-apn',
+            ),
+            androidPushProvider: const StreamVideoPushProvider.firebase(
+              name: 'flutter-firebase',
+            ),
+            pushParams: const StreamVideoPushParams(
+              appName: 'Stream Example',
+              ios: IOSParams(iconName: 'IconMask'),
+            ),
+          ),
       options: options,
     );
   }

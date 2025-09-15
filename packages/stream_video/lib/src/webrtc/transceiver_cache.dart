@@ -55,8 +55,10 @@ class TransceiverManager {
 
   /// Gets the transceiver for the given publish option.
   RTCRtpTransceiver? get(SfuPublishOptions publishOption) {
-    return _findTransceiver(publishOption.trackType, publishOption.id)
-        ?.transceiver;
+    return _findTransceiver(
+      publishOption.trackType,
+      publishOption.id,
+    )?.transceiver;
   }
 
   /// Gets the last transceiver for the given track type and publish option id.
@@ -111,8 +113,9 @@ class TransceiverManager {
     if (entry != null) {
       entry.layers = layers;
     } else {
-      _layers
-          .add(TrackLayersCache(publishOption: publishOption, layers: layers));
+      _layers.add(
+        TrackLayersCache(publishOption: publishOption, layers: layers),
+      );
     }
   }
 

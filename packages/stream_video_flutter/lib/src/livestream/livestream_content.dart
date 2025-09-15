@@ -4,10 +4,11 @@ import '../../stream_video_flutter.dart';
 import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 import '../l10n/localization_extension.dart';
 
-typedef LivestreamHostsUnavailableBuilder = Widget Function(
-  BuildContext context,
-  LivestreamHostsUnavailableProperties properties,
-);
+typedef LivestreamHostsUnavailableBuilder =
+    Widget Function(
+      BuildContext context,
+      LivestreamHostsUnavailableProperties properties,
+    );
 
 class LivestreamHostsUnavailableProperties {
   LivestreamHostsUnavailableProperties(
@@ -17,10 +18,11 @@ class LivestreamHostsUnavailableProperties {
   final Call call;
 }
 
-typedef LivestreamNotConnectedBuilder = Widget Function(
-  BuildContext context,
-  LivestreamNotConnectedProperties properties,
-);
+typedef LivestreamNotConnectedBuilder =
+    Widget Function(
+      BuildContext context,
+      LivestreamNotConnectedProperties properties,
+    );
 
 class LivestreamNotConnectedProperties {
   LivestreamNotConnectedProperties(
@@ -137,11 +139,13 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
     late Widget bodyWidget;
     if (callState.status.isConnected) {
-      final streamingParticipants =
-          callState.callParticipants.where((e) => e.isVideoEnabled).toList();
+      final streamingParticipants = callState.callParticipants
+          .where((e) => e.isVideoEnabled)
+          .toList();
 
       if (streamingParticipants.isEmpty) {
-        bodyWidget = widget.livestreamHostsUnavailableBuilder?.call(
+        bodyWidget =
+            widget.livestreamHostsUnavailableBuilder?.call(
               context,
               LivestreamHostsUnavailableProperties(call),
             ) ??
@@ -173,10 +177,11 @@ class _LivestreamContentState extends State<LivestreamContent> {
       final statusText = isMigrating
           ? 'Migrating'
           : isReconnecting
-              ? 'Reconnecting'
-              : 'Connecting';
+          ? 'Reconnecting'
+          : 'Connecting';
 
-      bodyWidget = widget.livestreamNotConnectedBuilder?.call(
+      bodyWidget =
+          widget.livestreamNotConnectedBuilder?.call(
             context,
             LivestreamNotConnectedProperties(
               call,

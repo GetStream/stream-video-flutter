@@ -243,25 +243,25 @@ class CallParticipantState
 
   @override
   List<Object?> get props => [
-        userId,
-        roles,
-        name,
-        custom,
-        image,
-        sessionId,
-        trackIdPrefix,
-        publishedTracks,
-        isLocal,
-        connectionQuality,
-        isOnline,
-        audioLevel,
-        audioLevels,
-        isSpeaking,
-        isDominantSpeaker,
-        pin,
-        reaction,
-        viewportVisibility,
-      ];
+    userId,
+    roles,
+    name,
+    custom,
+    image,
+    sessionId,
+    trackIdPrefix,
+    publishedTracks,
+    isLocal,
+    connectionQuality,
+    isOnline,
+    audioLevel,
+    audioLevels,
+    isSpeaking,
+    isDominantSpeaker,
+    pin,
+    reaction,
+    viewportVisibility,
+  ];
 
   TrackState? get videoTrack {
     return publishedTracks[SfuTrackType.video];
@@ -288,9 +288,9 @@ class CallParticipantState
   }
 
   UserInfo toUserInfo() => UserInfo(
-        id: userId,
-        role: roles.firstOrNull ?? '',
-        name: name.ifEmpty(() => userId),
-        image: image,
-      );
+    id: userId,
+    role: roles.firstOrNull ?? '',
+    name: name.ifEmpty(() => userId),
+    image: image,
+  );
 }

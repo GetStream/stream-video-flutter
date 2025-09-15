@@ -102,11 +102,16 @@ class StreamLobbyViewThemeData with Diagnosticable {
   ) {
     return StreamLobbyViewThemeData(
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
-      cardBackgroundColor:
-          Color.lerp(cardBackgroundColor, other.cardBackgroundColor, t)!,
+      cardBackgroundColor: Color.lerp(
+        cardBackgroundColor,
+        other.cardBackgroundColor,
+        t,
+      )!,
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
-      participantAvatarTheme:
-          participantAvatarTheme.lerp(other.participantAvatarTheme, t),
+      participantAvatarTheme: participantAvatarTheme.lerp(
+        other.participantAvatarTheme,
+        t,
+      ),
       participantListHeight: lerpDouble(
         participantListHeight,
         other.participantListHeight,
@@ -117,21 +122,24 @@ class StreamLobbyViewThemeData with Diagnosticable {
         other.optionOffBackgroundColor,
         t,
       )!,
-      optionOffIconColor:
-          Color.lerp(optionOffIconColor, other.optionOffIconColor, t)!,
+      optionOffIconColor: Color.lerp(
+        optionOffIconColor,
+        other.optionOffIconColor,
+        t,
+      )!,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        backgroundColor,
-        cardBackgroundColor,
-        userAvatarTheme,
-        participantAvatarTheme,
-        participantListHeight,
-        optionOffBackgroundColor,
-        optionOffIconColor,
-      );
+    backgroundColor,
+    cardBackgroundColor,
+    userAvatarTheme,
+    participantAvatarTheme,
+    participantListHeight,
+    optionOffBackgroundColor,
+    optionOffIconColor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -207,8 +215,8 @@ class StreamLobbyViewTheme extends InheritedWidget {
   /// [StreamLobbyViewTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.lobbyViewTheme].
   static StreamLobbyViewThemeData of(BuildContext context) {
-    final lobbyViewTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamLobbyViewTheme>();
+    final lobbyViewTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamLobbyViewTheme>();
     return lobbyViewTheme?.data ?? StreamVideoTheme.of(context).lobbyViewTheme;
   }
 

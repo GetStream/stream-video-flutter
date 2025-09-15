@@ -39,7 +39,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     )
     CallerCustomizationFunction? callerCustomizationCallback,
     @Deprecated(
-        'Background handler is no longer needed for terminated state ringing on iOS.')
+      'Background handler is no longer needed for terminated state ringing on iOS.',
+    )
     BackgroundVoipCallHandler? backgroundVoipCallHandler,
     StreamVideoPushParams? pushParams,
     bool registerApnDeviceToken = false,
@@ -80,13 +81,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _subscriptions.add(
       _idActiveCall,
       streamVideo.state.activeCalls.listen((calls) async {
-        _logger.d(() =>
-            '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]');
+        _logger.d(
+          () =>
+              '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]',
+        );
 
         for (final previousCall in currentActiveCalls) {
           if (!calls.any((c) => c.callCid == previousCall.callCid)) {
-            _logger.d(() =>
-                '[activeCall] Stopping previous call: ${previousCall.callCid}');
+            _logger.d(
+              () =>
+                  '[activeCall] Stopping previous call: ${previousCall.callCid}',
+            );
             await endCallByCid(previousCall.callCid.value);
           }
         }
@@ -98,82 +103,91 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     subscribeToEvents() {
       _subscriptions.add(
         _idCallEnded,
-        client.events.on<CoordinatorCallEndedEvent>(
-          (event) {
-            _logger.d(
-                () => '[subscribeToEvents] Call ended event: ${event.callCid}');
-            endCallByCid(event.callCid.toString());
-          },
-        ),
+        client.events.on<CoordinatorCallEndedEvent>((event) {
+          _logger.d(
+            () => '[subscribeToEvents] Call ended event: ${event.callCid}',
+          );
+          endCallByCid(event.callCid.toString());
+        }),
       );
 
       _subscriptions.add(
         _idCallParticipantCount,
-        client.events.on<CoordinatorCallSessionParticipantCountUpdatedEvent>(
-          (event) async {
-            final roleCounts =
-                event.participantsCountByRole.values.map((v) => v);
+        client.events.on<CoordinatorCallSessionParticipantCountUpdatedEvent>((
+          event,
+        ) async {
+          final roleCounts = event.participantsCountByRole.values.map((v) => v);
 
-            final totalCount =
-                roleCounts.isEmpty ? 0 : roleCounts.reduce((a, b) => a + b);
+          final totalCount = roleCounts.isEmpty
+              ? 0
+              : roleCounts.reduce((a, b) => a + b);
 
-            _logger.d(() =>
-                '[subscribeToEvents] Participant count updated event: ${event.callCid}, count: $totalCount');
-            if (totalCount == 0) {
-              _logger.v(() =>
-                  '[subscribeToEvents] No participants left, ending call: ${event.callCid}');
-              endCallByCid(event.callCid.toString());
-            }
-          },
-        ),
+          _logger.d(
+            () =>
+                '[subscribeToEvents] Participant count updated event: ${event.callCid}, count: $totalCount',
+          );
+          if (totalCount == 0) {
+            _logger.v(
+              () =>
+                  '[subscribeToEvents] No participants left, ending call: ${event.callCid}',
+            );
+            endCallByCid(event.callCid.toString());
+          }
+        }),
       );
 
       _subscriptions.add(
         _idCallRejected,
-        client.events.on<CoordinatorCallRejectedEvent>(
-          (event) async {
-            _logger.d(() =>
-                '[subscribeToEvents] Call rejected event: ${event.callCid}, rejected by: ${event.rejectedByUserId}');
-            if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
-                event.rejectedByUserId == streamVideo.currentUser.id) {
-              _logger.v(() =>
-                  '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}');
-              endCallByCid(event.callCid.toString());
-            }
-          },
-        ),
+        client.events.on<CoordinatorCallRejectedEvent>((event) async {
+          _logger.d(
+            () =>
+                '[subscribeToEvents] Call rejected event: ${event.callCid}, rejected by: ${event.rejectedByUserId}',
+          );
+          if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
+              event.rejectedByUserId == streamVideo.currentUser.id) {
+            _logger.v(
+              () =>
+                  '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}',
+            );
+            endCallByCid(event.callCid.toString());
+          }
+        }),
       );
 
       _subscriptions.add(
         _idCallAccepted,
-        client.events.on<CoordinatorCallAcceptedEvent>(
-          (event) async {
-            _logger.d(() =>
-                '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}');
-            if (event.acceptedByUserId != streamVideo.currentUser.id) return;
+        client.events.on<CoordinatorCallAcceptedEvent>((event) async {
+          _logger.d(
+            () =>
+                '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}',
+          );
+          if (event.acceptedByUserId != streamVideo.currentUser.id) return;
 
-            final activeCall = streamVideo.activeCalls
-                .firstWhereOrNull((call) => call.callCid == event.callCid);
+          final activeCall = streamVideo.activeCalls.firstWhereOrNull(
+            (call) => call.callCid == event.callCid,
+          );
 
-            // End the CallKit call on this device if the call was accepted on another device
-            if (activeCall?.state.value.status is! CallStatusActive) {
-              _logger.v(() =>
-                  '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}');
-              await endCallByCid(event.callCid.toString());
-            }
-
-            // If the call was accepted on this device, end the CallKit call silently
-            // (useful if the call was accepted via the app instead of the CallKit UI)
-            else {
-              _logger.v(() =>
-                  '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}');
-              await FlutterCallkitIncoming.silenceEvents();
-              await endCallByCid(event.callCid.toString());
-              await Future<void>.delayed(const Duration(milliseconds: 300));
-              await FlutterCallkitIncoming.unsilenceEvents();
-            }
-          },
-        ),
+          // End the CallKit call on this device if the call was accepted on another device
+          if (activeCall?.state.value.status is! CallStatusActive) {
+            _logger.v(
+              () =>
+                  '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}',
+            );
+            await endCallByCid(event.callCid.toString());
+          }
+          // If the call was accepted on this device, end the CallKit call silently
+          // (useful if the call was accepted via the app instead of the CallKit UI)
+          else {
+            _logger.v(
+              () =>
+                  '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}',
+            );
+            await FlutterCallkitIncoming.silenceEvents();
+            await endCallByCid(event.callCid.toString());
+            await Future<void>.delayed(const Duration(milliseconds: 300));
+            await FlutterCallkitIncoming.unsilenceEvents();
+          }
+        }),
       );
     }
 
@@ -186,38 +200,40 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
     _subscriptions.add(
       _idCallKit,
-      onCallEvent.listen(
-        (event) {
-          if (event is ActionCallToggleMute) {
-            {
-              _logger.d(() =>
-                  '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}');
-              final call = currentActiveCalls
-                  .firstWhereOrNull((c) => c.state.value.isRingingFlow);
-              if (call != null) {
-                call.setMicrophoneEnabled(enabled: !event.isMuted);
-              } else {
-                _logger.w(
-                    () => '[onCallEvent] Cannot toggle mute: no active call');
-              }
+      onCallEvent.listen((event) {
+        if (event is ActionCallToggleMute) {
+          {
+            _logger.d(
+              () =>
+                  '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}',
+            );
+            final call = currentActiveCalls.firstWhereOrNull(
+              (c) => c.state.value.isRingingFlow,
+            );
+            if (call != null) {
+              call.setMicrophoneEnabled(enabled: !event.isMuted);
+            } else {
+              _logger.w(
+                () => '[onCallEvent] Cannot toggle mute: no active call',
+              );
             }
-          } else if (event is ActionCallIncoming) {
-            if (!client.isConnected) {
-              client.openConnection();
-            }
-
-            subscribeToEvents();
-          } else if (event is ActionCallAccept ||
-              event is ActionCallDecline ||
-              event is ActionCallTimeout ||
-              event is ActionCallEnded) {
-            _subscriptions.cancel(_idCallAccepted);
-            _subscriptions.cancel(_idCallEnded);
-            _subscriptions.cancel(_idCallRejected);
-            _subscriptions.cancel(_idCallParticipantCount);
           }
-        },
-      ),
+        } else if (event is ActionCallIncoming) {
+          if (!client.isConnected) {
+            client.openConnection();
+          }
+
+          subscribeToEvents();
+        } else if (event is ActionCallAccept ||
+            event is ActionCallDecline ||
+            event is ActionCallTimeout ||
+            event is ActionCallEnded) {
+          _subscriptions.cancel(_idCallAccepted);
+          _subscriptions.cancel(_idCallEnded);
+          _subscriptions.cancel(_idCallRejected);
+          _subscriptions.cancel(_idCallParticipantCount);
+        }
+      }),
     );
   }
 
@@ -261,16 +277,16 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
       _client
           .createDevice(
-        id: token,
-        voipToken: isVoIP,
-        pushProvider: pushProvider.type,
-        pushProviderName: pushProvider.name,
-      )
+            id: token,
+            voipToken: isVoIP,
+            pushProvider: pushProvider.type,
+            pushProviderName: pushProvider.name,
+          )
           .then((result) {
-        if (result is Success) {
-          _sharedPreferences.setString(tokenKey, token);
-        }
-      });
+            if (result is Success) {
+              _sharedPreferences.setString(tokenKey, token);
+            }
+          });
     }
 
     if (CurrentPlatform.isIos && registerApnDeviceToken) {
@@ -282,9 +298,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     }
 
     _subscriptions.addIfAbsent(
-        _idToken,
-        () => pushProvider.onTokenRefresh
-            .listen((token) => registerDevice(token, true)));
+      _idToken,
+      () => pushProvider.onTokenRefresh.listen(
+        (token) => registerDevice(token, true),
+      ),
+    );
   }
 
   Future<void> removedStoredTokens() async {
@@ -310,8 +328,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Stream<CallKitEvent> get onCallEvent {
-    return StreamCallKit()
-        .onEvent
+    return StreamCallKit().onEvent
         .map((event) => event.toCallKitEvent())
         .doOnData((event) => _logger.v(() => '[onCallKitEvent] event: $event'));
   }
@@ -505,9 +522,7 @@ const _defaultPushParams = StreamVideoPushParams(
     subtitle: 'Missed call',
     callbackText: 'Call back',
   ),
-  callingNotification: NotificationParams(
-    showNotification: false,
-  ),
+  callingNotification: NotificationParams(showNotification: false),
   android: AndroidParams(
     isCustomNotification: true,
     isShowLogo: false,
@@ -563,24 +578,24 @@ extension on CallEvent {
           token: body['deviceTokenVoIP'] as String,
         ),
       Event.actionCallToggleHold => ActionCallToggleHold(
-          uuid: body['id'] as String,
-          isOnHold: body['isOnHold'] as bool,
-        ),
+        uuid: body['id'] as String,
+        isOnHold: body['isOnHold'] as bool,
+      ),
       Event.actionCallToggleMute => ActionCallToggleMute(
-          uuid: body['id'] as String,
-          isMuted: body['isMuted'] as bool,
-        ),
+        uuid: body['id'] as String,
+        isMuted: body['isMuted'] as bool,
+      ),
       Event.actionCallToggleDmtf => ActionCallToggleDmtf(
-          uuid: body['id'] as String,
-          digits: body['digits'] as String,
-        ),
+        uuid: body['id'] as String,
+        digits: body['digits'] as String,
+      ),
       Event.actionCallToggleGroup => ActionCallToggleGroup(
-          uuid: body['id'] as String,
-          callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
-        ),
+        uuid: body['id'] as String,
+        callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
+      ),
       Event.actionCallToggleAudioSession => ActionCallToggleAudioSession(
-          isActivate: body['isActivate'] as bool,
-        ),
+        isActivate: body['isActivate'] as bool,
+      ),
       Event.actionCallCustom => ActionCallCustom(body),
     };
   }

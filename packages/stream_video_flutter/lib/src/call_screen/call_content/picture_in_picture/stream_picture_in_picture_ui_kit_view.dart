@@ -53,11 +53,13 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
 }
 
 class _StreamPictureInPictureUiKitViewState
-    extends State<StreamPictureInPictureUiKitView> with WidgetsBindingObserver {
+    extends State<StreamPictureInPictureUiKitView>
+    with WidgetsBindingObserver {
   static const _idCallState = 2;
 
-  static const MethodChannel _channel =
-      MethodChannel('stream_video_flutter_pip');
+  static const MethodChannel _channel = MethodChannel(
+    'stream_video_flutter_pip',
+  );
 
   final Subscriptions _subscriptions = Subscriptions();
 
@@ -106,11 +108,13 @@ class _StreamPictureInPictureUiKitViewState
         'updateParticipant',
         {
           'trackId': videoTrack?.mediaTrack.id,
-          'name':
-              participant.name.isEmpty ? participant.userId : participant.name,
+          'name': participant.name.isEmpty
+              ? participant.userId
+              : participant.name,
           'imageUrl': participant.image,
           'isAudioEnabled': participant.isAudioEnabled,
-          'isVideoEnabled': videoTrack != null &&
+          'isVideoEnabled':
+              videoTrack != null &&
               (participant.isVideoEnabled || participant.isScreenShareEnabled),
           'connectionQuality': participant.connectionQuality.name,
           'showParticipantName': widget.configuration.showParticipantName,

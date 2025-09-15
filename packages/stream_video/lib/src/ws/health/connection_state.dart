@@ -63,7 +63,8 @@ mixin ConnectionStateMixin {
 
     _connectionState = newState;
 
-    final didConnected = oldState != ConnectionState.connected &&
+    final didConnected =
+        oldState != ConnectionState.connected &&
         newState == ConnectionState.connected;
 
     final updatedState = ConnectionStateUpdatedEvent(

@@ -74,7 +74,7 @@ class StreamIncomingCallContent extends StatefulWidget {
 
   /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilderWithData<ParticipantsData>?
-      participantsAvatarWidgetBuilder;
+  participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
   ///
@@ -84,7 +84,7 @@ class StreamIncomingCallContent extends StatefulWidget {
 
   /// Builder used to create a custom widget for participants display names.
   final CallWidgetBuilderWithData<ParticipantsData>?
-      participantsDisplayNameWidgetBuilder;
+  participantsDisplayNameWidgetBuilder;
 
   @override
   State<StreamIncomingCallContent> createState() =>
@@ -98,85 +98,85 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
   Widget build(BuildContext context) {
     final theme = StreamIncomingOutgoingCallTheme.incomingCallThemeOf(context);
 
-    final singleParticipantAvatarTheme = widget.singleParticipantAvatarTheme ??
+    final singleParticipantAvatarTheme =
+        widget.singleParticipantAvatarTheme ??
         theme.singleParticipantAvatarTheme;
     final multipleParticipantAvatarTheme =
         widget.multipleParticipantAvatarTheme ??
-            theme.multipleParticipantAvatarTheme;
+        theme.multipleParticipantAvatarTheme;
     final singleParticipantTextStyle =
         widget.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
-    final multipleParticipantTextStyle = widget.multipleParticipantTextStyle ??
+    final multipleParticipantTextStyle =
+        widget.multipleParticipantTextStyle ??
         theme.multipleParticipantTextStyle;
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
     Widget buildContent(List<UserInfo> users) => CallBackground(
-          participants: users,
-          child: Material(
-            color: Colors.transparent,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                widget.participantsAvatarWidgetBuilder?.call(
-                      context,
-                      widget.call,
-                      ParticipantsData(participants: users),
-                    ) ??
-                    widget.participantsAvatarBuilder?.call(
-                      context,
-                      widget.call,
-                      widget.callState ?? widget.call.state.value,
-                      users,
-                    ) ??
-                    ParticipantAvatars(
-                      participants: users,
-                      singleParticipantAvatarTheme:
-                          singleParticipantAvatarTheme,
-                      multipleParticipantAvatarTheme:
-                          multipleParticipantAvatarTheme,
-                    ),
-                widget.participantsDisplayNameWidgetBuilder?.call(
-                      context,
-                      widget.call,
-                      ParticipantsData(participants: users),
-                    ) ??
-                    widget.participantsDisplayNameBuilder?.call(
-                      context,
-                      widget.call,
-                      widget.callState ?? widget.call.state.value,
-                      users,
-                    ) ??
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 64,
-                        vertical: 32,
-                      ),
-                      child: CallingParticipants(
-                        participants: users,
-                        singleParticipantTextStyle: singleParticipantTextStyle,
-                        multipleParticipantTextStyle:
-                            multipleParticipantTextStyle,
-                      ),
-                    ),
-                Text(
-                  // TODO hardcoded text
-                  'Incoming Call...',
-                  style: callingLabelTextStyle,
+      participants: users,
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            widget.participantsAvatarWidgetBuilder?.call(
+                  context,
+                  widget.call,
+                  ParticipantsData(participants: users),
+                ) ??
+                widget.participantsAvatarBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState ?? widget.call.state.value,
+                  users,
+                ) ??
+                ParticipantAvatars(
+                  participants: users,
+                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
+                  multipleParticipantAvatarTheme:
+                      multipleParticipantAvatarTheme,
                 ),
-                const Spacer(),
-                IncomingCallControls(
-                  isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-                  isCameraEnabled: connectOptions.camera.isEnabled,
-                  onAcceptCallTap: _onAcceptCallTap,
-                  onDeclineCallTap: () => _onDeclineCallTap(context),
-                  onMicrophoneTap: () => _onMicrophoneTap(context),
-                  onCameraTap: () => _onCameraTap(context),
+            widget.participantsDisplayNameWidgetBuilder?.call(
+                  context,
+                  widget.call,
+                  ParticipantsData(participants: users),
+                ) ??
+                widget.participantsDisplayNameBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState ?? widget.call.state.value,
+                  users,
+                ) ??
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 64,
+                    vertical: 32,
+                  ),
+                  child: CallingParticipants(
+                    participants: users,
+                    singleParticipantTextStyle: singleParticipantTextStyle,
+                    multipleParticipantTextStyle: multipleParticipantTextStyle,
+                  ),
                 ),
-              ],
+            Text(
+              // TODO hardcoded text
+              'Incoming Call...',
+              style: callingLabelTextStyle,
             ),
-          ),
-        );
+            const Spacer(),
+            IncomingCallControls(
+              isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+              isCameraEnabled: connectOptions.camera.isEnabled,
+              onAcceptCallTap: _onAcceptCallTap,
+              onDeclineCallTap: () => _onDeclineCallTap(context),
+              onMicrophoneTap: () => _onMicrophoneTap(context),
+              onCameraTap: () => _onCameraTap(context),
+            ),
+          ],
+        ),
+      ),
+    );
 
     if (widget.callState != null) {
       return buildContent(

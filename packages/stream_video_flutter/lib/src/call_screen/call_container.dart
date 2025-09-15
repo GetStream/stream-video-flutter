@@ -10,53 +10,58 @@ import '../../stream_video_flutter.dart';
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef IncomingCallBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef IncomingCallBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Builder used to create a custom outgoing call widget.
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef OutgoingCallBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef OutgoingCallBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Builder used to create a custom call content widget.
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef CallContentBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef CallContentBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Builder used to create a custom widget for participants avatars.
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef ParticipantsAvatarBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-  List<UserInfo> participants,
-);
+typedef ParticipantsAvatarBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+      List<UserInfo> participants,
+    );
 
 /// Builder used to create a custom widget for participants display names.
 ///
 /// Replaced by the simplified [CallWidgetBuilder].
 @Deprecated('Use CallWidgetBuilder instead.')
-typedef ParticipantsDisplayNameBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-  List<UserInfo> participants,
-);
+typedef ParticipantsDisplayNameBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+      List<UserInfo> participants,
+    );
 
 /// Represents different call content based on the call state.
 class StreamCallContainer extends StatefulWidget {
@@ -208,8 +213,9 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   void _listenToCallStatus() {
     _callStatus = call.state.value.status;
-    _callStatusSubscription =
-        call.partialState((state) => state.status).listen(_setStatus);
+    _callStatusSubscription = call
+        .partialState((state) => state.status)
+        .listen(_setStatus);
   }
 
   void _setState(CallState callState) {

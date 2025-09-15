@@ -1,9 +1,6 @@
 /// The iceTransportPolicy used for [RTCConfiguration].
 /// See https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection
-enum RTCIceTransportPolicy {
-  all,
-  relay;
-}
+enum RTCIceTransportPolicy { all, relay }
 
 class RTCConfiguration {
   const RTCConfiguration({
@@ -40,12 +37,11 @@ class RTCConfiguration {
     int? iceCandidatePoolSize,
     List<RTCIceServer>? iceServers,
     RTCIceTransportPolicy? iceTransportPolicy,
-  }) =>
-      RTCConfiguration(
-        iceCandidatePoolSize: iceCandidatePoolSize ?? this.iceCandidatePoolSize,
-        iceServers: iceServers ?? this.iceServers,
-        iceTransportPolicy: iceTransportPolicy ?? this.iceTransportPolicy,
-      );
+  }) => RTCConfiguration(
+    iceCandidatePoolSize: iceCandidatePoolSize ?? this.iceCandidatePoolSize,
+    iceServers: iceServers ?? this.iceServers,
+    iceTransportPolicy: iceTransportPolicy ?? this.iceTransportPolicy,
+  );
 }
 
 class RTCIceServer {
@@ -60,8 +56,8 @@ class RTCIceServer {
   final String? credential;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        if (urls?.isNotEmpty ?? false) 'urls': urls,
-        if (username?.isNotEmpty ?? false) 'username': username,
-        if (credential?.isNotEmpty ?? false) 'credential': credential,
-      };
+    if (urls?.isNotEmpty ?? false) 'urls': urls,
+    if (username?.isNotEmpty ?? false) 'username': username,
+    if (credential?.isNotEmpty ?? false) 'credential': credential,
+  };
 }

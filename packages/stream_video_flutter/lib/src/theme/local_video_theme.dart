@@ -93,13 +93,20 @@ class StreamLocalVideoThemeData with Diagnosticable {
   ) {
     return StreamLocalVideoThemeData(
       localVideoWidth: lerpDouble(localVideoWidth, other.localVideoWidth, t)!,
-      localVideoHeight:
-          lerpDouble(localVideoHeight, other.localVideoHeight, t)!,
-      localVideoPadding:
-          lerpDouble(localVideoPadding, other.localVideoPadding, t)!,
+      localVideoHeight: lerpDouble(
+        localVideoHeight,
+        other.localVideoHeight,
+        t,
+      )!,
+      localVideoPadding: lerpDouble(
+        localVideoPadding,
+        other.localVideoPadding,
+        t,
+      )!,
       initialAlignment: t < 0.5 ? initialAlignment : other.initialAlignment,
-      enableSnappingBehavior:
-          t < 0.5 ? enableSnappingBehavior : other.enableSnappingBehavior,
+      enableSnappingBehavior: t < 0.5
+          ? enableSnappingBehavior
+          : other.enableSnappingBehavior,
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t)!,
@@ -108,15 +115,15 @@ class StreamLocalVideoThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        localVideoWidth,
-        localVideoHeight,
-        localVideoPadding,
-        initialAlignment,
-        enableSnappingBehavior,
-        userAvatarTheme,
-        borderRadius,
-        shadowColor,
-      );
+    localVideoWidth,
+    localVideoHeight,
+    localVideoPadding,
+    initialAlignment,
+    enableSnappingBehavior,
+    userAvatarTheme,
+    borderRadius,
+    shadowColor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -187,8 +194,8 @@ class StreamLocalVideoTheme extends InheritedWidget {
   /// [StreamLocalVideoTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.localVideoTheme].
   static StreamLocalVideoThemeData of(BuildContext context) {
-    final localVideoTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamLocalVideoTheme>();
+    final localVideoTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamLocalVideoTheme>();
     return localVideoTheme?.data ??
         StreamVideoTheme.of(context).localVideoTheme;
   }

@@ -17,10 +17,10 @@ class ScreenShareConstraints extends VideoConstraints {
     this.captureScreenAudio = false,
     required VideoConstraints constraints,
   }) : super(
-          deviceId: constraints.deviceId,
-          maxFrameRate: constraints.maxFrameRate,
-          params: constraints.params,
-        );
+         deviceId: constraints.deviceId,
+         maxFrameRate: constraints.maxFrameRate,
+         params: constraints.params,
+       );
 
   /// iOS only flag: Use Broadcast Extension for screen share capturing.
   /// See instructions on how to setup your Broadcast Extension here:
@@ -55,13 +55,12 @@ class ScreenShareConstraints extends VideoConstraints {
     double? maxFrameRate,
     bool? captureScreenAudio,
     bool? useiOSBroadcastExtension,
-  }) =>
-      ScreenShareConstraints(
-        params: params ?? this.params,
-        sourceId: deviceId ?? this.deviceId,
-        maxFrameRate: maxFrameRate ?? this.maxFrameRate,
-        captureScreenAudio: captureScreenAudio ?? this.captureScreenAudio,
-        useiOSBroadcastExtension:
-            useiOSBroadcastExtension ?? this.useiOSBroadcastExtension,
-      );
+  }) => ScreenShareConstraints(
+    params: params ?? this.params,
+    sourceId: deviceId ?? this.deviceId,
+    maxFrameRate: maxFrameRate ?? this.maxFrameRate,
+    captureScreenAudio: captureScreenAudio ?? this.captureScreenAudio,
+    useiOSBroadcastExtension:
+        useiOSBroadcastExtension ?? this.useiOSBroadcastExtension,
+  );
 }

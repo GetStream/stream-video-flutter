@@ -161,9 +161,11 @@ class StreamCallParticipantThemeData with Diagnosticable {
           connectionLevelAlignment ?? this.connectionLevelAlignment,
       participantsGridPadding:
           participantsGridPadding ?? this.participantsGridPadding,
-      participantsGridMainAxisSpacing: participantsGridMainAxisSpacing ??
+      participantsGridMainAxisSpacing:
+          participantsGridMainAxisSpacing ??
           this.participantsGridMainAxisSpacing,
-      participantsGridCrossAxisSpacing: participantsGridCrossAxisSpacing ??
+      participantsGridCrossAxisSpacing:
+          participantsGridCrossAxisSpacing ??
           this.participantsGridCrossAxisSpacing,
     );
   }
@@ -191,8 +193,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
         other.speakerBorderColor,
         t,
       )!,
-      showParticipantLabel:
-          t < 0.5 ? showParticipantLabel : other.showParticipantLabel,
+      showParticipantLabel: t < 0.5
+          ? showParticipantLabel
+          : other.showParticipantLabel,
       participantLabelTextStyle: TextStyle.lerp(
         participantLabelTextStyle,
         other.participantLabelTextStyle,
@@ -208,8 +211,11 @@ class StreamCallParticipantThemeData with Diagnosticable {
         other.audioLevelIndicatorColor,
         t,
       )!,
-      enabledMicrophoneColor:
-          Color.lerp(enabledMicrophoneColor, other.enabledMicrophoneColor, t)!,
+      enabledMicrophoneColor: Color.lerp(
+        enabledMicrophoneColor,
+        other.enabledMicrophoneColor,
+        t,
+      )!,
       disabledMicrophoneColor: Color.lerp(
         disabledMicrophoneColor,
         other.disabledMicrophoneColor,
@@ -253,27 +259,27 @@ class StreamCallParticipantThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        videoFit,
-        backgroundColor,
-        borderRadius,
-        userAvatarTheme,
-        showSpeakerBorder,
-        speakerBorderThickness,
-        speakerBorderColor,
-        showParticipantLabel,
-        participantLabelTextStyle,
-        participantLabelAlignment,
-        audioLevelIndicatorColor,
-        enabledMicrophoneColor,
-        disabledMicrophoneColor,
-        showConnectionQualityIndicator,
-        connectionLevelActiveColor,
-        connectionLevelInactiveColor,
-        connectionLevelAlignment,
-        participantsGridPadding,
-        participantsGridMainAxisSpacing,
-        participantsGridCrossAxisSpacing,
-      );
+    videoFit,
+    backgroundColor,
+    borderRadius,
+    userAvatarTheme,
+    showSpeakerBorder,
+    speakerBorderThickness,
+    speakerBorderColor,
+    showParticipantLabel,
+    participantLabelTextStyle,
+    participantLabelAlignment,
+    audioLevelIndicatorColor,
+    enabledMicrophoneColor,
+    disabledMicrophoneColor,
+    showConnectionQualityIndicator,
+    connectionLevelActiveColor,
+    connectionLevelInactiveColor,
+    connectionLevelAlignment,
+    participantsGridPadding,
+    participantsGridMainAxisSpacing,
+    participantsGridCrossAxisSpacing,
+  );
 
   @override
   bool operator ==(Object other) {

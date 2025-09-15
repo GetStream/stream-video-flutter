@@ -76,17 +76,17 @@ class CallConnectOptions with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        camera,
-        microphone,
-        screenShare,
-        audioOutputDevice,
-        audioInputDevice,
-        videoInputDevice,
-        cameraFacingMode,
-        speakerDefaultOn,
-        targetResolution,
-        screenShareTargetResolution,
-      ];
+    camera,
+    microphone,
+    screenShare,
+    audioOutputDevice,
+    audioInputDevice,
+    videoInputDevice,
+    cameraFacingMode,
+    speakerDefaultOn,
+    targetResolution,
+    screenShareTargetResolution,
+  ];
 
   @override
   String toString() {

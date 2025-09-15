@@ -94,10 +94,12 @@ class StreamVideoPushParams extends CallKitParams {
       duration: other.duration,
       textAccept: other.textAccept,
       textDecline: other.textDecline,
-      missedCallNotification:
-          missedCallNotification?.merge(other.missedCallNotification),
-      callingNotification:
-          callingNotification?.merge(other.callingNotification),
+      missedCallNotification: missedCallNotification?.merge(
+        other.missedCallNotification,
+      ),
+      callingNotification: callingNotification?.merge(
+        other.callingNotification,
+      ),
       extra: other.extra,
       headers: other.headers,
       android: android?.merge(other.android),
@@ -139,11 +141,12 @@ extension on IOSParams {
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
       audioSessionActive: audioSessionActive ?? this.audioSessionActive,
-      audioSessionPreferredSampleRate: audioSessionPreferredSampleRate ??
+      audioSessionPreferredSampleRate:
+          audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           audioSessionPreferredIOBufferDuration ??
-              this.audioSessionPreferredIOBufferDuration,
+          this.audioSessionPreferredIOBufferDuration,
       configureAudioSession:
           configureAudioSession ?? this.configureAudioSession,
       supportsDTMF: supportsDTMF ?? this.supportsDTMF,
@@ -201,8 +204,9 @@ extension on AndroidParams {
       actionColor: actionColor ?? this.actionColor,
       incomingCallNotificationChannelName:
           incomingCallNotificationChannelName ??
-              this.incomingCallNotificationChannelName,
-      missedCallNotificationChannelName: missedCallNotificationChannelName ??
+          this.incomingCallNotificationChannelName,
+      missedCallNotificationChannelName:
+          missedCallNotificationChannelName ??
           this.missedCallNotificationChannelName,
     );
   }

@@ -35,26 +35,29 @@ typedef OnRenegotiationNeeded = void Function(StreamPeerConnection);
 /// Handler when a reconnection is needed.
 /// The [SfuReconnectionStrategy] indicates how the reconnection should be handled.
 /// {@endtemplate}
-typedef OnReconnectionNeeded = void Function(
-  StreamPeerConnection,
-  SfuReconnectionStrategy,
-);
+typedef OnReconnectionNeeded =
+    void Function(
+      StreamPeerConnection,
+      SfuReconnectionStrategy,
+    );
 
 /// {@template onIceCandidate}
 /// Handler whenever we receive [rtc.RTCIceCandidate]s.
 /// {@endtemplate}
-typedef OnIceCandidate = void Function(
-  StreamPeerConnection,
-  rtc.RTCIceCandidate,
-);
+typedef OnIceCandidate =
+    void Function(
+      StreamPeerConnection,
+      rtc.RTCIceCandidate,
+    );
 
 /// {@template onTrack}
 /// Handler whenever we receive [rtc.RTCTrackEvent]s.
 /// {@endtemplate}
-typedef OnTrack = void Function(
-  StreamPeerConnection,
-  rtc.RTCTrackEvent,
-);
+typedef OnTrack =
+    void Function(
+      StreamPeerConnection,
+      rtc.RTCTrackEvent,
+    );
 
 /// Wrapper around the WebRTC connection that contains tracks.
 class StreamPeerConnection extends Disposable {
@@ -355,7 +358,8 @@ class StreamPeerConnection extends Disposable {
 
   void _onAddTrack(rtc.MediaStream stream, rtc.MediaStreamTrack track) {
     _logger.v(
-      () => '[onAddTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
+      () =>
+          '[onAddTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
           'track.kind: ${track.kind}',
     );
   }
@@ -369,7 +373,8 @@ class StreamPeerConnection extends Disposable {
 
   void _onRemoveTrack(rtc.MediaStream stream, rtc.MediaStreamTrack track) {
     _logger.v(
-      () => '[onRemoveTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
+      () =>
+          '[onRemoveTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
           'track.kind: ${track.kind}',
     );
   }
@@ -428,11 +433,13 @@ class StreamPeerConnection extends Disposable {
   }
 
   Future<
-      ({
-        List<RtcStats> rtcStats,
-        RtcPrintableStats printable,
-        List<Map<String, dynamic>> rawStats,
-      })> getStats() async {
+    ({
+      List<RtcStats> rtcStats,
+      RtcPrintableStats printable,
+      List<Map<String, dynamic>> rawStats,
+    })
+  >
+  getStats() async {
     final stats = await pc.getStats();
 
     final rtcPrintableStats = stats.toPrintableRtcStats();

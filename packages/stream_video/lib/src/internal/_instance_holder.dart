@@ -23,7 +23,8 @@ class InstanceHolder {
       }
       streamLog.w(
         'InstanceHolder',
-        () => 'StreamVideo has already been initialised, '
+        () =>
+            'StreamVideo has already been initialised, '
             'disconnecting the existing instance '
             'and overriding it with the new instance.',
       );

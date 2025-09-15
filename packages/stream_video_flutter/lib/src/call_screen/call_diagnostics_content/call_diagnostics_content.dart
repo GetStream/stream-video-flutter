@@ -34,7 +34,7 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
 
   /// Controls the subscription to the stats updates.
   StreamSubscription<({CallStats publisherStats, CallStats subscriberStats})>?
-      _subscription;
+  _subscription;
 
   @override
   void initState() {

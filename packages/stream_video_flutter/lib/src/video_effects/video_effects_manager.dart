@@ -102,18 +102,19 @@ class StreamVideoEffectsManager {
     _appliedVideoEffects = names;
 
     await _localVideoTrackSubscription?.cancel();
-    _localVideoTrackSubscription =
-        call.partialState((s) => s.localParticipant?.isVideoEnabled).listen(
-      (enabled) async {
-        final trackId = await _getTrackId();
-        if (trackId != null) {
-          await rtc.setVideoEffects(
-            trackId,
-            names: names,
-          );
-        }
-      },
-    );
+    _localVideoTrackSubscription = call
+        .partialState((s) => s.localParticipant?.isVideoEnabled)
+        .listen(
+          (enabled) async {
+            final trackId = await _getTrackId();
+            if (trackId != null) {
+              await rtc.setVideoEffects(
+                trackId,
+                names: names,
+              );
+            }
+          },
+        );
 
     final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {

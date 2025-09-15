@@ -1,12 +1,13 @@
 import '../stream_logger.dart';
 
-typedef ExternalFunction = void Function(
-  Priority priority,
-  String tag,
-  MessageBuilder message, [
-  Object? error,
-  StackTrace? stk,
-]);
+typedef ExternalFunction =
+    void Function(
+      Priority priority,
+      String tag,
+      MessageBuilder message, [
+      Object? error,
+      StackTrace? stk,
+    ]);
 
 class ExternalStreamLogger extends StreamLogger {
   const ExternalStreamLogger(this.external);

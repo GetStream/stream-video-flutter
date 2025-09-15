@@ -28,34 +28,38 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 }
 
 /// Builder for parts of the call screen that need a regular Widget.
-typedef CallWidgetBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-);
+typedef CallWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
 /// Builder for parts of the call screen that need a regular Widget.
 /// The function also contains a data object that can be used to build the widget.
 ///
 /// To prevent breaking changes we only add properties to the data object, but not to the function itself.
-typedef CallWidgetBuilderWithData<T extends CallbackData> = Widget Function(
-  BuildContext context,
-  Call call,
-  T data,
-);
+typedef CallWidgetBuilderWithData<T extends CallbackData> =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      T data,
+    );
 
 /// Builder for parts of the call screen that need a regular Widget and has a prebuild child widget.
-typedef CallWidgetChildBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  Widget child,
-);
+typedef CallWidgetChildBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      Widget child,
+    );
 
 /// Builder for parts of the call screen that need a PreferredSizeWidget.
 /// For example used to create a custom app bar.
-typedef CallPreferredSizeWidgetBuilder = PreferredSizeWidget? Function(
-  BuildContext context,
-  Call call,
-);
+typedef CallPreferredSizeWidgetBuilder =
+    PreferredSizeWidget? Function(
+      BuildContext context,
+      Call call,
+    );
 
 /// Data that can be used to build a part of the call screen.
 ///

@@ -149,63 +149,63 @@ Call createCallWithMockedResponse(
 mixin TestDeviceScenarios {
   /// Built-in devices only (no external devices)
   static List<RtcMediaDevice> get builtInDevicesOnly => [
-        const RtcMediaDevice(
-          id: 'built-in-mic',
-          label: 'Built-in Microphone',
-          kind: RtcMediaDeviceKind.audioInput,
-          groupId: 'builtin-group',
-        ),
-        const RtcMediaDevice(
-          id: 'speaker',
-          label: 'Speaker',
-          kind: RtcMediaDeviceKind.audioOutput,
-          groupId: 'builtin-group',
-        ),
-        const RtcMediaDevice(
-          id: 'earpiece',
-          label: 'Earpiece',
-          kind: RtcMediaDeviceKind.audioOutput,
-          groupId: 'builtin-group',
-        ),
-        const RtcMediaDevice(
-          id: 'front-camera',
-          label: 'Front Camera',
-          kind: RtcMediaDeviceKind.videoInput,
-          groupId: 'builtin-group',
-        ),
-        const RtcMediaDevice(
-          id: 'back-camera',
-          label: 'Back Camera',
-          kind: RtcMediaDeviceKind.videoInput,
-          groupId: 'builtin-group',
-        ),
-      ];
+    const RtcMediaDevice(
+      id: 'built-in-mic',
+      label: 'Built-in Microphone',
+      kind: RtcMediaDeviceKind.audioInput,
+      groupId: 'builtin-group',
+    ),
+    const RtcMediaDevice(
+      id: 'speaker',
+      label: 'Speaker',
+      kind: RtcMediaDeviceKind.audioOutput,
+      groupId: 'builtin-group',
+    ),
+    const RtcMediaDevice(
+      id: 'earpiece',
+      label: 'Earpiece',
+      kind: RtcMediaDeviceKind.audioOutput,
+      groupId: 'builtin-group',
+    ),
+    const RtcMediaDevice(
+      id: 'front-camera',
+      label: 'Front Camera',
+      kind: RtcMediaDeviceKind.videoInput,
+      groupId: 'builtin-group',
+    ),
+    const RtcMediaDevice(
+      id: 'back-camera',
+      label: 'Back Camera',
+      kind: RtcMediaDeviceKind.videoInput,
+      groupId: 'builtin-group',
+    ),
+  ];
 
   /// Devices with Bluetooth headphones connected
   static List<RtcMediaDevice> get withBluetoothHeadphones => [
-        ...builtInDevicesOnly,
-        const RtcMediaDevice(
-          id: 'bluetooth-headphones',
-          label: 'Bluetooth Headphones',
-          kind: RtcMediaDeviceKind.audioOutput,
-          groupId: 'bluetoothA2DP',
-        ),
-        const RtcMediaDevice(
-          id: 'bluetooth-headphones-mic',
-          label: 'Bluetooth Headphones Microphone',
-          kind: RtcMediaDeviceKind.audioInput,
-          groupId: 'bluetoothA2DP',
-        ),
-      ];
+    ...builtInDevicesOnly,
+    const RtcMediaDevice(
+      id: 'bluetooth-headphones',
+      label: 'Bluetooth Headphones',
+      kind: RtcMediaDeviceKind.audioOutput,
+      groupId: 'bluetoothA2DP',
+    ),
+    const RtcMediaDevice(
+      id: 'bluetooth-headphones-mic',
+      label: 'Bluetooth Headphones Microphone',
+      kind: RtcMediaDeviceKind.audioInput,
+      groupId: 'bluetoothA2DP',
+    ),
+  ];
 
   /// Devices with external webcam
   static List<RtcMediaDevice> get withExternalWebcam => [
-        ...builtInDevicesOnly,
-        const RtcMediaDevice(
-          id: 'external-webcam',
-          label: 'USB Camera',
-          kind: RtcMediaDeviceKind.videoInput,
-          groupId: 'usb-group',
-        ),
-      ];
+    ...builtInDevicesOnly,
+    const RtcMediaDevice(
+      id: 'external-webcam',
+      label: 'USB Camera',
+      kind: RtcMediaDeviceKind.videoInput,
+      groupId: 'usb-group',
+    ),
+  ];
 }

@@ -16,16 +16,16 @@ class SubscriptionChange {
     required this.trackIdPrefix,
     required this.trackType,
     this.videoDimension,
-  })  : trackId = '$trackIdPrefix:$trackType',
-        subscribed = true;
+  }) : trackId = '$trackIdPrefix:$trackType',
+       subscribed = true;
 
   SubscriptionChange.remove({
     required this.userId,
     required this.sessionId,
     required this.trackIdPrefix,
     required this.trackType,
-  })  : trackId = '$trackIdPrefix:$trackType',
-        subscribed = false;
+  }) : trackId = '$trackIdPrefix:$trackType',
+       subscribed = false;
 
   final String userId;
   final String sessionId;

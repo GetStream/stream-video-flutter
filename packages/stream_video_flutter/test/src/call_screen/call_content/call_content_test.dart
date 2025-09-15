@@ -23,16 +23,18 @@ void main() {
 
       when(() => mockCallStateEmitter.value).thenReturn(mockCallState);
       when(() => mockCall.state).thenReturn(mockCallStateEmitter);
-      when(() => mockCall.partialState<CallParticipantState?>(any()))
-          .thenAnswer((invocation) {
+      when(
+        () => mockCall.partialState<CallParticipantState?>(any()),
+      ).thenAnswer((invocation) {
         final CallStateSelector<CallParticipantState?> selector =
             invocation.positionalArguments[0];
         final filtered = selector(mockCallState);
         return Stream.value(filtered);
       });
 
-      when(() => mockCallState.localParticipant)
-          .thenReturn(mockLocalParticipant);
+      when(
+        () => mockCallState.localParticipant,
+      ).thenReturn(mockLocalParticipant);
       when(() => mockCallState.status).thenReturn(CallStatus.connected());
       when(() => mockCallState.callParticipants).thenReturn([]);
 
@@ -102,11 +104,11 @@ class _CallContentExample extends StatelessWidget {
           ),
           callParticipantsBuilder: (context, call, callState) =>
               const ColoredBox(
-            color: Colors.green,
-            child: Center(
-              child: Text('Custom Participants View'),
-            ),
-          ),
+                color: Colors.green,
+                child: Center(
+                  child: Text('Custom Participants View'),
+                ),
+              ),
           callControlsBuilder: (context, call, callState) => Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

@@ -15,8 +15,7 @@ void main() {
   Future<WebSocketChannel> defaultChannelProvider(
     Uri uri, {
     Iterable<String>? protocols,
-  }) async =>
-      webSocketChannel;
+  }) async => webSocketChannel;
 
   setUp(() {
     webSocketChannel = MockWebSocketChannel();
@@ -58,8 +57,7 @@ void main() {
     Future<WebSocketChannel> failingChannelProvider(
       Uri uri, {
       Iterable<String>? protocols,
-    }) async =>
-        throw Exception('test');
+    }) async => throw Exception('test');
 
     webSocket = TestWebSocket(
       'ws://<local-ip>:8800',

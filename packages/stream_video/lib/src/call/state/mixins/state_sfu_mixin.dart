@@ -14,7 +14,8 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     SfuParticipantLeftEvent event,
   ) {
     _logger.d(() => '[sfuParticipantLeft] ${state.sessionId}; event: $event');
-    final callParticipants = [...state.callParticipants]..removeWhere(
+    final callParticipants = [...state.callParticipants]
+      ..removeWhere(
         (participant) =>
             participant.userId == event.participant.userId &&
             participant.sessionId == event.participant.sessionId,
@@ -88,8 +89,10 @@ mixin StateSfuMixin on StateNotifier<CallState> {
             participant.sessionId == event.sessionId) {
           _logger.v(() => '[sfuTrackPublished] pFound: $participant');
 
-          final trackState = participant.publishedTracks[event.trackType]
-                  ?.copyWith(muted: false) ??
+          final trackState =
+              participant.publishedTracks[event.trackType]?.copyWith(
+                muted: false,
+              ) ??
               TrackState.base(isLocal: participant.isLocal);
           return participant.copyWith(
             publishedTracks: {
@@ -202,7 +205,8 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     _logger.d(
       () => '[sfuParticipantJoined] ${state.sessionId}; event: $event',
     );
-    final isLocal = state.currentUserId == event.participant.userId &&
+    final isLocal =
+        state.currentUserId == event.participant.userId &&
         state.sessionId == event.participant.sessionId;
 
     final participant = CallParticipantState(

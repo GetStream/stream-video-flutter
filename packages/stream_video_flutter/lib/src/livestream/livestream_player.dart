@@ -4,23 +4,26 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-typedef LivestreamEndedBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef LivestreamEndedBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
-typedef LivestreamBackstageBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef LivestreamBackstageBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
-typedef LivestreamControlsBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef LivestreamControlsBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 /// Creates a widget that allows a user to view a livestream.
 ///

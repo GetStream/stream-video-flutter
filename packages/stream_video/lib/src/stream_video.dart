@@ -31,7 +31,8 @@ import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
 import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
-    if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
+    if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart'
+    as lifecycle;
 import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
@@ -70,13 +71,14 @@ const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// Handler function used for logging.
-typedef LogHandlerFunction = void Function(
-  Priority priority,
-  String tag,
-  MessageBuilder message, [
-  Object? error,
-  StackTrace? stk,
-]);
+typedef LogHandlerFunction =
+    void Function(
+      Priority priority,
+      String tag,
+      MessageBuilder message, [
+      Object? error,
+      StackTrace? stk,
+    ]);
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo extends Disposable {
@@ -143,21 +145,21 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
-  })  : _options = options,
-        _state = MutableClientState(user, options) {
+  }) : _options = options,
+       _state = MutableClientState(user, options) {
     _networkMonitor =
         _options.networkMonitorSettings.internetConnectionInstance ??
-            InternetConnection.createInstance(
-              checkInterval: _options.networkMonitorSettings.checkInterval,
-              useDefaultOptions:
-                  _options.networkMonitorSettings.customEndpoints.isEmpty,
-              customCheckOptions:
-                  _options.networkMonitorSettings.customEndpoints.isEmpty
-                      ? null
-                      : _options.networkMonitorSettings.customEndpoints
-                          .map((option) => option.toInternetCheckOption())
-                          .toList(),
-            );
+        InternetConnection.createInstance(
+          checkInterval: _options.networkMonitorSettings.checkInterval,
+          useDefaultOptions:
+              _options.networkMonitorSettings.customEndpoints.isEmpty,
+          customCheckOptions:
+              _options.networkMonitorSettings.customEndpoints.isEmpty
+              ? null
+              : _options.networkMonitorSettings.customEndpoints
+                    .map((option) => option.toInternetCheckOption())
+                    .toList(),
+        );
 
     _client = buildCoordinatorClient(
       user: user,
@@ -171,8 +173,10 @@ class StreamVideo extends Disposable {
     );
 
     // Initialize the push notification manager if the provider is provided.
-    pushNotificationManager =
-        pushNotificationManagerProvider?.call(_client, this);
+    pushNotificationManager = pushNotificationManagerProvider?.call(
+      _client,
+      this,
+    );
 
     _state.user.value = user;
 
@@ -182,8 +186,8 @@ class StreamVideo extends Disposable {
           options: {
             if (CurrentPlatform.isAndroid &&
                 options.androidAudioConfiguration != null)
-              'androidAudioConfiguration':
-                  options.androidAudioConfiguration!.toMap(),
+              'androidAudioConfiguration': options.androidAudioConfiguration!
+                  .toMap(),
           },
         ),
       );
@@ -191,29 +195,29 @@ class StreamVideo extends Disposable {
 
     final tokenProvider = switch (user.type) {
       UserType.authenticated => TokenProvider.from(
-          userToken?.let(UserToken.jwt),
-          tokenLoader,
-          onTokenUpdated,
-        ),
+        userToken?.let(UserToken.jwt),
+        tokenLoader,
+        onTokenUpdated,
+      ),
       UserType.anonymous => TokenProvider.static(
-          UserToken.anonymous(),
-          onTokenUpdated: onTokenUpdated,
-        ),
+        UserToken.anonymous(),
+        onTokenUpdated: onTokenUpdated,
+      ),
       UserType.guest => TokenProvider.dynamic(
-          (userId) async {
-            final result = await _client.loadGuest(id: userId);
-            if (result is! Success<GuestCreatedData>) {
-              throw (result as Failure).error;
-            }
-            final updatedUser = result.data.user;
-            _state.user.value = User(
-              type: user.type,
-              info: updatedUser.toUserInfo(),
-            );
-            return result.data.accessToken;
-          },
-          onTokenUpdated: onTokenUpdated,
-        ),
+        (userId) async {
+          final result = await _client.loadGuest(id: userId);
+          if (result is! Success<GuestCreatedData>) {
+            throw (result as Failure).error;
+          }
+          final updatedUser = result.data.user;
+          _state.user.value = User(
+            type: user.type,
+            info: updatedUser.toUserInfo(),
+          );
+          return result.data.accessToken;
+        },
+        onTokenUpdated: onTokenUpdated,
+      ),
     };
 
     _tokenManager.setTokenProvider(
@@ -339,10 +343,12 @@ class StreamVideo extends Disposable {
 
     return _connectOperation!
         .valueOrDefault(Result.error('connect was cancelled'))
-        .whenComplete(() {
-      _logger.i(() => '[connect] clear shared operation');
-      _connectOperation = null;
-    });
+        .whenComplete(
+          () {
+            _logger.i(() => '[connect] clear shared operation');
+            _connectOperation = null;
+          },
+        );
   }
 
   /// Disconnects the user from the Stream Video service.
@@ -351,9 +357,9 @@ class StreamVideo extends Disposable {
     return _disconnectOperation!
         .valueOrDefault(Result.error('disconnect was cancelled'))
         .whenComplete(() {
-      _logger.i(() => '[disconnect] clear shared operation');
-      _disconnectOperation = null;
-    });
+          _logger.i(() => '[disconnect] clear shared operation');
+          _disconnectOperation = null;
+        });
   }
 
   Future<Result<UserToken>> _connect({
@@ -656,7 +662,8 @@ class StreamVideo extends Disposable {
     bool? voipToken,
   }) {
     _logger.d(
-      () => '[addDevice] pushProvider: $pushProvider'
+      () =>
+          '[addDevice] pushProvider: $pushProvider'
           ', pushToken: $pushToken, pushProviderName: $pushProviderName'
           ', voipToken: $voipToken',
     );
@@ -1003,23 +1010,25 @@ class StreamVideo extends Disposable {
       success: (success) {
         final callData = success.data;
 
-        if (callData.metadata.session.acceptedBy
-            .containsKey(_state.currentUser.id)) {
+        if (callData.metadata.session.acceptedBy.containsKey(
+          _state.currentUser.id,
+        )) {
           _logger.d(() => '[getCallRingingState] call already accepted');
           return CallRingingState.accepted;
         }
 
-        if (callData.metadata.session.rejectedBy
-            .containsKey(_state.currentUser.id)) {
+        if (callData.metadata.session.rejectedBy.containsKey(
+          _state.currentUser.id,
+        )) {
           _logger.d(() => '[getCallRingingState] call already rejected');
           return CallRingingState.rejected;
         }
 
         final otherMembers = callData.metadata.members.keys.toList()
           ..remove(_state.currentUser.id);
-        if (callData.metadata.session.rejectedBy.keys
-            .toSet()
-            .containsAll(otherMembers)) {
+        if (callData.metadata.session.rejectedBy.keys.toSet().containsAll(
+          otherMembers,
+        )) {
           _logger.d(
             () =>
                 '[getCallRingingState] call already rejected by all other members',

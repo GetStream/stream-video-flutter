@@ -12,8 +12,10 @@ class StatsLatencyChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sortedLatency = latencyHistory.toList()..sort();
-    final maxLatency =
-        max(100, ((sortedLatency.lastOrNull ?? 100) / 20).ceil() * 20);
+    final maxLatency = max(
+      100,
+      ((sortedLatency.lastOrNull ?? 100) / 20).ceil() * 20,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -27,16 +29,10 @@ class StatsLatencyChart extends StatelessWidget {
             verticalInterval: 1,
             horizontalInterval: 20,
             getDrawingVerticalLine: (value) {
-              return const FlLine(
-                color: Color(0xff37434d),
-                strokeWidth: 1,
-              );
+              return const FlLine(color: Color(0xff37434d), strokeWidth: 1);
             },
             getDrawingHorizontalLine: (value) {
-              return const FlLine(
-                color: Color(0xff37434d),
-                strokeWidth: 1,
-              );
+              return const FlLine(color: Color(0xff37434d), strokeWidth: 1);
             },
           ),
           titlesData: FlTitlesData(
@@ -58,9 +54,7 @@ class StatsLatencyChart extends StatelessWidget {
               sideTitles: SideTitles(showTitles: false),
             ),
           ),
-          borderData: FlBorderData(
-            show: false,
-          ),
+          borderData: FlBorderData(show: false),
           minX: 0,
           maxX: 20,
           minY: 0,
@@ -68,47 +62,45 @@ class StatsLatencyChart extends StatelessWidget {
           lineBarsData: [
             LineChartBarData(
               spots: latencyHistory.indexed
-                  .map<FlSpot>(
-                    (m) => FlSpot(m.$1.toDouble(), m.$2.toDouble()),
-                  )
+                  .map<FlSpot>((m) => FlSpot(m.$1.toDouble(), m.$2.toDouble()))
                   .toList(),
               isCurved: true,
               gradient: LinearGradient(
                 colors: [
                   ColorTween(
-                          begin: AppColorPalette.appGreen,
-                          // ignore: deprecated_member_use
-                          end: AppColorPalette.appGreen.withOpacity(0.5))
-                      .lerp(0.2)!,
+                    begin: AppColorPalette.appGreen,
+                    // ignore: deprecated_member_use
+                    end: AppColorPalette.appGreen.withOpacity(0.5),
+                  ).lerp(0.2)!,
                   ColorTween(
-                          begin: AppColorPalette.appGreen,
-                          // ignore: deprecated_member_use
-                          end: AppColorPalette.appGreen.withOpacity(0.5))
-                      .lerp(0.2)!,
+                    begin: AppColorPalette.appGreen,
+                    // ignore: deprecated_member_use
+                    end: AppColorPalette.appGreen.withOpacity(0.5),
+                  ).lerp(0.2)!,
                 ],
               ),
               barWidth: 3,
               isStrokeCapRound: true,
-              dotData: const FlDotData(
-                show: false,
-              ),
+              dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
                 gradient: LinearGradient(
                   colors: [
                     ColorTween(
-                            begin: AppColorPalette.appGreen,
-                            end:
-                                // ignore: deprecated_member_use
-                                AppColorPalette.appGreen.withOpacity(0.5))
+                          begin: AppColorPalette.appGreen,
+                          end:
+                              // ignore: deprecated_member_use
+                              AppColorPalette.appGreen.withOpacity(0.5),
+                        )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),
                     ColorTween(
-                            begin: AppColorPalette.appGreen,
-                            end:
-                                // ignore: deprecated_member_use
-                                AppColorPalette.appGreen.withOpacity(0.5))
+                          begin: AppColorPalette.appGreen,
+                          end:
+                              // ignore: deprecated_member_use
+                              AppColorPalette.appGreen.withOpacity(0.5),
+                        )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),

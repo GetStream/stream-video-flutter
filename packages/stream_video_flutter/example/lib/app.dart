@@ -98,8 +98,9 @@ const androidPlatformChannelSpecifics = ln.AndroidNotificationDetails(
 );
 
 Future<void> initNotifications() async {
-  const initializationSettingsAndroid =
-      ln.AndroidInitializationSettings('@mipmap/ic_launcher');
+  const initializationSettingsAndroid = ln.AndroidInitializationSettings(
+    '@mipmap/ic_launcher',
+  );
 
   const initializationSettings = ln.InitializationSettings(
     android: initializationSettingsAndroid,
@@ -113,8 +114,9 @@ Future<void> showNotification(
   String? type,
   String? fromUser,
 ) async {
-  const platformChannelSpecifics =
-      ln.NotificationDetails(android: androidPlatformChannelSpecifics);
+  const platformChannelSpecifics = ln.NotificationDetails(
+    android: androidPlatformChannelSpecifics,
+  );
 
   final notificationId = Object.hash(callCid, type);
 
@@ -169,8 +171,9 @@ class _MyAppState extends State<MyApp> {
     await FirebaseMessaging.instance.requestPermission();
 
     FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
-    _fcmSubscription =
-        FirebaseMessaging.onMessage.listen(_onFirebaseForegroundMessage);
+    _fcmSubscription = FirebaseMessaging.onMessage.listen(
+      _onFirebaseForegroundMessage,
+    );
   }
 
   Future<bool> _onFirebaseForegroundMessage(RemoteMessage message) async {

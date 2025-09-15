@@ -45,10 +45,10 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     required this.networkMonitor,
     this.includeUserDetails = false,
   }) : super(
-          _buildUrl(url, apiKey),
-          protocols: protocols,
-          tag: '$_tag-${++_seq}',
-        ) {
+         _buildUrl(url, apiKey),
+         protocols: protocols,
+         tag: '$_tag-${++_seq}',
+       ) {
     onConnectionStateUpdated = (event) {
       if (event.oldState == ConnectionState.reconnecting &&
           event.newState == ConnectionState.connected) {
@@ -67,8 +67,9 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   late final HealthMonitor healthMonitor = HealthMonitorImpl(
     'Coord',
     this,
-    networkMonitor:
-        NetworkMonitorFlutter.fromInternetConnection(networkMonitor),
+    networkMonitor: NetworkMonitorFlutter.fromInternetConnection(
+      networkMonitor,
+    ),
   );
 
   /// The API key used to authenticate the user.
@@ -107,7 +108,8 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   @override
   Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     _logger.i(
-      () => '[disconnect] closeCode: "$closeCode", '
+      () =>
+          '[disconnect] closeCode: "$closeCode", '
           'closeReason: "$closeReason"',
     );
     if (connectionState == ConnectionState.disconnected) {
@@ -279,7 +281,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
         'client_id': connectionId,
         // 'call_type': _callInfo?.callType,
         // 'call_id': _callInfo?.callId,
-      }
+      },
     ];
 
     return send(
@@ -301,7 +303,8 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
       return;
     }
     _logger.i(
-      () => '[reconnect] isConnecting: $isConnecting, '
+      () =>
+          '[reconnect] isConnecting: $isConnecting, '
           'isReconnecting: $isReconnecting, '
           'reconnectAttempt: $_reconnectAttempt',
     );

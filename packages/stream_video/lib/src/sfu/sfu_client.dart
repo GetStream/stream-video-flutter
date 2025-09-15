@@ -26,14 +26,14 @@ class SfuClient {
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
-  })  : _client = signal_twirp.SignalServerProtobufClient(
-          baseUrl,
-          prefix,
-          hooks: hooks,
-          interceptor: chainInterceptor(interceptors),
-        ),
-        _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
-        _tracer = tracer;
+  }) : _client = signal_twirp.SignalServerProtobufClient(
+         baseUrl,
+         prefix,
+         hooks: hooks,
+         interceptor: chainInterceptor(interceptors),
+       ),
+       _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
+       _tracer = tracer;
 
   final TaggedLogger _logger;
   final Tracer _tracer;
@@ -216,8 +216,9 @@ class SfuClient {
 
       final result =
           await _executeWithRetry<sfu.StartNoiseCancellationResponse>(
-        call: () => _client.startNoiseCancellation(_withAuthHeaders(), request),
-      );
+            call: () =>
+                _client.startNoiseCancellation(_withAuthHeaders(), request),
+          );
 
       if (result.isSuccess) {
         _logger.v(

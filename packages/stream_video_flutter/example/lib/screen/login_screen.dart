@@ -5,9 +5,10 @@ import '../app_config.dart';
 import '../core/auth_repository.dart';
 import 'home_screen.dart';
 
-typedef ConnectUser = Future<Result<None>> Function(
-  UserInfo user,
-);
+typedef ConnectUser =
+    Future<Result<None>> Function(
+      UserInfo user,
+    );
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({

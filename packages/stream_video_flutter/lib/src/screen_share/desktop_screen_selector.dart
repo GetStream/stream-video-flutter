@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
 
-typedef DesktopScreenSelectorBuilder = Future<DesktopCapturerSource?> Function(
-  BuildContext context,
-);
+typedef DesktopScreenSelectorBuilder =
+    Future<DesktopCapturerSource?> Function(
+      BuildContext context,
+    );
 
 /// Default screen selection dialog. This shows a dialog with 2 tabs for screens and windows.
-/// Can be styled using [overlay] from [StreamColorTheme]; [body], [bodyBold] and [tabBar] from [StreamTextTheme].
+/// Can be styled using overlay from [StreamColorTheme]; body, bodyBold and tabBar from [StreamTextTheme].
 ///
 /// For more customizations you can use [TabbedScreenSelectWidget] or [ThumbnailGrid] directly.
 Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
@@ -83,14 +84,15 @@ class TabbedScreenSelectWidget extends StatelessWidget {
                   onTap: (value) => _screenSelectorState.setSourceType(
                     [if (value == 0) SourceType.Screen else SourceType.Window],
                   ),
-                  tabs: [
-                    translations.desktopScreenShareEntireScreen,
-                    translations.desktopScreenShareWindow,
-                  ]
-                      .map(
-                        (e) => Tab(child: Text(e, style: textTheme.tabBar)),
-                      )
-                      .toList(),
+                  tabs:
+                      [
+                            translations.desktopScreenShareEntireScreen,
+                            translations.desktopScreenShareWindow,
+                          ]
+                          .map(
+                            (e) => Tab(child: Text(e, style: textTheme.tabBar)),
+                          )
+                          .toList(),
                 ),
                 Expanded(
                   child: TabBarView(

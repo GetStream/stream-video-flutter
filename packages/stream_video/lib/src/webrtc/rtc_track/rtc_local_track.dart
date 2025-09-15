@@ -267,7 +267,9 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
-        .enumerateDevices(kind: RtcMediaDeviceKind.videoInput);
+        .enumerateDevices(
+          kind: RtcMediaDeviceKind.videoInput,
+        );
 
     final mediaDevices = mediaDevicesResult.fold(
       success: (success) => success.data,

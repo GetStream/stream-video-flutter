@@ -26,13 +26,12 @@ GetIt locator = GetIt.instance;
 /// and injecting them into the app.
 class AppInjector {
   // Register dependencies
-  static Future<void> init({
-    Environment? forceEnvironment,
-  }) async {
+  static Future<void> init({Environment? forceEnvironment}) async {
     // Google sign in
-    locator.registerSingleton<GoogleSignIn>(
-      GoogleSignIn(hostedDomain: 'getstream.io'),
-    );
+    locator.registerSingletonAsync<GoogleSignIn>(() async {
+      await GoogleSignIn.instance.initialize(hostedDomain: 'getstream.io');
+      return GoogleSignIn.instance;
+    });
 
     // App Preferences
     final prefs = await SharedPreferences.getInstance();
@@ -46,25 +45,24 @@ class AppInjector {
 
     // Repositories
     locator.registerSingleton(
-      const TokenService(
-        customEnvironmentLoader: customEnvironmentLoader,
-      ),
+      const TokenService(customEnvironmentLoader: customEnvironmentLoader),
     );
 
-    locator.registerFactoryParam<UserAuthRepository, User, TokenResponse>(
-      (user, tokenResponse) {
-        registerStreamChat(tokenResponse.apiKey);
+    locator.registerFactoryParam<UserAuthRepository, User, TokenResponse>((
+      user,
+      tokenResponse,
+    ) {
+      registerStreamChat(tokenResponse.apiKey);
 
-        // We need to register the video client here because we need it to
-        // initialise the user auth repo.
-        registerStreamVideo(tokenResponse, user, appPrefs.environment);
+      // We need to register the video client here because we need it to
+      // initialise the user auth repo.
+      registerStreamVideo(tokenResponse, user, appPrefs.environment);
 
-        return UserAuthRepository(
-          videoClient: locator(),
-          tokenService: locator(),
-        );
-      },
-    );
+      return UserAuthRepository(
+        videoClient: locator(),
+        tokenService: locator(),
+      );
+    });
 
     // App wide Controller
     locator.registerLazySingleton<UserAuthController>(
@@ -80,10 +78,7 @@ class AppInjector {
     );
 
     locator.registerLazySingleton<UserChatRepository>(
-      () => UserChatRepository(
-        chatClient: locator(),
-        tokenService: locator(),
-      ),
+      () => UserChatRepository(chatClient: locator(), tokenService: locator()),
     );
   }
 
@@ -102,11 +97,11 @@ class AppInjector {
         initialToken: tokenResponse.token,
         tokenLoader: switch (user.type) {
           UserType.authenticated => (String userId) {
-              final tokenService = locator<TokenService>();
-              return tokenService
-                  .loadToken(userId: userId, environment: environment)
-                  .then((response) => response.token);
-            },
+            final tokenService = locator<TokenService>();
+            return tokenService
+                .loadToken(userId: userId, environment: environment)
+                .then((response) => response.token);
+          },
           _ => null,
         },
       ),
@@ -146,10 +141,7 @@ StreamLog _setupLogger() {
 }
 
 StreamChatClient _initStreamChat(String apiKey) {
-  final streamChatClient = StreamChatClient(
-    apiKey,
-    logLevel: Level.INFO,
-  );
+  final streamChatClient = StreamChatClient(apiKey, logLevel: Level.INFO);
 
   return streamChatClient;
 }
@@ -172,9 +164,7 @@ StreamVideo _initStreamVideo(
       audioProcessor: NoiseCancellationAudioProcessor(),
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
-      iosPushProvider: const StreamVideoPushProvider.apn(
-        name: 'flutter-apn',
-      ),
+      iosPushProvider: const StreamVideoPushProvider.apn(name: 'flutter-apn'),
       androidPushProvider: const StreamVideoPushProvider.firebase(
         name: 'flutter-firebase',
       ),

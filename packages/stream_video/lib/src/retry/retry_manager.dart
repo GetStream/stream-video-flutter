@@ -3,10 +3,11 @@ import '../utils/result.dart';
 import 'retry_policy.dart';
 
 typedef Delegate<T> = Future<Result<T>> Function();
-typedef OnFailure<T> = Future<void> Function(
-  VideoError error,
-  Duration nextAttemptDelay,
-);
+typedef OnFailure<T> =
+    Future<void> Function(
+      VideoError error,
+      Duration nextAttemptDelay,
+    );
 
 class RpcRetryManager {
   const RpcRetryManager(this.policy);

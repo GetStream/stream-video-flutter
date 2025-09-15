@@ -31,9 +31,9 @@ class StreamCallControls extends StatelessWidget {
     this.borderRadius,
     super.key,
   }) : options = defaultCallControlOptions(
-          call: call,
-          localParticipant: localParticipant,
-        );
+         call: call,
+         localParticipant: localParticipant,
+       );
 
   /// List of options to display.
   final List<Widget> options;

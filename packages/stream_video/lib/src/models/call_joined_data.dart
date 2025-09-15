@@ -23,8 +23,13 @@ class CallJoinedData with EquatableMixin {
   final StatsOptions statsOptions;
 
   @override
-  List<Object?> get props =>
-      [callCid, wasCreated, metadata, credentials, statsOptions];
+  List<Object?> get props => [
+    callCid,
+    wasCreated,
+    metadata,
+    credentials,
+    statsOptions,
+  ];
 
   @override
   String toString() {

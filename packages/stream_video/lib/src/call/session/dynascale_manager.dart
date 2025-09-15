@@ -25,15 +25,15 @@ class IncomingVideoSettings {
   });
 
   factory IncomingVideoSettings.default_() => IncomingVideoSettings(
-        enabled: null,
-        preferredResolution: null,
-        participants: {},
-      );
+    enabled: null,
+    preferredResolution: null,
+    participants: {},
+  );
 
   final bool? enabled;
   final RtcVideoDimension? preferredResolution;
   final Map<String, ({bool enabled, RtcVideoDimension? preferredResolution})>
-      participants;
+  participants;
 
   bool isParticipantVideoEnabled(String sessionId) {
     return participants[sessionId]?.enabled ?? enabled ?? true;
@@ -54,10 +54,10 @@ class DynascaleManager {
   late String sessionId;
 
   final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
-      _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
+  _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
 
   final BehaviorSubject<IncomingVideoSettings?>
-      _videoTrackSubscriptionsOverrides = BehaviorSubject.seeded(null);
+  _videoTrackSubscriptionsOverrides = BehaviorSubject.seeded(null);
 
   IncomingVideoSettings? get incomingVideoSettings =>
       _videoTrackSubscriptionsOverrides.value;
@@ -86,12 +86,13 @@ class DynascaleManager {
       final value = entry.value;
 
       if (value.trackType == SfuTrackType.video && !ignoreOverride) {
-        final enabled = incomingVideoSettings?.participants[key]?.enabled ??
+        final enabled =
+            incomingVideoSettings?.participants[key]?.enabled ??
             incomingVideoSettings?.enabled;
 
         final preferredResolution =
             incomingVideoSettings?.participants[key]?.preferredResolution ??
-                incomingVideoSettings?.preferredResolution;
+            incomingVideoSettings?.preferredResolution;
 
         if (enabled == null) {
           if (value.dimension != null) {
@@ -199,14 +200,16 @@ class DynascaleManager {
     List<String>? sessionIds,
   }) {
     _logger.d(
-      () => '[setVideoTrackSubscriptionOverrides] sessionIds: $sessionIds, '
+      () =>
+          '[setVideoTrackSubscriptionOverrides] sessionIds: $sessionIds, '
           'override: $override',
     );
 
     if (sessionIds == null) {
       if (override == null) {
-        return _videoTrackSubscriptionsOverrides
-            .add(IncomingVideoSettings.default_());
+        return _videoTrackSubscriptionsOverrides.add(
+          IncomingVideoSettings.default_(),
+        );
       }
 
       return _videoTrackSubscriptionsOverrides.add(
@@ -230,14 +233,14 @@ class DynascaleManager {
             ),
           if (override != null)
             ...sessionIds.asMap().map(
-                  (_, id) => MapEntry(
-                    id,
-                    (
-                      enabled: override.enabled,
-                      preferredResolution: override.dimension
-                    ),
-                  ),
+              (_, id) => MapEntry(
+                id,
+                (
+                  enabled: override.enabled,
+                  preferredResolution: override.dimension,
                 ),
+              ),
+            ),
         },
       ),
     );

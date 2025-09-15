@@ -38,8 +38,24 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loginWithGoogle() async {
     final googleService = locator<GoogleSignIn>();
 
-    final googleUser = await googleService.signIn();
-    if (googleUser == null) return debugPrint('Google login cancelled');
+    GoogleSignInAccount? googleUser;
+    try {
+      googleUser = await googleService.attemptLightweightAuthentication();
+    } catch (e) {
+      debugPrint('Google lightweight auth failed: $e');
+    }
+
+    if (googleUser == null && googleService.supportsAuthenticate()) {
+      try {
+        googleUser = await googleService.authenticate();
+      } catch (e) {
+        return debugPrint('Google sign-in failed: $e');
+      }
+    }
+
+    if (googleUser == null) {
+      return debugPrint('Google login cancelled or unavailable');
+    }
 
     final userInfo = UserInfo(
       role: 'admin',
@@ -74,8 +90,10 @@ class _LoginScreenState extends State<LoginScreen> {
           'https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg',
     );
 
-    return _login(User(info: userInfo, type: UserType.guest),
-        _appPreferences.environment);
+    return _login(
+      User(info: userInfo, type: UserType.guest),
+      _appPreferences.environment,
+    );
   }
 
   Future<void> _login(User user, Environment environment) async {
@@ -118,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (!kIsProd)
             EnvironmentSwitcher(
               currentEnvironment: _appPreferences.environment,
-            )
+            ),
         ],
       ),
       body: SafeArea(
@@ -150,8 +168,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextField(
                       controller: _emailController,
-                      style: theme.textTheme.bodyMedium
-                          ?.apply(color: Colors.white),
+                      style: theme.textTheme.bodyMedium?.apply(
+                        color: Colors.white,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Enter Email',
                         isDense: true,
@@ -177,20 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.grey,
-                          ),
+                          child: Container(height: 1, color: Colors.grey),
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8),
                           child: Text('OR'),
                         ),
                         Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.grey,
-                          ),
+                          child: Container(height: 1, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -198,9 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GoogleLoginButton(
-                      onPressed: _loginWithGoogle,
-                    ),
+                    child: GoogleLoginButton(onPressed: _loginWithGoogle),
                   ),
                   const SizedBox(height: 16),
                   Padding(
@@ -250,9 +261,9 @@ class GoogleLoginButton extends StatelessWidget {
     // Google SignIn plugin is supported on Web, Android, iOS and macOS.
     final isGoogleSignInSupported =
         defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.android ||
-            defaultTargetPlatform == TargetPlatform.macOS ||
-            kIsWeb;
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        kIsWeb;
 
     final currentPlatform = Theme.of(context).platform.name;
 

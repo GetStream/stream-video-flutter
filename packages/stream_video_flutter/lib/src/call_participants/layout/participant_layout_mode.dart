@@ -7,7 +7,7 @@ enum ParticipantLayoutMode {
   /// The layout mode is set to spotlight view.
   spotlight,
 
-  pictureInPicture;
+  pictureInPicture,
 }
 
 extension SortingExtension on ParticipantLayoutMode {

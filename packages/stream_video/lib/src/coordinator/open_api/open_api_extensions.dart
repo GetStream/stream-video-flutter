@@ -114,7 +114,8 @@ extension EnvelopeExt on open.CallResponse {
       createdBy: createdBy.toCallUser(),
       egress: egress.toCallEgress(),
       team: team ?? '',
-      ownCapabilities: ownCapabilities?.map(
+      ownCapabilities:
+          ownCapabilities?.map(
             (it) => CallPermission.fromAlias(it.value),
           ) ??
           [],

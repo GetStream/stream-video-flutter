@@ -41,10 +41,10 @@ class SfuSubscriptionDetails with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        userId,
-        sessionId,
-        trackIdPrefix,
-        trackType,
-        dimension,
-      ];
+    userId,
+    sessionId,
+    trackIdPrefix,
+    trackType,
+    dimension,
+  ];
 }
