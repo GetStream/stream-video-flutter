@@ -10,6 +10,7 @@ enum CallPermission {
   startBroadcastCall('start-broadcast-call'),
   stopBroadcastCall('stop-broadcast-call'),
   blockUsers('block-users'),
+  kickUser('kick-user'),
   readCall('read-call'),
   joinEndedCall('join-ended-call'),
   sendVideo('send-video'),

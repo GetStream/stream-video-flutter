@@ -13,6 +13,7 @@ part of openapi.api;
 class UserResponse {
   /// Returns a new [UserResponse] instance.
   UserResponse({
+    this.avgResponseTime,
     this.blockedUserIds = const [],
     required this.createdAt,
     this.custom = const {},
@@ -29,6 +30,14 @@ class UserResponse {
     this.teamsRole = const {},
     required this.updatedAt,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? avgResponseTime;
 
   List<String> blockedUserIds;
 
@@ -113,6 +122,7 @@ class UserResponse {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UserResponse &&
+          other.avgResponseTime == avgResponseTime &&
           _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
           other.createdAt == createdAt &&
           _deepEquality.equals(other.custom, custom) &&
@@ -132,6 +142,7 @@ class UserResponse {
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
+      (avgResponseTime == null ? 0 : avgResponseTime!.hashCode) +
       (blockedUserIds.hashCode) +
       (createdAt.hashCode) +
       (custom.hashCode) +
@@ -152,10 +163,15 @@ class UserResponse {
 
   @override
   String toString() =>
-      'UserResponse[blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
+      'UserResponse[avgResponseTime=$avgResponseTime, blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.avgResponseTime != null) {
+      json[r'avg_response_time'] = this.avgResponseTime;
+    } else {
+      json[r'avg_response_time'] = null;
+    }
     json[r'blocked_user_ids'] = this.blockedUserIds;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     json[r'custom'] = this.custom;
@@ -220,14 +236,14 @@ class UserResponse {
       }());
 
       return UserResponse(
+        avgResponseTime: mapValueOfType<int>(json, r'avg_response_time'),
         blockedUserIds: json[r'blocked_user_ids'] is Iterable
             ? (json[r'blocked_user_ids'] as Iterable)
                 .cast<String>()
                 .toList(growable: false)
             : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        // MANUAL_EDIT: allow null values
-        custom: mapCastOfType<String, Object?>(json, r'custom')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
