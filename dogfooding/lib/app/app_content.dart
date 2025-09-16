@@ -207,7 +207,7 @@ class _StreamDogFoodingAppContentState
     }
   }
 
-  _observeFcmMessages() {
+  void _observeFcmMessages() {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     _compositeSubscription.add(
       FirebaseMessaging.onMessage.listen(_handleRemoteMessage),
@@ -305,7 +305,7 @@ class _StreamDogFoodingAppContentState
     );
   }
 
-  ThemeData _buildTheme(brightness) {
+  ThemeData _buildTheme(Brightness brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
     final textTheme = StreamVideoTheme.dark().textTheme;

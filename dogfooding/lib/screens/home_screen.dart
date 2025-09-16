@@ -368,7 +368,7 @@ class _JoinForm extends StatelessWidget {
             const SizedBox(width: 12),
             ValueListenableBuilder(
               valueListenable: callIdController,
-              builder: (context, value, __) {
+              builder: (context, value, _) {
                 final hasText = value.text.isNotEmpty;
                 return StreamButton.active(
                   label: 'Join call',

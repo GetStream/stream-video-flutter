@@ -114,8 +114,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                         ),
                       ),
                     ),
-                  )
-                  .toList(),
+                  ),
             ],
           ),
         ],
