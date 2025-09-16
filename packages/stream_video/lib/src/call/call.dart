@@ -554,6 +554,10 @@ class Call {
     _stateManager.updateCallPreferences(preferences);
   }
 
+  /// Enables the given SFU client capabilities for this call.
+  ///
+  /// Should be configured before `call.join()` is called. Changes made after
+  /// joining will not affect the current session until the next join/reconnect.
   void enableClientCapabilities(
     List<SfuClientCapability> capabilities,
   ) {
@@ -561,6 +565,10 @@ class Call {
     capabilities.forEach(_sfuClientCapabilities.add);
   }
 
+  /// Disables the given SFU client capabilities for this call.
+  ///
+  /// Should be configured before `call.join()` is called. Changes made after
+  /// joining will not affect the current session until the next join/reconnect.
   void disableClientCapabilities(
     List<SfuClientCapability> capabilities,
   ) {
