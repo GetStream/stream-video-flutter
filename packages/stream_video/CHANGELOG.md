@@ -1,3 +1,8 @@
+## Unreleased
+
+🐞 Fixed
+* Multitasking camera on iOS is now enabled only once and kept enabled. This fixes potential errors when quickly toggling camera.
+
 ## 0.10.3
 
 🐞 Fixed
