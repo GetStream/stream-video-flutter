@@ -2614,14 +2614,19 @@ class Call {
         }).asCancelable(),
       );
 
-      // Set multitasking camera access for iOS
-      final multitaskingResult = await setMultitaskingCameraAccessEnabled(
-        enabled && !_streamVideo.options.muteVideoWhenInBackground,
-      );
+      var multitaskingEnabled = state.value.iOSMultitaskingCameraAccessEnabled;
+      if (enabled && !multitaskingEnabled) {
+        // Set multitasking camera access for iOS
+        final multitaskingResult = await setMultitaskingCameraAccessEnabled(
+          enabled && !_streamVideo.options.muteVideoWhenInBackground,
+        );
+
+        multitaskingEnabled = multitaskingResult.getDataOrNull() ?? false;
+      }
 
       _stateManager.participantSetCameraEnabled(
         enabled: enabled,
-        iOSMultitaskingCameraAccessEnabled: multitaskingResult.getDataOrNull(),
+        iOSMultitaskingCameraAccessEnabled: multitaskingEnabled,
       );
 
       _connectOptions = _connectOptions.copyWith(
