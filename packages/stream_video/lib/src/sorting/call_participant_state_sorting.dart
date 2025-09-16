@@ -108,7 +108,7 @@ Comparator<CallParticipantState> byRole(List<String> roles) {
     );
 
     if (aMatches > bMatches) return -1;
-    if (bMatches < aMatches) return 1;
+    if (aMatches < bMatches) return 1;
     return 0;
   };
 }

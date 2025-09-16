@@ -7,6 +7,10 @@
   * New `SfuClientCapability.subscriberVideoPause` (on by default). Control via `Call.enableClientCapabilities()` / `Call.disableClientCapabilities()`.
   * New `SfuInboundStateNotificationEvent` notifies when inbound tracks are paused or resumed.
   * `CallParticipantState.pausedTracks` and `CallParticipantState.isTrackPaused()` let you check which tracks are currently paused.
+* Added capability to remove a participant from a call via `call.kickUser()`. Requires the `kick-user` permission.
+
+🐞 Fixed
+* Multitasking camera on iOS is now enabled only once and kept enabled. This fixes potential errors when quickly toggling camera.
 
 ## 0.10.3
 

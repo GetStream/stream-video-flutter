@@ -1157,6 +1157,32 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> kickUser({
+    required StreamCallCid callCid,
+    required String userId,
+    bool block = false,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[kickUser] no connection established');
+        return connectionResult;
+      }
+      final result = await _defaultApi.kickUser(
+        callCid.type.value,
+        callCid.id,
+        open.KickUserRequest(userId: userId, block: block),
+      );
+      if (result == null) {
+        return Result.error('kickUser result is null');
+      }
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<None>> endCall(StreamCallCid callCid) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1299,6 +1325,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIngressSettings? ingress,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1325,6 +1352,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             broadcasting: broadcasting?.toOpenDto(),
             session: session?.toOpenDto(),
             frameRecording: frameRecording?.toOpenDto(),
+            ingress: ingress?.toOpenDto(),
           ),
         ),
       );

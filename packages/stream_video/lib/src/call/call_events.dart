@@ -1037,6 +1037,28 @@ class StreamCallUserUnblockedEvent extends StreamCallEvent {
       ];
 }
 
+/// Event that is triggered when the user is kicked from a call.
+class StreamCallUserKickedEvent extends StreamCallEvent {
+  const StreamCallUserKickedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.user,
+    required this.kickedByUser,
+  });
+
+  final DateTime createdAt;
+  final CallUser user;
+  final CallUser? kickedByUser;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        user,
+        kickedByUser,
+      ];
+}
+
 /// Event that is triggered when someone sends a reaction during a call
 class StreamCallReactionEvent extends StreamCallEvent {
   const StreamCallReactionEvent(
@@ -1447,6 +1469,12 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           event.callCid,
           createdAt: event.createdAt,
           user: event.user,
+        ),
+      final CoordinatorCallUserKickedEvent event => StreamCallUserKickedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          user: event.user,
+          kickedByUser: event.kickedByUser,
         ),
       final CoordinatorCallUserUnblockedEvent event =>
         StreamCallUserUnblockedEvent(
