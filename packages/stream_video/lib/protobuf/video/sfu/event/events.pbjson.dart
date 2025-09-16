@@ -215,6 +215,15 @@ const SfuEvent$json = {
       '9': 0,
       '10': 'changePublishOptions'
     },
+    {
+      '1': 'inbound_state_notification',
+      '3': 28,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.InboundStateNotification',
+      '9': 0,
+      '10': 'inboundStateNotification'
+    },
   ],
   '8': [
     {'1': 'event_payload'},
@@ -257,8 +266,10 @@ final $typed_data.Uint8List sfuEventDescriptor = $convert.base64Decode(
     'ljaXBhbnRfbWlncmF0aW9uX2NvbXBsZXRlGBkgASgLMjQuc3RyZWFtLnZpZGVvLnNmdS5ldmVu'
     'dC5QYXJ0aWNpcGFudE1pZ3JhdGlvbkNvbXBsZXRlSABSHHBhcnRpY2lwYW50TWlncmF0aW9uQ2'
     '9tcGxldGUSZAoWY2hhbmdlX3B1Ymxpc2hfb3B0aW9ucxgbIAEoCzIsLnN0cmVhbS52aWRlby5z'
-    'ZnUuZXZlbnQuQ2hhbmdlUHVibGlzaE9wdGlvbnNIAFIUY2hhbmdlUHVibGlzaE9wdGlvbnNCDw'
-    'oNZXZlbnRfcGF5bG9hZA==');
+    'ZnUuZXZlbnQuQ2hhbmdlUHVibGlzaE9wdGlvbnNIAFIUY2hhbmdlUHVibGlzaE9wdGlvbnMScA'
+    'oaaW5ib3VuZF9zdGF0ZV9ub3RpZmljYXRpb24YHCABKAsyMC5zdHJlYW0udmlkZW8uc2Z1LmV2'
+    'ZW50LkluYm91bmRTdGF0ZU5vdGlmaWNhdGlvbkgAUhhpbmJvdW5kU3RhdGVOb3RpZmljYXRpb2'
+    '5CDwoNZXZlbnRfcGF5bG9hZA==');
 
 @$core.Deprecated('Use changePublishOptionsDescriptor instead')
 const ChangePublishOptions$json = {
@@ -610,6 +621,22 @@ const JoinRequest$json = {
       '6': '.stream.video.sfu.models.SubscribeOption',
       '10': 'preferredSubscribeOptions'
     },
+    {
+      '1': 'capabilities',
+      '3': 11,
+      '4': 3,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ClientCapability',
+      '10': 'capabilities'
+    },
+    {
+      '1': 'source',
+      '3': 12,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ParticipantSource',
+      '10': 'source'
+    },
   ],
 };
 
@@ -626,7 +653,9 @@ final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode(
     'dGlvbnMYCSADKAsyJi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5QdWJsaXNoT3B0aW9uUhdwcm'
     'VmZXJyZWRQdWJsaXNoT3B0aW9ucxJoChtwcmVmZXJyZWRfc3Vic2NyaWJlX29wdGlvbnMYCiAD'
     'KAsyKC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5TdWJzY3JpYmVPcHRpb25SGXByZWZlcnJlZF'
-    'N1YnNjcmliZU9wdGlvbnM=');
+    'N1YnNjcmliZU9wdGlvbnMSTQoMY2FwYWJpbGl0aWVzGAsgAygOMikuc3RyZWFtLnZpZGVvLnNm'
+    'dS5tb2RlbHMuQ2xpZW50Q2FwYWJpbGl0eVIMY2FwYWJpbGl0aWVzEkIKBnNvdXJjZRgMIAEoDj'
+    'IqLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBhcnRpY2lwYW50U291cmNlUgZzb3VyY2U=');
 
 @$core.Deprecated('Use reconnectDetailsDescriptor instead')
 const ReconnectDetails$json = {
@@ -1143,3 +1172,49 @@ const CallEnded$json = {
 final $typed_data.Uint8List callEndedDescriptor = $convert.base64Decode(
     'CglDYWxsRW5kZWQSQAoGcmVhc29uGAEgASgOMiguc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ2'
     'FsbEVuZGVkUmVhc29uUgZyZWFzb24=');
+
+@$core.Deprecated('Use inboundStateNotificationDescriptor instead')
+const InboundStateNotification$json = {
+  '1': 'InboundStateNotification',
+  '2': [
+    {
+      '1': 'inbound_video_states',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.InboundVideoState',
+      '10': 'inboundVideoStates'
+    },
+  ],
+};
+
+/// Descriptor for `InboundStateNotification`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List inboundStateNotificationDescriptor = $convert.base64Decode(
+    'ChhJbmJvdW5kU3RhdGVOb3RpZmljYXRpb24SWwoUaW5ib3VuZF92aWRlb19zdGF0ZXMYASADKA'
+    'syKS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LkluYm91bmRWaWRlb1N0YXRlUhJpbmJvdW5kVmlk'
+    'ZW9TdGF0ZXM=');
+
+@$core.Deprecated('Use inboundVideoStateDescriptor instead')
+const InboundVideoState$json = {
+  '1': 'InboundVideoState',
+  '2': [
+    {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
+    {
+      '1': 'track_type',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {'1': 'paused', '3': 4, '4': 1, '5': 8, '10': 'paused'},
+  ],
+};
+
+/// Descriptor for `InboundVideoState`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List inboundVideoStateDescriptor = $convert.base64Decode(
+    'ChFJbmJvdW5kVmlkZW9TdGF0ZRIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSHQoKc2Vzc2lvbl'
+    '9pZBgCIAEoCVIJc2Vzc2lvbklkEkEKCnRyYWNrX3R5cGUYAyABKA4yIi5zdHJlYW0udmlkZW8u'
+    'c2Z1Lm1vZGVscy5UcmFja1R5cGVSCXRyYWNrVHlwZRIWCgZwYXVzZWQYBCABKAhSBnBhdXNlZA'
+    '==');

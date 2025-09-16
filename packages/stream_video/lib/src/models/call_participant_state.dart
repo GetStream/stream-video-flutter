@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import '../sfu/data/models/sfu_connection_quality.dart';
+import '../sfu/data/models/sfu_participant_source.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sorting/call_participant_sorting_presets.dart';
 import '../utils/string.dart';
@@ -35,6 +36,7 @@ class CallParticipantState
     this.reaction,
     this.viewportVisibility = ViewportVisibility.unknown,
     this.screenShareViewportVisibility = ViewportVisibility.unknown,
+    this.participantSource,
   }) : audioLevels = audioLevels ?? [audioLevel];
 
   /// Internal constructor to be used with copyWith methods
@@ -58,6 +60,7 @@ class CallParticipantState
     required this.reaction,
     required this.viewportVisibility,
     required this.screenShareViewportVisibility,
+    required this.participantSource,
   });
 
   final String userId;
@@ -70,6 +73,7 @@ class CallParticipantState
   final Map<SfuTrackType, TrackState> publishedTracks;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
+  final SfuParticipantSource? participantSource;
   final bool isOnline;
 
   /// The latest audio level for the user.
@@ -112,6 +116,7 @@ class CallParticipantState
     CallReaction? reaction,
     ViewportVisibility? viewportVisibility,
     ViewportVisibility? screenShareViewportVisibility,
+    SfuParticipantSource? participantSource,
   }) {
     return CallParticipantState._(
       userId: userId ?? this.userId,
@@ -134,6 +139,7 @@ class CallParticipantState
       viewportVisibility: viewportVisibility ?? this.viewportVisibility,
       screenShareViewportVisibility:
           screenShareViewportVisibility ?? this.screenShareViewportVisibility,
+      participantSource: participantSource ?? this.participantSource,
     );
   }
 
@@ -178,6 +184,7 @@ class CallParticipantState
       reaction: reaction,
       viewportVisibility: viewportVisibility,
       screenShareViewportVisibility: screenShareViewportVisibility,
+      participantSource: participantSource,
     );
   }
 
@@ -208,6 +215,7 @@ class CallParticipantState
       reaction: reaction,
       viewportVisibility: viewportVisibility,
       screenShareViewportVisibility: screenShareViewportVisibility,
+      participantSource: participantSource,
     );
   }
 
@@ -238,7 +246,9 @@ class CallParticipantState
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, audioLevels: $audioLevels, isSpeaking: $isSpeaking, '
         'isDominantSpeaker: $isDominantSpeaker, isPinned: $isPinned, '
-        'reaction: $reaction, viewportVisibility: $viewportVisibility}';
+        'reaction: $reaction, viewportVisibility: $viewportVisibility, '
+        'screenShareViewportVisibility: $screenShareViewportVisibility, '
+        'participantSource: $participantSource}';
   }
 
   @override
@@ -261,6 +271,8 @@ class CallParticipantState
         pin,
         reaction,
         viewportVisibility,
+        screenShareViewportVisibility,
+        participantSource,
       ];
 
   TrackState? get videoTrack {

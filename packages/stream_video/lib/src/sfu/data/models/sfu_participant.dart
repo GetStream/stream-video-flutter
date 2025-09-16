@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'sfu_connection_quality.dart';
+import 'sfu_participant_source.dart';
 import 'sfu_track_type.dart';
 
 class SfuParticipant with EquatableMixin {
@@ -18,6 +19,7 @@ class SfuParticipant with EquatableMixin {
     required this.isDominantSpeaker,
     required this.audioLevel,
     required this.roles,
+    required this.participantSource,
   });
 
   final String userId;
@@ -33,6 +35,7 @@ class SfuParticipant with EquatableMixin {
   final bool isDominantSpeaker;
   final double audioLevel;
   final List<String> roles;
+  final SfuParticipantSource participantSource;
 
   SfuParticipant copyWith({
     String? userId,
@@ -48,6 +51,7 @@ class SfuParticipant with EquatableMixin {
     bool? isDominantSpeaker,
     double? audioLevel,
     List<String>? roles,
+    SfuParticipantSource? participantSource,
   }) =>
       SfuParticipant(
         userId: userId ?? this.userId,
@@ -63,6 +67,7 @@ class SfuParticipant with EquatableMixin {
         isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
         audioLevel: audioLevel ?? this.audioLevel,
         roles: roles ?? this.roles,
+        participantSource: participantSource ?? this.participantSource,
       );
 
   @override
@@ -73,7 +78,7 @@ class SfuParticipant with EquatableMixin {
         'publishedTracks: $publishedTracks, joinedAt: $joinedAt, '
         'connectionQuality: $connectionQuality, isSpeaking: $isSpeaking, '
         'isDominantSpeaker: $isDominantSpeaker, audioLevel: $audioLevel, '
-        'roles: $roles}';
+        'roles: $roles, participantSource: $participantSource}';
   }
 
   @override
@@ -90,6 +95,7 @@ class SfuParticipant with EquatableMixin {
         isSpeaking,
         isDominantSpeaker,
         audioLevel.hashCode,
+        participantSource,
       ];
 }
 

@@ -311,6 +311,7 @@ class Participant extends $pb.GeneratedMessage {
     $core.String? image,
     $1.Struct? custom,
     $core.Iterable<$core.String>? roles,
+    ParticipantSource? source,
   }) {
     final $result = create();
     if (userId != null) {
@@ -352,6 +353,9 @@ class Participant extends $pb.GeneratedMessage {
     if (roles != null) {
       $result.roles.addAll(roles);
     }
+    if (source != null) {
+      $result.source = source;
+    }
     return $result;
   }
   Participant._() : super();
@@ -391,6 +395,11 @@ class Participant extends $pb.GeneratedMessage {
     ..aOM<$1.Struct>(12, _omitFieldNames ? '' : 'custom',
         subBuilder: $1.Struct.create)
     ..pPS(13, _omitFieldNames ? '' : 'roles')
+    ..e<ParticipantSource>(
+        14, _omitFieldNames ? '' : 'source', $pb.PbFieldType.OE,
+        defaultOrMaker: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        valueOf: ParticipantSource.valueOf,
+        enumValues: ParticipantSource.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -557,6 +566,18 @@ class Participant extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(13)
   $pb.PbList<$core.String> get roles => $_getList(12);
+
+  @$pb.TagNumber(14)
+  ParticipantSource get source => $_getN(13);
+  @$pb.TagNumber(14)
+  set source(ParticipantSource v) {
+    $_setField(14, v);
+  }
+
+  @$pb.TagNumber(14)
+  $core.bool hasSource() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearSource() => $_clearField(14);
 }
 
 class StreamQuality extends $pb.GeneratedMessage {

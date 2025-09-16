@@ -42,6 +42,7 @@ enum SfuEvent_EventPayload {
   participantUpdated,
   participantMigrationComplete,
   changePublishOptions,
+  inboundStateNotification,
   notSet
 }
 
@@ -70,6 +71,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     ParticipantUpdated? participantUpdated,
     ParticipantMigrationComplete? participantMigrationComplete,
     ChangePublishOptions? changePublishOptions,
+    InboundStateNotification? inboundStateNotification,
   }) {
     final $result = create();
     if (subscriberOffer != null) {
@@ -138,6 +140,9 @@ class SfuEvent extends $pb.GeneratedMessage {
     if (changePublishOptions != null) {
       $result.changePublishOptions = changePublishOptions;
     }
+    if (inboundStateNotification != null) {
+      $result.inboundStateNotification = inboundStateNotification;
+    }
     return $result;
   }
   SfuEvent._() : super();
@@ -172,6 +177,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     24: SfuEvent_EventPayload.participantUpdated,
     25: SfuEvent_EventPayload.participantMigrationComplete,
     27: SfuEvent_EventPayload.changePublishOptions,
+    28: SfuEvent_EventPayload.inboundStateNotification,
     0: SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
@@ -201,7 +207,8 @@ class SfuEvent extends $pb.GeneratedMessage {
       23,
       24,
       25,
-      27
+      27,
+      28
     ])
     ..aOM<SubscriberOffer>(1, _omitFieldNames ? '' : 'subscriberOffer',
         subBuilder: SubscriberOffer.create)
@@ -251,6 +258,9 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<ChangePublishOptions>(
         27, _omitFieldNames ? '' : 'changePublishOptions',
         subBuilder: ChangePublishOptions.create)
+    ..aOM<InboundStateNotification>(
+        28, _omitFieldNames ? '' : 'inboundStateNotification',
+        subBuilder: InboundStateNotification.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -630,6 +640,21 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearChangePublishOptions() => $_clearField(27);
   @$pb.TagNumber(27)
   ChangePublishOptions ensureChangePublishOptions() => $_ensure(21);
+
+  /// InboundStateNotification
+  @$pb.TagNumber(28)
+  InboundStateNotification get inboundStateNotification => $_getN(22);
+  @$pb.TagNumber(28)
+  set inboundStateNotification(InboundStateNotification v) {
+    $_setField(28, v);
+  }
+
+  @$pb.TagNumber(28)
+  $core.bool hasInboundStateNotification() => $_has(22);
+  @$pb.TagNumber(28)
+  void clearInboundStateNotification() => $_clearField(28);
+  @$pb.TagNumber(28)
+  InboundStateNotification ensureInboundStateNotification() => $_ensure(22);
 }
 
 class ChangePublishOptions extends $pb.GeneratedMessage {
@@ -1669,6 +1694,8 @@ class JoinRequest extends $pb.GeneratedMessage {
     $core.String? publisherSdp,
     $core.Iterable<$0.PublishOption>? preferredPublishOptions,
     $core.Iterable<$0.SubscribeOption>? preferredSubscribeOptions,
+    $core.Iterable<$0.ClientCapability>? capabilities,
+    $0.ParticipantSource? source,
   }) {
     final $result = create();
     if (token != null) {
@@ -1703,6 +1730,12 @@ class JoinRequest extends $pb.GeneratedMessage {
     if (preferredSubscribeOptions != null) {
       $result.preferredSubscribeOptions.addAll(preferredSubscribeOptions);
     }
+    if (capabilities != null) {
+      $result.capabilities.addAll(capabilities);
+    }
+    if (source != null) {
+      $result.source = source;
+    }
     return $result;
   }
   JoinRequest._() : super();
@@ -1735,6 +1768,17 @@ class JoinRequest extends $pb.GeneratedMessage {
     ..pc<$0.SubscribeOption>(10,
         _omitFieldNames ? '' : 'preferredSubscribeOptions', $pb.PbFieldType.PM,
         subBuilder: $0.SubscribeOption.create)
+    ..pc<$0.ClientCapability>(
+        11, _omitFieldNames ? '' : 'capabilities', $pb.PbFieldType.KE,
+        valueOf: $0.ClientCapability.valueOf,
+        enumValues: $0.ClientCapability.values,
+        defaultEnumValue: $0.ClientCapability.CLIENT_CAPABILITY_UNSPECIFIED)
+    ..e<$0.ParticipantSource>(
+        12, _omitFieldNames ? '' : 'source', $pb.PbFieldType.OE,
+        defaultOrMaker:
+            $0.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        valueOf: $0.ParticipantSource.valueOf,
+        enumValues: $0.ParticipantSource.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('Using this can add significant overhead to your binary. '
@@ -1886,6 +1930,21 @@ class JoinRequest extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(10)
   $pb.PbList<$0.SubscribeOption> get preferredSubscribeOptions => $_getList(9);
+
+  @$pb.TagNumber(11)
+  $pb.PbList<$0.ClientCapability> get capabilities => $_getList(10);
+
+  @$pb.TagNumber(12)
+  $0.ParticipantSource get source => $_getN(11);
+  @$pb.TagNumber(12)
+  set source($0.ParticipantSource v) {
+    $_setField(12, v);
+  }
+
+  @$pb.TagNumber(12)
+  $core.bool hasSource() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearSource() => $_clearField(12);
 }
 
 class ReconnectDetails extends $pb.GeneratedMessage {
@@ -3719,6 +3778,179 @@ class CallEnded extends $pb.GeneratedMessage {
   $core.bool hasReason() => $_has(0);
   @$pb.TagNumber(1)
   void clearReason() => $_clearField(1);
+}
+
+class InboundStateNotification extends $pb.GeneratedMessage {
+  factory InboundStateNotification({
+    $core.Iterable<InboundVideoState>? inboundVideoStates,
+  }) {
+    final $result = create();
+    if (inboundVideoStates != null) {
+      $result.inboundVideoStates.addAll(inboundVideoStates);
+    }
+    return $result;
+  }
+  InboundStateNotification._() : super();
+  factory InboundStateNotification.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory InboundStateNotification.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InboundStateNotification',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..pc<InboundVideoState>(
+        1, _omitFieldNames ? '' : 'inboundVideoStates', $pb.PbFieldType.PM,
+        subBuilder: InboundVideoState.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  InboundStateNotification clone() =>
+      InboundStateNotification()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  InboundStateNotification copyWith(
+          void Function(InboundStateNotification) updates) =>
+      super.copyWith((message) => updates(message as InboundStateNotification))
+          as InboundStateNotification;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InboundStateNotification create() => InboundStateNotification._();
+  InboundStateNotification createEmptyInstance() => create();
+  static $pb.PbList<InboundStateNotification> createRepeated() =>
+      $pb.PbList<InboundStateNotification>();
+  @$core.pragma('dart2js:noInline')
+  static InboundStateNotification getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InboundStateNotification>(create);
+  static InboundStateNotification? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<InboundVideoState> get inboundVideoStates => $_getList(0);
+}
+
+class InboundVideoState extends $pb.GeneratedMessage {
+  factory InboundVideoState({
+    $core.String? userId,
+    $core.String? sessionId,
+    $0.TrackType? trackType,
+    $core.bool? paused,
+  }) {
+    final $result = create();
+    if (userId != null) {
+      $result.userId = userId;
+    }
+    if (sessionId != null) {
+      $result.sessionId = sessionId;
+    }
+    if (trackType != null) {
+      $result.trackType = trackType;
+    }
+    if (paused != null) {
+      $result.paused = paused;
+    }
+    return $result;
+  }
+  InboundVideoState._() : super();
+  factory InboundVideoState.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory InboundVideoState.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InboundVideoState',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.event'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aOS(2, _omitFieldNames ? '' : 'sessionId')
+    ..e<$0.TrackType>(3, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
+        defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED,
+        valueOf: $0.TrackType.valueOf,
+        enumValues: $0.TrackType.values)
+    ..aOB(4, _omitFieldNames ? '' : 'paused')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  InboundVideoState clone() => InboundVideoState()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  InboundVideoState copyWith(void Function(InboundVideoState) updates) =>
+      super.copyWith((message) => updates(message as InboundVideoState))
+          as InboundVideoState;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InboundVideoState create() => InboundVideoState._();
+  InboundVideoState createEmptyInstance() => create();
+  static $pb.PbList<InboundVideoState> createRepeated() =>
+      $pb.PbList<InboundVideoState>();
+  @$core.pragma('dart2js:noInline')
+  static InboundVideoState getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InboundVideoState>(create);
+  static InboundVideoState? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get sessionId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set sessionId($core.String v) {
+    $_setString(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasSessionId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSessionId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $0.TrackType get trackType => $_getN(2);
+  @$pb.TagNumber(3)
+  set trackType($0.TrackType v) {
+    $_setField(3, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasTrackType() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTrackType() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get paused => $_getBF(3);
+  @$pb.TagNumber(4)
+  set paused($core.bool v) {
+    $_setBool(3, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasPaused() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPaused() => $_clearField(4);
 }
 
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');

@@ -1,6 +1,8 @@
 ## Unreleased
 
 ✅ Added
+* Extended `CallParticipantState` with `participantSource`. This indicates the participant's source channel (e.g., WebRTC, RTMP, WHIP) and can be used in filtering and sorting criteria.
+* Livestream sorting preset now prioritises RTMP sources in layout sorting.
 * Added capability to remove a participant from a call via `call.kickUser()`. Requires the `kick-user` permission.
 
 🐞 Fixed
