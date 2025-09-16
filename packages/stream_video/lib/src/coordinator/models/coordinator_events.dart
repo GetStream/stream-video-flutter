@@ -575,6 +575,24 @@ class CoordinatorCallUserUnblockedEvent extends CoordinatorCallEvent {
   List<Object?> get props => [...super.props, createdAt, user];
 }
 
+class CoordinatorCallUserKickedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallUserKickedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.user,
+    required this.kickedByUser,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallUser user;
+  final CallUser? kickedByUser;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, user, kickedByUser];
+}
+
 class CoordinatorCallReactionEvent extends CoordinatorCallEvent {
   const CoordinatorCallReactionEvent({
     required this.callCid,

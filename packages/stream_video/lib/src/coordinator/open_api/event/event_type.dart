@@ -20,6 +20,7 @@ enum EventType {
   callPermissionRequest('call.permission_request'),
   callPermissionsUpdated('call.permissions_updated'),
   callUserBlocked('call.blocked_user'),
+  callUserKicked('call.kicked_user'),
   callUserUnblocked('call.unblocked_user'),
   callRecordingStarted('call.recording_started'),
   callRecordingStopped('call.recording_stopped'),

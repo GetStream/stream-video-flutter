@@ -1115,6 +1115,7 @@ class Call {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIngressSettings? ingress,
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
@@ -1132,6 +1133,7 @@ class Call {
       broadcasting: broadcasting,
       session: session,
       frameRecording: frameRecording,
+      ingress: ingress,
     );
   }
 
@@ -2134,6 +2136,7 @@ class Call {
     StreamBroadcastingSettings? broadcasting,
     StreamGeofencingSettings? geofencing,
     StreamSessionSettings? session,
+    StreamIngressSettings? ingress,
     StreamFrameRecordingSettings? frameRecording,
     Map<String, Object> custom = const {},
   }) async {
@@ -2149,6 +2152,7 @@ class Call {
       broadcasting: broadcasting?.toOpenDto(),
       geofencing: geofencing?.toOpenDto(),
       session: session?.toOpenDto(),
+      ingress: ingress?.toOpenDto(),
       frameRecording: frameRecording?.toOpenDto(),
     );
 
@@ -2220,6 +2224,15 @@ class Call {
 
   Future<Result<None>> unblockUser(String userId) {
     return _permissionsManager.unblockUser(userId);
+  }
+
+  /// Kicks a user from the call.
+  /// Set [block] to true to also block the user from rejoining.
+  Future<Result<None>> kickUser(
+    String userId, {
+    bool block = false,
+  }) {
+    return _permissionsManager.kickUser(userId, block: block);
   }
 
   Future<Result<None>> startRecording({

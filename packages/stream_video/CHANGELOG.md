@@ -1,5 +1,8 @@
 ## Unreleased
 
+✅ Added
+* Added capability to remove a participant from a call via `call.kickUser()`. Requires the `kick-user` permission.
+
 🐞 Fixed
 * Multitasking camera on iOS is now enabled only once and kept enabled. This fixes potential errors when quickly toggling camera.
 
