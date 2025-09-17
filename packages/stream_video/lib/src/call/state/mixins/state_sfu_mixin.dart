@@ -69,6 +69,10 @@ mixin StateSfuMixin on StateNotifier<CallState> {
               ...participant.publishedTracks,
               if (trackState != null) event.trackType: trackState,
             },
+            pausedTracks: participant.pausedTracks
+                .toList()
+                .where((track) => track != event.trackType)
+                .toSet(),
           );
         }
 
@@ -265,6 +269,38 @@ mixin StateSfuMixin on StateNotifier<CallState> {
       callParticipants: [
         ...participants,
       ],
+    );
+  }
+
+  void sfuInboundStateNotification(SfuInboundStateNotificationEvent event) {
+    _logger.d(
+      () => '[sfuInboundStateNotification] ${state.sessionId}; event: $event',
+    );
+
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        final inboundStates = event.inboundVideoStates.where((it) {
+          return it.userId == participant.userId &&
+              it.sessionId == participant.sessionId;
+        }).toList();
+
+        if (inboundStates.isEmpty) {
+          return participant;
+        }
+
+        final pausedTracks = {...participant.pausedTracks};
+        for (final inboundState in inboundStates) {
+          if (inboundState.paused) {
+            pausedTracks.add(inboundState.trackType);
+          } else {
+            pausedTracks.remove(inboundState.trackType);
+          }
+        }
+
+        return participant.copyWith(
+          pausedTracks: pausedTracks,
+        );
+      }).toList(),
     );
   }
 }

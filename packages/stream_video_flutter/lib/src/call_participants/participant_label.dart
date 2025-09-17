@@ -11,9 +11,11 @@ class StreamParticipantLabel extends StatelessWidget {
     required this.participantName,
     required this.isAudioEnabled,
     required this.isSpeaking,
+    required this.isTrackPaused,
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
+    this.pausedVideoIndicatorColor,
     this.participantLabelTextStyle,
     super.key,
   });
@@ -24,10 +26,12 @@ class StreamParticipantLabel extends StatelessWidget {
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
+    this.pausedVideoIndicatorColor,
     this.participantLabelTextStyle,
   })  : participantName = participant.name,
         isAudioEnabled = participant.isAudioEnabled,
-        isSpeaking = participant.isSpeaking;
+        isSpeaking = participant.isSpeaking,
+        isTrackPaused = participant.isTrackPaused(SfuTrackType.video);
 
   /// The name of the participant.
   final String participantName;
@@ -38,6 +42,9 @@ class StreamParticipantLabel extends StatelessWidget {
   /// If the participant is speaking.
   final bool isSpeaking;
 
+  /// If the track is paused.
+  final bool isTrackPaused;
+
   /// The color of an audio level indicator.
   final Color? audioLevelIndicatorColor;
 
@@ -46,6 +53,9 @@ class StreamParticipantLabel extends StatelessWidget {
 
   /// The color of a disabled microphone icon.
   final Color? disabledMicrophoneColor;
+
+  /// The color of a paused video track icon.
+  final Color? pausedVideoIndicatorColor;
 
   /// Text style for the participant label.
   final TextStyle? participantLabelTextStyle;
@@ -84,6 +94,15 @@ class StreamParticipantLabel extends StatelessWidget {
               enabledMicrophoneColor: enabledMicrophoneColor,
               disabledMicrophoneColor: disabledMicrophoneColor,
             ),
+            if (isTrackPaused) ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.network_check,
+                size: 16,
+                color: pausedVideoIndicatorColor ??
+                    theme.pausedVideoIndicatorColor,
+              ),
+            ],
             const SizedBox(width: 2),
           ],
         ),

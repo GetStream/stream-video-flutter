@@ -25,6 +25,7 @@ class CallParticipantState
     required this.sessionId,
     required this.trackIdPrefix,
     this.publishedTracks = const {},
+    this.pausedTracks = const {},
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
@@ -49,6 +50,7 @@ class CallParticipantState
     required this.sessionId,
     required this.trackIdPrefix,
     required this.publishedTracks,
+    required this.pausedTracks,
     required this.isLocal,
     required this.connectionQuality,
     required this.isOnline,
@@ -82,6 +84,14 @@ class CallParticipantState
   /// List of the last 10 audio levels.
   final List<double> audioLevels;
 
+  /// A list of tracks that are currently paused by our servers.
+  /// Typically, a server-side pause happens when the local participant doesn't
+  /// have enough bandwidth to receive all tracks. In this case, the server
+  /// will pause some tracks to optimize the bandwidth usage.
+  /// Once the bandwidth is restored, the server will resume the paused tracks.
+  /// This is useful to avoid any unwanted video and audio artifacts.
+  final Set<SfuTrackType> pausedTracks;
+
   final bool isSpeaking;
   final bool isDominantSpeaker;
   final CallParticipantPin? pin;
@@ -105,6 +115,7 @@ class CallParticipantState
     String? sessionId,
     String? trackIdPrefix,
     Map<SfuTrackType, TrackState>? publishedTracks,
+    Set<SfuTrackType>? pausedTracks,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
@@ -127,6 +138,7 @@ class CallParticipantState
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       publishedTracks: publishedTracks ?? this.publishedTracks,
+      pausedTracks: pausedTracks ?? this.pausedTracks,
       isLocal: isLocal ?? this.isLocal,
       connectionQuality: connectionQuality ?? this.connectionQuality,
       isOnline: isOnline ?? this.isOnline,
@@ -173,6 +185,7 @@ class CallParticipantState
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
       publishedTracks: publishedTracks,
+      pausedTracks: pausedTracks,
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -204,6 +217,7 @@ class CallParticipantState
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
       publishedTracks: publishedTracks,
+      pausedTracks: pausedTracks,
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -242,6 +256,7 @@ class CallParticipantState
         'sessionId: $sessionId, '
         'trackId: $trackIdPrefix, image: $image, '
         'publishedTracks: $publishedTracks, '
+        'pausedTracks: $pausedTracks, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, audioLevels: $audioLevels, isSpeaking: $isSpeaking, '
@@ -261,6 +276,7 @@ class CallParticipantState
         sessionId,
         trackIdPrefix,
         publishedTracks,
+        pausedTracks,
         isLocal,
         connectionQuality,
         isOnline,
@@ -297,6 +313,10 @@ class CallParticipantState
 
   bool get isScreenShareEnabled {
     return !(screenShareTrack?.muted ?? true);
+  }
+
+  bool isTrackPaused(SfuTrackType trackType) {
+    return pausedTracks.contains(trackType);
   }
 
   UserInfo toUserInfo() => UserInfo(

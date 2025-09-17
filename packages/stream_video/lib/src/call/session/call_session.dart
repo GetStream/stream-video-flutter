@@ -20,6 +20,7 @@ import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
+import '../../sfu/data/models/sfu_client_capability.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
@@ -255,6 +256,7 @@ class CallSession extends Disposable {
             Duration fastReconnectDeadline,
           })>> start({
     sfu_events.ReconnectDetails? reconnectDetails,
+    Set<SfuClientCapability> capabilities = const {},
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
     bool isAnonymousUser = false,
   }) async {
@@ -331,6 +333,7 @@ class CallSession extends Disposable {
         reconnectDetails: reconnectDetails,
         preferredPublishOptions: preferredPublishOptions,
         preferredSubscribeOptions: preferredSubscribeOptions,
+        capabilities: capabilities.map((c) => c.toDTO()).toList(),
         source:
             sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
       );
@@ -634,6 +637,8 @@ class CallSession extends Disposable {
         stateManager.sfuDominantSpeakerChanged(event);
       } else if (event is SfuPinsUpdatedEvent) {
         stateManager.sfuPinsUpdated(event.pins);
+      } else if (event is SfuInboundStateNotificationEvent) {
+        stateManager.sfuInboundStateNotification(event);
       }
     });
   }

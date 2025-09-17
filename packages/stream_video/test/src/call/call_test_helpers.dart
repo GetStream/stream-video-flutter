@@ -302,6 +302,7 @@ MockCallSession setupMockCallSession() {
       reconnectDetails: any(named: 'reconnectDetails'),
       onRtcManagerCreatedCallback: any(named: 'onRtcManagerCreatedCallback'),
       isAnonymousUser: any(named: 'isAnonymousUser'),
+      capabilities: any(named: 'capabilities'),
     ),
   ).thenAnswer(
     (_) => Future.value(
