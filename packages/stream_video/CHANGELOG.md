@@ -1,4 +1,4 @@
-## Unreleased
+## 0.10.4
 
 ✅ Added
 * Extended `CallParticipantState` with `participantSource`. This indicates the participant's source channel (e.g., WebRTC, RTMP, WHIP) and can be used in filtering and sorting criteria.
