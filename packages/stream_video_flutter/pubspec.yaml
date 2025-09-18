@@ -23,7 +23,10 @@ dependencies:
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
   stream_video: ^0.10.4
-  stream_webrtc_flutter: ^1.0.11
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: ad879a28cda30e1a6979d950adab799e3347502f  
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
