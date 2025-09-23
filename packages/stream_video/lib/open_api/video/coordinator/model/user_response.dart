@@ -243,7 +243,8 @@ class UserResponse {
                 .toList(growable: false)
             : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        // MANUAL_EDIT: allow null values
+        custom: mapCastOfType<String, Object?>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
