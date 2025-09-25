@@ -43,6 +43,7 @@ void main() {
           onRtcManagerCreatedCallback:
               any(named: 'onRtcManagerCreatedCallback'),
           isAnonymousUser: any(named: 'isAnonymousUser'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
         ),
       ).thenAnswer(
         (_) async => const Result.failure(
@@ -74,6 +75,7 @@ void main() {
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
         () => mockCallSession.start(
               reconnectDetails: any(named: 'reconnectDetails'),
@@ -81,6 +83,7 @@ void main() {
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
         () => coordinatorClient.joinCall(
               callCid: any(named: 'callCid'),
@@ -96,6 +99,7 @@ void main() {
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
       ]);
     });

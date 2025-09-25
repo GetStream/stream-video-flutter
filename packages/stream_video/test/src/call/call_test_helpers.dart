@@ -303,6 +303,7 @@ MockCallSession setupMockCallSession() {
       onRtcManagerCreatedCallback: any(named: 'onRtcManagerCreatedCallback'),
       isAnonymousUser: any(named: 'isAnonymousUser'),
       capabilities: any(named: 'capabilities'),
+      unifiedSessionId: any(named: 'unifiedSessionId'),
     ),
   ).thenAnswer(
     (_) => Future.value(

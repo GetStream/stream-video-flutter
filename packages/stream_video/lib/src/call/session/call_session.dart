@@ -259,6 +259,7 @@ class CallSession extends Disposable {
     Set<SfuClientCapability> capabilities = const {},
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
     bool isAnonymousUser = false,
+    String? unifiedSessionId,
   }) async {
     try {
       _logger.d(
@@ -336,6 +337,7 @@ class CallSession extends Disposable {
         capabilities: capabilities.map((c) => c.toDTO()).toList(),
         source:
             sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        unifiedSessionId: unifiedSessionId,
       );
 
       _tracer.trace('joinRequest', joinRequest.toJson());
