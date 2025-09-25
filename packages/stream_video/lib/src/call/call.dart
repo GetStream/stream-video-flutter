@@ -928,7 +928,10 @@ class Call {
       _session = _previousSession;
 
       _logger.d(() => '[join] fast reconnecting');
-      final result = await _session!.fastReconnect();
+      final result = await _session!.fastReconnect(
+        capabilities: _sfuClientCapabilities,
+        unifiedSessionId: _unifiedSessionId,
+      );
 
       if (result.isFailure) {
         _logger.e(() => '[join] fast reconnecting failed: $result');
