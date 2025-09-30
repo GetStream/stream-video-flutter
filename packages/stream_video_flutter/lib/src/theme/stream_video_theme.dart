@@ -169,6 +169,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           color: Colors.white,
         ),
         disabledMicrophoneColor: colorTheme.accentError,
+        pausedVideoIndicatorColor: Colors.white,
         enabledMicrophoneColor: Colors.white,
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,

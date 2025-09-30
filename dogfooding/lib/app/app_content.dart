@@ -102,13 +102,13 @@ class _StreamDogFoodingAppContentState
       if (_userAuthController.currentUser != null) {
         _compositeSubscription.clear();
         initPushNotificationManagerIfAvailable();
+        _handleMobileAudioInterruptions();
       } else {
         _compositeSubscription.clear();
       }
     });
 
     _tryConsumingIncomingCallFromTerminatedState();
-    _handleMobileAudioInterruptions();
   }
 
   void initPushNotificationManagerIfAvailable() {

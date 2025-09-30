@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import '../sfu/data/models/sfu_connection_quality.dart';
+import '../sfu/data/models/sfu_participant_source.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sorting/call_participant_sorting_presets.dart';
 import '../utils/string.dart';
@@ -24,6 +25,7 @@ class CallParticipantState
     required this.sessionId,
     required this.trackIdPrefix,
     this.publishedTracks = const {},
+    this.pausedTracks = const {},
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
@@ -35,6 +37,7 @@ class CallParticipantState
     this.reaction,
     this.viewportVisibility = ViewportVisibility.unknown,
     this.screenShareViewportVisibility = ViewportVisibility.unknown,
+    this.participantSource,
   }) : audioLevels = audioLevels ?? [audioLevel];
 
   /// Internal constructor to be used with copyWith methods
@@ -47,6 +50,7 @@ class CallParticipantState
     required this.sessionId,
     required this.trackIdPrefix,
     required this.publishedTracks,
+    required this.pausedTracks,
     required this.isLocal,
     required this.connectionQuality,
     required this.isOnline,
@@ -58,6 +62,7 @@ class CallParticipantState
     required this.reaction,
     required this.viewportVisibility,
     required this.screenShareViewportVisibility,
+    required this.participantSource,
   });
 
   final String userId;
@@ -70,6 +75,7 @@ class CallParticipantState
   final Map<SfuTrackType, TrackState> publishedTracks;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
+  final SfuParticipantSource? participantSource;
   final bool isOnline;
 
   /// The latest audio level for the user.
@@ -77,6 +83,14 @@ class CallParticipantState
 
   /// List of the last 10 audio levels.
   final List<double> audioLevels;
+
+  /// A list of tracks that are currently paused by our servers.
+  /// Typically, a server-side pause happens when the local participant doesn't
+  /// have enough bandwidth to receive all tracks. In this case, the server
+  /// will pause some tracks to optimize the bandwidth usage.
+  /// Once the bandwidth is restored, the server will resume the paused tracks.
+  /// This is useful to avoid any unwanted video and audio artifacts.
+  final Set<SfuTrackType> pausedTracks;
 
   final bool isSpeaking;
   final bool isDominantSpeaker;
@@ -101,6 +115,7 @@ class CallParticipantState
     String? sessionId,
     String? trackIdPrefix,
     Map<SfuTrackType, TrackState>? publishedTracks,
+    Set<SfuTrackType>? pausedTracks,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
@@ -112,6 +127,7 @@ class CallParticipantState
     CallReaction? reaction,
     ViewportVisibility? viewportVisibility,
     ViewportVisibility? screenShareViewportVisibility,
+    SfuParticipantSource? participantSource,
   }) {
     return CallParticipantState._(
       userId: userId ?? this.userId,
@@ -122,6 +138,7 @@ class CallParticipantState
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       publishedTracks: publishedTracks ?? this.publishedTracks,
+      pausedTracks: pausedTracks ?? this.pausedTracks,
       isLocal: isLocal ?? this.isLocal,
       connectionQuality: connectionQuality ?? this.connectionQuality,
       isOnline: isOnline ?? this.isOnline,
@@ -134,6 +151,7 @@ class CallParticipantState
       viewportVisibility: viewportVisibility ?? this.viewportVisibility,
       screenShareViewportVisibility:
           screenShareViewportVisibility ?? this.screenShareViewportVisibility,
+      participantSource: participantSource ?? this.participantSource,
     );
   }
 
@@ -167,6 +185,7 @@ class CallParticipantState
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
       publishedTracks: publishedTracks,
+      pausedTracks: pausedTracks,
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -178,6 +197,7 @@ class CallParticipantState
       reaction: reaction,
       viewportVisibility: viewportVisibility,
       screenShareViewportVisibility: screenShareViewportVisibility,
+      participantSource: participantSource,
     );
   }
 
@@ -197,6 +217,7 @@ class CallParticipantState
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
       publishedTracks: publishedTracks,
+      pausedTracks: pausedTracks,
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -208,6 +229,7 @@ class CallParticipantState
       reaction: reaction,
       viewportVisibility: viewportVisibility,
       screenShareViewportVisibility: screenShareViewportVisibility,
+      participantSource: participantSource,
     );
   }
 
@@ -234,34 +256,40 @@ class CallParticipantState
         'sessionId: $sessionId, '
         'trackId: $trackIdPrefix, image: $image, '
         'publishedTracks: $publishedTracks, '
+        'pausedTracks: $pausedTracks, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, audioLevels: $audioLevels, isSpeaking: $isSpeaking, '
         'isDominantSpeaker: $isDominantSpeaker, isPinned: $isPinned, '
-        'reaction: $reaction, viewportVisibility: $viewportVisibility}';
+        'reaction: $reaction, viewportVisibility: $viewportVisibility, '
+        'screenShareViewportVisibility: $screenShareViewportVisibility, '
+        'participantSource: $participantSource}';
   }
 
   @override
   List<Object?> get props => [
-    userId,
-    roles,
-    name,
-    custom,
-    image,
-    sessionId,
-    trackIdPrefix,
-    publishedTracks,
-    isLocal,
-    connectionQuality,
-    isOnline,
-    audioLevel,
-    audioLevels,
-    isSpeaking,
-    isDominantSpeaker,
-    pin,
-    reaction,
-    viewportVisibility,
-  ];
+        userId,
+        roles,
+        name,
+        custom,
+        image,
+        sessionId,
+        trackIdPrefix,
+        publishedTracks,
+        pausedTracks,
+        isLocal,
+        connectionQuality,
+        isOnline,
+        audioLevel,
+        audioLevels,
+        isSpeaking,
+        isDominantSpeaker,
+        pin,
+        reaction,
+        viewportVisibility,
+        screenShareViewportVisibility,
+        participantSource,
+      ];
 
   TrackState? get videoTrack {
     return publishedTracks[SfuTrackType.video];
@@ -285,6 +313,10 @@ class CallParticipantState
 
   bool get isScreenShareEnabled {
     return !(screenShareTrack?.muted ?? true);
+  }
+
+  bool isTrackPaused(SfuTrackType trackType) {
+    return pausedTracks.contains(trackType);
   }
 
   UserInfo toUserInfo() => UserInfo(

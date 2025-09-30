@@ -1,4 +1,5 @@
 import '../models/call_participant_state.dart';
+import '../sfu/data/models/sfu_participant_source.dart';
 import 'call_participant_state_sorting.dart';
 
 mixin CallParticipantSortingPresets {
@@ -25,14 +26,14 @@ mixin CallParticipantSortingPresets {
   ]);
 
   /// The sorting preset for livestreams and audio rooms.
-  static final livestreamOrAudioRoom = combineComparators<CallParticipantState>(
-    [
-      ifInvisibleBy(dominantSpeaker),
-      ifInvisibleBy(speaking),
-      ifInvisibleBy(byReactionType('raised-hand')),
-      ifInvisibleBy(publishingVideo),
-      ifInvisibleBy(publishingAudio),
-      byRole(['admin', 'host', 'speaker']),
-    ],
-  );
+  static final livestreamOrAudioRoom =
+      combineComparators<CallParticipantState>([
+    ifInvisibleBy(dominantSpeaker),
+    ifInvisibleBy(speaking),
+    ifInvisibleBy(byReactionType('raised-hand')),
+    ifInvisibleBy(byParticipantSource(SfuParticipantSource.rtmp)),
+    ifInvisibleBy(publishingVideo),
+    ifInvisibleBy(publishingAudio),
+    byRole(['admin', 'host', 'speaker']),
+  ]);
 }

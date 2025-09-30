@@ -1,13 +1,14 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: video/sfu/models/models.proto
-//
+// Generated from video/sfu/models/models.proto.
+
 // @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -78,6 +79,43 @@ final $typed_data.Uint8List trackTypeDescriptor = $convert.base64Decode(
     'CglUcmFja1R5cGUSGgoWVFJBQ0tfVFlQRV9VTlNQRUNJRklFRBAAEhQKEFRSQUNLX1RZUEVfQV'
     'VESU8QARIUChBUUkFDS19UWVBFX1ZJREVPEAISGwoXVFJBQ0tfVFlQRV9TQ1JFRU5fU0hBUkUQ'
     'AxIhCh1UUkFDS19UWVBFX1NDUkVFTl9TSEFSRV9BVURJTxAE');
+
+@$core.Deprecated('Use participantSourceDescriptor instead')
+const ParticipantSource$json = {
+  '1': 'ParticipantSource',
+  '2': [
+    {'1': 'PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED', '2': 0},
+    {'1': 'PARTICIPANT_SOURCE_RTMP', '2': 1},
+    {'1': 'PARTICIPANT_SOURCE_WHIP', '2': 2},
+    {'1': 'PARTICIPANT_SOURCE_SIP', '2': 3},
+    {'1': 'PARTICIPANT_SOURCE_RTSP', '2': 4},
+    {'1': 'PARTICIPANT_SOURCE_SRT', '2': 5},
+  ],
+};
+
+/// Descriptor for `ParticipantSource`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List participantSourceDescriptor = $convert.base64Decode(
+    'ChFQYXJ0aWNpcGFudFNvdXJjZRIpCiVQQVJUSUNJUEFOVF9TT1VSQ0VfV0VCUlRDX1VOU1BFQ0'
+    'lGSUVEEAASGwoXUEFSVElDSVBBTlRfU09VUkNFX1JUTVAQARIbChdQQVJUSUNJUEFOVF9TT1VS'
+    'Q0VfV0hJUBACEhoKFlBBUlRJQ0lQQU5UX1NPVVJDRV9TSVAQAxIbChdQQVJUSUNJUEFOVF9TT1'
+    'VSQ0VfUlRTUBAEEhoKFlBBUlRJQ0lQQU5UX1NPVVJDRV9TUlQQBQ==');
+
+@$core.Deprecated('Use audioBitrateProfileDescriptor instead')
+const AudioBitrateProfile$json = {
+  '1': 'AudioBitrateProfile',
+  '2': [
+    {'1': 'AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED', '2': 0},
+    {'1': 'AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY', '2': 1},
+    {'1': 'AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY', '2': 2},
+  ],
+};
+
+/// Descriptor for `AudioBitrateProfile`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List audioBitrateProfileDescriptor = $convert.base64Decode(
+    'ChNBdWRpb0JpdHJhdGVQcm9maWxlEjQKMEFVRElPX0JJVFJBVEVfUFJPRklMRV9WT0lDRV9TVE'
+    'FOREFSRF9VTlNQRUNJRklFRBAAEiwKKEFVRElPX0JJVFJBVEVfUFJPRklMRV9WT0lDRV9ISUdI'
+    'X1FVQUxJVFkQARIsCihBVURJT19CSVRSQVRFX1BST0ZJTEVfTVVTSUNfSElHSF9RVUFMSVRZEA'
+    'I=');
 
 @$core.Deprecated('Use errorCodeDescriptor instead')
 const ErrorCode$json = {
@@ -267,6 +305,20 @@ final $typed_data.Uint8List appleThermalStateDescriptor = $convert.base64Decode(
     'RV9GQUlSEAISHwobQVBQTEVfVEhFUk1BTF9TVEFURV9TRVJJT1VTEAMSIAocQVBQTEVfVEhFUk'
     '1BTF9TVEFURV9DUklUSUNBTBAE');
 
+@$core.Deprecated('Use clientCapabilityDescriptor instead')
+const ClientCapability$json = {
+  '1': 'ClientCapability',
+  '2': [
+    {'1': 'CLIENT_CAPABILITY_UNSPECIFIED', '2': 0},
+    {'1': 'CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE', '2': 1},
+  ],
+};
+
+/// Descriptor for `ClientCapability`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List clientCapabilityDescriptor = $convert.base64Decode(
+    'ChBDbGllbnRDYXBhYmlsaXR5EiEKHUNMSUVOVF9DQVBBQklMSVRZX1VOU1BFQ0lGSUVEEAASLA'
+    'ooQ0xJRU5UX0NBUEFCSUxJVFlfU1VCU0NSSUJFUl9WSURFT19QQVVTRRAB');
+
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = {
   '1': 'CallState',
@@ -400,6 +452,14 @@ const Participant$json = {
       '10': 'custom'
     },
     {'1': 'roles', '3': 13, '4': 3, '5': 9, '10': 'roles'},
+    {
+      '1': 'source',
+      '3': 14,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ParticipantSource',
+      '10': 'source'
+    },
   ],
 };
 
@@ -415,7 +475,8 @@ final $typed_data.Uint8List participantDescriptor = $convert.base64Decode(
     '5hbnRfc3BlYWtlchgIIAEoCFIRaXNEb21pbmFudFNwZWFrZXISHwoLYXVkaW9fbGV2ZWwYCSAB'
     'KAJSCmF1ZGlvTGV2ZWwSEgoEbmFtZRgKIAEoCVIEbmFtZRIUCgVpbWFnZRgLIAEoCVIFaW1hZ2'
     'USLwoGY3VzdG9tGAwgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9tEhQKBXJv'
-    'bGVzGA0gAygJUgVyb2xlcw==');
+    'bGVzGA0gAygJUgVyb2xlcxJCCgZzb3VyY2UYDiABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZG'
+    'Vscy5QYXJ0aWNpcGFudFNvdXJjZVIGc291cmNl');
 
 @$core.Deprecated('Use streamQualityDescriptor instead')
 const StreamQuality$json = {
@@ -561,6 +622,14 @@ const PublishOption$json = {
     },
     {'1': 'id', '3': 8, '4': 1, '5': 5, '10': 'id'},
     {'1': 'use_single_layer', '3': 9, '4': 1, '5': 8, '10': 'useSingleLayer'},
+    {
+      '1': 'audio_bitrate_profiles',
+      '3': 10,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.AudioBitrate',
+      '10': 'audioBitrateProfiles'
+    },
   ],
 };
 
@@ -573,7 +642,9 @@ final $typed_data.Uint8List publishOptionDescriptor = $convert.base64Decode(
     'eWVycxIuChNtYXhfdGVtcG9yYWxfbGF5ZXJzGAYgASgFUhFtYXhUZW1wb3JhbExheWVycxJQCg'
     '92aWRlb19kaW1lbnNpb24YByABKAsyJy5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5WaWRlb0Rp'
     'bWVuc2lvblIOdmlkZW9EaW1lbnNpb24SDgoCaWQYCCABKAVSAmlkEigKEHVzZV9zaW5nbGVfbG'
-    'F5ZXIYCSABKAhSDnVzZVNpbmdsZUxheWVy');
+    'F5ZXIYCSABKAhSDnVzZVNpbmdsZUxheWVyElsKFmF1ZGlvX2JpdHJhdGVfcHJvZmlsZXMYCiAD'
+    'KAsyJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BdWRpb0JpdHJhdGVSFGF1ZGlvQml0cmF0ZV'
+    'Byb2ZpbGVz');
 
 @$core.Deprecated('Use codecDescriptor instead')
 const Codec$json = {
@@ -621,6 +692,28 @@ final $typed_data.Uint8List iCETrickleDescriptor = $convert.base64Decode(
     'CgpJQ0VUcmlja2xlEj4KCXBlZXJfdHlwZRgBIAEoDjIhLnN0cmVhbS52aWRlby5zZnUubW9kZW'
     'xzLlBlZXJUeXBlUghwZWVyVHlwZRIjCg1pY2VfY2FuZGlkYXRlGAIgASgJUgxpY2VDYW5kaWRh'
     'dGUSHQoKc2Vzc2lvbl9pZBgDIAEoCVIJc2Vzc2lvbklk');
+
+@$core.Deprecated('Use audioBitrateDescriptor instead')
+const AudioBitrate$json = {
+  '1': 'AudioBitrate',
+  '2': [
+    {
+      '1': 'profile',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.AudioBitrateProfile',
+      '10': 'profile'
+    },
+    {'1': 'bitrate', '3': 2, '4': 1, '5': 5, '10': 'bitrate'},
+  ],
+};
+
+/// Descriptor for `AudioBitrate`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List audioBitrateDescriptor = $convert.base64Decode(
+    'CgxBdWRpb0JpdHJhdGUSRgoHcHJvZmlsZRgBIAEoDjIsLnN0cmVhbS52aWRlby5zZnUubW9kZW'
+    'xzLkF1ZGlvQml0cmF0ZVByb2ZpbGVSB3Byb2ZpbGUSGAoHYml0cmF0ZRgCIAEoBVIHYml0cmF0'
+    'ZQ==');
 
 @$core.Deprecated('Use trackInfoDescriptor instead')
 const TrackInfo$json = {

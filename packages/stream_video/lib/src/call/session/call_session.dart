@@ -20,6 +20,7 @@ import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
+import '../../sfu/data/models/sfu_client_capability.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
@@ -252,8 +253,10 @@ class CallSession extends Disposable {
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})>>
   start({
     sfu_events.ReconnectDetails? reconnectDetails,
+    Set<SfuClientCapability> capabilities = const {},
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
     bool isAnonymousUser = false,
+    String? unifiedSessionId,
   }) async {
     try {
       _logger.d(
@@ -334,6 +337,10 @@ class CallSession extends Disposable {
         reconnectDetails: reconnectDetails,
         preferredPublishOptions: preferredPublishOptions,
         preferredSubscribeOptions: preferredSubscribeOptions,
+        capabilities: capabilities.map((c) => c.toDTO()).toList(),
+        source:
+            sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        unifiedSessionId: unifiedSessionId,
       );
 
       _tracer.trace('joinRequest', joinRequest.toJson());
@@ -408,6 +415,20 @@ class CallSession extends Disposable {
       await onRtcManagerCreatedCallback?.call(rtcManager!);
       _rtcManagerSubject!.add(rtcManager!);
 
+      // Set Android audio configuration right after creating rtcManager
+      if (CurrentPlatform.isAndroid &&
+          _streamVideo.options.androidAudioConfiguration != null) {
+        try {
+          await rtc.Helper.setAndroidAudioConfiguration(
+            _streamVideo.options.androidAudioConfiguration!,
+          );
+        } catch (e) {
+          _logger.w(
+            () => '[start] Failed to set Android audio configuration: $e',
+          );
+        }
+      }
+
       stateManager.sfuPinsUpdated(event.callState.pins);
 
       _logger.d(() => '[start] completed');
@@ -440,7 +461,10 @@ class CallSession extends Disposable {
   }
 
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
-  fastReconnect() async {
+      fastReconnect({
+    Set<SfuClientCapability> capabilities = const {},
+    String? unifiedSessionId,
+  }) async {
     try {
       _logger.d(() => '[fastReconnect] no args');
 
@@ -475,9 +499,12 @@ class CallSession extends Disposable {
             subscriberSdp: subscriberSdp,
             publisherSdp: publisherSdp,
             reconnectDetails: reconnectDetails,
-            preferredPublishOptions: rtcManager?.publishOptions.map(
-              (o) => o.toDTO(),
-            ),
+            preferredPublishOptions:
+                rtcManager?.publishOptions.map((o) => o.toDTO()),
+            source: sfu_models
+                .ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+            capabilities: capabilities.map((c) => c.toDTO()).toList(),
+            unifiedSessionId: unifiedSessionId,
           ),
         ),
       );
@@ -641,6 +668,8 @@ class CallSession extends Disposable {
         stateManager.sfuDominantSpeakerChanged(event);
       } else if (event is SfuPinsUpdatedEvent) {
         stateManager.sfuPinsUpdated(event.pins);
+      } else if (event is SfuInboundStateNotificationEvent) {
+        stateManager.sfuInboundStateNotification(event);
       }
     });
   }

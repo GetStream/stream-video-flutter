@@ -13,6 +13,7 @@ part of openapi.api;
 class User {
   /// Returns a new [User] instance.
   User({
+    this.avgResponseTime,
     this.banExpires,
     required this.banned,
     this.createdAt,
@@ -32,6 +33,14 @@ class User {
     this.teamsRole = const {},
     this.updatedAt,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? avgResponseTime;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -139,6 +148,7 @@ class User {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is User &&
+          other.avgResponseTime == avgResponseTime &&
           other.banExpires == banExpires &&
           other.banned == banned &&
           other.createdAt == createdAt &&
@@ -161,6 +171,7 @@ class User {
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
+      (avgResponseTime == null ? 0 : avgResponseTime!.hashCode) +
       (banExpires == null ? 0 : banExpires!.hashCode) +
       (banned.hashCode) +
       (createdAt == null ? 0 : createdAt!.hashCode) +
@@ -184,10 +195,15 @@ class User {
 
   @override
   String toString() =>
-      'User[banExpires=$banExpires, banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, lastEngagedAt=$lastEngagedAt, online=$online, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
+      'User[avgResponseTime=$avgResponseTime, banExpires=$banExpires, banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, lastEngagedAt=$lastEngagedAt, online=$online, privacySettings=$privacySettings, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, teamsRole=$teamsRole, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.avgResponseTime != null) {
+      json[r'avg_response_time'] = this.avgResponseTime;
+    } else {
+      json[r'avg_response_time'] = null;
+    }
     if (this.banExpires != null) {
       json[r'ban_expires'] = this.banExpires!.toUtc().toIso8601String();
     } else {
@@ -275,6 +291,7 @@ class User {
       }());
 
       return User(
+        avgResponseTime: mapValueOfType<int>(json, r'avg_response_time'),
         banExpires: mapDateTime(json, r'ban_expires', r''),
         banned: mapValueOfType<bool>(json, r'banned')!,
         createdAt: mapDateTime(json, r'created_at', r''),

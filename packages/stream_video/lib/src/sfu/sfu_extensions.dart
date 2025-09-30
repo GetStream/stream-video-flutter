@@ -60,6 +60,7 @@ extension SfuParticipantX on SfuParticipant {
       isSpeaking: isSpeaking,
       audioLevel: audioLevel,
       isDominantSpeaker: isDominantSpeaker,
+      participantSource: participantSource,
     );
   }
 }
@@ -480,12 +481,13 @@ extension JoinRequestX on sfu_events.JoinRequest {
       'client_details': clientDetails.toJson(),
       'reconnect_details': reconnectDetails.toJson(),
       'publisher_sdp': publisherSdpParsed,
-      'preferred_publish_options': preferredPublishOptions
-          .map((option) => option.toJson())
-          .toList(),
-      'preferred_subscribe_options': preferredSubscribeOptions
-          .map((option) => option.toJson())
-          .toList(),
+      'preferred_publish_options':
+          preferredPublishOptions.map((option) => option.toJson()).toList(),
+      'preferred_subscribe_options':
+          preferredSubscribeOptions.map((option) => option.toJson()).toList(),
+      'source': source.toString(),
+      if (capabilities.isNotEmpty)
+        'capabilities': capabilities.map((c) => c.toString()).toList(),
     };
   }
 }

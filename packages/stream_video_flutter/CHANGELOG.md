@@ -3,6 +3,20 @@
 * Updated minimum Flutter version to 3.32.0
 * Updated minimum supported dart SDK version to 3.8.0
 
+## 0.10.4
+
+✅ Added
+* Extended `CallParticipantState` with `participantSource`. This indicates the participant's source channel (e.g., WebRTC, RTMP, WHIP) and can be used in filtering and sorting criteria.
+* Livestream sorting preset now prioritises RTMP sources in layout sorting.
+* Automatic SFU-driven pausing of inbound video to save bandwidth and prevent visual artifacts:
+  * New `SfuClientCapability.subscriberVideoPause` (on by default). Control via `Call.enableClientCapabilities()` / `Call.disableClientCapabilities()`.
+  * New `SfuInboundStateNotificationEvent` notifies when inbound tracks are paused or resumed.
+  * `CallParticipantState.pausedTracks` and `CallParticipantState.isTrackPaused()` let you check which tracks are currently paused.
+* Added capability to remove a participant from a call via `call.kickUser()`. Requires the `kick-user` permission.
+
+🐞 Fixed
+* Multitasking camera on iOS is now enabled only once and kept enabled. This fixes potential errors when quickly toggling camera.
+
 ## 0.10.3
 
 🐞 Fixed

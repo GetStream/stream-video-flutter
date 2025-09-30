@@ -260,6 +260,15 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: event.createdAt,
           user: event.user.toCallUser(),
         );
+      case EventType.callUserKicked:
+        final event = callUserKicked!;
+
+        return CoordinatorCallUserKickedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          user: event.user.toCallUser(),
+          kickedByUser: event.kickedByUser?.toCallUser(),
+        );
       case EventType.callReaction:
         final event = callReaction!;
 

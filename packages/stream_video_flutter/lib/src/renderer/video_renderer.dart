@@ -72,9 +72,11 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
   Widget build(BuildContext context) {
     final trackState =
         widget.participant.publishedTracks[widget.videoTrackType];
+    final isTrackPaused =
+        widget.participant.isTrackPaused(widget.videoTrackType);
 
     final Widget child;
-    if (trackState == null) {
+    if (trackState == null || isTrackPaused) {
       // The video track hasn't been published or subscribed yet.
       child = widget.placeholderBuilder.call(context);
     } else if (trackState is! RemoteTrackState) {

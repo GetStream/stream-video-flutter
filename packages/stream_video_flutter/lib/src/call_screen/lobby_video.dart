@@ -157,6 +157,7 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
                               StreamParticipantLabel(
                                 isAudioEnabled: microphoneEnabled,
                                 isSpeaking: false,
+                                isTrackPaused: false,
                                 participantName: currentUser.name,
                               ),
                             ],

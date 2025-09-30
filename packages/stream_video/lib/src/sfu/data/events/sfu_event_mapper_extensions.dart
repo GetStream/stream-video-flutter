@@ -11,10 +11,13 @@ import '../models/sfu_connection_info.dart';
 import '../models/sfu_connection_quality.dart';
 import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
+import '../models/sfu_inbound_video_state.dart';
 import '../models/sfu_model_mapper_extensions.dart';
 import '../models/sfu_participant.dart';
+import '../models/sfu_participant_source.dart';
 import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
+import '../models/sfu_client_capability.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_layer_setting.dart';
 import '../models/sfu_video_sender.dart';
@@ -177,6 +180,18 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuCallEndedEvent(
           callEndedReason: payload.reason.toDomain(),
         );
+      case sfu_events.SfuEvent_EventPayload.inboundStateNotification:
+        final payload = inboundStateNotification;
+        return SfuInboundStateNotificationEvent(
+          inboundVideoStates: payload.inboundVideoStates
+              .map((s) => SfuInboundVideoState(
+                    userId: s.userId,
+                    sessionId: s.sessionId,
+                    trackType: s.trackType.toDomain(),
+                    paused: s.paused,
+                  ))
+              .toList(),
+        );
       case sfu_events.SfuEvent_EventPayload.participantUpdated:
         final payload = participantUpdated;
         return SfuParticipantUpdatedEvent(
@@ -187,6 +202,18 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return const SfuParticipantMigrationCompleteEvent();
       default:
         return const SfuUnknownEvent();
+    }
+  }
+}
+
+extension SfuClientCapabilityExtension on sfu_models.ClientCapability {
+  SfuClientCapability toDomain() {
+    switch (this) {
+      case sfu_models.ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE:
+        return SfuClientCapability.subscriberVideoPause;
+      case sfu_models.ClientCapability.CLIENT_CAPABILITY_UNSPECIFIED:
+      default:
+        return SfuClientCapability.unspecified;
     }
   }
 }
@@ -212,7 +239,6 @@ extension on sfu_models.ParticipantCount {
   }
 }
 
-/// TODO
 extension SfuParticipantExtension on sfu_models.Participant {
   SfuParticipant toDomain() {
     return SfuParticipant(
@@ -233,7 +259,7 @@ extension SfuParticipantExtension on sfu_models.Participant {
       isDominantSpeaker: isDominantSpeaker,
       audioLevel: audioLevel,
       roles: roles,
-      //TODO custom: custom.toDomain(),
+      participantSource: source.toDomain(),
     );
   }
 }
@@ -251,6 +277,27 @@ extension SfuConnectionQualityExtension on sfu_models.ConnectionQuality {
         return SfuConnectionQuality.unspecified;
       default:
         return SfuConnectionQuality.unspecified;
+    }
+  }
+}
+
+extension SfuParticipantSourceExtension on sfu_models.ParticipantSource {
+  SfuParticipantSource toDomain() {
+    switch (this) {
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_RTMP:
+        return SfuParticipantSource.rtmp;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WHIP:
+        return SfuParticipantSource.whip;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_SIP:
+        return SfuParticipantSource.sip;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_RTSP:
+        return SfuParticipantSource.rtsp;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_SRT:
+        return SfuParticipantSource.srt;
+      case sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED:
+        return SfuParticipantSource.webrtc;
+      default:
+        return SfuParticipantSource.webrtc;
     }
   }
 }

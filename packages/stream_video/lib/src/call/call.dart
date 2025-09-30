@@ -29,6 +29,7 @@ import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
+import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../shared_emitter.dart';
@@ -294,6 +295,9 @@ class Call {
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
+  final Set<SfuClientCapability> _sfuClientCapabilities = {
+    SfuClientCapability.subscriberVideoPause, // on by default
+  };
 
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
@@ -555,6 +559,28 @@ class Call {
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
     _stateManager.updateCallPreferences(preferences);
+  }
+
+  /// Enables the given SFU client capabilities for this call.
+  ///
+  /// Should be configured before `call.join()` is called. Changes made after
+  /// joining will not affect the current session until the next join/reconnect.
+  void enableClientCapabilities(
+    List<SfuClientCapability> capabilities,
+  ) {
+    _logger.i(() => '[enableClientCapabilities] $capabilities');
+    capabilities.forEach(_sfuClientCapabilities.add);
+  }
+
+  /// Disables the given SFU client capabilities for this call.
+  ///
+  /// Should be configured before `call.join()` is called. Changes made after
+  /// joining will not affect the current session until the next join/reconnect.
+  void disableClientCapabilities(
+    List<SfuClientCapability> capabilities,
+  ) {
+    _logger.i(() => '[disableClientCapabilities] $capabilities');
+    capabilities.forEach(_sfuClientCapabilities.remove);
   }
 
   /// Accepts the incoming call.
@@ -913,7 +939,10 @@ class Call {
       _session = _previousSession;
 
       _logger.d(() => '[join] fast reconnecting');
-      final result = await _session!.fastReconnect();
+      final result = await _session!.fastReconnect(
+        capabilities: _sfuClientCapabilities,
+        unifiedSessionId: _unifiedSessionId,
+      );
 
       if (result.isFailure) {
         _logger.e(() => '[join] fast reconnecting failed: $result');
@@ -1131,6 +1160,7 @@ class Call {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIngressSettings? ingress,
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
@@ -1148,6 +1178,7 @@ class Call {
       broadcasting: broadcasting,
       session: session,
       frameRecording: frameRecording,
+      ingress: ingress,
     );
   }
 
@@ -1160,6 +1191,7 @@ class Call {
     );
 
     _session = session;
+    _unifiedSessionId ??= _session?.sessionId;
 
     _sfuStatsReporter?.stop();
     _subscriptions.cancel(_idSessionStats);
@@ -1196,12 +1228,14 @@ class Call {
 
     final result = await session.start(
       reconnectDetails: reconnectDetails,
+      capabilities: _sfuClientCapabilities,
       onRtcManagerCreatedCallback: (_) async {
         _logger.v(() => '[startSession] applying connect options');
         await _applyConnectOptions();
       },
       isAnonymousUser:
           _streamVideo.state.currentUser.type == UserType.anonymous,
+      unifiedSessionId: _unifiedSessionId,
     );
 
     if (session.rtcManager != null) {
@@ -1224,7 +1258,6 @@ class Call {
     }
 
     if (_sfuStatsOptions != null) {
-      _unifiedSessionId ??= _session?.sessionId;
       await _sfuStatsReporter?.sendSfuStats();
       _sfuStatsReporter =
           SfuStatsReporter(
@@ -2177,6 +2210,7 @@ class Call {
     StreamBroadcastingSettings? broadcasting,
     StreamGeofencingSettings? geofencing,
     StreamSessionSettings? session,
+    StreamIngressSettings? ingress,
     StreamFrameRecordingSettings? frameRecording,
     Map<String, Object> custom = const {},
   }) async {
@@ -2192,6 +2226,7 @@ class Call {
       broadcasting: broadcasting?.toOpenDto(),
       geofencing: geofencing?.toOpenDto(),
       session: session?.toOpenDto(),
+      ingress: ingress?.toOpenDto(),
       frameRecording: frameRecording?.toOpenDto(),
     );
 
@@ -2263,6 +2298,15 @@ class Call {
 
   Future<Result<None>> unblockUser(String userId) {
     return _permissionsManager.unblockUser(userId);
+  }
+
+  /// Kicks a user from the call.
+  /// Set [block] to true to also block the user from rejoining.
+  Future<Result<None>> kickUser(
+    String userId, {
+    bool block = false,
+  }) {
+    return _permissionsManager.kickUser(userId, block: block);
   }
 
   Future<Result<None>> startRecording({
@@ -2652,14 +2696,19 @@ class Call {
         }).asCancelable(),
       );
 
-      // Set multitasking camera access for iOS
-      final multitaskingResult = await setMultitaskingCameraAccessEnabled(
-        enabled && !_streamVideo.options.muteVideoWhenInBackground,
-      );
+      var multitaskingEnabled = state.value.iOSMultitaskingCameraAccessEnabled;
+      if (enabled && !multitaskingEnabled) {
+        // Set multitasking camera access for iOS
+        final multitaskingResult = await setMultitaskingCameraAccessEnabled(
+          enabled && !_streamVideo.options.muteVideoWhenInBackground,
+        );
+
+        multitaskingEnabled = multitaskingResult.getDataOrNull() ?? false;
+      }
 
       _stateManager.participantSetCameraEnabled(
         enabled: enabled,
-        iOSMultitaskingCameraAccessEnabled: multitaskingResult.getDataOrNull(),
+        iOSMultitaskingCameraAccessEnabled: multitaskingEnabled,
       );
 
       _connectOptions = _connectOptions.copyWith(

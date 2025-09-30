@@ -30,6 +30,7 @@ class OpenApiEvent with EquatableMixin {
     this.callPermissionsUpdated,
     this.callUserBlocked,
     this.callUserUnblocked,
+    this.callUserKicked,
     this.callRecordingStarted,
     this.callRecordingStopped,
     this.callBroadcastingStarted,
@@ -122,6 +123,9 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callUserUnblocked:
         final event = open.UnblockedUserEvent.fromJson(jsonObj);
         return result.copyWith(callUserUnblocked: event);
+      case EventType.callUserKicked:
+        final event = open.KickedUserEvent.fromJson(jsonObj);
+        return result.copyWith(callUserKicked: event);
       case EventType.callRecordingStarted:
         final event = open.CallRecordingStartedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingStarted: event);
@@ -236,6 +240,7 @@ class OpenApiEvent with EquatableMixin {
   final open.UpdatedCallPermissionsEvent? callPermissionsUpdated;
   final open.BlockedUserEvent? callUserBlocked;
   final open.UnblockedUserEvent? callUserUnblocked;
+  final open.KickedUserEvent? callUserKicked;
   final open.CallRecordingStartedEvent? callRecordingStarted;
   final open.CallRecordingStoppedEvent? callRecordingStopped;
   final open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted;
@@ -286,6 +291,7 @@ class OpenApiEvent with EquatableMixin {
     open.UpdatedCallPermissionsEvent? callPermissionsUpdated,
     open.BlockedUserEvent? callUserBlocked,
     open.UnblockedUserEvent? callUserUnblocked,
+    open.KickedUserEvent? callUserKicked,
     open.CallRecordingStartedEvent? callRecordingStarted,
     open.CallRecordingStoppedEvent? callRecordingStopped,
     open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted,
@@ -341,6 +347,7 @@ class OpenApiEvent with EquatableMixin {
           callPermissionsUpdated ?? this.callPermissionsUpdated,
       callUserBlocked: callUserBlocked ?? this.callUserBlocked,
       callUserUnblocked: callUserUnblocked ?? this.callUserUnblocked,
+      callUserKicked: callUserKicked ?? this.callUserKicked,
       callRecordingStarted: callRecordingStarted ?? this.callRecordingStarted,
       callRecordingStopped: callRecordingStopped ?? this.callRecordingStopped,
       callBroadcastingStarted:
@@ -390,51 +397,52 @@ class OpenApiEvent with EquatableMixin {
 
   @override
   List<Object?> get props => [
-    type,
-    connected,
-    healthCheck,
-    callCreated,
-    callMissed,
-    callRing,
-    callNotification,
-    callAccepted,
-    callRejected,
-    callUpdated,
-    callEnded,
-    callSessionStarted,
-    callSessionEnded,
-    callSessionParticipantJoined,
-    callSessionParticipantLeft,
-    callSessionParticipantCountUpdated,
-    callPermissionRequest,
-    callPermissionsUpdated,
-    callUserBlocked,
-    callUserUnblocked,
-    callRecordingStarted,
-    callRecordingStopped,
-    callBroadcastingStarted,
-    callBroadcastingStopped,
-    callLiveStarted,
-    callMemberAdded,
-    callMemberRemoved,
-    callMemberUpdated,
-    callMemberUpdatedPermission,
-    callReaction,
-    callUserMuted,
-    callRecordingReady,
-    callRecordingFailed,
-    callTranscriptionStarted,
-    callTranscriptionStopped,
-    callTranscriptionFailed,
-    callClosedCaptionsStarted,
-    callClosedCaptionsStopped,
-    callClosedCaptionsFailed,
-    callClosedCaption,
-    callFrameRecordingStarted,
-    callFrameRecordingFailed,
-    callFrameRecordingStopped,
-    callFrameRecordingFrameReady,
-    custom,
-    unknown,
-  ];
+        type,
+        connected,
+        healthCheck,
+        callCreated,
+        callMissed,
+        callRing,
+        callNotification,
+        callAccepted,
+        callRejected,
+        callUpdated,
+        callEnded,
+        callSessionStarted,
+        callSessionEnded,
+        callSessionParticipantJoined,
+        callSessionParticipantLeft,
+        callSessionParticipantCountUpdated,
+        callPermissionRequest,
+        callPermissionsUpdated,
+        callUserBlocked,
+        callUserUnblocked,
+        callUserKicked,
+        callRecordingStarted,
+        callRecordingStopped,
+        callBroadcastingStarted,
+        callBroadcastingStopped,
+        callLiveStarted,
+        callMemberAdded,
+        callMemberRemoved,
+        callMemberUpdated,
+        callMemberUpdatedPermission,
+        callReaction,
+        callUserMuted,
+        callRecordingReady,
+        callRecordingFailed,
+        callTranscriptionStarted,
+        callTranscriptionStopped,
+        callTranscriptionFailed,
+        callClosedCaptionsStarted,
+        callClosedCaptionsStopped,
+        callClosedCaptionsFailed,
+        callClosedCaption,
+        callFrameRecordingStarted,
+        callFrameRecordingFailed,
+        callFrameRecordingStopped,
+        callFrameRecordingFrameReady,
+        custom,
+        unknown,
+      ];
 }

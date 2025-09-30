@@ -310,6 +310,8 @@ MockCallSession setupMockCallSession() {
       reconnectDetails: any(named: 'reconnectDetails'),
       onRtcManagerCreatedCallback: any(named: 'onRtcManagerCreatedCallback'),
       isAnonymousUser: any(named: 'isAnonymousUser'),
+      capabilities: any(named: 'capabilities'),
+      unifiedSessionId: any(named: 'unifiedSessionId'),
     ),
   ).thenAnswer(
     (_) => Future.value(
@@ -344,7 +346,12 @@ MockCallSession setupMockCallSession() {
     ),
   ).thenAnswer((_) => Future.value(sfu_events.ReconnectDetails()));
 
-  when(callSession.fastReconnect).thenAnswer(
+  when(
+    () => callSession.fastReconnect(
+      capabilities: any(named: 'capabilities'),
+      unifiedSessionId: any(named: 'unifiedSessionId'),
+    ),
+  ).thenAnswer(
     (_) => Future.value(
       Result.success(
         (

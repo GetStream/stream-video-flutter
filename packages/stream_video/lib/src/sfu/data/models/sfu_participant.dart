@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'sfu_connection_quality.dart';
+import 'sfu_participant_source.dart';
 import 'sfu_track_type.dart';
 
 class SfuParticipant with EquatableMixin {
@@ -18,6 +19,7 @@ class SfuParticipant with EquatableMixin {
     required this.isDominantSpeaker,
     required this.audioLevel,
     required this.roles,
+    required this.participantSource,
   });
 
   final String userId;
@@ -33,6 +35,7 @@ class SfuParticipant with EquatableMixin {
   final bool isDominantSpeaker;
   final double audioLevel;
   final List<String> roles;
+  final SfuParticipantSource participantSource;
 
   SfuParticipant copyWith({
     String? userId,
@@ -48,21 +51,24 @@ class SfuParticipant with EquatableMixin {
     bool? isDominantSpeaker,
     double? audioLevel,
     List<String>? roles,
-  }) => SfuParticipant(
-    userId: userId ?? this.userId,
-    userName: userId ?? this.userName,
-    userImage: userId ?? this.userImage,
-    sessionId: sessionId ?? this.sessionId,
-    custom: custom ?? this.custom,
-    publishedTracks: publishedTracks ?? this.publishedTracks,
-    joinedAt: joinedAt ?? this.joinedAt,
-    trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
-    connectionQuality: connectionQuality ?? this.connectionQuality,
-    isSpeaking: isSpeaking ?? this.isSpeaking,
-    isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
-    audioLevel: audioLevel ?? this.audioLevel,
-    roles: roles ?? this.roles,
-  );
+    SfuParticipantSource? participantSource,
+  }) =>
+      SfuParticipant(
+        userId: userId ?? this.userId,
+        userName: userId ?? this.userName,
+        userImage: userId ?? this.userImage,
+        sessionId: sessionId ?? this.sessionId,
+        custom: custom ?? this.custom,
+        publishedTracks: publishedTracks ?? this.publishedTracks,
+        joinedAt: joinedAt ?? this.joinedAt,
+        trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
+        connectionQuality: connectionQuality ?? this.connectionQuality,
+        isSpeaking: isSpeaking ?? this.isSpeaking,
+        isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
+        audioLevel: audioLevel ?? this.audioLevel,
+        roles: roles ?? this.roles,
+        participantSource: participantSource ?? this.participantSource,
+      );
 
   @override
   String toString() {
@@ -72,24 +78,25 @@ class SfuParticipant with EquatableMixin {
         'publishedTracks: $publishedTracks, joinedAt: $joinedAt, '
         'connectionQuality: $connectionQuality, isSpeaking: $isSpeaking, '
         'isDominantSpeaker: $isDominantSpeaker, audioLevel: $audioLevel, '
-        'roles: $roles}';
+        'roles: $roles, participantSource: $participantSource}';
   }
 
   @override
   List<Object?> get props => [
-    userId,
-    userName,
-    userImage,
-    sessionId,
-    custom,
-    publishedTracks,
-    joinedAt,
-    trackLookupPrefix,
-    connectionQuality,
-    isSpeaking,
-    isDominantSpeaker,
-    audioLevel.hashCode,
-  ];
+        userId,
+        userName,
+        userImage,
+        sessionId,
+        custom,
+        publishedTracks,
+        joinedAt,
+        trackLookupPrefix,
+        connectionQuality,
+        isSpeaking,
+        isDominantSpeaker,
+        audioLevel.hashCode,
+        participantSource,
+      ];
 }
 
 class SfuParticipantCount with EquatableMixin {

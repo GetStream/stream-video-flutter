@@ -1308,6 +1308,88 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Kick user from a call
+  ///
+  /// Kicks a user from the call. Optionally block the user from rejoining by setting block=true.  Sends events: - call.blocked_user - call.kicked_user
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [KickUserRequest] kickUserRequest (required):
+  ///   KickUserRequest
+  Future<Response> kickUserWithHttpInfo(
+    String type,
+    String id,
+    KickUserRequest kickUserRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/kick'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = kickUserRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Kick user from a call
+  ///
+  /// Kicks a user from the call. Optionally block the user from rejoining by setting block=true.  Sends events: - call.blocked_user - call.kicked_user
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [KickUserRequest] kickUserRequest (required):
+  ///   KickUserRequest
+  Future<KickUserResponse?> kickUser(
+    String type,
+    String id,
+    KickUserRequest kickUserRequest,
+  ) async {
+    final response = await kickUserWithHttpInfo(
+      type,
+      id,
+      kickUserRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'KickUserResponse',
+      ) as KickUserResponse;
+    }
+    return null;
+  }
+
   /// List devices
   ///
   /// Returns all available devices
