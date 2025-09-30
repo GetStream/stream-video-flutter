@@ -2,6 +2,7 @@
 
 🐞 Fixed
 * Fixed an issue where the leave call operation could fail if the there were some issues in parsing custom data.
+* Fixed an issue where the Android audio configuration could not be applied correctly for participants joining the call
 
 ## 0.10.4
 
