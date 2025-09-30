@@ -1,13 +1,14 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: video/sfu/models/models.proto
-//
+// Generated from video/sfu/models/models.proto.
+
 // @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names
 
 import 'dart:core' as $core;
 
@@ -25,11 +26,12 @@ class PeerType extends $pb.ProtobufEnum {
     PEER_TYPE_SUBSCRIBER,
   ];
 
-  static final $core.Map<$core.int, PeerType> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static PeerType? valueOf($core.int value) => _byValue[value];
+  static final $core.List<PeerType?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 1);
+  static PeerType? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const PeerType._(super.v, super.n);
+  const PeerType._(super.value, super.name);
 }
 
 class ConnectionQuality extends $pb.ProtobufEnum {
@@ -51,11 +53,12 @@ class ConnectionQuality extends $pb.ProtobufEnum {
     CONNECTION_QUALITY_EXCELLENT,
   ];
 
-  static final $core.Map<$core.int, ConnectionQuality> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static ConnectionQuality? valueOf($core.int value) => _byValue[value];
+  static final $core.List<ConnectionQuality?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
+  static ConnectionQuality? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const ConnectionQuality._(super.v, super.n);
+  const ConnectionQuality._(super.value, super.name);
 }
 
 class VideoQuality extends $pb.ProtobufEnum {
@@ -75,11 +78,12 @@ class VideoQuality extends $pb.ProtobufEnum {
     VIDEO_QUALITY_OFF,
   ];
 
-  static final $core.Map<$core.int, VideoQuality> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static VideoQuality? valueOf($core.int value) => _byValue[value];
+  static final $core.List<VideoQuality?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
+  static VideoQuality? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const VideoQuality._(super.v, super.n);
+  const VideoQuality._(super.value, super.name);
 }
 
 class TrackType extends $pb.ProtobufEnum {
@@ -102,11 +106,12 @@ class TrackType extends $pb.ProtobufEnum {
     TRACK_TYPE_SCREEN_SHARE_AUDIO,
   ];
 
-  static final $core.Map<$core.int, TrackType> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static TrackType? valueOf($core.int value) => _byValue[value];
+  static final $core.List<TrackType?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static TrackType? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const TrackType._(super.v, super.n);
+  const TrackType._(super.value, super.name);
 }
 
 /// must be aligned with kit
@@ -134,11 +139,40 @@ class ParticipantSource extends $pb.ProtobufEnum {
     PARTICIPANT_SOURCE_SRT,
   ];
 
-  static final $core.Map<$core.int, ParticipantSource> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static ParticipantSource? valueOf($core.int value) => _byValue[value];
+  static final $core.List<ParticipantSource?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 5);
+  static ParticipantSource? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const ParticipantSource._(super.v, super.n);
+  const ParticipantSource._(super.value, super.name);
+}
+
+class AudioBitrateProfile extends $pb.ProtobufEnum {
+  static const AudioBitrateProfile
+      AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED = AudioBitrateProfile._(
+          0,
+          _omitEnumNames
+              ? ''
+              : 'AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED');
+  static const AudioBitrateProfile AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY =
+      AudioBitrateProfile._(
+          1, _omitEnumNames ? '' : 'AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY');
+  static const AudioBitrateProfile AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY =
+      AudioBitrateProfile._(
+          2, _omitEnumNames ? '' : 'AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY');
+
+  static const $core.List<AudioBitrateProfile> values = <AudioBitrateProfile>[
+    AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+    AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY,
+    AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+  ];
+
+  static final $core.List<AudioBitrateProfile?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 2);
+  static AudioBitrateProfile? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const AudioBitrateProfile._(super.value, super.name);
 }
 
 class ErrorCode extends $pb.ProtobufEnum {
@@ -225,7 +259,7 @@ class ErrorCode extends $pb.ProtobufEnum {
       $pb.ProtobufEnum.initByValue(values);
   static ErrorCode? valueOf($core.int value) => _byValue[value];
 
-  const ErrorCode._(super.v, super.n);
+  const ErrorCode._(super.value, super.name);
 }
 
 class SdkType extends $pb.ProtobufEnum {
@@ -263,11 +297,12 @@ class SdkType extends $pb.ProtobufEnum {
     SDK_TYPE_PLAIN_JAVASCRIPT,
   ];
 
-  static final $core.Map<$core.int, SdkType> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static SdkType? valueOf($core.int value) => _byValue[value];
+  static final $core.List<SdkType?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 9);
+  static SdkType? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const SdkType._(super.v, super.n);
+  const SdkType._(super.value, super.name);
 }
 
 class TrackUnpublishReason extends $pb.ProtobufEnum {
@@ -304,11 +339,12 @@ class TrackUnpublishReason extends $pb.ProtobufEnum {
     TRACK_UNPUBLISH_REASON_MODERATION,
   ];
 
-  static final $core.Map<$core.int, TrackUnpublishReason> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static TrackUnpublishReason? valueOf($core.int value) => _byValue[value];
+  static final $core.List<TrackUnpublishReason?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
+  static TrackUnpublishReason? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const TrackUnpublishReason._(super.v, super.n);
+  const TrackUnpublishReason._(super.value, super.name);
 }
 
 /// GoAwayReason represents the reason for the SFU to
@@ -327,11 +363,12 @@ class GoAwayReason extends $pb.ProtobufEnum {
     GO_AWAY_REASON_REBALANCE,
   ];
 
-  static final $core.Map<$core.int, GoAwayReason> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static GoAwayReason? valueOf($core.int value) => _byValue[value];
+  static final $core.List<GoAwayReason?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 2);
+  static GoAwayReason? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const GoAwayReason._(super.v, super.n);
+  const GoAwayReason._(super.value, super.name);
 }
 
 /// CallEndedReason represents the reason for the call to end.
@@ -357,11 +394,12 @@ class CallEndedReason extends $pb.ProtobufEnum {
     CALL_ENDED_REASON_SESSION_ENDED,
   ];
 
-  static final $core.Map<$core.int, CallEndedReason> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static CallEndedReason? valueOf($core.int value) => _byValue[value];
+  static final $core.List<CallEndedReason?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static CallEndedReason? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const CallEndedReason._(super.v, super.n);
+  const CallEndedReason._(super.value, super.name);
 }
 
 /// WebsocketReconnectStrategy defines the ws strategies available for handling reconnections.
@@ -401,12 +439,12 @@ class WebsocketReconnectStrategy extends $pb.ProtobufEnum {
     WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
   ];
 
-  static final $core.Map<$core.int, WebsocketReconnectStrategy> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
+  static final $core.List<WebsocketReconnectStrategy?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
   static WebsocketReconnectStrategy? valueOf($core.int value) =>
-      _byValue[value];
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const WebsocketReconnectStrategy._(super.v, super.n);
+  const WebsocketReconnectStrategy._(super.value, super.name);
 }
 
 /// AndroidThermalState is reported by the Android API. The full list of values is documented here
@@ -448,11 +486,12 @@ class AndroidThermalState extends $pb.ProtobufEnum {
     ANDROID_THERMAL_STATE_SHUTDOWN,
   ];
 
-  static final $core.Map<$core.int, AndroidThermalState> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static AndroidThermalState? valueOf($core.int value) => _byValue[value];
+  static final $core.List<AndroidThermalState?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 7);
+  static AndroidThermalState? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const AndroidThermalState._(super.v, super.n);
+  const AndroidThermalState._(super.value, super.name);
 }
 
 /// AppleThermalState is the thermal state as reported by Apple devices when available or applicable to the platform.
@@ -481,11 +520,12 @@ class AppleThermalState extends $pb.ProtobufEnum {
     APPLE_THERMAL_STATE_CRITICAL,
   ];
 
-  static final $core.Map<$core.int, AppleThermalState> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static AppleThermalState? valueOf($core.int value) => _byValue[value];
+  static final $core.List<AppleThermalState?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static AppleThermalState? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const AppleThermalState._(super.v, super.n);
+  const AppleThermalState._(super.value, super.name);
 }
 
 /// ClientCapability defines a feature that client supports
@@ -504,11 +544,13 @@ class ClientCapability extends $pb.ProtobufEnum {
     CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE,
   ];
 
-  static final $core.Map<$core.int, ClientCapability> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static ClientCapability? valueOf($core.int value) => _byValue[value];
+  static final $core.List<ClientCapability?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 1);
+  static ClientCapability? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const ClientCapability._(super.v, super.n);
+  const ClientCapability._(super.value, super.name);
 }
 
-const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');
+const $core.bool _omitEnumNames =
+    $core.bool.fromEnvironment('protobuf.omit_enum_names');

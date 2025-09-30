@@ -928,7 +928,10 @@ class Call {
       _session = _previousSession;
 
       _logger.d(() => '[join] fast reconnecting');
-      final result = await _session!.fastReconnect();
+      final result = await _session!.fastReconnect(
+        capabilities: _sfuClientCapabilities,
+        unifiedSessionId: _unifiedSessionId,
+      );
 
       if (result.isFailure) {
         _logger.e(() => '[join] fast reconnecting failed: $result');
@@ -1172,6 +1175,7 @@ class Call {
     );
 
     _session = session;
+    _unifiedSessionId ??= _session?.sessionId;
 
     _sfuStatsReporter?.stop();
     _subscriptions.cancel(_idSessionStats);
@@ -1215,6 +1219,7 @@ class Call {
       },
       isAnonymousUser:
           _streamVideo.state.currentUser.type == UserType.anonymous,
+      unifiedSessionId: _unifiedSessionId,
     );
 
     if (session.rtcManager != null) {
@@ -1235,7 +1240,6 @@ class Call {
     }
 
     if (_sfuStatsOptions != null) {
-      _unifiedSessionId ??= _session?.sessionId;
       await _sfuStatsReporter?.sendSfuStats();
       _sfuStatsReporter = SfuStatsReporter(
         callSession: session,

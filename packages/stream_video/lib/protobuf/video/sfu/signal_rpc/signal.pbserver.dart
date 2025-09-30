@@ -1,14 +1,14 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: video/sfu/signal_rpc/signal.proto
-//
+// Generated from video/sfu/signal_rpc/signal.proto.
+
 // @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
 // ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: non_constant_identifier_names
 
 import 'dart:async' as $async;
 import 'dart:core' as $core;
@@ -70,26 +70,25 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'SetPublisher':
-        return this.setPublisher(ctx, request as $1.SetPublisherRequest);
+        return setPublisher(ctx, request as $1.SetPublisherRequest);
       case 'SendAnswer':
-        return this.sendAnswer(ctx, request as $1.SendAnswerRequest);
+        return sendAnswer(ctx, request as $1.SendAnswerRequest);
       case 'IceTrickle':
-        return this.iceTrickle(ctx, request as $0.ICETrickle);
+        return iceTrickle(ctx, request as $0.ICETrickle);
       case 'UpdateSubscriptions':
-        return this
-            .updateSubscriptions(ctx, request as $1.UpdateSubscriptionsRequest);
+        return updateSubscriptions(
+            ctx, request as $1.UpdateSubscriptionsRequest);
       case 'UpdateMuteStates':
-        return this
-            .updateMuteStates(ctx, request as $1.UpdateMuteStatesRequest);
+        return updateMuteStates(ctx, request as $1.UpdateMuteStatesRequest);
       case 'IceRestart':
-        return this.iceRestart(ctx, request as $1.ICERestartRequest);
+        return iceRestart(ctx, request as $1.ICERestartRequest);
       case 'SendStats':
-        return this.sendStats(ctx, request as $1.SendStatsRequest);
+        return sendStats(ctx, request as $1.SendStatsRequest);
       case 'StartNoiseCancellation':
-        return this.startNoiseCancellation(
+        return startNoiseCancellation(
             ctx, request as $1.StartNoiseCancellationRequest);
       case 'StopNoiseCancellation':
-        return this.stopNoiseCancellation(
+        return stopNoiseCancellation(
             ctx, request as $1.StopNoiseCancellationRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');

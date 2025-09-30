@@ -259,6 +259,7 @@ class CallSession extends Disposable {
     Set<SfuClientCapability> capabilities = const {},
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
     bool isAnonymousUser = false,
+    String? unifiedSessionId,
   }) async {
     try {
       _logger.d(
@@ -336,6 +337,7 @@ class CallSession extends Disposable {
         capabilities: capabilities.map((c) => c.toDTO()).toList(),
         source:
             sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        unifiedSessionId: unifiedSessionId,
       );
 
       _tracer.trace('joinRequest', joinRequest.toJson());
@@ -453,7 +455,10 @@ class CallSession extends Disposable {
   }
 
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
-      fastReconnect() async {
+      fastReconnect({
+    Set<SfuClientCapability> capabilities = const {},
+    String? unifiedSessionId,
+  }) async {
     try {
       _logger.d(() => '[fastReconnect] no args');
 
@@ -489,6 +494,8 @@ class CallSession extends Disposable {
                 rtcManager?.publishOptions.map((o) => o.toDTO()),
             source: sfu_models
                 .ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+            capabilities: capabilities.map((c) => c.toDTO()).toList(),
+            unifiedSessionId: unifiedSessionId,
           ),
         ),
       );
