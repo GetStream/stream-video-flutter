@@ -87,9 +87,12 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
           Text(
             'Tell us about your video call experience',
             textAlign: TextAlign.center,
-            style: StreamVideoTheme.of(
-              context,
-            ).textTheme.footnote.apply(color: AppColorPalette.secondaryText),
+            style:
+                StreamVideoTheme.of(
+                  context,
+                ).textTheme.footnote.apply(
+                  color: AppColorPalette.secondaryText,
+                ),
           ),
           const SizedBox(height: 32),
           RatingStars(

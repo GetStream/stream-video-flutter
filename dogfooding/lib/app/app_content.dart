@@ -336,14 +336,26 @@ class _StreamDogFoodingAppContentState
                 emojiCode: ':fireworks:',
                 icon: '🎉',
               ),
-              CallReactionData(type: 'Liked', emojiCode: ':like:', icon: '👍'),
+              CallReactionData(
+                type: 'Liked',
+                emojiCode: ':like:',
+                icon: '👍',
+              ),
               CallReactionData(
                 type: 'Dislike',
                 emojiCode: ':dislike:',
                 icon: '👎',
               ),
-              CallReactionData(type: 'Smile', emojiCode: ':smile:', icon: '😊'),
-              CallReactionData(type: 'Heart', emojiCode: ':heart:', icon: '♥️'),
+              CallReactionData(
+                type: 'Smile',
+                emojiCode: ':smile:',
+                icon: '😊',
+              ),
+              CallReactionData(
+                type: 'Heart',
+                emojiCode: ':heart:',
+                icon: '♥️',
+              ),
               CallReactionData(
                 emojiCode: ':raise-hand:',
                 type: 'Raise hand',

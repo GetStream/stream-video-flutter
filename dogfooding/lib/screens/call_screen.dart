@@ -278,9 +278,7 @@ class _CallScreenState extends State<CallScreen> {
                             return BadgedCallOption(
                               callControlOption: CallControlOption(
                                 icon: const Icon(Icons.people),
-                                onPressed:
-                                    _channel !=
-                                        null //
+                                onPressed: _channel != null
                                     ? () => showParticipants(context)
                                     : null,
                               ),
@@ -346,11 +344,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
     return BadgedCallOption(
       callControlOption: CallControlOption(
         icon: const Icon(Icons.question_answer),
-        onPressed:
-            widget.channel !=
-                null //
-            ? () => showChat(context)
-            : null,
+        onPressed: widget.channel != null ? () => showChat(context) : null,
       ),
       badgeCount: _unreadCount == 0 ? null : _unreadCount,
     );
