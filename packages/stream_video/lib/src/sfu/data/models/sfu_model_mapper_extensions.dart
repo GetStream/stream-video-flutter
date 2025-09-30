@@ -27,7 +27,8 @@ extension SfuClientCapabilityMapper on SfuClientCapability {
     switch (this) {
       case SfuClientCapability.subscriberVideoPause:
         return sfu_models
-            .ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE;
+            .ClientCapability
+            .CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE;
       case SfuClientCapability.unspecified:
         return sfu_models.ClientCapability.CLIENT_CAPABILITY_UNSPECIFIED;
     }

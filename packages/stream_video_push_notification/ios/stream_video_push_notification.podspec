@@ -16,7 +16,7 @@ Official Push Notification Plugin for Stream Video.
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'flutter_callkit_incoming'
-  s.platform = :ios, '14'
+  s.platform = :ios, '15'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

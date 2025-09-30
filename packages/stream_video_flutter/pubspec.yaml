@@ -23,11 +23,12 @@ dependencies:
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
   stream_video: ^0.10.4
-  stream_webrtc_flutter: ^1.0.11
+  stream_webrtc_flutter: ^1.0.12
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   alchemist: ">=0.11.0 <0.13.0"
+  build_runner: ^2.8.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0

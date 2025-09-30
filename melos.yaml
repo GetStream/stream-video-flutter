@@ -19,10 +19,10 @@ command:
     # Dependencies used in the project.
     dependencies:
       dart_webrtc: ^1.5.3+hotfix.2
-      device_info_plus: ">=10.1.2 <12.0.0"
+      device_info_plus: ^12.1.0
       share_plus: ^11.0.0
-      stream_chat_flutter: ^9.8.0
-      stream_webrtc_flutter: ^1.0.11
+      stream_chat_flutter: ^9.17.0
+      stream_webrtc_flutter: ^1.0.12
       stream_video: ^0.10.4
       stream_video_flutter: ^0.10.4
       stream_video_noise_cancellation: ^0.10.4

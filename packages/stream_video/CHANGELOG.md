@@ -1,5 +1,13 @@
 ## Upcoming
 
+🚧 Build breaking changes
+
+> Note: This release has breaking changes for Android.
+> - compileSDK 36 for Android part
+> - Android Gradle Plugin >=8.12.1
+> - Gradle wrapper >=8.13
+> - Kotlin 2.2.0
+
 * Updated minimum Flutter version to 3.32.0
 * Updated minimum supported dart SDK version to 3.8.0
 

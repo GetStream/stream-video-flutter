@@ -28,10 +28,10 @@ class StreamParticipantLabel extends StatelessWidget {
     this.disabledMicrophoneColor,
     this.pausedVideoIndicatorColor,
     this.participantLabelTextStyle,
-  })  : participantName = participant.name,
-        isAudioEnabled = participant.isAudioEnabled,
-        isSpeaking = participant.isSpeaking,
-        isTrackPaused = participant.isTrackPaused(SfuTrackType.video);
+  }) : participantName = participant.name,
+       isAudioEnabled = participant.isAudioEnabled,
+       isSpeaking = participant.isSpeaking,
+       isTrackPaused = participant.isTrackPaused(SfuTrackType.video);
 
   /// The name of the participant.
   final String participantName;
@@ -100,7 +100,8 @@ class StreamParticipantLabel extends StatelessWidget {
               Icon(
                 Icons.network_check,
                 size: 16,
-                color: pausedVideoIndicatorColor ??
+                color:
+                    pausedVideoIndicatorColor ??
                     theme.pausedVideoIndicatorColor,
               ),
             ],

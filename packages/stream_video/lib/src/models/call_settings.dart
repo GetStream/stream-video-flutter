@@ -523,8 +523,11 @@ class StreamIngressSettings extends AbstractSettings {
   final Map<String, StreamIngressVideoEncodingOptions> videoEncodingOptions;
 
   @override
-  List<Object?> get props =>
-      [audioEncodingOptions, enabled, videoEncodingOptions];
+  List<Object?> get props => [
+    audioEncodingOptions,
+    enabled,
+    videoEncodingOptions,
+  ];
 
   IngressSettingsRequest toOpenDto() {
     return IngressSettingsRequest(
@@ -593,8 +596,13 @@ class StreamIngressVideoLayer extends AbstractSettings {
   final int minDimension;
 
   @override
-  List<Object?> get props =>
-      [bitrate, codec, frameRateLimit, maxDimension, minDimension];
+  List<Object?> get props => [
+    bitrate,
+    codec,
+    frameRateLimit,
+    maxDimension,
+    minDimension,
+  ];
 
   IngressVideoLayerRequest toOpenDto() {
     return IngressVideoLayerRequest(

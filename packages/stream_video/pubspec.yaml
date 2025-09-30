@@ -12,26 +12,26 @@ environment:
 
 dependencies:
   async: ^2.12.0
-  battery_plus: ^6.2.3
+  battery_plus: ^7.0.0
   collection: ^1.19.1
-  connectivity_plus: ^6.1.5
+  connectivity_plus: ^7.0.0
   dart_webrtc: ^1.5.3+hotfix.2
-  device_info_plus: ">=10.1.2 <12.0.0"
+  device_info_plus: ^12.1.0
   equatable: ^2.0.7
   fixnum: ^1.1.1
   flutter:
     sdk: flutter
   http: ^1.1.0
-  internet_connection_checker_plus: ^2.7.2
+  internet_connection_checker_plus: ^2.9.0
   intl: ">=0.18.1 <=0.21.0"
   jose: ^0.3.4
   meta: ^1.16.0
-  package_info_plus: ^8.3.1
+  package_info_plus: ^9.0.0
   protobuf: ^4.0.0
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^1.0.11
+  stream_webrtc_flutter: ^1.0.12
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.5.1

@@ -357,7 +357,8 @@ extension on open.IngressVideoLayerResponse {
   StreamIngressVideoLayer toSettingsDomain() {
     return StreamIngressVideoLayer(
       bitrate: bitrate,
-      codec: IngressVideoLayerRequestCodecEnumTypeTransformer().decode(codec) ??
+      codec:
+          IngressVideoLayerRequestCodecEnumTypeTransformer().decode(codec) ??
           IngressVideoLayerRequestCodecEnum.h264,
       frameRateLimit: frameRateLimit,
       maxDimension: maxDimension,

@@ -271,30 +271,30 @@ class StreamCallParticipantThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        videoFit,
-        backgroundColor,
-        borderRadius,
-        userAvatarTheme,
-        showSpeakerBorder,
-        speakerBorderThickness,
-        speakerBorderColor,
-        showParticipantLabel,
-        participantLabelTextStyle,
-        participantLabelAlignment,
-        showConnectionQualityIndicator,
-        connectionLevelAlignment,
-        participantsGridPadding,
-        participantsGridMainAxisSpacing,
-        participantsGridCrossAxisSpacing,
-        Object.hash(
-          audioLevelIndicatorColor,
-          enabledMicrophoneColor,
-          disabledMicrophoneColor,
-          pausedVideoIndicatorColor,
-          connectionLevelActiveColor,
-          connectionLevelInactiveColor,
-        ),
-      );
+    videoFit,
+    backgroundColor,
+    borderRadius,
+    userAvatarTheme,
+    showSpeakerBorder,
+    speakerBorderThickness,
+    speakerBorderColor,
+    showParticipantLabel,
+    participantLabelTextStyle,
+    participantLabelAlignment,
+    showConnectionQualityIndicator,
+    connectionLevelAlignment,
+    participantsGridPadding,
+    participantsGridMainAxisSpacing,
+    participantsGridCrossAxisSpacing,
+    Object.hash(
+      audioLevelIndicatorColor,
+      enabledMicrophoneColor,
+      disabledMicrophoneColor,
+      pausedVideoIndicatorColor,
+      connectionLevelActiveColor,
+      connectionLevelInactiveColor,
+    ),
+  );
 
   @override
   bool operator ==(Object other) {

@@ -52,23 +52,22 @@ class SfuParticipant with EquatableMixin {
     double? audioLevel,
     List<String>? roles,
     SfuParticipantSource? participantSource,
-  }) =>
-      SfuParticipant(
-        userId: userId ?? this.userId,
-        userName: userId ?? this.userName,
-        userImage: userId ?? this.userImage,
-        sessionId: sessionId ?? this.sessionId,
-        custom: custom ?? this.custom,
-        publishedTracks: publishedTracks ?? this.publishedTracks,
-        joinedAt: joinedAt ?? this.joinedAt,
-        trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
-        connectionQuality: connectionQuality ?? this.connectionQuality,
-        isSpeaking: isSpeaking ?? this.isSpeaking,
-        isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
-        audioLevel: audioLevel ?? this.audioLevel,
-        roles: roles ?? this.roles,
-        participantSource: participantSource ?? this.participantSource,
-      );
+  }) => SfuParticipant(
+    userId: userId ?? this.userId,
+    userName: userId ?? this.userName,
+    userImage: userId ?? this.userImage,
+    sessionId: sessionId ?? this.sessionId,
+    custom: custom ?? this.custom,
+    publishedTracks: publishedTracks ?? this.publishedTracks,
+    joinedAt: joinedAt ?? this.joinedAt,
+    trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
+    connectionQuality: connectionQuality ?? this.connectionQuality,
+    isSpeaking: isSpeaking ?? this.isSpeaking,
+    isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
+    audioLevel: audioLevel ?? this.audioLevel,
+    roles: roles ?? this.roles,
+    participantSource: participantSource ?? this.participantSource,
+  );
 
   @override
   String toString() {
@@ -83,20 +82,20 @@ class SfuParticipant with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        userId,
-        userName,
-        userImage,
-        sessionId,
-        custom,
-        publishedTracks,
-        joinedAt,
-        trackLookupPrefix,
-        connectionQuality,
-        isSpeaking,
-        isDominantSpeaker,
-        audioLevel.hashCode,
-        participantSource,
-      ];
+    userId,
+    userName,
+    userImage,
+    sessionId,
+    custom,
+    publishedTracks,
+    joinedAt,
+    trackLookupPrefix,
+    connectionQuality,
+    isSpeaking,
+    isDominantSpeaker,
+    audioLevel.hashCode,
+    participantSource,
+  ];
 }
 
 class SfuParticipantCount with EquatableMixin {

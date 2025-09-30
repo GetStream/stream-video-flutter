@@ -20,7 +20,6 @@ import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
-import '../../sfu/data/models/sfu_client_capability.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
@@ -461,7 +460,7 @@ class CallSession extends Disposable {
   }
 
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
-      fastReconnect({
+  fastReconnect({
     Set<SfuClientCapability> capabilities = const {},
     String? unifiedSessionId,
   }) async {
@@ -499,10 +498,12 @@ class CallSession extends Disposable {
             subscriberSdp: subscriberSdp,
             publisherSdp: publisherSdp,
             reconnectDetails: reconnectDetails,
-            preferredPublishOptions:
-                rtcManager?.publishOptions.map((o) => o.toDTO()),
+            preferredPublishOptions: rtcManager?.publishOptions.map(
+              (o) => o.toDTO(),
+            ),
             source: sfu_models
-                .ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+                .ParticipantSource
+                .PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
             capabilities: capabilities.map((c) => c.toDTO()).toList(),
             unifiedSessionId: unifiedSessionId,
           ),

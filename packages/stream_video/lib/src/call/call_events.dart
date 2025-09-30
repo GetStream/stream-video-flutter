@@ -1052,11 +1052,11 @@ class StreamCallUserKickedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        user,
-        kickedByUser,
-      ];
+    ...super.props,
+    createdAt,
+    user,
+    kickedByUser,
+  ];
 }
 
 /// Event that is triggered when someone sends a reaction during a call
@@ -1466,16 +1466,16 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           createdAt: event.createdAt,
         ),
       final CoordinatorCallUserBlockedEvent event => StreamCallUserBlockedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        user: event.user,
+      ),
       final CoordinatorCallUserKickedEvent event => StreamCallUserKickedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-          kickedByUser: event.kickedByUser,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        user: event.user,
+        kickedByUser: event.kickedByUser,
+      ),
       final CoordinatorCallUserUnblockedEvent event =>
         StreamCallUserUnblockedEvent(
           event.callCid,
