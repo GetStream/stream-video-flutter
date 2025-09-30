@@ -43,6 +43,7 @@ void main() {
           onRtcManagerCreatedCallback:
               any(named: 'onRtcManagerCreatedCallback'),
           isAnonymousUser: any(named: 'isAnonymousUser'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
         ),
       ).thenAnswer(
         (_) async => const Result.failure(
@@ -74,6 +75,7 @@ void main() {
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
         () => mockCallSession.start(
               reconnectDetails: any(named: 'reconnectDetails'),
@@ -81,6 +83,7 @@ void main() {
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
         () => coordinatorClient.joinCall(
               callCid: any(named: 'callCid'),
@@ -96,6 +99,7 @@ void main() {
                   any(named: 'onRtcManagerCreatedCallback'),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
       ]);
     });
@@ -133,14 +137,24 @@ void main() {
         ),
       ).called(1);
 
-      verifyNever(callSession.fastReconnect);
+      verifyNever(
+        () => callSession.fastReconnect(
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+        ),
+      );
 
       internetStatusController.add(InternetStatus.disconnected);
       await Future<void>.delayed(Duration.zero);
       internetStatusController.add(InternetStatus.connected);
       await Future<void>.delayed(Duration.zero);
 
-      verify(callSession.fastReconnect).called(1);
+      verify(
+        () => callSession.fastReconnect(
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+        ),
+      ).called(1);
 
       await internetStatusController.close();
     });
@@ -168,7 +182,12 @@ void main() {
 
       // Track when fastReconnect is called during the timeout scenario
       var fastReconnectCallCount = 0;
-      when(callSession.fastReconnect).thenAnswer((_) {
+      when(
+        () => callSession.fastReconnect(
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+        ),
+      ).thenAnswer((_) {
         fastReconnectCallCount++;
         return Future.value(
           Result.success(
