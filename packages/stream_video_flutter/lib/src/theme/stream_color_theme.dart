@@ -304,8 +304,11 @@ class StreamColorTheme {
       borderBottom: borderBottom.lerp(other.borderBottom, t),
       shadowIconButton: shadowIconButton.lerp(other.shadowIconButton, t),
       modalShadow: modalShadow.lerp(other.modalShadow, t),
-      livestreamBackground:
-          Color.lerp(livestreamBackground, other.livestreamBackground, t),
+      livestreamBackground: Color.lerp(
+        livestreamBackground,
+        other.livestreamBackground,
+        t,
+      ),
       livestreamCallControlsColor: Color.lerp(
         livestreamCallControlsColor,
         other.livestreamCallControlsColor,

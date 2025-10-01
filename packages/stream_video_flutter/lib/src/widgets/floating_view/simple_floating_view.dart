@@ -67,10 +67,14 @@ class _SimpleFloatingViewState extends State<SimpleFloatingView> {
 
         // If window is resized, this resets the floating window.
         bottomRightOffset.value = Offset(
-          bottomRightOffset.value.dx
-              .coerceIn(floatingViewPadding, maxRightOffset),
-          bottomRightOffset.value.dy
-              .coerceIn(floatingViewPadding, maxBottomOffset),
+          bottomRightOffset.value.dx.coerceIn(
+            floatingViewPadding,
+            maxRightOffset,
+          ),
+          bottomRightOffset.value.dy.coerceIn(
+            floatingViewPadding,
+            maxBottomOffset,
+          ),
         );
 
         return Stack(

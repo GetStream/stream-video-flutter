@@ -1,3 +1,9 @@
+/// Stream Video Flutter UI toolkit and widgets.
+///
+/// High-level Flutter components, themes, and utilities for building call
+/// experiences with the Stream Video SDK. Import this library to access call
+/// screens, participants views, controls, livestream UI, screen sharing, and
+/// related helpers built on top of `package:stream_video/stream_video.dart`.
 library stream_video_flutter;
 
 export 'package:stream_video/stream_video.dart';

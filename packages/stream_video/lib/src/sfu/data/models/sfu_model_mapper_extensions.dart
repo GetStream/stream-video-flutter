@@ -27,7 +27,8 @@ extension SfuClientCapabilityMapper on SfuClientCapability {
     switch (this) {
       case SfuClientCapability.subscriberVideoPause:
         return sfu_models
-            .ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE;
+            .ClientCapability
+            .CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE;
       case SfuClientCapability.unspecified:
         return sfu_models.ClientCapability.CLIENT_CAPABILITY_UNSPECIFIED;
     }
@@ -57,7 +58,7 @@ extension RtcVideoQualityMapper on RtcVideoQuality {
         sfu_models.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
       RtcVideoQuality.mid => sfu_models.VideoQuality.VIDEO_QUALITY_MID,
       RtcVideoQuality.high => sfu_models.VideoQuality.VIDEO_QUALITY_HIGH,
-      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF
+      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF,
     };
   }
 }

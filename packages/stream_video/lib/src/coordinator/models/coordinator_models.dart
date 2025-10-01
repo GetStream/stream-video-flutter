@@ -38,14 +38,14 @@ class CoordinatorJoined extends CoordinatorModel {
 
   @override
   List<Object?> get props => [
-        wasCreated,
-        metadata,
-        credentials,
-        members,
-        users,
-        duration,
-        statsOptions,
-      ];
+    wasCreated,
+    metadata,
+    credentials,
+    members,
+    users,
+    duration,
+    statsOptions,
+  ];
 }
 
 class SfuServerSelected extends CoordinatorModel {

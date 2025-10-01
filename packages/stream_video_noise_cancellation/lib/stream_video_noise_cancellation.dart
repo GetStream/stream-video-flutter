@@ -1,3 +1,9 @@
+/// Stream Video noise cancellation utilities.
+///
+/// Exposes methods to register and control client-side audio noise
+/// cancellation when supported by the current platform.
+library;
+
 import 'stream_video_noise_cancellation_platform_interface.dart';
 
 class StreamVideoNoiseCancellation {

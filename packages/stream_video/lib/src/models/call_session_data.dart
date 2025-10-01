@@ -32,13 +32,13 @@ class CallSessionData with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        id,
-        startedAt,
-        liveStartedAt,
-        liveStartedAt,
-        liveEndedAt,
-        timerEndsAt,
-      ];
+    id,
+    startedAt,
+    liveStartedAt,
+    liveStartedAt,
+    liveEndedAt,
+    timerEndsAt,
+  ];
 }
 
 @immutable
@@ -57,11 +57,11 @@ class CallParticipant with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        userSessionId,
-        userId,
-        role,
-        joinedAt,
-      ];
+    userSessionId,
+    userId,
+    role,
+    joinedAt,
+  ];
 
   @override
   String toString() {

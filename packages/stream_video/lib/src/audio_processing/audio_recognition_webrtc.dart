@@ -144,8 +144,10 @@ class AudioRecognitionWebRTC implements AudioRecognition {
       }
     }
 
-    final interval =
-        Timer.periodic(const Duration(milliseconds: 100), checkAudioLevel);
+    final interval = Timer.periodic(
+      const Duration(milliseconds: 100),
+      checkAudioLevel,
+    );
 
     return () {
       speechTimer?.cancel();

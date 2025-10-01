@@ -51,12 +51,13 @@ enum StreamWebSocketCloseCode {
 }
 
 /// Typedef used for connecting to a websocket. Method returns a
-/// [WebSocketChannel] and accepts a connection [url] and an optional
+/// [WebSocketChannel] and accepts a connection url and an optional
 /// [Iterable] of `protocols`.
-typedef WebSocketChannelConnector = Future<WebSocketChannel> Function(
-  Uri uri, {
-  Iterable<String>? protocols,
-});
+typedef WebSocketChannelConnector =
+    Future<WebSocketChannel> Function(
+      Uri uri, {
+      Iterable<String>? protocols,
+    });
 
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
 abstract class StreamWebSocket with ConnectionStateMixin {
@@ -66,9 +67,9 @@ abstract class StreamWebSocket with ConnectionStateMixin {
     this.protocols,
     WebSocketChannelConnector? webSocketChannelConnector,
     String tag = 'SV:AbstractWS',
-  })  : _webSocketChannelConnector =
-            webSocketChannelConnector ?? platform.connect,
-        _logger = taggedLogger(tag: tag);
+  }) : _webSocketChannelConnector =
+           webSocketChannelConnector ?? platform.connect,
+       _logger = taggedLogger(tag: tag);
 
   /// The URI to connect to.
   final String url;
@@ -98,7 +99,8 @@ abstract class StreamWebSocket with ConnectionStateMixin {
   /// communicate over the resulting socket.
   Future<Result<None>> connect() async {
     _logger.i(
-      () => '[connect] connectRequestInProgress: '
+      () =>
+          '[connect] connectRequestInProgress: '
           '$_connectRequestInProgress, url: $url',
     );
     try {
@@ -150,7 +152,8 @@ abstract class StreamWebSocket with ConnectionStateMixin {
   Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     try {
       _logger.i(
-        () => '[disconnect] connectRequestInProgress: '
+        () =>
+            '[disconnect] connectRequestInProgress: '
             '$_connectRequestInProgress, url: $url',
       );
       await _ws?.sink.close(closeCode, closeReason);

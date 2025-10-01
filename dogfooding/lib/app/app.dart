@@ -1,19 +1,16 @@
-// 🐦 Flutter imports:
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-// 📦 Package imports:
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 // 🌎 Project imports:
-import 'package:flutter_dogfooding/di/injector.dart';
-import 'package:flutter_dogfooding/screens/splash_screen.dart';
-import 'package:flutter_dogfooding/utils/consts.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
+import '../di/injector.dart';
 import '../firebase_options.dart';
+import '../screens/splash_screen.dart';
+import '../utils/consts.dart';
 import 'app_content.dart';
 import 'user_auth_controller.dart';
 
@@ -82,7 +79,9 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
 
     final authController = locator.get<UserAuthController>();
     await authController.login(
-        User(info: credentials.userInfo), prefs.environment);
+      User(info: credentials.userInfo),
+      prefs.environment,
+    );
   }
 
   @override

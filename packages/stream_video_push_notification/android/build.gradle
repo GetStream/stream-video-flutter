@@ -15,7 +15,7 @@ android {
         namespace = "io.getstream.video.flutter.stream_video_push_notification"
     }
 
-    compileSdk = 34
+    compileSdk = flutter.compileSdkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -36,8 +36,6 @@ android {
     }
 
     dependencies {
-        testImplementation("org.jetbrains.kotlin:kotlin-test")
-        testImplementation("org.mockito:mockito-core:5.0.0")
     }
 
     testOptions {

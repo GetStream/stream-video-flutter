@@ -95,8 +95,8 @@ class _DynamicProvider implements TokenProvider {
     this.loader, {
     UserToken? initialToken,
     OnTokenUpdated? onTokenUpdated,
-  })  : _initialToken = initialToken,
-        _onTokenUpdated = onTokenUpdated;
+  }) : _initialToken = initialToken,
+       _onTokenUpdated = onTokenUpdated;
 
   final _logger = taggedLogger(tag: 'SV:DynamicToken');
 
@@ -156,9 +156,9 @@ class UserToken extends Equatable {
   /// The token that can be used when user is unknown.
   /// Is used by `anonymous` token provider.
   factory UserToken.anonymous({String userId = '!anon'}) => UserToken._(
-        userId: userId,
-        authType: AuthType.anonymous,
-      );
+    userId: userId,
+    authType: AuthType.anonymous,
+  );
 
   /// Creates a [UserToken] instance from the provided [rawValue] if it's valid.
   factory UserToken.jwt(String rawValue) {

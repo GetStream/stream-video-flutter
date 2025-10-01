@@ -110,14 +110,14 @@ class StreamAudioSettings extends MediaSettings {
 
   @override
   List<Object?> get props => [
-        accessRequestEnabled,
-        opusDtxEnabled,
-        redundantCodingEnabled,
-        defaultDevice,
-        micDefaultOn,
-        speakerDefaultOn,
-        noiseCancellation,
-      ];
+    accessRequestEnabled,
+    opusDtxEnabled,
+    redundantCodingEnabled,
+    defaultDevice,
+    micDefaultOn,
+    speakerDefaultOn,
+    noiseCancellation,
+  ];
 
   AudioSettingsRequest toOpenDto() {
     return AudioSettingsRequest(
@@ -151,12 +151,12 @@ class StreamVideoSettings extends MediaSettings {
 
   @override
   List<Object?> get props => [
-        accessRequestEnabled,
-        enabled,
-        cameraDefaultOn,
-        cameraFacing,
-        targetResolution,
-      ];
+    accessRequestEnabled,
+    enabled,
+    cameraDefaultOn,
+    cameraFacing,
+    targetResolution,
+  ];
 
   VideoSettingsRequest toOpenDto() {
     return VideoSettingsRequest(
@@ -173,8 +173,10 @@ class StreamScreenShareSettings extends MediaSettings {
   const StreamScreenShareSettings({
     super.accessRequestEnabled = false,
     this.enabled = false,
-    this.targetResolution =
-        const StreamTargetResolution(height: 1280, width: 720),
+    this.targetResolution = const StreamTargetResolution(
+      height: 1280,
+      width: 720,
+    ),
   });
 
   final bool enabled;
@@ -182,10 +184,10 @@ class StreamScreenShareSettings extends MediaSettings {
 
   @override
   List<Object?> get props => [
-        accessRequestEnabled,
-        enabled,
-        targetResolution,
-      ];
+    accessRequestEnabled,
+    enabled,
+    targetResolution,
+  ];
 
   ScreensharingSettingsRequest toOpenDto() {
     return ScreensharingSettingsRequest(
@@ -231,11 +233,11 @@ class StreamLimitsSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [
-        maxDurationSeconds,
-        maxParticipants,
-        maxParticipantsExcludeOwner,
-        maxParticipantsExcludeRoles,
-      ];
+    maxDurationSeconds,
+    maxParticipants,
+    maxParticipantsExcludeOwner,
+    maxParticipantsExcludeRoles,
+  ];
 
   LimitsSettingsRequest toOpenDto() {
     return LimitsSettingsRequest(
@@ -300,10 +302,10 @@ class StreamFrameRecordingSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [
-        captureIntervalInSeconds,
-        mode,
-        quality,
-      ];
+    captureIntervalInSeconds,
+    mode,
+    quality,
+  ];
 
   FrameRecordingSettingsRequest toOpenDto() {
     return FrameRecordingSettingsRequest(
@@ -323,8 +325,8 @@ class StreamSessionSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [
-        inactivityTimeoutSeconds,
-      ];
+    inactivityTimeoutSeconds,
+  ];
 
   SessionSettingsRequest toOpenDto() {
     return SessionSettingsRequest(
@@ -372,8 +374,11 @@ class StreamRingSettings extends AbstractSettings {
   final Duration missedCallTimeout;
 
   @override
-  List<Object?> get props =>
-      [autoCancelTimeout, autoRejectTimeout, missedCallTimeout];
+  List<Object?> get props => [
+    autoCancelTimeout,
+    autoRejectTimeout,
+    missedCallTimeout,
+  ];
 
   RingSettingsRequest toOpenDto() {
     return RingSettingsRequest(
@@ -518,8 +523,11 @@ class StreamIngressSettings extends AbstractSettings {
   final Map<String, StreamIngressVideoEncodingOptions> videoEncodingOptions;
 
   @override
-  List<Object?> get props =>
-      [audioEncodingOptions, enabled, videoEncodingOptions];
+  List<Object?> get props => [
+    audioEncodingOptions,
+    enabled,
+    videoEncodingOptions,
+  ];
 
   IngressSettingsRequest toOpenDto() {
     return IngressSettingsRequest(
@@ -588,8 +596,13 @@ class StreamIngressVideoLayer extends AbstractSettings {
   final int minDimension;
 
   @override
-  List<Object?> get props =>
-      [bitrate, codec, frameRateLimit, maxDimension, minDimension];
+  List<Object?> get props => [
+    bitrate,
+    codec,
+    frameRateLimit,
+    maxDimension,
+    minDimension,
+  ];
 
   IngressVideoLayerRequest toOpenDto() {
     return IngressVideoLayerRequest(
@@ -949,20 +962,23 @@ enum TranscriptionSettingsLanguage {
   String toString() => value;
 
   TranscriptionSettingsRequestLanguageEnum toOpenDto() {
-    return TranscriptionSettingsRequestLanguageEnumTypeTransformer()
-            .decode(value) ??
+    return TranscriptionSettingsRequestLanguageEnumTypeTransformer().decode(
+          value,
+        ) ??
         TranscriptionSettingsRequestLanguageEnum.auto;
   }
 
   StartTranscriptionRequestLanguageEnum toStartTranscriptionDto() {
-    return StartTranscriptionRequestLanguageEnumTypeTransformer()
-            .decode(value) ??
+    return StartTranscriptionRequestLanguageEnumTypeTransformer().decode(
+          value,
+        ) ??
         StartTranscriptionRequestLanguageEnum.auto;
   }
 
   StartClosedCaptionsRequestLanguageEnum toStartClosedCaptionsDto() {
-    return StartClosedCaptionsRequestLanguageEnumTypeTransformer()
-            .decode(value) ??
+    return StartClosedCaptionsRequestLanguageEnumTypeTransformer().decode(
+          value,
+        ) ??
         StartClosedCaptionsRequestLanguageEnum.auto;
   }
 }

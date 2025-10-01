@@ -52,13 +52,13 @@ class PeerConnectionStats {
   });
 
   factory PeerConnectionStats.empty() => const PeerConnectionStats(
-        latency: null,
-        resolution: null,
-        qualityDropReason: null,
-        jitterInMs: null,
-        bitrateKbps: null,
-        videoCodec: null,
-      );
+    latency: null,
+    resolution: null,
+    qualityDropReason: null,
+    jitterInMs: null,
+    bitrateKbps: null,
+    videoCodec: null,
+  );
 
   final int? latency;
   final String? resolution;
@@ -133,18 +133,17 @@ class MediaStatsInfo {
 
   factory MediaStatsInfo.fromRtcOutboundRtpVideoStream(
     RtcOutboundRtpVideoStream stream,
-  ) =>
-      MediaStatsInfo(
-        id: stream.id,
-        bytesSent: stream.bytesSent,
-        videoCodecId: stream.codecId,
-        qualityLimit: stream.qualityLimitationReason,
-        jitter: stream.jitter,
-        width: stream.frameWidth,
-        height: stream.frameHeight,
-        fps: stream.framesPerSecond,
-        deviceLatency: stream.totalPacketSendDelay,
-      );
+  ) => MediaStatsInfo(
+    id: stream.id,
+    bytesSent: stream.bytesSent,
+    videoCodecId: stream.codecId,
+    qualityLimit: stream.qualityLimitationReason,
+    jitter: stream.jitter,
+    width: stream.frameWidth,
+    height: stream.frameHeight,
+    fps: stream.framesPerSecond,
+    deviceLatency: stream.totalPacketSendDelay,
+  );
 
   final String? id;
   final String? qualityLimit;
@@ -198,10 +197,10 @@ class LocalStats {
   });
 
   factory LocalStats.empty() => const LocalStats(
-        sfu: '',
-        sdkVersion: '',
-        webRtcVersion: '',
-      );
+    sfu: '',
+    sdkVersion: '',
+    webRtcVersion: '',
+  );
 
   final String sfu;
   final String sdkVersion;

@@ -46,10 +46,11 @@ typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
 /// {@template OnRemoteTrackPublished}
 /// Called when a subscriber track is received.
 /// {@endtemplate}
-typedef OnRemoteTrackReceived = void Function(
-  StreamPeerConnection pc,
-  RtcRemoteTrack track,
-);
+typedef OnRemoteTrackReceived =
+    void Function(
+      StreamPeerConnection pc,
+      RtcRemoteTrack track,
+    );
 
 const _tag = 'SV:RtcManager';
 
@@ -76,7 +77,7 @@ class RtcManager extends Disposable {
   final transceiversManager = TransceiverManager();
   List<SfuPublishOptions> publishOptions;
 
-  final tracks = < /*trackId*/ String, RtcTrack>{};
+  final tracks = </*trackId*/ String, RtcTrack>{};
 
   set onPublisherIceCandidate(OnIceCandidate? cb) {
     publisher?.onIceCandidate = cb;
@@ -362,12 +363,12 @@ class RtcManager extends Disposable {
     for (final encoder in params.encodings!) {
       final layer = usesSvcCodec
           ? // for SVC, we only have one layer (q) and often rid is omitted
-          enabledLayers.firstOrNull
+            enabledLayers.firstOrNull
           : // for non-SVC, we need to find the layer by rid (simulcast)
-          enabledLayers.firstWhereOrNull((l) => l.name == encoder.rid) ??
-              (params.encodings!.length == 1
-                  ? enabledLayers.firstOrNull
-                  : null);
+            enabledLayers.firstWhereOrNull((l) => l.name == encoder.rid) ??
+                (params.encodings!.length == 1
+                    ? enabledLayers.firstOrNull
+                    : null);
 
       // flip 'active' flag only when necessary
       final shouldActivate = layer?.active ?? false;
@@ -544,8 +545,9 @@ extension PublisherRtcManager on RtcManager {
   }) {
     final track = transceiverCache.track;
 
-    final transceiverInitialIndex =
-        transceiversManager.indexOf(transceiverCache.transceiver);
+    final transceiverInitialIndex = transceiversManager.indexOf(
+      transceiverCache.transceiver,
+    );
 
     if (track is RtcLocalAudioTrack) {
       return RtcTrackInfo(
@@ -709,8 +711,9 @@ extension PublisherRtcManager on RtcManager {
           ],
         );
 
-        _logger
-            .v(() => '[publishVideoTrack] new transceiver: $transceiverResult');
+        _logger.v(
+          () => '[publishVideoTrack] new transceiver: $transceiverResult',
+        );
       } else {
         final previousTrack = cashedTransceiver.sender.track;
 
@@ -784,11 +787,11 @@ extension PublisherRtcManager on RtcManager {
   }
 
   Future<
-      Result<
-          ({
-            rtc.RTCRtpTransceiver transceiver,
-            rtc.MediaStreamTrack mediaTrack,
-          })>> _addTransceiver(
+    Result<
+      ({rtc.RTCRtpTransceiver transceiver, rtc.MediaStreamTrack mediaTrack})
+    >
+  >
+  _addTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
   ) async {
@@ -890,8 +893,9 @@ extension PublisherRtcManager on RtcManager {
 
     // If the track was released before, restart it.
     if (track.stopTrackOnMute) {
-      final transceivers =
-          transceiversManager.getTransceiversForTrack(track.trackId).toList();
+      final transceivers = transceiversManager
+          .getTransceiversForTrack(track.trackId)
+          .toList();
 
       final updatedTrack = await track.recreate(transceivers);
       tracks[trackId] = updatedTrack;
@@ -992,8 +996,9 @@ extension PublisherRtcManager on RtcManager {
       return Result.error('Track is not camera');
     }
 
-    final transceivers =
-        transceiversManager.getTransceiversForTrack(track.trackId).toList();
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(track.trackId)
+        .toList();
 
     final updatedTrack = await track.recreate(
       transceivers,
@@ -1045,8 +1050,9 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Track is not camera');
     }
 
-    final transceivers =
-        transceiversManager.getTransceiversForTrack(track.trackId).toList();
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(track.trackId)
+        .toList();
 
     final updatedTrack = await track.selectVideoInput(device, transceivers);
     tracks[updatedTrack.trackId] = updatedTrack;
@@ -1071,8 +1077,9 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Track is not audio');
     }
 
-    final transceivers =
-        transceiversManager.getTransceiversForTrack(track.trackId).toList();
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(track.trackId)
+        .toList();
 
     final updatedTrack = await track.selectAudioInput(transceivers, device);
     tracks[updatedTrack.trackId] = updatedTrack;
@@ -1084,9 +1091,9 @@ extension RtcManagerTrackHelper on RtcManager {
     required RtcMediaDevice device,
   }) async {
     // Get all remote audio tracks.
-    final audioTracks = tracks.values
-        .whereType<RtcRemoteTrack>()
-        .where((it) => it.trackType == SfuTrackType.audio);
+    final audioTracks = tracks.values.whereType<RtcRemoteTrack>().where(
+      (it) => it.trackType == SfuTrackType.audio,
+    );
 
     // If the platform is web, set the sink id for all remote audio tracks
     // to the selected device.
@@ -1281,8 +1288,9 @@ extension RtcManagerTrackHelper on RtcManager {
       }
 
       final screenShareTrackResult = await createScreenShareTrack(
-        constraints: (constraints ?? const ScreenShareConstraints())
-            as ScreenShareConstraints,
+        constraints:
+            (constraints ?? const ScreenShareConstraints())
+                as ScreenShareConstraints,
       );
       return screenShareTrackResult.fold(
         success: (it) => publishVideoTrack(track: it.data),

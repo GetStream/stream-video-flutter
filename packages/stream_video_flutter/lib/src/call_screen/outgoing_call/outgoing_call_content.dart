@@ -8,12 +8,13 @@ import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
 import 'outgoing_call_controls.dart';
 
-typedef OutgoingCallBackground = Widget Function(
-  Call call,
-  CallState callState,
-  List<UserInfo> participants,
-  Widget child,
-);
+typedef OutgoingCallBackground =
+    Widget Function(
+      Call call,
+      CallState callState,
+      List<UserInfo> participants,
+      Widget child,
+    );
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
@@ -81,7 +82,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
 
   /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilderWithData<ParticipantsData>?
-      participantsAvatarWidgetBuilder;
+  participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
   ///
@@ -91,7 +92,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
 
   /// Builder used to create a custom widget for participants display names.
   final CallWidgetBuilderWithData<ParticipantsData>?
-      participantsDisplayNameWidgetBuilder;
+  participantsDisplayNameWidgetBuilder;
 
   /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
@@ -118,14 +119,16 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
   Widget build(BuildContext context) {
     final theme = StreamIncomingOutgoingCallTheme.outgoingCallThemeOf(context);
 
-    final singleParticipantAvatarTheme = widget.singleParticipantAvatarTheme ??
+    final singleParticipantAvatarTheme =
+        widget.singleParticipantAvatarTheme ??
         theme.singleParticipantAvatarTheme;
     final multipleParticipantAvatarTheme =
         widget.multipleParticipantAvatarTheme ??
-            theme.multipleParticipantAvatarTheme;
+        theme.multipleParticipantAvatarTheme;
     final singleParticipantTextStyle =
         widget.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
-    final multipleParticipantTextStyle = widget.multipleParticipantTextStyle ??
+    final multipleParticipantTextStyle =
+        widget.multipleParticipantTextStyle ??
         theme.multipleParticipantTextStyle;
     final callingLabelTextStyle =
         widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
@@ -166,8 +169,10 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
                   participants,
                 ) ??
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 64,
+                    vertical: 32,
+                  ),
                   child: CallingParticipants(
                     participants: participants,
                     singleParticipantTextStyle: singleParticipantTextStyle,

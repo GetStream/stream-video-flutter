@@ -63,13 +63,15 @@ import 'stream_video_flutter_localizations_nl.dart';
 /// property.
 abstract class StreamVideoFlutterLocalizations {
   StreamVideoFlutterLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
   static StreamVideoFlutterLocalizations? of(BuildContext context) {
     return Localizations.of<StreamVideoFlutterLocalizations>(
-        context, StreamVideoFlutterLocalizations);
+      context,
+      StreamVideoFlutterLocalizations,
+    );
   }
 
   static const LocalizationsDelegate<StreamVideoFlutterLocalizations> delegate =
@@ -87,16 +89,16 @@ abstract class StreamVideoFlutterLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('nl')
+    Locale('nl'),
   ];
 
   /// Title for dialog to choose for a window or screen to share
@@ -185,7 +187,8 @@ class _StreamVideoFlutterLocalizationsDelegate
   @override
   Future<StreamVideoFlutterLocalizations> load(Locale locale) {
     return SynchronousFuture<StreamVideoFlutterLocalizations>(
-        lookupStreamVideoFlutterLocalizations(locale));
+      lookupStreamVideoFlutterLocalizations(locale),
+    );
   }
 
   @override
@@ -197,7 +200,8 @@ class _StreamVideoFlutterLocalizationsDelegate
 }
 
 StreamVideoFlutterLocalizations lookupStreamVideoFlutterLocalizations(
-    Locale locale) {
+  Locale locale,
+) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en':
@@ -207,8 +211,9 @@ StreamVideoFlutterLocalizations lookupStreamVideoFlutterLocalizations(
   }
 
   throw FlutterError(
-      'StreamVideoFlutterLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'StreamVideoFlutterLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

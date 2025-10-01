@@ -404,78 +404,80 @@ void main() {
   });
 
   group('sorting presets', () {
-    test('regular: pinned > screenShare; dominant applies only if invisible',
-        () {
-      final now = DateTime.now();
+    test(
+      'regular: pinned > screenShare; dominant applies only if invisible',
+      () {
+        final now = DateTime.now();
 
-      final pinnedUser = CallParticipantState(
-        name: 'Pinned',
-        userId: '1',
-        sessionId: '1',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        pin: CallParticipantPin(isLocalPin: true, pinnedAt: now),
-        viewportVisibility: ViewportVisibility.visible,
-      );
+        final pinnedUser = CallParticipantState(
+          name: 'Pinned',
+          userId: '1',
+          sessionId: '1',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          pin: CallParticipantPin(isLocalPin: true, pinnedAt: now),
+          viewportVisibility: ViewportVisibility.visible,
+        );
 
-      final screenSharer = CallParticipantState(
-        name: 'Screen',
-        userId: '2',
-        sessionId: '2',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        publishedTracks: {
-          SfuTrackType.screenShare: TrackState.remote(),
-        },
-        viewportVisibility: ViewportVisibility.visible,
-      );
+        final screenSharer = CallParticipantState(
+          name: 'Screen',
+          userId: '2',
+          sessionId: '2',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          publishedTracks: {
+            SfuTrackType.screenShare: TrackState.remote(),
+          },
+          viewportVisibility: ViewportVisibility.visible,
+        );
 
-      final dominantInvisible = CallParticipantState(
-        name: 'Dominant',
-        userId: '3',
-        sessionId: '3',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        isDominantSpeaker: true,
-        viewportVisibility: ViewportVisibility.unknown,
-      );
+        final dominantInvisible = CallParticipantState(
+          name: 'Dominant',
+          userId: '3',
+          sessionId: '3',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          isDominantSpeaker: true,
+          viewportVisibility: ViewportVisibility.unknown,
+        );
 
-      final speakingVisible = CallParticipantState(
-        name: 'Speaking',
-        userId: '4',
-        sessionId: '4',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        isSpeaking: true,
-        viewportVisibility: ViewportVisibility.visible,
-      );
+        final speakingVisible = CallParticipantState(
+          name: 'Speaking',
+          userId: '4',
+          sessionId: '4',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          isSpeaking: true,
+          viewportVisibility: ViewportVisibility.visible,
+        );
 
-      final others = CallParticipantState(
-        name: 'Other',
-        userId: '5',
-        sessionId: '5',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        viewportVisibility: ViewportVisibility.visible,
-      );
+        final others = CallParticipantState(
+          name: 'Other',
+          userId: '5',
+          sessionId: '5',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          viewportVisibility: ViewportVisibility.visible,
+        );
 
-      final list = [
-        others,
-        speakingVisible,
-        dominantInvisible,
-        pinnedUser,
-        screenSharer,
-      ]..sort(CallParticipantSortingPresets.regular);
+        final list = [
+          others,
+          speakingVisible,
+          dominantInvisible,
+          pinnedUser,
+          screenSharer,
+        ]..sort(CallParticipantSortingPresets.regular);
 
-      expect(list.first, pinnedUser);
-      expect(list[1], screenSharer);
-      expect(list[2], dominantInvisible);
-    });
+        expect(list.first, pinnedUser);
+        expect(list[1], screenSharer);
+        expect(list[2], dominantInvisible);
+      },
+    );
 
     test('speaker: pinned > screenShare > dominant', () {
       final pinnedUser = CallParticipantState(
@@ -522,77 +524,80 @@ void main() {
     });
 
     test(
-        'livestreamOrAudioRoom: rtmp prioritized; then roles (admin/host/speaker)',
-        () {
-      final viewer = CallParticipantState(
-        name: 'Viewer',
-        userId: '1',
-        sessionId: '1',
-        custom: const {},
-        roles: const ['viewer'],
-        trackIdPrefix: 'prefix',
-        participantSource: SfuParticipantSource.webrtc,
-        viewportVisibility: ViewportVisibility.visible,
-      );
+      'livestreamOrAudioRoom: rtmp prioritized; then roles (admin/host/speaker)',
+      () {
+        final viewer = CallParticipantState(
+          name: 'Viewer',
+          userId: '1',
+          sessionId: '1',
+          custom: const {},
+          roles: const ['viewer'],
+          trackIdPrefix: 'prefix',
+          participantSource: SfuParticipantSource.webrtc,
+          viewportVisibility: ViewportVisibility.visible,
+        );
 
-      final admin = CallParticipantState(
-        name: 'Admin',
-        userId: '2',
-        sessionId: '2',
-        custom: const {},
-        roles: const ['admin'],
-        trackIdPrefix: 'prefix',
-        participantSource: SfuParticipantSource.webrtc,
-        viewportVisibility: ViewportVisibility.hidden,
-      );
+        final admin = CallParticipantState(
+          name: 'Admin',
+          userId: '2',
+          sessionId: '2',
+          custom: const {},
+          roles: const ['admin'],
+          trackIdPrefix: 'prefix',
+          participantSource: SfuParticipantSource.webrtc,
+          viewportVisibility: ViewportVisibility.hidden,
+        );
 
-      final rtmp = CallParticipantState(
-        name: 'Rtmp',
-        userId: '3',
-        sessionId: '3',
-        custom: const {},
-        roles: const ['viewer'],
-        trackIdPrefix: 'prefix',
-        participantSource: SfuParticipantSource.rtmp,
-        viewportVisibility: ViewportVisibility.hidden,
-      );
+        final rtmp = CallParticipantState(
+          name: 'Rtmp',
+          userId: '3',
+          sessionId: '3',
+          custom: const {},
+          roles: const ['viewer'],
+          trackIdPrefix: 'prefix',
+          participantSource: SfuParticipantSource.rtmp,
+          viewportVisibility: ViewportVisibility.hidden,
+        );
 
-      final list = [viewer, admin, rtmp]
-        ..sort(CallParticipantSortingPresets.livestreamOrAudioRoom);
+        final list = [viewer, admin, rtmp]
+          ..sort(CallParticipantSortingPresets.livestreamOrAudioRoom);
 
-      // rtmp first due to byParticipantSource
-      expect(list[0], rtmp);
-      expect(list[1], admin);
-      expect(list[2], viewer);
-    });
+        // rtmp first due to byParticipantSource
+        expect(list[0], rtmp);
+        expect(list[1], admin);
+        expect(list[2], viewer);
+      },
+    );
 
-    test('livestreamOrAudioRoom: raised hand prioritized when any invisible',
-        () {
-      final invisibleRaised = CallParticipantState(
-        name: 'Raised',
-        userId: '1',
-        sessionId: '1',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        reaction: CallReaction(type: 'raised-hand', user: CallUser.empty()),
-        viewportVisibility: ViewportVisibility.unknown,
-      );
+    test(
+      'livestreamOrAudioRoom: raised hand prioritized when any invisible',
+      () {
+        final invisibleRaised = CallParticipantState(
+          name: 'Raised',
+          userId: '1',
+          sessionId: '1',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          reaction: CallReaction(type: 'raised-hand', user: CallUser.empty()),
+          viewportVisibility: ViewportVisibility.unknown,
+        );
 
-      final visibleOther = CallParticipantState(
-        name: 'Other',
-        userId: '2',
-        sessionId: '2',
-        custom: const {},
-        roles: const [],
-        trackIdPrefix: 'prefix',
-        viewportVisibility: ViewportVisibility.visible,
-      );
+        final visibleOther = CallParticipantState(
+          name: 'Other',
+          userId: '2',
+          sessionId: '2',
+          custom: const {},
+          roles: const [],
+          trackIdPrefix: 'prefix',
+          viewportVisibility: ViewportVisibility.visible,
+        );
 
-      final list = [visibleOther, invisibleRaised]
-        ..sort(CallParticipantSortingPresets.livestreamOrAudioRoom);
+        final list = [visibleOther, invisibleRaised]
+          ..sort(CallParticipantSortingPresets.livestreamOrAudioRoom);
 
-      expect(list.first, invisibleRaised);
-    });
+        expect(list.first, invisibleRaised);
+      },
+    );
   });
 }

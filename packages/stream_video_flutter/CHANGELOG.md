@@ -1,3 +1,8 @@
+## Unreleased
+
+* Updated minimum Flutter version to 3.32.0
+* Updated minimum supported dart SDK version to 3.8.0
+
 ## 0.10.4
 
 ✅ Added

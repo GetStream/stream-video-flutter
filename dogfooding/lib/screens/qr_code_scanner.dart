@@ -3,10 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class QrCodeScanner extends StatefulWidget {
-  const QrCodeScanner({
-    super.key,
-    this.title = 'Scan Call QR code',
-  });
+  const QrCodeScanner({super.key, this.title = 'Scan Call QR code'});
 
   final String title;
 
@@ -29,9 +26,7 @@ class _QrCodeScannerState extends State<QrCodeScanner> {
   @override
   void initState() {
     super.initState();
-    controller = MobileScannerController(
-      formats: [BarcodeFormat.qrCode],
-    );
+    controller = MobileScannerController(formats: [BarcodeFormat.qrCode]);
   }
 
   @override
@@ -62,10 +57,7 @@ class _QrCodeScannerState extends State<QrCodeScanner> {
         centerTitle: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: MobileScanner(
-        controller: controller,
-        onDetect: _handleBarcode,
-      ),
+      body: MobileScanner(controller: controller, onDetect: _handleBarcode),
     );
   }
 }

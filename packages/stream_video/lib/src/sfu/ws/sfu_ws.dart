@@ -80,8 +80,9 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
   late final HealthMonitor healthMonitor = HealthMonitorImpl(
     'Sfu',
     this,
-    networkMonitor:
-        NetworkMonitorFlutter.fromInternetConnection(networkMonitor),
+    networkMonitor: NetworkMonitorFlutter.fromInternetConnection(
+      networkMonitor,
+    ),
   );
 
   final int sessionSeq;
@@ -166,7 +167,8 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
   @override
   void onClose(int? closeCode, String? closeReason) {
     _logger.i(
-      () => '[onClose] closeCode: $closeCode, closeReason: $closeReason, '
+      () =>
+          '[onClose] closeCode: $closeCode, closeReason: $closeReason, '
           'manuallyClosed: $_manuallyClosed',
     );
 

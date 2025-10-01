@@ -69,14 +69,14 @@ class RtcMediaDevice with EquatableMixin {
     if (CurrentPlatform.isIos) {
       return iOSExternalPorts.any(
         (port) => groupId!.toLowerCase().contains(
-              port.toLowerCase(),
-            ),
+          port.toLowerCase(),
+        ),
       );
     } else if (CurrentPlatform.isAndroid) {
       return androidExternalAudioDeviceType.any(
         (type) => groupId!.toLowerCase().contains(
-              type.toLowerCase(),
-            ),
+          type.toLowerCase(),
+        ),
       );
     } else {
       return groupId!.toLowerCase().contains('bluetooth');

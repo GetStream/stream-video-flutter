@@ -1,24 +1,23 @@
+import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_noise_cancellation/stream_video_noise_cancellation.dart';
+import 'stream_video_noise_cancellation.dart';
 
 class NoiseCancellationAudioProcessor extends AudioProcessor {
-  final _logger = taggedLogger(tag: 'SV:NoiseCancellationAudioProcessor');
-
   NoiseCancellationAudioProcessor() {
     _init();
   }
 
+  final _logger = taggedLogger(tag: 'SV:NoiseCancellationAudioProcessor');
+
   Future<void> _init() async {
     try {
       await StreamVideoNoiseCancellation().registerProcessor();
-    } on UnimplementedError catch (e) {
+    } on PlatformException catch (e) {
       _logger.w(
         () => 'Noise cancellation is not supported on this platform: $e',
       );
     } catch (err) {
-      _logger.e(
-        () => err.toString(),
-      );
+      _logger.e(err.toString);
     }
   }
 
@@ -27,12 +26,12 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
     try {
       final result = await StreamVideoNoiseCancellation().isEnabled() ?? false;
       return Result.success(result);
-    } on UnimplementedError catch (e) {
+    } on PlatformException catch (e) {
       _logger.w(
         () => 'Noise cancellation is not supported on this platform: $e',
       );
 
-      return Result.success(false);
+      return const Result.success(false);
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }
@@ -42,8 +41,8 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
   Future<Result<None>> setEnabled(bool enabled) async {
     try {
       await StreamVideoNoiseCancellation().setEnabled(enabled);
-      return Result.success(none);
-    } on UnimplementedError catch (e) {
+      return const Result.success(none);
+    } on PlatformException catch (e) {
       _logger.e(
         () => 'Noise cancellation is not supported on this platform: $e',
       );
@@ -59,16 +58,17 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
   @override
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     try {
-      final result = await StreamVideoNoiseCancellation()
+      final result =
+          await StreamVideoNoiseCancellation()
               .deviceSupportsAdvancedAudioProcessing() ??
           false;
       return Result.success(result);
-    } on UnimplementedError catch (e) {
+    } on PlatformException catch (e) {
       _logger.w(
         () => 'Noise cancellation is not supported on this platform: $e',
       );
 
-      return Result.success(false);
+      return const Result.success(false);
     } catch (err, stackTrace) {
       return Result.error(err.toString(), stackTrace);
     }

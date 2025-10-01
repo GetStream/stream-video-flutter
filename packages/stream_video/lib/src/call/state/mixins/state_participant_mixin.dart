@@ -90,8 +90,9 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
         if (participant.userId == userId &&
             participant.sessionId == sessionId &&
             trackState is RemoteTrackState) {
-          _logger
-              .v(() => '[participantUpdateSubscription] pFound: $participant');
+          _logger.v(
+            () => '[participantUpdateSubscription] pFound: $participant',
+          );
 
           return participant.copyWith(
             publishedTracks: {

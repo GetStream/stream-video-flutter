@@ -38,21 +38,21 @@ class CallMemberState with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        userId,
-        roles,
-        name,
-        custom,
-        image,
-        callRejectedAt,
-        callAcceptedAt,
-      ];
+    userId,
+    roles,
+    name,
+    custom,
+    image,
+    callRejectedAt,
+    callAcceptedAt,
+  ];
 
   UserInfo toUserInfo() => UserInfo(
-        id: userId,
-        role: roles.firstOrNull ?? '',
-        name: name,
-        image: image,
-      );
+    id: userId,
+    role: roles.firstOrNull ?? '',
+    name: name,
+    image: image,
+  );
 
   CallMemberState copyWith({
     String? userId,

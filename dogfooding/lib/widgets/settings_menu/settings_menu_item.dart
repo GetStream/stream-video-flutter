@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
+
+import '../../theme/app_palette.dart';
 
 class SettingsMenuItem extends StatelessWidget {
-  const SettingsMenuItem({
-    super.key,
-    required this.child,
-    this.onPressed,
-  });
+  const SettingsMenuItem({super.key, required this.child, this.onPressed});
 
   final Widget child;
   final void Function()? onPressed;

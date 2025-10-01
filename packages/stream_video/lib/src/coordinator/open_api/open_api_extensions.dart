@@ -114,7 +114,8 @@ extension EnvelopeExt on open.CallResponse {
       createdBy: createdBy.toCallUser(),
       egress: egress.toCallEgress(),
       team: team ?? '',
-      ownCapabilities: ownCapabilities?.map(
+      ownCapabilities:
+          ownCapabilities?.map(
             (it) => CallPermission.fromAlias(it.value),
           ) ??
           [],
@@ -356,7 +357,8 @@ extension on open.IngressVideoLayerResponse {
   StreamIngressVideoLayer toSettingsDomain() {
     return StreamIngressVideoLayer(
       bitrate: bitrate,
-      codec: IngressVideoLayerRequestCodecEnumTypeTransformer().decode(codec) ??
+      codec:
+          IngressVideoLayerRequestCodecEnumTypeTransformer().decode(codec) ??
           IngressVideoLayerRequestCodecEnum.h264,
       frameRateLimit: frameRateLimit,
       maxDimension: maxDimension,

@@ -13,13 +13,13 @@ import 'dart:async';
 ///     apiKey: '{API_KEY}');
 /// ```
 class CustomEnvironmentLoader {
-  final FutureOr<String> Function(String) tokenLoader;
-  final String apiKey;
-
   const CustomEnvironmentLoader({
     required this.tokenLoader,
     required this.apiKey,
   });
+
+  final FutureOr<String> Function(String) tokenLoader;
+  final String apiKey;
 }
 
 // Replace this with your own implementation.

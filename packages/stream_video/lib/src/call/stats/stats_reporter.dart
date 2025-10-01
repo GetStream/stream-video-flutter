@@ -34,14 +34,15 @@ class StatsReporter {
   }
 
   Future<({CallStats publisherStats, CallStats subscriberStats})>
-      collectStats() async {
+  collectStats() async {
     final publisherStatsBundle = await rtcManager.publisher?.getStats();
     final subscriberStatsBundle = await rtcManager.subscriber.getStats();
 
     final publisherStats = CallStats(
       peerType: StreamPeerType.publisher,
       stats: publisherStatsBundle?.rtcStats ?? [],
-      printable: publisherStatsBundle?.printable ??
+      printable:
+          publisherStatsBundle?.printable ??
           const RtcPrintableStats(local: '', remote: ''),
       raw: publisherStatsBundle?.rawStats ?? [],
     );
@@ -66,7 +67,9 @@ class StatsReporter {
 
     final allStats = stats.publisherStats.stats
         .whereType<RtcOutboundRtpVideoStream>()
-        .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream);
+        .map(
+          MediaStatsInfo.fromRtcOutboundRtpVideoStream,
+        );
 
     final mediaStats = allStats.firstWhereOrNull(
       (s) => s.width != null && s.height != null && s.fps != null,
@@ -115,7 +118,8 @@ class StatsReporter {
 
     if (inboudRtpVideo != null) {
       final jitterInMs = ((inboudRtpVideo.jitter ?? 0) * 1000).toInt();
-      final resolution = inboudRtpVideo.frameWidth != null &&
+      final resolution =
+          inboudRtpVideo.frameWidth != null &&
               inboudRtpVideo.frameHeight != null &&
               inboudRtpVideo.framesPerSecond != null
           ? '${inboudRtpVideo.frameWidth} x ${inboudRtpVideo.frameHeight} @ ${inboudRtpVideo.framesPerSecond}fps'

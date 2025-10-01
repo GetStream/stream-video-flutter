@@ -26,10 +26,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
-    textTheme ??=
-        isDark ? const StreamTextTheme.dark() : const StreamTextTheme.light();
-    colorTheme ??=
-        isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
+    textTheme ??= isDark
+        ? const StreamTextTheme.dark()
+        : const StreamTextTheme.light();
+    colorTheme ??= isDark
+        ? const StreamColorTheme.dark()
+        : const StreamColorTheme.light();
 
     final defaultTheme = StreamVideoTheme.fromColorAndTextTheme(
       colorTheme,
@@ -163,8 +165,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           selectionThickness: 4,
         ),
         audioLevelIndicatorColor: colorTheme.accentPrimary,
-        participantLabelTextStyle:
-            textTheme.footnote.copyWith(color: Colors.white),
+        participantLabelTextStyle: textTheme.footnote.copyWith(
+          color: Colors.white,
+        ),
         disabledMicrophoneColor: colorTheme.accentError,
         pausedVideoIndicatorColor: Colors.white,
         enabledMicrophoneColor: Colors.white,
@@ -381,21 +384,19 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallContentThemeData? callContentTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
     StreamLivestreamThemeData? livestreamTheme,
-  }) =>
-      StreamVideoTheme.raw(
-        textTheme: this.textTheme.merge(textTheme),
-        colorTheme: this.colorTheme.merge(colorTheme),
-        callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
-        userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
-        lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
-        callParticipantTheme:
-            this.callParticipantTheme.merge(callParticipantTheme),
-        localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
-        incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
-        callContentTheme: this.callContentTheme.merge(callContentTheme),
-        outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
-        livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
-      );
+  }) => StreamVideoTheme.raw(
+    textTheme: this.textTheme.merge(textTheme),
+    colorTheme: this.colorTheme.merge(colorTheme),
+    callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
+    userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
+    lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
+    callParticipantTheme: this.callParticipantTheme.merge(callParticipantTheme),
+    localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
+    incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
+    callContentTheme: this.callContentTheme.merge(callContentTheme),
+    outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
+    livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
+  );
 
   /// Merge themes
   StreamVideoTheme merge(StreamVideoTheme? other) {
@@ -406,8 +407,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsTheme: callControlsTheme.merge(callControlsTheme),
       userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
-      callParticipantTheme:
-          callParticipantTheme.merge(other.callParticipantTheme),
+      callParticipantTheme: callParticipantTheme.merge(
+        other.callParticipantTheme,
+      ),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       callContentTheme: callContentTheme.merge(other.callContentTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
@@ -428,8 +430,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
       lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
-      callParticipantTheme:
-          callParticipantTheme.lerp(other.callParticipantTheme, t),
+      callParticipantTheme: callParticipantTheme.lerp(
+        other.callParticipantTheme,
+        t,
+      ),
       localVideoTheme: localVideoTheme.lerp(other.localVideoTheme, t),
       callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),

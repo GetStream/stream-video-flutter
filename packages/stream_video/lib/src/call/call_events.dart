@@ -45,12 +45,12 @@ class StreamCallJoinedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        participants,
-        participantCount,
-        anonymousCount,
-        startedAt,
-      ];
+    ...super.props,
+    participants,
+    participantCount,
+    anonymousCount,
+    startedAt,
+  ];
 }
 
 /// Event that is triggered when the connection quality changes for participants
@@ -64,9 +64,9 @@ class StreamCallConnectionQualityChangedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        connectionQualityUpdates,
-      ];
+    ...super.props,
+    connectionQualityUpdates,
+  ];
 }
 
 /// Event that is triggered when the audio levels change for participants
@@ -80,9 +80,9 @@ class StreamCallAudioLevelChangedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        audioLevels,
-      ];
+    ...super.props,
+    audioLevels,
+  ];
 }
 
 /// Event that is triggered when a participant joins the call
@@ -96,10 +96,10 @@ class StreamCallParticipantJoinedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        callCid,
-        participant,
-      ];
+    ...super.props,
+    callCid,
+    participant,
+  ];
 }
 
 /// Event that is triggered when a participant leaves the call
@@ -113,10 +113,10 @@ class StreamCallParticipantLeftEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        callCid,
-        participant,
-      ];
+    ...super.props,
+    callCid,
+    participant,
+  ];
 }
 
 /// Event that is triggered when the dominant speaker changes
@@ -132,10 +132,10 @@ class StreamCallDominantSpeakerChangedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        userId,
-        sessionId,
-      ];
+    ...super.props,
+    userId,
+    sessionId,
+  ];
 }
 
 /// Event that is triggered when pinned participants are updated
@@ -149,9 +149,9 @@ class StreamPinsUpdatedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        pins,
-      ];
+    ...super.props,
+    pins,
+  ];
 }
 
 class StreamCallSfuTrackPublishedEvent extends StreamSfuCallEvent {
@@ -170,12 +170,12 @@ class StreamCallSfuTrackPublishedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        userId,
-        sessionId,
-        trackType,
-        participant,
-      ];
+    ...super.props,
+    userId,
+    sessionId,
+    trackType,
+    participant,
+  ];
 }
 
 class StreamCallSfuTrackUnpublishedEvent extends StreamSfuCallEvent {
@@ -194,12 +194,12 @@ class StreamCallSfuTrackUnpublishedEvent extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        userId,
-        sessionId,
-        trackType,
-        participant,
-      ];
+    ...super.props,
+    userId,
+    sessionId,
+    trackType,
+    participant,
+  ];
 }
 
 class StreamCallGrantsUpdated extends StreamSfuCallEvent {
@@ -214,10 +214,10 @@ class StreamCallGrantsUpdated extends StreamSfuCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        currentGrants,
-        message,
-      ];
+    ...super.props,
+    currentGrants,
+    message,
+  ];
 }
 
 /// Event that is triggered when the call is connected
@@ -233,10 +233,10 @@ class StreamCallConnectedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        connectionId,
-        userId,
-      ];
+    ...super.props,
+    connectionId,
+    userId,
+  ];
 }
 
 /// Event that is triggered when the call is disconnected
@@ -256,12 +256,12 @@ class StreamCallDisconnectedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        connectionId,
-        userId,
-        closeCode,
-        closeReason,
-      ];
+    ...super.props,
+    connectionId,
+    userId,
+    closeCode,
+    closeReason,
+  ];
 }
 
 /// Event that is triggered when the call is created and another person is invited to participate.
@@ -277,10 +277,10 @@ class StreamCallCreatedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when the call is created and another person is invited to participate.
@@ -304,13 +304,13 @@ class StreamCallMissedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        sessionId,
-        createdAt,
-        metadata,
-        callUser,
-        members,
-      ];
+    ...super.props,
+    sessionId,
+    createdAt,
+    metadata,
+    callUser,
+    members,
+  ];
 }
 
 /// Event that is triggered when the call is ringing.
@@ -330,12 +330,12 @@ class StreamCallRingingEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        ringing,
-        sessionId,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    ringing,
+    sessionId,
+    createdAt,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when the call is updated.
@@ -353,11 +353,11 @@ class StreamCallUpdatedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        metadata,
-        capabilitiesByRole,
-        createdAt,
-      ];
+    ...super.props,
+    metadata,
+    capabilitiesByRole,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the call is ended.
@@ -381,10 +381,10 @@ class StreamCallEndedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        endedBy,
-        createdAt,
-      ];
+    ...super.props,
+    endedBy,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when a call goes live.
@@ -400,10 +400,10 @@ class StreamCallLiveStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when members are added to a call.
@@ -421,11 +421,11 @@ class StreamCallMemberAddedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        members,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    members,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when members are removed from a call.
@@ -443,11 +443,11 @@ class StreamCallMemberRemovedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        removedMemberIds,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    removedMemberIds,
+  ];
 }
 
 /// Event that is triggered when members are updated in a call.
@@ -465,11 +465,11 @@ class StreamCallMemberUpdatedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        members,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    members,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when member permissions are updated in a call.
@@ -489,12 +489,12 @@ class StreamCallMemberUpdatedPermissionEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        updatedMembers,
-        capabilitiesByRole,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    updatedMembers,
+    capabilitiesByRole,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when frame recording starts.
@@ -512,11 +512,11 @@ class StreamCallFrameRecordingStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        egressId,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    egressId,
+  ];
 }
 
 /// Event that is triggered when frame recording stops.
@@ -534,11 +534,11 @@ class StreamCallFrameRecordingStoppedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        egressId,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    egressId,
+  ];
 }
 
 /// Event that is triggered when frame recording fails.
@@ -556,11 +556,11 @@ class StreamCallFrameRecordingFailedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        egressId,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    egressId,
+  ];
 }
 
 /// Event that is triggered when a frame recording is ready.
@@ -586,15 +586,15 @@ class StreamCallFrameRecordingReadyEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        url,
-        capturedAt,
-        egressId,
-        sessionId,
-        trackType,
-        usersInFrame,
-      ];
+    ...super.props,
+    createdAt,
+    url,
+    capturedAt,
+    egressId,
+    sessionId,
+    trackType,
+    usersInFrame,
+  ];
 }
 
 /// Event that is triggered for call notifications.
@@ -614,12 +614,12 @@ class StreamCallNotificationEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        user,
-        members,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    user,
+    members,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when users are muted.
@@ -637,11 +637,11 @@ class StreamCallUserMutedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        fromUserId,
-        mutedUserIds,
-      ];
+    ...super.props,
+    createdAt,
+    fromUserId,
+    mutedUserIds,
+  ];
 }
 
 /// Event that is triggered when a recording is ready.
@@ -667,15 +667,15 @@ class StreamCallRecordingReadyEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        egressId,
-        endTime,
-        filename,
-        sessionId,
-        startTime,
-        url,
-      ];
+    ...super.props,
+    createdAt,
+    egressId,
+    endTime,
+    filename,
+    sessionId,
+    startTime,
+    url,
+  ];
 }
 
 /// Event that is triggered when the call is accepted.
@@ -695,11 +695,11 @@ class StreamCallAcceptedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        acceptedBy,
-        metadata,
-        createdAt,
-      ];
+    ...super.props,
+    acceptedBy,
+    metadata,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the call is rejected.
@@ -719,11 +719,11 @@ class StreamCallRejectedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        rejectedBy,
-        metadata,
-        createdAt,
-      ];
+    ...super.props,
+    rejectedBy,
+    metadata,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when there is a permission request for a call.
@@ -741,11 +741,11 @@ class StreamCallPermissionRequestEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        permissions,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    permissions,
+    user,
+  ];
 }
 
 /// Event that is triggered when the permissions are updated for a call.
@@ -763,11 +763,11 @@ class StreamCallPermissionsUpdatedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        ownCapabilities,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    ownCapabilities,
+    user,
+  ];
 }
 
 /// Event that is triggered when the recording is started for a call.
@@ -781,9 +781,9 @@ class StreamCallRecordingStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the recording is stopped for a call.
@@ -797,9 +797,9 @@ class StreamCallRecordingStoppedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the recording failed for a call.
@@ -813,9 +813,9 @@ class StreamCallRecordingFailedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the transcription is started for a call.
@@ -829,9 +829,9 @@ class StreamCallTranscriptionStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the transcription is stopped for a call.
@@ -845,9 +845,9 @@ class StreamCallTranscriptionStoppedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the transcription failed for a call.
@@ -863,9 +863,9 @@ class StreamCallTranscriptionFailedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the closed captioning is started for a call.
@@ -879,9 +879,9 @@ class StreamCallClosedCaptionsStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the closed captioning is stopped for a call.
@@ -895,9 +895,9 @@ class StreamCallClosedCaptionsStoppedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the closed captioning failed for a call.
@@ -911,9 +911,9 @@ class StreamCallClosedCaptionsFailedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the closed caption is received
@@ -937,14 +937,14 @@ class StreamCallClosedCaptionsEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        startTime,
-        endTime,
-        speakerId,
-        text,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    startTime,
+    endTime,
+    speakerId,
+    text,
+    user,
+  ];
 }
 
 /// Event that is triggered when the broadcasting is started for a call.
@@ -960,10 +960,10 @@ class StreamCallBroadcastingStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        hlsPlaylistUrl,
-        createdAt,
-      ];
+    ...super.props,
+    hlsPlaylistUrl,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the broadcasting is stopped for a call.
@@ -977,9 +977,9 @@ class StreamCallBroadcastingStoppedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the broadcasting fails for a call.
@@ -993,9 +993,9 @@ class StreamCallBroadcastingFailedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 /// Event that is triggered when the user is blocked in a call.
@@ -1011,10 +1011,10 @@ class StreamCallUserBlockedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    user,
+  ];
 }
 
 /// Event that is triggered when the user is unblocked in a call.
@@ -1030,11 +1030,11 @@ class StreamCallUserUnblockedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        callCid,
-        createdAt,
-        user,
-      ];
+    ...super.props,
+    callCid,
+    createdAt,
+    user,
+  ];
 }
 
 /// Event that is triggered when the user is kicked from a call.
@@ -1052,11 +1052,11 @@ class StreamCallUserKickedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        user,
-        kickedByUser,
-      ];
+    ...super.props,
+    createdAt,
+    user,
+    kickedByUser,
+  ];
 }
 
 /// Event that is triggered when someone sends a reaction during a call
@@ -1078,11 +1078,11 @@ class StreamCallReactionEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        emojiCode,
-        custom,
-      ];
+    ...super.props,
+    createdAt,
+    emojiCode,
+    custom,
+  ];
 }
 
 class StreamCallCustomEvent extends StreamCallEvent {
@@ -1103,13 +1103,13 @@ class StreamCallCustomEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        senderUserId,
-        createdAt,
-        eventType,
-        custom,
-        users,
-      ];
+    ...super.props,
+    senderUserId,
+    createdAt,
+    eventType,
+    custom,
+    users,
+  ];
 }
 
 /// Event that is triggered when the new session is started for a call
@@ -1127,11 +1127,11 @@ class StreamCallSessionStartedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    metadata,
+  ];
 }
 
 /// Event that is triggered when the session is ended for a call
@@ -1149,11 +1149,11 @@ class StreamCallSessionEndedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    metadata,
+  ];
 }
 
 class StreamCallSessionParticipantCountUpdatedEvent extends StreamCallEvent {
@@ -1172,12 +1172,12 @@ class StreamCallSessionParticipantCountUpdatedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        participantsCountByRole,
-        anonymousParticipantCount,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    participantsCountByRole,
+    anonymousParticipantCount,
+  ];
 }
 
 /// Event that is triggered when participant joins the call session
@@ -1197,12 +1197,12 @@ class StreamCallSessionParticipantJoinedEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        participant,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    participant,
+    user,
+  ];
 }
 
 /// Event that is triggered when participant leaves the call session
@@ -1224,13 +1224,13 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        participant,
-        user,
-        duration,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    participant,
+    user,
+    duration,
+  ];
 }
 
 extension StreamCallEventX on StreamCallEvent? {
@@ -1249,31 +1249,31 @@ extension SfuEventX on SfuEvent {
   StreamCallEvent? mapToCallEvent(CallState state) {
     return switch (this) {
       final SfuJoinResponseEvent event => StreamCallJoinedEvent(
-          state.callCid,
-          participants: event.callState.participants
-              .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
-              .toList(),
-          participantCount: event.callState.participantCount.total,
-          anonymousCount: event.callState.participantCount.anonymous,
-          startedAt: event.callState.startedAt,
-        ),
+        state.callCid,
+        participants: event.callState.participants
+            .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
+            .toList(),
+        participantCount: event.callState.participantCount.total,
+        anonymousCount: event.callState.participantCount.anonymous,
+        startedAt: event.callState.startedAt,
+      ),
       final SfuConnectionQualityChangedEvent event =>
         StreamCallConnectionQualityChangedEvent(
           state.callCid,
           connectionQualityUpdates: event.connectionQualityUpdates,
         ),
       final SfuAudioLevelChangedEvent event => StreamCallAudioLevelChangedEvent(
-          state.callCid,
-          audioLevels: event.audioLevels,
-        ),
+        state.callCid,
+        audioLevels: event.audioLevels,
+      ),
       final SfuParticipantJoinedEvent event => StreamCallParticipantJoinedEvent(
-          state.callCid,
-          participant: event.participant.toParticipantState(state),
-        ),
+        state.callCid,
+        participant: event.participant.toParticipantState(state),
+      ),
       final SfuParticipantLeftEvent event => StreamCallParticipantLeftEvent(
-          state.callCid,
-          participant: event.participant.toParticipantState(state),
-        ),
+        state.callCid,
+        participant: event.participant.toParticipantState(state),
+      ),
       final SfuDominantSpeakerChangedEvent event =>
         StreamCallDominantSpeakerChangedEvent(
           state.callCid,
@@ -1281,16 +1281,16 @@ extension SfuEventX on SfuEvent {
           sessionId: event.sessionId,
         ),
       final SfuPinsUpdatedEvent event => StreamPinsUpdatedEvent(
-          state.callCid,
-          pins: event.pins,
-        ),
+        state.callCid,
+        pins: event.pins,
+      ),
       final SfuTrackPublishedEvent event => StreamCallSfuTrackPublishedEvent(
-          state.callCid,
-          userId: event.userId,
-          sessionId: event.sessionId,
-          trackType: event.trackType,
-          participant: event.participant.toParticipantState(state),
-        ),
+        state.callCid,
+        userId: event.userId,
+        sessionId: event.sessionId,
+        trackType: event.trackType,
+        participant: event.participant.toParticipantState(state),
+      ),
       final SfuTrackUnpublishedEvent event =>
         StreamCallSfuTrackUnpublishedEvent(
           state.callCid,
@@ -1300,10 +1300,10 @@ extension SfuEventX on SfuEvent {
           participant: event.participant.toParticipantState(state),
         ),
       final SfuCallGrantsUpdated event => StreamCallGrantsUpdated(
-          state.callCid,
-          currentGrants: event.currentGrants,
-          message: event.message,
-        ),
+        state.callCid,
+        currentGrants: event.currentGrants,
+        message: event.message,
+      ),
       // Ignore other events as they are internal to SFU logic
       _ => null,
     };
@@ -1314,63 +1314,63 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
   StreamCallEvent? mapToCallEvent(CallState state) {
     return switch (this) {
       final CoordinatorConnectedEvent event => StreamCallConnectedEvent(
-          state.callCid,
-          connectionId: event.connectionId,
-          userId: event.userId,
-        ),
+        state.callCid,
+        connectionId: event.connectionId,
+        userId: event.userId,
+      ),
       final CoordinatorDisconnectedEvent event => StreamCallDisconnectedEvent(
-          state.callCid,
-          connectionId: event.connectionId,
-          userId: event.userId,
-          closeCode: event.closeCode,
-          closeReason: event.closeReason,
-        ),
+        state.callCid,
+        connectionId: event.connectionId,
+        userId: event.userId,
+        closeCode: event.closeCode,
+        closeReason: event.closeReason,
+      ),
       final CoordinatorCallCreatedEvent event => StreamCallCreatedEvent(
-          event.callCid,
-          metadata: event.metadata,
-          createdAt: event.createdAt,
-        ),
+        event.callCid,
+        metadata: event.metadata,
+        createdAt: event.createdAt,
+      ),
       final CoordinatorCallMissedEvent event => StreamCallMissedEvent(
-          event.callCid,
-          metadata: event.metadata,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          callUser: event.callUser,
-          members: event.members,
-        ),
+        event.callCid,
+        metadata: event.metadata,
+        createdAt: event.createdAt,
+        sessionId: event.sessionId,
+        callUser: event.callUser,
+        members: event.members,
+      ),
       final CoordinatorCallRingingEvent event => StreamCallRingingEvent(
-          event.callCid,
-          ringing: event.ringing,
-          metadata: event.metadata,
-          sessionId: event.sessionId,
-          createdAt: event.createdAt,
-        ),
+        event.callCid,
+        ringing: event.ringing,
+        metadata: event.metadata,
+        sessionId: event.sessionId,
+        createdAt: event.createdAt,
+      ),
       final CoordinatorCallUpdatedEvent event => StreamCallUpdatedEvent(
-          event.callCid,
-          metadata: event.metadata,
-          capabilitiesByRole: event.capabilitiesByRole,
-          createdAt: event.createdAt,
-        ),
+        event.callCid,
+        metadata: event.metadata,
+        capabilitiesByRole: event.capabilitiesByRole,
+        createdAt: event.createdAt,
+      ),
       final CoordinatorCallEndedEvent event => StreamCallEndedEvent(
-          event.callCid,
-          endedBy: event.endedBy,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-          type: event.type,
-          reason: event.reason,
-        ),
+        event.callCid,
+        endedBy: event.endedBy,
+        createdAt: event.createdAt,
+        metadata: event.metadata,
+        type: event.type,
+        reason: event.reason,
+      ),
       final CoordinatorCallAcceptedEvent event => StreamCallAcceptedEvent(
-          event.callCid,
-          acceptedBy: event.acceptedBy,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-        ),
+        event.callCid,
+        acceptedBy: event.acceptedBy,
+        createdAt: event.createdAt,
+        metadata: event.metadata,
+      ),
       final CoordinatorCallRejectedEvent event => StreamCallRejectedEvent(
-          event.callCid,
-          rejectedBy: event.rejectedBy,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-        ),
+        event.callCid,
+        rejectedBy: event.rejectedBy,
+        createdAt: event.createdAt,
+        metadata: event.metadata,
+      ),
       final CoordinatorCallPermissionRequestEvent event =>
         StreamCallPermissionRequestEvent(
           event.callCid,
@@ -1466,16 +1466,16 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           createdAt: event.createdAt,
         ),
       final CoordinatorCallUserBlockedEvent event => StreamCallUserBlockedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        user: event.user,
+      ),
       final CoordinatorCallUserKickedEvent event => StreamCallUserKickedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-          kickedByUser: event.kickedByUser,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        user: event.user,
+        kickedByUser: event.kickedByUser,
+      ),
       final CoordinatorCallUserUnblockedEvent event =>
         StreamCallUserUnblockedEvent(
           event.callCid,
@@ -1483,21 +1483,21 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           user: event.user,
         ),
       final CoordinatorCallReactionEvent event => StreamCallReactionEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          reactionType: event.reactionType,
-          user: event.user,
-          emojiCode: event.emojiCode,
-          custom: event.custom,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        reactionType: event.reactionType,
+        user: event.user,
+        emojiCode: event.emojiCode,
+        custom: event.custom,
+      ),
       final CoordinatorCallCustomEvent event => StreamCallCustomEvent(
-          event.callCid,
-          senderUserId: event.senderUserId,
-          createdAt: event.createdAt,
-          eventType: event.eventType,
-          users: event.users,
-          custom: event.custom,
-        ),
+        event.callCid,
+        senderUserId: event.senderUserId,
+        createdAt: event.createdAt,
+        eventType: event.eventType,
+        users: event.users,
+        custom: event.custom,
+      ),
       final CoordinatorCallSessionStartedEvent event =>
         StreamCallSessionStartedEvent(
           event.callCid,
@@ -1530,16 +1530,16 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           duration: event.duration,
         ),
       final CoordinatorCallLiveStartedEvent event => StreamCallLiveStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        metadata: event.metadata,
+      ),
       final CoordinatorCallMemberAddedEvent event => StreamCallMemberAddedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          members: event.members,
-          metadata: event.metadata,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        members: event.members,
+        metadata: event.metadata,
+      ),
       final CoordinatorCallMemberRemovedEvent event =>
         StreamCallMemberRemovedEvent(
           event.callCid,
@@ -1603,11 +1603,11 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           metadata: event.metadata,
         ),
       final CoordinatorCallUserMutedEvent event => StreamCallUserMutedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          fromUserId: event.fromUserId,
-          mutedUserIds: event.mutedUserIds,
-        ),
+        event.callCid,
+        createdAt: event.createdAt,
+        fromUserId: event.fromUserId,
+        mutedUserIds: event.mutedUserIds,
+      ),
       final CoordinatorCallRecordingReadyEvent event =>
         StreamCallRecordingReadyEvent(
           event.callCid,

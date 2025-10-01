@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/standard_action_menu_item.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../../theme/app_palette.dart';
+import 'standard_action_menu_item.dart';
 
 class ChooseAudioOutputMenuItem extends StatelessWidget {
   const ChooseAudioOutputMenuItem({required this.onPressed, super.key});
@@ -34,7 +35,7 @@ class ToggleAudioOutputMenuItem extends StatelessWidget {
 
   final RtcMediaDevice audioOutputDevice;
   final List<RtcMediaDevice> audioOutputs;
-  final Function(RtcMediaDevice) onPressed;
+  final void Function(RtcMediaDevice) onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class ToggleAudioOutputMenuItem extends StatelessWidget {
           icon: enabled ? Icons.speaker : Icons.headphones,
           label: 'Speaker',
           onPressed: () {
-            var device = audioOutputs.firstWhereOrNull(
+            final device = audioOutputs.firstWhereOrNull(
               (it) => it.id.equalsIgnoreCase(
                 !enabled ? deviceIdSpeaker : deviceIdEarpiece,
               ),
@@ -56,9 +57,7 @@ class ToggleAudioOutputMenuItem extends StatelessWidget {
           },
           trailing: Text(
             enabled ? 'On' : 'Off',
-            style: TextStyle(
-              color: enabled ? AppColorPalette.appGreen : null,
-            ),
+            style: TextStyle(color: enabled ? AppColorPalette.appGreen : null),
           ),
         ),
       ],

@@ -362,8 +362,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           egressId: event.egressId,
           sessionId: event.sessionId,
           trackType: event.trackType,
-          usersInFrame: event.users
-              .map((key, value) => MapEntry(key, value.toCallUser())),
+          usersInFrame: event.users.map(
+            (key, value) => MapEntry(key, value.toCallUser()),
+          ),
         );
       case EventType.callNotification:
         final event = callNotification!;

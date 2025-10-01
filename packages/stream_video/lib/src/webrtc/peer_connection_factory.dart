@@ -78,7 +78,8 @@ class StreamPeerConnectionFactory {
     CallSessionConfig? callSessionConfig,
   }) async {
     _logger.i(
-      () => '[createPeerConnection] #$type; configuration: '
+      () =>
+          '[createPeerConnection] #$type; configuration: '
           '${configuration.toMap()}, mediaConstraints: $mediaConstraints',
     );
     final pc = await rtc.createPeerConnection(
@@ -94,12 +95,11 @@ class StreamPeerConnectionFactory {
 
     tracer.trace(
       'create',
-      configuration.toMap()
-        ..addAll(
-          {
-            'url': callSessionConfig?.sfuName,
-          },
-        ),
+      configuration.toMap()..addAll(
+        {
+          'url': callSessionConfig?.sfuName,
+        },
+      ),
     );
 
     return TracedStreamPeerConnection(

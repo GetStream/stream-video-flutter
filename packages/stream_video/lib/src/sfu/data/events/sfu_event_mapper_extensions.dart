@@ -6,6 +6,7 @@ import '../models/sfu_audio_sender.dart';
 import '../models/sfu_call_ended_reason.dart';
 import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
+import '../models/sfu_client_capability.dart';
 import '../models/sfu_codec.dart';
 import '../models/sfu_connection_info.dart';
 import '../models/sfu_connection_quality.dart';
@@ -17,7 +18,6 @@ import '../models/sfu_participant.dart';
 import '../models/sfu_participant_source.dart';
 import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
-import '../models/sfu_client_capability.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_layer_setting.dart';
 import '../models/sfu_video_sender.dart';
@@ -184,12 +184,14 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         final payload = inboundStateNotification;
         return SfuInboundStateNotificationEvent(
           inboundVideoStates: payload.inboundVideoStates
-              .map((s) => SfuInboundVideoState(
-                    userId: s.userId,
-                    sessionId: s.sessionId,
-                    trackType: s.trackType.toDomain(),
-                    paused: s.paused,
-                  ))
+              .map(
+                (s) => SfuInboundVideoState(
+                  userId: s.userId,
+                  sessionId: s.sessionId,
+                  trackType: s.trackType.toDomain(),
+                  paused: s.paused,
+                ),
+              )
               .toList(),
         );
       case sfu_events.SfuEvent_EventPayload.participantUpdated:
@@ -413,16 +415,20 @@ extension SfuWebsocketReconnectStrategyExtension
   SfuReconnectionStrategy toDomain() {
     switch (this) {
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
         return SfuReconnectionStrategy.disconnect;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_FAST:
         return SfuReconnectionStrategy.fast;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_REJOIN:
         return SfuReconnectionStrategy.rejoin;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
+          .WebsocketReconnectStrategy
+          .WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
         return SfuReconnectionStrategy.migrate;
       default:
         return SfuReconnectionStrategy.unspecified;

@@ -7,18 +7,20 @@ import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
 /// Builder function used to build a video placeholder.
-typedef VideoPlaceholderBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef VideoPlaceholderBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// Builder function used to build a video renderer.
-typedef VideoRendererBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef VideoRendererBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// A widget that represents a single participant in a call.
 class StreamCallParticipant extends StatelessWidget {
@@ -148,7 +150,7 @@ class StreamCallParticipant extends StatelessWidget {
         this.pausedVideoIndicatorColor ?? theme.pausedVideoIndicatorColor;
     final showConnectionQualityIndicator =
         this.showConnectionQualityIndicator ??
-            theme.showConnectionQualityIndicator;
+        theme.showConnectionQualityIndicator;
     final connectionLevelActiveColor =
         this.connectionLevelActiveColor ?? theme.connectionLevelActiveColor;
     final connectionLevelInactiveColor =

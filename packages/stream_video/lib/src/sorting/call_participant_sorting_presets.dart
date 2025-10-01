@@ -26,14 +26,15 @@ mixin CallParticipantSortingPresets {
   ]);
 
   /// The sorting preset for livestreams and audio rooms.
-  static final livestreamOrAudioRoom =
-      combineComparators<CallParticipantState>([
-    ifInvisibleBy(dominantSpeaker),
-    ifInvisibleBy(speaking),
-    ifInvisibleBy(byReactionType('raised-hand')),
-    ifInvisibleBy(byParticipantSource(SfuParticipantSource.rtmp)),
-    ifInvisibleBy(publishingVideo),
-    ifInvisibleBy(publishingAudio),
-    byRole(['admin', 'host', 'speaker']),
-  ]);
+  static final livestreamOrAudioRoom = combineComparators<CallParticipantState>(
+    [
+      ifInvisibleBy(dominantSpeaker),
+      ifInvisibleBy(speaking),
+      ifInvisibleBy(byReactionType('raised-hand')),
+      ifInvisibleBy(byParticipantSource(SfuParticipantSource.rtmp)),
+      ifInvisibleBy(publishingVideo),
+      ifInvisibleBy(publishingAudio),
+      byRole(['admin', 'host', 'speaker']),
+    ],
+  );
 }

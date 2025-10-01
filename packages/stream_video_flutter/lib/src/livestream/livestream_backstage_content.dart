@@ -117,8 +117,9 @@ class _LivestreamBackstageContentState
             if (participants.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                translations
-                    .livestreamBackstageParticipants(participants.length),
+                translations.livestreamBackstageParticipants(
+                  participants.length,
+                ),
                 style: liveTheme.backstageParticipantsTextStyle,
               ),
             ],
