@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
+
+import '../theme/app_palette.dart';
 
 class StreamButton extends StatelessWidget {
   const StreamButton({
@@ -67,7 +68,7 @@ class StreamButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4),
         shape: RoundedRectangleBorder(
           side: borderColor != null
-              ? BorderSide(color: borderColor!, width: 1)
+              ? BorderSide(color: borderColor!)
               : BorderSide.none,
           borderRadius: BorderRadius.circular(36),
         ),

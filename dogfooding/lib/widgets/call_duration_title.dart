@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../theme/app_palette.dart';
 
 class CallDurationTitle extends StatefulWidget {
   const CallDurationTitle({super.key, required this.call});

@@ -1,20 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/utils/consts.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/audio_output_menu_item.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/background_filters_menu_item.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/closed_captions_menu_item.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/noise_cancellation_menu_item.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu_item.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/standard_action_menu_item.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../dogfooding_app_channel.dart';
+import '../../theme/app_palette.dart';
+import '../../utils/consts.dart';
 import '../../utils/feedback_dialog.dart';
+import 'audio_output_menu_item.dart';
+import 'background_filters_menu_item.dart';
+import 'closed_captions_menu_item.dart';
+import 'noise_cancellation_menu_item.dart';
+import 'settings_menu_item.dart';
+import 'standard_action_menu_item.dart';
 
 CallReactionData _raisedHandReaction = const CallReactionData(
   emojiCode: ':raise-hand:',
@@ -31,9 +31,9 @@ enum IncomingVideoQuality {
   p144('144p'),
   off('Off');
 
-  final String name;
-
   const IncomingVideoQuality(this.name);
+
+  final String name;
 
   @override
   String toString() => name;
@@ -171,7 +171,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   child: CallControlOption(
                     icon: Text(e.icon, textAlign: TextAlign.center),
                     onPressed: () {},
-                    padding: const EdgeInsets.all(0),
+                    padding: EdgeInsets.zero,
                   ),
                 ),
               );
@@ -310,7 +310,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               },
             );
           })
-          .cast()
+          .cast<Widget>()
           .insertBetween(const SizedBox(height: 16)),
     ];
   }
@@ -348,7 +348,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               },
             );
           })
-          .cast()
+          .cast<Widget>()
           .insertBetween(const SizedBox(height: 16)),
     ];
   }
@@ -381,7 +381,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               },
             );
           })
-          .cast()
+          .cast<Widget>()
           .insertBetween(const SizedBox(height: 16)),
     ];
   }
@@ -480,7 +480,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               'assets/bg1.jpg',
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 'assets/bg1.jpg',
                 fit: BoxFit.cover,
@@ -494,7 +494,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               'assets/bg2.jpg',
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 'assets/bg2.jpg',
                 fit: BoxFit.cover,
@@ -508,7 +508,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               'assets/bg3.jpg',
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 'assets/bg3.jpg',
                 fit: BoxFit.cover,
@@ -589,7 +589,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               },
             );
           })
-          .cast()
+          .cast<Widget>()
           .insertBetween(const SizedBox(height: 16)),
     ];
   }

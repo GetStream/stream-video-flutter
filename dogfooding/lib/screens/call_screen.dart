@@ -2,27 +2,26 @@
 import 'dart:async';
 import 'dart:convert';
 
-// 🐦 Flutter imports:
-import 'package:flutter/material.dart';
-
-// 📦 Package imports:
+// � Package imports:
 import 'package:crypto/crypto.dart';
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/router/routes.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/utils/feedback_dialog.dart';
-import 'package:flutter_dogfooding/widgets/badged_call_option.dart';
-import 'package:flutter_dogfooding/widgets/call_duration_title.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu.dart';
-import 'package:flutter_dogfooding/widgets/share_call_card.dart';
+// �🐦 Flutter imports:
+import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
 // 🌎 Project imports:
-import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
 import '../app/user_auth_controller.dart';
+import '../core/repos/app_preferences.dart';
+import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
+import '../router/routes.dart';
+import '../theme/app_palette.dart';
+import '../utils/feedback_dialog.dart';
+import '../widgets/badged_call_option.dart';
+import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
+import '../widgets/settings_menu/settings_menu.dart';
+import '../widgets/share_call_card.dart';
 
 const _useCustomDesktopScreenShareOption = false;
 
@@ -95,11 +94,11 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   void showParticipants(BuildContext context) {
-    CallParticipantsRoute($extra: widget.call).push(context);
+    CallParticipantsRoute($extra: widget.call).push<void>(context);
   }
 
   void showStats(BuildContext context) {
-    CallStatsRoute($extra: widget.call).push(context);
+    CallStatsRoute($extra: widget.call).push<void>(context);
   }
 
   void toggleMoreMenu(BuildContext context) {
@@ -257,6 +256,7 @@ class _CallScreenState extends State<CallScreen> {
                               AppColorPalette.primary,
                           disabledScreenShareIcon: Icons.screen_share,
                           desktopScreenSelectorBuilder:
+                              // ignore: avoid_redundant_argument_values
                               _useCustomDesktopScreenShareOption
                               ? _customDesktopScreenShareSelector
                               : null,
@@ -397,7 +397,7 @@ class ChatBottomSheet extends StatelessWidget {
 Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
   BuildContext context,
 ) {
-  final ScreenSelectorStateNotifier stateNotifier = ScreenSelectorStateNotifier(
+  final stateNotifier = ScreenSelectorStateNotifier(
     sourceTypes: [SourceType.Screen],
   );
 
@@ -409,7 +409,7 @@ Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
         builder:
             (BuildContext context, ScreenSelectorState value, Widget? child) =>
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: ThumbnailGrid(
                     sources: value.sources.values.toList(),
                     selectedSource: value.selectedSource,

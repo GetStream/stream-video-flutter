@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/standard_action_menu_item.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../../theme/app_palette.dart';
+import 'settings_menu.dart';
+import 'standard_action_menu_item.dart';
 
 class ClosedCaptionsMenuItem extends StatelessWidget {
   const ClosedCaptionsMenuItem({super.key, required this.widget});
@@ -15,10 +16,11 @@ class ClosedCaptionsMenuItem extends StatelessWidget {
       stream: widget.call.state.asStream(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final callState = snapshot.data as CallState;
+          final callState = snapshot.data;
 
-          if (callState.settings.transcription.closedCaptionMode ==
-              ClosedCaptionSettingsMode.disabled) {
+          if (callState == null ||
+              callState.settings.transcription.closedCaptionMode ==
+                  ClosedCaptionSettingsMode.disabled) {
             return const SizedBox.shrink();
           }
 

@@ -1,26 +1,23 @@
-// 🎯 Dart imports:
 import 'dart:convert';
-
-// 📦 Package imports:
-import 'package:flutter_dogfooding/core/model/environment.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/environment.dart';
 import 'custom_environment_loader.dart';
 
 class TokenResponse {
-  final String token;
-  final String apiKey;
-
   const TokenResponse(this.token, this.apiKey);
 
   factory TokenResponse.fromJson(Map<String, dynamic> json) =>
       TokenResponse(json['token'], json['apiKey']);
+
+  final String token;
+  final String apiKey;
 }
 
 class TokenService {
-  final CustomEnvironmentLoader? customEnvironmentLoader;
-
   const TokenService({this.customEnvironmentLoader});
+
+  final CustomEnvironmentLoader? customEnvironmentLoader;
 
   Future<TokenResponse> loadToken({
     required String userId,

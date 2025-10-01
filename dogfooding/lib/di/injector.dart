@@ -1,8 +1,4 @@
-// 📦 Package imports:
 import 'package:flutter/foundation.dart';
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,9 +10,11 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 
 import '../app/user_auth_controller.dart';
 import '../core/model/environment.dart';
+import '../core/repos/app_preferences.dart';
 import '../core/repos/custom_environment_loader.dart';
 import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
+import '../core/repos/user_chat_repository.dart';
 import '../log_config.dart';
 import '../utils/consts.dart';
 
@@ -25,6 +23,8 @@ GetIt locator = GetIt.instance;
 /// This class is responsible for registering dependencies
 /// and injecting them into the app.
 class AppInjector {
+  AppInjector._();
+
   // Register dependencies
   static Future<void> init({Environment? forceEnvironment}) async {
     // Google sign in
@@ -45,6 +45,7 @@ class AppInjector {
 
     // Repositories
     locator.registerSingleton(
+      // ignore: avoid_redundant_argument_values
       const TokenService(customEnvironmentLoader: customEnvironmentLoader),
     );
 
@@ -158,8 +159,6 @@ StreamVideo _initStreamVideo(
     tokenLoader: tokenLoader,
     options: StreamVideoOptions(
       logPriority: Priority.debug,
-      muteAudioWhenInBackground: false,
-      muteVideoWhenInBackground: false,
       keepConnectionsAliveWhenInBackground: true,
       audioProcessor: NoiseCancellationAudioProcessor(),
     ),

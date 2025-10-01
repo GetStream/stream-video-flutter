@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../theme/app_palette.dart';
 
 class ClosedCaptionsWidget extends StatelessWidget {
   const ClosedCaptionsWidget({
@@ -24,12 +25,12 @@ class ClosedCaptionsWidget extends StatelessWidget {
       stream: call.closedCaptions,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          var closedCaptions = (snapshot.data as List<StreamClosedCaption>)
-              .reversed
-              .toList();
+          var closedCaptions = snapshot.data != null
+              ? snapshot.data!.reversed.toList()
+              : <StreamClosedCaption>[];
 
           if (maxCaptions != null && closedCaptions.length > maxCaptions!) {
-            closedCaptions = closedCaptions.sublist(0, maxCaptions!);
+            closedCaptions = closedCaptions.sublist(0, maxCaptions);
           }
 
           return AnimatedContainer(
@@ -50,7 +51,7 @@ class ClosedCaptionsWidget extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: "${caption.user.name}: ",
+                          text: '${caption.user.name}: ',
                           style: const TextStyle(
                             color: AppColorPalette.secondaryText,
                             fontSize: 16,

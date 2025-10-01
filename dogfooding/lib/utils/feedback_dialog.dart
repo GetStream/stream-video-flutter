@@ -1,15 +1,13 @@
-// 🐦 Flutter imports:
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/utils/assets.dart';
-import 'package:flutter_dogfooding/widgets/stream_button.dart';
-import 'package:go_router/go_router.dart';
-
-// 📦 Package imports:
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
+import 'package:go_router/go_router.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../theme/app_palette.dart';
+import '../widgets/stream_button.dart';
+import 'assets.dart';
 
 Future<void> showFeedbackDialog(
   BuildContext context, {
@@ -19,11 +17,10 @@ Future<void> showFeedbackDialog(
     context: context,
     builder: (BuildContext context) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Align(
-            alignment: Alignment.center,
             child: Stack(
               children: [
                 Container(
@@ -104,14 +101,11 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
             },
             starBuilder: (index, color) =>
                 Icon(Icons.star, size: 45, color: color),
-            starCount: 5,
             starSize: 45,
-            maxValue: 5,
             starSpacing: 5,
             maxValueVisibility: false,
             valueLabelVisibility: false,
             animationDuration: const Duration(milliseconds: 1000),
-            starOffColor: const Color(0xffe7e8ea),
             starColor: AppColorPalette.appGreen,
           ),
           const SizedBox(height: 16),

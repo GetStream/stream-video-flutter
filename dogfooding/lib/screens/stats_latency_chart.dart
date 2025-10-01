@@ -1,8 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter/material.dart';
+
+import '../theme/app_palette.dart';
 
 class StatsLatencyChart extends StatelessWidget {
   const StatsLatencyChart({super.key, required this.latencyHistory});
@@ -18,14 +19,12 @@ class StatsLatencyChart extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: LineChart(
         LineChartData(
           lineTouchData: const LineTouchData(enabled: false),
           gridData: FlGridData(
-            show: true,
             drawVerticalLine: false,
-            drawHorizontalLine: true,
             verticalInterval: 1,
             horizontalInterval: 20,
             getDrawingVerticalLine: (value) {
@@ -36,7 +35,6 @@ class StatsLatencyChart extends StatelessWidget {
             },
           ),
           titlesData: FlTitlesData(
-            show: true,
             rightTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -44,15 +42,9 @@ class StatsLatencyChart extends StatelessWidget {
                 interval: maxLatency / 5,
               ),
             ),
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            bottomTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            topTitles: const AxisTitles(),
+            bottomTitles: const AxisTitles(),
+            leftTitles: const AxisTitles(),
           ),
           borderData: FlBorderData(show: false),
           minX: 0,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/settings_menu_item.dart';
+
+import 'settings_menu_item.dart';
 
 class StandardActionMenuItem extends StatelessWidget {
   const StandardActionMenuItem({

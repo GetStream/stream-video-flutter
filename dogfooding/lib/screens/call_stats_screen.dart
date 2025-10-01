@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/app/user_auth_controller.dart';
-import 'package:flutter_dogfooding/di/injector.dart';
-import 'package:flutter_dogfooding/screens/stats_latency_chart.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../app/user_auth_controller.dart';
+import '../di/injector.dart';
+import '../theme/app_palette.dart';
+import 'stats_latency_chart.dart';
 
 class CallStatsScreen extends StatelessWidget {
   CallStatsScreen({super.key, required this.call});
@@ -60,7 +61,7 @@ class CallStatsScreen extends StatelessWidget {
                   ),
                   if (snapshot.hasData) ...[
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
                           const Icon(Icons.network_check, color: Colors.white),
@@ -73,7 +74,7 @@ class CallStatsScreen extends StatelessWidget {
                       ),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
                         style: TextStyle(color: Colors.white),
@@ -88,7 +89,7 @@ class CallStatsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
                           const Icon(Icons.bar_chart, color: Colors.white),
@@ -101,7 +102,7 @@ class CallStatsScreen extends StatelessWidget {
                       ),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'Review the key data points below to assess call performance.',
                         style: TextStyle(color: Colors.white),
@@ -274,11 +275,11 @@ class StatIndicator extends StatelessWidget {
     if (value == null) {
       return null;
     } else if (okRange.contains(value)) {
-      return (const Color(0xFFFFD646), "Ok");
+      return (const Color(0xFFFFD646), 'Ok');
     } else if (okRange.first > value!) {
-      return (const Color(0xFF00E2A1), "Good");
+      return (const Color(0xFF00E2A1), 'Good');
     } else {
-      return (const Color(0xFFDC433B), "Bad");
+      return (const Color(0xFFDC433B), 'Bad');
     }
   }
 

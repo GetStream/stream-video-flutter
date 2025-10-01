@@ -1,14 +1,10 @@
-// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-
-// 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-// 🌎 Project imports:
 import '../core/model/environment.dart';
+import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../theme/app_palette.dart';
 
 class EnvironmentSwitcher extends StatefulWidget {
   const EnvironmentSwitcher({super.key, required this.currentEnvironment});
@@ -33,7 +29,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
     final streamVideoTheme = StreamVideoTheme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
           Container(
@@ -97,7 +93,6 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                             color: selectedEnvironment == env
                                 ? AppColorPalette.appGreen
                                 : Colors.white,
-                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),

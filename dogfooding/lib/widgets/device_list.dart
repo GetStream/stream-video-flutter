@@ -47,7 +47,7 @@ class _DeviceListState extends State<DeviceList> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(child: Text(e.userId ?? '')),
-                          if (e.voip == true) ...[
+                          if (e.voip ?? false) ...[
                             const Icon(Icons.phone, size: 16),
                             const SizedBox(width: 4),
                             const Text('VOIP'),

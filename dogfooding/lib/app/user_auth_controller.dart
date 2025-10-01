@@ -1,17 +1,13 @@
-// 🐦 Flutter imports:
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
-import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
-
-// 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/core/model/user_credentials.dart';
-import 'package:flutter_dogfooding/core/repos/user_auth_repository.dart';
 import '../core/model/environment.dart';
+import '../core/model/user_credentials.dart';
 import '../core/repos/app_preferences.dart';
+import '../core/repos/token_service.dart';
+import '../core/repos/user_auth_repository.dart';
+import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 
 /// A controller that handles user authentication.

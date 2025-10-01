@@ -1,17 +1,13 @@
-// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/screens/call_participants_list.dart';
-import 'package:flutter_dogfooding/screens/call_stats_screen.dart';
-import 'package:flutter_dogfooding/screens/livestream_demo_screen.dart';
-
-// 📦 Package imports:
 import 'package:go_router/go_router.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/screens/call_screen.dart';
-import 'package:flutter_dogfooding/screens/home_screen.dart';
-import 'package:flutter_dogfooding/screens/lobby_screen.dart';
+import '../screens/call_participants_list.dart';
+import '../screens/call_screen.dart';
+import '../screens/call_stats_screen.dart';
+import '../screens/home_screen.dart';
+import '../screens/livestream_demo_screen.dart';
+import '../screens/lobby_screen.dart';
 import '../screens/login_screen.dart';
 
 part 'routes.g.dart';

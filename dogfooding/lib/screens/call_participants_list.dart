@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/widgets/share_call_card.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../widgets/share_call_card.dart';
 
 class CallParticipantsList extends StatelessWidget {
   const CallParticipantsList({super.key, required this.call});
@@ -80,13 +81,15 @@ class CallParticipantsList extends StatelessWidget {
                               ),
                             ),
                           ),
-                          participant.isAudioEnabled
-                              ? const Icon(Icons.mic_rounded)
-                              : const Icon(Icons.mic_off_rounded),
+                          if (participant.isAudioEnabled)
+                            const Icon(Icons.mic_rounded)
+                          else
+                            const Icon(Icons.mic_off_rounded),
                           const SizedBox(width: 8),
-                          participant.isVideoEnabled
-                              ? const Icon(Icons.videocam_rounded)
-                              : const Icon(Icons.videocam_off_rounded),
+                          if (participant.isVideoEnabled)
+                            const Icon(Icons.videocam_rounded)
+                          else
+                            const Icon(Icons.videocam_off_rounded),
                         ],
                       ),
                     );

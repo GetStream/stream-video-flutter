@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/dogfooding_app_channel.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../../dogfooding_app_channel.dart';
+import '../../theme/app_palette.dart';
 
 const _iconSize = 40.0;
 
@@ -37,7 +38,7 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
+      padding: const EdgeInsets.only(top: 16),
       child: SizedBox(
         height: _iconSize,
         child: ListView(
@@ -192,7 +193,7 @@ class _GrayscaleFilterOption extends _CustomFilterOption {
 
   @override
   Future<void> registerEffectProcessorCallback() async {
-    _dogfoodingAppChannel.registerGreyscaleEffect();
+    await _dogfoodingAppChannel.registerGreyscaleEffect();
   }
 
   @override

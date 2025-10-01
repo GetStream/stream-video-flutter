@@ -36,12 +36,6 @@ enum Environment {
   ),
   custom('Custom', 'custom', '');
 
-  final String displayName;
-  final String envName;
-  final String hostName;
-  final List<String> aliases;
-  final List<String> baseUrls;
-
   const Environment(
     this.displayName,
     this.envName,
@@ -59,7 +53,7 @@ enum Environment {
 
   factory Environment.fromHost(String host) {
     final hostParts = host.split('.');
-    final String envAlias = hostParts.length < 2 ? '' : hostParts[0];
+    final envAlias = hostParts.length < 2 ? '' : hostParts[0];
 
     return Environment.fromSubdomain(envAlias);
   }
@@ -69,6 +63,12 @@ enum Environment {
       (env) => env.baseUrls.contains(baseUrl),
     );
   }
+
+  final String displayName;
+  final String envName;
+  final String hostName;
+  final List<String> aliases;
+  final List<String> baseUrls;
 
   String? getJoinUrl({required String callId, String? callType}) {
     switch (this) {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/widgets/device_list.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../theme/app_palette.dart';
+import 'device_list.dart';
 
 class UserActionsAvatar extends StatelessWidget {
   const UserActionsAvatar({required this.currentUser, super.key});
@@ -21,7 +21,6 @@ class UserActionsAvatar extends StatelessWidget {
             AppColorPalette.buttonSecondary,
           ),
         ),
-        alignmentOffset: const Offset(00, 0),
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
               return InkWell(
@@ -44,7 +43,7 @@ class UserActionsAvatar extends StatelessWidget {
             onPressed: () async {
               final devices = await StreamVideo.instance.getDevices();
 
-              showDialog(
+              await showDialog<void>(
                 // ignore: use_build_context_synchronously
                 context: context,
                 builder: (context) {

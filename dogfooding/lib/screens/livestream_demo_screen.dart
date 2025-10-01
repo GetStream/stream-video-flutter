@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/core/model/environment.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
-import 'package:flutter_dogfooding/screens/login_screen.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../core/model/environment.dart';
+import '../core/repos/token_service.dart';
+import 'login_screen.dart';
 
 class LivestreamDemoScreen extends StatefulWidget {
   const LivestreamDemoScreen({super.key, required this.callId});
@@ -32,7 +33,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
       environment: Environment.livestream,
     );
 
-    var streamVideo = StreamVideo.create(
+    final streamVideo = StreamVideo.create(
       tokenResponse.apiKey,
       user: User.regular(userId: userId),
       tokenLoader: (userId) async {
@@ -102,7 +103,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
       ),
       body: switch (_call) {
         null => const Center(child: CircularProgressIndicator()),
-        Call call => LivestreamPlayer(call: call),
+        final Call call => LivestreamPlayer(call: call),
       },
     );
   }

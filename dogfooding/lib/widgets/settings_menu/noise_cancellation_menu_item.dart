@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/widgets/settings_menu/standard_action_menu_item.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../../theme/app_palette.dart';
+import 'standard_action_menu_item.dart';
 
 class NoiseCancellationMenuItem extends StatefulWidget {
   const NoiseCancellationMenuItem({super.key, required this.call});
@@ -20,10 +21,11 @@ class _NoiseCancellationMenuItemState extends State<NoiseCancellationMenuItem> {
       stream: widget.call.state.asStream(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final callState = snapshot.data as CallState;
+          final callState = snapshot.data;
 
-          if (callState.settings.audio.noiseCancellation?.mode ==
-              NoiceCancellationSettingsMode.disabled) {
+          if (callState == null ||
+              callState.settings.audio.noiseCancellation?.mode ==
+                  NoiceCancellationSettingsMode.disabled) {
             return const SizedBox.shrink();
           }
 

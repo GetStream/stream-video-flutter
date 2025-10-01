@@ -2,28 +2,27 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-// 🐦 Flutter imports:
-import 'package:flutter/material.dart';
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/router/routes.dart';
-import 'package:flutter_dogfooding/screens/qr_code_scanner.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/widgets/environment_switcher.dart';
-import 'package:flutter_dogfooding/widgets/stream_button.dart';
 // 📦 Package imports:
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
+// 🌎 Project imports:
 import '../app/user_auth_controller.dart';
 import '../core/model/environment.dart';
+import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../router/routes.dart';
+import '../theme/app_palette.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
+import '../widgets/environment_switcher.dart';
+import '../widgets/stream_button.dart';
 import '../widgets/user_actions_avatar.dart';
+import 'qr_code_scanner.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final _userAuthController = locator.get<UserAuthController>();
   late final _callIdController = TextEditingController();
 
-  Call? _call;
+  late Call _call;
 
   @override
   void initState() {
@@ -58,13 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
       onButtonClick: (call, type, serviceType) async {
         switch (serviceType) {
           case ServiceType.call:
-            call.reject(reason: CallRejectReason.cancel());
+            await call.reject(reason: CallRejectReason.cancel());
           case ServiceType.screenSharing:
-            StreamVideoFlutterBackground.stopService(
+            await StreamVideoFlutterBackground.stopService(
               ServiceType.screenSharing,
               callCid: call.callCid.value,
             );
-            call.setScreenShareEnabled(enabled: false);
+
+            await call.setScreenShareEnabled(enabled: false);
         }
       },
     );
@@ -95,10 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    bool isRinging = memberIds.isNotEmpty;
+    final isRinging = memberIds.isNotEmpty;
 
     try {
-      final result = await _call!.getOrCreate(
+      final result = await _call.getOrCreate(
         memberIds: memberIds,
         ringing: isRinging,
         video: true,
@@ -110,13 +110,13 @@ class _HomeScreenState extends State<HomeScreen> {
             if (isRinging) {
               CallRoute(
                 $extra: (
-                  call: _call!,
+                  call: _call,
                   connectOptions: null,
                   effectsManager: null,
                 ),
-              ).push(context);
+              ).push<void>(context);
             } else {
-              LobbyRoute($extra: _call!).push(context);
+              LobbyRoute($extra: _call).push<void>(context);
             }
           }
         },
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _directCall(BuildContext context) async {
-    TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     final theme = Theme.of(context);
 
     return showDialog(
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               TextField(
                 controller: controller,
                 decoration: const InputDecoration(
-                  hintText: "User ID",
+                  hintText: 'User ID',
                   hintStyle: TextStyle(color: Colors.white30),
                 ),
               ),
@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: EnvironmentBanner(
                   currentEnvironment: _appPreferences.environment,
                 ),
@@ -345,7 +345,6 @@ class _JoinForm extends StatelessWidget {
                   enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(
                       color: AppColorPalette.secondaryText,
-                      width: 1,
                     ),
                     borderRadius: BorderRadius.all(Radius.circular(36)),
                   ),
@@ -405,7 +404,7 @@ class _JoinForm extends StatelessWidget {
       final result = await QrCodeScanner.scan(context);
 
       if (context.mounted && result != null) {
-        _handleJoinUrl(context, result);
+        await _handleJoinUrl(context, result);
       }
     },
   );
@@ -421,8 +420,7 @@ class _JoinForm extends StatelessWidget {
     final Environment environment;
     try {
       environment = Environment.fromBaseUrl(uri.origin);
-    } on StateError catch (_) {
-      // no valid environment found
+    } on Exception catch (_) {
       return;
     }
 
@@ -430,14 +428,14 @@ class _JoinForm extends StatelessWidget {
       // Example: https://livestream-react-demo.vercel.app/?id=6G9bxsMaFbMiGvLWWP85d&type=livestream
       final callId = uri.queryParameters['id'];
       if (callId != null) {
-        LivestreamRoute($extra: callId).push(context);
+        await LivestreamRoute($extra: callId).push<void>(context);
       }
       return;
     }
 
     if (environment != currentEnvironment) {
       if (!kIsProd) {
-        showDialog(
+        await showDialog<void>(
           context: context,
           builder: (context) {
             return AlertDialog(

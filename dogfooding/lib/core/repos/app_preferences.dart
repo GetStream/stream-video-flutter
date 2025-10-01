@@ -1,13 +1,8 @@
-// 🎯 Dart imports:
 import 'dart:convert';
-
-// 📦 Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/core/model/user_credentials.dart';
-
 import '../model/environment.dart';
+import '../model/user_credentials.dart';
 
 class AppPreferences {
   const AppPreferences({required SharedPreferences prefs}) : _prefs = prefs;
