@@ -27,10 +27,12 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
   CallMetrics? get currentMetrics => state;
 
   Stream<
-      ({
-        PeerConnectionStatsBundle publisherStatsBundle,
-        PeerConnectionStatsBundle subscriberStatsBundle,
-      })> run({
+    ({
+      PeerConnectionStatsBundle publisherStatsBundle,
+      PeerConnectionStatsBundle subscriberStatsBundle,
+    })
+  >
+  run({
     Duration interval = const Duration(seconds: 10),
   }) {
     return Stream.periodic(interval, (tick) => (collectStats(), tick)).asyncMap(
@@ -43,17 +45,20 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
   }
 
   Future<
-      ({
-        PeerConnectionStatsBundle publisherStatsBundle,
-        PeerConnectionStatsBundle subscriberStatsBundle
-      })> collectStats() async {
+    ({
+      PeerConnectionStatsBundle publisherStatsBundle,
+      PeerConnectionStatsBundle subscriberStatsBundle,
+    })
+  >
+  collectStats() async {
     final publisherStatsBundle = await rtcManager.publisher?.getStats();
     final subscriberStatsBundle = await rtcManager.subscriber.getStats();
 
     final publisherStats = PeerConnectionStatsBundle(
       peerType: StreamPeerType.publisher,
       stats: publisherStatsBundle?.rtcStats ?? [],
-      printable: publisherStatsBundle?.printable ??
+      printable:
+          publisherStatsBundle?.printable ??
           const RtcPrintableStats(local: '', remote: ''),
       raw: publisherStatsBundle?.rawStats ?? [],
     );
@@ -67,15 +72,16 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
     return (
       publisherStatsBundle: publisherStats,
-      subscriberStatsBundle: subscriberStats
+      subscriberStatsBundle: subscriberStats,
     );
   }
 
   Future<void> _processStats(
     ({
       PeerConnectionStatsBundle publisherStatsBundle,
-      PeerConnectionStatsBundle subscriberStatsBundle
-    }) stats,
+      PeerConnectionStatsBundle subscriberStatsBundle,
+    })
+    stats,
     int tick,
   ) async {
     var publisherStats = state?.publisher ?? PeerConnectionStats.empty();
@@ -83,7 +89,9 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
     final allStats = stats.publisherStatsBundle.stats
         .whereType<RtcOutboundRtpVideoStream>()
-        .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream);
+        .map(
+          MediaStatsInfo.fromRtcOutboundRtpVideoStream,
+        );
 
     final mediaStats = allStats.firstWhereOrNull(
       (s) => s.width != null && s.height != null && s.fps != null,
@@ -132,7 +140,8 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
     if (inboudRtpVideo != null) {
       final jitterInMs = ((inboudRtpVideo.jitter ?? 0) * 1000).toInt();
-      final resolution = inboudRtpVideo.frameWidth != null &&
+      final resolution =
+          inboudRtpVideo.frameWidth != null &&
               inboudRtpVideo.frameHeight != null &&
               inboudRtpVideo.framesPerSecond != null
           ? '${inboudRtpVideo.frameWidth} x ${inboudRtpVideo.frameHeight} @ ${inboudRtpVideo.framesPerSecond}fps'
@@ -190,7 +199,8 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
     // check battery and thermal state every 10th tick (by default every 100s)
     if (tick % 10 == 0) {
-      final batteryCheckAvailable = CurrentPlatform.isAndroid ||
+      final batteryCheckAvailable =
+          CurrentPlatform.isAndroid ||
           CurrentPlatform.isIos ||
           CurrentPlatform.isMacOS ||
           CurrentPlatform.isWindows;
@@ -228,7 +238,8 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
       }
     }
 
-    state = state?.copyWith(
+    state =
+        state?.copyWith(
           publisher: publisherStats,
           subscriber: subscriberStats,
           latencyHistory: latencyHistory ?? [],

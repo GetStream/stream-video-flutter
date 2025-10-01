@@ -1,14 +1,10 @@
 // 📦 Package imports:
+// ignore_for_file: cast_nullable_to_non_nullable
+
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class UserCredentials {
-  const UserCredentials({
-    required this.token,
-    required this.userInfo,
-  });
-
-  final UserToken token;
-  final UserInfo userInfo;
+  const UserCredentials({required this.token, required this.userInfo});
 
   factory UserCredentials.fromJson(Map<String, Object?> json) {
     return UserCredentials(
@@ -17,11 +13,11 @@ class UserCredentials {
     );
   }
 
+  final UserToken token;
+  final UserInfo userInfo;
+
   Map<String, Object?> toJson() {
-    return {
-      'token': token.rawValue,
-      'user': userInfo.toJson(),
-    };
+    return {'token': token.rawValue, 'user': userInfo.toJson()};
   }
 }
 

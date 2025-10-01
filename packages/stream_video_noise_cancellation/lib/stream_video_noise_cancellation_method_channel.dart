@@ -15,7 +15,8 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<void> registerProcessor() async {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-          'The current platform (${CurrentPlatform.name}) does not support audio processing.');
+        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+      );
     }
 
     await methodChannel.invokeMethod<void>('registerProcessor');
@@ -25,7 +26,8 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<bool?> isEnabled() async {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-          'The current platform (${CurrentPlatform.name}) does not support audio processing.');
+        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+      );
     }
 
     return methodChannel.invokeMethod<bool>('isEnabled');
@@ -35,7 +37,8 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<void> setEnabled(bool enabled) {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-          'The current platform (${CurrentPlatform.name}) does not support audio processing.');
+        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+      );
     }
 
     return methodChannel.invokeMethod<void>('setEnabled', {'enabled': enabled});
@@ -45,10 +48,12 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<bool?> deviceSupportsAdvancedAudioProcessing() {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-          'The current platform (${CurrentPlatform.name}) does not support audio processing.');
+        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+      );
     }
 
-    return methodChannel
-        .invokeMethod<bool>('deviceSupportsAdvancedAudioProcessing');
+    return methodChannel.invokeMethod<bool>(
+      'deviceSupportsAdvancedAudioProcessing',
+    );
   }
 }

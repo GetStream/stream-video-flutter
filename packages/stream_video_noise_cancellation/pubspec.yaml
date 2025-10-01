@@ -1,25 +1,26 @@
 name: stream_video_noise_cancellation
-description: The Official package for Stream Video, providing noise cancellation feature for video and audio calls.
-version: 0.10.3
+description: The Official package for Stream Video, providing noise cancellation
+  feature for video and audio calls.
+version: 0.10.4
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ^3.6.2
-  flutter: ">=3.27.4"
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
-  stream_video: ^0.10.3
-  stream_webrtc_flutter: ^1.0.11
+  stream_video: ^0.10.4
+  stream_webrtc_flutter: ^1.0.12
 
 dev_dependencies:
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:
   plugin:

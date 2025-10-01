@@ -104,10 +104,10 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+  ];
 }
 
 /// Sent when someone creates a call and invites another person to participate.
@@ -133,12 +133,12 @@ class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        ringing,
-        sessionId,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    ringing,
+    sessionId,
+    createdAt,
+    metadata,
+  ];
 }
 
 /// Sent when someone misses a call.
@@ -165,13 +165,13 @@ class CoordinatorCallMissedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        sessionId,
-        createdAt,
-        metadata,
-        callUser,
-        members,
-      ];
+    ...super.props,
+    sessionId,
+    createdAt,
+    metadata,
+    callUser,
+    members,
+  ];
 }
 
 /// Sent when a call gets updated.
@@ -191,11 +191,11 @@ class CoordinatorCallUpdatedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        metadata,
-        capabilitiesByRole,
-        createdAt,
-      ];
+    ...super.props,
+    metadata,
+    capabilitiesByRole,
+    createdAt,
+  ];
 }
 
 /// Sent when a calls gets ended.
@@ -221,10 +221,10 @@ class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        endedBy,
-        createdAt,
-      ];
+    ...super.props,
+    endedBy,
+    createdAt,
+  ];
 }
 
 /// Sent when a user accepts the call.
@@ -248,12 +248,12 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        acceptedBy,
-        createdAt,
-        metadata,
-        user,
-      ];
+    ...super.props,
+    acceptedBy,
+    createdAt,
+    metadata,
+    user,
+  ];
 }
 
 /// Sent when a user rejects the call.
@@ -277,12 +277,12 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        rejectedBy,
-        createdAt,
-        metadata,
-        user,
-      ];
+    ...super.props,
+    rejectedBy,
+    createdAt,
+    metadata,
+    user,
+  ];
 }
 
 class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
@@ -301,11 +301,11 @@ class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        permissions,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    permissions,
+    user,
+  ];
 }
 
 class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
@@ -324,11 +324,11 @@ class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        ownCapabilities,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    ownCapabilities,
+    user,
+  ];
 }
 
 class CoordinatorCallRecordingStartedEvent extends CoordinatorCallEvent {
@@ -343,9 +343,9 @@ class CoordinatorCallRecordingStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
@@ -360,9 +360,9 @@ class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallRecordingFailedEvent extends CoordinatorCallEvent {
@@ -377,9 +377,9 @@ class CoordinatorCallRecordingFailedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallTranscriptionStartedEvent extends CoordinatorCallEvent {
@@ -394,9 +394,9 @@ class CoordinatorCallTranscriptionStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallTranscriptionStoppedEvent extends CoordinatorCallEvent {
@@ -411,9 +411,9 @@ class CoordinatorCallTranscriptionStoppedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallTranscriptionFailedEvent extends CoordinatorCallEvent {
@@ -430,9 +430,9 @@ class CoordinatorCallTranscriptionFailedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallClosedCaptionStartedEvent extends CoordinatorCallEvent {
@@ -447,9 +447,9 @@ class CoordinatorCallClosedCaptionStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallClosedCaptionStoppedEvent extends CoordinatorCallEvent {
@@ -464,9 +464,9 @@ class CoordinatorCallClosedCaptionStoppedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallClosedCaptionFailedEvent extends CoordinatorCallEvent {
@@ -481,9 +481,9 @@ class CoordinatorCallClosedCaptionFailedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallBroadcastingStartedEvent extends CoordinatorCallEvent {
@@ -502,11 +502,11 @@ class CoordinatorCallBroadcastingStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        hlsPlaylistUrl,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    hlsPlaylistUrl,
+    createdAt,
+    metadata,
+  ];
 }
 
 class CoordinatorCallBroadcastingStoppedEvent extends CoordinatorCallEvent {
@@ -521,9 +521,9 @@ class CoordinatorCallBroadcastingStoppedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallBroadcastingFailedEvent extends CoordinatorCallEvent {
@@ -538,9 +538,9 @@ class CoordinatorCallBroadcastingFailedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-      ];
+    ...super.props,
+    createdAt,
+  ];
 }
 
 class CoordinatorCallUserBlockedEvent extends CoordinatorCallEvent {
@@ -573,6 +573,24 @@ class CoordinatorCallUserUnblockedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [...super.props, createdAt, user];
+}
+
+class CoordinatorCallUserKickedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallUserKickedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.user,
+    required this.kickedByUser,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final CallUser user;
+  final CallUser? kickedByUser;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, user, kickedByUser];
 }
 
 class CoordinatorCallReactionEvent extends CoordinatorCallEvent {
@@ -617,13 +635,13 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        senderUserId,
-        createdAt,
-        eventType,
-        custom,
-        users,
-      ];
+    ...super.props,
+    senderUserId,
+    createdAt,
+    eventType,
+    custom,
+    users,
+  ];
 }
 
 class CoordinatorCallSessionStartedEvent extends CoordinatorCallEvent {
@@ -681,12 +699,12 @@ class CoordinatorCallSessionParticipantJoinedEvent
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        participant,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    participant,
+    user,
+  ];
 }
 
 class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
@@ -709,13 +727,13 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        participant,
-        user,
-        duration,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    participant,
+    user,
+    duration,
+  ];
 }
 
 class CoordinatorCallSessionParticipantCountUpdatedEvent
@@ -737,12 +755,12 @@ class CoordinatorCallSessionParticipantCountUpdatedEvent
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        sessionId,
-        participantsCountByRole,
-        anonymousParticipantCount,
-      ];
+    ...super.props,
+    createdAt,
+    sessionId,
+    participantsCountByRole,
+    anonymousParticipantCount,
+  ];
 }
 
 class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
@@ -767,14 +785,14 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        startTime,
-        endTime,
-        speakerId,
-        text,
-        user,
-      ];
+    ...super.props,
+    createdAt,
+    startTime,
+    endTime,
+    speakerId,
+    text,
+    user,
+  ];
 }
 
 class CoordinatorCallLiveStartedEvent extends CoordinatorCallEvent {
@@ -791,10 +809,10 @@ class CoordinatorCallLiveStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+  ];
 }
 
 class CoordinatorCallMemberAddedEvent extends CoordinatorCallEvent {
@@ -813,11 +831,11 @@ class CoordinatorCallMemberAddedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        members,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    members,
+    metadata,
+  ];
 }
 
 class CoordinatorCallMemberRemovedEvent extends CoordinatorCallEvent {
@@ -836,10 +854,10 @@ class CoordinatorCallMemberRemovedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        removedMemberIds,
-      ];
+    ...super.props,
+    createdAt,
+    removedMemberIds,
+  ];
 }
 
 class CoordinatorCallMemberUpdatedEvent extends CoordinatorCallEvent {
@@ -858,11 +876,11 @@ class CoordinatorCallMemberUpdatedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        members,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    members,
+    metadata,
+  ];
 }
 
 class CoordinatorCallMemberUpdatedPermissionEvent extends CoordinatorCallEvent {
@@ -883,12 +901,12 @@ class CoordinatorCallMemberUpdatedPermissionEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        capabilitiesByRole,
-        updatedMembers,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    capabilitiesByRole,
+    updatedMembers,
+    metadata,
+  ];
 }
 
 class CoordinatorCallFrameRecordingStartedEvent extends CoordinatorCallEvent {
@@ -907,11 +925,11 @@ class CoordinatorCallFrameRecordingStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        egressId,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    egressId,
+  ];
 }
 
 class CoordinatorCallFrameRecordingStoppedEvent extends CoordinatorCallEvent {
@@ -930,11 +948,11 @@ class CoordinatorCallFrameRecordingStoppedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        egressId,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    egressId,
+  ];
 }
 
 class CoordinatorCallFrameRecordingFailedEvent extends CoordinatorCallEvent {
@@ -953,11 +971,11 @@ class CoordinatorCallFrameRecordingFailedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        metadata,
-        egressId,
-      ];
+    ...super.props,
+    createdAt,
+    metadata,
+    egressId,
+  ];
 }
 
 class CoordinatorCallFrameRecordingReadyEvent extends CoordinatorCallEvent {
@@ -984,15 +1002,15 @@ class CoordinatorCallFrameRecordingReadyEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        url,
-        capturedAt,
-        egressId,
-        sessionId,
-        trackType,
-        usersInFrame,
-      ];
+    ...super.props,
+    createdAt,
+    url,
+    capturedAt,
+    egressId,
+    sessionId,
+    trackType,
+    usersInFrame,
+  ];
 }
 
 class CoordinatorCallNotificationEvent extends CoordinatorCallEvent {
@@ -1013,12 +1031,12 @@ class CoordinatorCallNotificationEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        user,
-        members,
-        metadata,
-      ];
+    ...super.props,
+    createdAt,
+    user,
+    members,
+    metadata,
+  ];
 }
 
 class CoordinatorCallUserMutedEvent extends CoordinatorCallEvent {
@@ -1037,11 +1055,11 @@ class CoordinatorCallUserMutedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        fromUserId,
-        mutedUserIds,
-      ];
+    ...super.props,
+    createdAt,
+    fromUserId,
+    mutedUserIds,
+  ];
 }
 
 class CoordinatorCallRecordingReadyEvent extends CoordinatorCallEvent {
@@ -1068,15 +1086,15 @@ class CoordinatorCallRecordingReadyEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        createdAt,
-        egressId,
-        endTime,
-        filename,
-        sessionId,
-        startTime,
-        url,
-      ];
+    ...super.props,
+    createdAt,
+    egressId,
+    endTime,
+    filename,
+    sessionId,
+    startTime,
+    url,
+  ];
 }
 
 // Unknown event.

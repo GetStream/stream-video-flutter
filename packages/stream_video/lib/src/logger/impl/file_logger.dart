@@ -26,8 +26,9 @@ class FileStreamLogger extends StreamLogger {
     this.console,
   });
 
-  static final Finalizer<IOSink> _finalizer =
-      Finalizer((ioSink) async => ioSink.close());
+  static final Finalizer<IOSink> _finalizer = Finalizer(
+    (ioSink) async => ioSink.close(),
+  );
 
   final FileLogConfig config;
   final FileLogSender? sender;
@@ -73,9 +74,9 @@ class FileStreamLogger extends StreamLogger {
         final File currentFile;
         if (!_file0.existsSync() || !_file1.existsSync()) {
           currentFile = _file0;
-        } else if (_file0
-            .lastModifiedSync()
-            .isAfter(_file1.lastModifiedSync())) {
+        } else if (_file0.lastModifiedSync().isAfter(
+          _file1.lastModifiedSync(),
+        )) {
           currentFile = _file0;
         } else {
           currentFile = _file1;
@@ -120,7 +121,8 @@ class FileStreamLogger extends StreamLogger {
   Future<void> clear() async {
     try {
       _logD(
-        () => '[clear] before; file0: ${_file0.lengthSync()}, '
+        () =>
+            '[clear] before; file0: ${_file0.lengthSync()}, '
             'file1: ${_file1.lengthSync()}',
       );
       final currentIO = _currentIO;
@@ -139,7 +141,8 @@ class FileStreamLogger extends StreamLogger {
         _finalizer.attach(this, it, detach: this);
       });
       _logV(
-        () => '[clear] after; file0: ${_file0.lengthSync()}, '
+        () =>
+            '[clear] after; file0: ${_file0.lengthSync()}, '
             'file1: ${_file1.lengthSync()}',
       );
     } catch (e, stk) {
@@ -166,7 +169,8 @@ class FileStreamLogger extends StreamLogger {
   }
 
   Future<File> prepareShareable() async {
-    final filename = '$_shareableFilePrefix'
+    final filename =
+        '$_shareableFilePrefix'
         '${_dateFormat.format(DateTime.now())}.txt';
     final out = File('${_tempsDir.path}$pathSeparator$filename')
       ..createSync(recursive: true);
@@ -176,9 +180,13 @@ class FileStreamLogger extends StreamLogger {
     try {
       writer = out.openWrite(mode: FileMode.append);
       writer.writeln(await _buildHeader());
-      final filtered = [_file0, _file1]
-          .where((file) => file.existsSync())
-          .sortedBy((file) => file.lastModifiedSync());
+      final filtered =
+          [
+                _file0,
+                _file1,
+              ]
+              .where((file) => file.existsSync())
+              .sortedBy((file) => file.lastModifiedSync());
       for (final file in filtered) {
         if (file.existsSync()) {
           await writer.addStream(file.openRead());

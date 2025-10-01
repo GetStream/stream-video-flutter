@@ -1,5 +1,9 @@
 include: all_lint_rules.yaml
 
+formatter:
+  trailing_commas: preserve
+  page_width: 80
+
 analyzer:
   language:
     strict-casts: false

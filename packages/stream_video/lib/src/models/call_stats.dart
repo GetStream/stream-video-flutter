@@ -1,5 +1,4 @@
 import 'package:meta/meta.dart';
-import 'package:thermal/thermal.dart';
 
 import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../webrtc/model/stats/rtc_printable_stats.dart';
@@ -98,13 +97,13 @@ class PeerConnectionStats {
   });
 
   factory PeerConnectionStats.empty() => const PeerConnectionStats(
-        latency: null,
-        resolution: null,
-        qualityDropReason: null,
-        jitterInMs: null,
-        bitrateKbps: null,
-        videoCodec: null,
-      );
+    latency: null,
+    resolution: null,
+    qualityDropReason: null,
+    jitterInMs: null,
+    bitrateKbps: null,
+    videoCodec: null,
+  );
 
   final int? latency;
   final String? resolution;
@@ -179,18 +178,17 @@ class MediaStatsInfo {
 
   factory MediaStatsInfo.fromRtcOutboundRtpVideoStream(
     RtcOutboundRtpVideoStream stream,
-  ) =>
-      MediaStatsInfo(
-        id: stream.id,
-        bytesSent: stream.bytesSent,
-        videoCodecId: stream.codecId,
-        qualityLimit: stream.qualityLimitationReason,
-        jitter: stream.jitter,
-        width: stream.frameWidth,
-        height: stream.frameHeight,
-        fps: stream.framesPerSecond,
-        deviceLatency: stream.totalPacketSendDelay,
-      );
+  ) => MediaStatsInfo(
+    id: stream.id,
+    bytesSent: stream.bytesSent,
+    videoCodecId: stream.codecId,
+    qualityLimit: stream.qualityLimitationReason,
+    jitter: stream.jitter,
+    width: stream.frameWidth,
+    height: stream.frameHeight,
+    fps: stream.framesPerSecond,
+    deviceLatency: stream.totalPacketSendDelay,
+  );
 
   final String? id;
   final String? qualityLimit;
@@ -244,10 +242,10 @@ class ClientEnvironment {
   });
 
   factory ClientEnvironment.empty() => const ClientEnvironment(
-        sfu: '',
-        sdkVersion: '',
-        webRtcVersion: '',
-      );
+    sfu: '',
+    sdkVersion: '',
+    webRtcVersion: '',
+  );
 
   final String sfu;
   final String sdkVersion;

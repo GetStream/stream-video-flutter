@@ -1,13 +1,12 @@
-// 🐦 Flutter imports:
-import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/app/user_auth_controller.dart';
-import 'package:flutter_dogfooding/di/injector.dart';
-import 'package:flutter_dogfooding/utils/assets.dart';
-import 'package:flutter_dogfooding/widgets/stream_button.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-
 // 📦 Package imports:
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../app/user_auth_controller.dart';
+import '../di/injector.dart';
+import '../utils/assets.dart';
+import '../widgets/stream_button.dart';
 
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({
@@ -16,8 +15,8 @@ class LobbyScreen extends StatefulWidget {
     required this.call,
   });
 
-  final Function(CallConnectOptions, StreamVideoEffectsManager)
-      onJoinCallPressed;
+  final void Function(CallConnectOptions, StreamVideoEffectsManager)
+  onJoinCallPressed;
   final Call call;
 
   @override
@@ -43,16 +42,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     final cameraTrack = _cameraTrack;
     if (cameraTrack != null) {
-      options = options.copyWith(
-        camera: TrackOption.enabled(),
-      );
+      options = options.copyWith(camera: TrackOption.enabled());
     }
 
     final microphoneTrack = _microphoneTrack;
     if (microphoneTrack != null) {
-      options = options.copyWith(
-        microphone: TrackOption.enabled(),
-      );
+      options = options.copyWith(microphone: TrackOption.enabled());
     }
 
     widget.onJoinCallPressed(options, _videoEffectsManager);
@@ -87,16 +82,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
         ),
         titleSpacing: 4,
         centerTitle: false,
-        title: Text(
-          currentUser.name,
-          style: textTheme.body,
-        ),
+        title: Text(currentUser.name, style: textTheme.body),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.close,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.close, color: Colors.white),
             onPressed: () => Navigator.maybePop(context),
           ),
         ],
@@ -107,10 +96,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
-                SvgPicture.asset(
-                  globalNetworkAssest,
-                  width: 35,
-                ),
+                SvgPicture.asset(globalNetworkAssest, width: 35),
                 const SizedBox(height: 8),
                 Text(
                   'Set up your call\nbefore joining',
@@ -146,12 +132,13 @@ class _LobbyScreenState extends State<LobbyScreen> {
                           });
 
                           if (_blurEnabled) {
-                            _videoEffectsManager.applyBackgroundBlurFilter(
-                              BlurIntensity.medium,
-                              track: _cameraTrack,
-                            );
+                            await _videoEffectsManager
+                                .applyBackgroundBlurFilter(
+                                  BlurIntensity.medium,
+                                  track: _cameraTrack,
+                                );
                           } else {
-                            _videoEffectsManager.disableAllFilters(
+                            await _videoEffectsManager.disableAllFilters(
                               track: _cameraTrack,
                             );
                           }
@@ -176,7 +163,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                             Row(
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: EdgeInsets.all(8),
                                   child: Icon(Icons.lock_person),
                                 ),
                                 Expanded(
@@ -186,13 +173,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
                                       color: colorTheme.textLowEmphasis,
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
                             StreamButton.active(
-                                label: 'Start a test call',
-                                onPressed: joinCallPressed)
+                              label: 'Start a test call',
+                              onPressed: joinCallPressed,
+                            ),
                           ],
                         ),
                       ),

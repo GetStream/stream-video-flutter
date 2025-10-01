@@ -476,10 +476,32 @@ class ApiClient {
           return HealthCheckEvent.fromJson(value);
         case 'ICEServer':
           return ICEServer.fromJson(value);
+        case 'IngressAudioEncodingOptionsRequest':
+          return IngressAudioEncodingOptionsRequest.fromJson(value);
+        case 'IngressAudioEncodingResponse':
+          return IngressAudioEncodingResponse.fromJson(value);
+        case 'IngressSettingsRequest':
+          return IngressSettingsRequest.fromJson(value);
+        case 'IngressSettingsResponse':
+          return IngressSettingsResponse.fromJson(value);
+        case 'IngressVideoEncodingOptionsRequest':
+          return IngressVideoEncodingOptionsRequest.fromJson(value);
+        case 'IngressVideoEncodingResponse':
+          return IngressVideoEncodingResponse.fromJson(value);
+        case 'IngressVideoLayerRequest':
+          return IngressVideoLayerRequest.fromJson(value);
+        case 'IngressVideoLayerResponse':
+          return IngressVideoLayerResponse.fromJson(value);
         case 'JoinCallRequest':
           return JoinCallRequest.fromJson(value);
         case 'JoinCallResponse':
           return JoinCallResponse.fromJson(value);
+        case 'KickUserRequest':
+          return KickUserRequest.fromJson(value);
+        case 'KickUserResponse':
+          return KickUserResponse.fromJson(value);
+        case 'KickedUserEvent':
+          return KickedUserEvent.fromJson(value);
         case 'LayoutSettingsRequest':
           return LayoutSettingsRequest.fromJson(value);
         case 'LimitsSettingsRequest':

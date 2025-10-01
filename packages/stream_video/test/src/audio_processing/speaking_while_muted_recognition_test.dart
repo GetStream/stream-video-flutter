@@ -31,10 +31,12 @@ void main() {
           onSoundStateChanged: any(named: 'onSoundStateChanged'),
         ),
       ).thenAnswer((_) => Future.value());
-      when(() => audioRecognition.stop())
-          .thenAnswer((_) => Future<void>.value());
-      when(() => audioRecognition.dispose())
-          .thenAnswer((_) => Future<void>.value());
+      when(
+        () => audioRecognition.stop(),
+      ).thenAnswer((_) => Future<void>.value());
+      when(
+        () => audioRecognition.dispose(),
+      ).thenAnswer((_) => Future<void>.value());
     });
 
     tearDown(() {

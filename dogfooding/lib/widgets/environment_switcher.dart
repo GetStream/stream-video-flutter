@@ -1,20 +1,13 @@
-// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-
-// 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-// 🌎 Project imports:
 import '../core/model/environment.dart';
+import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../theme/app_palette.dart';
 
 class EnvironmentSwitcher extends StatefulWidget {
-  const EnvironmentSwitcher({
-    super.key,
-    required this.currentEnvironment,
-  });
+  const EnvironmentSwitcher({super.key, required this.currentEnvironment});
 
   final Environment currentEnvironment;
 
@@ -36,53 +29,50 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
     final streamVideoTheme = StreamVideoTheme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
           Container(
             margin: const EdgeInsets.symmetric(vertical: 4),
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColorPalette.appGreen,
-                width: 0.5,
-              ),
+              border: Border.all(color: AppColorPalette.appGreen, width: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
                 selectedEnvironment.displayName,
-                style: streamVideoTheme.textTheme.footnoteBold
-                    .apply(color: AppColorPalette.appGreen),
+                style: streamVideoTheme.textTheme.footnoteBold.apply(
+                  color: AppColorPalette.appGreen,
+                ),
               ),
             ),
           ),
           MenuAnchor(
             style: const MenuStyle(
               alignment: Alignment.bottomLeft,
-              backgroundColor:
-                  WidgetStatePropertyAll(AppColorPalette.backgroundColor),
+              backgroundColor: WidgetStatePropertyAll(
+                AppColorPalette.backgroundColor,
+              ),
             ),
             alignmentOffset: const Offset(-70, 0),
-            builder: (
-              BuildContext context,
-              MenuController controller,
-              Widget? child,
-            ) {
-              return IconButton(
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
+            builder:
+                (
+                  BuildContext context,
+                  MenuController controller,
+                  Widget? child,
+                ) {
+                  return IconButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    icon: const Icon(Icons.settings, color: Colors.white),
+                  );
                 },
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                ),
-              );
-            },
             menuChildren: [
               ...Environment.values
                   .where((e) => e != Environment.livestream)
@@ -103,7 +93,6 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                             color: selectedEnvironment == env
                                 ? AppColorPalette.appGreen
                                 : Colors.white,
-                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -120,8 +109,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                         ),
                       ),
                     ),
-                  )
-                  .toList()
+                  ),
             ],
           ),
         ],
@@ -131,10 +119,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
 }
 
 class EnvironmentBanner extends StatelessWidget {
-  const EnvironmentBanner({
-    super.key,
-    required this.currentEnvironment,
-  });
+  const EnvironmentBanner({super.key, required this.currentEnvironment});
 
   final Environment currentEnvironment;
 
@@ -146,17 +131,15 @@ class EnvironmentBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColorPalette.appGreen,
-          width: 0.5,
-        ),
+        border: Border.all(color: AppColorPalette.appGreen, width: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
         child: Text(
           currentEnvironment.displayName,
-          style: streamVideoTheme.textTheme.footnoteBold
-              .apply(color: AppColorPalette.appGreen),
+          style: streamVideoTheme.textTheme.footnoteBold.apply(
+            color: AppColorPalette.appGreen,
+          ),
         ),
       ),
     );

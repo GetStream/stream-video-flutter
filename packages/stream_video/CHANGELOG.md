@@ -1,4 +1,15 @@
-## Unreleased
+## Upcoming
+
+🚧 Build breaking changes
+
+> Note: This release has breaking changes for Android.
+> - compileSDK 36 for Android part
+> - Android Gradle Plugin >=8.12.1
+> - Gradle wrapper >=8.13
+> - Kotlin 2.2.0
+
+* Updated minimum Flutter version to 3.32.0
+* Updated minimum supported dart SDK version to 3.8.0
 
 🚧 Breaking changes
 * `Call.stats` payload changed. It now emits
@@ -16,6 +27,24 @@
 
 🔄 Changed
 * `Call.stats` continues to emit periodically, but the record field names/types changed as noted under breaking changes.
+
+🐞 Fixed
+* Fixed an issue where the leave call operation could fail if the there were some issues in parsing custom data.
+* Fixed an issue where the Android audio configuration could not be applied correctly for participants joining the call
+
+## 0.10.4
+
+✅ Added
+* Extended `CallParticipantState` with `participantSource`. This indicates the participant's source channel (e.g., WebRTC, RTMP, WHIP) and can be used in filtering and sorting criteria.
+* Livestream sorting preset now prioritises RTMP sources in layout sorting.
+* Automatic SFU-driven pausing of inbound video to save bandwidth and prevent visual artifacts:
+  * New `SfuClientCapability.subscriberVideoPause` (on by default). Control via `Call.enableClientCapabilities()` / `Call.disableClientCapabilities()`.
+  * New `SfuInboundStateNotificationEvent` notifies when inbound tracks are paused or resumed.
+  * `CallParticipantState.pausedTracks` and `CallParticipantState.isTrackPaused()` let you check which tracks are currently paused.
+* Added capability to remove a participant from a call via `call.kickUser()`. Requires the `kick-user` permission.
+
+🐞 Fixed
+* Multitasking camera on iOS is now enabled only once and kept enabled. This fixes potential errors when quickly toggling camera.
 
 ## 0.10.3
 

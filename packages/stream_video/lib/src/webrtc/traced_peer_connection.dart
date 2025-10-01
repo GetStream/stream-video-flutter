@@ -132,8 +132,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   ) {
     final encodeStats = <PerformanceStats>[];
 
-    final outboundVideoRtpStats =
-        rtcStats.whereType<RtcOutboundRtpVideoStream>().toList();
+    final outboundVideoRtpStats = rtcStats
+        .whereType<RtcOutboundRtpVideoStream>()
+        .toList();
 
     for (final rtpStat in outboundVideoRtpStats) {
       final codecId = rtpStat.codecId;
@@ -150,29 +151,33 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         continue;
       }
 
-      final prevStat = _previousOutboundRtpStats!
-          .firstWhere((stat) => stat.id == rtpStat.id);
+      final prevStat = _previousOutboundRtpStats!.firstWhere(
+        (stat) => stat.id == rtpStat.id,
+      );
 
       final deltaTotalEncodeTime =
           totalEncodeTime - (prevStat.totalEncodeTime ?? 0);
       final deltaFramesSent = framesSent - (prevStat.framesSent ?? 0);
-      final framesEncodeTime = (deltaFramesSent > 0
-              ? (deltaTotalEncodeTime / deltaFramesSent) * 1000
-              : 0)
-          .toDouble();
+      final framesEncodeTime =
+          (deltaFramesSent > 0
+                  ? (deltaTotalEncodeTime / deltaFramesSent) * 1000
+                  : 0)
+              .toDouble();
 
       frameTimesHistory.add(framesEncodeTime);
       fpsHistory.add(framesPerSecond);
 
       var trackType = TrackType.TRACK_TYPE_VIDEO;
       if (mediaSourceId != null) {
-        final mediaStats =
-            rtcStats.whereType<RtcMediaSource>().firstWhereOrNull(
-                  (stat) => stat.id == mediaSourceId,
-                );
+        final mediaStats = rtcStats
+            .whereType<RtcMediaSource>()
+            .firstWhereOrNull(
+              (stat) => stat.id == mediaSourceId,
+            );
 
         if (mediaStats != null && mediaStats.trackIdentifier != null) {
-          trackType = trackIdToTrackType.call(mediaStats.trackIdentifier!) ??
+          trackType =
+              trackIdToTrackType.call(mediaStats.trackIdentifier!) ??
               TrackType.TRACK_TYPE_VIDEO;
         }
       }
@@ -180,9 +185,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
       final avgFrameTimeMs = average(frameTimesHistory);
       final avgFps = average(fpsHistory);
 
-      final codec = rtcStats
-          .whereType<RtcCodec>()
-          .firstWhereOrNull((stat) => stat.id == codecId);
+      final codec = rtcStats.whereType<RtcCodec>().firstWhereOrNull(
+        (stat) => stat.id == codecId,
+      );
 
       encodeStats.add(
         PerformanceStats(
@@ -210,8 +215,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     var maxArea = 0;
     RtcInboundRtpVideoStream? maxAreaStat;
 
-    final inboundVideoRtpStats =
-        rtcStats.whereType<RtcInboundRtpVideoStream>().toList();
+    final inboundVideoRtpStats = rtcStats
+        .whereType<RtcInboundRtpVideoStream>()
+        .toList();
 
     for (final rtpStat in inboundVideoRtpStats) {
       final kind = rtpStat.kind;
@@ -225,8 +231,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
       }
     }
 
-    final prevStat = _previousInboundRtpStats
-        ?.firstWhereOrNull((stat) => stat.id == maxAreaStat?.id);
+    final prevStat = _previousInboundRtpStats?.firstWhereOrNull(
+      (stat) => stat.id == maxAreaStat?.id,
+    );
 
     if (maxAreaStat == null ||
         _previousInboundRtpStats == null ||
@@ -244,26 +251,28 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         totalDecodeTime - (prevStat.totalDecodeTime ?? 0);
     final deltaFramesDecoded = framesDecoded - (prevStat.framesDecoded ?? 0);
 
-    final framesDecodeTime = (deltaFramesDecoded > 0
-            ? (deltaTotalDecodeTime / deltaFramesDecoded) * 1000
-            : 0)
-        .toDouble();
+    final framesDecodeTime =
+        (deltaFramesDecoded > 0
+                ? (deltaTotalDecodeTime / deltaFramesDecoded) * 1000
+                : 0)
+            .toDouble();
 
     frameTimesHistory.add(framesDecodeTime);
     fpsHistory.add(framesPerSecond);
 
     var trackType = TrackType.TRACK_TYPE_VIDEO;
     if (trackIdentifier != null) {
-      trackType = trackIdToTrackType.call(trackIdentifier) ??
+      trackType =
+          trackIdToTrackType.call(trackIdentifier) ??
           TrackType.TRACK_TYPE_VIDEO;
     }
 
     final avgFrameTimeMs = average(frameTimesHistory);
     final avgFps = average(fpsHistory);
 
-    final codec = rtcStats
-        .whereType<RtcCodec>()
-        .firstWhereOrNull((stat) => stat.id == maxAreaStat?.codecId);
+    final codec = rtcStats.whereType<RtcCodec>().firstWhereOrNull(
+      (stat) => stat.id == maxAreaStat?.codecId,
+    );
 
     _previousInboundRtpStats = inboundVideoRtpStats;
 
@@ -361,8 +370,9 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     // Add top-level timestamp as a separate report (if needed)
     newStatsLookup.addAll(
       {
-        'timestamp':
-            latestTimestamp == double.negativeInfinity ? 0 : latestTimestamp,
+        'timestamp': latestTimestamp == double.negativeInfinity
+            ? 0
+            : latestTimestamp,
       },
     );
 

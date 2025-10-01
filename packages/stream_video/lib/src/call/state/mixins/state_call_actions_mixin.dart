@@ -47,7 +47,8 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     String? hlsPlaylistUrl,
   }) {
     _logger.v(
-      () => '[setCallBroadcasting] isBroadcasting:$isBroadcasting'
+      () =>
+          '[setCallBroadcasting] isBroadcasting:$isBroadcasting'
           ', hlsPlaylistUrl: $hlsPlaylistUrl',
     );
     final curEgress = state.egress;

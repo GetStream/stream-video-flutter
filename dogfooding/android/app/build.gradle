@@ -40,8 +40,8 @@ android {
         namespace = "io.getstream.video.flutter.dogfooding"
     }
 
-    compileSdkVersion 35
-    ndkVersion = "27.0.12077973"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17

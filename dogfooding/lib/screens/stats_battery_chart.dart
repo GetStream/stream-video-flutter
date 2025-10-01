@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter/material.dart';
+
+import '../theme/app_palette.dart';
 
 class StatsBatteryChart extends StatelessWidget {
   const StatsBatteryChart({super.key, required this.batteryLevelHistory});
@@ -10,14 +11,12 @@ class StatsBatteryChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: LineChart(
         LineChartData(
           lineTouchData: const LineTouchData(enabled: false),
           gridData: FlGridData(
-            show: true,
             drawVerticalLine: false,
-            drawHorizontalLine: true,
             verticalInterval: 1,
             horizontalInterval: 20,
             getDrawingVerticalLine: (value) {
@@ -33,24 +32,17 @@ class StatsBatteryChart extends StatelessWidget {
               );
             },
           ),
-          titlesData: FlTitlesData(
-            show: true,
-            rightTitles: const AxisTitles(
+          titlesData: const FlTitlesData(
+            rightTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40,
                 interval: 20,
               ),
             ),
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            bottomTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            topTitles: AxisTitles(),
+            bottomTitles: AxisTitles(),
+            leftTitles: AxisTitles(),
           ),
           borderData: FlBorderData(
             show: false,
@@ -70,15 +62,15 @@ class StatsBatteryChart extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   ColorTween(
-                          begin: AppColorPalette.appGreen,
-                          // ignore: deprecated_member_use
-                          end: AppColorPalette.appGreen.withOpacity(0.5))
-                      .lerp(0.2)!,
+                    begin: AppColorPalette.appGreen,
+                    // ignore: deprecated_member_use
+                    end: AppColorPalette.appGreen.withOpacity(0.5),
+                  ).lerp(0.2)!,
                   ColorTween(
-                          begin: AppColorPalette.appGreen,
-                          // ignore: deprecated_member_use
-                          end: AppColorPalette.appGreen.withOpacity(0.5))
-                      .lerp(0.2)!,
+                    begin: AppColorPalette.appGreen,
+                    // ignore: deprecated_member_use
+                    end: AppColorPalette.appGreen.withOpacity(0.5),
+                  ).lerp(0.2)!,
                 ],
               ),
               barWidth: 3,
@@ -91,18 +83,20 @@ class StatsBatteryChart extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     ColorTween(
-                            begin: AppColorPalette.appGreen,
-                            end:
-                                // ignore: deprecated_member_use
-                                AppColorPalette.appGreen.withOpacity(0.5))
+                          begin: AppColorPalette.appGreen,
+                          end:
+                              // ignore: deprecated_member_use
+                              AppColorPalette.appGreen.withOpacity(0.5),
+                        )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),
                     ColorTween(
-                            begin: AppColorPalette.appGreen,
-                            end:
-                                // ignore: deprecated_member_use
-                                AppColorPalette.appGreen.withOpacity(0.5))
+                          begin: AppColorPalette.appGreen,
+                          end:
+                              // ignore: deprecated_member_use
+                              AppColorPalette.appGreen.withOpacity(0.5),
+                        )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),

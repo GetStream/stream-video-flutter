@@ -29,7 +29,7 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
   void Function(String callCid)? onBackgroundNotificationContentClick;
 
   void Function(String buttonType, String callCid, ServiceType serviceType)?
-      onBackgroundNotificationButtonClick;
+  onBackgroundNotificationButtonClick;
 
   void Function(String callCid)? onBackgroundNotificationUiLayerDestroyed;
 

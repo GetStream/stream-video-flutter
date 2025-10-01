@@ -38,7 +38,8 @@ class CallSessionFactory {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
 
-    final rtcConfig = _makeRtcConfig(credentials.iceServers) ??
+    final rtcConfig =
+        _makeRtcConfig(credentials.iceServers) ??
         defaultRtcConfiguration(credentials.sfuServer.url);
 
     final sessionConfig = CallSessionConfig(

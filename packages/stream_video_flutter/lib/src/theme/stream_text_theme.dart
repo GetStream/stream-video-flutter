@@ -185,20 +185,19 @@ class StreamTextTheme {
     TextStyle? footnoteBold,
     TextStyle? captionBold,
     TextStyle? tabBar,
-  }) =>
-      StreamTextTheme.raw(
-        title1: title1 ?? this.title1,
-        title3: title3 ?? this.title3,
-        title3Bold: title3Bold ?? this.title3Bold,
-        body: body ?? this.body,
-        bodyItalic: bodyItalic ?? this.bodyItalic,
-        bodyBold: bodyBold ?? this.bodyBold,
-        footnote: footnote ?? this.footnote,
-        footnoteItalic: footnoteItalic ?? this.footnoteItalic,
-        footnoteBold: footnoteBold ?? this.footnoteBold,
-        captionBold: captionBold ?? this.captionBold,
-        tabBar: tabBar ?? this.tabBar,
-      );
+  }) => StreamTextTheme.raw(
+    title1: title1 ?? this.title1,
+    title3: title3 ?? this.title3,
+    title3Bold: title3Bold ?? this.title3Bold,
+    body: body ?? this.body,
+    bodyItalic: bodyItalic ?? this.bodyItalic,
+    bodyBold: bodyBold ?? this.bodyBold,
+    footnote: footnote ?? this.footnote,
+    footnoteItalic: footnoteItalic ?? this.footnoteItalic,
+    footnoteBold: footnoteBold ?? this.footnoteBold,
+    captionBold: captionBold ?? this.captionBold,
+    tabBar: tabBar ?? this.tabBar,
+  );
 
   /// Merge text themes.
   StreamTextTheme merge(StreamTextTheme? other) {

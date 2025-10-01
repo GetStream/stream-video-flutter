@@ -46,8 +46,8 @@ class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
     T? initialValue, {
     bool sync = false,
   }) : _state = initialValue == null
-            ? BehaviorSubject(sync: sync)
-            : BehaviorSubject.seeded(initialValue, sync: sync);
+           ? BehaviorSubject(sync: sync)
+           : BehaviorSubject.seeded(initialValue, sync: sync);
 
   final BehaviorSubject<T> _state;
 

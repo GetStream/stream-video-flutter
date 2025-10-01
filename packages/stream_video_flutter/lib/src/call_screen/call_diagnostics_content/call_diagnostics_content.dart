@@ -34,10 +34,12 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
 
   /// Controls the subscription to the stats updates.
   StreamSubscription<
-      ({
-        PeerConnectionStatsBundle publisherStatsBundle,
-        PeerConnectionStatsBundle subscriberStatsBundle
-      })>? _subscription;
+    ({
+      PeerConnectionStatsBundle publisherStatsBundle,
+      PeerConnectionStatsBundle subscriberStatsBundle,
+    })
+  >?
+  _subscription;
 
   @override
   void initState() {

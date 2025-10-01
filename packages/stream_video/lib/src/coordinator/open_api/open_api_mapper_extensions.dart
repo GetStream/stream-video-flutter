@@ -260,6 +260,15 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: event.createdAt,
           user: event.user.toCallUser(),
         );
+      case EventType.callUserKicked:
+        final event = callUserKicked!;
+
+        return CoordinatorCallUserKickedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          user: event.user.toCallUser(),
+          kickedByUser: event.kickedByUser?.toCallUser(),
+        );
       case EventType.callReaction:
         final event = callReaction!;
 
@@ -353,8 +362,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           egressId: event.egressId,
           sessionId: event.sessionId,
           trackType: event.trackType,
-          usersInFrame: event.users
-              .map((key, value) => MapEntry(key, value.toCallUser())),
+          usersInFrame: event.users.map(
+            (key, value) => MapEntry(key, value.toCallUser()),
+          ),
         );
       case EventType.callNotification:
         final event = callNotification!;

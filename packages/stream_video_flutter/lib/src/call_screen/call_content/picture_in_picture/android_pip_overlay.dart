@@ -26,7 +26,8 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay> {
     return Material(
       color: Colors.black,
       child: SizedBox.expand(
-        child: widget.customBuilder?.call(context, widget.call) ??
+        child:
+            widget.customBuilder?.call(context, widget.call) ??
             StreamCallParticipants(
               call: widget.call,
               layoutMode: ParticipantLayoutMode.pictureInPicture,

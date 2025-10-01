@@ -27,8 +27,8 @@ class CoordinatorClientRetry extends CoordinatorClient {
   CoordinatorClientRetry({
     required CoordinatorClient delegate,
     required RetryPolicy retryPolicy,
-  })  : _delegate = delegate,
-        _retryManager = RpcRetryManager(retryPolicy);
+  }) : _delegate = delegate,
+       _retryManager = RpcRetryManager(retryPolicy);
 
   final CoordinatorClient _delegate;
   final RpcRetryManager _retryManager;
@@ -47,6 +47,24 @@ class CoordinatorClientRetry extends CoordinatorClient {
       ),
       (error, nextAttemptDelay) async {
         _logRetry('blockUser', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> kickUser({
+    required StreamCallCid callCid,
+    required String userId,
+    bool block = false,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.kickUser(
+        callCid: callCid,
+        userId: userId,
+        block: block,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('kickUser', error, nextAttemptDelay);
       },
     );
   }
@@ -679,6 +697,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIngressSettings? ingress,
   }) {
     return _retryManager.execute(
       () => _delegate.updateCall(
@@ -696,6 +715,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         limits: limits,
         session: session,
         frameRecording: frameRecording,
+        ingress: ingress,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('updateCall', error, nextAttemptDelay);
@@ -729,7 +749,8 @@ class CoordinatorClientRetry extends CoordinatorClient {
     Duration nextAttemptDelay,
   ) {
     _logger.w(
-      () => '[$req] failed: $error, '
+      () =>
+          '[$req] failed: $error, '
           'retrying in ${nextAttemptDelay.inMilliseconds} ms',
     );
   }

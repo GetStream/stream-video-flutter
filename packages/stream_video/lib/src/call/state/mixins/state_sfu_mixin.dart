@@ -14,7 +14,8 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     SfuParticipantLeftEvent event,
   ) {
     _logger.d(() => '[sfuParticipantLeft] ${state.sessionId}; event: $event');
-    final callParticipants = [...state.callParticipants]..removeWhere(
+    final callParticipants = [...state.callParticipants]
+      ..removeWhere(
         (participant) =>
             participant.userId == event.participant.userId &&
             participant.sessionId == event.participant.sessionId,
@@ -69,6 +70,10 @@ mixin StateSfuMixin on StateNotifier<CallState> {
               ...participant.publishedTracks,
               if (trackState != null) event.trackType: trackState,
             },
+            pausedTracks: participant.pausedTracks
+                .toList()
+                .where((track) => track != event.trackType)
+                .toSet(),
           );
         }
 
@@ -88,8 +93,10 @@ mixin StateSfuMixin on StateNotifier<CallState> {
             participant.sessionId == event.sessionId) {
           _logger.v(() => '[sfuTrackPublished] pFound: $participant');
 
-          final trackState = participant.publishedTracks[event.trackType]
-                  ?.copyWith(muted: false) ??
+          final trackState =
+              participant.publishedTracks[event.trackType]?.copyWith(
+                muted: false,
+              ) ??
               TrackState.base(isLocal: participant.isLocal);
           return participant.copyWith(
             publishedTracks: {
@@ -202,7 +209,8 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     _logger.d(
       () => '[sfuParticipantJoined] ${state.sessionId}; event: $event',
     );
-    final isLocal = state.currentUserId == event.participant.userId &&
+    final isLocal =
+        state.currentUserId == event.participant.userId &&
         state.sessionId == event.participant.sessionId;
 
     final participant = CallParticipantState(
@@ -265,6 +273,38 @@ mixin StateSfuMixin on StateNotifier<CallState> {
       callParticipants: [
         ...participants,
       ],
+    );
+  }
+
+  void sfuInboundStateNotification(SfuInboundStateNotificationEvent event) {
+    _logger.d(
+      () => '[sfuInboundStateNotification] ${state.sessionId}; event: $event',
+    );
+
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        final inboundStates = event.inboundVideoStates.where((it) {
+          return it.userId == participant.userId &&
+              it.sessionId == participant.sessionId;
+        }).toList();
+
+        if (inboundStates.isEmpty) {
+          return participant;
+        }
+
+        final pausedTracks = {...participant.pausedTracks};
+        for (final inboundState in inboundStates) {
+          if (inboundState.paused) {
+            pausedTracks.add(inboundState.trackType);
+          } else {
+            pausedTracks.remove(inboundState.trackType);
+          }
+        }
+
+        return participant.copyWith(
+          pausedTracks: pausedTracks,
+        );
+      }).toList(),
     );
   }
 }

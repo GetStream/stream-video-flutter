@@ -72,18 +72,23 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
   Widget build(BuildContext context) {
     final trackState =
         widget.participant.publishedTracks[widget.videoTrackType];
+    final isTrackPaused = widget.participant.isTrackPaused(
+      widget.videoTrackType,
+    );
 
     final Widget child;
-    if (trackState == null) {
+    if (trackState == null || isTrackPaused) {
       // The video track hasn't been published or subscribed yet.
       child = widget.placeholderBuilder.call(context);
     } else if (trackState is! RemoteTrackState) {
       // The video track is local and is already published.
       child = _buildVideoTrackRenderer(context, trackState);
     } else if (trackState.subscribed && trackState.received) {
-      final incomingVideoSettingsEnabled = widget
-              .call.dynascaleManager.incomingVideoSettings
-              ?.isParticipantVideoEnabled(widget.participant.sessionId) ??
+      final incomingVideoSettingsEnabled =
+          widget.call.dynascaleManager.incomingVideoSettings
+              ?.isParticipantVideoEnabled(
+                widget.participant.sessionId,
+              ) ??
           true;
 
       if (!incomingVideoSettingsEnabled) {
@@ -124,7 +129,8 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
       return widget.placeholderBuilder.call(context);
     }
 
-    var mirror = (trackState is RemoteTrackState && trackState.mirrorVideo) ||
+    var mirror =
+        (trackState is RemoteTrackState && trackState.mirrorVideo) ||
         widget.participant.isLocal;
 
     if (videoTrack is RtcLocalScreenShareTrack) {
@@ -136,7 +142,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
       mirror = switch (videoTrack.mediaConstraints.mirrorMode) {
         MirrorMode.defaultMode => mirror && !isBackCamera,
         MirrorMode.on => true,
-        MirrorMode.off => false
+        MirrorMode.off => false,
       };
     }
 

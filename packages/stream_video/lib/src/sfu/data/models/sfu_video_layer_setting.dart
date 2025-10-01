@@ -26,12 +26,12 @@ class SfuVideoLayerSetting with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        name,
-        active,
-        maxBitrate,
-        maxFramerate,
-        scaleResolutionDownBy,
-        scalabilityMode,
-        codec,
-      ];
+    name,
+    active,
+    maxBitrate,
+    maxFramerate,
+    scaleResolutionDownBy,
+    scalabilityMode,
+    codec,
+  ];
 }

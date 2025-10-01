@@ -104,7 +104,8 @@ Call createTestCall({
   return BaseCallFactory.makeCall(
     coordinatorClient: coordinatorClient ?? setupMockCoordinatorClient(),
     streamVideo: streamVideo ?? setupMockStreamVideo(),
-    stateManager: stateManager ??
+    stateManager:
+        stateManager ??
         CallStateNotifier(
           CallState(
             preferences: DefaultCallPreferences(),
@@ -138,7 +139,8 @@ CallState createTestCallState({
 MockCallStateNotifier createTestCallStateManager({
   MutableStateEmitterImpl<CallState>? callState,
 }) {
-  final callStateStream = callState ??
+  final callStateStream =
+      callState ??
       MutableStateEmitterImpl<CallState>(createTestCallState(), sync: true);
 
   final stateManager = MockCallStateNotifier();
@@ -148,8 +150,9 @@ MockCallStateNotifier createTestCallStateManager({
   when(() => stateManager.callStateStream).thenAnswer(
     (_) => callStateStream,
   );
-  when(() => stateManager.validateUserId(any()))
-      .thenAnswer((_) => Future.value(const Result.success(none)));
+  when(
+    () => stateManager.validateUserId(any()),
+  ).thenAnswer((_) => Future.value(const Result.success(none)));
   return stateManager;
 }
 
@@ -158,18 +161,22 @@ MockClientState setupMockClientState() {
     const User(info: defaultUserInfo),
     sync: true,
   );
-  final activeCallsEmitter =
-      MutableStateEmitterImpl<List<Call>>([], sync: true);
+  final activeCallsEmitter = MutableStateEmitterImpl<List<Call>>(
+    [],
+    sync: true,
+  );
   final outgoingCallEmitter = MutableStateEmitterImpl<Call?>(null, sync: true);
 
   final clientState = MockClientState();
   when(() => clientState.user).thenAnswer((_) => userStateEmitter);
   when(() => clientState.currentUser).thenReturn(userStateEmitter.value);
   when(() => clientState.activeCalls).thenAnswer((_) => activeCallsEmitter);
-  when(() => clientState.setActiveCall(any()))
-      .thenAnswer((_) => Future.value());
-  when(() => clientState.removeActiveCall(any()))
-      .thenAnswer((_) => Future.value());
+  when(
+    () => clientState.setActiveCall(any()),
+  ).thenAnswer((_) => Future.value());
+  when(
+    () => clientState.removeActiveCall(any()),
+  ).thenAnswer((_) => Future.value());
   when(() => clientState.outgoingCall).thenAnswer((_) => outgoingCallEmitter);
 
   return clientState;
@@ -271,8 +278,9 @@ MockInternetConnection setupMockInternetConnection({
 
 MockRtcMediaDeviceNotifier setupMockRtcMediaDeviceNotifier() {
   final rtcMediaDeviceNotifier = MockRtcMediaDeviceNotifier();
-  when(rtcMediaDeviceNotifier.enumerateDevices)
-      .thenAnswer((_) => Future.value(const Result.success([])));
+  when(
+    rtcMediaDeviceNotifier.enumerateDevices,
+  ).thenAnswer((_) => Future.value(const Result.success([])));
   return rtcMediaDeviceNotifier;
 }
 
@@ -302,13 +310,15 @@ MockCallSession setupMockCallSession() {
       reconnectDetails: any(named: 'reconnectDetails'),
       onRtcManagerCreatedCallback: any(named: 'onRtcManagerCreatedCallback'),
       isAnonymousUser: any(named: 'isAnonymousUser'),
+      capabilities: any(named: 'capabilities'),
+      unifiedSessionId: any(named: 'unifiedSessionId'),
     ),
   ).thenAnswer(
     (_) => Future.value(
       Result.success(
         (
           callState: createTestSfuCallState(),
-          fastReconnectDeadline: Duration.zero
+          fastReconnectDeadline: Duration.zero,
         ),
       ),
     ),
@@ -336,7 +346,12 @@ MockCallSession setupMockCallSession() {
     ),
   ).thenAnswer((_) => Future.value(sfu_events.ReconnectDetails()));
 
-  when(callSession.fastReconnect).thenAnswer(
+  when(
+    () => callSession.fastReconnect(
+      capabilities: any(named: 'capabilities'),
+      unifiedSessionId: any(named: 'unifiedSessionId'),
+    ),
+  ).thenAnswer(
     (_) => Future.value(
       Result.success(
         (

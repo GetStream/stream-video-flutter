@@ -7,18 +7,20 @@ import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
 /// Builder function used to build a video placeholder.
-typedef VideoPlaceholderBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef VideoPlaceholderBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// Builder function used to build a video renderer.
-typedef VideoRendererBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
+typedef VideoRendererBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallParticipantState participant,
+    );
 
 /// A widget that represents a single participant in a call.
 class StreamCallParticipant extends StatelessWidget {
@@ -40,6 +42,7 @@ class StreamCallParticipant extends StatelessWidget {
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
+    this.pausedVideoIndicatorColor,
     this.showConnectionQualityIndicator,
     this.connectionLevelActiveColor,
     this.connectionLevelInactiveColor,
@@ -94,6 +97,9 @@ class StreamCallParticipant extends StatelessWidget {
   /// The color of a disabled microphone icon.
   final Color? disabledMicrophoneColor;
 
+  /// The color of a paused video indicator.
+  final Color? pausedVideoIndicatorColor;
+
   /// Whether to show the connection quality indicator.
   final bool? showConnectionQualityIndicator;
 
@@ -140,9 +146,11 @@ class StreamCallParticipant extends StatelessWidget {
         this.enabledMicrophoneColor ?? theme.enabledMicrophoneColor;
     final disabledMicrophoneColor =
         this.disabledMicrophoneColor ?? theme.disabledMicrophoneColor;
+    final pausedVideoIndicatorColor =
+        this.pausedVideoIndicatorColor ?? theme.pausedVideoIndicatorColor;
     final showConnectionQualityIndicator =
         this.showConnectionQualityIndicator ??
-            theme.showConnectionQualityIndicator;
+        theme.showConnectionQualityIndicator;
     final connectionLevelActiveColor =
         this.connectionLevelActiveColor ?? theme.connectionLevelActiveColor;
     final connectionLevelInactiveColor =
@@ -238,6 +246,7 @@ class StreamCallParticipant extends StatelessWidget {
                           audioLevelIndicatorColor: audioLevelIndicatorColor,
                           disabledMicrophoneColor: disabledMicrophoneColor,
                           enabledMicrophoneColor: enabledMicrophoneColor,
+                          pausedVideoIndicatorColor: pausedVideoIndicatorColor,
                           participantLabelTextStyle: participantLabelTextStyle,
                         ),
                       ],
