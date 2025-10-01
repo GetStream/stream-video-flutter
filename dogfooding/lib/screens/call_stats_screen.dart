@@ -37,8 +37,10 @@ class CallStatsScreen extends StatelessWidget {
         final publisherBitrate = state.publisher?.bitrateKbps;
 
         final batteryDrained =
-            (state.initialBatteryLevel ?? 0) -
-            (state.batteryLevelHistory.lastOrNull ?? 0);
+            state.initialBatteryLevel != null &&
+                state.batteryLevelHistory.isNotEmpty
+            ? state.initialBatteryLevel! - state.batteryLevelHistory.last
+            : null;
 
         return SafeArea(
           top: false,
@@ -167,7 +169,7 @@ class CallStatsScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Battery percentage consumed during call: $batteryDrained%',
+                        'Battery percentage consumed during call: ${batteryDrained != null ? "$batteryDrained%" : "N/A"}',
                         style: const TextStyle(color: Colors.white),
                       ),
                       const SizedBox(
