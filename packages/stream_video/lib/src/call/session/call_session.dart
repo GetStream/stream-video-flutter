@@ -35,6 +35,7 @@ import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/stats_reporter.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
 
@@ -117,6 +118,8 @@ class CallSession extends Disposable {
   StreamSubscription<SfuEvent>? _eventsSubscription;
   StreamSubscription<InternetStatus>? _networkStatusSubscription;
 
+  StatsReporter? statsReporter;
+
   Timer? _peerConnectionCheckTimer;
 
   sfu_models.ClientDetails? _clientDetails;
@@ -135,6 +138,10 @@ class CallSession extends Disposable {
 
   void setTraceEnabled(bool enabled) {
     _tracer.setEnabled(enabled);
+  }
+
+  void trace(String tag, dynamic data) {
+    _tracer.trace(tag, data);
   }
 
   void _observeNetworkStatus() {
@@ -430,6 +437,21 @@ class CallSession extends Disposable {
 
       stateManager.sfuPinsUpdated(event.callState.pins);
 
+      final environment = ClientEnvironment(
+        sfu: config.sfuUrl,
+        sdkVersion: streamVideoVersion,
+        webRtcVersion: switch (CurrentPlatform.type) {
+          PlatformType.android => androidWebRTCVersion,
+          PlatformType.ios => iosWebRTCVersion,
+          _ => '',
+        },
+      );
+
+      statsReporter = StatsReporter(
+        rtcManager: rtcManager!,
+        clientEnvironment: environment,
+      );
+
       _logger.d(() => '[start] completed');
       return Result.success(
         (
@@ -579,6 +601,9 @@ class CallSession extends Disposable {
       code.value,
       'dart-client: $closeReason',
     );
+
+    statsReporter?.dispose();
+    statsReporter = null;
 
     await rtcManager?.dispose();
     rtcManager = null;
@@ -756,7 +781,7 @@ class CallSession extends Disposable {
     _logger.d(() => '[onPublishQualityChanged] event: $event');
 
     final usedCodec =
-        stateManager.callState.publisherStats?.videoCodec?.firstOrNull;
+        statsReporter?.currentMetrics?.publisher?.videoCodec?.firstOrNull;
 
     for (final videoSender in event.videoSenders) {
       await rtcManager?.onPublishQualityChanged(videoSender, usedCodec);

@@ -63,9 +63,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         DisconnectReason.ended(),
       ),
       sessionId: '',
-      localStats: LocalStats.empty(),
-      publisherStats: PeerConnectionStats.empty(),
-      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -202,9 +199,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       ),
       sessionId: '',
       callParticipants: const [],
-      localStats: LocalStats.empty(),
-      publisherStats: PeerConnectionStats.empty(),
-      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -232,12 +226,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
   void lifecycleCallSessionStart({
     required String sessionId,
-    LocalStats? localStats,
   }) {
     _logWithState('lifecycleCallSessionStart');
     state = state.copyWith(
       sessionId: sessionId,
-      localStats: localStats,
     );
   }
 
@@ -245,18 +237,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     _logWithState('lifecycleCallConnected');
     state = state.copyWith(
       status: CallStatus.connected(),
-    );
-  }
-
-  void lifecycleCallStats({
-    required List<int> latencyHistory,
-    PeerConnectionStats? publisherStats,
-    PeerConnectionStats? subscriberStats,
-  }) {
-    state = state.copyWith(
-      publisherStats: publisherStats,
-      subscriberStats: subscriberStats,
-      latencyHistory: latencyHistory,
     );
   }
 

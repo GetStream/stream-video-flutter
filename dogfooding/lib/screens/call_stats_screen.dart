@@ -4,7 +4,9 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
 import '../theme/app_palette.dart';
+import 'stats_battery_chart.dart';
 import 'stats_latency_chart.dart';
+import 'stats_thermal_chart.dart';
 
 class CallStatsScreen extends StatelessWidget {
   CallStatsScreen({super.key, required this.call});
@@ -19,12 +21,26 @@ class CallStatsScreen extends StatelessWidget {
     final textTheme = streamVideoTheme.textTheme;
     final currentUser = _userAuthController.currentUser;
 
-    return StreamBuilder<CallState>(
-      stream: call.state.asStream(),
+    return StreamBuilder<CallMetrics?>(
+      stream: call.statsReporter?.stream,
+      initialData: call.statsReporter?.currentMetrics,
       builder: (context, snapshot) {
         final state = snapshot.data;
-        final subscriberBitrate = state?.subscriberStats?.bitrateKbps;
-        final publisherBitrate = state?.publisherStats?.bitrateKbps;
+
+        if (state == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final subscriberBitrate = state.subscriber?.bitrateKbps;
+        final publisherBitrate = state.publisher?.bitrateKbps;
+
+        final batteryDrained =
+            state.initialBatteryLevel != null &&
+                state.batteryLevelHistory.isNotEmpty
+            ? state.initialBatteryLevel! - state.batteryLevelHistory.last
+            : null;
 
         return SafeArea(
           top: false,
@@ -84,104 +100,183 @@ class CallStatsScreen extends StatelessWidget {
                     SizedBox(
                       height: 200,
                       child: StatsLatencyChart(
-                        latencyHistory: state!.latencyHistory,
+                        latencyHistory: state.latencyHistory,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
+                    if (snapshot.hasData) ...[
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.whatshot, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Thermal state',
+                              style: textTheme.title3.apply(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Device thermal state history. Higher bars indicate more severe states.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 200,
+                        child: StatsThermalChart(
+                          thermalSeverityHistory: state.thermalStatusHistory,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.battery_full, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Battery level',
+                              style: textTheme.title3.apply(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Track device battery level throughout the call.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 200,
+                        child: StatsBatteryChart(
+                          batteryLevelHistory: state.batteryLevelHistory,
+                        ),
+                      ),
+                      Text(
+                        'Battery percentage consumed during call: ${batteryDrained != null ? "$batteryDrained%" : "N/A"}',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bar_chart, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Call performance',
+                              style: textTheme.title3.apply(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Review the key data points below to assess call performance.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Row(
                         children: [
-                          const Icon(Icons.bar_chart, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Call performance',
-                            style: textTheme.title3.apply(color: Colors.white),
+                          Expanded(
+                            child: LatencyOrJitterItem(
+                              title: 'Latency',
+                              value: state.publisher?.latency ?? 0,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Review the key data points below to assess call performance.',
-                        style: TextStyle(color: Colors.white),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: LatencyOrJitterItem(
+                              title: 'Receive jitter',
+                              value: state.subscriber?.jitterInMs,
+                            ),
+                          ),
+                          Expanded(
+                            child: LatencyOrJitterItem(
+                              title: 'Publish jitter',
+                              value: state.publisher?.jitterInMs,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: LatencyOrJitterItem(
-                            title: 'Latency',
-                            value: state.publisherStats?.latency ?? 0,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Publish bitrate',
+                              value: publisherBitrate == null
+                                  ? '--'
+                                  : '${state.publisher?.bitrateKbps} Kbps',
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: LatencyOrJitterItem(
-                            title: 'Receive jitter',
-                            value: state.subscriberStats?.jitterInMs,
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Receive bitrate',
+                              value: subscriberBitrate == null
+                                  ? '--'
+                                  : '${state.subscriber?.bitrateKbps} Kbps',
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: LatencyOrJitterItem(
-                            title: 'Publish jitter',
-                            value: state.publisherStats?.jitterInMs,
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Publish resolution',
+                              value:
+                                  "${state.publisher?.resolution} | ${state.publisher?.videoCodec?.join('+')}",
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatsItem(
-                            title: 'Publish bitrate',
-                            value: publisherBitrate == null
-                                ? '--'
-                                : '${state.publisherStats?.bitrateKbps} Kbps',
+                          Expanded(
+                            child: StatsItem(
+                              title: 'Receive resolution',
+                              value:
+                                  "${state.subscriber?.resolution} | ${state.subscriber?.videoCodec?.join('+')}",
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: StatsItem(
-                            title: 'Receive bitrate',
-                            value: subscriberBitrate == null
-                                ? '--'
-                                : '${state.subscriberStats?.bitrateKbps} Kbps',
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatsItem(
-                            title: 'Publish resolution',
-                            value:
-                                "${state.publisherStats?.resolution} | ${state.publisherStats?.videoCodec?.join('+')}",
-                          ),
-                        ),
-                        Expanded(
-                          child: StatsItem(
-                            title: 'Reveive resolution',
-                            value:
-                                "${state.subscriberStats?.resolution} | ${state.subscriberStats?.videoCodec?.join('+')}",
-                          ),
-                        ),
-                      ],
-                    ),
-                    StatsItem(title: 'Region', value: state.localStats?.sfu),
-                    StatsItem(
-                      title: 'SDK Version',
-                      value: state.localStats?.sdkVersion,
-                    ),
-                    StatsItem(
-                      title: 'WebRTC Version',
-                      value: state.localStats?.webRtcVersion,
-                    ),
+                        ],
+                      ),
+                      StatsItem(
+                        title: 'Region',
+                        value: state.clientEnvironment.sfu,
+                      ),
+                      StatsItem(
+                        title: 'SDK Version',
+                        value: state.clientEnvironment.sdkVersion,
+                      ),
+                      StatsItem(
+                        title: 'WebRTC Version',
+                        value: state.clientEnvironment.webRtcVersion,
+                      ),
+                    ],
                   ],
                 ],
               ),

@@ -11,6 +11,23 @@
 * Updated minimum Flutter version to 3.32.0
 * Updated minimum supported dart SDK version to 3.8.0
 
+🚧 Breaking changes
+* `Call.stats` payload changed. It now emits
+  `({ PeerConnectionStatsBundle publisherStatsBundle, PeerConnectionStatsBundle subscriberStatsBundle })`
+  instead of the previous
+  `({ CallStats publisherStats, CallStats subscriberStats })`.
+  - The record field names have changed and the element types are different.
+* Stats-related fields were removed from `CallState` (e.g., `publisherStats`, `subscriberStats`, `latencyHistory`).
+  - Use `call.stats` for periodic WebRTC stats updates, or
+  - Access `call.statsReporter?.currentMetrics` for the latest aggregated metrics instead.
+
+✅ Added
+* `StatsReporter` is now exposed on `Call` as `call.statsReporter`, providing `currentMetrics` — a consolidated view of publisher/subscriber WebRTC quality, client environment, and rolling histories (latency, battery level, thermal status).
+* Battery level and device thermal status are now tracked and available via `call.statsReporter?.currentMetrics`.
+
+🔄 Changed
+* `Call.stats` continues to emit periodically, but the record field names/types changed as noted under breaking changes.
+
 🐞 Fixed
 * Fixed an issue where the leave call operation could fail if the there were some issues in parsing custom data.
 * Fixed an issue where the Android audio configuration could not be applied correctly for participants joining the call

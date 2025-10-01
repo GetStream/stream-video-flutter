@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
@@ -6,6 +8,7 @@ import '../../core/utils.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
+import '../stats/trace_record.dart';
 import '../stats/tracer.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
@@ -21,6 +24,21 @@ class CallSessionFactory {
   final StreamCallCid callCid;
   final SdpEditor sdpEditor;
 
+  /// Creates a new [CallSession] instance.
+  /// If [sessionId] is not provided, a new UUID will be generated.
+  /// [sessionSeq] is used for logging and tracing purposes. It should be incremented
+  /// for each new session created for the same call.
+  /// [credentials] are required to connect to the SFU.
+  /// [stateManager] manages the state of the call.
+  /// [dynascaleManager] manages dynascale operations.
+  /// [onReconnectionNeeded] is a callback invoked when reconnection is needed
+  /// because of PeerConnection issues.
+  /// [networkMonitor] monitors the internet connection.
+  /// [statsOptions] configures the statistics reporting.
+  /// [streamVideo] is the main StreamVideo instance.
+  /// [clientPublishOptions] are optional publish options for the client.
+  /// [leftoverTraceRecords] are trace records from previous sessions that were not sent
+  /// before the session ended. They will be included in the new session's trace.
   Future<CallSession> makeCallSession({
     String? sessionId,
     int sessionSeq = 0,
@@ -32,6 +50,7 @@ class CallSessionFactory {
     required StatsOptions statsOptions,
     required StreamVideo streamVideo,
     ClientPublishOptions? clientPublishOptions,
+    List<TraceRecord> leftoverTraceRecords = const [],
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
@@ -55,6 +74,15 @@ class CallSessionFactory {
 
     final tracer = Tracer('$sessionSeq')
       ..setEnabled(statsOptions.enableRtcStats)
+      ..traceMultiple(
+        leftoverTraceRecords
+            .map(
+              (r) => r.copyWith(
+                id: '${max(0, sessionSeq - 1)}',
+              ),
+            )
+            .toList(),
+      )
       ..trace('create', {'url': sfuName});
 
     return CallSession(

@@ -47,10 +47,6 @@ class CallState extends Equatable {
       liveStartedAt: null,
       liveEndedAt: null,
       timerEndsAt: null,
-      publisherStats: null,
-      subscriberStats: null,
-      localStats: null,
-      latencyHistory: const [],
       blockedUserIds: const [],
       participantCount: 0,
       anonymousParticipantCount: 0,
@@ -91,10 +87,6 @@ class CallState extends Equatable {
     required this.liveStartedAt,
     required this.liveEndedAt,
     required this.timerEndsAt,
-    required this.publisherStats,
-    required this.subscriberStats,
-    required this.localStats,
-    required this.latencyHistory,
     required this.blockedUserIds,
     required this.participantCount,
     required this.anonymousParticipantCount,
@@ -133,10 +125,6 @@ class CallState extends Equatable {
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
   final DateTime? timerEndsAt;
-  final PeerConnectionStats? publisherStats;
-  final PeerConnectionStats? subscriberStats;
-  final LocalStats? localStats;
-  final List<int> latencyHistory;
   final List<String> blockedUserIds;
   final int participantCount;
   final int anonymousParticipantCount;
@@ -208,10 +196,6 @@ class CallState extends Equatable {
     DateTime? liveStartedAt,
     DateTime? liveEndedAt,
     DateTime? timerEndsAt,
-    PeerConnectionStats? publisherStats,
-    PeerConnectionStats? subscriberStats,
-    LocalStats? localStats,
-    List<int>? latencyHistory,
     List<String>? blockedUserIds,
     int? participantCount,
     int? anonymousParticipantCount,
@@ -250,10 +234,6 @@ class CallState extends Equatable {
       liveStartedAt: liveStartedAt ?? this.liveStartedAt,
       liveEndedAt: liveEndedAt ?? this.liveEndedAt,
       timerEndsAt: timerEndsAt ?? this.timerEndsAt,
-      publisherStats: publisherStats ?? this.publisherStats,
-      subscriberStats: subscriberStats ?? this.subscriberStats,
-      localStats: localStats ?? this.localStats,
-      latencyHistory: latencyHistory ?? this.latencyHistory,
       blockedUserIds: blockedUserIds ?? this.blockedUserIds,
       participantCount: participantCount ?? this.participantCount,
       anonymousParticipantCount:
@@ -327,10 +307,6 @@ class CallState extends Equatable {
     liveStartedAt,
     liveEndedAt,
     timerEndsAt,
-    publisherStats,
-    subscriberStats,
-    localStats,
-    latencyHistory,
     blockedUserIds,
     participantCount,
     anonymousParticipantCount,
