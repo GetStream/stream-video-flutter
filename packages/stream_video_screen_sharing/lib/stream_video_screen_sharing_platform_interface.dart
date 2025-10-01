@@ -2,6 +2,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'stream_video_screen_sharing_method_channel.dart';
 
+// ignore: avoid_classes_with_only_static_members
 abstract class StreamVideoScreenSharingPlatform extends PlatformInterface {
   /// Constructs a StreamVideoScreenSharingPlatform.
   StreamVideoScreenSharingPlatform() : super(token: _token);

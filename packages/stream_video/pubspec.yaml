@@ -27,14 +27,14 @@ dependencies:
   jose: ^0.3.4
   meta: ^1.16.0
   package_info_plus: ^9.0.0
-  protobuf: ^4.0.0
+  protobuf: ^5.0.0
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
   stream_webrtc_flutter: ^1.0.12
   synchronized: ^3.1.0
   system_info2: ^4.0.0
-  tart: ^0.5.1
+  tart: ^0.6.0
   thermal: ^1.1.11
   uuid: ^4.5.1
   web: ^1.0.0
@@ -46,6 +46,7 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.4.2
   mocktail: ^1.0.0
+  protoc_plugin: ^23.0.0
   pubspec_parse: ^1.2.1
 
 topics:

@@ -53,19 +53,17 @@ class CallState extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..pc<Participant>(
-        1, _omitFieldNames ? '' : 'participants', $pb.PbFieldType.PM,
+    ..pPM<Participant>(1, _omitFieldNames ? '' : 'participants',
         subBuilder: Participant.create)
     ..aOM<$0.Timestamp>(2, _omitFieldNames ? '' : 'startedAt',
         subBuilder: $0.Timestamp.create)
     ..aOM<ParticipantCount>(3, _omitFieldNames ? '' : 'participantCount',
         subBuilder: ParticipantCount.create)
-    ..pc<Pin>(4, _omitFieldNames ? '' : 'pins', $pb.PbFieldType.PM,
-        subBuilder: Pin.create)
+    ..pPM<Pin>(4, _omitFieldNames ? '' : 'pins', subBuilder: Pin.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CallState clone() => CallState()..mergeFromMessage(this);
+  CallState clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   CallState copyWith(void Function(CallState) updates) =>
       super.copyWith((message) => updates(message as CallState)) as CallState;
@@ -146,12 +144,12 @@ class ParticipantCount extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'total', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'anonymous', $pb.PbFieldType.OU3)
+    ..aI(1, _omitFieldNames ? '' : 'total', fieldType: $pb.PbFieldType.OU3)
+    ..aI(2, _omitFieldNames ? '' : 'anonymous', fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ParticipantCount clone() => ParticipantCount()..mergeFromMessage(this);
+  ParticipantCount clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ParticipantCount copyWith(void Function(ParticipantCount) updates) =>
       super.copyWith((message) => updates(message as ParticipantCount))
@@ -223,7 +221,7 @@ class Pin extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Pin clone() => Pin()..mergeFromMessage(this);
+  Pin clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Pin copyWith(void Function(Pin) updates) =>
       super.copyWith((message) => updates(message as Pin)) as Pin;
@@ -322,29 +320,22 @@ class Participant extends $pb.GeneratedMessage {
     ..aOM<$0.Timestamp>(4, _omitFieldNames ? '' : 'joinedAt',
         subBuilder: $0.Timestamp.create)
     ..aOS(5, _omitFieldNames ? '' : 'trackLookupPrefix')
-    ..e<ConnectionQuality>(
-        6, _omitFieldNames ? '' : 'connectionQuality', $pb.PbFieldType.OE,
-        defaultOrMaker: ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED,
-        valueOf: ConnectionQuality.valueOf,
+    ..aE<ConnectionQuality>(6, _omitFieldNames ? '' : 'connectionQuality',
         enumValues: ConnectionQuality.values)
     ..aOB(7, _omitFieldNames ? '' : 'isSpeaking')
     ..aOB(8, _omitFieldNames ? '' : 'isDominantSpeaker')
-    ..a<$core.double>(
-        9, _omitFieldNames ? '' : 'audioLevel', $pb.PbFieldType.OF)
+    ..aD(9, _omitFieldNames ? '' : 'audioLevel', fieldType: $pb.PbFieldType.OF)
     ..aOS(10, _omitFieldNames ? '' : 'name')
     ..aOS(11, _omitFieldNames ? '' : 'image')
     ..aOM<$1.Struct>(12, _omitFieldNames ? '' : 'custom',
         subBuilder: $1.Struct.create)
     ..pPS(13, _omitFieldNames ? '' : 'roles')
-    ..e<ParticipantSource>(
-        14, _omitFieldNames ? '' : 'source', $pb.PbFieldType.OE,
-        defaultOrMaker: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-        valueOf: ParticipantSource.valueOf,
+    ..aE<ParticipantSource>(14, _omitFieldNames ? '' : 'source',
         enumValues: ParticipantSource.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Participant clone() => Participant()..mergeFromMessage(this);
+  Participant clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Participant copyWith(void Function(Participant) updates) =>
       super.copyWith((message) => updates(message as Participant))
@@ -508,16 +499,13 @@ class StreamQuality extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<VideoQuality>(
-        1, _omitFieldNames ? '' : 'videoQuality', $pb.PbFieldType.OE,
-        defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
-        valueOf: VideoQuality.valueOf,
+    ..aE<VideoQuality>(1, _omitFieldNames ? '' : 'videoQuality',
         enumValues: VideoQuality.values)
     ..aOS(2, _omitFieldNames ? '' : 'userId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StreamQuality clone() => StreamQuality()..mergeFromMessage(this);
+  StreamQuality clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   StreamQuality copyWith(void Function(StreamQuality) updates) =>
       super.copyWith((message) => updates(message as StreamQuality))
@@ -581,12 +569,12 @@ class VideoDimension extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'width', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'height', $pb.PbFieldType.OU3)
+    ..aI(1, _omitFieldNames ? '' : 'width', fieldType: $pb.PbFieldType.OU3)
+    ..aI(2, _omitFieldNames ? '' : 'height', fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  VideoDimension clone() => VideoDimension()..mergeFromMessage(this);
+  VideoDimension clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   VideoDimension copyWith(void Function(VideoDimension) updates) =>
       super.copyWith((message) => updates(message as VideoDimension))
@@ -659,16 +647,14 @@ class VideoLayer extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'rid')
     ..aOM<VideoDimension>(2, _omitFieldNames ? '' : 'videoDimension',
         subBuilder: VideoDimension.create)
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'bitrate', $pb.PbFieldType.OU3)
-    ..a<$core.int>(5, _omitFieldNames ? '' : 'fps', $pb.PbFieldType.OU3)
-    ..e<VideoQuality>(6, _omitFieldNames ? '' : 'quality', $pb.PbFieldType.OE,
-        defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
-        valueOf: VideoQuality.valueOf,
+    ..aI(4, _omitFieldNames ? '' : 'bitrate', fieldType: $pb.PbFieldType.OU3)
+    ..aI(5, _omitFieldNames ? '' : 'fps', fieldType: $pb.PbFieldType.OU3)
+    ..aE<VideoQuality>(6, _omitFieldNames ? '' : 'quality',
         enumValues: VideoQuality.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  VideoLayer clone() => VideoLayer()..mergeFromMessage(this);
+  VideoLayer clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   VideoLayer copyWith(void Function(VideoLayer) updates) =>
       super.copyWith((message) => updates(message as VideoLayer)) as VideoLayer;
@@ -762,16 +748,13 @@ class SubscribeOption extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<TrackType>(1, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
-        defaultOrMaker: TrackType.TRACK_TYPE_UNSPECIFIED,
-        valueOf: TrackType.valueOf,
+    ..aE<TrackType>(1, _omitFieldNames ? '' : 'trackType',
         enumValues: TrackType.values)
-    ..pc<Codec>(2, _omitFieldNames ? '' : 'codecs', $pb.PbFieldType.PM,
-        subBuilder: Codec.create)
+    ..pPM<Codec>(2, _omitFieldNames ? '' : 'codecs', subBuilder: Codec.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscribeOption clone() => SubscribeOption()..mergeFromMessage(this);
+  SubscribeOption clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   SubscribeOption copyWith(void Function(SubscribeOption) updates) =>
       super.copyWith((message) => updates(message as SubscribeOption))
@@ -849,28 +832,23 @@ class PublishOption extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<TrackType>(1, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
-        defaultOrMaker: TrackType.TRACK_TYPE_UNSPECIFIED,
-        valueOf: TrackType.valueOf,
+    ..aE<TrackType>(1, _omitFieldNames ? '' : 'trackType',
         enumValues: TrackType.values)
     ..aOM<Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'bitrate', $pb.PbFieldType.O3)
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'fps', $pb.PbFieldType.O3)
-    ..a<$core.int>(
-        5, _omitFieldNames ? '' : 'maxSpatialLayers', $pb.PbFieldType.O3)
-    ..a<$core.int>(
-        6, _omitFieldNames ? '' : 'maxTemporalLayers', $pb.PbFieldType.O3)
+    ..aI(3, _omitFieldNames ? '' : 'bitrate')
+    ..aI(4, _omitFieldNames ? '' : 'fps')
+    ..aI(5, _omitFieldNames ? '' : 'maxSpatialLayers')
+    ..aI(6, _omitFieldNames ? '' : 'maxTemporalLayers')
     ..aOM<VideoDimension>(7, _omitFieldNames ? '' : 'videoDimension',
         subBuilder: VideoDimension.create)
-    ..a<$core.int>(8, _omitFieldNames ? '' : 'id', $pb.PbFieldType.O3)
+    ..aI(8, _omitFieldNames ? '' : 'id')
     ..aOB(9, _omitFieldNames ? '' : 'useSingleLayer')
-    ..pc<AudioBitrate>(
-        10, _omitFieldNames ? '' : 'audioBitrateProfiles', $pb.PbFieldType.PM,
+    ..pPM<AudioBitrate>(10, _omitFieldNames ? '' : 'audioBitrateProfiles',
         subBuilder: AudioBitrate.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PublishOption clone() => PublishOption()..mergeFromMessage(this);
+  PublishOption clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PublishOption copyWith(void Function(PublishOption) updates) =>
       super.copyWith((message) => updates(message as PublishOption))
@@ -1048,14 +1026,14 @@ class Codec extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..aOS(10, _omitFieldNames ? '' : 'name')
     ..aOS(12, _omitFieldNames ? '' : 'fmtp')
-    ..a<$core.int>(14, _omitFieldNames ? '' : 'clockRate', $pb.PbFieldType.OU3)
+    ..aI(14, _omitFieldNames ? '' : 'clockRate', fieldType: $pb.PbFieldType.OU3)
     ..aOS(15, _omitFieldNames ? '' : 'encodingParameters')
-    ..a<$core.int>(
-        16, _omitFieldNames ? '' : 'payloadType', $pb.PbFieldType.OU3)
+    ..aI(16, _omitFieldNames ? '' : 'payloadType',
+        fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Codec clone() => Codec()..mergeFromMessage(this);
+  Codec clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Codec copyWith(void Function(Codec) updates) =>
       super.copyWith((message) => updates(message as Codec)) as Codec;
@@ -1146,16 +1124,14 @@ class ICETrickle extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<PeerType>(1, _omitFieldNames ? '' : 'peerType', $pb.PbFieldType.OE,
-        defaultOrMaker: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
-        valueOf: PeerType.valueOf,
+    ..aE<PeerType>(1, _omitFieldNames ? '' : 'peerType',
         enumValues: PeerType.values)
     ..aOS(2, _omitFieldNames ? '' : 'iceCandidate')
     ..aOS(3, _omitFieldNames ? '' : 'sessionId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ICETrickle clone() => ICETrickle()..mergeFromMessage(this);
+  ICETrickle clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ICETrickle copyWith(void Function(ICETrickle) updates) =>
       super.copyWith((message) => updates(message as ICETrickle)) as ICETrickle;
@@ -1226,17 +1202,13 @@ class AudioBitrate extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<AudioBitrateProfile>(
-        1, _omitFieldNames ? '' : 'profile', $pb.PbFieldType.OE,
-        defaultOrMaker: AudioBitrateProfile
-            .AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
-        valueOf: AudioBitrateProfile.valueOf,
+    ..aE<AudioBitrateProfile>(1, _omitFieldNames ? '' : 'profile',
         enumValues: AudioBitrateProfile.values)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'bitrate', $pb.PbFieldType.O3)
+    ..aI(2, _omitFieldNames ? '' : 'bitrate')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  AudioBitrate clone() => AudioBitrate()..mergeFromMessage(this);
+  AudioBitrate clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   AudioBitrate copyWith(void Function(AudioBitrate) updates) =>
       super.copyWith((message) => updates(message as AudioBitrate))
@@ -1317,11 +1289,9 @@ class TrackInfo extends $pb.GeneratedMessage {
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'trackId')
-    ..e<TrackType>(2, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
-        defaultOrMaker: TrackType.TRACK_TYPE_UNSPECIFIED,
-        valueOf: TrackType.valueOf,
+    ..aE<TrackType>(2, _omitFieldNames ? '' : 'trackType',
         enumValues: TrackType.values)
-    ..pc<VideoLayer>(5, _omitFieldNames ? '' : 'layers', $pb.PbFieldType.PM,
+    ..pPM<VideoLayer>(5, _omitFieldNames ? '' : 'layers',
         subBuilder: VideoLayer.create)
     ..aOS(6, _omitFieldNames ? '' : 'mid')
     ..aOB(7, _omitFieldNames ? '' : 'dtx')
@@ -1329,12 +1299,11 @@ class TrackInfo extends $pb.GeneratedMessage {
     ..aOB(9, _omitFieldNames ? '' : 'red')
     ..aOB(10, _omitFieldNames ? '' : 'muted')
     ..aOM<Codec>(11, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
-    ..a<$core.int>(
-        12, _omitFieldNames ? '' : 'publishOptionId', $pb.PbFieldType.O3)
+    ..aI(12, _omitFieldNames ? '' : 'publishOptionId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  TrackInfo clone() => TrackInfo()..mergeFromMessage(this);
+  TrackInfo clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   TrackInfo copyWith(void Function(TrackInfo) updates) =>
       super.copyWith((message) => updates(message as TrackInfo)) as TrackInfo;
@@ -1467,16 +1436,14 @@ class Error extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<ErrorCode>(1, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OE,
-        defaultOrMaker: ErrorCode.ERROR_CODE_UNSPECIFIED,
-        valueOf: ErrorCode.valueOf,
+    ..aE<ErrorCode>(1, _omitFieldNames ? '' : 'code',
         enumValues: ErrorCode.values)
     ..aOS(2, _omitFieldNames ? '' : 'message')
     ..aOB(3, _omitFieldNames ? '' : 'shouldRetry')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Error clone() => Error()..mergeFromMessage(this);
+  Error clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Error copyWith(void Function(Error) updates) =>
       super.copyWith((message) => updates(message as Error)) as Error;
@@ -1559,7 +1526,7 @@ class ClientDetails extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ClientDetails clone() => ClientDetails()..mergeFromMessage(this);
+  ClientDetails clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ClientDetails copyWith(void Function(ClientDetails) updates) =>
       super.copyWith((message) => updates(message as ClientDetails))
@@ -1653,17 +1620,14 @@ class Sdk extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<SdkType>(1, _omitFieldNames ? '' : 'type', $pb.PbFieldType.OE,
-        defaultOrMaker: SdkType.SDK_TYPE_UNSPECIFIED,
-        valueOf: SdkType.valueOf,
-        enumValues: SdkType.values)
+    ..aE<SdkType>(1, _omitFieldNames ? '' : 'type', enumValues: SdkType.values)
     ..aOS(2, _omitFieldNames ? '' : 'major')
     ..aOS(3, _omitFieldNames ? '' : 'minor')
     ..aOS(4, _omitFieldNames ? '' : 'patch')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Sdk clone() => Sdk()..mergeFromMessage(this);
+  Sdk clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Sdk copyWith(void Function(Sdk) updates) =>
       super.copyWith((message) => updates(message as Sdk)) as Sdk;
@@ -1751,7 +1715,7 @@ class OS extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  OS clone() => OS()..mergeFromMessage(this);
+  OS clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   OS copyWith(void Function(OS) updates) =>
       super.copyWith((message) => updates(message as OS)) as OS;
@@ -1827,7 +1791,7 @@ class Browser extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Browser clone() => Browser()..mergeFromMessage(this);
+  Browser clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Browser copyWith(void Function(Browser) updates) =>
       super.copyWith((message) => updates(message as Browser)) as Browser;
@@ -1899,9 +1863,9 @@ class RTMPIngress extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'width', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'height', $pb.PbFieldType.OU3)
-    ..a<$core.double>(3, _omitFieldNames ? '' : 'frameRate', $pb.PbFieldType.OD)
+    ..aI(1, _omitFieldNames ? '' : 'width', fieldType: $pb.PbFieldType.OU3)
+    ..aI(2, _omitFieldNames ? '' : 'height', fieldType: $pb.PbFieldType.OU3)
+    ..aD(3, _omitFieldNames ? '' : 'frameRate')
     ..aOS(4, _omitFieldNames ? '' : 'software')
     ..aOS(5, _omitFieldNames ? '' : 'version')
     ..aOS(6, _omitFieldNames ? '' : 'encoder')
@@ -1909,7 +1873,7 @@ class RTMPIngress extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RTMPIngress clone() => RTMPIngress()..mergeFromMessage(this);
+  RTMPIngress clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RTMPIngress copyWith(void Function(RTMPIngress) updates) =>
       super.copyWith((message) => updates(message as RTMPIngress))
@@ -2025,7 +1989,7 @@ class Device extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Device clone() => Device()..mergeFromMessage(this);
+  Device clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Device copyWith(void Function(Device) updates) =>
       super.copyWith((message) => updates(message as Device)) as Device;
@@ -2110,7 +2074,7 @@ class Call extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Call clone() => Call()..mergeFromMessage(this);
+  Call clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Call copyWith(void Function(Call) updates) =>
       super.copyWith((message) => updates(message as Call)) as Call;
@@ -2237,7 +2201,7 @@ class CallGrants extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CallGrants clone() => CallGrants()..mergeFromMessage(this);
+  CallGrants clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   CallGrants copyWith(void Function(CallGrants) updates) =>
       super.copyWith((message) => updates(message as CallGrants)) as CallGrants;
@@ -2317,7 +2281,7 @@ class InputDevices extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  InputDevices clone() => InputDevices()..mergeFromMessage(this);
+  InputDevices clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   InputDevices copyWith(void Function(InputDevices) updates) =>
       super.copyWith((message) => updates(message as InputDevices))
@@ -2384,16 +2348,13 @@ class AndroidState extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<AndroidThermalState>(
-        1, _omitFieldNames ? '' : 'thermalState', $pb.PbFieldType.OE,
-        defaultOrMaker: AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED,
-        valueOf: AndroidThermalState.valueOf,
+    ..aE<AndroidThermalState>(1, _omitFieldNames ? '' : 'thermalState',
         enumValues: AndroidThermalState.values)
     ..aOB(2, _omitFieldNames ? '' : 'isPowerSaverMode')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  AndroidState clone() => AndroidState()..mergeFromMessage(this);
+  AndroidState clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   AndroidState copyWith(void Function(AndroidState) updates) =>
       super.copyWith((message) => updates(message as AndroidState))
@@ -2458,16 +2419,13 @@ class AppleState extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<AppleThermalState>(
-        1, _omitFieldNames ? '' : 'thermalState', $pb.PbFieldType.OE,
-        defaultOrMaker: AppleThermalState.APPLE_THERMAL_STATE_UNSPECIFIED,
-        valueOf: AppleThermalState.valueOf,
+    ..aE<AppleThermalState>(1, _omitFieldNames ? '' : 'thermalState',
         enumValues: AppleThermalState.values)
     ..aOB(2, _omitFieldNames ? '' : 'isLowPowerModeEnabled')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  AppleState clone() => AppleState()..mergeFromMessage(this);
+  AppleState clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   AppleState copyWith(void Function(AppleState) updates) =>
       super.copyWith((message) => updates(message as AppleState)) as AppleState;
@@ -2539,22 +2497,19 @@ class PerformanceStats extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'stream.video.sfu.models'),
       createEmptyInstance: create)
-    ..e<TrackType>(1, _omitFieldNames ? '' : 'trackType', $pb.PbFieldType.OE,
-        defaultOrMaker: TrackType.TRACK_TYPE_UNSPECIFIED,
-        valueOf: TrackType.valueOf,
+    ..aE<TrackType>(1, _omitFieldNames ? '' : 'trackType',
         enumValues: TrackType.values)
     ..aOM<Codec>(2, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
-    ..a<$core.double>(
-        3, _omitFieldNames ? '' : 'avgFrameTimeMs', $pb.PbFieldType.OF)
-    ..a<$core.double>(4, _omitFieldNames ? '' : 'avgFps', $pb.PbFieldType.OF)
+    ..aD(3, _omitFieldNames ? '' : 'avgFrameTimeMs',
+        fieldType: $pb.PbFieldType.OF)
+    ..aD(4, _omitFieldNames ? '' : 'avgFps', fieldType: $pb.PbFieldType.OF)
     ..aOM<VideoDimension>(5, _omitFieldNames ? '' : 'videoDimension',
         subBuilder: VideoDimension.create)
-    ..a<$core.int>(
-        6, _omitFieldNames ? '' : 'targetBitrate', $pb.PbFieldType.O3)
+    ..aI(6, _omitFieldNames ? '' : 'targetBitrate')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PerformanceStats clone() => PerformanceStats()..mergeFromMessage(this);
+  PerformanceStats clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PerformanceStats copyWith(void Function(PerformanceStats) updates) =>
       super.copyWith((message) => updates(message as PerformanceStats))

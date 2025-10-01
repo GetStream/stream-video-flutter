@@ -5,3 +5,4 @@ environment:
 
 dev_dependencies:
   melos: ^6.2.0
+  lints: ^6.0.0
