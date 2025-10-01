@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
@@ -22,6 +24,21 @@ class CallSessionFactory {
   final StreamCallCid callCid;
   final SdpEditor sdpEditor;
 
+  /// Creates a new [CallSession] instance.
+  /// If [sessionId] is not provided, a new UUID will be generated.
+  /// [sessionSeq] is used for logging and tracing purposes. It should be incremented
+  /// for each new session created for the same call.
+  /// [credentials] are required to connect to the SFU.
+  /// [stateManager] manages the state of the call.
+  /// [dynascaleManager] manages dynascale operations.
+  /// [onReconnectionNeeded] is a callback invoked when reconnection is needed
+  /// because of PeerConnection issues.
+  /// [networkMonitor] monitors the internet connection.
+  /// [statsOptions] configures the statistics reporting.
+  /// [streamVideo] is the main StreamVideo instance.
+  /// [clientPublishOptions] are optional publish options for the client.
+  /// [leftoverTraceRecords] are trace records from previous sessions that were not sent
+  /// before the session ended. They will be included in the new session's trace.
   Future<CallSession> makeCallSession({
     String? sessionId,
     int sessionSeq = 0,
@@ -61,7 +78,7 @@ class CallSessionFactory {
         leftoverTraceRecords
             .map(
               (r) => r.copyWith(
-                id: '${sessionSeq - 1}',
+                id: '${max(0, sessionSeq - 1)}',
               ),
             )
             .toList(),

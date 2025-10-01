@@ -102,40 +102,6 @@ class CallStatsScreen extends StatelessWidget {
                       ),
                     ),
                     if (snapshot.hasData) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.network_check,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Call latency',
-                              style: textTheme.title3.apply(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      SizedBox(
-                        height: 200,
-                        child: StatsLatencyChart(
-                          latencyHistory: state.latencyHistory,
-                        ),
-                      ),
                       const SizedBox(
                         height: 16,
                       ),

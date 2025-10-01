@@ -19,10 +19,18 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
   StatsReporter({
     required this.rtcManager,
     required this.clientEnvironment,
-  }) : super(null);
+    Battery? battery,
+    Thermal? thermal,
+  }) : super(null) {
+    _battery = battery ?? Battery();
+    _thermal = thermal ?? Thermal();
+  }
 
   final RtcManager rtcManager;
   final ClientEnvironment clientEnvironment;
+
+  late Battery _battery;
+  late Thermal _thermal;
 
   CallMetrics? get currentMetrics => state;
 
@@ -207,7 +215,7 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
       try {
         if (batteryCheckAvailable) {
-          batteryLevel = await Battery().batteryLevel;
+          batteryLevel = await _battery.batteryLevel;
           batteryLevelHistory = <int>[
             ...state?.batteryLevelHistory.reversed.take(49).toList().reversed ??
                 [],
@@ -223,7 +231,7 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
       try {
         if (thermalStatusAvailable) {
-          final thermalStatus = await Thermal().thermalStatus;
+          final thermalStatus = await _thermal.thermalStatus;
           thermalStatusHistory = <int>[
             ...state?.thermalStatusHistory.reversed
                     .take(49)
