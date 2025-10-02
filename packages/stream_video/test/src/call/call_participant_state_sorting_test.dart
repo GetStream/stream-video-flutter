@@ -15,9 +15,12 @@ import 'package:stream_video/src/sorting/call_participant_state_sorting.dart';
 
 void main() {
   group('sorting comparators', () {
-    test('byParticipantSource prioritizes requested source', () {
+    test('byParticipantSource prioritizes requested sources', () {
       final comparator = combineComparators<CallParticipantState>([
-        byParticipantSource(SfuParticipantSource.rtmp),
+        byParticipantSource([
+          SfuParticipantSource.rtmp,
+          SfuParticipantSource.sip,
+        ]),
         byName,
       ]);
 
@@ -63,7 +66,7 @@ void main() {
 
       final list = [user1, user3, user4, user2]..sort(comparator);
       expect(list.first, user2);
-      expect(list.map((p) => p.name), ['user2', 'user3', 'user1', 'user4']);
+      expect(list.map((p) => p.name), ['user2', 'user3', 'user4', 'user1']);
     });
 
     test('byReactionType prioritizes given reaction type', () {

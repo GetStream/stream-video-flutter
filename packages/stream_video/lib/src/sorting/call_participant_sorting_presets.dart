@@ -21,6 +21,7 @@ mixin CallParticipantSortingPresets {
     dominantSpeaker,
     ifInvisibleBy(speaking),
     ifInvisibleBy(byReactionType('raised-hand')),
+    ifInvisibleBy(byVideoIngressSource()),
     ifInvisibleBy(publishingVideo),
     ifInvisibleBy(publishingAudio),
   ]);
@@ -31,7 +32,7 @@ mixin CallParticipantSortingPresets {
       ifInvisibleBy(dominantSpeaker),
       ifInvisibleBy(speaking),
       ifInvisibleBy(byReactionType('raised-hand')),
-      ifInvisibleBy(byParticipantSource(SfuParticipantSource.rtmp)),
+      ifInvisibleBy(byVideoIngressSource()),
       ifInvisibleBy(publishingVideo),
       ifInvisibleBy(publishingAudio),
       byRole(['admin', 'host', 'speaker']),

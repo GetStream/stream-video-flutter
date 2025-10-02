@@ -2762,7 +2762,7 @@ class Call {
     AudioConstraints? constraints,
   }) async {
     if (enabled && !hasPermission(CallPermission.sendAudio)) {
-      return Result.error('Missing permission to send video');
+      return Result.error('Missing permission to send audio');
     }
 
     if (enabled && CurrentPlatform.isAndroid) {
