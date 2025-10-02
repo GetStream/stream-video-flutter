@@ -25,6 +25,9 @@
     - For periodic WebRTC stats: Use `call.stats` stream
     - For latest aggregated metrics: Use `call.statsReporter?.currentMetrics`
 
+* **Dependency updates**
+  - Updated most dependencies to their latest versions to ensure compatibility and security
+
 ✅ Added
 
 - New `call.statsReporter` property provides access to `currentMetrics`
