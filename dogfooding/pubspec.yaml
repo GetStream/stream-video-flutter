@@ -39,7 +39,7 @@ dependencies:
   stream_chat_flutter: ^9.17.0
   stream_video_flutter: ^0.11.0
   stream_video_noise_cancellation: ^0.11.0
-  stream_video_push_notification: ^0.11.0
+  # stream_video_push_notification: ^0.11.0
   stream_video_screen_sharing: ^0.11.0
 
 dependency_overrides:
@@ -47,8 +47,8 @@ dependency_overrides:
     path: ../packages/stream_video
   stream_video_flutter:
     path: ../packages/stream_video_flutter
-  stream_video_noise_cancellation:
-    path: ../packages/stream_video_noise_cancellation
+  # stream_video_noise_cancellation:
+  #  path: ../packages/stream_video_noise_cancellation
   stream_video_push_notification:
     path: ../packages/stream_video_push_notification
   stream_video_screen_sharing:
