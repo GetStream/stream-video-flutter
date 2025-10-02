@@ -55,21 +55,33 @@ int pinned(CallParticipantState a, CallParticipantState b) {
 }
 
 /// A comparator factory which creates a comparator which prioritizes
-/// participants who are from a specific source (e.g., WebRTC, RTMP, WHIP...).
+/// participants who are from a specific sources (e.g., WebRTC, RTMP, WHIP...).
 Comparator<CallParticipantState> byParticipantSource(
-  SfuParticipantSource source,
+  List<SfuParticipantSource> sources,
 ) {
+  double sourcePriority(SfuParticipantSource? source) {
+    if (source == null) return double.maxFinite;
+
+    final index = sources.indexOf(source);
+    return index == -1 ? double.maxFinite : index.toDouble();
+  }
+
   return (CallParticipantState a, CallParticipantState b) {
-    if (a.participantSource == source && b.participantSource != source) {
-      return -1;
-    }
-
-    if (a.participantSource != source && b.participantSource == source) {
-      return 1;
-    }
-
+    final priorityA = sourcePriority(a.participantSource);
+    final priorityB = sourcePriority(b.participantSource);
+    if (priorityA < priorityB) return -1;
+    if (priorityA > priorityB) return 1;
     return 0;
   };
+}
+
+Comparator<CallParticipantState> byVideoIngressSource() {
+  return byParticipantSource([
+    SfuParticipantSource.rtmp,
+    SfuParticipantSource.srt,
+    SfuParticipantSource.whip,
+    SfuParticipantSource.rtsp,
+  ]);
 }
 
 /// A comparator creator which will set up a comparator which prioritizes
