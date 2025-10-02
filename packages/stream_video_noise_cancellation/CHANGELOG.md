@@ -1,7 +1,17 @@
-## Unreleased
+## 0.11.0
+
+🚧 Build breaking changes
+
+> **Important:** This release includes breaking changes for Android development.
+> 
+> **Android Requirements:**
+> - Minimum compileSDK 36
+> - Android Gradle Plugin >=8.12.1
+> - Gradle wrapper >=8.13
+> - Kotlin 2.2.0
 
 * Updated minimum Flutter version to 3.32.0
-* Updated minimum supported dart SDK version to 3.8.0
+* Updated minimum supported Dart SDK version to 3.8.0
 
 ## 0.10.4
 * Sync version with `stream_video_flutter` 0.10.4
