@@ -139,8 +139,8 @@ class _CallScreenState extends State<CallScreen> {
               layoutMode: _currentLayoutMode,
               pictureInPictureConfiguration:
                   const PictureInPictureConfiguration(
-                enablePictureInPicture: true,
-              ),
+                    enablePictureInPicture: true,
+                  ),
               callParticipantsWidgetBuilder: (context, call) {
                 return Stack(
                   children: [
@@ -223,8 +223,8 @@ class _CallScreenState extends State<CallScreen> {
                         selector: (state) => state.localParticipant != null,
                         builder: (context, hasLocalParticipant) =>
                             hasLocalParticipant
-                                ? FlipCameraOption(call: call)
-                                : const SizedBox.shrink(),
+                            ? FlipCameraOption(call: call)
+                            : const SizedBox.shrink(),
                       ),
                     ],
                   ),
@@ -258,8 +258,8 @@ class _CallScreenState extends State<CallScreen> {
                           desktopScreenSelectorBuilder:
                               // ignore: avoid_redundant_argument_values
                               _useCustomDesktopScreenShareOption
-                                  ? _customDesktopScreenShareSelector
-                                  : null,
+                              ? _customDesktopScreenShareSelector
+                              : null,
                         ),
                         ToggleMicrophoneOption(
                           call: call,
@@ -409,13 +409,13 @@ Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
         builder:
             (BuildContext context, ScreenSelectorState value, Widget? child) =>
                 Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: ThumbnailGrid(
-            sources: value.sources.values.toList(),
-            selectedSource: value.selectedSource,
-            onSelectSource: (source) => Navigator.pop(context, source),
-          ),
-        ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ThumbnailGrid(
+                    sources: value.sources.values.toList(),
+                    selectedSource: value.selectedSource,
+                    onSelectSource: (source) => Navigator.pop(context, source),
+                  ),
+                ),
       );
     },
   );

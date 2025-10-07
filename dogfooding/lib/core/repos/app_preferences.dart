@@ -23,8 +23,8 @@ class AppPreferences {
 
   String? get apiKey => _prefs.getString(_kApiKeyPref);
   Environment get environment => Environment.fromSubdomain(
-        _prefs.getString(_kEnvironemntPref) ?? Environment.pronto.name,
-      );
+    _prefs.getString(_kEnvironemntPref) ?? Environment.pronto.name,
+  );
 
   Future<bool> setUserCredentials(UserCredentials? credentials) {
     final jsonString = jsonEncode(credentials?.toJson());

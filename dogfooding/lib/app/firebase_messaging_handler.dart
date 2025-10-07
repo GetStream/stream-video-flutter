@@ -26,9 +26,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     if (credentials == null) return;
 
     final tokenResponse = await locator.get<TokenService>().loadToken(
-          userId: credentials.userInfo.id,
-          environment: prefs.environment,
-        );
+      userId: credentials.userInfo.id,
+      environment: prefs.environment,
+    );
 
     // Initialise the video client.
     final streamVideo = AppInjector.registerStreamVideo(

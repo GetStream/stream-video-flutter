@@ -77,7 +77,8 @@ class CallRoute extends GoRouteData with $CallRoute {
     Call call,
     CallConnectOptions? connectOptions,
     StreamVideoEffectsManager? effectsManager,
-  }) $extra;
+  })
+  $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

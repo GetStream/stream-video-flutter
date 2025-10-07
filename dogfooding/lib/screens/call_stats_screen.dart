@@ -36,7 +36,8 @@ class CallStatsScreen extends StatelessWidget {
         final subscriberBitrate = state.subscriber?.bitrateKbps;
         final publisherBitrate = state.publisher?.bitrateKbps;
 
-        final batteryDrained = state.initialBatteryLevel != null &&
+        final batteryDrained =
+            state.initialBatteryLevel != null &&
                 state.batteryLevelHistory.isNotEmpty
             ? state.initialBatteryLevel! - state.batteryLevelHistory.last
             : null;

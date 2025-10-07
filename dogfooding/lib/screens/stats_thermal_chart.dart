@@ -49,7 +49,8 @@ class StatsThermalChart extends StatelessWidget {
                   x: entry.$1,
                   barRods: [
                     BarChartRodData(
-                      toY: entry.$2
+                      toY:
+                          entry.$2
                               .toDouble()
                               .clamp(0, _maxSeverity)
                               .toDouble() +

@@ -23,17 +23,17 @@ class UserActionsAvatar extends StatelessWidget {
         ),
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
-          return InkWell(
-            onTap: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
+              return InkWell(
+                onTap: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: StreamUserAvatar(user: currentUser),
+              );
             },
-            child: StreamUserAvatar(user: currentUser),
-          );
-        },
         menuChildren: [
           MenuItemButton(
             child: const Text(

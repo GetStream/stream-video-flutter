@@ -27,8 +27,8 @@ class UserAuthController extends ChangeNotifier {
   UserAuthController({
     required AppPreferences prefs,
     required TokenService tokenService,
-  })  : _prefs = prefs,
-        _tokenService = tokenService;
+  }) : _prefs = prefs,
+       _tokenService = tokenService;
 
   final AppPreferences _prefs;
   final TokenService _tokenService;

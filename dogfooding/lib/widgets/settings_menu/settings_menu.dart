@@ -153,31 +153,30 @@ class _SettingsMenuState extends State<SettingsMenu> {
     return [
       Wrap(
         alignment: WrapAlignment.spaceEvenly,
-        children: StreamVideoTheme.of(context)
-            .callControlsTheme
-            .callReactions
+        children: StreamVideoTheme.of(context).callControlsTheme.callReactions
             .where(
               (element) => element.emojiCode != _raisedHandReaction.emojiCode,
             )
             .map((e) {
-          return InkWell(
-            onTap: () {
-              widget.call.sendReaction(
-                reactionType: e.type,
-                emojiCode: e.emojiCode,
-              );
+              return InkWell(
+                onTap: () {
+                  widget.call.sendReaction(
+                    reactionType: e.type,
+                    emojiCode: e.emojiCode,
+                  );
 
-              widget.onReactionSend?.call(e);
-            },
-            child: IgnorePointer(
-              child: CallControlOption(
-                icon: Text(e.icon, textAlign: TextAlign.center),
-                onPressed: () {},
-                padding: EdgeInsets.zero,
-              ),
-            ),
-          );
-        }).toList(),
+                  widget.onReactionSend?.call(e);
+                },
+                child: IgnorePointer(
+                  child: CallControlOption(
+                    icon: Text(e.icon, textAlign: TextAlign.center),
+                    onPressed: () {},
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              );
+            })
+            .toList(),
       ),
       const SizedBox(height: 8),
       SettingsMenuItem(
@@ -572,7 +571,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
             return StandardActionMenuItem(
               icon: Icons.video_settings,
               label: quality.name,
-              color: getIncomingVideoQuality(
+              color:
+                  getIncomingVideoQuality(
                         widget.call.dynascaleManager.incomingVideoSettings,
                       ) ==
                       quality
