@@ -20,14 +20,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Temporary Override Local Dependencies
-      uses: mikefarah/yq@master
-      with:
-        cmd: |
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+    # - name: Temporary Override Local Dependencies
+    #   uses: mikefarah/yq@master
+    #   with:
+    #     cmd: |
+    #       yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+    #       yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
+    #       yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+    #       yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
