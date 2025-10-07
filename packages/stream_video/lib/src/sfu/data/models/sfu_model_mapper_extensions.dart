@@ -2,6 +2,7 @@ import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
+import 'sfu_client_capability.dart';
 import 'sfu_codec.dart';
 import 'sfu_publish_options.dart';
 import 'sfu_subscription_details.dart';
@@ -18,6 +19,19 @@ extension SfuPeerTypeMapper on sfu_models.PeerType {
     }
 
     throw StateError('unexpected quality: $this');
+  }
+}
+
+extension SfuClientCapabilityMapper on SfuClientCapability {
+  sfu_models.ClientCapability toDTO() {
+    switch (this) {
+      case SfuClientCapability.subscriberVideoPause:
+        return sfu_models
+            .ClientCapability
+            .CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE;
+      case SfuClientCapability.unspecified:
+        return sfu_models.ClientCapability.CLIENT_CAPABILITY_UNSPECIFIED;
+    }
   }
 }
 
@@ -44,7 +58,7 @@ extension RtcVideoQualityMapper on RtcVideoQuality {
         sfu_models.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
       RtcVideoQuality.mid => sfu_models.VideoQuality.VIDEO_QUALITY_MID,
       RtcVideoQuality.high => sfu_models.VideoQuality.VIDEO_QUALITY_HIGH,
-      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF
+      RtcVideoQuality.off => sfu_models.VideoQuality.VIDEO_QUALITY_OFF,
     };
   }
 }

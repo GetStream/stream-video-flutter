@@ -35,7 +35,7 @@ abstract class MutableSharedEmitter<T> extends SharedEmitter<T> {
 class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
   /// Creates a new instance.
   MutableSharedEmitterImpl({bool sync = false})
-      : _shared = PublishSubject(sync: sync);
+    : _shared = PublishSubject(sync: sync);
 
   final PublishSubject<T> _shared;
 

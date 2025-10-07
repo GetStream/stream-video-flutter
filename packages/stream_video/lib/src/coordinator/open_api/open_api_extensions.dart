@@ -114,7 +114,8 @@ extension EnvelopeExt on open.CallResponse {
       createdBy: createdBy.toCallUser(),
       egress: egress.toCallEgress(),
       team: team ?? '',
-      ownCapabilities: ownCapabilities?.map(
+      ownCapabilities:
+          ownCapabilities?.map(
             (it) => CallPermission.fromAlias(it.value),
           ) ??
           [],
@@ -211,6 +212,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         maxParticipantsExcludeOwner: limits.maxParticipantsExcludeOwner,
         maxParticipantsExcludeRoles: limits.maxParticipantsExcludeRoles,
       ),
+      ingress: ingress?.toSettingsDomain(),
     );
   }
 }
@@ -317,6 +319,50 @@ extension on open.TargetResolution {
       height: height,
       width: width,
       bitrate: bitrate,
+    );
+  }
+}
+
+extension on open.IngressSettingsResponse {
+  StreamIngressSettings toSettingsDomain() {
+    return StreamIngressSettings(
+      enabled: enabled,
+      audioEncodingOptions: audioEncodingOptions?.toSettingsDomain(),
+      videoEncodingOptions: videoEncodingOptions.map(
+        (key, value) => MapEntry(key, value.toSettingsDomain()),
+      ),
+    );
+  }
+}
+
+extension on open.IngressAudioEncodingResponse {
+  StreamIngressAudioEncodingOptions toSettingsDomain() {
+    return StreamIngressAudioEncodingOptions(
+      bitrate: bitrate,
+      channels: IngressAudioChannels.fromValue(channels),
+      enableDtx: enableDtx,
+    );
+  }
+}
+
+extension on open.IngressVideoEncodingResponse {
+  StreamIngressVideoEncodingOptions toSettingsDomain() {
+    return StreamIngressVideoEncodingOptions(
+      layers: layers.map((e) => e.toSettingsDomain()).toList(),
+    );
+  }
+}
+
+extension on open.IngressVideoLayerResponse {
+  StreamIngressVideoLayer toSettingsDomain() {
+    return StreamIngressVideoLayer(
+      bitrate: bitrate,
+      codec:
+          IngressVideoLayerRequestCodecEnumTypeTransformer().decode(codec) ??
+          IngressVideoLayerRequestCodecEnum.h264,
+      frameRateLimit: frameRateLimit,
+      maxDimension: maxDimension,
+      minDimension: minDimension,
     );
   }
 }

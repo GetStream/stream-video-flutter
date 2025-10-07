@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/widgets/device_list.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../theme/app_palette.dart';
+import 'device_list.dart';
 
 class UserActionsAvatar extends StatelessWidget {
-  const UserActionsAvatar({
-    required this.currentUser,
-    super.key,
-  });
+  const UserActionsAvatar({required this.currentUser, super.key});
 
   final UserInfo currentUser;
 
@@ -20,26 +17,23 @@ class UserActionsAvatar extends StatelessWidget {
         style: const MenuStyle(
           alignment: Alignment.bottomRight,
           padding: WidgetStatePropertyAll(EdgeInsets.all(8)),
-          backgroundColor:
-              WidgetStatePropertyAll(AppColorPalette.buttonSecondary),
+          backgroundColor: WidgetStatePropertyAll(
+            AppColorPalette.buttonSecondary,
+          ),
         ),
-        alignmentOffset: const Offset(00, 0),
-        builder: (
-          BuildContext context,
-          MenuController controller,
-          Widget? child,
-        ) {
-          return InkWell(
-            onTap: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
+        builder:
+            (BuildContext context, MenuController controller, Widget? child) {
+              return InkWell(
+                onTap: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: StreamUserAvatar(user: currentUser),
+              );
             },
-            child: StreamUserAvatar(user: currentUser),
-          );
-        },
         menuChildren: [
           MenuItemButton(
             child: const Text(
@@ -49,7 +43,7 @@ class UserActionsAvatar extends StatelessWidget {
             onPressed: () async {
               final devices = await StreamVideo.instance.getDevices();
 
-              showDialog(
+              await showDialog<void>(
                 // ignore: use_build_context_synchronously
                 context: context,
                 builder: (context) {
@@ -61,23 +55,19 @@ class UserActionsAvatar extends StatelessWidget {
                         IconButton(
                           onPressed: () async {
                             for (final device in devices.getDataOrNull()!) {
-                              await StreamVideo.instance
-                                  .removeDevice(pushToken: device.pushToken);
+                              await StreamVideo.instance.removeDevice(
+                                pushToken: device.pushToken,
+                              );
                             }
 
                             // ignore: use_build_context_synchronously
                             Navigator.of(context).pop();
                           },
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                        )
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                        ),
                       ],
                     ),
-                    content: DeviceList(
-                      devices: devices.getDataOrNull()!,
-                    ),
+                    content: DeviceList(devices: devices.getDataOrNull()!),
                   );
                 },
               );

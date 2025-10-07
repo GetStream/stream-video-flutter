@@ -6,7 +6,7 @@ class NetworkMonitorFlutter implements NetworkMonitor {
   NetworkMonitorFlutter.fromInternetConnection(
     InternetConnection? internetConnection,
   ) : _internetConnection =
-            internetConnection ?? InternetConnection.createInstance();
+          internetConnection ?? InternetConnection.createInstance();
 
   final InternetConnection _internetConnection;
 

@@ -5,30 +5,34 @@ import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
 
 /// Builder function used to build an image widget for the user avatar.
-typedef ImageWidgetBuilder = Widget Function(
-  BuildContext context,
-  UserInfo user,
-  ImageProvider imageProvider,
-);
+typedef ImageWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      UserInfo user,
+      ImageProvider imageProvider,
+    );
 
 /// Builder function used to build a placeholder widget.
-typedef PlaceholderWidgetBuilder = Widget Function(
-  BuildContext context,
-  UserInfo user,
-);
+typedef PlaceholderWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      UserInfo user,
+    );
 
 /// Builder function used to build an error widget.
-typedef ErrorWidgetBuilder = Widget Function(
-  BuildContext context,
-  UserInfo user,
-  Object error,
-);
+typedef ErrorWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      UserInfo user,
+      Object error,
+    );
 
 /// Builder function used to build a widget with the user initials.
-typedef FallbackWidgetBuilder = Widget Function(
-  BuildContext context,
-  UserInfo user,
-);
+typedef FallbackWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      UserInfo user,
+    );
 
 /// The action to perform when the user avatar is tapped.
 typedef OnUserAvatarTap = void Function(UserInfo);
@@ -141,13 +145,13 @@ class StreamUserAvatar extends StatelessWidget {
                       ),
               )
             : fallbackBuilder != null
-                ? fallbackBuilder!(context, user)
-                : _InitialsUserAvatar(
-                    user: user,
-                    borderRadius: borderRadius,
-                    initialsTextStyle: initialsTextStyle,
-                    initialsBackground: initialsBackground,
-                  ),
+            ? fallbackBuilder!(context, user)
+            : _InitialsUserAvatar(
+                user: user,
+                borderRadius: borderRadius,
+                initialsTextStyle: initialsTextStyle,
+                initialsBackground: initialsBackground,
+              ),
       ),
     );
 
@@ -224,8 +228,9 @@ class _InitialsUserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials =
-        user.name.isNotEmpty ? user.name.initials() : user.id.initials();
+    final initials = user.name.isNotEmpty
+        ? user.name.initials()
+        : user.id.initials();
 
     final avatarColorIndex = initials.hashCode.abs() % avatarColors.length;
     final avatarColor = avatarColors[avatarColorIndex];

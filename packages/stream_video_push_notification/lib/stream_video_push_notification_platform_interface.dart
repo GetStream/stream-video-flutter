@@ -35,7 +35,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   Future<void> ensureFullScreenIntentPermission() {
     throw UnimplementedError(
-        'ensureFullScreenIntentPermission() has not been implemented.');
+      'ensureFullScreenIntentPermission() has not been implemented.',
+    );
   }
 
   /// Listen to event callback from Ringing flow.

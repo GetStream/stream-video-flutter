@@ -1,3 +1,8 @@
+/// Stream Video SDK for Dart and Flutter.
+///
+/// This library exposes the public API for building real‑time audio/video
+/// experiences with Stream Video.
+///
 library stream_video;
 
 export 'open_api/video/coordinator/api.dart' hide User;
@@ -24,9 +29,11 @@ export 'src/network_monitor_settings.dart';
 export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/retry/retry_policy.dart';
+export 'src/sfu/data/models/sfu_client_capability.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
 export 'src/sfu/data/models/sfu_error.dart';
 export 'src/sfu/data/models/sfu_goaway_reason.dart';
+export 'src/sfu/data/models/sfu_participant_source.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/sorting/call_participant_sorting_presets.dart';
 export 'src/sorting/call_participant_state_sorting.dart';

@@ -61,9 +61,9 @@ class AudioConstraints extends MediaConstraints {
       if (CurrentPlatform.isWeb) {
         constraints['deviceId'] = deviceId;
       } else {
-        (constraints['optional'] as List)
-            .cast<Map<String, dynamic>>()
-            .add(<String, dynamic>{'sourceId': deviceId});
+        (constraints['optional'] as List).cast<Map<String, dynamic>>().add(
+          <String, dynamic>{'sourceId': deviceId},
+        );
       }
     }
     return {
@@ -80,13 +80,12 @@ class AudioConstraints extends MediaConstraints {
     bool? autoGainControl,
     bool? highPassFilter,
     bool? typingNoiseDetection,
-  }) =>
-      AudioConstraints(
-        deviceId: deviceId ?? this.deviceId,
-        noiseSuppression: noiseSuppression ?? this.noiseSuppression,
-        echoCancellation: echoCancellation ?? this.echoCancellation,
-        autoGainControl: autoGainControl ?? this.autoGainControl,
-        highPassFilter: highPassFilter ?? this.highPassFilter,
-        typingNoiseDetection: typingNoiseDetection ?? this.typingNoiseDetection,
-      );
+  }) => AudioConstraints(
+    deviceId: deviceId ?? this.deviceId,
+    noiseSuppression: noiseSuppression ?? this.noiseSuppression,
+    echoCancellation: echoCancellation ?? this.echoCancellation,
+    autoGainControl: autoGainControl ?? this.autoGainControl,
+    highPassFilter: highPassFilter ?? this.highPassFilter,
+    typingNoiseDetection: typingNoiseDetection ?? this.typingNoiseDetection,
+  );
 }

@@ -16,9 +16,9 @@ final class StreamVideoPushProvider {
   const StreamVideoPushProvider.firebase({
     required this.name,
     TokenStreamProvider tokenStreamProvider = _firebaseTokenStreamProvider,
-  })  : isVoIP = false,
-        _tokenStreamProvider = tokenStreamProvider,
-        type = PushProvider.firebase;
+  }) : isVoIP = false,
+       _tokenStreamProvider = tokenStreamProvider,
+       type = PushProvider.firebase;
 
   static Stream<String> _firebaseTokenStreamProvider() async* {
     final initialToken = await StreamTokenProvider.getFirebaseToken();
@@ -31,9 +31,9 @@ final class StreamVideoPushProvider {
   const StreamVideoPushProvider.apn({
     required this.name,
     TokenStreamProvider tokenStreamProvider = _voIPTokenStreamProvider,
-  })  : isVoIP = true,
-        _tokenStreamProvider = tokenStreamProvider,
-        type = PushProvider.apn;
+  }) : isVoIP = true,
+       _tokenStreamProvider = tokenStreamProvider,
+       type = PushProvider.apn;
 
   static Stream<String> _voIPTokenStreamProvider() async* {
     final initialToken = await StreamTokenProvider.getVoIPToken();

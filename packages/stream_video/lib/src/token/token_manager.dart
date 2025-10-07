@@ -62,12 +62,12 @@ class TokenManager {
     }
     return _tokenOperation!
         .valueOrDefault(
-      Result.error('provideToken was cancelled'),
-    )
+          Result.error('provideToken was cancelled'),
+        )
         .whenComplete(() {
-      _logger.v(() => '[provideToken] drop cached future');
-      _tokenOperation = null;
-    });
+          _logger.v(() => '[provideToken] drop cached future');
+          _tokenOperation = null;
+        });
   }
 
   /// Returns the token refreshing the existing one.

@@ -12,7 +12,7 @@ void main() {
     expect(platform.registerProcessorCallCount, 0);
 
     final _ = NoiseCancellationAudioProcessor();
-    await Future.delayed(const Duration());
+    await Future<void>.delayed(Duration.zero);
 
     expect(platform.registerProcessorCallCount, 1);
   });

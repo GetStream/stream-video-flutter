@@ -10,10 +10,11 @@ part 'call_kit_events.dart';
 
 /// Signature for a function which provides a new instance of
 /// [PushNotificationManager].
-typedef PNManagerProvider = PushNotificationManager Function(
-  CoordinatorClient client,
-  StreamVideo streamVideo,
-);
+typedef PNManagerProvider =
+    PushNotificationManager Function(
+      CoordinatorClient client,
+      StreamVideo streamVideo,
+    );
 
 /// Interface for managing push notifications related to call events.
 abstract class PushNotificationManager {

@@ -128,12 +128,12 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        singleParticipantAvatarTheme,
-        multipleParticipantAvatarTheme,
-        singleParticipantTextStyle,
-        multipleParticipantTextStyle,
-        callingLabelTextStyle,
-      );
+    singleParticipantAvatarTheme,
+    multipleParticipantAvatarTheme,
+    singleParticipantTextStyle,
+    multipleParticipantTextStyle,
+    callingLabelTextStyle,
+  );
 
   @override
   bool operator ==(Object other) {

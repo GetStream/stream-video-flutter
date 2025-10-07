@@ -12,6 +12,7 @@ import '../models/sfu_call_state.dart';
 import '../models/sfu_connection_info.dart';
 import '../models/sfu_error.dart';
 import '../models/sfu_goaway_reason.dart';
+import '../models/sfu_inbound_video_state.dart';
 import '../models/sfu_participant.dart';
 import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
@@ -264,6 +265,22 @@ class SfuCallGrantsUpdated extends SfuEvent {
 
   @override
   List<Object> get props => [currentGrants, message];
+}
+
+class SfuInboundStateNotificationEvent extends SfuEvent {
+  const SfuInboundStateNotificationEvent({
+    required this.inboundVideoStates,
+  });
+
+  final List<SfuInboundVideoState> inboundVideoStates;
+
+  @override
+  List<Object> get props => [inboundVideoStates];
+
+  @override
+  String toString() {
+    return 'SfuInboundStateNotificationEvent{inboundVideoStates: $inboundVideoStates}';
+  }
 }
 
 class SfuErrorEvent extends SfuEvent {

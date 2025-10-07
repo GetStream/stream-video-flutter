@@ -24,11 +24,11 @@ class Rtpmap with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        payloadType,
-        encodingName,
-        clockRate,
-        encodingParameters,
-      ];
+    payloadType,
+    encodingName,
+    clockRate,
+    encodingParameters,
+  ];
 }
 
 extension RtpmapUtils on Rtpmap {

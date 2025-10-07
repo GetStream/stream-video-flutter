@@ -1,18 +1,11 @@
-// 🎯 Dart imports:
 import 'dart:convert';
-
-// 📦 Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/core/model/user_credentials.dart';
-
 import '../model/environment.dart';
+import '../model/user_credentials.dart';
 
 class AppPreferences {
-  const AppPreferences({
-    required SharedPreferences prefs,
-  }) : _prefs = prefs;
+  const AppPreferences({required SharedPreferences prefs}) : _prefs = prefs;
 
   final SharedPreferences _prefs;
 
@@ -30,7 +23,8 @@ class AppPreferences {
 
   String? get apiKey => _prefs.getString(_kApiKeyPref);
   Environment get environment => Environment.fromSubdomain(
-      _prefs.getString(_kEnvironemntPref) ?? Environment.pronto.name);
+    _prefs.getString(_kEnvironemntPref) ?? Environment.pronto.name,
+  );
 
   Future<bool> setUserCredentials(UserCredentials? credentials) {
     final jsonString = jsonEncode(credentials?.toJson());

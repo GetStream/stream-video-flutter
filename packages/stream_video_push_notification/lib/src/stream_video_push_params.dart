@@ -314,11 +314,12 @@ class IOSParams {
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
       audioSessionActive: audioSessionActive ?? this.audioSessionActive,
-      audioSessionPreferredSampleRate: audioSessionPreferredSampleRate ??
+      audioSessionPreferredSampleRate:
+          audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           audioSessionPreferredIOBufferDuration ??
-              this.audioSessionPreferredIOBufferDuration,
+          this.audioSessionPreferredIOBufferDuration,
       configureAudioSession:
           configureAudioSession ?? this.configureAudioSession,
       supportsDTMF: supportsDTMF ?? this.supportsDTMF,

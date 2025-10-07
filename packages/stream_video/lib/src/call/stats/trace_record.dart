@@ -37,6 +37,20 @@ class TraceRecord {
     return [tag, id, data, timestamp];
   }
 
+  TraceRecord copyWith({
+    String? tag,
+    String? id,
+    dynamic data,
+    int? timestamp,
+  }) {
+    return TraceRecord(
+      tag: tag ?? this.tag,
+      id: id ?? this.id,
+      data: data ?? this.data,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
   @override
   String toString() {
     return 'TraceRecord(tag: $tag, id: $id, data: $data, timestamp: $timestamp)';

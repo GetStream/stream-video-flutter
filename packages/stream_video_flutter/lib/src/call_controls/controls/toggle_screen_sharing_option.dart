@@ -59,57 +59,60 @@ class ToggleScreenShareOption extends StatelessWidget {
     var screenShareConstraints = this.screenShareConstraints;
 
     Widget buildContent(bool enabled) => CallControlOption(
-          icon: enabled
-              ? Icon(enabledScreenShareIcon)
-              : Icon(disabledScreenShareIcon),
-          iconColor: enabled
-              ? enabledScreenShareIconColor
-              : disabledScreenShareIconColor,
-          backgroundColor: enabled
-              ? enabledScreenShareBackgroundColor
-              : disabledScreenShareBackgroundColor,
-          onPressed: () async {
-            final toggledEnabled = !enabled;
+      icon: enabled
+          ? Icon(enabledScreenShareIcon)
+          : Icon(disabledScreenShareIcon),
+      iconColor: enabled
+          ? enabledScreenShareIconColor
+          : disabledScreenShareIconColor,
+      backgroundColor: enabled
+          ? enabledScreenShareBackgroundColor
+          : disabledScreenShareBackgroundColor,
+      onPressed: () async {
+        final toggledEnabled = !enabled;
 
-            if (CurrentPlatform.isDesktop && toggledEnabled) {
-              final source =
-                  await (desktopScreenSelectorBuilder?.call(context) ??
-                      showDefaultScreenSelectionDialog(context));
+        if (CurrentPlatform.isDesktop && toggledEnabled) {
+          final source =
+              await (desktopScreenSelectorBuilder?.call(context) ??
+                  showDefaultScreenSelectionDialog(context));
 
-              if (source != null) {
-                screenShareConstraints =
-                    (screenShareConstraints ?? const ScreenShareConstraints())
-                        .copyWith(deviceId: source.id);
-              } else {
-                return;
-              }
+          if (source != null) {
+            screenShareConstraints =
+                (screenShareConstraints ?? const ScreenShareConstraints())
+                    .copyWith(deviceId: source.id);
+          } else {
+            return;
+          }
+        }
+
+        if (CurrentPlatform.isAndroid) {
+          if (toggledEnabled) {
+            if (!await call.requestScreenSharePermission()) {
+              return;
             }
 
-            if (CurrentPlatform.isAndroid) {
-              if (toggledEnabled) {
-                if (!await call.requestScreenSharePermission()) {
-                  return;
-                }
+            await StreamBackgroundService()
+                .startScreenSharingNotificationService(call);
+          } else {
+            await StreamBackgroundService()
+                .stopScreenSharingNotificationService(
+                  call.callCid.value,
+                );
+          }
+        }
 
-                await StreamBackgroundService()
-                    .startScreenSharingNotificationService(call);
-              } else {
-                await StreamBackgroundService()
-                    .stopScreenSharingNotificationService(call.callCid.value);
-              }
-            }
-
-            final result = await call.setScreenShareEnabled(
-              enabled: toggledEnabled,
-              constraints: screenShareConstraints,
-            );
-
-            if (CurrentPlatform.isAndroid && result.isFailure) {
-              await StreamBackgroundService()
-                  .stopScreenSharingNotificationService(call.callCid.value);
-            }
-          },
+        final result = await call.setScreenShareEnabled(
+          enabled: toggledEnabled,
+          constraints: screenShareConstraints,
         );
+
+        if (CurrentPlatform.isAndroid && result.isFailure) {
+          await StreamBackgroundService().stopScreenSharingNotificationService(
+            call.callCid.value,
+          );
+        }
+      },
+    );
 
     if (localParticipant != null) {
       return buildContent(localParticipant!.isScreenShareEnabled);

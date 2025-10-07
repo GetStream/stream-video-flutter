@@ -27,30 +27,35 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
   final _logger = taggedLogger(tag: 'SV:DiagnosticsView');
 
   /// Represents the publisher stats.
-  CallStats? _publisherStats;
+  PeerConnectionStatsBundle? _publisherStats;
 
   /// Represents the subscriber stats.
-  CallStats? _subscriberStats;
+  PeerConnectionStatsBundle? _subscriberStats;
 
   /// Controls the subscription to the stats updates.
-  StreamSubscription<({CallStats publisherStats, CallStats subscriberStats})>?
-      _subscription;
+  StreamSubscription<
+    ({
+      PeerConnectionStatsBundle publisherStatsBundle,
+      PeerConnectionStatsBundle subscriberStatsBundle,
+    })
+  >?
+  _subscription;
 
   @override
   void initState() {
     super.initState();
     _subscription = widget.call.stats.listen((stats) {
       setState(() {
-        _publisherStats = stats.publisherStats;
-        _subscriberStats = stats.subscriberStats;
+        _publisherStats = stats.publisherStatsBundle;
+        _subscriberStats = stats.subscriberStatsBundle;
       });
     });
   }
 
   @override
   Future<void> dispose() async {
-    super.dispose();
     await _subscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -131,10 +136,10 @@ class _CallStatsContent extends StatelessWidget {
   });
 
   /// Represents the publisher stats.
-  final CallStats? publisherStats;
+  final PeerConnectionStatsBundle? publisherStats;
 
   /// Represents the subscriber stats.
-  final CallStats? subscriberStats;
+  final PeerConnectionStatsBundle? subscriberStats;
 
   @override
   Widget build(BuildContext context) {

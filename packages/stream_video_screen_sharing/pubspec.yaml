@@ -1,15 +1,15 @@
 name: stream_video_screen_sharing
 description: >
-  Official Screen Sharing Plugin for Stream Video Flutter that enables sharing device screens
-  during video calls.
-version: 0.10.3
+  Official Screen Sharing Plugin for Stream Video Flutter that enables sharing
+  device screens during video calls.
+version: 0.11.0
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ^3.6.2
-  flutter: ">=3.27.4"
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
@@ -17,9 +17,9 @@ dependencies:
   plugin_platform_interface: ^2.1.8
 
 dev_dependencies:
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
 
 flutter:
   plugin:

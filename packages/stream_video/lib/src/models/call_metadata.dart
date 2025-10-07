@@ -77,22 +77,22 @@ class CallDetails with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        createdBy,
-        ownCapabilities,
-        blockedUserIds,
-        broadcasting,
-        recording,
-        backstage,
-        transcribing,
-        captioning,
-        egress,
-        custom,
-        rtmpIngress,
-        startsAt,
-        createdAt,
-        createdAt,
-        updatedAt,
-      ];
+    createdBy,
+    ownCapabilities,
+    blockedUserIds,
+    broadcasting,
+    recording,
+    backstage,
+    transcribing,
+    captioning,
+    egress,
+    custom,
+    rtmpIngress,
+    startsAt,
+    createdAt,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 @immutable
@@ -115,12 +115,12 @@ class CallMember with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        userId,
-        roles,
-        createdAt,
-        updatedAt,
-        deletedAt,
-      ];
+    userId,
+    roles,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  ];
 
   @override
   String toString() {
@@ -144,11 +144,11 @@ class CallUser with EquatableMixin {
   });
 
   factory CallUser.empty() => const CallUser(
-        id: '',
-        name: '',
-        roles: [],
-        image: '',
-      );
+    id: '',
+    name: '',
+    roles: [],
+    image: '',
+  );
 
   final String id;
   final String name;
@@ -162,16 +162,16 @@ class CallUser with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        roles,
-        image,
-        teams,
-        createdAt,
-        updatedAt,
-        deletedAt,
-        custom,
-      ];
+    id,
+    name,
+    roles,
+    image,
+    teams,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    custom,
+  ];
 
   @override
   String toString() {

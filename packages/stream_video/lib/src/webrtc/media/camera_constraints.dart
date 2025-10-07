@@ -5,7 +5,11 @@ import 'constraints/mirror_mode.dart';
 import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the camera.
-/// [mirror]: Whether the video should be mirrored. If set to null, the default is true when facingMode is user and false when facingMode is environment.
+///
+/// - [mirrorMode]: Controls whether the local video should be mirrored. The
+///   default behavior ([MirrorMode.defaultMode]) mirrors when [facingMode] is
+///   [FacingMode.user] and does not mirror when [facingMode] is
+///   [FacingMode.environment].
 class CameraConstraints extends VideoConstraints {
   const CameraConstraints({
     this.facingMode = FacingMode.user,
@@ -16,13 +20,13 @@ class CameraConstraints extends VideoConstraints {
   });
 
   CameraConstraints.from({required VideoConstraints constraints})
-      : facingMode = FacingMode.user,
-        mirrorMode = MirrorMode.defaultMode,
-        super(
-          deviceId: constraints.deviceId,
-          maxFrameRate: constraints.maxFrameRate,
-          params: constraints.params,
-        );
+    : facingMode = FacingMode.user,
+      mirrorMode = MirrorMode.defaultMode,
+      super(
+        deviceId: constraints.deviceId,
+        maxFrameRate: constraints.maxFrameRate,
+        params: constraints.params,
+      );
 
   final FacingMode facingMode;
   final MirrorMode mirrorMode;
@@ -59,12 +63,11 @@ class CameraConstraints extends VideoConstraints {
     String? deviceId,
     double? maxFrameRate,
     MirrorMode? mirrorMode,
-  }) =>
-      CameraConstraints(
-        params: params ?? this.params,
-        facingMode: facingMode ?? this.facingMode,
-        deviceId: deviceId ?? this.deviceId,
-        maxFrameRate: maxFrameRate ?? this.maxFrameRate,
-        mirrorMode: mirrorMode ?? this.mirrorMode,
-      );
+  }) => CameraConstraints(
+    params: params ?? this.params,
+    facingMode: facingMode ?? this.facingMode,
+    deviceId: deviceId ?? this.deviceId,
+    maxFrameRate: maxFrameRate ?? this.maxFrameRate,
+    mirrorMode: mirrorMode ?? this.mirrorMode,
+  );
 }

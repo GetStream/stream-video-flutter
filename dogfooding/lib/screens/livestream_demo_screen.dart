@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/core/model/environment.dart';
-import 'package:flutter_dogfooding/core/repos/token_service.dart';
-import 'package:flutter_dogfooding/screens/login_screen.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../core/model/environment.dart';
+import '../core/repos/token_service.dart';
+import 'login_screen.dart';
+
 class LivestreamDemoScreen extends StatefulWidget {
-  const LivestreamDemoScreen({
-    super.key,
-    required this.callId,
-  });
+  const LivestreamDemoScreen({super.key, required this.callId});
 
   final String callId;
 
@@ -35,11 +33,9 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
       environment: Environment.livestream,
     );
 
-    var streamVideo = StreamVideo.create(
+    final streamVideo = StreamVideo.create(
       tokenResponse.apiKey,
-      user: User.regular(
-        userId: userId,
-      ),
+      user: User.regular(userId: userId),
       tokenLoader: (userId) async {
         final token = await _tokenService.loadToken(
           userId: userId,
@@ -61,16 +57,19 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
 
     _streamVideo = streamVideo;
 
-    result.fold(success: (data) {
-      _call = call;
-      if (mounted) {
-        setState(() {});
-      }
-    }, failure: (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-      ));
-    });
+    result.fold(
+      success: (data) {
+        _call = call;
+        if (mounted) {
+          setState(() {});
+        }
+      },
+      failure: (error) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      },
+    );
   }
 
   @override
@@ -92,16 +91,10 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         titleSpacing: 4,
         centerTitle: false,
-        title: Text(
-          'Livestream Demo',
-          style: textTheme.body,
-        ),
+        title: Text('Livestream Demo', style: textTheme.body),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.close,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.close, color: Colors.white),
             onPressed: () {
               Navigator.maybePop(context);
             },
@@ -110,7 +103,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
       ),
       body: switch (_call) {
         null => const Center(child: CircularProgressIndicator()),
-        Call call => LivestreamPlayer(call: call),
+        final Call call => LivestreamPlayer(call: call),
       },
     );
   }

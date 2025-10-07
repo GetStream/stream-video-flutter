@@ -7,8 +7,8 @@ const String kMessageChannelType = 'videocall';
 const String kAppName = 'Stream Dogfooding';
 const double kMaxWidthRegularScreen = 500;
 bool get kIsProd => switch (appFlavor) {
-      'dev' => false,
-      'beta' => false,
-      'prod' => true,
-      _ => !kIsWeb, // On our web builds we enable non-prod features.
-    };
+  'dev' => false,
+  'beta' => false,
+  'prod' => true,
+  _ => !kIsWeb, // On our web builds we enable non-prod features.
+};

@@ -18,10 +18,10 @@ class RtcManagerFactory {
     required SdpEditor sdpEditor,
     this.mediaConstraints = const {},
   }) : pcFactory = StreamPeerConnectionFactory(
-          sessionId: sessionId,
-          callCid: callCid,
-          sdpEditor: sdpEditor,
-        );
+         sessionId: sessionId,
+         callCid: callCid,
+         sdpEditor: sdpEditor,
+       );
 
   final _logger = taggedLogger(tag: 'SV:RtcManagerFactory');
 

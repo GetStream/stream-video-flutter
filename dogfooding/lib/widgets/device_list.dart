@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class DeviceList extends StatefulWidget {
-  const DeviceList({
-    required this.devices,
-    super.key,
-  });
+  const DeviceList({required this.devices, super.key});
 
   final List<PushDevice> devices;
 
@@ -41,10 +38,7 @@ class _DeviceListState extends State<DeviceList> {
                         devices.remove(e);
                       });
                     },
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
+                    icon: const Icon(Icons.delete, color: Colors.red),
                   ),
                   Expanded(
                     child: ListTile(
@@ -53,11 +47,8 @@ class _DeviceListState extends State<DeviceList> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(child: Text(e.userId ?? '')),
-                          if (e.voip == true) ...[
-                            const Icon(
-                              Icons.phone,
-                              size: 16,
-                            ),
+                          if (e.voip ?? false) ...[
+                            const Icon(Icons.phone, size: 16),
                             const SizedBox(width: 4),
                             const Text('VOIP'),
                           ],

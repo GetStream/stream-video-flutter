@@ -1,4 +1,4 @@
-## Unreleased
+# Unreleased
 
 🚧 Breaking changes
 
@@ -18,6 +18,66 @@ In this release, we removed the dependency on `flutter_callkit_incoming`, which 
 - `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
 - `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
 - `CallKitEvent` (type) → `RingingEvent`
+
+## 0.11.0
+
+🚧 Build breaking changes
+
+> **Important:** This release includes breaking changes for Android development.
+> 
+> **Android Requirements:**
+> - Minimum compileSDK 36
+> - Android Gradle Plugin >=8.12.1
+> - Gradle wrapper >=8.13
+> - Kotlin 2.2.0
+
+* Updated minimum Flutter version to 3.32.0
+* Updated minimum supported Dart SDK version to 3.8.0
+
+🚧 Breaking changes
+
+* **`Call.stats` payload structure changed**
+  - **Before:** `({ CallStats publisherStats, CallStats subscriberStats })`
+  - **Now:** `({ PeerConnectionStatsBundle publisherStatsBundle, PeerConnectionStatsBundle subscriberStatsBundle })`
+  - The record field names and element types have changed to provide more detailed WebRTC statistics
+
+* **Stats-related fields removed from `CallState`**
+  - Removed: `publisherStats`, `subscriberStats`, `latencyHistory`
+    - For periodic WebRTC stats: Use `call.stats` stream
+    - For latest aggregated metrics: Use `call.statsReporter?.currentMetrics`
+
+* **Dependency updates**
+  - Updated most dependencies to their latest versions to ensure compatibility and security
+
+✅ Added
+
+- New `call.statsReporter` property provides access to `currentMetrics`
+- Battery level tracking now available via `call.statsReporter?.currentMetrics`
+- Device thermal status monitoring for better call quality optimization
+
+🔄 Changed
+
+- `Call.stats` record field names and types updated as noted in breaking changes section
+
+🐞 Fixed
+
+- Fixed leave call operation failures when parsing custom data encounters issues
+- [Android] Fixed custom Android audio configuration application for participants joining calls
+- [Android] Fixed video rendering issue where background textures were incorrectly blended with video content on devices using Impeller rendering engine
+
+## 0.10.4
+
+✅ Added
+* Extended `CallParticipantState` with `participantSource`. This indicates the participant's source channel (e.g., WebRTC, RTMP, WHIP) and can be used in filtering and sorting criteria.
+* Livestream sorting preset now prioritises RTMP sources in layout sorting.
+* Automatic SFU-driven pausing of inbound video to save bandwidth and prevent visual artifacts:
+  * New `SfuClientCapability.subscriberVideoPause` (on by default). Control via `Call.enableClientCapabilities()` / `Call.disableClientCapabilities()`.
+  * New `SfuInboundStateNotificationEvent` notifies when inbound tracks are paused or resumed.
+  * `CallParticipantState.pausedTracks` and `CallParticipantState.isTrackPaused()` let you check which tracks are currently paused.
+* Added capability to remove a participant from a call via `call.kickUser()`. Requires the `kick-user` permission.
+
+🐞 Fixed
+* Multitasking camera on iOS is now enabled only once and kept enabled. This fixes potential errors when quickly toggling camera.
 
 ## 0.10.3
 

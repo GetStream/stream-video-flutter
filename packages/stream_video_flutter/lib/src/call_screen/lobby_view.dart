@@ -137,28 +137,29 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   void _listenEvents() {
     _eventSubscription?.cancel();
-    _eventSubscription =
-        (widget.streamVideo ?? StreamVideo.instance).events.listen((event) {
-      if (event is CoordinatorCallSessionParticipantLeftEvent) {
-        _logger.d(() => '[listenEvents] #userLeft; user: ${event.user}');
-        _participants.removeWhere(
-          (it) => it.userSessionId == event.participant.userSessionId,
-        );
-        final hasSameUser = _participants.firstWhereOrNull(
-              (it) => it.userId == event.participant.userId,
-            ) !=
-            null;
-        if (!hasSameUser) {
-          _users.remove(event.user.id);
-        }
-        setState(() {});
-      } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
-        _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
-        _users[event.user.id] = event.user;
-        _participants.add(event.participant);
-        setState(() {});
-      }
-    });
+    _eventSubscription = (widget.streamVideo ?? StreamVideo.instance).events
+        .listen((event) {
+          if (event is CoordinatorCallSessionParticipantLeftEvent) {
+            _logger.d(() => '[listenEvents] #userLeft; user: ${event.user}');
+            _participants.removeWhere(
+              (it) => it.userSessionId == event.participant.userSessionId,
+            );
+            final hasSameUser =
+                _participants.firstWhereOrNull(
+                  (it) => it.userId == event.participant.userId,
+                ) !=
+                null;
+            if (!hasSameUser) {
+              _users.remove(event.user.id);
+            }
+            setState(() {});
+          } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
+            _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
+            _users[event.user.id] = event.user;
+            _participants.add(event.participant);
+            setState(() {});
+          }
+        });
   }
 
   @override

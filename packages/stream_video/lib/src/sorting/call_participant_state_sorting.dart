@@ -1,5 +1,6 @@
 import '../models/call_participant_state.dart';
 import '../models/viewport_visibility.dart';
+import '../sfu/data/models/sfu_participant_source.dart';
 
 /// A comparator which sorts participants by the fact that they are the
 /// dominant speaker or not.
@@ -53,6 +54,36 @@ int pinned(CallParticipantState a, CallParticipantState b) {
   return 0;
 }
 
+/// A comparator factory which creates a comparator which prioritizes
+/// participants who are from a specific sources (e.g., WebRTC, RTMP, WHIP...).
+Comparator<CallParticipantState> byParticipantSource(
+  List<SfuParticipantSource> sources,
+) {
+  double sourcePriority(SfuParticipantSource? source) {
+    if (source == null) return double.maxFinite;
+
+    final index = sources.indexOf(source);
+    return index == -1 ? double.maxFinite : index.toDouble();
+  }
+
+  return (CallParticipantState a, CallParticipantState b) {
+    final priorityA = sourcePriority(a.participantSource);
+    final priorityB = sourcePriority(b.participantSource);
+    if (priorityA < priorityB) return -1;
+    if (priorityA > priorityB) return 1;
+    return 0;
+  };
+}
+
+Comparator<CallParticipantState> byVideoIngressSource() {
+  return byParticipantSource([
+    SfuParticipantSource.rtmp,
+    SfuParticipantSource.srt,
+    SfuParticipantSource.whip,
+    SfuParticipantSource.rtsp,
+  ]);
+}
+
 /// A comparator creator which will set up a comparator which prioritizes
 /// participants who have a specific reaction.
 Comparator<CallParticipantState> byReactionType(String type) {
@@ -89,7 +120,7 @@ Comparator<CallParticipantState> byRole(List<String> roles) {
     );
 
     if (aMatches > bMatches) return -1;
-    if (bMatches < aMatches) return 1;
+    if (aMatches < bMatches) return 1;
     return 0;
   };
 }

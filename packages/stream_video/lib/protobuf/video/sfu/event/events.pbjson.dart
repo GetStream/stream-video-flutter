@@ -1,13 +1,14 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: video/sfu/event/events.proto
-//
+// Generated from video/sfu/event/events.proto.
+
 // @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -215,6 +216,15 @@ const SfuEvent$json = {
       '9': 0,
       '10': 'changePublishOptions'
     },
+    {
+      '1': 'inbound_state_notification',
+      '3': 28,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.event.InboundStateNotification',
+      '9': 0,
+      '10': 'inboundStateNotification'
+    },
   ],
   '8': [
     {'1': 'event_payload'},
@@ -257,8 +267,10 @@ final $typed_data.Uint8List sfuEventDescriptor = $convert.base64Decode(
     'ljaXBhbnRfbWlncmF0aW9uX2NvbXBsZXRlGBkgASgLMjQuc3RyZWFtLnZpZGVvLnNmdS5ldmVu'
     'dC5QYXJ0aWNpcGFudE1pZ3JhdGlvbkNvbXBsZXRlSABSHHBhcnRpY2lwYW50TWlncmF0aW9uQ2'
     '9tcGxldGUSZAoWY2hhbmdlX3B1Ymxpc2hfb3B0aW9ucxgbIAEoCzIsLnN0cmVhbS52aWRlby5z'
-    'ZnUuZXZlbnQuQ2hhbmdlUHVibGlzaE9wdGlvbnNIAFIUY2hhbmdlUHVibGlzaE9wdGlvbnNCDw'
-    'oNZXZlbnRfcGF5bG9hZA==');
+    'ZnUuZXZlbnQuQ2hhbmdlUHVibGlzaE9wdGlvbnNIAFIUY2hhbmdlUHVibGlzaE9wdGlvbnMScA'
+    'oaaW5ib3VuZF9zdGF0ZV9ub3RpZmljYXRpb24YHCABKAsyMC5zdHJlYW0udmlkZW8uc2Z1LmV2'
+    'ZW50LkluYm91bmRTdGF0ZU5vdGlmaWNhdGlvbkgAUhhpbmJvdW5kU3RhdGVOb3RpZmljYXRpb2'
+    '5CDwoNZXZlbnRfcGF5bG9hZA==');
 
 @$core.Deprecated('Use changePublishOptionsDescriptor instead')
 const ChangePublishOptions$json = {
@@ -559,6 +571,13 @@ const JoinRequest$json = {
   '2': [
     {'1': 'token', '3': 1, '4': 1, '5': 9, '10': 'token'},
     {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
+    {
+      '1': 'unified_session_id',
+      '3': 13,
+      '4': 1,
+      '5': 9,
+      '10': 'unifiedSessionId'
+    },
     {'1': 'subscriber_sdp', '3': 3, '4': 1, '5': 9, '10': 'subscriberSdp'},
     {'1': 'publisher_sdp', '3': 8, '4': 1, '5': 9, '10': 'publisherSdp'},
     {
@@ -610,23 +629,42 @@ const JoinRequest$json = {
       '6': '.stream.video.sfu.models.SubscribeOption',
       '10': 'preferredSubscribeOptions'
     },
+    {
+      '1': 'capabilities',
+      '3': 11,
+      '4': 3,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ClientCapability',
+      '10': 'capabilities'
+    },
+    {
+      '1': 'source',
+      '3': 12,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.ParticipantSource',
+      '10': 'source'
+    },
   ],
 };
 
 /// Descriptor for `JoinRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode(
     'CgtKb2luUmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SHQoKc2Vzc2lvbl9pZBgCIAEoCV'
-    'IJc2Vzc2lvbklkEiUKDnN1YnNjcmliZXJfc2RwGAMgASgJUg1zdWJzY3JpYmVyU2RwEiMKDXB1'
-    'Ymxpc2hlcl9zZHAYCCABKAlSDHB1Ymxpc2hlclNkcBJNCg5jbGllbnRfZGV0YWlscxgEIAEoCz'
-    'ImLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNsaWVudERldGFpbHNSDWNsaWVudERldGFpbHMS'
-    'QwoJbWlncmF0aW9uGAUgASgLMiEuc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5NaWdyYXRpb25CAh'
-    'gBUgltaWdyYXRpb24SKQoOZmFzdF9yZWNvbm5lY3QYBiABKAhCAhgBUg1mYXN0UmVjb25uZWN0'
-    'ElUKEXJlY29ubmVjdF9kZXRhaWxzGAcgASgLMiguc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5SZW'
-    'Nvbm5lY3REZXRhaWxzUhByZWNvbm5lY3REZXRhaWxzEmIKGXByZWZlcnJlZF9wdWJsaXNoX29w'
-    'dGlvbnMYCSADKAsyJi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5QdWJsaXNoT3B0aW9uUhdwcm'
-    'VmZXJyZWRQdWJsaXNoT3B0aW9ucxJoChtwcmVmZXJyZWRfc3Vic2NyaWJlX29wdGlvbnMYCiAD'
-    'KAsyKC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5TdWJzY3JpYmVPcHRpb25SGXByZWZlcnJlZF'
-    'N1YnNjcmliZU9wdGlvbnM=');
+    'IJc2Vzc2lvbklkEiwKEnVuaWZpZWRfc2Vzc2lvbl9pZBgNIAEoCVIQdW5pZmllZFNlc3Npb25J'
+    'ZBIlCg5zdWJzY3JpYmVyX3NkcBgDIAEoCVINc3Vic2NyaWJlclNkcBIjCg1wdWJsaXNoZXJfc2'
+    'RwGAggASgJUgxwdWJsaXNoZXJTZHASTQoOY2xpZW50X2RldGFpbHMYBCABKAsyJi5zdHJlYW0u'
+    'dmlkZW8uc2Z1Lm1vZGVscy5DbGllbnREZXRhaWxzUg1jbGllbnREZXRhaWxzEkMKCW1pZ3JhdG'
+    'lvbhgFIAEoCzIhLnN0cmVhbS52aWRlby5zZnUuZXZlbnQuTWlncmF0aW9uQgIYAVIJbWlncmF0'
+    'aW9uEikKDmZhc3RfcmVjb25uZWN0GAYgASgIQgIYAVINZmFzdFJlY29ubmVjdBJVChFyZWNvbm'
+    '5lY3RfZGV0YWlscxgHIAEoCzIoLnN0cmVhbS52aWRlby5zZnUuZXZlbnQuUmVjb25uZWN0RGV0'
+    'YWlsc1IQcmVjb25uZWN0RGV0YWlscxJiChlwcmVmZXJyZWRfcHVibGlzaF9vcHRpb25zGAkgAy'
+    'gLMiYuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUHVibGlzaE9wdGlvblIXcHJlZmVycmVkUHVi'
+    'bGlzaE9wdGlvbnMSaAobcHJlZmVycmVkX3N1YnNjcmliZV9vcHRpb25zGAogAygLMiguc3RyZW'
+    'FtLnZpZGVvLnNmdS5tb2RlbHMuU3Vic2NyaWJlT3B0aW9uUhlwcmVmZXJyZWRTdWJzY3JpYmVP'
+    'cHRpb25zEk0KDGNhcGFiaWxpdGllcxgLIAMoDjIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLk'
+    'NsaWVudENhcGFiaWxpdHlSDGNhcGFiaWxpdGllcxJCCgZzb3VyY2UYDCABKA4yKi5zdHJlYW0u'
+    'dmlkZW8uc2Z1Lm1vZGVscy5QYXJ0aWNpcGFudFNvdXJjZVIGc291cmNl');
 
 @$core.Deprecated('Use reconnectDetailsDescriptor instead')
 const ReconnectDetails$json = {
@@ -1143,3 +1181,49 @@ const CallEnded$json = {
 final $typed_data.Uint8List callEndedDescriptor = $convert.base64Decode(
     'CglDYWxsRW5kZWQSQAoGcmVhc29uGAEgASgOMiguc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ2'
     'FsbEVuZGVkUmVhc29uUgZyZWFzb24=');
+
+@$core.Deprecated('Use inboundStateNotificationDescriptor instead')
+const InboundStateNotification$json = {
+  '1': 'InboundStateNotification',
+  '2': [
+    {
+      '1': 'inbound_video_states',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.event.InboundVideoState',
+      '10': 'inboundVideoStates'
+    },
+  ],
+};
+
+/// Descriptor for `InboundStateNotification`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List inboundStateNotificationDescriptor = $convert.base64Decode(
+    'ChhJbmJvdW5kU3RhdGVOb3RpZmljYXRpb24SWwoUaW5ib3VuZF92aWRlb19zdGF0ZXMYASADKA'
+    'syKS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LkluYm91bmRWaWRlb1N0YXRlUhJpbmJvdW5kVmlk'
+    'ZW9TdGF0ZXM=');
+
+@$core.Deprecated('Use inboundVideoStateDescriptor instead')
+const InboundVideoState$json = {
+  '1': 'InboundVideoState',
+  '2': [
+    {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
+    {
+      '1': 'track_type',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.TrackType',
+      '10': 'trackType'
+    },
+    {'1': 'paused', '3': 4, '4': 1, '5': 8, '10': 'paused'},
+  ],
+};
+
+/// Descriptor for `InboundVideoState`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List inboundVideoStateDescriptor = $convert.base64Decode(
+    'ChFJbmJvdW5kVmlkZW9TdGF0ZRIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSHQoKc2Vzc2lvbl'
+    '9pZBgCIAEoCVIJc2Vzc2lvbklkEkEKCnRyYWNrX3R5cGUYAyABKA4yIi5zdHJlYW0udmlkZW8u'
+    'c2Z1Lm1vZGVscy5UcmFja1R5cGVSCXRyYWNrVHlwZRIWCgZwYXVzZWQYBCABKAhSBnBhdXNlZA'
+    '==');

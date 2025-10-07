@@ -129,6 +129,24 @@ class PermissionsManager {
     return result;
   }
 
+  Future<Result<None>> kickUser(
+    String userId, {
+    bool block = false,
+  }) async {
+    if (!hasPermission(CallPermission.kickUser)) {
+      _logger.w(() => '[kickUser] rejected (no permission)');
+      return Result.error('Cannot kick user (no permission)');
+    }
+    _logger.d(() => '[kickUser] userId: $userId');
+    final result = await coordinatorClient.kickUser(
+      callCid: callCid,
+      userId: userId,
+      block: block,
+    );
+    _logger.v(() => '[kickUser] result: $result');
+    return result;
+  }
+
   Future<Result<None>> startRecording({
     String? recordingExternalStorage,
   }) async {

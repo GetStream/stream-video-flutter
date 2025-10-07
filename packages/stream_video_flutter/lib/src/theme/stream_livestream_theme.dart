@@ -182,13 +182,22 @@ class StreamLivestreamThemeData with Diagnosticable {
   ) {
     return StreamLivestreamThemeData(
       playIconTheme: IconThemeData.lerp(playIconTheme, other.playIconTheme, t),
-      pauseIconTheme:
-          IconThemeData.lerp(pauseIconTheme, other.pauseIconTheme, t),
-      playPauseIconSize:
-          lerpDouble(playPauseIconSize, other.playPauseIconSize, t)!,
+      pauseIconTheme: IconThemeData.lerp(
+        pauseIconTheme,
+        other.pauseIconTheme,
+        t,
+      ),
+      playPauseIconSize: lerpDouble(
+        playPauseIconSize,
+        other.playPauseIconSize,
+        t,
+      )!,
       liveButtonColor: Color.lerp(liveButtonColor, other.liveButtonColor, t)!,
-      backstageButtonColor:
-          Color.lerp(backstageButtonColor, other.backstageButtonColor, t)!,
+      backstageButtonColor: Color.lerp(
+        backstageButtonColor,
+        other.backstageButtonColor,
+        t,
+      )!,
       callStateButtonTextStyle: TextStyle.lerp(
         callStateButtonTextStyle,
         other.callStateButtonTextStyle,
@@ -259,25 +268,25 @@ class StreamLivestreamThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        playIconTheme,
-        pauseIconTheme,
-        playPauseIconSize,
-        liveButtonColor,
-        backstageButtonColor,
-        callStateButtonTextStyle,
-        participantCountTextStyle,
-        durationTextStyle,
-        backstageTextStyle,
-        backstageCounterTextStyle,
-        backstageParticipantsTextStyle,
-        liveEndedTextStyle,
-        liveEndedRecordingsTextStyle,
-        participantIconTheme,
-        speakerEnabledIconTheme,
-        speakerDisabledIconTheme,
-        expandIconTheme,
-        contractIconTheme,
-      );
+    playIconTheme,
+    pauseIconTheme,
+    playPauseIconSize,
+    liveButtonColor,
+    backstageButtonColor,
+    callStateButtonTextStyle,
+    participantCountTextStyle,
+    durationTextStyle,
+    backstageTextStyle,
+    backstageCounterTextStyle,
+    backstageParticipantsTextStyle,
+    liveEndedTextStyle,
+    liveEndedRecordingsTextStyle,
+    participantIconTheme,
+    speakerEnabledIconTheme,
+    speakerDisabledIconTheme,
+    expandIconTheme,
+    contractIconTheme,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -420,8 +429,8 @@ class StreamLivestreamTheme extends InheritedWidget {
   /// [StreamLivestreamTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.livestreamTheme].
   static StreamLivestreamThemeData of(BuildContext context) {
-    final livestreamTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamLivestreamTheme>();
+    final livestreamTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamLivestreamTheme>();
     return livestreamTheme?.data ??
         StreamVideoTheme.of(context).livestreamTheme;
   }
