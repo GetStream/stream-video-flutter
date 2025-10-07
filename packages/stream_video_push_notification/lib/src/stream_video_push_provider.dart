@@ -12,6 +12,14 @@ final class StreamVideoPushProvider {
     required TokenStreamProvider tokenStreamProvider,
   }) : _tokenStreamProvider = tokenStreamProvider;
 
+  /// Creates a new push provider for APN.
+  const StreamVideoPushProvider.apn({
+    required this.name,
+    TokenStreamProvider tokenStreamProvider = _voIPTokenStreamProvider,
+  }) : isVoIP = true,
+       _tokenStreamProvider = tokenStreamProvider,
+       type = PushProvider.apn;
+
   /// Creates a new push provider for Firebase.
   const StreamVideoPushProvider.firebase({
     required this.name,
@@ -26,14 +34,6 @@ final class StreamVideoPushProvider {
 
     yield* StreamTokenProvider.onFirebaseTokenRefresh;
   }
-
-  /// Creates a new push provider for APN.
-  const StreamVideoPushProvider.apn({
-    required this.name,
-    TokenStreamProvider tokenStreamProvider = _voIPTokenStreamProvider,
-  }) : isVoIP = true,
-       _tokenStreamProvider = tokenStreamProvider,
-       type = PushProvider.apn;
 
   static Stream<String> _voIPTokenStreamProvider() async* {
     final initialToken = await StreamTokenProvider.getVoIPToken();
@@ -60,6 +60,8 @@ final class StreamVideoPushProvider {
 
 /// Provides push tokens for the device.
 final class StreamTokenProvider {
+  StreamTokenProvider._();
+
   /// Gets the current push token for the device.
   static Future<String?> getVoIPToken() async {
     if (!CurrentPlatform.isIos) return null;

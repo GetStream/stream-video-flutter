@@ -1,9 +1,11 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/src/stream_video_call_event.dart';
-import 'package:stream_video_push_notification/src/stream_video_push_params.dart';
+import 'src/stream_video_call_event.dart';
+import 'src/stream_video_push_params.dart';
 import 'stream_video_push_notification_platform_interface.dart';
 
 /// An implementation of [StreamVideoPushNotificationPlatform] that uses method channels.
@@ -38,7 +40,7 @@ class MethodChannelStreamVideoPushNotification
   /// On iOS, using Callkit. On Android, using a custom UI.
   @override
   Future<void> showIncomingCall(StreamVideoPushParams params) async {
-    await methodChannel.invokeMethod("showIncomingCall", params.toJson());
+    await methodChannel.invokeMethod('showIncomingCall', params.toJson());
   }
 
   /// Show Miss Call Notification.
@@ -50,7 +52,7 @@ class MethodChannelStreamVideoPushNotification
     }
 
     await methodChannel.invokeMethod(
-      "showMissCallNotification",
+      'showMissCallNotification',
       params.toJson(),
     );
   }
@@ -63,7 +65,7 @@ class MethodChannelStreamVideoPushNotification
       return;
     }
 
-    await methodChannel.invokeMethod("hideIncomingCall", params.toJson());
+    await methodChannel.invokeMethod('hideIncomingCall', params.toJson());
   }
 
   /// Start an Outgoing call.
@@ -71,15 +73,15 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future<void> startCall(StreamVideoPushParams params) async {
-    await methodChannel.invokeMethod("startCall", params.toJson());
+    await methodChannel.invokeMethod('startCall', params.toJson());
   }
 
   /// Muting an Ongoing call.
   /// On iOS, using Callkit(update the ongoing call ui).
   /// On Android, Nothing(only callback event listener).
   @override
-  Future muteCall(String id, {bool isMuted = true}) async {
-    await methodChannel.invokeMethod("muteCall", {
+  Future<void> muteCall(String id, {bool isMuted = true}) async {
+    await methodChannel.invokeMethod('muteCall', {
       'id': id,
       'isMuted': isMuted,
     });
@@ -90,7 +92,7 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future<bool> isMuted(String id) async {
-    return (await methodChannel.invokeMethod("isMuted", {'id': id})) as bool? ??
+    return (await methodChannel.invokeMethod('isMuted', {'id': id})) as bool? ??
         false;
   }
 
@@ -99,7 +101,7 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
-    await methodChannel.invokeMethod("holdCall", {
+    await methodChannel.invokeMethod('holdCall', {
       'id': id,
       'isOnHold': isOnHold,
     });
@@ -110,7 +112,7 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future<void> endCall(String id) async {
-    await methodChannel.invokeMethod("endCall", {'id': id});
+    await methodChannel.invokeMethod('endCall', {'id': id});
   }
 
   /// Set call has been connected successfully.
@@ -118,13 +120,13 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future<void> setCallConnected(String id) async {
-    await methodChannel.invokeMethod("callConnected", {'id': id});
+    await methodChannel.invokeMethod('callConnected', {'id': id});
   }
 
   /// End all calls.
   @override
   Future<void> endAllCalls() async {
-    await methodChannel.invokeMethod("endAllCalls");
+    await methodChannel.invokeMethod('endAllCalls');
   }
 
   /// Get active calls.
@@ -132,7 +134,7 @@ class MethodChannelStreamVideoPushNotification
   /// On Android: only return last call
   @override
   Future<dynamic> activeCalls() async {
-    return await methodChannel.invokeMethod("activeCalls");
+    return methodChannel.invokeMethod('activeCalls');
   }
 
   /// Get device push token VoIP.
@@ -141,20 +143,20 @@ class MethodChannelStreamVideoPushNotification
   @override
   Future<String> getDevicePushTokenVoIP() async {
     if (!CurrentPlatform.isIos) return '';
-    final token = await methodChannel.invokeMethod("getDevicePushTokenVoIP");
+    final token = await methodChannel.invokeMethod('getDevicePushTokenVoIP');
     return token ?? '';
   }
 
   /// Silence Ringing events
   @override
   Future<void> silenceEvents() async {
-    return await methodChannel.invokeMethod("silenceEvents", true);
+    return methodChannel.invokeMethod('silenceEvents', true);
   }
 
   /// Unsilence Ringing events
   @override
   Future<void> unsilenceEvents() async {
-    return await methodChannel.invokeMethod("silenceEvents", false);
+    return methodChannel.invokeMethod('silenceEvents', false);
   }
 
   /// Request permission show notification for Android(13)
@@ -167,8 +169,8 @@ class MethodChannelStreamVideoPushNotification
       );
     }
 
-    return await methodChannel.invokeMethod(
-      "requestNotificationPermission",
+    return methodChannel.invokeMethod(
+      'requestNotificationPermission',
       data,
     );
   }
@@ -184,7 +186,7 @@ class MethodChannelStreamVideoPushNotification
     }
 
     final allowed = await methodChannel.invokeMethod<bool>(
-      "canUseFullScreenIntent",
+      'canUseFullScreenIntent',
     );
     return allowed ?? false;
   }

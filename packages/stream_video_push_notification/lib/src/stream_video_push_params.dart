@@ -1,7 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_video_push_notification/src/stream_video_push_configuration.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
+
+import '../stream_video_push_notification.dart';
+import 'stream_video_push_configuration.dart';
 
 part 'stream_video_push_params.g.dart';
 
@@ -18,6 +19,21 @@ class StreamVideoPushParams {
     this.android,
     this.ios,
   });
+
+  factory StreamVideoPushParams.fromPushConfiguration(
+    StreamVideoPushConfiguration configuration,
+  ) => StreamVideoPushParams(
+    headers: configuration.headers,
+    android: configuration.android != null
+        ? AndroidParams.fromPushConfiguration(configuration.android!)
+        : null,
+    ios: configuration.ios != null
+        ? IOSParams.fromPushConfiguration(configuration.ios!)
+        : null,
+  );
+
+  factory StreamVideoPushParams.fromJson(Map<String, dynamic> json) =>
+      _$StreamVideoPushParamsFromJson(json);
 
   const StreamVideoPushParams._internal({
     this.id,
@@ -40,19 +56,6 @@ class StreamVideoPushParams {
   final Map<String, dynamic>? headers;
   final AndroidParams? android;
   final IOSParams? ios;
-
-  factory StreamVideoPushParams.fromPushConfiguration(
-    StreamVideoPushConfiguration configuration,
-  ) => StreamVideoPushParams(
-    extra: null,
-    headers: configuration.headers,
-    android: configuration.android != null
-        ? AndroidParams.fromPushConfiguration(configuration.android!)
-        : null,
-    ios: configuration.ios != null
-        ? IOSParams.fromPushConfiguration(configuration.ios!)
-        : null,
-  );
 
   @internal
   StreamVideoPushParams copyWith({
@@ -96,9 +99,6 @@ class StreamVideoPushParams {
     );
   }
 
-  factory StreamVideoPushParams.fromJson(Map<String, dynamic> json) =>
-      _$StreamVideoPushParamsFromJson(json);
-
   Map<String, dynamic> toJson() => _$StreamVideoPushParamsToJson(this);
 }
 
@@ -116,6 +116,23 @@ class AndroidParams {
     this.missedCallNotification,
     this.incomingCallNotification,
   });
+
+  factory AndroidParams.fromPushConfiguration(
+    AndroidPushConfiguration configuration,
+  ) => AndroidParams(
+    defaultAvatar: configuration.defaultAvatar,
+    ringtonePath: configuration.ringtonePath,
+    incomingCallNotificationChannelName:
+        configuration.incomingCallNotificationChannelName,
+    missedCallNotificationChannelName:
+        configuration.missedCallNotificationChannelName,
+    showFullScreenOnLockScreen: configuration.showFullScreenOnLockScreen,
+    missedCallNotification: configuration.missedCallNotification,
+    incomingCallNotification: configuration.incomingCallNotification,
+  );
+
+  factory AndroidParams.fromJson(Map<String, dynamic> json) =>
+      _$AndroidParamsFromJson(json);
 
   final MissedCallNotificationParams? missedCallNotification;
 
@@ -145,20 +162,6 @@ class AndroidParams {
   /// Used primarily to identify automated tooling.
   /// https://developer.android.com/reference/androidx/core/app/Person#isBot()
   final bool? isBot;
-
-  factory AndroidParams.fromPushConfiguration(
-    AndroidPushConfiguration configuration,
-  ) => AndroidParams(
-    defaultAvatar: configuration.defaultAvatar,
-    ringtonePath: configuration.ringtonePath,
-    incomingCallNotificationChannelName:
-        configuration.incomingCallNotificationChannelName,
-    missedCallNotificationChannelName:
-        configuration.missedCallNotificationChannelName,
-    showFullScreenOnLockScreen: configuration.showFullScreenOnLockScreen,
-    missedCallNotification: configuration.missedCallNotification,
-    incomingCallNotification: configuration.incomingCallNotification,
-  );
 
   AndroidParams copyWith({
     String? avatar,
@@ -212,36 +215,11 @@ class AndroidParams {
     );
   }
 
-  factory AndroidParams.fromJson(Map<String, dynamic> json) =>
-      _$AndroidParamsFromJson(json);
-
   Map<String, dynamic> toJson() => _$AndroidParamsToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
 class IOSParams {
-  /// App's Icon. using for display inside Callkit(iOS)
-  final String? iconName;
-
-  /// Type handle call `generic`, `number`, `email`
-  final String? handleType;
-  final bool? useComplexHandle;
-  final bool? supportsVideo;
-  final int? maximumCallGroups;
-  final int? maximumCallsPerCallGroup;
-  final String? audioSessionMode;
-  final bool? audioSessionActive;
-  final double? audioSessionPreferredSampleRate;
-  final double? audioSessionPreferredIOBufferDuration;
-  final bool? configureAudioSession;
-  final bool? supportsDTMF;
-  final bool? supportsHolding;
-  final bool? supportsGrouping;
-  final bool? supportsUngrouping;
-
-  /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
-  final String? ringtonePath;
-
   const IOSParams({
     this.iconName,
     this.handleType,
@@ -282,6 +260,31 @@ class IOSParams {
         supportsUngrouping: configuration.supportsUngrouping,
         ringtonePath: configuration.ringtonePath,
       );
+
+  factory IOSParams.fromJson(Map<String, dynamic> json) =>
+      _$IOSParamsFromJson(json);
+
+  /// App's Icon. using for display inside Callkit(iOS)
+  final String? iconName;
+
+  /// Type handle call `generic`, `number`, `email`
+  final String? handleType;
+  final bool? useComplexHandle;
+  final bool? supportsVideo;
+  final int? maximumCallGroups;
+  final int? maximumCallsPerCallGroup;
+  final String? audioSessionMode;
+  final bool? audioSessionActive;
+  final double? audioSessionPreferredSampleRate;
+  final double? audioSessionPreferredIOBufferDuration;
+  final bool? configureAudioSession;
+  final bool? supportsDTMF;
+  final bool? supportsHolding;
+  final bool? supportsGrouping;
+  final bool? supportsUngrouping;
+
+  /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
+  final String? ringtonePath;
 
   IOSParams copyWith({
     String? iconName,
@@ -351,9 +354,6 @@ class IOSParams {
     );
   }
 
-  factory IOSParams.fromJson(Map<String, dynamic> json) =>
-      _$IOSParamsFromJson(json);
-
   Map<String, dynamic> toJson() => _$IOSParamsToJson(this);
 }
 
@@ -367,6 +367,8 @@ class MissedCallNotificationParams {
     this.showCallbackButton,
     this.count,
   });
+  factory MissedCallNotificationParams.fromJson(Map<String, dynamic> json) =>
+      _$MissedCallNotificationParamsFromJson(json);
 
   final int? id;
   final bool? showNotification;
@@ -374,9 +376,6 @@ class MissedCallNotificationParams {
   final String? callbackText;
   final bool? showCallbackButton;
   final int? count;
-
-  factory MissedCallNotificationParams.fromJson(Map<String, dynamic> json) =>
-      _$MissedCallNotificationParamsFromJson(json);
   Map<String, dynamic> toJson() => _$MissedCallNotificationParamsToJson(this);
 }
 
@@ -392,6 +391,8 @@ class IncomingCallNotificationParams {
     this.textDecline,
     this.showCallHandle,
   });
+  factory IncomingCallNotificationParams.fromJson(Map<String, dynamic> json) =>
+      _$IncomingCallNotificationParamsFromJson(json);
 
   final bool? fullScreenShowLogo;
   final String? fullScreenLogoUrl;
@@ -402,8 +403,5 @@ class IncomingCallNotificationParams {
   final String? textAccept;
   final String? textDecline;
   final bool? showCallHandle;
-
-  factory IncomingCallNotificationParams.fromJson(Map<String, dynamic> json) =>
-      _$IncomingCallNotificationParamsFromJson(json);
   Map<String, dynamic> toJson() => _$IncomingCallNotificationParamsToJson(this);
 }

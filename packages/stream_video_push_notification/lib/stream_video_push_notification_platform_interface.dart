@@ -1,8 +1,8 @@
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/src/stream_video_push_params.dart';
+import 'src/stream_video_push_params.dart';
 
 import 'stream_video_push_notification_method_channel.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 typedef BackgroundVoipCallHandler = Future<void> Function();
 
@@ -44,13 +44,13 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   /// Show Incoming ringing call.
   /// On iOS, using Callkit. On Android, using a custom UI.
-  Future showIncomingCall(StreamVideoPushParams params) {
+  Future<void> showIncomingCall(StreamVideoPushParams params) {
     throw UnimplementedError('showIncomingCall() has not been implemented.');
   }
 
   /// Show Miss Call Notification.
   /// Only Android
-  Future showMissCallNotification(StreamVideoPushParams params) {
+  Future<void> showMissCallNotification(StreamVideoPushParams params) {
     throw UnimplementedError(
       'showMissCallNotification() has not been implemented.',
     );
@@ -58,21 +58,21 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   /// Hide notification call for Android.
   /// Only Android
-  Future hideIncomingCall(StreamVideoPushParams params) {
+  Future<void> hideIncomingCall(StreamVideoPushParams params) {
     throw UnimplementedError('hideIncomingCall() has not been implemented.');
   }
 
   /// Start an Outgoing call.
   /// On iOS, using Callkit(create a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
-  Future startCall(StreamVideoPushParams params) {
+  Future<void> startCall(StreamVideoPushParams params) {
     throw UnimplementedError('startCall() has not been implemented.');
   }
 
   /// Muting an Ongoing call.
   /// On iOS, using Callkit(update the ongoing call ui).
   /// On Android, Nothing(only callback event listener).
-  Future muteCall(String id, {bool isMuted = true}) {
+  Future<void> muteCall(String id, {bool isMuted = true}) {
     throw UnimplementedError('muteCall() has not been implemented.');
   }
 
@@ -86,26 +86,26 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// Hold an Ongoing call.
   /// On iOS, using Callkit(update the ongoing call ui).
   /// On Android, Nothing(only callback event listener).
-  Future holdCall(String id, {bool isOnHold = true}) {
+  Future<void> holdCall(String id, {bool isOnHold = true}) {
     throw UnimplementedError('holdCall() has not been implemented.');
   }
 
   /// End an Incoming/Outgoing call.
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
-  Future endCall(String id) {
+  Future<void> endCall(String id) {
     throw UnimplementedError('endCall() has not been implemented.');
   }
 
   /// Set call has been connected successfully.
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
-  Future setCallConnected(String id) {
+  Future<void> setCallConnected(String id) {
     throw UnimplementedError('setCallConnected() has not been implemented.');
   }
 
   /// End all calls.
-  Future endAllCalls() {
+  Future<void> endAllCalls() {
     throw UnimplementedError('endAllCalls() has not been implemented.');
   }
 
@@ -126,18 +126,18 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   }
 
   /// Silence CallKit events
-  Future silenceEvents() {
+  Future<void> silenceEvents() {
     throw UnimplementedError('silenceEvents() has not been implemented.');
   }
 
   /// Unsilence CallKit events
-  Future unsilenceEvents() {
+  Future<void> unsilenceEvents() {
     throw UnimplementedError('unsilenceEvents() has not been implemented.');
   }
 
   /// Request permission show notification for Android(13)
   /// Only Android: show request permission post notification for Android 13+
-  Future requestNotificationPermission(dynamic data) {
+  Future<void> requestNotificationPermission(dynamic data) {
     throw UnimplementedError(
       'requestNotificationPermission() has not been implemented.',
     );
@@ -145,7 +145,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   /// Check can use full screen intent for Android(14)+
   /// Only Android: canUseFullScreenIntent permission for ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
-  Future canUseFullScreenIntent() {
+  Future<bool> canUseFullScreenIntent() {
     throw UnimplementedError(
       'canUseFullScreenIntent() has not been implemented.',
     );

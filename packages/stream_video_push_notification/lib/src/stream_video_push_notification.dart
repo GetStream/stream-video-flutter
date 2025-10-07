@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -5,8 +7,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
+import '../stream_video_push_notification.dart';
+import '../stream_video_push_notification_platform_interface.dart';
 
 part 'stream_video_push_provider.dart';
 
@@ -20,32 +22,6 @@ const _idActiveCall = 8;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
-  static const userDeviceTokenKey = 'io.getstream.userDeviceToken';
-  static const userDeviceTokenVoIPKey = 'io.getstream.userDeviceTokenVoIP';
-
-  /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
-  static create({
-    required StreamVideoPushProvider iosPushProvider,
-    required StreamVideoPushProvider androidPushProvider,
-    StreamVideoPushConfiguration? pushConfiguration,
-    bool registerApnDeviceToken = false,
-  }) {
-    return (CoordinatorClient client, StreamVideo streamVideo) {
-      final configuration = _defaultPushConfiguration.merge(pushConfiguration);
-
-      StreamVideoPushNotificationPlatform.instance.init(configuration.toJson());
-
-      return StreamVideoPushNotificationManager._(
-        client: client,
-        streamVideo: streamVideo,
-        iosPushProvider: iosPushProvider,
-        androidPushProvider: androidPushProvider,
-        pushConfiguration: configuration,
-        registerApnDeviceToken: registerApnDeviceToken,
-      );
-    };
-  }
-
   StreamVideoPushNotificationManager._({
     required CoordinatorClient client,
     required StreamVideo streamVideo,
@@ -80,7 +56,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       }),
     );
 
-    subscribeToEvents() {
+    void subscribeToEvents() {
       _subscriptions.add(
         _idCallEnded,
         client.events.on<CoordinatorCallEndedEvent>((event) {
@@ -111,7 +87,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               () =>
                   '[subscribeToEvents] No participants left, ending call: ${event.callCid}',
             );
-            endCallByCid(event.callCid.toString());
+
+            await endCallByCid(event.callCid.toString());
           }
         }),
       );
@@ -129,7 +106,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               () =>
                   '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}',
             );
-            endCallByCid(event.callCid.toString());
+
+            await endCallByCid(event.callCid.toString());
           }
         }),
       );
@@ -217,6 +195,35 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       }),
     );
   }
+  static const userDeviceTokenKey = 'io.getstream.userDeviceToken';
+  static const userDeviceTokenVoIPKey = 'io.getstream.userDeviceTokenVoIP';
+
+  /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
+  static StreamVideoPushNotificationManager Function(
+    CoordinatorClient client,
+    StreamVideo streamVideo,
+  )
+  create({
+    required StreamVideoPushProvider iosPushProvider,
+    required StreamVideoPushProvider androidPushProvider,
+    StreamVideoPushConfiguration? pushConfiguration,
+    bool registerApnDeviceToken = false,
+  }) {
+    return (CoordinatorClient client, StreamVideo streamVideo) {
+      final configuration = _defaultPushConfiguration.merge(pushConfiguration);
+
+      StreamVideoPushNotificationPlatform.instance.init(configuration.toJson());
+
+      return StreamVideoPushNotificationManager._(
+        client: client,
+        streamVideo: streamVideo,
+        iosPushProvider: iosPushProvider,
+        androidPushProvider: androidPushProvider,
+        pushConfiguration: configuration,
+        registerApnDeviceToken: registerApnDeviceToken,
+      );
+    };
+  }
 
   final CoordinatorClient _client;
   final StreamVideoPushProvider iosPushProvider;
@@ -244,13 +251,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       return;
     }
 
-    void registerDevice(String token, bool isVoIP) async {
+    Future<void> registerDevice(String token, bool isVoIP) async {
       final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
 
       final storedToken = _sharedPreferences.getString(tokenKey);
       if (storedToken == token) return;
 
-      _client
+      await _client
           .createDevice(
             id: token,
             voipToken: isVoIP,
@@ -447,21 +454,21 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
     for (final call in calls) {
       // Silence events to avoid infinite loop
-      StreamVideoPushNotificationPlatform.instance.silenceEvents();
+      await StreamVideoPushNotificationPlatform.instance.silenceEvents();
       await StreamVideoPushNotificationPlatform.instance.muteCall(
         call.uuid!,
         isMuted: isMuted,
       );
-      StreamVideoPushNotificationPlatform.instance.unsilenceEvents();
+      await StreamVideoPushNotificationPlatform.instance.unsilenceEvents();
     }
   }
 
   @override
   Future<String?> getDevicePushTokenVoIP() async {
     if (CurrentPlatform.isIos) {
-      return await StreamTokenProvider.getVoIPToken();
+      return StreamTokenProvider.getVoIPToken();
     } else if (CurrentPlatform.isAndroid) {
-      return await StreamTokenProvider.getFirebaseToken();
+      return StreamTokenProvider.getFirebaseToken();
     }
 
     return null;
@@ -484,7 +491,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
-  Future<void> setCallConnected(uuid) {
+  Future<void> setCallConnected(String uuid) {
     return StreamVideoPushNotificationPlatform.instance.setCallConnected(uuid);
   }
 
@@ -493,7 +500,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _subscriptions.cancelAll();
   }
 
-  static Future ensureFullScreenIntentPermission() {
+  static Future<void> ensureFullScreenIntentPermission() {
     return StreamVideoPushNotificationPlatform.instance
         .ensureFullScreenIntentPermission();
   }
@@ -502,7 +509,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 const _defaultPushConfiguration = StreamVideoPushConfiguration(
   android: AndroidPushConfiguration(
     ringtonePath: 'system_ringtone_default',
-    incomingCallNotificationChannelName: "Incoming Call",
+    incomingCallNotificationChannelName: 'Incoming Call',
     missedCallNotification: MissedCallNotificationParams(
       showNotification: true,
       showCallbackButton: true,
@@ -520,7 +527,7 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
     maximumCallGroups: 1,
     audioSessionMode: 'default',
     audioSessionActive: true,
-    audioSessionPreferredSampleRate: 44100.0,
+    audioSessionPreferredSampleRate: 44100,
     audioSessionPreferredIOBufferDuration: 0.005,
     supportsDTMF: true,
     supportsHolding: false,

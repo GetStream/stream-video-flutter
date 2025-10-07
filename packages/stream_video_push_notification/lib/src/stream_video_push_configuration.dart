@@ -1,11 +1,18 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
+import '../stream_video_push_notification.dart';
 
 part 'stream_video_push_configuration.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class StreamVideoPushConfiguration {
-  const StreamVideoPushConfiguration({this.headers, this.android, this.ios});
+  const StreamVideoPushConfiguration({
+    this.headers,
+    this.android,
+    this.ios,
+  });
+
+  factory StreamVideoPushConfiguration.fromJson(Map<String, dynamic> json) =>
+      _$StreamVideoPushConfigurationFromJson(json);
 
   final Map<String, dynamic>? headers;
   final AndroidPushConfiguration? android;
@@ -40,9 +47,6 @@ class StreamVideoPushConfiguration {
     );
   }
 
-  factory StreamVideoPushConfiguration.fromJson(Map<String, dynamic> json) =>
-      _$StreamVideoPushConfigurationFromJson(json);
-
   Map<String, dynamic> toJson() => _$StreamVideoPushConfigurationToJson(this);
 }
 
@@ -58,6 +62,9 @@ class AndroidPushConfiguration {
     this.missedCallNotificationChannelName,
     this.showFullScreenOnLockScreen,
   });
+
+  factory AndroidPushConfiguration.fromJson(Map<String, dynamic> json) =>
+      _$AndroidPushConfigurationFromJson(json);
 
   final MissedCallNotificationParams? missedCallNotification;
 
@@ -121,14 +128,33 @@ class AndroidPushConfiguration {
     );
   }
 
-  factory AndroidPushConfiguration.fromJson(Map<String, dynamic> json) =>
-      _$AndroidPushConfigurationFromJson(json);
-
   Map<String, dynamic> toJson() => _$AndroidPushConfigurationToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
 class IOSPushConfiguration {
+  const IOSPushConfiguration({
+    this.iconName,
+    this.handleType,
+    this.useComplexHandle,
+    this.supportsVideo,
+    this.maximumCallGroups,
+    this.maximumCallsPerCallGroup,
+    this.audioSessionMode,
+    this.audioSessionActive,
+    this.audioSessionPreferredSampleRate,
+    this.audioSessionPreferredIOBufferDuration,
+    this.configureAudioSession,
+    this.supportsDTMF,
+    this.supportsHolding,
+    this.supportsGrouping,
+    this.supportsUngrouping,
+    this.ringtonePath,
+  });
+
+  factory IOSPushConfiguration.fromJson(Map<String, dynamic> json) =>
+      _$IOSPushConfigurationFromJson(json);
+
   /// App's Icon. using for display inside Callkit(iOS)
   final String? iconName;
 
@@ -150,25 +176,6 @@ class IOSPushConfiguration {
 
   /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
   final String? ringtonePath;
-
-  const IOSPushConfiguration({
-    this.iconName,
-    this.handleType,
-    this.useComplexHandle,
-    this.supportsVideo,
-    this.maximumCallGroups,
-    this.maximumCallsPerCallGroup,
-    this.audioSessionMode,
-    this.audioSessionActive,
-    this.audioSessionPreferredSampleRate,
-    this.audioSessionPreferredIOBufferDuration,
-    this.configureAudioSession,
-    this.supportsDTMF,
-    this.supportsHolding,
-    this.supportsGrouping,
-    this.supportsUngrouping,
-    this.ringtonePath,
-  });
 
   IOSPushConfiguration copyWith({
     String? iconName,
@@ -237,9 +244,6 @@ class IOSPushConfiguration {
       ringtonePath: other.ringtonePath,
     );
   }
-
-  factory IOSPushConfiguration.fromJson(Map<String, dynamic> json) =>
-      _$IOSPushConfigurationFromJson(json);
 
   Map<String, dynamic> toJson() => _$IOSPushConfigurationToJson(this);
 }
