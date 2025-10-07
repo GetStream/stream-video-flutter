@@ -43,7 +43,7 @@ android {
         implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
         implementation 'com.fasterxml.jackson.core:jackson-core:2.20.0'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
-        implementation "io.coil-kt:coil:2.4.0"
+        implementation "io.coil-kt:coil:1.4.0"
     }
 
     testOptions {
