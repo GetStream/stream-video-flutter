@@ -25,10 +25,21 @@ runs:
       uses: mikefarah/yq@master
       with:
         cmd: |
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_push_notification = {"path": "../stream_video_push_notification"}' -i pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_noise_cancellation = {"path": "../stream_video_noise_cancellation"}' -i pubspec.yaml
+          # --- stream_video_flutter ---
+          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+
+          # --- stream_video_push_notification ---
+          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+
+          # --- stream_video_noise_cancellation ---
+          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
