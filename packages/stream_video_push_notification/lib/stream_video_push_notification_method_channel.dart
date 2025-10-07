@@ -12,13 +12,12 @@ class MethodChannelStreamVideoPushNotification
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('stream_video_push_notification');
-  final eventChannel =
-      const EventChannel('stream_video_push_notification_events');
+  final eventChannel = const EventChannel(
+    'stream_video_push_notification_events',
+  );
 
   @override
-  Future<void> init(
-    Map<String, dynamic> pushConfiguration,
-  ) async {
+  Future<void> init(Map<String, dynamic> pushConfiguration) async {
     if (!CurrentPlatform.isIos) return;
     await methodChannel.invokeMethod<String>('initData', pushConfiguration);
   }
@@ -51,7 +50,9 @@ class MethodChannelStreamVideoPushNotification
     }
 
     await methodChannel.invokeMethod(
-        "showMissCallNotification", params.toJson());
+      "showMissCallNotification",
+      params.toJson(),
+    );
   }
 
   /// Hide notification call for Android.
@@ -78,8 +79,10 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future muteCall(String id, {bool isMuted = true}) async {
-    await methodChannel
-        .invokeMethod("muteCall", {'id': id, 'isMuted': isMuted});
+    await methodChannel.invokeMethod("muteCall", {
+      'id': id,
+      'isMuted': isMuted,
+    });
   }
 
   /// Get Callkit Mic Status (muted/unmuted).
@@ -96,8 +99,10 @@ class MethodChannelStreamVideoPushNotification
   /// On Android, Nothing(only callback event listener).
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
-    await methodChannel
-        .invokeMethod("holdCall", {'id': id, 'isOnHold': isOnHold});
+    await methodChannel.invokeMethod("holdCall", {
+      'id': id,
+      'isOnHold': isOnHold,
+    });
   }
 
   /// End an Incoming/Outgoing call.
@@ -158,11 +163,14 @@ class MethodChannelStreamVideoPushNotification
   Future<void> requestNotificationPermission(dynamic data) async {
     if (!CurrentPlatform.isAndroid) {
       throw UnimplementedError(
-          'requestNotificationPermission() is only implemented for Android.');
+        'requestNotificationPermission() is only implemented for Android.',
+      );
     }
 
     return await methodChannel.invokeMethod(
-        "requestNotificationPermission", data);
+      "requestNotificationPermission",
+      data,
+    );
   }
 
   /// Check can use full screen intent for Android(14)+
@@ -171,7 +179,8 @@ class MethodChannelStreamVideoPushNotification
   Future<bool> canUseFullScreenIntent() async {
     if (!CurrentPlatform.isAndroid) {
       throw UnimplementedError(
-          'canUseFullScreenIntent() is only implemented for Android.');
+        'canUseFullScreenIntent() is only implemented for Android.',
+      );
     }
 
     final allowed = await methodChannel.invokeMethod<bool>(
@@ -212,24 +221,24 @@ class MethodChannelStreamVideoPushNotification
             token: body['deviceTokenVoIP'] as String,
           ),
         Event.actionCallToggleHold => ActionCallToggleHold(
-            uuid: body['id'] as String,
-            isOnHold: body['isOnHold'] as bool,
-          ),
+          uuid: body['id'] as String,
+          isOnHold: body['isOnHold'] as bool,
+        ),
         Event.actionCallToggleMute => ActionCallToggleMute(
-            uuid: body['id'] as String,
-            isMuted: body['isMuted'] as bool,
-          ),
+          uuid: body['id'] as String,
+          isMuted: body['isMuted'] as bool,
+        ),
         Event.actionCallToggleDtmf => ActionCallToggleDtmf(
-            uuid: body['id'] as String,
-            digits: body['digits'] as String,
-          ),
+          uuid: body['id'] as String,
+          digits: body['digits'] as String,
+        ),
         Event.actionCallToggleGroup => ActionCallToggleGroup(
-            uuid: body['id'] as String,
-            callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
-          ),
+          uuid: body['id'] as String,
+          callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
+        ),
         Event.actionCallToggleAudioSession => ActionCallToggleAudioSession(
-            isActive: body['isActive'] as bool,
-          ),
+          isActive: body['isActive'] as bool,
+        ),
         Event.actionCallCustom => ActionCallCustom(body),
       };
     }

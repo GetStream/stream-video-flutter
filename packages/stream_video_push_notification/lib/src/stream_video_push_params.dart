@@ -43,17 +43,16 @@ class StreamVideoPushParams {
 
   factory StreamVideoPushParams.fromPushConfiguration(
     StreamVideoPushConfiguration configuration,
-  ) =>
-      StreamVideoPushParams(
-        extra: null,
-        headers: configuration.headers,
-        android: configuration.android != null
-            ? AndroidParams.fromPushConfiguration(configuration.android!)
-            : null,
-        ios: configuration.ios != null
-            ? IOSParams.fromPushConfiguration(configuration.ios!)
-            : null,
-      );
+  ) => StreamVideoPushParams(
+    extra: null,
+    headers: configuration.headers,
+    android: configuration.android != null
+        ? AndroidParams.fromPushConfiguration(configuration.android!)
+        : null,
+    ios: configuration.ios != null
+        ? IOSParams.fromPushConfiguration(configuration.ios!)
+        : null,
+  );
 
   @internal
   StreamVideoPushParams copyWith({
@@ -149,18 +148,17 @@ class AndroidParams {
 
   factory AndroidParams.fromPushConfiguration(
     AndroidPushConfiguration configuration,
-  ) =>
-      AndroidParams(
-        defaultAvatar: configuration.defaultAvatar,
-        ringtonePath: configuration.ringtonePath,
-        incomingCallNotificationChannelName:
-            configuration.incomingCallNotificationChannelName,
-        missedCallNotificationChannelName:
-            configuration.missedCallNotificationChannelName,
-        showFullScreenOnLockScreen: configuration.showFullScreenOnLockScreen,
-        missedCallNotification: configuration.missedCallNotification,
-        incomingCallNotification: configuration.incomingCallNotification,
-      );
+  ) => AndroidParams(
+    defaultAvatar: configuration.defaultAvatar,
+    ringtonePath: configuration.ringtonePath,
+    incomingCallNotificationChannelName:
+        configuration.incomingCallNotificationChannelName,
+    missedCallNotificationChannelName:
+        configuration.missedCallNotificationChannelName,
+    showFullScreenOnLockScreen: configuration.showFullScreenOnLockScreen,
+    missedCallNotification: configuration.missedCallNotification,
+    incomingCallNotification: configuration.incomingCallNotification,
+  );
 
   AndroidParams copyWith({
     String? avatar,
@@ -180,8 +178,9 @@ class AndroidParams {
       ringtonePath: ringtonePath ?? this.ringtonePath,
       incomingCallNotificationChannelName:
           incomingCallNotificationChannelName ??
-              this.incomingCallNotificationChannelName,
-      missedCallNotificationChannelName: missedCallNotificationChannelName ??
+          this.incomingCallNotificationChannelName,
+      missedCallNotificationChannelName:
+          missedCallNotificationChannelName ??
           this.missedCallNotificationChannelName,
       showFullScreenOnLockScreen:
           showFullScreenOnLockScreen ?? this.showFullScreenOnLockScreen,
@@ -262,9 +261,7 @@ class IOSParams {
     this.ringtonePath,
   });
 
-  factory IOSParams.fromPushConfiguration(
-    IOSPushConfiguration configuration,
-  ) =>
+  factory IOSParams.fromPushConfiguration(IOSPushConfiguration configuration) =>
       IOSParams(
         iconName: configuration.iconName,
         handleType: configuration.handleType,

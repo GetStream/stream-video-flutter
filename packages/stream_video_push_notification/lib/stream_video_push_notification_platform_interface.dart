@@ -27,9 +27,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> init(
-    Map<String, dynamic> pushConfiguration,
-  ) {
+  Future<void> init(Map<String, dynamic> pushConfiguration) {
     throw UnimplementedError('init() has not been implemented.');
   }
 
@@ -54,7 +52,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// Only Android
   Future showMissCallNotification(StreamVideoPushParams params) {
     throw UnimplementedError(
-        'showMissCallNotification() has not been implemented.');
+      'showMissCallNotification() has not been implemented.',
+    );
   }
 
   /// Hide notification call for Android.
@@ -122,7 +121,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// On Android: return Empty
   Future<String> getDevicePushTokenVoIP() {
     throw UnimplementedError(
-        'getDevicePushTokenVoIP() has not been implemented.');
+      'getDevicePushTokenVoIP() has not been implemented.',
+    );
   }
 
   /// Silence CallKit events
@@ -139,13 +139,15 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// Only Android: show request permission post notification for Android 13+
   Future requestNotificationPermission(dynamic data) {
     throw UnimplementedError(
-        'requestNotificationPermission() has not been implemented.');
+      'requestNotificationPermission() has not been implemented.',
+    );
   }
 
   /// Check can use full screen intent for Android(14)+
   /// Only Android: canUseFullScreenIntent permission for ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
   Future canUseFullScreenIntent() {
     throw UnimplementedError(
-        'canUseFullScreenIntent() has not been implemented.');
+      'canUseFullScreenIntent() has not been implemented.',
+    );
   }
 }

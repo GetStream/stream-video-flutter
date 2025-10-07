@@ -5,11 +5,7 @@ part 'stream_video_push_configuration.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class StreamVideoPushConfiguration {
-  const StreamVideoPushConfiguration({
-    this.headers,
-    this.android,
-    this.ios,
-  });
+  const StreamVideoPushConfiguration({this.headers, this.android, this.ios});
 
   final Map<String, dynamic>? headers;
   final AndroidPushConfiguration? android;
@@ -100,8 +96,9 @@ class AndroidPushConfiguration {
       ringtonePath: ringtonePath ?? this.ringtonePath,
       incomingCallNotificationChannelName:
           incomingCallNotificationChannelName ??
-              this.incomingCallNotificationChannelName,
-      missedCallNotificationChannelName: missedCallNotificationChannelName ??
+          this.incomingCallNotificationChannelName,
+      missedCallNotificationChannelName:
+          missedCallNotificationChannelName ??
           this.missedCallNotificationChannelName,
       showFullScreenOnLockScreen:
           showFullScreenOnLockScreen ?? this.showFullScreenOnLockScreen,
@@ -201,11 +198,12 @@ class IOSPushConfiguration {
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
       audioSessionActive: audioSessionActive ?? this.audioSessionActive,
-      audioSessionPreferredSampleRate: audioSessionPreferredSampleRate ??
+      audioSessionPreferredSampleRate:
+          audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           audioSessionPreferredIOBufferDuration ??
-              this.audioSessionPreferredIOBufferDuration,
+          this.audioSessionPreferredIOBufferDuration,
       configureAudioSession:
           configureAudioSession ?? this.configureAudioSession,
       supportsDTMF: supportsDTMF ?? this.supportsDTMF,
