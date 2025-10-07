@@ -1,7 +1,6 @@
 import Flutter
 import Foundation
 import PushKit
-import flutter_callkit_incoming
 
 public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
     UNUserNotificationCenterDelegate
@@ -9,7 +8,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
     public static let shared = StreamVideoPKDelegateManager()
 
     private var pushRegistry: PKPushRegistry?
-    private var defaultData: [String: Any]?
+    private var defaultConfiguration: StreamVideoPushConfiguration?
     private var mainChannel: FlutterMethodChannel?
 
     private override init() {
@@ -27,7 +26,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
     }
 
     public func initData(data: [String: Any]) {
-        defaultData = data
+        defaultConfiguration = StreamVideoPushConfiguration(args: data)
     }
 
     // MARK: - PKPushRegistryDelegate
@@ -55,21 +54,9 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
         }
 
         var streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
-
-        let state = UIApplication.shared.applicationState
-        if state == .background || state == .inactive {
-            handleIncomingCall(streamDict: streamDict, state: state, completion: completion)
-        } else if state == .active {
-            mainChannel?.invokeMethod("customizeCaller", arguments: streamDict) { (response) in
-                if let customData = response as? [String: Any] {
-                    streamDict?["created_by_display_name"] = customData["name"] as? String
-                    streamDict?["created_by_id"] = customData["handle"] as? String
-                }
-
-                self.handleIncomingCall(
-                    streamDict: streamDict, state: state, completion: completion)
-            }
-        }
+        handleIncomingCall(
+            streamDict: streamDict, state: UIApplication.shared.applicationState,
+            completion: completion)
     }
 
     func handleIncomingCall(
@@ -86,29 +73,30 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
 
         var callUUID = UUID().uuidString
 
-        let data: StreamVideoPushParams
-        if let jsonData = self.defaultData {
-            data = StreamVideoPushParams(args: jsonData)
+        let data: CallData
+        if let configuration = self.defaultConfiguration {
+            data = CallData.init(args: configuration.toJSON())
         } else {
-            data = StreamVideoPushParams(args: [String: Any]())
+            data = CallData.init(args: [String: Any]())
         }
 
         let nonEmptyString: (String?) -> String? = { str in
             return str?.isEmpty == false ? str : nil
         }
 
-        data.callKitData.uuid = callUUID
-        data.callKitData.nameCaller =
+        data.uuid = callUUID
+        data.callerName =
             nonEmptyString(callDisplayName) ?? nonEmptyString(createdByName) ?? defaultCallText
-        data.callKitData.handle = createdById ?? defaultCallText
-        data.callKitData.type = videoData
-        data.callKitData.extra = ["callCid": callCid]
-        data.callKitData.iconName =
-            UserDefaults.standard.string(forKey: "callKit_iconName") ?? data.callKitData.iconName
+        data.handle = createdById ?? defaultCallText
+        data.type = videoData
+        data.extra = ["callCid": callCid]
+        data.iconName =
+            UserDefaults.standard.string(forKey: "callKit_iconName") ?? defaultConfiguration?
+            .iconName ?? data.iconName
 
         // Show call incoming notification.
         StreamVideoPushNotificationPlugin.showIncomingCall(
-            data: data.callKitData,
+            data: data,
             fromPushKit: true
         )
 

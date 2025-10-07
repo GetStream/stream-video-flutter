@@ -1,18 +1,21 @@
 part of 'push_notification_manager.dart';
 
-/// Represents an event related to the CallKit.
+@Deprecated('Use RingingEvent instead.')
+typedef CallKitEvent = RingingEvent;
+
+/// Represents an event related to the Ringing flow.
 ///
 /// Instances of this class are used to signify different call events that can be
 /// received from [PushNotificationManager].
-sealed class CallKitEvent with EquatableMixin {
-  const CallKitEvent();
+sealed class RingingEvent with EquatableMixin {
+  const RingingEvent();
 
   @override
   bool? get stringify => true;
 }
 
 /// Event for updating the VoIP push token on the device (iOS specific).
-class ActionDidUpdateDevicePushTokenVoip extends CallKitEvent {
+class ActionDidUpdateDevicePushTokenVoip extends RingingEvent {
   /// Creates an [ActionDidUpdateDevicePushTokenVoip] event instance with the
   /// specified [token].
   const ActionDidUpdateDevicePushTokenVoip({required this.token});
@@ -27,7 +30,7 @@ class ActionDidUpdateDevicePushTokenVoip extends CallKitEvent {
 /// Represents an incoming call event.
 ///
 /// This event is triggered when a incoming call is received.
-class ActionCallIncoming extends CallKitEvent {
+class ActionCallIncoming extends RingingEvent {
   /// Creates an [ActionCallIncoming] event instance with the specified [data].
   const ActionCallIncoming({required this.data});
 
@@ -41,7 +44,7 @@ class ActionCallIncoming extends CallKitEvent {
 /// Represents a call start event.
 ///
 /// This event is triggered when a outgoing call is started.
-class ActionCallStart extends CallKitEvent {
+class ActionCallStart extends RingingEvent {
   /// Creates an [ActionCallStart] event instance with the specified [data].
   const ActionCallStart({required this.data});
 
@@ -57,7 +60,7 @@ class ActionCallStart extends CallKitEvent {
 /// This event is triggered when a incoming call is accepted. This can happen
 /// when a user clicks on the "Accept" action from a incoming call
 /// notification.
-class ActionCallAccept extends CallKitEvent {
+class ActionCallAccept extends RingingEvent {
   /// Creates an [ActionCallAccept] event instance with the specified [data].
   const ActionCallAccept({required this.data});
 
@@ -73,7 +76,7 @@ class ActionCallAccept extends CallKitEvent {
 /// This event is triggered when a incoming call is declined. This can happen
 /// when a user clicks on the "Decline" action from a incoming call
 /// notification.
-class ActionCallDecline extends CallKitEvent {
+class ActionCallDecline extends RingingEvent {
   /// Creates an [ActionCallDecline] event instance with the specified [data].
   const ActionCallDecline({required this.data});
 
@@ -88,7 +91,7 @@ class ActionCallDecline extends CallKitEvent {
 ///
 /// This event is triggered when a incoming or outgoing call is ended. This can
 /// happen when a user clicks on the "End" action from the notification.
-class ActionCallEnded extends CallKitEvent {
+class ActionCallEnded extends RingingEvent {
   /// Creates an [ActionCallEnded] event instance with the specified [data].
   const ActionCallEnded({required this.data});
 
@@ -103,7 +106,7 @@ class ActionCallEnded extends CallKitEvent {
 ///
 /// This event is triggered when a call times out. This can happen when a user
 /// doesn't answer a incoming call within a certain time frame.
-class ActionCallTimeout extends CallKitEvent {
+class ActionCallTimeout extends RingingEvent {
   /// Creates an [ActionCallTimeout] event instance with the specified [data].
   const ActionCallTimeout({required this.data});
 
@@ -120,7 +123,7 @@ class ActionCallTimeout extends CallKitEvent {
 /// user clicks on the "Call back" action from a missed call notification.
 ///
 /// Note: This event is only available on Android.
-class ActionCallCallback extends CallKitEvent {
+class ActionCallCallback extends RingingEvent {
   /// Creates an [ActionCallCallback] event instance with the specified [data].
   const ActionCallCallback({required this.data});
 
@@ -131,7 +134,7 @@ class ActionCallCallback extends CallKitEvent {
   List<Object?> get props => [data];
 }
 
-class ActionCallConnected extends CallKitEvent {
+class ActionCallConnected extends RingingEvent {
   /// Creates an [ActionCallConnected] event instance with the specified [data].
   const ActionCallConnected({required this.data});
 
@@ -145,7 +148,7 @@ class ActionCallConnected extends CallKitEvent {
 /// Represents a call toggle hold event.
 ///
 /// Note: This event is only available on iOS.
-class ActionCallToggleHold extends CallKitEvent {
+class ActionCallToggleHold extends RingingEvent {
   /// Creates an [ActionCallToggleHold] event instance with the specified [uuid]
   /// and [isOnHold] flag.
   const ActionCallToggleHold({
@@ -166,7 +169,7 @@ class ActionCallToggleHold extends CallKitEvent {
 /// Represents a call toggle mute event.
 ///
 /// Note: This event is only available on iOS.
-class ActionCallToggleMute extends CallKitEvent {
+class ActionCallToggleMute extends RingingEvent {
   /// Creates an [ActionCallToggleMute] event instance with the specified [uuid]
   /// and [isMuted] flag.
   const ActionCallToggleMute({
@@ -184,13 +187,13 @@ class ActionCallToggleMute extends CallKitEvent {
   List<Object?> get props => [uuid, isMuted];
 }
 
-/// Represents a call toggle DMTF event.
+/// Represents a call toggle DTMF event.
 ///
 /// Note: This event is only available on iOS.
-class ActionCallToggleDmtf extends CallKitEvent {
-  /// Creates an [ActionCallToggleDmtf] event instance with the specified [uuid]
+class ActionCallToggleDtmf extends RingingEvent {
+  /// Creates an [ActionCallToggleDtmf] event instance with the specified [uuid]
   /// and [digits].
-  const ActionCallToggleDmtf({
+  const ActionCallToggleDtmf({
     required this.uuid,
     required this.digits,
   });
@@ -208,7 +211,7 @@ class ActionCallToggleDmtf extends CallKitEvent {
 /// Represents a call toggle group event.
 ///
 /// Note: This event is only available on iOS.
-class ActionCallToggleGroup extends CallKitEvent {
+class ActionCallToggleGroup extends RingingEvent {
   /// Creates an [ActionCallToggleGroup] event instance with the specified
   /// [uuid] and [callUUIDToGroupWith].
   const ActionCallToggleGroup({
@@ -229,20 +232,20 @@ class ActionCallToggleGroup extends CallKitEvent {
 /// Represents a call toggle audio session event.
 ///
 /// Note: This event is only available on iOS.
-class ActionCallToggleAudioSession extends CallKitEvent {
+class ActionCallToggleAudioSession extends RingingEvent {
   /// Creates an [ActionCallToggleAudioSession] event instance with the
-  /// specified [isActivate] flag.
-  const ActionCallToggleAudioSession({required this.isActivate});
+  /// specified [isActive] flag.
+  const ActionCallToggleAudioSession({required this.isActive});
 
   /// Indicates whether the audio session is active.
-  final bool isActivate;
+  final bool isActive;
 
   @override
-  List<Object?> get props => [isActivate];
+  List<Object?> get props => [isActive];
 }
 
 /// Represents a custom call event.
-class ActionCallCustom extends CallKitEvent {
+class ActionCallCustom extends RingingEvent {
   /// Creates an [ActionCallCustom] event instance with the specified [body].
   const ActionCallCustom(this.body);
 
@@ -265,7 +268,7 @@ class CallData with EquatableMixin {
     this.callCid,
     this.avatar,
     this.handle,
-    this.nameCaller,
+    this.callerName,
     this.hasVideo,
     this.extraData,
   });
@@ -283,7 +286,7 @@ class CallData with EquatableMixin {
   final String? handle;
 
   /// Name of the caller.
-  final String? nameCaller;
+  final String? callerName;
 
   /// Indicates whether the call has video.
   final bool? hasVideo;
@@ -300,7 +303,7 @@ class CallData with EquatableMixin {
     callCid,
     avatar,
     handle,
-    nameCaller,
+    callerName,
     hasVideo,
     extraData,
   ];

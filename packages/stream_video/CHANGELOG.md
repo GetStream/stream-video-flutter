@@ -1,5 +1,16 @@
 ## Unreleased
 
+🚧 Breaking changes
+
+### API renames and type changes
+
+- `onCallKitEvent` → `onRingingEvent`
+- `observeCoreCallKitEvents` → `observeCoreRingingEvents`
+- `observeCallAcceptCallKitEvent` → `observeCallAcceptRingingEvent`
+- `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
+- `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
+- `CallKitEvent` (type) → `RingingEvent`
+
 🔄 Changed
 - The `byParticipantSource` participant sorting now accepts a list of sources. The default sorting for `speaker` and `livestream` presets now include other ingress sources.
 

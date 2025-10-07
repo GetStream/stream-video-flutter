@@ -1,20 +1,21 @@
 name: Pana Workflow
+description: "Runs pana and checks the score for the package"
 
 inputs:
   min_score:
+    description: "The minimum pana score required"
     required: false
-    type: number
-    default: 120
+    default: "120"
   pana_version:
+    description: "The pana version to use"
     required: false
-    type: string
   runs_on:
+    description: "The runner to use"
     required: false
-    type: string
     default: "ubuntu-latest"
   working_directory:
+    description: "The working directory"
     required: false
-    type: string
     default: "."
 
 runs:
@@ -24,9 +25,21 @@ runs:
       uses: mikefarah/yq@master
       with:
         cmd: |
+          # --- stream_video_flutter ---
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+
+          # --- stream_video_push_notification ---
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+
+          # --- stream_video_noise_cancellation ---
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
