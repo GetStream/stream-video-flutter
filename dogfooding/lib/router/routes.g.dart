@@ -7,14 +7,14 @@ part of 'routes.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
-  $homeRoute,
-  $loginRoute,
-  $lobbyRoute,
-  $livestreamRoute,
-  $callRoute,
-  $callParticipantsRoute,
-  $callStatsRoute,
-];
+      $homeRoute,
+      $loginRoute,
+      $lobbyRoute,
+      $livestreamRoute,
+      $callRoute,
+      $callParticipantsRoute,
+      $callStatsRoute,
+    ];
 
 RouteBase get $homeRoute =>
     GoRouteData.$route(path: '/', name: 'home', factory: $HomeRoute._fromState);
@@ -40,10 +40,10 @@ mixin $HomeRoute on GoRouteData {
 }
 
 RouteBase get $loginRoute => GoRouteData.$route(
-  path: '/login',
-  name: 'login',
-  factory: $LoginRoute._fromState,
-);
+      path: '/login',
+      name: 'login',
+      factory: $LoginRoute._fromState,
+    );
 
 mixin $LoginRoute on GoRouteData {
   static LoginRoute _fromState(GoRouterState state) => LoginRoute();
@@ -66,10 +66,10 @@ mixin $LoginRoute on GoRouteData {
 }
 
 RouteBase get $lobbyRoute => GoRouteData.$route(
-  path: '/lobby',
-  name: 'lobby',
-  factory: $LobbyRoute._fromState,
-);
+      path: '/lobby',
+      name: 'lobby',
+      factory: $LobbyRoute._fromState,
+    );
 
 mixin $LobbyRoute on GoRouteData {
   static LobbyRoute _fromState(GoRouterState state) =>
@@ -97,10 +97,10 @@ mixin $LobbyRoute on GoRouteData {
 }
 
 RouteBase get $livestreamRoute => GoRouteData.$route(
-  path: '/livestream',
-  name: 'livestream',
-  factory: $LivestreamRoute._fromState,
-);
+      path: '/livestream',
+      name: 'livestream',
+      factory: $LivestreamRoute._fromState,
+    );
 
 mixin $LivestreamRoute on GoRouteData {
   static LivestreamRoute _fromState(GoRouterState state) =>
@@ -128,21 +128,19 @@ mixin $LivestreamRoute on GoRouteData {
 }
 
 RouteBase get $callRoute => GoRouteData.$route(
-  path: '/call',
-  name: 'call',
-  factory: $CallRoute._fromState,
-);
+      path: '/call',
+      name: 'call',
+      factory: $CallRoute._fromState,
+    );
 
 mixin $CallRoute on GoRouteData {
   static CallRoute _fromState(GoRouterState state) => CallRoute(
-    $extra:
-        state.extra
-            as ({
-              Call call,
-              CallConnectOptions? connectOptions,
-              StreamVideoEffectsManager? effectsManager,
-            }),
-  );
+        $extra: state.extra as ({
+          Call call,
+          CallConnectOptions? connectOptions,
+          StreamVideoEffectsManager? effectsManager,
+        }),
+      );
 
   CallRoute get _self => this as CallRoute;
 
@@ -166,10 +164,10 @@ mixin $CallRoute on GoRouteData {
 }
 
 RouteBase get $callParticipantsRoute => GoRouteData.$route(
-  path: '/call/participants',
-  name: 'participants',
-  factory: $CallParticipantsRoute._fromState,
-);
+      path: '/call/participants',
+      name: 'participants',
+      factory: $CallParticipantsRoute._fromState,
+    );
 
 mixin $CallParticipantsRoute on GoRouteData {
   static CallParticipantsRoute _fromState(GoRouterState state) =>
@@ -197,10 +195,10 @@ mixin $CallParticipantsRoute on GoRouteData {
 }
 
 RouteBase get $callStatsRoute => GoRouteData.$route(
-  path: '/call/stats',
-  name: 'stats',
-  factory: $CallStatsRoute._fromState,
-);
+      path: '/call/stats',
+      name: 'stats',
+      factory: $CallStatsRoute._fromState,
+    );
 
 mixin $CallStatsRoute on GoRouteData {
   static CallStatsRoute _fromState(GoRouterState state) =>

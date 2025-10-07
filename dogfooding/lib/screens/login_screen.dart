@@ -256,9 +256,9 @@ class GoogleLoginButton extends StatelessWidget {
     // Google SignIn plugin is supported on Web, Android, iOS and macOS.
     final isGoogleSignInSupported =
         defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        kIsWeb;
+            defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.macOS ||
+            kIsWeb;
 
     final currentPlatform = Theme.of(context).platform.name;
 

@@ -56,23 +56,22 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
               ),
             ),
             alignmentOffset: const Offset(-70, 0),
-            builder:
-                (
-                  BuildContext context,
-                  MenuController controller,
-                  Widget? child,
-                ) {
-                  return IconButton(
-                    onPressed: () {
-                      if (controller.isOpen) {
-                        controller.close();
-                      } else {
-                        controller.open();
-                      }
-                    },
-                    icon: const Icon(Icons.settings, color: Colors.white),
-                  );
+            builder: (
+              BuildContext context,
+              MenuController controller,
+              Widget? child,
+            ) {
+              return IconButton(
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
                 },
+                icon: const Icon(Icons.settings, color: Colors.white),
+              );
+            },
             menuChildren: [
               ...Environment.values
                   .where((e) => e != Environment.livestream)

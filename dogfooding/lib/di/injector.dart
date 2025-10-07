@@ -97,11 +97,11 @@ class AppInjector {
         initialToken: tokenResponse.token,
         tokenLoader: switch (user.type) {
           UserType.authenticated => (String userId) {
-            final tokenService = locator<TokenService>();
-            return tokenService
-                .loadToken(userId: userId, environment: environment)
-                .then((response) => response.token);
-          },
+              final tokenService = locator<TokenService>();
+              return tokenService
+                  .loadToken(userId: userId, environment: environment)
+                  .then((response) => response.token);
+            },
           _ => null,
         },
       ),

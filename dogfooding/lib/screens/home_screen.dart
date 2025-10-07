@@ -383,31 +383,31 @@ class _JoinForm extends StatelessWidget {
   }
 
   Widget _refreshIconButton() => IconButton(
-    icon: const Icon(Icons.refresh),
-    color: Colors.white,
-    padding: EdgeInsets.zero,
-    onPressed: () {
-      // generate a 10 character nanoId for call id
-      final callId = generateAlphanumericString(10);
-      callIdController.value = TextEditingValue(
-        text: callId,
-        selection: TextSelection.collapsed(offset: callId.length),
+        icon: const Icon(Icons.refresh),
+        color: Colors.white,
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          // generate a 10 character nanoId for call id
+          final callId = generateAlphanumericString(10);
+          callIdController.value = TextEditingValue(
+            text: callId,
+            selection: TextSelection.collapsed(offset: callId.length),
+          );
+        },
       );
-    },
-  );
 
   Widget _scanQRButton(BuildContext context) => IconButton(
-    icon: const Icon(Icons.qr_code),
-    color: Colors.white,
-    padding: EdgeInsets.zero,
-    onPressed: () async {
-      final result = await QrCodeScanner.scan(context);
+        icon: const Icon(Icons.qr_code),
+        color: Colors.white,
+        padding: EdgeInsets.zero,
+        onPressed: () async {
+          final result = await QrCodeScanner.scan(context);
 
-      if (context.mounted && result != null) {
-        await _handleJoinUrl(context, result);
-      }
-    },
-  );
+          if (context.mounted && result != null) {
+            await _handleJoinUrl(context, result);
+          }
+        },
+      );
 
   Future<void> _handleJoinUrl(BuildContext context, String url) async {
     Uri uri;
@@ -466,8 +466,7 @@ class _JoinForm extends StatelessWidget {
     // Fetch the callId from the path components
     // e.g https://getstream.io/join/path-call-id
     final pathSegmentsLength = uri.pathSegments.length;
-    final callPathId =
-        pathSegmentsLength >= 2 &&
+    final callPathId = pathSegmentsLength >= 2 &&
             uri.pathSegments[pathSegmentsLength - 2] == 'join'
         ? uri.pathSegments.last
         : null;

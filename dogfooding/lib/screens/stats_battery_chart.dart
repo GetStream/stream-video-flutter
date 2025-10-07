@@ -83,20 +83,20 @@ class StatsBatteryChart extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     ColorTween(
-                          begin: AppColorPalette.appGreen,
-                          end:
-                              // ignore: deprecated_member_use
-                              AppColorPalette.appGreen.withOpacity(0.5),
-                        )
+                      begin: AppColorPalette.appGreen,
+                      end:
+                          // ignore: deprecated_member_use
+                          AppColorPalette.appGreen.withOpacity(0.5),
+                    )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),
                     ColorTween(
-                          begin: AppColorPalette.appGreen,
-                          end:
-                              // ignore: deprecated_member_use
-                              AppColorPalette.appGreen.withOpacity(0.5),
-                        )
+                      begin: AppColorPalette.appGreen,
+                      end:
+                          // ignore: deprecated_member_use
+                          AppColorPalette.appGreen.withOpacity(0.5),
+                    )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),

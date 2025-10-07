@@ -16,7 +16,7 @@ class LobbyScreen extends StatefulWidget {
   });
 
   final void Function(CallConnectOptions, StreamVideoEffectsManager)
-  onJoinCallPressed;
+      onJoinCallPressed;
   final Call call;
 
   @override
@@ -134,9 +134,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
                           if (_blurEnabled) {
                             await _videoEffectsManager
                                 .applyBackgroundBlurFilter(
-                                  BlurIntensity.medium,
-                                  track: _cameraTrack,
-                                );
+                              BlurIntensity.medium,
+                              track: _cameraTrack,
+                            );
                           } else {
                             await _videoEffectsManager.disableAllFilters(
                               track: _cameraTrack,

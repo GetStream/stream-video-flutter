@@ -299,12 +299,12 @@ class CallData with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        uuid,
-        callCid,
-        avatar,
-        handle,
-        callerName,
-        hasVideo,
-        extraData,
-      ];
+    uuid,
+    callCid,
+    avatar,
+    handle,
+    callerName,
+    hasVideo,
+    extraData,
+  ];
 }
