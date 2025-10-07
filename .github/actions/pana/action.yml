@@ -1,4 +1,5 @@
 name: Pana Workflow
+description: "Runs pana and checks the score for the package"
 
 inputs:
   min_score:

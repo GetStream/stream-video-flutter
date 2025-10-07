@@ -2,8 +2,8 @@
 class CallEvent {
   CallEvent(this.body, this.event);
 
-  Event event;
-  dynamic body;
+  final Event event;
+  final dynamic body;
 
   @override
   String toString() => 'CallEvent( body: $body, event: $event)';
