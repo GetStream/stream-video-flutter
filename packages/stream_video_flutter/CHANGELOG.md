@@ -1,3 +1,9 @@
+## Unreleased
+
+🔄 Changed
+- The `byParticipantSource` participant sorting now accepts a list of sources. The default sorting for `speaker` and `livestream` presets now include other ingress sources.
+- Updated the renderscript dependency on Android to support 16kb page size.
+
 ## 0.11.0
 
 🚧 Build breaking changes
