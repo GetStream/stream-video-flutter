@@ -21,7 +21,8 @@ jobs:
           scopes: |
             llc
             ui
-            doc
+            ci
+            deps
             repo
             samples
           requireScope: true
