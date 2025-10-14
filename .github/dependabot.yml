@@ -22,71 +22,15 @@ updates:
         update-types: ["version-update:semver-patch"]
   
   # Pub Packages
-  # Each package groups all dependency updates into a single PR per week
-  
-  # stream_video (Low-level client)
+  # All packages grouped into a single configuration using multi-directory support
   - package-ecosystem: "pub"
-    directory: "/packages/stream_video"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      all-dependencies:
-        patterns: ["*"]
-    commit-message:
-      prefix: "chore(deps)"
-  
-  # stream_video_flutter (UI components)
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_video_flutter"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      all-dependencies:
-        patterns: ["*"]
-    commit-message:
-      prefix: "chore(deps)"
-  
-  # stream_video_noise_cancellation (Noise cancellation)
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_video_noise_cancellation"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      all-dependencies:
-        patterns: ["*"]
-    commit-message:
-      prefix: "chore(deps)"
-  
-  # stream_video_push_notification (Push notifications)
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_video_push_notification"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      all-dependencies:
-        patterns: ["*"]
-    commit-message:
-      prefix: "chore(deps)"
-  
-  # stream_video_screen_sharing (Screen sharing)
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_video_screen_sharing"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      all-dependencies:
-        patterns: ["*"]
-    commit-message:
-      prefix: "chore(deps)"
-  
-  # Dogfooding App (Sample app)
-  - package-ecosystem: "pub"
-    directory: "/dogfooding"
+    directories:
+      - "/dogfooding"
+      - "/packages/stream_video"
+      - "/packages/stream_video_flutter"
+      - "/packages/stream_video_noise_cancellation"
+      - "/packages/stream_video_push_notification"
+      - "/packages/stream_video_screen_sharing"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
