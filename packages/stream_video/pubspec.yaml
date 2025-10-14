@@ -31,7 +31,10 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^1.0.12
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 107ce0d97794bcbc9dc1aad23e4959ebf325b9a0
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.6.0
@@ -39,7 +42,7 @@ dependencies:
   uuid: ^4.5.1
   web: ^1.0.0
   web_socket_channel: ^3.0.3
-  webrtc_interface: ^1.1.1
+  webrtc_interface: ^1.2.2+hotfix.1
 
 dev_dependencies:
   flutter_test:
