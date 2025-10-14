@@ -23,7 +23,8 @@ dependencies:
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
   stream_video: ^0.11.0
-  stream_webrtc_flutter: ^1.0.12
+  stream_webrtc_flutter:
+    path: ../../../webrtc-flutter
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
