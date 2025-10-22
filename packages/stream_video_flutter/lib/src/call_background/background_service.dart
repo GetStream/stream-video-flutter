@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/transformers.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video_flutter_background.dart';
 import 'model/notification_options.dart';
@@ -35,8 +38,7 @@ class StreamBackgroundService {
   StreamBackgroundService._();
 
   static final StreamBackgroundService _instance = StreamBackgroundService._();
-
-  static StreamSubscription<List<Call>>? _activeCalSubscription;
+  static final Subscriptions _subscriptions = Subscriptions();
 
   // Map to store context for each managed call
   final Map<String, _CallServiceContext> _managedCalls = {};
@@ -132,8 +134,8 @@ class StreamBackgroundService {
       await onPlatformUiLayerDestroyed?.call(context.call);
     });
 
-    _activeCalSubscription?.cancel();
-    _activeCalSubscription = streamVideo.listenActiveCalls((
+    _subscriptions.cancelAll();
+    final activeCallSubscription = streamVideo.listenActiveCalls((
       List<Call> currentCalls,
     ) async {
       final currentCallCids = currentCalls.map((c) => c.callCid.value).toSet();
@@ -172,6 +174,36 @@ class StreamBackgroundService {
         }
       }
     });
+
+    _subscriptions.add(1, activeCallSubscription);
+
+    final rtcEventsSubscription = RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .whereType<ScreenSharingStoppedEvent>()
+        .listen((event) async {
+          final trackId = event.data?['trackId'] as String?;
+          if (trackId != null) {
+            final call = streamVideo.activeCalls.singleWhereOrNull(
+              (call) =>
+                  call
+                      .getTrack(
+                        call.state.value.localParticipant!.trackIdPrefix,
+                        SfuTrackType.screenShare,
+                      )
+                      ?.mediaTrack
+                      .id ==
+                  trackId,
+            );
+
+            if (call != null) {
+              await _instance.stopScreenSharingNotificationService(
+                call.callCid.value,
+              );
+            }
+          }
+        });
+
+    _subscriptions.add(2, rtcEventsSubscription);
   }
 
   Future<void> _startManagingCall(

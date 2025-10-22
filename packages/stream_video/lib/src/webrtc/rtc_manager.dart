@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -28,6 +31,7 @@ import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
 import 'rtc_media_device/rtc_media_device.dart';
+import 'rtc_media_device/rtc_media_device_notifier.dart';
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track.dart';
 import 'traced_peer_connection.dart';
@@ -1292,6 +1296,29 @@ extension RtcManagerTrackHelper on RtcManager {
             (constraints ?? const ScreenShareConstraints())
                 as ScreenShareConstraints,
       );
+
+      // On iOS, wait for the native WebRTC event indicating that
+      // screen sharing has started when using the Broadcast Extension.
+      if (CurrentPlatform.isIos &&
+          screenShareTrackResult.isSuccess &&
+          constraints is ScreenShareConstraints &&
+          constraints.useiOSBroadcastExtension) {
+        return awaitNativeWebRtcEvent<ScreenSharingStartedEvent>()
+            .then(
+              (value) => publishVideoTrack(
+                track: screenShareTrackResult.getDataOrNull()!,
+              ),
+            )
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                return Result.error(
+                  'Timeout waiting for ScreenSharingStartedEvent',
+                );
+              },
+            );
+      }
+
       return screenShareTrackResult.fold(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
@@ -1300,6 +1327,21 @@ extension RtcManagerTrackHelper on RtcManager {
 
     _logger.e(() => 'Unsupported trackType $trackType');
     return Result.error('Unsupported trackType $trackType');
+  }
+
+  Future<void> awaitNativeWebRtcEvent<T extends NativeWebRtcEvent>() {
+    final completer = Completer<void>();
+
+    StreamSubscription<T>? rtcEventsSubscription;
+    rtcEventsSubscription = RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .whereType<T>()
+        .listen((event) {
+          completer.complete();
+          rtcEventsSubscription?.cancel();
+        });
+
+    return completer.future;
   }
 
   Future<Result<None>> setAppleAudioConfiguration({

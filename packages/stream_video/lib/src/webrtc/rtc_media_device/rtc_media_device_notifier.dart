@@ -15,6 +15,18 @@ class InterruptionBeginEvent extends InterruptionEvent {}
 
 class InterruptionEndEvent extends InterruptionEvent {}
 
+abstract class NativeWebRtcEvent {}
+
+class ScreenSharingStoppedEvent extends NativeWebRtcEvent {
+  ScreenSharingStoppedEvent({this.data});
+  final Map<dynamic, dynamic>? data;
+}
+
+class ScreenSharingStartedEvent extends NativeWebRtcEvent {
+  ScreenSharingStartedEvent({this.data});
+  final Map<dynamic, dynamic>? data;
+}
+
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
@@ -69,6 +81,24 @@ class RtcMediaDeviceNotifier {
       androidAudioAttributesUsageType: androidAudioAttributesUsageType,
       androidAudioAttributesContentType: androidAudioAttributesContentType,
     );
+  }
+
+  Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
+    return rtc.eventStream
+        .map<NativeWebRtcEvent?>((data) {
+          final event = data.keys.first;
+          final Map<dynamic, dynamic> values = data.values.first;
+          switch (event) {
+            case 'screenSharingStopped':
+              return ScreenSharingStoppedEvent(data: values);
+            case 'screenSharingStarted':
+              return ScreenSharingStartedEvent(data: values);
+            default:
+              return null;
+          }
+        })
+        .whereNotNull()
+        .asBroadcastStream();
   }
 
   Future<void> _onDeviceChange(_) async {

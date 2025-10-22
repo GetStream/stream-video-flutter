@@ -8,6 +8,7 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/transformers.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -87,6 +88,7 @@ const _idConnect = 6;
 const _idAwait = 7;
 const _idFastReconnectTimeout = 8;
 const _idReconnect = 9;
+const _idNativeWebRtc = 10;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -381,10 +383,18 @@ class Call {
       _observeState();
       _observeReconnectEvents();
       _observeUserId();
+      _observeNativeWebRtcEventStream();
 
       _logger.v(() => '[_init] initialized');
       _initialized = true;
     });
+  }
+
+  void _observeNativeWebRtcEventStream() {
+    _subscriptions.add(
+      _idNativeWebRtc,
+      _onNativeWebRtcEvent(),
+    );
   }
 
   void _observeState() {
@@ -456,6 +466,34 @@ class Call {
         state.settings.audio.opusDtxEnabled;
     _sessionFactory.sdpEditor.opusRedEnabled =
         state.settings.audio.redundantCodingEnabled;
+  }
+
+  StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {
+    return RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .whereType<ScreenSharingStoppedEvent>()
+        .listen((event) {
+          _logger.d(
+            () => '[_onNativeWebRtcEvent] screenSharingStopped: $event',
+          );
+
+          if (CurrentPlatform.isIos) {
+            // On iOS only one broadcast extension can be active at a time
+            setScreenShareEnabled(enabled: false);
+          } else {
+            final trackId = event.data?['trackId'] as String?;
+            if (trackId != null) {
+              final track = getTrack(
+                state.value.localParticipant!.trackIdPrefix,
+                SfuTrackType.screenShare,
+              );
+
+              if (track?.mediaTrack.id == trackId) {
+                setScreenShareEnabled(enabled: false);
+              }
+            }
+          }
+        });
   }
 
   Future<void> _onCoordinatorEvent(StreamCallEvent event) async {
@@ -559,7 +597,6 @@ class Call {
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallSessionStartedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-
       default:
         break;
     }

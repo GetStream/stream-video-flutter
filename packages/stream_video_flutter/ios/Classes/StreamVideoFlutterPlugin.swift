@@ -3,6 +3,9 @@ import UIKit
 import stream_webrtc_flutter
 
 public class StreamVideoFlutterPlugin: NSObject, FlutterPlugin {
+    static let broadcastStartedNotification = "io.getstream.video.screen_sharing.broadcastStarted"
+    static let broadcastStoppedNotification = "io.getstream.video.screen_sharing.broadcastStopped"
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
             name: "stream_video_flutter", binaryMessenger: registrar.messenger())
@@ -13,6 +16,21 @@ public class StreamVideoFlutterPlugin: NSObject, FlutterPlugin {
         registrar.register(
             factory,
             withId: "stream-pip-view")
+
+        ScreenShareManager.shared.observeNotification(named: broadcastStartedNotification)
+        ScreenShareManager.shared.observeNotification(named: broadcastStoppedNotification)
+        ScreenShareManager.shared.onNotification = { name in
+            switch name {
+            case broadcastStartedNotification:
+                FlutterWebRTCPlugin.sharedSingleton()?.postEvent(
+                    withName: "screenSharingStarted", data: nil)
+            case broadcastStoppedNotification:
+                FlutterWebRTCPlugin.sharedSingleton()?.postEvent(
+                    withName: "screenSharingStopped", data: nil)
+            default:
+                break
+            }
+        }
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
