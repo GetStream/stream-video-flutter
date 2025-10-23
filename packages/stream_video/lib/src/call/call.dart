@@ -1999,13 +1999,19 @@ class Call {
       final mediaConstraints = track.mediaConstraints;
       if (mediaConstraints is AudioConstraints) {
         _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
-        await setMicrophoneEnabled(enabled: true);
+        await setMicrophoneEnabled(
+          enabled: true,
+          constraints: mediaConstraints,
+        );
       } else if (mediaConstraints is CameraConstraints) {
         _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
-        await setCameraEnabled(enabled: true);
+        await setCameraEnabled(enabled: true, constraints: mediaConstraints);
       } else if (mediaConstraints is ScreenShareConstraints) {
         _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
-        await setScreenShareEnabled(enabled: true);
+        await setScreenShareEnabled(
+          enabled: true,
+          constraints: mediaConstraints,
+        );
       } else {
         streamLog.e(
           _tag,

@@ -1185,9 +1185,7 @@ extension RtcManagerTrackHelper on RtcManager {
 
     // Track found, mute/unmute it.
     if (track != null) {
-      if (enabled &&
-          track is RtcLocalScreenShareTrack &&
-          !track.compareScreenShareMode(constraints)) {
+      if (enabled && track is RtcLocalScreenShareTrack) {
         return _createAndPublishTrack(
           trackType: trackType,
           constraints: constraints,
@@ -1310,7 +1308,7 @@ extension RtcManagerTrackHelper on RtcManager {
               ),
             )
             .timeout(
-              const Duration(seconds: 15),
+              const Duration(seconds: 30),
               onTimeout: () {
                 return Result.error(
                   'Timeout waiting for ScreenSharingStartedEvent',

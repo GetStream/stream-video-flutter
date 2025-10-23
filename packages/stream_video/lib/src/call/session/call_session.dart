@@ -775,6 +775,8 @@ class CallSession extends Disposable {
       if (localTrack != null &&
           localTrack.isScreenShareTrack &&
           localTrack.mediaTrack.enabled) {
+        // If the unpublished track is a local screen share track and it's still enabled,
+        // disable screen sharing. It means the screen sharing was muted by the server.
         await setScreenShareEnabled(false);
       }
 
