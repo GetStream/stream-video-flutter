@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video_flutter_background.dart';
 import 'model/notification_options.dart';
