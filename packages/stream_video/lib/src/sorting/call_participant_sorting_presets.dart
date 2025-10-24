@@ -1,5 +1,4 @@
 import '../models/call_participant_state.dart';
-import '../sfu/data/models/sfu_participant_source.dart';
 import 'call_participant_state_sorting.dart';
 
 mixin CallParticipantSortingPresets {

@@ -95,6 +95,7 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.fromAlias(it.kind),
           );
         }),
+
         if (CurrentPlatform.isIos &&
             (kind == null || kind == RtcMediaDeviceKind.audioOutput) &&
             devices.none(
@@ -109,6 +110,8 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.audioOutput,
           ),
       ];
+
+      _devicesController.add(mediaDevices);
 
       if (kind != null) {
         final devices = mediaDevices.where((d) => d.kind == kind);

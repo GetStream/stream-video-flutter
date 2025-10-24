@@ -59,7 +59,7 @@ class AudioConstraints extends MediaConstraints {
 
     if (deviceId != null) {
       if (CurrentPlatform.isWeb) {
-        constraints['deviceId'] = deviceId;
+        constraints['deviceId'] = {'exact': deviceId};
       } else {
         (constraints['optional'] as List).cast<Map<String, dynamic>>().add(
           <String, dynamic>{'sourceId': deviceId},
