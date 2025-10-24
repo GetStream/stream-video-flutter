@@ -1,3 +1,12 @@
+## Unreleased
+
+🐞 Fixed
+- [Web] Fixed setting input audio/video device passed by `CallConnectOptions` as well as switching those devices during the call.
+- [Web] Fixed changing the output audio device during the call.
+
+✅ Added
+- [Web] Added `checkIfAudioOutputChangeSupported()` to the `Call` class to check whether the browser supports changing the audio output device.
+
 ## 0.11.1
 
 🔄 Changed
