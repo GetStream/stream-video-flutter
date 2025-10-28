@@ -142,17 +142,18 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     if (!mounted) return;
 
-    setState(() {
-      _selectedVideoInputDevice = result;
+    _selectedVideoInputDevice = result;
 
-      if (_selectedVideoInputDevice != null) {
-        unawaited(
-          _cameraTrack?.selectVideoInput(_selectedVideoInputDevice!, []),
-        );
-      } else {
-        _cameraTrack?.recreate([]);
-      }
-    });
+    if (_selectedVideoInputDevice != null) {
+      _cameraTrack = await _cameraTrack?.selectVideoInput(
+        _selectedVideoInputDevice!,
+        [],
+      );
+    } else {
+      _cameraTrack = await _cameraTrack?.recreate([]);
+    }
+
+    setState(() {});
   }
 
   @override
@@ -200,10 +201,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
-                  key: ValueKey(_selectedVideoInputDevice?.id),
+                  key: ValueKey(_cameraTrack),
                   call: widget.call,
-                  onMicrophoneTrackSet: (track) => _microphoneTrack = track,
                   initialCameraDevice: _selectedVideoInputDevice,
+                  onMicrophoneTrackSet: (track) => _microphoneTrack = track,
                   onCameraTrackSet: (track) {
                     _cameraTrack = track;
 
@@ -256,16 +257,23 @@ class _LobbyScreenState extends State<LobbyScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        icon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.mic_rounded),
-                            const SizedBox(width: 4),
-                            Text(
-                              _selectedAudioInputDevice?.label ?? 'Default',
-                              style: textTheme.body,
-                            ),
-                          ],
+                        icon: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 220),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.mic_rounded),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  _selectedAudioInputDevice?.label ?? 'Default',
+                                  style: textTheme.body,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         onPressed: _audioInputDevices.isEmpty
                             ? null
@@ -279,16 +287,23 @@ class _LobbyScreenState extends State<LobbyScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        icon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.videocam_rounded),
-                            const SizedBox(width: 4),
-                            Text(
-                              _selectedVideoInputDevice?.label ?? 'Default',
-                              style: textTheme.body,
-                            ),
-                          ],
+                        icon: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 220),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.videocam_rounded),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  _selectedVideoInputDevice?.label ?? 'Default',
+                                  style: textTheme.body,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         onPressed: _videoInputDevices.isEmpty
                             ? null
