@@ -182,17 +182,20 @@ class StreamBackgroundService {
         .listen((event) async {
           final trackId = event.data?['trackId'] as String?;
           if (trackId != null) {
-            final call = streamVideo.activeCalls.singleWhereOrNull(
-              (call) =>
-                  call
+            final call = streamVideo.activeCalls.singleWhereOrNull((call) {
+              if (call.state.value.localParticipant == null) {
+                return false;
+              }
+
+              return call
                       .getTrack(
                         call.state.value.localParticipant!.trackIdPrefix,
                         SfuTrackType.screenShare,
                       )
                       ?.mediaTrack
                       .id ==
-                  trackId,
-            );
+                  trackId;
+            });
 
             if (call != null) {
               await _instance.stopScreenSharingNotificationService(

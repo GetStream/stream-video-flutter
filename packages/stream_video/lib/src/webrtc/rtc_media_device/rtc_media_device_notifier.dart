@@ -86,8 +86,13 @@ class RtcMediaDeviceNotifier {
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
     return rtc.eventStream
         .map<NativeWebRtcEvent?>((data) {
+          if (data.isEmpty) return null;
+
           final event = data.keys.first;
-          final Map<dynamic, dynamic> values = data.values.first;
+          final values = data.values.first;
+
+          if (values is! Map<dynamic, dynamic>?) return null;
+
           switch (event) {
             case 'screenSharingStopped':
               return ScreenSharingStoppedEvent(data: values);

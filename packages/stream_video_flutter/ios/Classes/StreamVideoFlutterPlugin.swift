@@ -20,15 +20,17 @@ public class StreamVideoFlutterPlugin: NSObject, FlutterPlugin {
         ScreenShareManager.shared.observeNotification(named: broadcastStartedNotification)
         ScreenShareManager.shared.observeNotification(named: broadcastStoppedNotification)
         ScreenShareManager.shared.onNotification = { name in
-            switch name {
-            case broadcastStartedNotification:
-                FlutterWebRTCPlugin.sharedSingleton()?.postEvent(
-                    withName: "screenSharingStarted", data: nil)
-            case broadcastStoppedNotification:
-                FlutterWebRTCPlugin.sharedSingleton()?.postEvent(
-                    withName: "screenSharingStopped", data: nil)
-            default:
-                break
+            DispatchQueue.main.async {
+                switch name {
+                case broadcastStartedNotification:
+                    FlutterWebRTCPlugin.sharedSingleton()?.postEvent(
+                        withName: "screenSharingStarted", data: nil)
+                case broadcastStoppedNotification:
+                    FlutterWebRTCPlugin.sharedSingleton()?.postEvent(
+                        withName: "screenSharingStopped", data: nil)
+                default:
+                    break
+                }
             }
         }
     }

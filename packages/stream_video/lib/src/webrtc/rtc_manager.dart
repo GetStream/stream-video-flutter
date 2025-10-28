@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/transformers.dart';
@@ -18,6 +19,7 @@ import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/extensions.dart';
+import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
@@ -103,6 +105,11 @@ class RtcManager extends Disposable {
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
   OnRemoteTrackReceived? onRemoteTrackReceived;
+
+  CancelableOperation<ScreenSharingStartedEvent>?
+  _screenSharingStartedOperation;
+  StreamSubscription<ScreenSharingStartedEvent>?
+  _screenSharingStartedSubscription;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp(
@@ -429,6 +436,8 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+    await _screenSharingStartedOperation?.cancel();
+    _screenSharingStartedOperation = null;
     for (final trackSid in [...tracks.keys]) {
       await unpublishTrack(trackId: trackSid);
     }
@@ -1168,12 +1177,38 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalTrack>> setScreenShareEnabled({
     bool enabled = true,
     ScreenShareConstraints? constraints,
-  }) {
-    return _setTrackEnabled(
-      trackType: SfuTrackType.screenShare,
-      enabled: enabled,
-      constraints: constraints,
-    );
+  }) async {
+    if (CurrentPlatform.isIos &&
+        enabled &&
+        constraints is ScreenShareConstraints &&
+        constraints.useiOSBroadcastExtension) {
+      final screenShareTrackResult = await createScreenShareTrack(
+        constraints: constraints,
+      );
+
+      if (screenShareTrackResult.isFailure) {
+        _logger.e(
+          () =>
+              '[ScreenSharingStartedEvent] failed to create screen share track: ${screenShareTrackResult.getErrorOrNull()}',
+        );
+        return screenShareTrackResult;
+      }
+
+      _startListeningToScreenShareStarted(
+        screenShareTrackResult.getDataOrNull()!,
+      );
+
+      return Future.value(
+        Result.success(screenShareTrackResult.getDataOrNull()!),
+      );
+    } else {
+      await _screenSharingStartedSubscription?.cancel();
+      return _setTrackEnabled(
+        trackType: SfuTrackType.screenShare,
+        enabled: enabled,
+        constraints: constraints,
+      );
+    }
   }
 
   Future<Result<RtcLocalTrack>> _setTrackEnabled({
@@ -1186,6 +1221,8 @@ extension RtcManagerTrackHelper on RtcManager {
     // Track found, mute/unmute it.
     if (track != null) {
       if (enabled && track is RtcLocalScreenShareTrack) {
+        // Always create a new screen share track when enabling screen sharing.
+        // This ensures correct handling of constraints on iOS and supports selecting different screens on web and desktop platforms.
         return _createAndPublishTrack(
           trackType: trackType,
           constraints: constraints,
@@ -1295,28 +1332,6 @@ extension RtcManagerTrackHelper on RtcManager {
                 as ScreenShareConstraints,
       );
 
-      // On iOS, wait for the native WebRTC event indicating that
-      // screen sharing has started when using the Broadcast Extension.
-      if (CurrentPlatform.isIos &&
-          screenShareTrackResult.isSuccess &&
-          constraints is ScreenShareConstraints &&
-          constraints.useiOSBroadcastExtension) {
-        return awaitNativeWebRtcEvent<ScreenSharingStartedEvent>()
-            .then(
-              (value) => publishVideoTrack(
-                track: screenShareTrackResult.getDataOrNull()!,
-              ),
-            )
-            .timeout(
-              const Duration(seconds: 30),
-              onTimeout: () {
-                return Result.error(
-                  'Timeout waiting for ScreenSharingStartedEvent',
-                );
-              },
-            );
-      }
-
       return screenShareTrackResult.fold(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
@@ -1327,19 +1342,28 @@ extension RtcManagerTrackHelper on RtcManager {
     return Result.error('Unsupported trackType $trackType');
   }
 
-  Future<void> awaitNativeWebRtcEvent<T extends NativeWebRtcEvent>() {
-    final completer = Completer<void>();
-
-    StreamSubscription<T>? rtcEventsSubscription;
-    rtcEventsSubscription = RtcMediaDeviceNotifier.instance
+  Future<T> awaitNativeWebRtcEvent<T extends NativeWebRtcEvent>() {
+    return RtcMediaDeviceNotifier.instance
         .nativeWebRtcEventsStream()
         .whereType<T>()
-        .listen((event) {
-          completer.complete();
-          rtcEventsSubscription?.cancel();
-        });
+        .take(1)
+        .first;
+  }
 
-    return completer.future;
+  void _startListeningToScreenShareStarted(
+    RtcLocalTrack<ScreenShareConstraints> track,
+  ) {
+    _screenSharingStartedSubscription?.cancel();
+    _screenSharingStartedSubscription = RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .whereType<ScreenSharingStartedEvent>()
+        .listen((event) async {
+          _logger.i(() => '[ScreenSharingStartedEvent] received: $event');
+
+          await publishVideoTrack(
+            track: track,
+          );
+        });
   }
 
   Future<Result<None>> setAppleAudioConfiguration({
