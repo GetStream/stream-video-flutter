@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:characters/characters.dart';
+
 /// Extensions on [String].
 extension StringExtension on String {
   /// Returns initials for a string
@@ -13,7 +15,7 @@ extension StringExtension on String {
     final resultBuffer = StringBuffer();
 
     for (var i = 0; i < parts.length; i++) {
-      resultBuffer.write(parts[i][0].toUpperCase());
+      resultBuffer.write(parts[i].characters.first.toUpperCase());
     }
 
     return resultBuffer.toString();
