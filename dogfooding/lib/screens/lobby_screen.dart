@@ -1,6 +1,9 @@
 // 📦 Package imports:
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
@@ -26,15 +29,35 @@ class LobbyScreen extends StatefulWidget {
 class _LobbyScreenState extends State<LobbyScreen> {
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
+  RtcMediaDevice? _selectedAudioInputDevice;
+  RtcMediaDevice? _selectedVideoInputDevice;
   bool _blurEnabled = false;
+
+  final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
+  List<RtcMediaDevice> _audioInputDevices = const [];
+  List<RtcMediaDevice> _videoInputDevices = const [];
 
   final _userAuthController = locator.get<UserAuthController>();
   late StreamVideoEffectsManager _videoEffectsManager;
+
+  bool _hasMicrophonePermission = false;
+  bool _hasCameraPermission = false;
 
   @override
   void initState() {
     super.initState();
     _videoEffectsManager = StreamVideoEffectsManager(widget.call);
+    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen(
+      _handleDeviceChange,
+    );
+    unawaited(_deviceNotifier.enumerateDevices());
+    Permission.microphone.isGranted.then(
+      (value) => setState(() => _hasMicrophonePermission = value),
+    );
+    Permission.camera.isGranted.then(
+      (value) => setState(() => _hasCameraPermission = value),
+    );
   }
 
   void joinCallPressed() {
@@ -50,6 +73,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
       options = options.copyWith(microphone: TrackOption.enabled());
     }
 
+    if (_selectedAudioInputDevice != null) {
+      options = options.copyWith(audioInputDevice: _selectedAudioInputDevice);
+    }
+
+    if (_selectedVideoInputDevice != null) {
+      options = options.copyWith(videoInputDevice: _selectedVideoInputDevice);
+    }
+
     widget.onJoinCallPressed(options, _videoEffectsManager);
   }
 
@@ -60,7 +91,79 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     _cameraTrack = null;
     _microphoneTrack = null;
+    _deviceChangeSubscription?.cancel();
     super.dispose();
+  }
+
+  void _handleDeviceChange(List<RtcMediaDevice> devices) {
+    if (!mounted) return;
+
+    final audioInputs = devices
+        .where((device) => device.kind == RtcMediaDeviceKind.audioInput)
+        .toList(growable: false);
+    final videoInputs = devices
+        .where((device) => device.kind == RtcMediaDeviceKind.videoInput)
+        .toList(growable: false);
+
+    setState(() {
+      _audioInputDevices = audioInputs;
+      _videoInputDevices = videoInputs;
+    });
+  }
+
+  Future<void> _showAudioInputPicker(BuildContext context) async {
+    final result = await showModalBottomSheet<RtcMediaDevice?>(
+      context: context,
+      builder: (context) {
+        return _DevicePickerSheet(
+          title: 'Select audio input',
+          emptyLabel: 'No audio inputs available',
+          devices: _audioInputDevices,
+          selectedDeviceId: _selectedAudioInputDevice?.id,
+          onDeviceSelected: (device) {
+            Navigator.of(context).pop(device);
+          },
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _selectedAudioInputDevice = result;
+    });
+  }
+
+  Future<void> _showVideoInputPicker(BuildContext context) async {
+    final result = await showModalBottomSheet<RtcMediaDevice?>(
+      context: context,
+      builder: (context) {
+        return _DevicePickerSheet(
+          title: 'Select video input',
+          emptyLabel: 'No video inputs available',
+          devices: _videoInputDevices,
+          selectedDeviceId: _selectedVideoInputDevice?.id,
+          onDeviceSelected: (device) {
+            Navigator.of(context).pop(device);
+          },
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    _selectedVideoInputDevice = result;
+
+    if (_selectedVideoInputDevice != null) {
+      _cameraTrack = await _cameraTrack?.selectVideoInput(
+        _selectedVideoInputDevice!,
+        [],
+      );
+    } else {
+      _cameraTrack = await _cameraTrack?.recreate([]);
+    }
+
+    setState(() {});
   }
 
   @override
@@ -108,7 +211,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
+                  key: ValueKey(_cameraTrack),
                   call: widget.call,
+                  initialCameraDevice: _selectedVideoInputDevice,
                   onMicrophoneTrackSet: (track) => _microphoneTrack = track,
                   onCameraTrackSet: (track) {
                     _cameraTrack = track;
@@ -122,31 +227,108 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   },
                   additionalActionsBuilder: (context, call) {
                     return [
-                      CallControlOption(
-                        icon: _blurEnabled
-                            ? const Icon(Icons.blur_on)
-                            : const Icon(Icons.blur_off),
-                        onPressed: () async {
-                          setState(() {
-                            _blurEnabled = !_blurEnabled;
-                          });
+                      Tooltip(
+                        message: _blurEnabled
+                            ? 'Disable background blur'
+                            : 'Enable background blur',
+                        child: CallControlOption(
+                          icon: _blurEnabled
+                              ? const Icon(Icons.blur_on)
+                              : const Icon(Icons.blur_off),
+                          onPressed: () async {
+                            setState(() {
+                              _blurEnabled = !_blurEnabled;
+                            });
 
-                          if (_blurEnabled) {
-                            await _videoEffectsManager
-                                .applyBackgroundBlurFilter(
-                                  BlurIntensity.medium,
-                                  track: _cameraTrack,
-                                );
-                          } else {
-                            await _videoEffectsManager.disableAllFilters(
-                              track: _cameraTrack,
-                            );
-                          }
-                        },
+                            if (_blurEnabled) {
+                              await _videoEffectsManager
+                                  .applyBackgroundBlurFilter(
+                                    BlurIntensity.medium,
+                                    track: _cameraTrack,
+                                  );
+                            } else {
+                              await _videoEffectsManager.disableAllFilters(
+                                track: _cameraTrack,
+                              );
+                            }
+                          },
+                        ),
                       ),
                     ];
                   },
                 ),
+                const SizedBox(height: 12),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  runSpacing: 12,
+                  children: [
+                    if (_hasMicrophonePermission)
+                      Tooltip(
+                        message: 'Select audio input device',
+                        child: CallControlOption(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          icon: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.mic_rounded),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    _selectedAudioInputDevice?.label ??
+                                        'Default',
+                                    style: textTheme.body,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onPressed: _audioInputDevices.isEmpty
+                              ? null
+                              : () => _showAudioInputPicker(context),
+                        ),
+                      ),
+                    if (_hasMicrophonePermission || _hasCameraPermission)
+                      const SizedBox(width: 12),
+                    if (_hasCameraPermission)
+                      Tooltip(
+                        message: 'Select video input device',
+                        child: CallControlOption(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          icon: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.videocam_rounded),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    _selectedVideoInputDevice?.label ??
+                                        'Default',
+                                    style: textTheme.body,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onPressed: _videoInputDevices.isEmpty
+                              ? null
+                              : () => _showVideoInputPicker(context),
+                        ),
+                      ),
+                  ],
+                ),
+
                 const SizedBox(height: 24),
                 Container(
                   constraints: const BoxConstraints(maxWidth: 360),
@@ -193,6 +375,109 @@ class _LobbyScreenState extends State<LobbyScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DevicePickerSheet extends StatelessWidget {
+  const _DevicePickerSheet({
+    required this.title,
+    required this.emptyLabel,
+    required this.devices,
+    required this.selectedDeviceId,
+    required this.onDeviceSelected,
+  });
+
+  final String title;
+  final String emptyLabel;
+  final List<RtcMediaDevice> devices;
+  final String? selectedDeviceId;
+  final ValueChanged<RtcMediaDevice?> onDeviceSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final streamVideoTheme = StreamVideoTheme.of(context);
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: streamVideoTheme.textTheme.title3,
+            ),
+            const SizedBox(height: 16),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 360),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: devices.length + 1,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _DeviceListTile(
+                      label: 'System default',
+                      selected: selectedDeviceId == null,
+                      onTap: () => onDeviceSelected(null),
+                    );
+                  }
+
+                  final device = devices[index - 1];
+                  final label = device.label.isNotEmpty
+                      ? device.label
+                      : device.id;
+
+                  return _DeviceListTile(
+                    label: label,
+                    selected: device.id == selectedDeviceId,
+                    onTap: () => onDeviceSelected(device),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeviceListTile extends StatelessWidget {
+  const _DeviceListTile({
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final streamVideoTheme = StreamVideoTheme.of(context);
+    final colorTheme = streamVideoTheme.colorTheme;
+
+    return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      tileColor: selected
+          ? colorTheme.accentPrimary.withValues(alpha: .08)
+          : colorTheme.textHighEmphasis.withValues(alpha: .04),
+      title: Text(
+        label,
+        style: streamVideoTheme.textTheme.body,
+      ),
+
+      trailing: selected
+          ? Icon(
+              Icons.check,
+              color: colorTheme.accentPrimary,
+            )
+          : null,
+      onTap: onTap,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'dart:js_interop' as jsutil;
 import 'dart:js_interop_unsafe';
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
+import 'package:flutter/foundation.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 
@@ -40,10 +41,29 @@ void stopAudio(String id) {
 }
 
 void setSinkId(String id, String deviceId) {
+  if (!checkIfAudioOutputChangeSupported()) {
+    debugPrint(
+      'Audio Output device change is not supported on this browser.',
+    );
+    return;
+  }
+
   final audioElement = web.document.getElementById(audioPrefix + id);
 
-  if (audioElement is web.HTMLAudioElement && audioElement.has('setSinkId')) {
-    audioElement.setProperty('setSinkId'.toJS, deviceId.toJS);
+  if (audioElement is web.HTMLAudioElement &&
+      audioElement.hasProperty('setSinkId'.toJS).toDart) {
+    audioElement.setSinkId(deviceId);
+  }
+}
+
+bool checkIfAudioOutputChangeSupported() {
+  final element = web.document.createElement('audio');
+
+  try {
+    element.callMethod('setSinkId'.toJS, 'default'.toJS);
+    return true;
+  } catch (_) {
+    return false;
   }
 }
 

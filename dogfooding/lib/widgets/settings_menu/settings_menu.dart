@@ -200,7 +200,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
           audioOutputs: _audioOutputs,
           onPressed: (device) => _setAudioOutput(device, closeMenu: false),
         ),
-      ] else
+      ] else if (widget.call.checkIfAudioOutputChangeSupported()) ...[
         ChooseAudioOutputMenuItem(
           onPressed: () {
             if (CurrentPlatform.isIos) {
@@ -213,6 +213,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             });
           },
         ),
+      ],
       ClosedCaptionsMenuItem(widget: widget),
       const SizedBox(height: 16),
       StandardActionMenuItem(
