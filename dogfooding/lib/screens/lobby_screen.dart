@@ -248,8 +248,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   },
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  runSpacing: 12,
                   children: [
                     Tooltip(
                       message: 'Select audio input device',
