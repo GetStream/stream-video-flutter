@@ -107,12 +107,7 @@ class RtcMediaDeviceNotifier {
   }
 
   Future<void> _onDeviceChange(_) async {
-    final devicesResult = await enumerateDevices();
-    final devices = devicesResult.getDataOrNull();
-
-    if (devices == null) return;
-
-    _devicesController.add(devices);
+    await enumerateDevices();
   }
 
   Future<Result<List<RtcMediaDevice>>> enumerateDevices({
