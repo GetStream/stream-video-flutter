@@ -39,6 +39,10 @@ abstract class RtcTrack {
       trackType == SfuTrackType.audio ||
       trackType == SfuTrackType.screenShareAudio;
 
+  bool get isScreenShareTrack =>
+      trackType == SfuTrackType.screenShare ||
+      trackType == SfuTrackType.screenShareAudio;
+
   void enable() {
     // Return if the track is already enabled.
     if (mediaTrack.enabled) return;
