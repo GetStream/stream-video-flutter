@@ -15,6 +15,18 @@ class InterruptionBeginEvent extends InterruptionEvent {}
 
 class InterruptionEndEvent extends InterruptionEvent {}
 
+abstract class NativeWebRtcEvent {}
+
+class ScreenSharingStoppedEvent extends NativeWebRtcEvent {
+  ScreenSharingStoppedEvent({this.data});
+  final Map<dynamic, dynamic>? data;
+}
+
+class ScreenSharingStartedEvent extends NativeWebRtcEvent {
+  ScreenSharingStartedEvent({this.data});
+  final Map<dynamic, dynamic>? data;
+}
+
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
@@ -71,13 +83,31 @@ class RtcMediaDeviceNotifier {
     );
   }
 
+  Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
+    return rtc.eventStream
+        .map<NativeWebRtcEvent?>((data) {
+          if (data.isEmpty) return null;
+
+          final event = data.keys.first;
+          final values = data.values.first;
+
+          if (values is! Map<dynamic, dynamic>?) return null;
+
+          switch (event) {
+            case 'screenSharingStopped':
+              return ScreenSharingStoppedEvent(data: values);
+            case 'screenSharingStarted':
+              return ScreenSharingStartedEvent(data: values);
+            default:
+              return null;
+          }
+        })
+        .whereNotNull()
+        .asBroadcastStream();
+  }
+
   Future<void> _onDeviceChange(_) async {
-    final devicesResult = await enumerateDevices();
-    final devices = devicesResult.getDataOrNull();
-
-    if (devices == null) return;
-
-    _devicesController.add(devices);
+    await enumerateDevices();
   }
 
   Future<Result<List<RtcMediaDevice>>> enumerateDevices({
@@ -95,6 +125,7 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.fromAlias(it.kind),
           );
         }),
+
         if (CurrentPlatform.isIos &&
             (kind == null || kind == RtcMediaDeviceKind.audioOutput) &&
             devices.none(
@@ -109,6 +140,8 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.audioOutput,
           ),
       ];
+
+      _devicesController.add(mediaDevices);
 
       if (kind != null) {
         final devices = mediaDevices.where((d) => d.kind == kind);

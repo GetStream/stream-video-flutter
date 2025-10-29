@@ -770,7 +770,18 @@ class CallSession extends Disposable {
     if (track == null) return;
 
     // Only stop remote tracks. Local tracks are stopped by the user.
-    if (track is! RtcRemoteTrack) return;
+    if (track is! RtcRemoteTrack) {
+      final localTrack = rtcManager?.getTrack(track.trackId);
+      if (localTrack != null &&
+          localTrack.isScreenShareTrack &&
+          localTrack.mediaTrack.enabled) {
+        // If the unpublished track is a local screen share track and it's still enabled,
+        // disable screen sharing. It means the screen sharing was muted by the server.
+        await setScreenShareEnabled(false);
+      }
+
+      return;
+    }
 
     await track.stop();
   }

@@ -67,7 +67,7 @@ extension MediaDevices on rtc_interface.MediaDevices {
       rethrow;
     }
 
-    final straemDump = {
+    final streamDump = {
       'id': stream.id,
       'tracks': stream.getTracks().map((track) {
         return {
@@ -81,7 +81,7 @@ extension MediaDevices on rtc_interface.MediaDevices {
       }).toList(),
     };
 
-    tracer?.trace('$tag.success.$sequence', straemDump);
+    tracer?.trace('$tag.success.$sequence', streamDump);
     return stream;
   }
 }
