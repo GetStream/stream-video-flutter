@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
@@ -40,6 +41,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
   final _userAuthController = locator.get<UserAuthController>();
   late StreamVideoEffectsManager _videoEffectsManager;
 
+  bool _hasMicrophonePermission = false;
+  bool _hasCameraPermission = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +52,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
       _handleDeviceChange,
     );
     unawaited(_deviceNotifier.enumerateDevices());
+    Permission.microphone.isGranted.then(
+      (value) => setState(() => _hasMicrophonePermission = value),
+    );
+    Permission.camera.isGranted.then(
+      (value) => setState(() => _hasCameraPermission = value),
+    );
   }
 
   void joinCallPressed() {
@@ -252,65 +262,70 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   alignment: WrapAlignment.center,
                   runSpacing: 12,
                   children: [
-                    Tooltip(
-                      message: 'Select audio input device',
-                      child: CallControlOption(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        icon: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 220),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.mic_rounded),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  _selectedAudioInputDevice?.label ?? 'Default',
-                                  style: textTheme.body,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                    if (_hasMicrophonePermission)
+                      Tooltip(
+                        message: 'Select audio input device',
+                        child: CallControlOption(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ),
-                        onPressed: _audioInputDevices.isEmpty
-                            ? null
-                            : () => _showAudioInputPicker(context),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Tooltip(
-                      message: 'Select video input device',
-                      child: CallControlOption(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        icon: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 220),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.videocam_rounded),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  _selectedVideoInputDevice?.label ?? 'Default',
-                                  style: textTheme.body,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                          icon: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.mic_rounded),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    _selectedAudioInputDevice?.label ??
+                                        'Default',
+                                    style: textTheme.body,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          onPressed: _audioInputDevices.isEmpty
+                              ? null
+                              : () => _showAudioInputPicker(context),
                         ),
-                        onPressed: _videoInputDevices.isEmpty
-                            ? null
-                            : () => _showVideoInputPicker(context),
                       ),
-                    ),
+                    if (_hasMicrophonePermission || _hasCameraPermission)
+                      const SizedBox(width: 12),
+                    if (_hasCameraPermission)
+                      Tooltip(
+                        message: 'Select video input device',
+                        child: CallControlOption(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          icon: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.videocam_rounded),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    _selectedVideoInputDevice?.label ??
+                                        'Default',
+                                    style: textTheme.body,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onPressed: _videoInputDevices.isEmpty
+                              ? null
+                              : () => _showVideoInputPicker(context),
+                        ),
+                      ),
                   ],
                 ),
 
