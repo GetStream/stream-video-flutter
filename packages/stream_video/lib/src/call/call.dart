@@ -8,6 +8,7 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/transformers.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -87,6 +88,7 @@ const _idConnect = 6;
 const _idAwait = 7;
 const _idFastReconnectTimeout = 8;
 const _idReconnect = 9;
+const _idNativeWebRtc = 10;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -381,10 +383,18 @@ class Call {
       _observeState();
       _observeReconnectEvents();
       _observeUserId();
+      _observeNativeWebRtcEventStream();
 
       _logger.v(() => '[_init] initialized');
       _initialized = true;
     });
+  }
+
+  void _observeNativeWebRtcEventStream() {
+    _subscriptions.add(
+      _idNativeWebRtc,
+      _onNativeWebRtcEvent(),
+    );
   }
 
   void _observeState() {
@@ -456,6 +466,52 @@ class Call {
         state.settings.audio.opusDtxEnabled;
     _sessionFactory.sdpEditor.opusRedEnabled =
         state.settings.audio.redundantCodingEnabled;
+  }
+
+  StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {
+    return RtcMediaDeviceNotifier.instance.nativeWebRtcEventsStream().listen((
+      event,
+    ) {
+      _logger.d(
+        () => '[_onNativeWebRtcEvent] screenSharingStopped: $event',
+      );
+
+      switch (event) {
+        case ScreenSharingStoppedEvent _:
+          if (CurrentPlatform.isIos) {
+            // On iOS only one broadcast extension can be active at a time
+            setScreenShareEnabled(enabled: false);
+          } else {
+            final trackId = event.data?['trackId'] as String?;
+            if (trackId != null && state.value.localParticipant != null) {
+              final track = getTrack(
+                state.value.localParticipant!.trackIdPrefix,
+                SfuTrackType.screenShare,
+              );
+
+              if (track?.mediaTrack.id == trackId) {
+                setScreenShareEnabled(enabled: false);
+              }
+            }
+          }
+          break;
+        case ScreenSharingStartedEvent _:
+          _stateManager.participantSetScreenShareEnabled(
+            enabled: true,
+          );
+
+          _connectOptions = _connectOptions.copyWith(
+            screenShare: TrackOption.enabled(
+              constraints: const ScreenShareConstraints(
+                useiOSBroadcastExtension: true,
+              ),
+            ),
+          );
+          break;
+        default:
+          return;
+      }
+    });
   }
 
   Future<void> _onCoordinatorEvent(StreamCallEvent event) async {
@@ -559,7 +615,6 @@ class Call {
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallSessionStartedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
-
       default:
         break;
     }
@@ -1906,15 +1961,21 @@ class Call {
     if (cameraOption is TrackProvided) {
       return _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
+      final constraints = cameraOption.constraints is CameraConstraints
+          ? cameraOption.constraints as CameraConstraints?
+          : null;
+
       return setCameraEnabled(
         enabled: true,
-        constraints: CameraConstraints(
-          facingMode: facingMode,
-          deviceId: deviceId,
-          params:
-              targetResolution?.toVideoParams() ??
-              RtcVideoParametersPresets.h720_16x9,
-        ),
+        constraints:
+            constraints ??
+            CameraConstraints(
+              facingMode: facingMode,
+              deviceId: deviceId,
+              params:
+                  targetResolution?.toVideoParams() ??
+                  RtcVideoParametersPresets.h720_16x9,
+            ),
       );
     }
 
@@ -1925,7 +1986,10 @@ class Call {
     if (microphoneOption is TrackProvided) {
       await _setLocalTrack(microphoneOption.track);
     } else if (microphoneOption is TrackEnabled) {
-      await setMicrophoneEnabled(enabled: true);
+      final constraints = microphoneOption.constraints is AudioConstraints
+          ? microphoneOption.constraints as AudioConstraints?
+          : null;
+      await setMicrophoneEnabled(enabled: true, constraints: constraints);
     }
   }
 
@@ -1936,15 +2000,22 @@ class Call {
     if (screenShareOption is TrackProvided) {
       await _setLocalTrack(screenShareOption.track);
     } else if (screenShareOption is TrackEnabled) {
+      final constraints =
+          screenShareOption.constraints is ScreenShareConstraints
+          ? screenShareOption.constraints as ScreenShareConstraints?
+          : null;
+
       await setScreenShareEnabled(
         enabled: true,
-        constraints: ScreenShareConstraints(
-          params:
-              targetResolution?.toVideoParams(
-                defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
-              ) ??
-              RtcVideoParametersPresets.h1080_16x9,
-        ),
+        constraints:
+            constraints ??
+            ScreenShareConstraints(
+              params:
+                  targetResolution?.toVideoParams(
+                    defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
+                  ) ??
+                  RtcVideoParametersPresets.h1080_16x9,
+            ),
       );
     }
   }
@@ -1962,13 +2033,19 @@ class Call {
       final mediaConstraints = track.mediaConstraints;
       if (mediaConstraints is AudioConstraints) {
         _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
-        await setMicrophoneEnabled(enabled: true);
+        await setMicrophoneEnabled(
+          enabled: true,
+          constraints: mediaConstraints,
+        );
       } else if (mediaConstraints is CameraConstraints) {
         _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
-        await setCameraEnabled(enabled: true);
+        await setCameraEnabled(enabled: true, constraints: mediaConstraints);
       } else if (mediaConstraints is ScreenShareConstraints) {
         _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
-        await setScreenShareEnabled(enabled: true);
+        await setScreenShareEnabled(
+          enabled: true,
+          constraints: mediaConstraints,
+        );
       } else {
         streamLog.e(
           _tag,
@@ -2749,7 +2826,9 @@ class Call {
       );
 
       _connectOptions = _connectOptions.copyWith(
-        camera: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+        camera: enabled
+            ? TrackOption.enabled(constraints: constraints)
+            : TrackOption.disabled(),
         cameraFacingMode: constraints?.facingMode ?? FacingMode.user,
       );
     }
@@ -2811,7 +2890,9 @@ class Call {
       );
 
       _connectOptions = _connectOptions.copyWith(
-        microphone: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+        microphone: enabled
+            ? TrackOption.enabled(constraints: constraints)
+            : TrackOption.disabled(),
       );
     }
 
@@ -2848,16 +2929,27 @@ class Call {
         ) ??
         Result.error('Call session is null, cannot start screen share');
 
+    // In case of iOS Broadcast Extension, we don't update the state here
+    // We listen to the ScreenShareStarted event instead
+    if (CurrentPlatform.isIos &&
+        constraints is ScreenShareConstraints &&
+        constraints.useiOSBroadcastExtension) {
+      return result.map((_) => none);
+    }
+
     if (result.isSuccess) {
       _stateManager.participantSetScreenShareEnabled(
         enabled: enabled,
       );
 
       _connectOptions = _connectOptions.copyWith(
-        screenShare: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+        screenShare: enabled
+            ? TrackOption.enabled(constraints: updatedConstraints)
+            : TrackOption.disabled(),
       );
 
       if (enabled) {
+        // [web only] Automatically stop screen share when the track ends
         result.getDataOrNull()?.mediaTrack.onEnded = () {
           setScreenShareEnabled(enabled: false);
         };

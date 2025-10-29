@@ -111,8 +111,8 @@ abstract class TrackOption with EquatableMixin {
   factory TrackOption.fromSetting({required bool enabled}) =>
       enabled ? TrackOption.enabled() : TrackOption.disabled();
 
-  factory TrackOption.enabled() {
-    return TrackEnabled._instance;
+  factory TrackOption.enabled({MediaConstraints? constraints}) {
+    return TrackEnabled._(constraints: constraints);
   }
 
   factory TrackOption.disabled() {
@@ -140,12 +140,15 @@ class TrackDisabled extends TrackOption {
 }
 
 class TrackEnabled extends TrackOption {
-  const TrackEnabled._();
+  const TrackEnabled._({this.constraints});
 
-  static const TrackEnabled _instance = TrackEnabled._();
+  final MediaConstraints? constraints;
 
   @override
-  String toString() => 'enabled';
+  List<Object?> get props => [constraints];
+
+  @override
+  String toString() => 'enabled($constraints)';
 }
 
 class TrackProvided<T extends MediaConstraints> extends TrackOption {

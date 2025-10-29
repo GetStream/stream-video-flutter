@@ -1,3 +1,10 @@
+# Unreleased
+
+🐞 Fixed
+
+- [Android/iOS] Fixed an issue where screen sharing was not stopped correctly when canceled via the system UI on Android or iOS.
+- [iOS] Improved broadcast extension handling — the app now waits for the broadcast picker selection before actually starting screen sharing.
+
 ## 0.11.1
 
 🔄 Changed
