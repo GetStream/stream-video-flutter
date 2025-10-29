@@ -11,3 +11,7 @@ void stopAudio(String id) {
 void setSinkId(String id, String deviceId) {
   throw UnimplementedError();
 }
+
+bool checkIfAudioOutputChangeSupported() {
+  throw UnimplementedError();
+}
