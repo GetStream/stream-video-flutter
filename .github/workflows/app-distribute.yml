@@ -31,7 +31,6 @@ on:
 env:
   FLUTTER_VERSION: "3.35.3"
   FLUTTER_CHANNEL: stable
-  ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
   CREDENTIAL_FILE_CONTENT: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
   MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
@@ -78,7 +77,6 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "${{ env.ENV_PROPERTIES }}" > .env
           echo "${{ env.APPSTORE_API_KEY }}" | base64 --decode > ~/.ssh/appstore_api_key
 
       - name: Setup Ruby and Gems
@@ -133,7 +131,6 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "${{ env.ENV_PROPERTIES }}" > .env
           echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/firebase-service-account.json
 
       - name: Setup Ruby and Gems

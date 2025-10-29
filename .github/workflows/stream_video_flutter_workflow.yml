@@ -3,7 +3,6 @@ name: stream_video_flutter_workflow
 env:
   FLUTTER_CHANNEL: stable
   FLUTTER_VERSION: 3.35.3
-  ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
 
 on:
   pull_request:
@@ -50,7 +49,6 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "${{ env.ENV_PROPERTIES }}" > .env &&
           melos run generate:all
 
         # TODO: Treat info and warning as error once all packages solve their issues.
@@ -106,7 +104,6 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "${{ env.ENV_PROPERTIES }}" > .env &&
           melos run generate:all
 
       - name: Build Example
