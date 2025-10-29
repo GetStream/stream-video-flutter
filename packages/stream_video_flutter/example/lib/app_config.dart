@@ -1,43 +1,45 @@
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'env/env.dart';
-
 final sampleUsers = <UserInfo>[
   const UserInfo(
-    id: Env.sampleUserId00,
-    name: Env.sampleUserName00,
-    role: Env.sampleUserRole00,
-    image: Env.sampleUserImage00,
+    id: 'vasil',
+    name: 'Willard Hessel',
+    role: 'admin',
+    image:
+        'https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg',
   ),
   const UserInfo(
-    id: Env.sampleUserId01,
-    name: Env.sampleUserName01,
-    role: Env.sampleUserRole01,
-    image: Env.sampleUserImage01,
+    id: 'veselin',
+    name: 'Blanche Schoen',
+    role: 'admin',
+    image:
+        'https://getstream.io/chat/docs/sdk/avatars/jpg/Blanche%20Schoen.jpg',
   ),
   const UserInfo(
-    id: Env.sampleUserId02,
-    name: Env.sampleUserName02,
-    role: Env.sampleUserRole02,
-    image: Env.sampleUserImage02,
+    id: 'valia',
+    name: 'Bernard Windler',
+    role: 'admin',
+    image:
+        'https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg',
   ),
   const UserInfo(
-    id: Env.sampleUserId03,
-    name: Env.sampleUserName03,
-    role: Env.sampleUserRole03,
-    image: Env.sampleUserImage03,
+    id: 'damjan',
+    name: 'Tyrone Bailey',
+    role: 'admin',
+    image: 'https://getstream.io/chat/docs/sdk/avatars/jpg/Tyrone%20Bailey.jpg',
   ),
   const UserInfo(
-    id: Env.sampleUserId04,
-    name: Env.sampleUserName04,
-    role: Env.sampleUserRole04,
-    image: Env.sampleUserImage04,
+    id: 'jordan',
+    name: 'Claudia Bradtke',
+    role: 'admin',
+    image:
+        'https://getstream.io/chat/docs/sdk/avatars/jpg/Claudia%20Bradtke.jpg',
   ),
   const UserInfo(
-    id: Env.sampleUserId05,
-    name: Env.sampleUserName05,
-    role: Env.sampleUserRole05,
-    image: Env.sampleUserImage05,
+    id: 'ina',
+    name: 'Byron Waelchi',
+    role: 'admin',
+    image: 'https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg',
   ),
   const UserInfo(
     id: 'alex',
