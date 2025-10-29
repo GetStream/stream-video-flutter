@@ -47,6 +47,7 @@ import '../utils/subscriptions.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
+import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
@@ -2983,6 +2984,12 @@ class Call {
     }
   }
 
+  /// Sets the audio output device for the call.
+  /// - [device]: The audio output device to set.
+  /// Returns a [Result] indicating the success or failure of the operation.
+  ///
+  /// On web platforms, this method may return an error if the browser does not support
+  /// setting audio output devices programmatically.
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
     final result =
         await _session?.setAudioOutputDevice(device) ??
@@ -2997,6 +3004,10 @@ class Call {
     }
 
     return result;
+  }
+
+  bool checkIfAudioOutputChangeSupported() {
+    return rtc_audio.checkIfAudioOutputChangeSupported();
   }
 
   /// Sets the mirror state for a remote participant's video track.

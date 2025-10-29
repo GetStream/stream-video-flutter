@@ -107,12 +107,7 @@ class RtcMediaDeviceNotifier {
   }
 
   Future<void> _onDeviceChange(_) async {
-    final devicesResult = await enumerateDevices();
-    final devices = devicesResult.getDataOrNull();
-
-    if (devices == null) return;
-
-    _devicesController.add(devices);
+    await enumerateDevices();
   }
 
   Future<Result<List<RtcMediaDevice>>> enumerateDevices({
@@ -130,6 +125,7 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.fromAlias(it.kind),
           );
         }),
+
         if (CurrentPlatform.isIos &&
             (kind == null || kind == RtcMediaDeviceKind.audioOutput) &&
             devices.none(
@@ -144,6 +140,8 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.audioOutput,
           ),
       ];
+
+      _devicesController.add(mediaDevices);
 
       if (kind != null) {
         final devices = mediaDevices.where((d) => d.kind == kind);

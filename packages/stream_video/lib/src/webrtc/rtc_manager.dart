@@ -32,6 +32,8 @@ import 'model/rtc_video_encoding.dart';
 import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
+import 'rtc_audio_api/rtc_audio_api.dart'
+    show checkIfAudioOutputChangeSupported;
 import 'rtc_media_device/rtc_media_device.dart';
 import 'rtc_media_device/rtc_media_device_notifier.dart';
 import 'rtc_parser.dart';
@@ -1109,6 +1111,16 @@ extension RtcManagerTrackHelper on RtcManager {
     // If the platform is web, set the sink id for all remote audio tracks
     // to the selected device.
     if (CurrentPlatform.isWeb) {
+      if (!checkIfAudioOutputChangeSupported()) {
+        _logger.w(
+          () =>
+              '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
+        );
+        return Result.error(
+          'Audio Output device change is not supported on this browser.',
+        );
+      }
+
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.setSinkId(device.id);
         tracks[updatedTrack.trackId] = updatedTrack;

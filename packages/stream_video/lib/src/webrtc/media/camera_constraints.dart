@@ -40,7 +40,7 @@ class CameraConstraints extends VideoConstraints {
     };
     if (deviceId != null) {
       if (CurrentPlatform.isWeb) {
-        constraints['deviceId'] = deviceId;
+        constraints['deviceId'] = {'exact': deviceId};
       } else {
         constraints['optional'] = [
           {'sourceId': deviceId},
