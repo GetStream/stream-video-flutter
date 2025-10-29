@@ -106,8 +106,6 @@ class RtcManager extends Disposable {
   OnLocalTrackPublished? onLocalTrackPublished;
   OnRemoteTrackReceived? onRemoteTrackReceived;
 
-  CancelableOperation<ScreenSharingStartedEvent>?
-  _screenSharingStartedOperation;
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
 
@@ -436,8 +434,8 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
-    await _screenSharingStartedOperation?.cancel();
-    _screenSharingStartedOperation = null;
+    await _screenSharingStartedSubscription?.cancel();
+    _screenSharingStartedSubscription = null;
     for (final trackSid in [...tracks.keys]) {
       await unpublishTrack(trackId: trackSid);
     }
