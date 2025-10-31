@@ -5,6 +5,7 @@
 - [Web] Fixed changing the output audio device during the call.
 - [Android/iOS] Fixed an issue where screen sharing was not stopped correctly when canceled via the system UI on Android or iOS.
 - [iOS] Improved broadcast extension handling — the app now waits for the broadcast picker selection before actually starting screen sharing.
+- Fixed an issue where `callMembers` collection wasn't reflecting the actual members list after starting the call session.
 
 ✅ Added
 - [Web] Added `checkIfAudioOutputChangeSupported()` to the `Call` class to check whether the browser supports changing the audio output device.

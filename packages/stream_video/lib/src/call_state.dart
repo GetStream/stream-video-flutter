@@ -248,6 +248,7 @@ class CallState extends Equatable {
   CallState copyFromMetadata(
     CallMetadata metadata, {
     Map<String, List<String>>? capabilitiesByRole,
+    bool updateMembers = true,
   }) {
     final capabilities = metadata.details.ownCapabilities.toList();
 
@@ -273,7 +274,7 @@ class CallState extends Equatable {
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
       capabilitiesByRole: capabilitiesByRole,
-      callMembers: metadata.toCallMembers(),
+      callMembers: updateMembers ? metadata.toCallMembers() : null,
     );
   }
 
@@ -298,6 +299,7 @@ class CallState extends Equatable {
     audioOutputDevice,
     ownCapabilities,
     callParticipants,
+    callMembers,
     capabilitiesByRole,
     createdAt,
     updatedAt,

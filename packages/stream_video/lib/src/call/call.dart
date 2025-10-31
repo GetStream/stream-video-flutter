@@ -613,9 +613,15 @@ class Call {
       case StreamCallMissedEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallSessionEndedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
+        return _stateManager.callMetadataChanged(
+          event.metadata,
+          updateMembers: false,
+        );
       case StreamCallSessionStartedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
+        return _stateManager.callMetadataChanged(
+          event.metadata,
+          updateMembers: false,
+        );
       default:
         break;
     }
