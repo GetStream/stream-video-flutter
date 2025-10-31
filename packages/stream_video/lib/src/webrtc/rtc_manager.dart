@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/transformers.dart';
@@ -19,7 +18,6 @@ import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/extensions.dart';
-import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
@@ -1043,10 +1041,17 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Track is not camera');
     }
 
-    final updatedTrack = await track.flipCamera();
-    tracks[updatedTrack.trackId] = updatedTrack;
+    track.disable();
 
-    return Result.success(updatedTrack);
+    try {
+      final updatedTrack = await track.flipCamera();
+      tracks[updatedTrack.trackId] = updatedTrack;
+      return Result.success(updatedTrack);
+    } finally {
+      // small delay avoids camera being mirrored wrongly for a brief moment
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      track.enable();
+    }
   }
 
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({

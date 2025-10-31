@@ -8,7 +8,6 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/transformers.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -2691,11 +2690,14 @@ class Call {
             .firstOrNull;
 
         _connectOptions = connectOptions.copyWith(
-          cameraFacingMode: connectOptions.cameraFacingMode.flip(),
+          cameraFacingMode: success.data.mediaConstraints.facingMode,
           videoInputDevice: currentInput,
         );
 
-        _stateManager.participantFlipCamera(currentInput);
+        _stateManager.participantFlipCamera(
+          currentInput,
+          track: success.data,
+        );
       },
       failure: (failure) {},
     );
@@ -2790,10 +2792,16 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
-      _connectOptions = connectOptions.copyWith(videoInputDevice: device);
+      final track = result.getDataOrNull()!;
+
+      _connectOptions = connectOptions.copyWith(
+        videoInputDevice: device,
+        cameraFacingMode: track.mediaConstraints.facingMode,
+      );
+
       _stateManager.participantSetVideoInputDevice(
         device: device,
-        track: result.getDataOrNull()!,
+        track: track,
       );
     }
 
