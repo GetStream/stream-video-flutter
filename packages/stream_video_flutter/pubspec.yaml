@@ -12,6 +12,7 @@ environment:
 
 dependencies:
   cached_network_image: ^3.4.1
+  characters: ^1.4.0
   collection: ^1.19.1
   equatable: ^2.0.7
   flutter:

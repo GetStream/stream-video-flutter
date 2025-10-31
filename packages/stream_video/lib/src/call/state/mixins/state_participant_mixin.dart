@@ -219,7 +219,15 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     );
   }
 
-  void participantFlipCamera(RtcMediaDevice? videoDevice) {
+  void participantFlipCamera(
+    RtcMediaDevice? videoDevice, {
+    required RtcLocalTrack<CameraConstraints> track,
+  }) {
+    final facingMode = track.mediaConstraints.facingMode;
+    final cameraPosition = facingMode == FacingMode.user
+        ? CameraPosition.front
+        : CameraPosition.back;
+
     state = state.copyWith(
       videoInputDevice: videoDevice,
       callParticipants: state.callParticipants.map((participant) {
@@ -230,7 +238,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
             // CopyWith doesn't support null values.
             final newTrackState = TrackState.local(
               muted: trackState.muted,
-              cameraPosition: trackState.cameraPosition?.flip(),
+              cameraPosition: cameraPosition,
             );
 
             return participant.copyWith(
