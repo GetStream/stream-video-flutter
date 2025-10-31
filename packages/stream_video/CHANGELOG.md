@@ -1,4 +1,4 @@
-## Unreleased
+## 0.11.2
 
 🐞 Fixed
 - [Web] Fixed setting input audio/video device passed by `CallConnectOptions` as well as switching those devices during the call.
