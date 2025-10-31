@@ -276,14 +276,12 @@ FacingMode _detectFacingModeFromTrack(
     if (settingsFacingMode != null) {
       return FacingMode.fromAlias(settingsFacingMode);
     } else {
-      // Infer from device label as fallback if provided.
+      // Try to infer from device label if available
       if (deviceLabel != null) {
         return _inferFacingModeFromLabel(deviceLabel, fallbackFacingMode);
       }
     }
   } catch (e) {
-    streamLog.w(_cameraTag, () => 'Error getting facingMode from settings: $e');
-
     if (deviceLabel != null) {
       return _inferFacingModeFromLabel(deviceLabel, fallbackFacingMode);
     }
@@ -368,11 +366,6 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       updatedTrack.mediaTrack,
       fallbackFacingMode: mediaConstraints.facingMode,
       deviceLabel: device.label,
-    );
-
-    streamLog.i(
-      _cameraTag,
-      () => 'Final facingMode: $facingMode for device: ${device.label}',
     );
 
     return updatedTrack.copyWith(

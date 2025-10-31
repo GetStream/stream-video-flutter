@@ -2831,7 +2831,7 @@ class Call {
 
       var facingMode = constraints?.facingMode;
       if (facingMode == null && result.getDataOrNull() is RtcLocalCameraTrack) {
-        final track = result.getDataOrNull() as RtcLocalCameraTrack;
+        final track = result.getDataOrNull()! as RtcLocalCameraTrack;
         facingMode = track.mediaConstraints.facingMode;
       }
 
