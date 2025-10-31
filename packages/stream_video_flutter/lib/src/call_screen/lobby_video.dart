@@ -149,7 +149,9 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
                       children: [
                         if (cameraEnabled)
                           VideoTrackRenderer(
-                            mirror: true,
+                            mirror:
+                                _cameraTrack!.mediaConstraints.facingMode ==
+                                FacingMode.user,
                             videoTrack: _cameraTrack!,
                             placeholderBuilder: placeHolderBuilder,
                           )
