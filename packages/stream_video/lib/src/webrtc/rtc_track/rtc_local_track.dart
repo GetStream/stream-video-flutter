@@ -71,12 +71,21 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       throw VideoException('No camera track found');
     }
 
+    final detectedFacingMode = _detectFacingModeFromTrack(
+      videoTrack,
+      fallbackFacingMode: constraints.facingMode,
+    );
+
+    final updatedConstraints = constraints.copyWith(
+      facingMode: detectedFacingMode,
+    );
+
     final track = RtcLocalTrack(
       trackIdPrefix: trackIdPrefix,
       trackType: SfuTrackType.video,
       mediaStream: stream,
       mediaTrack: videoTrack,
-      mediaConstraints: constraints,
+      mediaConstraints: updatedConstraints,
     );
 
     return track;
@@ -254,6 +263,48 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
 const _cameraTag = 'SV:RtcLocalCameraTrack';
 
+/// Detects the facing mode from a video track.
+FacingMode _detectFacingModeFromTrack(
+  rtc.MediaStreamTrack videoTrack, {
+  required FacingMode fallbackFacingMode,
+  String? deviceLabel,
+}) {
+  try {
+    final settings = videoTrack.getSettings();
+    final settingsFacingMode = settings['facingMode'];
+
+    if (settingsFacingMode != null) {
+      return FacingMode.fromAlias(settingsFacingMode);
+    } else {
+      // Infer from device label as fallback if provided.
+      if (deviceLabel != null) {
+        return _inferFacingModeFromLabel(deviceLabel, fallbackFacingMode);
+      }
+    }
+  } catch (e) {
+    streamLog.w(_cameraTag, () => 'Error getting facingMode from settings: $e');
+
+    if (deviceLabel != null) {
+      return _inferFacingModeFromLabel(deviceLabel, fallbackFacingMode);
+    }
+  }
+
+  return fallbackFacingMode;
+}
+
+FacingMode _inferFacingModeFromLabel(String label, FacingMode fallback) {
+  final lowerLabel = label.toLowerCase();
+  if (lowerLabel.contains('back') ||
+      lowerLabel.contains('rear') ||
+      lowerLabel.contains('environment')) {
+    return FacingMode.environment;
+  } else if (lowerLabel.contains('front')) {
+    return FacingMode.user;
+  }
+
+  return fallback;
+}
+
 extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
   Future<RtcLocalCameraTrack> flipCamera() async {
     streamLog.i(_cameraTag, () => 'Flipping camera');
@@ -312,16 +363,17 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       ),
     );
 
-    // Default to user facing mode.
-    var facingMode = FacingMode.user;
+    // Detect the actual facing mode from the track.
+    final facingMode = _detectFacingModeFromTrack(
+      updatedTrack.mediaTrack,
+      fallbackFacingMode: mediaConstraints.facingMode,
+      deviceLabel: device.label,
+    );
 
-    // Use the facingMode from the track settings if available.
-    try {
-      final settings = updatedTrack.mediaTrack.getSettings();
-      facingMode = FacingMode.fromAlias(settings['facingMode']);
-    } catch (e) {
-      // ignore
-    }
+    streamLog.i(
+      _cameraTag,
+      () => 'Final facingMode: $facingMode for device: ${device.label}',
+    );
 
     return updatedTrack.copyWith(
       mediaConstraints: updatedTrack.mediaConstraints.copyWith(

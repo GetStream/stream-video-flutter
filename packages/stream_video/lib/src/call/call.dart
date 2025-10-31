@@ -2785,10 +2785,13 @@ class Call {
 
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(videoInputDevice: device);
-      _stateManager.participantSetVideoInputDevice(device: device);
+      _stateManager.participantSetVideoInputDevice(
+        device: device,
+        track: result.getDataOrNull()!,
+      );
     }
 
-    return result;
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setCameraEnabled({
@@ -2826,11 +2829,17 @@ class Call {
         iOSMultitaskingCameraAccessEnabled: multitaskingEnabled,
       );
 
+      var facingMode = constraints?.facingMode;
+      if (facingMode == null && result.getDataOrNull() is RtcLocalCameraTrack) {
+        final track = result.getDataOrNull() as RtcLocalCameraTrack;
+        facingMode = track.mediaConstraints.facingMode;
+      }
+
       _connectOptions = _connectOptions.copyWith(
         camera: enabled
             ? TrackOption.enabled(constraints: constraints)
             : TrackOption.disabled(),
-        cameraFacingMode: constraints?.facingMode ?? FacingMode.user,
+        cameraFacingMode: facingMode ?? _connectOptions.cameraFacingMode,
       );
     }
 

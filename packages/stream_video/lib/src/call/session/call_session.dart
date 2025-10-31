@@ -1110,14 +1110,15 @@ class CallSession extends Disposable {
     return result;
   }
 
-  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
+  Future<Result<RtcLocalTrack<CameraConstraints>>> setVideoInputDevice(
+    RtcMediaDevice device,
+  ) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set video input, Call not connected');
     }
 
-    final result = await rtcManager.setVideoInputDevice(device: device);
-    return result.map((_) => none);
+    return rtcManager.setVideoInputDevice(device: device);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition position) async {
