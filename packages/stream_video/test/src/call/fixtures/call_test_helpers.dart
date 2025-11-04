@@ -10,8 +10,8 @@ import 'package:stream_video/src/call/session/call_session_config.dart';
 import 'package:stream_video/src/call/session/call_session_factory.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
-import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/core/client_state.dart';
+import 'package:stream_video/src/models/call_member_state.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
@@ -20,36 +20,13 @@ import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../../test_helpers.dart';
-
-final defaultCid = StreamCallCid.from(
-  type: StreamCallType.defaultType(),
-  id: 'test-cid',
-);
-
-const defaultCredentials = CallCredentials(
-  sfuToken: 'test-token',
-  iceServers: [],
-  sfuServer: CallSfuServer(
-    name: 'test',
-    url: 'https://test.com',
-    wsEndpoint: 'wss://test.com',
-  ),
-);
-
-const defaultMediaDevice = RtcMediaDevice(
-  id: 'fallback-device',
-  label: 'Fallback Device',
-  kind: RtcMediaDeviceKind.audioInput,
-  groupId: 'fallback-group',
-);
-
-const defaultUserInfo = UserInfo(id: 'testUserId');
+import '../../../test_helpers.dart';
+import 'data.dart';
 
 void registerMockFallbackValues() {
-  registerFallbackValue(defaultCid);
+  registerFallbackValue(SampleCallData.defaultCid);
   registerFallbackValue(createStubCall());
-  registerFallbackValue(defaultCredentials);
+  registerFallbackValue(SampleCallData.defaultCredentials);
   registerFallbackValue(CallStateNotifier(createTestCallState()));
   registerFallbackValue(
     DynascaleManager(stateManager: CallStateNotifier(createTestCallState())),
@@ -59,7 +36,7 @@ void registerMockFallbackValues() {
     StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
   );
   registerFallbackValue(SfuReconnectionStrategy.fast);
-  registerFallbackValue(defaultMediaDevice);
+  registerFallbackValue(SampleCallData.defaultMediaDevice);
   registerFallbackValue(MockStreamVideo());
 }
 
@@ -85,7 +62,7 @@ Call createStubCall({
     sdpPolicy: sdpPolicy ?? const SdpPolicy(),
     rtcMediaDeviceNotifier:
         rtcMediaDeviceNotifier ?? MockRtcMediaDeviceNotifier(),
-    credentials: credentials ?? defaultCredentials,
+    credentials: credentials ?? SampleCallData.defaultCredentials,
     sessionFactory: sessionFactory ?? MockSessionFactory(),
   );
 }
@@ -110,8 +87,8 @@ Call createTestCall({
         CallStateNotifier(
           CallState(
             preferences: DefaultCallPreferences(),
-            currentUserId: defaultUserInfo.id,
-            callCid: defaultCid,
+            currentUserId: SampleCallData.defaultUserInfo.id,
+            callCid: SampleCallData.defaultCid,
           ),
         ),
     permissionManager: permissionManager ?? MockPermissionsManager(),
@@ -120,7 +97,7 @@ Call createTestCall({
     sdpPolicy: sdpPolicy ?? const SdpPolicy(),
     rtcMediaDeviceNotifier:
         rtcMediaDeviceNotifier ?? setupMockRtcMediaDeviceNotifier(),
-    credentials: credentials ?? defaultCredentials,
+    credentials: credentials ?? SampleCallData.defaultCredentials,
     sessionFactory: sessionFactory ?? setupMockSessionFactory(),
   );
 }
@@ -133,7 +110,7 @@ CallState createTestCallState({
   return CallState(
     preferences: preferences ?? DefaultCallPreferences(),
     currentUserId: currentUserId ?? 'test',
-    callCid: callCid ?? defaultCid,
+    callCid: callCid ?? SampleCallData.defaultCid,
   );
 }
 
@@ -159,7 +136,7 @@ MockCallStateNotifier createTestCallStateManager({
 
 MockClientState setupMockClientState() {
   final userStateEmitter = MutableStateEmitterImpl<User>(
-    const User(info: defaultUserInfo),
+    User(info: SampleCallData.defaultUserInfo),
     sync: true,
   );
   final activeCallsEmitter = MutableStateEmitterImpl<List<Call>>(
@@ -188,17 +165,45 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
   final effectiveClientState = clientState ?? setupMockClientState();
 
   when(() => streamVideo.state).thenReturn(effectiveClientState);
-  when(() => streamVideo.currentUser).thenReturn(defaultUserInfo);
+  when(
+    () => streamVideo.currentUser,
+  ).thenReturn(SampleCallData.defaultUserInfo);
   when(streamVideo.isAudioProcessorConfigured).thenReturn(false);
 
   return streamVideo;
 }
 
-MockCoordinatorClient setupMockCoordinatorClient() {
+MockCoordinatorClient setupMockCoordinatorClient({
+  SharedEmitter<CoordinatorEvent>? events,
+  CallReceivedOrCreatedData? getOrCreateCallResult,
+}) {
   final coordinatorClient = MockCoordinatorClient();
-  final coordinatorEventStream = MutableSharedEmitterImpl<CoordinatorEvent>();
+  final coordinatorEventStream =
+      events ?? MutableSharedEmitterImpl<CoordinatorEvent>();
   when(() => coordinatorClient.events).thenAnswer(
     (_) => coordinatorEventStream,
+  );
+
+  when(
+    () => coordinatorClient.getOrCreateCall(
+      callCid: any(named: 'callCid'),
+      ringing: any(named: 'ringing'),
+      members: any(named: 'members'),
+      team: any(named: 'team'),
+      notify: any(named: 'notify'),
+      video: any(named: 'video'),
+      startsAt: any(named: 'startsAt'),
+      membersLimit: any(named: 'membersLimit'),
+      settingsOverride: any(named: 'settingsOverride'),
+      custom: any(named: 'custom'),
+    ),
+  ).thenAnswer(
+    (_) => Future.value(
+      Result.success(
+        getOrCreateCallResult ??
+            SampleCallData.createCallReceivedOrCreatedData(),
+      ),
+    ),
   );
 
   when(
@@ -212,50 +217,7 @@ MockCoordinatorClient setupMockCoordinatorClient() {
   ).thenAnswer(
     (_) => Future.value(
       Result.success(
-        CoordinatorJoined(
-          wasCreated: true,
-          members: const {},
-          users: const {},
-          duration: '0',
-          statsOptions: StatsOptions(
-            enableRtcStats: true,
-            reportingIntervalMs: 5000,
-          ),
-          ownCapabilities: const [],
-          metadata: CallMetadata(
-            session: const CallSessionData(),
-            users: const {},
-            members: const {},
-            cid: StreamCallCid.from(
-              type: StreamCallType.defaultType(),
-              id: 'testCallId',
-            ),
-            details: CallDetails(
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-              endedAt: DateTime.now(),
-              createdBy: const CallUser(
-                id: 'test-id',
-                name: 'test-name',
-                roles: ['test-role'],
-                image: 'test-image',
-              ),
-              team: 'test-team',
-              ownCapabilities: const [],
-              blockedUserIds: const [],
-              broadcasting: false,
-              recording: false,
-              backstage: false,
-              transcribing: false,
-              captioning: false,
-              custom: const {},
-              egress: const CallEgress(),
-              rtmpIngress: '',
-            ),
-            settings: const CallSettings(),
-          ),
-          credentials: defaultCredentials,
-        ),
+        SampleCallData.coordinatorJoinedSuccess,
       ),
     ),
   );
@@ -331,10 +293,10 @@ MockCallSession setupMockCallSession() {
   when(() => callSession.events).thenReturn(callSessionEvents);
   when(() => callSession.config).thenReturn(
     CallSessionConfig(
-      sfuName: defaultCredentials.sfuServer.name,
-      sfuUrl: defaultCredentials.sfuServer.url,
-      sfuWsEndpoint: defaultCredentials.sfuServer.wsEndpoint,
-      sfuToken: defaultCredentials.sfuToken,
+      sfuName: SampleCallData.defaultCredentials.sfuServer.name,
+      sfuUrl: SampleCallData.defaultCredentials.sfuServer.url,
+      sfuWsEndpoint: SampleCallData.defaultCredentials.sfuServer.wsEndpoint,
+      sfuToken: SampleCallData.defaultCredentials.sfuToken,
       rtcConfig: const RTCConfiguration(),
     ),
   );
@@ -396,4 +358,40 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
   );
 
   return sessionFactory;
+}
+
+Call createTestCallWithState({
+  required CallState initialState,
+  CoordinatorClient? coordinatorClient,
+  StreamVideo? streamVideo,
+}) {
+  final stateManager = CallStateNotifier(initialState);
+
+  final call = createTestCall(
+    coordinatorClient: coordinatorClient,
+    streamVideo: streamVideo,
+    stateManager: stateManager,
+  );
+
+  return call;
+}
+
+CallState createActiveCallState({
+  CallUser? currentByUser,
+  List<CallMemberState>? members,
+  CallStatus? status,
+}) {
+  final createdBy = currentByUser ?? SampleCallData.defaultCallUser;
+  final baseState = CallState(
+    preferences: DefaultCallPreferences(),
+    currentUserId: createdBy.id,
+    callCid: SampleCallData.defaultCid,
+  );
+
+  return baseState.copyWith(
+    callMembers: members,
+    status: status ?? CallStatus.connected(),
+    createdByUser: createdBy,
+    sessionId: 'test-session-id',
+  );
 }

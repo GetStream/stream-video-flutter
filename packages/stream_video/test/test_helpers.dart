@@ -146,7 +146,9 @@ Call createCallWithMockedResponse(
 }
 
 /// Pre-defined device lists for testing different scenarios
-mixin TestDeviceScenarios {
+class TestDeviceScenarios {
+  TestDeviceScenarios._();
+
   /// Built-in devices only (no external devices)
   static List<RtcMediaDevice> get builtInDevicesOnly => [
     const RtcMediaDevice(
