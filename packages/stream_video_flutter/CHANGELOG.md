@@ -19,6 +19,26 @@ In this release, we removed the dependency on `flutter_callkit_incoming`, which 
 - `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
 - `CallKitEvent` (type) → `RingingEvent`
 
+## 0.11.2
+
+🐞 Fixed
+- [Web] Fixed setting input audio/video device passed by `CallConnectOptions` as well as switching those devices during the call.
+- [Web] Fixed changing the output audio device during the call.
+- [Android/iOS] Fixed an issue where screen sharing was not stopped correctly when canceled via the system UI on Android or iOS.
+- [iOS] Improved broadcast extension handling — the app now waits for the broadcast picker selection before actually starting screen sharing.
+- Resolved an issue where the camera wouldn’t flip correctly if the back camera was selected initially.
+- Fixed an issue where `callMembers` collection wasn't reflecting the actual members list after starting the call session.
+- Fixed an issue with initials creation when multicharacter symbols were used in a user name.
+
+✅ Added
+- [Web] Added `checkIfAudioOutputChangeSupported()` to the `Call` class to check whether the browser supports changing the audio output device.
+
+## 0.11.1
+
+🔄 Changed
+- The `byParticipantSource` participant sorting now accepts a list of sources. The default sorting for `speaker` and `livestream` presets now include other ingress sources.
+- Updated the renderscript dependency on Android to support 16kb page size.
+
 ## 0.11.0
 
 🚧 Build breaking changes

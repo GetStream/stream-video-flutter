@@ -1,3 +1,9 @@
+## 0.11.2
+* Sync version with `stream_video_flutter` 0.11.2
+
+## 0.11.1
+* Sync version with `stream_video_flutter` 0.11.1
+
 ## 0.11.0
 
 🚧 Build breaking changes

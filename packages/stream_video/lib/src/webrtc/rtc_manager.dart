@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -27,7 +30,10 @@ import 'model/rtc_video_encoding.dart';
 import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
+import 'rtc_audio_api/rtc_audio_api.dart'
+    show checkIfAudioOutputChangeSupported;
 import 'rtc_media_device/rtc_media_device.dart';
+import 'rtc_media_device/rtc_media_device_notifier.dart';
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track.dart';
 import 'traced_peer_connection.dart';
@@ -99,6 +105,9 @@ class RtcManager extends Disposable {
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
   OnRemoteTrackReceived? onRemoteTrackReceived;
+
+  StreamSubscription<ScreenSharingStartedEvent>?
+  _screenSharingStartedSubscription;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp(
@@ -425,6 +434,8 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+    await _screenSharingStartedSubscription?.cancel();
+    _screenSharingStartedSubscription = null;
     for (final trackSid in [...tracks.keys]) {
       await unpublishTrack(trackId: trackSid);
     }
@@ -1030,10 +1041,17 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Track is not camera');
     }
 
-    final updatedTrack = await track.flipCamera();
-    tracks[updatedTrack.trackId] = updatedTrack;
+    track.disable();
 
-    return Result.success(updatedTrack);
+    try {
+      final updatedTrack = await track.flipCamera();
+      tracks[updatedTrack.trackId] = updatedTrack;
+      return Result.success(updatedTrack);
+    } finally {
+      // small delay avoids camera being mirrored wrongly for a brief moment
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      track.enable();
+    }
   }
 
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({
@@ -1098,6 +1116,16 @@ extension RtcManagerTrackHelper on RtcManager {
     // If the platform is web, set the sink id for all remote audio tracks
     // to the selected device.
     if (CurrentPlatform.isWeb) {
+      if (!checkIfAudioOutputChangeSupported()) {
+        _logger.w(
+          () =>
+              '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
+        );
+        return Result.error(
+          'Audio Output device change is not supported on this browser.',
+        );
+      }
+
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.setSinkId(device.id);
         tracks[updatedTrack.trackId] = updatedTrack;
@@ -1164,12 +1192,38 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalTrack>> setScreenShareEnabled({
     bool enabled = true,
     ScreenShareConstraints? constraints,
-  }) {
-    return _setTrackEnabled(
-      trackType: SfuTrackType.screenShare,
-      enabled: enabled,
-      constraints: constraints,
-    );
+  }) async {
+    if (CurrentPlatform.isIos &&
+        enabled &&
+        constraints is ScreenShareConstraints &&
+        constraints.useiOSBroadcastExtension) {
+      final screenShareTrackResult = await createScreenShareTrack(
+        constraints: constraints,
+      );
+
+      if (screenShareTrackResult.isFailure) {
+        _logger.e(
+          () =>
+              '[ScreenSharingStartedEvent] failed to create screen share track: ${screenShareTrackResult.getErrorOrNull()}',
+        );
+        return screenShareTrackResult;
+      }
+
+      _startListeningToScreenShareStarted(
+        screenShareTrackResult.getDataOrNull()!,
+      );
+
+      return Future.value(
+        Result.success(screenShareTrackResult.getDataOrNull()!),
+      );
+    } else {
+      await _screenSharingStartedSubscription?.cancel();
+      return _setTrackEnabled(
+        trackType: SfuTrackType.screenShare,
+        enabled: enabled,
+        constraints: constraints,
+      );
+    }
   }
 
   Future<Result<RtcLocalTrack>> _setTrackEnabled({
@@ -1181,9 +1235,9 @@ extension RtcManagerTrackHelper on RtcManager {
 
     // Track found, mute/unmute it.
     if (track != null) {
-      if (enabled &&
-          track is RtcLocalScreenShareTrack &&
-          !track.compareScreenShareMode(constraints)) {
+      if (enabled && track is RtcLocalScreenShareTrack) {
+        // Always create a new screen share track when enabling screen sharing.
+        // This ensures correct handling of constraints on iOS and supports selecting different screens on web and desktop platforms.
         return _createAndPublishTrack(
           trackType: trackType,
           constraints: constraints,
@@ -1292,6 +1346,7 @@ extension RtcManagerTrackHelper on RtcManager {
             (constraints ?? const ScreenShareConstraints())
                 as ScreenShareConstraints,
       );
+
       return screenShareTrackResult.fold(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
@@ -1300,6 +1355,30 @@ extension RtcManagerTrackHelper on RtcManager {
 
     _logger.e(() => 'Unsupported trackType $trackType');
     return Result.error('Unsupported trackType $trackType');
+  }
+
+  Future<T> awaitNativeWebRtcEvent<T extends NativeWebRtcEvent>() {
+    return RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .whereType<T>()
+        .take(1)
+        .first;
+  }
+
+  void _startListeningToScreenShareStarted(
+    RtcLocalTrack<ScreenShareConstraints> track,
+  ) {
+    _screenSharingStartedSubscription?.cancel();
+    _screenSharingStartedSubscription = RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .whereType<ScreenSharingStartedEvent>()
+        .listen((event) async {
+          _logger.i(() => '[ScreenSharingStartedEvent] received: $event');
+
+          await publishVideoTrack(
+            track: track,
+          );
+        });
   }
 
   Future<Result<None>> setAppleAudioConfiguration({

@@ -37,11 +37,9 @@ We use [Melos](https://melos.invertase.dev) to manage this repository.
 ## Process to get started with this repository
 
 1. Clone the base repository.
-2. All API keys and users used in the sample apps are to be stored in a file named '.env' at the root of the project. 
-3. You will find a template for the env file entitled 'env.sample' at the root of the project. Fill out this template and store it as '.env'.
 4. Run `melos postclean` to clean the project.
 5. Run `melos bootstrap` to fetch dependencies for all projects.
-6. Run `melos generate:all` to generate the required env files. If there are any changes in the '.env' file, regenerate this.
+6. Run `melos generate:all` to generate the required files.
 7. You can now run any app in the project or start making changes to the SDK.
 
 If you see any unexpected behaviour in the repository, feel free to [file an issue](https://github.com/GetStream/stream-video-flutter/issues/new) in the repository.

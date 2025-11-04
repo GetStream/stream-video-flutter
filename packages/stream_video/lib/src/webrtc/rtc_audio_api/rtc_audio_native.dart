@@ -14,3 +14,8 @@ void setSinkId(String id, String deviceId) {
   // We don't need to do anything here, because sinkId is only supported in
   // web platforms.
 }
+
+bool checkIfAudioOutputChangeSupported() {
+  // On native platforms, we assume audio output change is supported.
+  return true;
+}

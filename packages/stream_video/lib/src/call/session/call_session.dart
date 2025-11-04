@@ -770,7 +770,18 @@ class CallSession extends Disposable {
     if (track == null) return;
 
     // Only stop remote tracks. Local tracks are stopped by the user.
-    if (track is! RtcRemoteTrack) return;
+    if (track is! RtcRemoteTrack) {
+      final localTrack = rtcManager?.getTrack(track.trackId);
+      if (localTrack != null &&
+          localTrack.isScreenShareTrack &&
+          localTrack.mediaTrack.enabled) {
+        // If the unpublished track is a local screen share track and it's still enabled,
+        // disable screen sharing. It means the screen sharing was muted by the server.
+        await setScreenShareEnabled(false);
+      }
+
+      return;
+    }
 
     await track.stop();
   }
@@ -1099,14 +1110,15 @@ class CallSession extends Disposable {
     return result;
   }
 
-  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
+  Future<Result<RtcLocalTrack<CameraConstraints>>> setVideoInputDevice(
+    RtcMediaDevice device,
+  ) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set video input, Call not connected');
     }
 
-    final result = await rtcManager.setVideoInputDevice(device: device);
-    return result.map((_) => none);
+    return rtcManager.setVideoInputDevice(device: device);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition position) async {

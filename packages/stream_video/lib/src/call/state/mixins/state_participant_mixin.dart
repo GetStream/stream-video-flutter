@@ -7,8 +7,10 @@ import '../../../models/call_track_state.dart';
 import '../../../models/viewport_visibility.dart';
 import '../../../sfu/data/models/sfu_track_type.dart';
 import '../../../webrtc/media/constraints/camera_position.dart';
+import '../../../webrtc/media/media_constraints.dart';
 import '../../../webrtc/model/rtc_video_dimension.dart';
 import '../../../webrtc/rtc_media_device/rtc_media_device.dart';
+import '../../../webrtc/rtc_track/rtc_local_track.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -217,7 +219,15 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     );
   }
 
-  void participantFlipCamera(RtcMediaDevice? videoDevice) {
+  void participantFlipCamera(
+    RtcMediaDevice? videoDevice, {
+    required RtcLocalTrack<CameraConstraints> track,
+  }) {
+    final facingMode = track.mediaConstraints.facingMode;
+    final cameraPosition = facingMode == FacingMode.user
+        ? CameraPosition.front
+        : CameraPosition.back;
+
     state = state.copyWith(
       videoInputDevice: videoDevice,
       callParticipants: state.callParticipants.map((participant) {
@@ -228,7 +238,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
             // CopyWith doesn't support null values.
             final newTrackState = TrackState.local(
               muted: trackState.muted,
-              cameraPosition: trackState.cameraPosition?.flip(),
+              cameraPosition: cameraPosition,
             );
 
             return participant.copyWith(
@@ -246,7 +256,13 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
 
   void participantSetVideoInputDevice({
     required RtcMediaDevice device,
+    required RtcLocalTrack<CameraConstraints> track,
   }) {
+    final facingMode = track.mediaConstraints.facingMode;
+    final cameraPosition = facingMode == FacingMode.user
+        ? CameraPosition.front
+        : CameraPosition.back;
+
     state = state.copyWith(
       videoInputDevice: device,
       callParticipants: state.callParticipants.map((participant) {
@@ -259,7 +275,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
                 SfuTrackType.video: trackState.copyWith(
                   sourceDevice: device,
                   // reset camera position to default
-                  cameraPosition: CameraPosition.front,
+                  cameraPosition: cameraPosition,
                 ),
               },
             );

@@ -19,6 +19,7 @@ class StreamLobbyVideo extends StatefulWidget {
     this.onCameraTrackSet,
     this.streamVideo,
     this.additionalActionsBuilder,
+    this.initialCameraDevice,
   });
 
   /// Represents a call.
@@ -26,6 +27,8 @@ class StreamLobbyVideo extends StatefulWidget {
 
   /// The color of the focus border.
   final Color? cardBackgroundColor;
+
+  final RtcMediaDevice? initialCameraDevice;
 
   /// Theme for the avatar.
   final StreamUserAvatarThemeData? userAvatarTheme;
@@ -75,7 +78,11 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
     }
 
     try {
-      final cameraTrack = await RtcLocalTrack.camera();
+      final cameraTrack = await RtcLocalTrack.camera(
+        constraints: CameraConstraints(
+          deviceId: widget.initialCameraDevice?.id,
+        ),
+      );
       await widget.onCameraTrackSet?.call(cameraTrack);
 
       return setState(() => _cameraTrack = cameraTrack);
@@ -142,7 +149,9 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
                       children: [
                         if (cameraEnabled)
                           VideoTrackRenderer(
-                            mirror: true,
+                            mirror:
+                                _cameraTrack!.mediaConstraints.facingMode ==
+                                FacingMode.user,
                             videoTrack: _cameraTrack!,
                             placeholderBuilder: placeHolderBuilder,
                           )

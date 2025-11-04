@@ -17,10 +17,12 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   void callMetadataChanged(
     CallMetadata callMetadata, {
     Map<String, List<String>>? capabilitiesByRole,
+    bool updateMembers = true,
   }) {
     state = state.copyFromMetadata(
       callMetadata,
       capabilitiesByRole: capabilitiesByRole,
+      updateMembers: updateMembers,
     );
   }
 
