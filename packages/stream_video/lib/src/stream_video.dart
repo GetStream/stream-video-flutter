@@ -697,22 +697,22 @@ class StreamVideo extends Disposable {
     return result;
   }
 
-  StreamSubscription<T>? onCallKitEvent<T extends CallKitEvent>(
+  StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
     void Function(T event)? onEvent,
   ) {
     final manager = pushNotificationManager;
     if (manager == null) {
-      _logger.e(() => '[onCallKitEvent] rejected (no manager)');
+      _logger.e(() => '[onRingingEvent] rejected (no manager)');
       return null;
     }
 
     return manager.on<T>(onEvent);
   }
 
-  StreamSubscription<CallKitEvent>? disposeAfterResolvingRinging({
+  StreamSubscription<RingingEvent>? disposeAfterResolvingRinging({
     void Function()? disposingCallback,
   }) {
-    return onCallKitEvent(
+    return onRingingEvent(
       (event) {
         if (event is ActionCallAccept ||
             event is ActionCallDecline ||
@@ -759,28 +759,50 @@ class StreamVideo extends Disposable {
     return false;
   }
 
+  @Deprecated('Use observeCoreRingingEvents instead.')
   CompositeSubscription observeCoreCallKitEvents({
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
   }) {
-    final callKitEventSubscriptions = CompositeSubscription();
-
-    observeCallAcceptCallKitEvent(
+    return observeCoreRingingEvents(
       onCallAccepted: onCallAccepted,
       acceptCallPreferences: acceptCallPreferences,
-    )?.addTo(callKitEventSubscriptions);
-
-    observeCallDeclinedCallKitEvent()?.addTo(callKitEventSubscriptions);
-    observeCallEndedCallKitEvent()?.addTo(callKitEventSubscriptions);
-
-    return callKitEventSubscriptions;
+    );
   }
 
+  CompositeSubscription observeCoreRingingEvents({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
+  }) {
+    final ringingEventSubscriptions = CompositeSubscription();
+
+    observeCallAcceptRingingEvent(
+      onCallAccepted: onCallAccepted,
+      acceptCallPreferences: acceptCallPreferences,
+    )?.addTo(ringingEventSubscriptions);
+
+    observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
+    observeCallEndedRingingEvent()?.addTo(ringingEventSubscriptions);
+
+    return ringingEventSubscriptions;
+  }
+
+  @Deprecated('Use observeCallAcceptRingingEvent instead.')
   StreamSubscription<ActionCallAccept>? observeCallAcceptCallKitEvent({
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
   }) {
-    return onCallKitEvent<ActionCallAccept>(
+    return observeCallAcceptRingingEvent(
+      onCallAccepted: onCallAccepted,
+      acceptCallPreferences: acceptCallPreferences,
+    );
+  }
+
+  StreamSubscription<ActionCallAccept>? observeCallAcceptRingingEvent({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
+  }) {
+    return onRingingEvent<ActionCallAccept>(
       (event) => _onCallAccept(
         event,
         onCallAccepted: onCallAccepted,
@@ -789,12 +811,22 @@ class StreamVideo extends Disposable {
     );
   }
 
+  @Deprecated('Use observeCallDeclinedRingingEvent instead.')
   StreamSubscription<ActionCallDecline>? observeCallDeclinedCallKitEvent() {
-    return onCallKitEvent<ActionCallDecline>(_onCallDecline);
+    return observeCallDeclinedRingingEvent();
   }
 
+  StreamSubscription<ActionCallDecline>? observeCallDeclinedRingingEvent() {
+    return onRingingEvent<ActionCallDecline>(_onCallDecline);
+  }
+
+  @Deprecated('Use observeCallEndedRingingEvent instead.')
   StreamSubscription<ActionCallEnded>? observeCallEndedCallKitEvent() {
-    return onCallKitEvent<ActionCallEnded>(_onCallEnded);
+    return observeCallEndedRingingEvent();
+  }
+
+  StreamSubscription<ActionCallEnded>? observeCallEndedRingingEvent() {
+    return onRingingEvent<ActionCallEnded>(_onCallEnded);
   }
 
   Future<void> _onCallAccept(
@@ -855,7 +887,7 @@ class StreamVideo extends Disposable {
     }
   }
 
-  /// ActionCallEnded event is sent by `flutter_callkit_incoming` when the call is ended.
+  /// ActionCallEnded event is sent by native side of stream_video_push_notification package when the call is ended.
   /// On iOS this is connected to CallKit and should end active call or reject incoming call.
   /// On Android this is connected to push notification being dismissed.
   /// When app is terminated it can be send even when accepting the call. That's why we only handle it on iOS.
@@ -952,7 +984,7 @@ class StreamVideo extends Disposable {
         manager.showMissedCall(
           uuid: callUUID,
           handle: createdById,
-          nameCaller: (callDisplayName?.isNotEmpty ?? false)
+          callerName: (callDisplayName?.isNotEmpty ?? false)
               ? callDisplayName
               : createdByName,
           callCid: callCid,
@@ -975,7 +1007,7 @@ class StreamVideo extends Disposable {
           manager.showIncomingCall(
             uuid: callUUID,
             handle: createdById,
-            nameCaller: (callDisplayName?.isNotEmpty ?? false)
+            callerName: (callDisplayName?.isNotEmpty ?? false)
                 ? callDisplayName
                 : createdByName,
             callCid: callCid,
