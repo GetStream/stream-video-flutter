@@ -8,10 +8,6 @@ import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
 
-class MockCoordinatorClient extends Mock implements CoordinatorClient {}
-
-class MockCall extends Mock implements Call {}
-
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +19,7 @@ void main() {
         id: 'fallback-call-id',
       ),
     );
+
     registerFallbackValue(DisconnectReasonReplaced());
   });
 

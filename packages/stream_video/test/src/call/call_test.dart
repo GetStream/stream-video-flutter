@@ -10,7 +10,8 @@ import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
-import 'call_test_helpers.dart';
+import 'fixtures/call_test_helpers.dart';
+import 'fixtures/data.dart';
 
 void main() {
   setUpAll(() {
@@ -93,7 +94,7 @@ void main() {
             callCid: any(named: 'callCid'),
             ringing: any(named: 'ringing'),
             create: any(named: 'create'),
-            migratingFrom: defaultCredentials.sfuServer.name,
+            migratingFrom: SampleCallData.defaultCredentials.sfuServer.name,
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
           ),
@@ -136,7 +137,7 @@ void main() {
 
         verify(
           () => coordinatorClient.joinCall(
-            callCid: defaultCid,
+            callCid: SampleCallData.defaultCid,
             ringing: null,
             create: true,
             migratingFrom: null,
@@ -178,8 +179,8 @@ void main() {
         final customStateManager = CallStateNotifier(
           CallState(
             preferences: customPreferences,
-            currentUserId: defaultUserInfo.id,
-            callCid: defaultCid,
+            currentUserId: SampleCallData.defaultUserInfo.id,
+            callCid: SampleCallData.defaultCid,
           ),
         );
 

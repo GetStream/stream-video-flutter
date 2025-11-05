@@ -553,20 +553,12 @@ class Call {
         return _stateManager.coordinatorCallClosedCaptionsStopped(event);
       case StreamCallClosedCaptionsFailedEvent _:
         return _stateManager.coordinatorCallClosedCaptionsFailed(event);
-
       case StreamCallBroadcastingStartedEvent _:
         return _stateManager.coordinatorCallBroadcastingStarted(event);
       case StreamCallBroadcastingStoppedEvent _:
         return _stateManager.coordinatorCallBroadcastingStopped(event);
       case StreamCallBroadcastingFailedEvent _:
         return _stateManager.coordinatorCallBroadcastingFailed(event);
-      case StreamCallUpdatedEvent _:
-        return _stateManager.callMetadataChanged(
-          event.metadata,
-          capabilitiesByRole: event.capabilitiesByRole,
-        );
-      case StreamCallLiveStartedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
@@ -607,6 +599,13 @@ class Call {
         return _stateManager.coordinatorCallUserBlocked(event);
       case StreamCallUserUnblockedEvent _:
         return _stateManager.coordinatorCallUserUnblocked(event);
+      case StreamCallUpdatedEvent _:
+        return _stateManager.callMetadataChanged(
+          event.metadata,
+          capabilitiesByRole: event.capabilitiesByRole,
+        );
+      case StreamCallLiveStartedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallRingingEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallMissedEvent _:
