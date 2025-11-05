@@ -12,6 +12,7 @@ void main() {
       currentUserId: 'userId',
       preferences: DefaultCallPreferences(),
     );
+
     final notifier = CallStateNotifier(callState);
     var updates = 0;
 
