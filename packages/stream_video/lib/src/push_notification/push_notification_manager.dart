@@ -18,8 +18,8 @@ typedef PNManagerProvider =
 
 /// Interface for managing push notifications related to call events.
 abstract class PushNotificationManager {
-  /// Stream of [CallKitEvent] for call-related events.
-  Stream<CallKitEvent> get onCallEvent;
+  /// Stream of [RingingEvent] for call-related events.
+  Stream<RingingEvent> get onCallEvent;
 
   /// Registers the device for push notifications.
   void registerDevice();
@@ -33,14 +33,14 @@ abstract class PushNotificationManager {
   /// [callCid] is the call's unique identifier.
   /// [avatar] is the avatar of the caller.
   /// [handle] is the handle of the caller.
-  /// [nameCaller] is the name of the caller.
+  /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
   Future<void> showIncomingCall({
     required String uuid,
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   });
 
@@ -50,14 +50,14 @@ abstract class PushNotificationManager {
   /// [callCid] is the call's unique identifier.
   /// [avatar] is the avatar of the caller.
   /// [handle] is the handle of the caller.
-  /// [nameCaller] is the name of the caller.
+  /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
   Future<void> showMissedCall({
     required String uuid,
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   });
 
@@ -67,14 +67,14 @@ abstract class PushNotificationManager {
   /// [callCid] is the call's unique identifier.
   /// [avatar] is the avatar of the caller.
   /// [handle] is the handle of the caller.
-  /// [nameCaller] is the name of the caller.
+  /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
   Future<void> startOutgoingCall({
     required String uuid,
     required String callCid,
     String? avatar,
     String? handle,
-    String? nameCaller,
+    String? callerName,
     bool hasVideo = true,
   });
 
@@ -122,7 +122,7 @@ abstract class PushNotificationManager {
 }
 
 extension NotificationManagerExtension on PushNotificationManager {
-  StreamSubscription<T> on<T extends CallKitEvent>(
+  StreamSubscription<T> on<T extends RingingEvent>(
     void Function(T event)? onEvent,
   ) {
     return onCallEvent.whereType<T>().listen(onEvent);

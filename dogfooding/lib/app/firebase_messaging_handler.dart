@@ -37,7 +37,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       prefs.environment,
     );
 
-    final subscription = streamVideo.observeCallDeclinedCallKitEvent();
+    final subscription = streamVideo.observeCallDeclinedRingingEvent();
 
     streamVideo.disposeAfterResolvingRinging(
       disposingCallback: () {

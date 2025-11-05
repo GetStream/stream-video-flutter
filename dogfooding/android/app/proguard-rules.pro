@@ -4,8 +4,6 @@
 -keep class io.flutter.view.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
--keep class com.hiennv.flutter_callkit_incoming.** { *; }
-
 -keep class java.beans.Transient.** {*;}
 -keep class java.beans.ConstructorProperties.** {*;}
 -keep class java.nio.file.Path.** {*;}
