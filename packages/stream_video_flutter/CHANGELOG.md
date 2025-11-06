@@ -20,9 +20,9 @@ In this release, we removed the dependency on `flutter_callkit_incoming`, which 
 - `CallKitEvent` (type) → `RingingEvent`
 
 🐞 Fixed
-* [iOS] Fixed an issue in Picture in Picture where video tracks could end up being disabled when foregrounding the app
-* [iOS] Fixed an issue in Picture in Picture where the PiP was not ended properly when call ended during PiP mode
-* [iOS] Fixed an issue where backgrounding the app imediately after ending the call could still trigger the PiP mode
+* [iOS] Resolved an issue in Picture in Picture where video tracks might remain disabled after returning the app to the foreground.
+* [iOS] Addressed a problem where Picture in Picture was not exited properly if the call ended during PiP mode.
+* [iOS] Fixed a bug where quickly backgrounding the app right after ending a call could still activate PiP mode.
 
 ## 0.11.2
 
