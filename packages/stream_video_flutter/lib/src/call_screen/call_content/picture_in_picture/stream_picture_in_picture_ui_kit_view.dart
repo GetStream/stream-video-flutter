@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,6 +57,7 @@ class _StreamPictureInPictureUiKitViewState
     extends State<StreamPictureInPictureUiKitView>
     with WidgetsBindingObserver {
   static const _idCallState = 2;
+  static const _idCallEnded = 3;
 
   static const MethodChannel _channel = MethodChannel(
     'stream_video_flutter_pip',
@@ -63,13 +65,13 @@ class _StreamPictureInPictureUiKitViewState
 
   final Subscriptions _subscriptions = Subscriptions();
 
-  Future<void> _handleCallState(
-    CallState callState,
+  Future<void> _handleParticipantsChange(
+    List<CallParticipantState> callParticipants,
     bool includeLocalParticipantVideo,
   ) async {
     final participants = includeLocalParticipantVideo
-        ? callState.callParticipants
-        : callState.otherParticipants;
+        ? callParticipants
+        : callParticipants.where((element) => !element.isLocal).toList();
 
     final sorted = List<CallParticipantState>.from(participants);
     mergeSort(
@@ -125,21 +127,23 @@ class _StreamPictureInPictureUiKitViewState
         },
       );
     }
-
-    if (callState.status is CallStatusDisconnected) {
-      await _channel.invokeMethod(
-        'callEnded',
-      );
-    }
   }
 
   void _subscribeToCallEvents() {
+    if (widget.call.state.value.status is CallStatusDisconnected) {
+      return;
+    }
+
     _subscriptions.add(
       _idCallState,
       widget.call.state.listen(
-        (callState) {
-          _handleCallState(
-            callState,
+        (state) {
+          if (state.status is CallStatusDisconnected) {
+            return;
+          }
+
+          _handleParticipantsChange(
+            state.callParticipants,
             widget.configuration.includeLocalParticipantVideo &&
                 widget.call.state.value.iOSMultitaskingCameraAccessEnabled,
           );
@@ -152,6 +156,19 @@ class _StreamPictureInPictureUiKitViewState
   void initState() {
     WidgetsBinding.instance.addObserver(this);
 
+    _subscriptions.add(
+      _idCallEnded,
+      widget.call.state.listen(
+        (state) async {
+          if (state.status is CallStatusDisconnected) {
+            await _channel.invokeMethod(
+              'callEnded',
+            );
+          }
+        },
+      ),
+    );
+
     super.initState();
   }
 
@@ -161,13 +178,56 @@ class _StreamPictureInPictureUiKitViewState
 
     switch (state) {
       case AppLifecycleState.resumed:
-        _subscriptions.cancelAll();
+        _subscriptions.cancel(_idCallState);
+        _toggleSubscribedTracks(true);
         break;
       case AppLifecycleState.paused:
+        _toggleSubscribedTracks(false);
         _subscribeToCallEvents();
+
+        // Check status with a small delay to catch the race condition where
+        // the call disconnects at nearly the same time as backgrounding
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (!mounted) return;
+          if (widget.call.state.value.status is CallStatusDisconnected) {
+            try {
+              _channel.invokeMethod('callEnded');
+            } catch (e) {
+              // Silent catch
+            }
+          }
+        });
         break;
       default:
         break;
+    }
+  }
+
+  // When app goes to background disable video tracks of all participants except
+  // the one shown in PiP to save bandwidth and resources.
+  // Re-enable them when app comes back to foreground.
+  void _toggleSubscribedTracks(bool enable) {
+    final participants = widget.call.state.value.callParticipants;
+
+    for (final participant in participants.where(
+      (p) => p.isVideoEnabled,
+    )) {
+      if (!enable && participant.isSpeaking) {
+        // Do not disable video track of speaking participant
+        continue;
+      }
+
+      final videoTrackState = participant.publishedTracks[SfuTrackType.video];
+      if ((videoTrackState is RemoteTrackState && videoTrackState.subscribed) ||
+          participant.isLocal) {
+        final track = widget.call.getTrack(
+          participant.trackIdPrefix,
+          SfuTrackType.video,
+        );
+        if (track != null) {
+          track.mediaTrack.enabled = enable;
+        }
+      }
     }
   }
 
