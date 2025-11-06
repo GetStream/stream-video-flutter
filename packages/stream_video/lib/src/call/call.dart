@@ -381,7 +381,6 @@ class Call {
 
       _observeEvents();
       _observeState();
-      _observeReconnectEvents();
       _observeUserId();
       _observeNativeWebRtcEventStream();
 
@@ -416,20 +415,6 @@ class Call {
             .emitIfNotNull(_callEvents)
             ?.also(_onCoordinatorEvent);
       }),
-    );
-  }
-
-  void _observeReconnectEvents() {
-    _subscriptions.add(
-      _idReconnect,
-      networkMonitor.onStatusChange.listen(
-        (status) {
-          if (status == InternetStatus.disconnected) {
-            _logger.d(() => '[observeReconnectEvents] network disconnected');
-            _reconnect(SfuReconnectionStrategy.fast);
-          }
-        },
-      ),
     );
   }
 
@@ -1650,7 +1635,9 @@ class Call {
     });
 
     final previousCheckInterval = networkMonitor.checkInterval;
-    networkMonitor.setIntervalAndResetTimer(const Duration(seconds: 1));
+    networkMonitor.setIntervalAndResetTimer(
+      _streamVideo.options.networkMonitorSettings.offlineCheckInterval,
+    );
 
     final networkFuture = networkMonitor.onStatusChange
         .startWithFuture(networkMonitor.internetStatus)
