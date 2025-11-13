@@ -22,7 +22,7 @@ command:
       device_info_plus: ^12.1.0
       share_plus: ^11.0.0
       stream_chat_flutter: ^9.17.0
-      stream_webrtc_flutter: ^2.0.0
+      # stream_webrtc_flutter: ^2.0.0
       stream_video: ^0.11.2
       stream_video_flutter: ^0.11.2
       stream_video_noise_cancellation: ^0.11.2

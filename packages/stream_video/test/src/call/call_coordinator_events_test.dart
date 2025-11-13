@@ -1742,7 +1742,7 @@ void main() {
 
         final initialState = createActiveCallState(
           currentByUser: currentUser,
-          status: CallStatus.outgoing(acceptedByCallee: false),
+          status: CallStatus.outgoing(),
         );
         final stateManager = CallStateNotifier(initialState);
 

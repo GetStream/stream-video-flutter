@@ -13,7 +13,7 @@ Official Flutter Plugin for Stream Video..
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'getstream.io' => 'support@getstream.io' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'stream_video_flutter/Sources/stream_video_flutter/**/*.swift'
   s.dependency 'Flutter'
   s.dependency 'stream_webrtc_flutter'
   s.static_framework = true

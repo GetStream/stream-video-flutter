@@ -13,7 +13,7 @@ Official Push Notification Plugin for Stream Video.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'getstream.io' => 'support@getstream.io' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'stream_video_push_notification/Sources/stream_video_push_notification/**/*.swift'
   s.dependency 'Flutter'
   s.dependency 'CryptoSwift', '~> 1.8'
   s.platform = :ios, '14'

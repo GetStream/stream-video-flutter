@@ -6,7 +6,6 @@ import '../../../models/call_participant_pin.dart';
 import '../../../models/call_track_state.dart';
 import '../../../models/viewport_visibility.dart';
 import '../../../sfu/data/models/sfu_track_type.dart';
-import '../../../webrtc/media/constraints/camera_position.dart';
 import '../../../webrtc/media/media_constraints.dart';
 import '../../../webrtc/model/rtc_video_dimension.dart';
 import '../../../webrtc/rtc_media_device/rtc_media_device.dart';
