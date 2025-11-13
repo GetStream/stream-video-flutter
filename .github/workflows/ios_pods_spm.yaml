@@ -20,6 +20,9 @@ jobs:
         with:
           channel: "stable"
 
+      - name: 🛠️ Setup FlutterFire CLI
+        run: flutter pub global activate flutterfire_cli
+
       - name: 📦 Deps flutter pub get
         run: flutter pub get
 
