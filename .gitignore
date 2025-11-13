@@ -142,3 +142,7 @@ env.g.dart
 **/test/**/goldens/**/*.*
 **/test/**/failures/**/*.*
 !**/test/**/goldens/ci/*.*
+
+# Swift
+.build/
+.swiftpm/

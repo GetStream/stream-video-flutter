@@ -25,7 +25,10 @@ dependencies:
   rate_limiter: ^1.0.0
   rxdart: ^0.28.0
   stream_video: ^0.11.2
-  stream_webrtc_flutter: ^2.0.0
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter/
+      ref: chore/spm_support_2
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
