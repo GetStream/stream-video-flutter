@@ -146,3 +146,4 @@ env.g.dart
 # Swift
 .build/
 .swiftpm/
+Package.resolved
