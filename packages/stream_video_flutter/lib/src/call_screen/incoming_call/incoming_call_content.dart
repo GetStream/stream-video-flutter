@@ -14,7 +14,6 @@ class StreamIncomingCallContent extends StatefulWidget {
   const StreamIncomingCallContent({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.onAcceptCallTap,
     this.onDeclineCallTap,
     this.onMicrophoneTap,
@@ -24,20 +23,12 @@ class StreamIncomingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
-    @Deprecated('Use participantsAvatarWidgetBuilder instead.')
-    this.participantsAvatarBuilder,
     this.participantsAvatarWidgetBuilder,
-    @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
-    this.participantsDisplayNameBuilder,
     this.participantsDisplayNameWidgetBuilder,
   });
 
   /// Represents a call.
   final Call call;
-
-  /// Holds information about the call.
-  @Deprecated(PartialStateDeprecationMessage.callState)
-  final CallState? callState;
 
   /// The action to perform when the accept call button is tapped.
   final VoidCallback? onAcceptCallTap;
@@ -67,20 +58,8 @@ class StreamIncomingCallContent extends StatefulWidget {
   final TextStyle? callingLabelTextStyle;
 
   /// Builder used to create a custom widget for participants avatars.
-  ///
-  /// Recommend to use [participantsAvatarWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use participantsAvatarWidgetBuilder instead.')
-  final ParticipantsAvatarBuilder? participantsAvatarBuilder;
-
-  /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilderWithData<ParticipantsData>?
   participantsAvatarWidgetBuilder;
-
-  /// Builder used to create a custom widget for participants display names.
-  ///
-  /// Recommend to use [participantsDisplayNameWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
-  final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
   /// Builder used to create a custom widget for participants display names.
   final CallWidgetBuilderWithData<ParticipantsData>?
@@ -125,12 +104,6 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
                   widget.call,
                   ParticipantsData(participants: users),
                 ) ??
-                widget.participantsAvatarBuilder?.call(
-                  context,
-                  widget.call,
-                  widget.callState ?? widget.call.state.value,
-                  users,
-                ) ??
                 ParticipantAvatars(
                   participants: users,
                   singleParticipantAvatarTheme: singleParticipantAvatarTheme,
@@ -141,12 +114,6 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
                   context,
                   widget.call,
                   ParticipantsData(participants: users),
-                ) ??
-                widget.participantsDisplayNameBuilder?.call(
-                  context,
-                  widget.call,
-                  widget.callState ?? widget.call.state.value,
-                  users,
                 ) ??
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -177,12 +144,6 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
         ),
       ),
     );
-
-    if (widget.callState != null) {
-      return buildContent(
-        widget.callState!.ringingMembers.map((e) => e.toUserInfo()).toList(),
-      );
-    }
 
     return PartialCallStateBuilder(
       call: widget.call,

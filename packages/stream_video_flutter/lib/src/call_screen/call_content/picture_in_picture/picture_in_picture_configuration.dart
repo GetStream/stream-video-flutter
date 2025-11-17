@@ -39,16 +39,8 @@ class PictureInPictureConfiguration {
 
 class AndroidPictureInPictureConfiguration {
   const AndroidPictureInPictureConfiguration({
-    @Deprecated('Use callPictureInPictureWidgetBuilder instead.')
-    this.callPictureInPictureBuilder,
     this.callPictureInPictureWidgetBuilder,
   });
-
-  /// Builder used to create a custom picture in picture mode. (available only on Android)
-  ///
-  /// Recommend to use [callPictureInPictureWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use callPictureInPictureWidgetBuilder instead.')
-  final CallPictureInPictureBuilder? callPictureInPictureBuilder;
 
   /// Builder used to create a custom picture in picture mode. (available only on Android)
   final CallWidgetBuilder? callPictureInPictureWidgetBuilder;

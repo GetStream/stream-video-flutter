@@ -23,7 +23,6 @@ class StreamOutgoingCallContent extends StatefulWidget {
   const StreamOutgoingCallContent({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.onCancelCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
@@ -32,23 +31,13 @@ class StreamOutgoingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
-    @Deprecated('Use callBackgroundWidgetBuilder instead.')
-    this.callBackgroundBuilder,
     this.callBackgroundWidgetBuilder,
-    @Deprecated('Use participantsAvatarWidgetBuilder instead.')
-    this.participantsAvatarBuilder,
     this.participantsAvatarWidgetBuilder,
-    @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
-    this.participantsDisplayNameBuilder,
     this.participantsDisplayNameWidgetBuilder,
   });
 
   /// Represents a call.
   final Call call;
-
-  /// Holds information about the call.
-  @Deprecated(PartialStateDeprecationMessage.callState)
-  final CallState? callState;
 
   /// The action to perform when the cancel call button is tapped.
   final VoidCallback? onCancelCallTap;
@@ -75,32 +64,12 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final TextStyle? callingLabelTextStyle;
 
   /// Builder used to create a custom widget for participants avatars.
-  ///
-  /// Recommend to use [participantsAvatarWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use participantsAvatarWidgetBuilder instead.')
-  final ParticipantsAvatarBuilder? participantsAvatarBuilder;
-
-  /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilderWithData<ParticipantsData>?
   participantsAvatarWidgetBuilder;
 
   /// Builder used to create a custom widget for participants display names.
-  ///
-  /// Recommend to use [participantsDisplayNameWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use participantsDisplayNameWidgetBuilder instead.')
-  final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
-
-  /// Builder used to create a custom widget for participants display names.
   final CallWidgetBuilderWithData<ParticipantsData>?
   participantsDisplayNameWidgetBuilder;
-
-  /// A widget that is placed behind the outgoing call UI instead of the Stream default
-  ///
-  /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
-  ///
-  /// Recommend to use [callBackgroundWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use callBackgroundWidgetBuilder instead.')
-  final OutgoingCallBackground? callBackgroundBuilder;
 
   /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
@@ -145,12 +114,6 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
                   widget.call,
                   ParticipantsData(participants: participants),
                 ) ??
-                widget.participantsAvatarBuilder?.call(
-                  context,
-                  widget.call,
-                  widget.callState ?? widget.call.state.value,
-                  participants,
-                ) ??
                 ParticipantAvatars(
                   participants: participants,
                   singleParticipantAvatarTheme: singleParticipantAvatarTheme,
@@ -161,12 +124,6 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
                   context,
                   widget.call,
                   ParticipantsData(participants: participants),
-                ) ??
-                widget.participantsDisplayNameBuilder?.call(
-                  context,
-                  widget.call,
-                  widget.callState ?? widget.call.state.value,
-                  participants,
                 ) ??
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -200,22 +157,10 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
             widget.call,
             child,
           ) ??
-          widget.callBackgroundBuilder?.call(
-            widget.call,
-            widget.callState ?? widget.call.state.value,
-            participants,
-            child,
-          ) ??
           CallBackground(
             participants: participants,
             child: child,
           );
-    }
-
-    if (widget.callState != null) {
-      return buildContent(
-        widget.callState!.ringingMembers.map((e) => e.toUserInfo()).toList(),
-      );
     }
 
     return PartialCallStateBuilder(

@@ -3051,21 +3051,6 @@ class Call {
     return const Result.success(none);
   }
 
-  @Deprecated('Use setParticipantPinnedLocally instead')
-  Future<Result<None>> setParticipantPinned({
-    required String sessionId,
-    required String userId,
-    required bool pinned,
-  }) async {
-    setParticipantPinnedLocally(
-      sessionId: sessionId,
-      userId: userId,
-      pinned: pinned,
-    );
-
-    return const Result.success(none);
-  }
-
   /// Pins/unpins the given session to the top of the participants list.
   /// The change is done locally and won't affect other participants.
   void setParticipantPinnedLocally({
@@ -3101,10 +3086,6 @@ class Call {
   /// Starts the livestreaming of the call.
   Future<Result<CallMetadata>> goLive({
     bool? startHls,
-    @Deprecated(
-      'RTMP broadcast initiation should be managed by the backend. This property is no longer used.',
-    )
-    bool? startRtmpBroadcasts,
     bool? startRecording,
     bool? startTranscription,
     bool? startClosedCaption,

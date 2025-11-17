@@ -1,3 +1,16 @@
+## Unreleased
+
+🚧 Breaking changes
+- Removed deprecated APIs and parameters. Migrate as follows:
+  - `StreamVideo.muteVideoWhenInBackground` → `StreamVideo.options.muteVideoWhenInBackground`
+  - `StreamVideo.muteAudioWhenInBackground` → `StreamVideo.options.muteAudioWhenInBackground`
+  - Default `StreamCallType()` constructor → `StreamCallType.defaultType()`
+  - `Call.setParticipantPinned()` → `Call.setParticipantPinnedLocally()` (local-only pin)
+  - Removed deprecated `startRtmpBroadcasts` parameter from `Call.goLive()`
+  - Removed `localParticipant` parameter from `AddReactionOption` constructor
+  - Removed multiple deprecated builder callbacks in favor of [callbacks that don't provide the state object](https://github.com/GetStream/stream-video-flutter/pull/983); corresponding state object parameters in affected widgets have been removed.
+  
+
 ## 0.11.2
 
 🐞 Fixed

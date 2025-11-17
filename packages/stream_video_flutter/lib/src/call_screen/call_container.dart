@@ -6,63 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Builder used to create a custom incoming call widget.
-///
-/// Replaced by the simplified [CallWidgetBuilder].
-@Deprecated('Use CallWidgetBuilder instead.')
-typedef IncomingCallBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-/// Builder used to create a custom outgoing call widget.
-///
-/// Replaced by the simplified [CallWidgetBuilder].
-@Deprecated('Use CallWidgetBuilder instead.')
-typedef OutgoingCallBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-/// Builder used to create a custom call content widget.
-///
-/// Replaced by the simplified [CallWidgetBuilder].
-@Deprecated('Use CallWidgetBuilder instead.')
-typedef CallContentBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-/// Builder used to create a custom widget for participants avatars.
-///
-/// Replaced by the simplified [CallWidgetBuilder].
-@Deprecated('Use CallWidgetBuilder instead.')
-typedef ParticipantsAvatarBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-      List<UserInfo> participants,
-    );
-
-/// Builder used to create a custom widget for participants display names.
-///
-/// Replaced by the simplified [CallWidgetBuilder].
-@Deprecated('Use CallWidgetBuilder instead.')
-typedef ParticipantsDisplayNameBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-      List<UserInfo> participants,
-    );
-
 /// Represents different call content based on the call state.
 class StreamCallContainer extends StatefulWidget {
   /// Creates a new instance of [StreamCallContainer].
@@ -76,14 +19,8 @@ class StreamCallContainer extends StatefulWidget {
     this.onDeclineCallTap,
     this.onCancelCallTap,
     this.onCallDisconnected,
-    @Deprecated('Use [incomingCallWidgetBuilder] instead.')
-    this.incomingCallBuilder,
     this.incomingCallWidgetBuilder,
-    @Deprecated('Use [outgoingCallWidgetBuilder] instead.')
-    this.outgoingCallBuilder,
     this.outgoingCallWidgetBuilder,
-    @Deprecated('Use [callContentWidgetBuilder] instead.')
-    this.callContentBuilder,
     this.callContentWidgetBuilder,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
@@ -113,45 +50,16 @@ class StreamCallContainer extends StatefulWidget {
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
   /// Builder used to create a custom incoming call widget.
-  ///
-  /// If [incomingCallBuilder] is provided, the whole [StreamCallContainer] widget will
-  /// rebuild on every call state change.
-  /// Recommend to use [incomingCallWidgetBuilder] which is not rebuild on every state change.
-  @Deprecated('Use [incomingCallWidgetBuilder] instead.')
-  final IncomingCallBuilder? incomingCallBuilder;
-
-  /// Builder used to create a custom incoming call widget.
   final CallWidgetBuilder? incomingCallWidgetBuilder;
 
   /// Builder used to create a custom outgoing call widget.
-  ///
-  /// If [outgoingCallBuilder] is provided, the whole [StreamCallContainer] widget will
-  /// rebuild on every call state change.
-  /// Recommend to use [outgoingCallWidgetBuilder] which is not rebuild on every state change.
-  @Deprecated('Use [outgoingCallWidgetBuilder] instead.')
-  final OutgoingCallBuilder? outgoingCallBuilder;
-
-  /// Builder used to create a custom outgoing call widget.
   final CallWidgetBuilder? outgoingCallWidgetBuilder;
-
-  /// Builder used to create a custom call content widget.
-  ///
-  /// If [callContentBuilder] is provided, the whole [StreamCallContainer] widget will
-  /// rebuild on every call state change.
-  /// Recommend to use [callContentWidgetBuilder] which is not rebuild on every state change.
-  @Deprecated('Use [callContentWidgetBuilder] instead.')
-  final CallContentBuilder? callContentBuilder;
 
   /// Builder used to create a custom call content widget.
   final CallWidgetBuilder? callContentWidgetBuilder;
 
   /// Configuration for picture-in-picture mode.
   final PictureInPictureConfiguration pictureInPictureConfiguration;
-
-  bool get _shouldListenToCallState =>
-      incomingCallBuilder != null ||
-      outgoingCallBuilder != null ||
-      callContentBuilder != null;
 
   @override
   State<StreamCallContainer> createState() => _StreamCallContainerState();
@@ -165,16 +73,12 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   /// Represents a call.
   Call get call => widget.call;
 
-  /// Holds all information about the call.
-  CallState? _callState;
-
   /// Holds only status information about the call.
   late CallStatus _callStatus;
 
   @override
   void initState() {
     super.initState();
-    _listenToCallStateIfNeeded();
     _listenToCallStatus();
     _connect();
   }
@@ -188,7 +92,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       _callStatusSubscription?.cancel();
       _callStatusSubscription = null;
 
-      _listenToCallStateIfNeeded();
       _listenToCallStatus();
     }
   }
@@ -202,27 +105,11 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     super.dispose();
   }
 
-  void _listenToCallStateIfNeeded() {
-    if (widget._shouldListenToCallState) {
-      _callState = call.state.value;
-      _callStateSubscription = call.state.listen(_setState);
-    } else {
-      _callState = null;
-    }
-  }
-
   void _listenToCallStatus() {
     _callStatus = call.state.value.status;
     _callStatusSubscription = call
         .partialState((state) => state.status)
         .listen(_setStatus);
-  }
-
-  void _setState(CallState callState) {
-    _logger.v(() => '[setState] callState.status: ${callState.status}');
-    setState(() {
-      _callState = callState;
-    });
   }
 
   void _setStatus(CallStatus callStatus) {
@@ -286,46 +173,26 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   }
 
   Widget _buildIncomingCall() {
-    assert(
-      _callState != null || widget.incomingCallBuilder == null,
-      'Call state is supposed to be available to build the incoming call widget.',
-    );
-
     return widget.incomingCallWidgetBuilder?.call(context, call) ??
-        widget.incomingCallBuilder?.call(context, call, _callState!) ??
         StreamIncomingCallContent(
           call: call,
-          callState: _callState,
           onAcceptCallTap: widget.onAcceptCallTap,
           onDeclineCallTap: widget.onDeclineCallTap,
         );
   }
 
   Widget _buildOutgoingCall() {
-    assert(
-      _callState != null || widget.outgoingCallBuilder == null,
-      'Call state is supposed to be available to build the outgoing call widget.',
-    );
     return widget.outgoingCallWidgetBuilder?.call(context, call) ??
-        widget.outgoingCallBuilder?.call(context, call, _callState!) ??
         StreamOutgoingCallContent(
           call: call,
-          callState: _callState,
           onCancelCallTap: widget.onCancelCallTap,
         );
   }
 
   Widget _buildCallContent() {
-    assert(
-      _callState != null || widget.callContentBuilder == null,
-      'Call state is supposed to be available to build the call content widget.',
-    );
-
     return widget.callContentWidgetBuilder?.call(context, call) ??
-        widget.callContentBuilder?.call(context, call, _callState!) ??
         StreamCallContent(
           call: call,
-          callState: _callState,
           onBackPressed: widget.onBackPressed,
           onLeaveCallTap: widget.onLeaveCallTap,
           pictureInPictureConfiguration: widget.pictureInPictureConfiguration,

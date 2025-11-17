@@ -13,9 +13,6 @@ import 'package:equatable/equatable.dart';
 /// StreamCallType.custom('custom_type');
 /// ```
 class StreamCallType with EquatableMixin {
-  @Deprecated('Use StreamCallType.defaultType() instead')
-  factory StreamCallType() => const StreamCallType._('default');
-
   const StreamCallType._(this.value);
 
   factory StreamCallType.defaultType() => const StreamCallType._('default');
