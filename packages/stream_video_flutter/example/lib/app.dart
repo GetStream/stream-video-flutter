@@ -130,6 +130,8 @@ class _MyAppState extends State<MyApp> {
   final _compositeSubscription = CompositeSubscription();
 
   void _observeRingingEvents() {
+    _compositeSubscription.clear();
+
     // On mobile we depend on call kit notifications.
     // On desktop and web they are (currently) not available, so we depend on a
     // websocket which can receive a call when the app is open.
