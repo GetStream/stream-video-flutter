@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "stream_video_screen_sharing",
     platforms: [
-        .iOS("15.0")  
+        .iOS("14.0")
     ],
     products: [
         .library(name: "stream-video-screen-sharing", targets: ["stream_video_screen_sharing"])

@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "stream_video_push_notification",
     platforms: [
-        .iOS("15.0")  
+        .iOS("14.0")
     ],
     products: [
         .library(

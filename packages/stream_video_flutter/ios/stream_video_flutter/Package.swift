@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "stream_video_flutter",
     platforms: [
-        .iOS("15.0")  
+        .iOS("14.0")
     ],
     products: [
         .library(name: "stream-video-flutter", type: .static, targets: ["stream_video_flutter"])
@@ -26,7 +26,7 @@ let package = Package(
             ],
             swiftSettings: [
                 .unsafeFlags(["-Xfrontend", "-warn-concurrency"]),
-                .unsafeFlags(["-Xfrontend", "-strict-concurrency=minimal"])
+                .unsafeFlags(["-Xfrontend", "-strict-concurrency=minimal"]),
             ]
         )
     ],
