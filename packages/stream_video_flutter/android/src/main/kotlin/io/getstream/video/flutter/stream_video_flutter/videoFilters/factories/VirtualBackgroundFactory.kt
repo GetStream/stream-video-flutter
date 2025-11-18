@@ -106,7 +106,9 @@ private class VirtualBackgroundVideoFilter(
                 loadImageAssetAsBitmap(appContext, backgroundImageUrlString)
             } else {
                 val url = URL(backgroundImageUrlString)
-                BitmapFactory.decodeStream(url.openConnection().getInputStream())
+                url.openConnection().getInputStream().use { input ->
+                    BitmapFactory.decodeStream(input)
+                }
             }
         } catch (e: IOException) {
             Log.e(TAG, "cant get bitmap for image url: $backgroundImageUrlString", e)
