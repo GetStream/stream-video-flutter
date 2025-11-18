@@ -37,7 +37,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
   streamLog.i(_tag, () => '[connectUser] user: $user');
 
   final tokenResponse = await const TokenService().loadToken(
-    environment: Environment.prontoStaging,
+    environment: Environment.pronto,
     userId: user.id,
   );
 
