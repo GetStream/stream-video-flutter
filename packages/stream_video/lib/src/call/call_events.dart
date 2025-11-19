@@ -629,11 +629,13 @@ class StreamCallUserMutedEvent extends StreamCallEvent {
     required this.createdAt,
     required this.fromUserId,
     required this.mutedUserIds,
+    this.reason,
   });
 
   final DateTime createdAt;
   final String fromUserId;
   final List<String> mutedUserIds;
+  final String? reason;
 
   @override
   List<Object?> get props => [
@@ -641,6 +643,7 @@ class StreamCallUserMutedEvent extends StreamCallEvent {
     createdAt,
     fromUserId,
     mutedUserIds,
+    reason,
   ];
 }
 
@@ -926,6 +929,9 @@ class StreamCallClosedCaptionsEvent extends StreamCallEvent {
     required this.speakerId,
     required this.text,
     required this.user,
+    required this.language,
+    required this.translated,
+    this.service,
   });
 
   final DateTime createdAt;
@@ -934,6 +940,9 @@ class StreamCallClosedCaptionsEvent extends StreamCallEvent {
   final String speakerId;
   final String text;
   final CallUser user;
+  final String language;
+  final String? service;
+  final bool translated;
 
   @override
   List<Object?> get props => [
@@ -944,6 +953,9 @@ class StreamCallClosedCaptionsEvent extends StreamCallEvent {
     speakerId,
     text,
     user,
+    language,
+    service,
+    translated,
   ];
 }
 
@@ -1214,6 +1226,7 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
     required this.user,
     required this.participant,
     required this.duration,
+    this.reason,
   });
 
   final DateTime createdAt;
@@ -1221,6 +1234,7 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
   final CallUser user;
   final CallParticipant participant;
   final Duration duration;
+  final String? reason;
 
   @override
   List<Object?> get props => [
@@ -1230,6 +1244,7 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
     participant,
     user,
     duration,
+    reason,
   ];
 }
 
@@ -1448,6 +1463,9 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           speakerId: event.speakerId,
           text: event.text,
           user: event.user,
+          language: event.language,
+          translated: event.translated,
+          service: event.service,
         ),
       final CoordinatorCallBroadcastingStartedEvent event =>
         StreamCallBroadcastingStartedEvent(
@@ -1528,6 +1546,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           user: event.user,
           participant: event.participant,
           duration: event.duration,
+          reason: event.reason,
         ),
       final CoordinatorCallLiveStartedEvent event => StreamCallLiveStartedEvent(
         event.callCid,
@@ -1607,6 +1626,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
         createdAt: event.createdAt,
         fromUserId: event.fromUserId,
         mutedUserIds: event.mutedUserIds,
+        reason: event.reason,
       ),
       final CoordinatorCallRecordingReadyEvent event =>
         StreamCallRecordingReadyEvent(

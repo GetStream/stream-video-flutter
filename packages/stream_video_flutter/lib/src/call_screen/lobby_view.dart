@@ -140,7 +140,10 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     _eventSubscription = (widget.streamVideo ?? StreamVideo.instance).events
         .listen((event) {
           if (event is CoordinatorCallSessionParticipantLeftEvent) {
-            _logger.d(() => '[listenEvents] #userLeft; user: ${event.user}');
+            _logger.d(
+              () =>
+                  '[listenEvents] #userLeft; user: ${event.user}, reason: ${event.reason}',
+            );
             _participants.removeWhere(
               (it) => it.userSessionId == event.participant.userSessionId,
             );

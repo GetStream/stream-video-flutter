@@ -14,19 +14,37 @@ class CallClosedCaption {
   /// Returns a new [CallClosedCaption] instance.
   CallClosedCaption({
     required this.endTime,
+    required this.id,
+    required this.language,
+    this.service,
     required this.speakerId,
     required this.startTime,
     required this.text,
+    required this.translated,
     required this.user,
   });
 
   DateTime endTime;
+
+  String id;
+
+  String language;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? service;
 
   String speakerId;
 
   DateTime startTime;
 
   String text;
+
+  bool translated;
 
   UserResponse user;
 
@@ -35,30 +53,46 @@ class CallClosedCaption {
       identical(this, other) ||
       other is CallClosedCaption &&
           other.endTime == endTime &&
+          other.id == id &&
+          other.language == language &&
+          other.service == service &&
           other.speakerId == speakerId &&
           other.startTime == startTime &&
           other.text == text &&
+          other.translated == translated &&
           other.user == user;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (endTime.hashCode) +
+      (id.hashCode) +
+      (language.hashCode) +
+      (service == null ? 0 : service!.hashCode) +
       (speakerId.hashCode) +
       (startTime.hashCode) +
       (text.hashCode) +
+      (translated.hashCode) +
       (user.hashCode);
 
   @override
   String toString() =>
-      'CallClosedCaption[endTime=$endTime, speakerId=$speakerId, startTime=$startTime, text=$text, user=$user]';
+      'CallClosedCaption[endTime=$endTime, id=$id, language=$language, service=$service, speakerId=$speakerId, startTime=$startTime, text=$text, translated=$translated, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'end_time'] = this.endTime.toUtc().toIso8601String();
+    json[r'id'] = this.id;
+    json[r'language'] = this.language;
+    if (this.service != null) {
+      json[r'service'] = this.service;
+    } else {
+      json[r'service'] = null;
+    }
     json[r'speaker_id'] = this.speakerId;
     json[r'start_time'] = this.startTime.toUtc().toIso8601String();
     json[r'text'] = this.text;
+    json[r'translated'] = this.translated;
     json[r'user'] = this.user;
     return json;
   }
@@ -85,9 +119,13 @@ class CallClosedCaption {
 
       return CallClosedCaption(
         endTime: mapDateTime(json, r'end_time', r'')!,
+        id: mapValueOfType<String>(json, r'id')!,
+        language: mapValueOfType<String>(json, r'language')!,
+        service: mapValueOfType<String>(json, r'service'),
         speakerId: mapValueOfType<String>(json, r'speaker_id')!,
         startTime: mapDateTime(json, r'start_time', r'')!,
         text: mapValueOfType<String>(json, r'text')!,
+        translated: mapValueOfType<bool>(json, r'translated')!,
         user: UserResponse.fromJson(json[r'user'])!,
       );
     }
@@ -146,9 +184,12 @@ class CallClosedCaption {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'end_time',
+    'id',
+    'language',
     'speaker_id',
     'start_time',
     'text',
+    'translated',
     'user',
   };
 }

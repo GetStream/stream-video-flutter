@@ -576,6 +576,45 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
+  @override
+  Future<Result<List<String>>> ringCall({
+    required StreamCallCid callCid,
+    required List<String> membersIds,
+    bool? video,
+  }) async {
+    try {
+      _logger.d(
+        () =>
+            '[ringCall] cid: $callCid, membersIds: $membersIds, video: $video',
+      );
+
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[ringCall] no connection established');
+        return connectionResult;
+      }
+
+      final result = await _defaultApi.ringCall(
+        callCid.type.value,
+        callCid.id,
+        open.RingCallRequest(
+          membersIds: membersIds,
+          video: video,
+        ),
+      );
+
+      _logger.v(() => '[ringCall] completed: $result');
+      if (result == null) {
+        return Result.error('ringCall result is null');
+      }
+
+      return Result.success(result.membersIds);
+    } catch (e, stk) {
+      _logger.e(() => '[ringCall] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
   /// Sends a custom event with encoded JSON data.
   @override
   Future<Result<None>> sendCustomEvent({

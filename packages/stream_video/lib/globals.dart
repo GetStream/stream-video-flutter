@@ -3,7 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as webrtc;
 
 const String streamSdkName = 'stream-flutter';
 const String streamVideoVersion = '0.11.2';
-const String openapiModelsVersion = '190.7.0';
+const String openapiModelsVersion = '202.0.0';
 const String protocolModelsVersion = '1.40.1';
 const String androidWebRTCVersion = webrtc.androidWebRTCVersion;
 const String iosWebRTCVersion = webrtc.iosWebRTCVersion;
