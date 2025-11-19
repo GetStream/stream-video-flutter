@@ -1,7 +1,7 @@
 ## Unreleased
 
 ✅ Added
-- Introduced a new method in the `Call` class that allows ringing individual members of an existing call. Use `call.ring(userId: ['userId'])` to have the backend send a VoIP/ringing push notification to the user's devices. Note: the user must first be a member of the call (use `call.addMember()` if needed).
+- Introduced a new method in the `Call` class that allows ringing individual members of an existing call. Use `call.ring(userId: ['userId'])` to have the backend send a VoIP/ringing push notification to the user's devices. Note: the user must first be a member of the call (use `call.addMembers()` if needed).
 
 ## 0.11.2
 
