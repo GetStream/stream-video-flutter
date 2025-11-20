@@ -19,6 +19,9 @@ In this release, we removed the dependency on `flutter_callkit_incoming`, which 
 - `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
 - `CallKitEvent` (type) → `RingingEvent`
 
+✨ Improvements
+- [Android] Enhanced video filter performance to deliver smoother frame rates during application.
+
 ## 0.11.2
 
 🐞 Fixed
