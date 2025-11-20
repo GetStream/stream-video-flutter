@@ -54,6 +54,8 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     /// active track.
     private let trackStateAdapter: StreamPictureInPictureTrackStateAdapter = .init()
 
+    private var shouldCleanupAfterStop: Bool = false
+
     // MARK: - Lifecycle
 
     /// Initializes the controller and creates the content view
@@ -121,9 +123,30 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     public func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
+        if shouldCleanupAfterStop {
+            shouldCleanupAfterStop = false
+            track = nil
+            sourceView = nil
+        }
+
     }
 
     // MARK: - Public API
+
+    public func stopPictureInPictureAndCleanup() {
+        let isActive = pictureInPictureController?.isPictureInPictureActive == true
+
+        if isActive && !shouldCleanupAfterStop {
+            shouldCleanupAfterStop = true
+            pictureInPictureController?.stopPictureInPicture()
+        } else {
+            if track != nil || sourceView != nil {
+                shouldCleanupAfterStop = false
+                track = nil
+                sourceView = nil
+            }
+        }
+    }
 
     /// Updates participant information and refreshes overlay
     /// - Note: Only available on iOS 15.0+. Earlier versions will ignore this call.
