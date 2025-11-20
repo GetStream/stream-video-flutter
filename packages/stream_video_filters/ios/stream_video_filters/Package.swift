@@ -24,7 +24,7 @@ let package = Package(
             ],
             resources: [
                 .process("PrivacyInfo.xcprivacy")
-            ]
+            ],
             swiftSettings: [
                 .unsafeFlags(["-Xfrontend", "-warn-concurrency"]),
                 .unsafeFlags(["-Xfrontend", "-strict-concurrency=minimal"]),

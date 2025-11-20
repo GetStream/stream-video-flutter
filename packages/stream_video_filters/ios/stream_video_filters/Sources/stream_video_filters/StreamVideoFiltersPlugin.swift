@@ -35,29 +35,32 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
 
       result(nil)
     case "registerImageEffectProcessors":
-      if #available(iOS 15.0, *) {
-        if let arguments = call.arguments as? [String: Any] {
-          guard let backgroundImageUrl = arguments["backgroundImageUrl"] as? String
-          else {
-            result(
-              FlutterError(
-                code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil)
-            )
-            return
-          }
-
-          ProcessorProvider.addProcessor(
-            ImageBackgroundVideoFrameProcessor(backgroundImageUrl),
-            forName: "VirtualBackground-\(backgroundImageUrl)")
-
-          result(nil)
-        }
-
-        result(nil)
-
-      } else {
+      guard #available(iOS 15.0, *) else {
         print("Image overlay effects are not supported on iOS versions earlier than 15.0")
+        result(nil)
+        return
       }
+
+      guard
+        let arguments = call.arguments as? [String: Any],
+        let backgroundImageUrl = arguments["backgroundImageUrl"] as? String
+      else {
+        result(
+          FlutterError(
+            code: "INVALID_ARGUMENT",
+            message: "Invalid argument",
+            details: nil
+          )
+        )
+        return
+      }
+
+      ProcessorProvider.addProcessor(
+        ImageBackgroundVideoFrameProcessor(backgroundImageUrl),
+        forName: "VirtualBackground-\(backgroundImageUrl)"
+      )
+
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }
