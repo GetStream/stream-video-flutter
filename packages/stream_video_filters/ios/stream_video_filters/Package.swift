@@ -14,13 +14,13 @@ let package = Package(
     dependencies: [
         // When built via Flutter's SPM integration, this package lives as a sibling under
         // ios/Flutter/ephemeral/Packages/.packages/
-        .package(name: "stream_webrtc_flutter", path: "../stream_webrtc_flutter"),
+        .package(name: "stream_webrtc_flutter", path: "../stream_webrtc_flutter")
     ],
     targets: [
         .target(
             name: "stream_video_filters",
             dependencies: [
-                .product(name: "stream-webrtc-flutter", package: "stream_webrtc_flutter"),
+                .product(name: "stream-webrtc-flutter", package: "stream_webrtc_flutter")
             ],
             resources: [
                 .process("PrivacyInfo.xcprivacy")
@@ -30,6 +30,6 @@ let package = Package(
                 .unsafeFlags(["-Xfrontend", "-strict-concurrency=minimal"]),
             ]
         )
-    ]
+    ],
     swiftLanguageVersions: [.version("5.9")]
 )
