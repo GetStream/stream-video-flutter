@@ -130,8 +130,9 @@ class StreamPictureInPictureNativeView: NSObject, FlutterPlatformView {
             }
             result(nil)
         case "callEnded":
-            self.pictureInPictureController?.track = nil
-            self.pictureInPictureController?.sourceView = nil
+            DispatchQueue.main.async {
+                self.pictureInPictureController?.stopPictureInPictureAndCleanup()
+            }
             result(nil)
         default:
             result(FlutterMethodNotImplemented)
