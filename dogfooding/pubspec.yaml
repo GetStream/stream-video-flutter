@@ -37,6 +37,7 @@ dependencies:
   share_plus: ^11.0.0
   shared_preferences: ^2.5.3
   stream_chat_flutter: ^9.17.0
+  stream_video_filters: ^0.11.2
   stream_video_flutter: ^0.11.2
   stream_video_noise_cancellation: ^0.11.2
   stream_video_push_notification: ^0.11.2
@@ -45,6 +46,8 @@ dependencies:
 dependency_overrides:
   stream_video:
     path: ../packages/stream_video
+  stream_video_filters:
+    path: ../packages/stream_video_filters
   stream_video_flutter:
     path: ../packages/stream_video_flutter
   stream_video_noise_cancellation:

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_filters/video_effects_manager.dart';
 
 import '../../dogfooding_app_channel.dart';
 import '../../theme/app_palette.dart';

@@ -52,7 +52,6 @@ export 'src/renderer/video_renderer.dart';
 export 'src/screen_share/screen_share.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart';
-export 'src/video_effects/video_effects_manager.dart';
 export 'src/widgets/floating_view/floating_view_alignment.dart';
 export 'src/widgets/floating_view/floating_view_container.dart';
 export 'src/widgets/partial_call_state_builder.dart';
