@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
+import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';

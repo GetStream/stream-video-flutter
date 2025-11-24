@@ -1,0 +1,68 @@
+group = "io.getstream.video.flutter.stream_video_filters"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.2.0"
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.12.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+    namespace = "io.getstream.video.flutter.stream_video_filters"
+
+    compileSdk = flutter.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 21
+    }
+
+    dependencies {
+        implementation "io.github.crow-misia.libyuv:libyuv-android:0.43.0"
+        implementation 'com.google.mlkit:segmentation-selfie:16.0.0-beta6'
+        implementation 'io.getstream:stream-video-webrtc-android:137.0.1'
+        implementation 'io.getstream:stream-video-renderscript-android:0.0.1'
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+}

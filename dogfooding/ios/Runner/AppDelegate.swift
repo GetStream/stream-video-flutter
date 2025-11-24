@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import stream_video_filters
 import stream_video_flutter
 import stream_video_push_notification
 import stream_webrtc_flutter
@@ -57,7 +58,7 @@ import stream_webrtc_flutter
     }
 }
 
-final class GrayScaleVideoFrameProcessor: VideoFilter {
+final class GrayScaleVideoFrameProcessor: stream_video_filters.VideoFilter {
     @available(*, unavailable)
     override public init(
         filter: @escaping (Input) -> CIImage

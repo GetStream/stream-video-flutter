@@ -10,8 +10,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 import io.getstream.video.flutter.stream_video_flutter.StreamFlutterActivity
-import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.VideoFrameProcessorWithBitmapFilter
-import io.getstream.video.flutter.stream_video_flutter.videoFilters.common.BitmapVideoFilter
+import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
+import io.getstream.video.flutter.stream_video_filters.common.BitmapVideoFilter
 import io.getstream.webrtc.flutter.videoEffects.ProcessorProvider
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessorFactoryInterface

@@ -264,11 +264,6 @@ class StreamVideo extends Disposable {
   final StreamVideoOptions _options;
   final String apiKey;
 
-  @Deprecated('Use options.muteVideoWhenInBackground instead')
-  bool get muteVideoWhenInBackground => _options.muteVideoWhenInBackground;
-  @Deprecated('Use options.muteAudioWhenInBackground instead')
-  bool get muteAudioWhenInBackground => _options.muteAudioWhenInBackground;
-
   final MutableClientState _state;
 
   StreamVideoOptions get options => _options;

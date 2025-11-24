@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
 // 🌎 Project imports:

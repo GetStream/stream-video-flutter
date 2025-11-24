@@ -2,8 +2,7 @@ import 'package:equatable/equatable.dart';
 
 /// The type of call to be made.
 ///
-/// The default type is [StreamCallType()] which is a normal call.
-///
+/// [StreamCallType.defaultType()] is used for default calls.
 /// [StreamCallType.liveStream()] is used for live streaming.
 /// [StreamCallType.audioRoom()] is used for audio rooms.
 /// [StreamCallType.development()] is used for development.
@@ -13,9 +12,6 @@ import 'package:equatable/equatable.dart';
 /// StreamCallType.custom('custom_type');
 /// ```
 class StreamCallType with EquatableMixin {
-  @Deprecated('Use StreamCallType.defaultType() instead')
-  factory StreamCallType() => const StreamCallType._('default');
-
   const StreamCallType._(this.value);
 
   factory StreamCallType.defaultType() => const StreamCallType._('default');
