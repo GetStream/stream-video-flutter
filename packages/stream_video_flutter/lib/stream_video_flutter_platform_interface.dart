@@ -60,24 +60,4 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError('isRunningService has not been implemented.');
   }
-
-  Future<bool?> isBackgroundEffectSupported() {
-    throw UnimplementedError(
-      'isBackgroundEffectSupported has not been implemented.',
-    );
-  }
-
-  Future<void> registerBlurEffectProcessors() {
-    throw UnimplementedError(
-      'registerBlurEffectProcessors has not been implemented.',
-    );
-  }
-
-  Future<void> registerImageEffectProcessors({
-    required String backgroundImageUrl,
-  }) {
-    throw UnimplementedError(
-      'registerImageEffectProcessors has not been implemented.',
-    );
-  }
 }

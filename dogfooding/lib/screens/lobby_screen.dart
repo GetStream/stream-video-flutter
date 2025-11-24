@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';

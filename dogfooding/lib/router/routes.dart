@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../screens/call_participants_list.dart';

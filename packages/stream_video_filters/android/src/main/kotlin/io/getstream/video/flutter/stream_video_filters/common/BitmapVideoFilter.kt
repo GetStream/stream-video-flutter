@@ -1,4 +1,4 @@
-package io.getstream.video.flutter.stream_video_flutter.videoFilters.common
+package io.getstream.video.flutter.stream_video_filters.common
 
 import android.graphics.Bitmap
 

@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-
-import '../../stream_video_flutter_platform_interface.dart';
+import 'stream_video_filters.dart';
 
 const _tag = 'SVF:BackgroundFilters';
 
@@ -36,9 +35,7 @@ class StreamVideoEffectsManager {
   /// Checks if the background effect is supported on the current device.
   Future<bool> isSupported() async {
     try {
-      return await StreamVideoFlutterPlatform.instance
-              .isBackgroundEffectSupported() ??
-          false;
+      return await StreamVideoFilters().isBackgroundEffectSupported() ?? false;
     } on MissingPluginException catch (_) {
       return false;
     }
@@ -134,7 +131,7 @@ class StreamVideoEffectsManager {
   /// Ensures that the blur effect processor is registered.
   Future<void> ensureBlurEffectRegistered() async {
     if (!isBlurRegistered) {
-      await StreamVideoFlutterPlatform.instance.registerBlurEffectProcessors();
+      await StreamVideoFilters().registerBlurEffectProcessors();
       isBlurRegistered = true;
     }
   }
@@ -142,7 +139,7 @@ class StreamVideoEffectsManager {
   /// Ensures that the image effect processor is registered.
   Future<void> ensureImageEffectRegistered(String imageUrl) async {
     if (!isImageRegistered.containsKey(imageUrl)) {
-      await StreamVideoFlutterPlatform.instance.registerImageEffectProcessors(
+      await StreamVideoFilters().registerImageEffectProcessors(
         backgroundImageUrl: imageUrl,
       );
       isImageRegistered[imageUrl] = true;

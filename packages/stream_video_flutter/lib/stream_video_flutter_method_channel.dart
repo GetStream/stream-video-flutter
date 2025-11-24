@@ -109,27 +109,4 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
       },
     );
   }
-
-  @override
-  Future<bool?> isBackgroundEffectSupported() async {
-    return methodChannel.invokeMethod<bool>(
-      'isBackgroundEffectSupported',
-    );
-  }
-
-  @override
-  Future<void> registerBlurEffectProcessors() {
-    return methodChannel.invokeMethod(
-      'registerBlurEffectProcessors',
-    );
-  }
-
-  @override
-  Future<void> registerImageEffectProcessors({
-    required String backgroundImageUrl,
-  }) {
-    return methodChannel.invokeMethod('registerImageEffectProcessors', {
-      'backgroundImageUrl': backgroundImageUrl,
-    });
-  }
 }
