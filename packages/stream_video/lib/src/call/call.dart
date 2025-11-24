@@ -2388,6 +2388,23 @@ class Call {
     );
   }
 
+  /// Sends a ring notification to the provided users who are not already in the call.
+  /// All users should be members of the call.
+  /// If you want to ring user who are not members yet, use [addMembers] first.
+  ///
+  /// - [userIds]: List of user IDs to ring. If empty, rings all members who are not in the call.
+  /// - [video]: Whether to indicate it's a video call.
+  Future<Result<List<String>>> ring({
+    List<String> userIds = const [],
+    bool video = false,
+  }) {
+    return _coordinatorClient.ringCall(
+      callCid: callCid,
+      membersIds: userIds,
+      video: video,
+    );
+  }
+
   /// Returns true if the current user has the [CallPermission] supplied.
   bool hasPermission(CallPermission permission) {
     return _permissionsManager.hasPermission(permission);

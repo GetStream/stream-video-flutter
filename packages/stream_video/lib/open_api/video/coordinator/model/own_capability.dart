@@ -40,6 +40,8 @@ class OwnCapability {
   static const removeCallMember = OwnCapability._(r'remove-call-member');
   static const screenshare = OwnCapability._(r'screenshare');
   static const sendAudio = OwnCapability._(r'send-audio');
+  static const sendClosedCaptionsCall =
+      OwnCapability._(r'send-closed-captions-call');
   static const sendVideo = OwnCapability._(r'send-video');
   static const startBroadcastCall = OwnCapability._(r'start-broadcast-call');
   static const startClosedCaptionsCall =
@@ -80,6 +82,7 @@ class OwnCapability {
     removeCallMember,
     screenshare,
     sendAudio,
+    sendClosedCaptionsCall,
     sendVideo,
     startBroadcastCall,
     startClosedCaptionsCall,
@@ -170,6 +173,8 @@ class OwnCapabilityTypeTransformer {
           return OwnCapability.screenshare;
         case r'send-audio':
           return OwnCapability.sendAudio;
+        case r'send-closed-captions-call':
+          return OwnCapability.sendClosedCaptionsCall;
         case r'send-video':
           return OwnCapability.sendVideo;
         case r'start-broadcast-call':

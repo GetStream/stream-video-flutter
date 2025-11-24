@@ -91,6 +91,12 @@ abstract class CoordinatorClient {
     int? membersLimit,
   });
 
+  Future<Result<List<String>>> ringCall({
+    required StreamCallCid callCid,
+    required List<String> membersIds,
+    bool? video,
+  });
+
   Future<Result<None>> acceptCall({required StreamCallCid cid});
 
   Future<Result<None>> rejectCall({required StreamCallCid cid, String? reason});

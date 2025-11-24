@@ -34,6 +34,7 @@ class CallResponse {
     this.team,
     this.thumbnails,
     required this.transcribing,
+    required this.translating,
     required this.type,
     required this.updatedAt,
   });
@@ -128,6 +129,8 @@ class CallResponse {
 
   bool transcribing;
 
+  bool translating;
+
   /// The type of call
   String type;
 
@@ -159,6 +162,7 @@ class CallResponse {
           other.team == team &&
           other.thumbnails == thumbnails &&
           other.transcribing == transcribing &&
+          other.translating == translating &&
           other.type == type &&
           other.updatedAt == updatedAt;
 
@@ -186,12 +190,13 @@ class CallResponse {
       (team == null ? 0 : team!.hashCode) +
       (thumbnails == null ? 0 : thumbnails!.hashCode) +
       (transcribing.hashCode) +
+      (translating.hashCode) +
       (type.hashCode) +
       (updatedAt.hashCode);
 
   @override
   String toString() =>
-      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, channelCid=$channelCid, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, channelCid=$channelCid, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, translating=$translating, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -244,6 +249,7 @@ class CallResponse {
       json[r'thumbnails'] = null;
     }
     json[r'transcribing'] = this.transcribing;
+    json[r'translating'] = this.translating;
     json[r'type'] = this.type;
     json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
@@ -296,6 +302,7 @@ class CallResponse {
         team: mapValueOfType<String>(json, r'team'),
         thumbnails: ThumbnailResponse.fromJson(json[r'thumbnails']),
         transcribing: mapValueOfType<bool>(json, r'transcribing')!,
+        translating: mapValueOfType<bool>(json, r'translating')!,
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
@@ -368,6 +375,7 @@ class CallResponse {
     'recording',
     'settings',
     'transcribing',
+    'translating',
     'type',
     'updated_at',
   };

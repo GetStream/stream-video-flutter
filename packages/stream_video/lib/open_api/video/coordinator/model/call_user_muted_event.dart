@@ -17,6 +17,7 @@ class CallUserMutedEvent {
     required this.createdAt,
     required this.fromUserId,
     this.mutedUserIds = const [],
+    required this.reason,
     this.type = 'call.user_muted',
   });
 
@@ -27,6 +28,8 @@ class CallUserMutedEvent {
   String fromUserId;
 
   List<String> mutedUserIds;
+
+  String reason;
 
   /// The type of event: \"call.user_muted\" in this case
   String type;
@@ -39,6 +42,7 @@ class CallUserMutedEvent {
           other.createdAt == createdAt &&
           other.fromUserId == fromUserId &&
           _deepEquality.equals(other.mutedUserIds, mutedUserIds) &&
+          other.reason == reason &&
           other.type == type;
 
   @override
@@ -48,11 +52,12 @@ class CallUserMutedEvent {
       (createdAt.hashCode) +
       (fromUserId.hashCode) +
       (mutedUserIds.hashCode) +
+      (reason.hashCode) +
       (type.hashCode);
 
   @override
   String toString() =>
-      'CallUserMutedEvent[callCid=$callCid, createdAt=$createdAt, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, type=$type]';
+      'CallUserMutedEvent[callCid=$callCid, createdAt=$createdAt, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, reason=$reason, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -60,6 +65,7 @@ class CallUserMutedEvent {
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     json[r'from_user_id'] = this.fromUserId;
     json[r'muted_user_ids'] = this.mutedUserIds;
+    json[r'reason'] = this.reason;
     json[r'type'] = this.type;
     return json;
   }
@@ -93,6 +99,7 @@ class CallUserMutedEvent {
                 .cast<String>()
                 .toList(growable: false)
             : const [],
+        reason: mapValueOfType<String>(json, r'reason')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -154,6 +161,7 @@ class CallUserMutedEvent {
     'created_at',
     'from_user_id',
     'muted_user_ids',
+    'reason',
     'type',
   };
 }

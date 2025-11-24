@@ -15,6 +15,7 @@ class AudioSettingsRequest {
   AudioSettingsRequest({
     this.accessRequestEnabled,
     required this.defaultDevice,
+    this.hifiAudioEnabled,
     this.micDefaultOn,
     this.noiseCancellation,
     this.opusDtxEnabled,
@@ -31,6 +32,14 @@ class AudioSettingsRequest {
   bool? accessRequestEnabled;
 
   AudioSettingsRequestDefaultDeviceEnum defaultDevice;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? hifiAudioEnabled;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -78,6 +87,7 @@ class AudioSettingsRequest {
       other is AudioSettingsRequest &&
           other.accessRequestEnabled == accessRequestEnabled &&
           other.defaultDevice == defaultDevice &&
+          other.hifiAudioEnabled == hifiAudioEnabled &&
           other.micDefaultOn == micDefaultOn &&
           other.noiseCancellation == noiseCancellation &&
           other.opusDtxEnabled == opusDtxEnabled &&
@@ -89,6 +99,7 @@ class AudioSettingsRequest {
       // ignore: unnecessary_parenthesis
       (accessRequestEnabled == null ? 0 : accessRequestEnabled!.hashCode) +
       (defaultDevice.hashCode) +
+      (hifiAudioEnabled == null ? 0 : hifiAudioEnabled!.hashCode) +
       (micDefaultOn == null ? 0 : micDefaultOn!.hashCode) +
       (noiseCancellation == null ? 0 : noiseCancellation!.hashCode) +
       (opusDtxEnabled == null ? 0 : opusDtxEnabled!.hashCode) +
@@ -97,7 +108,7 @@ class AudioSettingsRequest {
 
   @override
   String toString() =>
-      'AudioSettingsRequest[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
+      'AudioSettingsRequest[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, hifiAudioEnabled=$hifiAudioEnabled, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -107,6 +118,11 @@ class AudioSettingsRequest {
       json[r'access_request_enabled'] = null;
     }
     json[r'default_device'] = this.defaultDevice;
+    if (this.hifiAudioEnabled != null) {
+      json[r'hifi_audio_enabled'] = this.hifiAudioEnabled;
+    } else {
+      json[r'hifi_audio_enabled'] = null;
+    }
     if (this.micDefaultOn != null) {
       json[r'mic_default_on'] = this.micDefaultOn;
     } else {
@@ -160,6 +176,7 @@ class AudioSettingsRequest {
             mapValueOfType<bool>(json, r'access_request_enabled'),
         defaultDevice: AudioSettingsRequestDefaultDeviceEnum.fromJson(
             json[r'default_device'])!,
+        hifiAudioEnabled: mapValueOfType<bool>(json, r'hifi_audio_enabled'),
         micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on'),
         noiseCancellation:
             NoiseCancellationSettings.fromJson(json[r'noise_cancellation']),
