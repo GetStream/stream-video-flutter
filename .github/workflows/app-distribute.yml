@@ -57,7 +57,7 @@ jobs:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -108,7 +108,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_android == true }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: ⚙️ Set up Java
         uses: actions/setup-java@v5
@@ -166,7 +166,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_web == true }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: config git
         run: |
