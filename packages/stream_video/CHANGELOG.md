@@ -1,5 +1,24 @@
 ## Unreleased
 
+🚧 Breaking changes
+- Removed deprecated APIs and parameters. Migrate as follows:
+  - `StreamVideo.muteVideoWhenInBackground` → `StreamVideo.options.muteVideoWhenInBackground`
+  - `StreamVideo.muteAudioWhenInBackground` → `StreamVideo.options.muteAudioWhenInBackground`
+  - Default `StreamCallType()` constructor → `StreamCallType.defaultType()`
+  - `Call.setParticipantPinned()` → `Call.setParticipantPinnedLocally()` (local-only pin)
+  - Removed deprecated `startRtmpBroadcasts` parameter from `Call.goLive()`
+  - Removed `localParticipant` parameter from `AddReactionOption` constructor
+  - Removed multiple deprecated builder callbacks in favor of [callbacks that don't provide the state object](https://github.com/GetStream/stream-video-flutter/pull/983); corresponding state object parameters in affected widgets have been removed.
+
+### API renames and type changes
+
+- `onCallKitEvent` → `onRingingEvent`
+- `observeCoreCallKitEvents` → `observeCoreRingingEvents`
+- `observeCallAcceptCallKitEvent` → `observeCallAcceptRingingEvent`
+- `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
+- `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
+- `CallKitEvent` (type) → `RingingEvent`
+
 ✅ Added
 - Introduced a new method in the `Call` class that allows ringing individual members of an existing call. Use `call.ring(userId: ['userId'])` to have the backend send a VoIP/ringing push notification to the user's devices. Note: the user must first be a member of the call (use `call.addMembers()` if needed).
 
@@ -20,17 +39,6 @@
 - [Web] Added `checkIfAudioOutputChangeSupported()` to the `Call` class to check whether the browser supports changing the audio output device.
 
 ## 0.11.1
-
-🚧 Breaking changes
-
-### API renames and type changes
-
-- `onCallKitEvent` → `onRingingEvent`
-- `observeCoreCallKitEvents` → `observeCoreRingingEvents`
-- `observeCallAcceptCallKitEvent` → `observeCallAcceptRingingEvent`
-- `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
-- `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
-- `CallKitEvent` (type) → `RingingEvent`
 
 🔄 Changed
 - The `byParticipantSource` participant sorting now accepts a list of sources. The default sorting for `speaker` and `livestream` presets now include other ingress sources.
