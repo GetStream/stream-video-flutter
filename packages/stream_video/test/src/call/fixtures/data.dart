@@ -210,6 +210,9 @@ class SampleCallData {
       speakerId: speakerId,
       text: text,
       user: user ?? testCallUser1,
+      language: 'en',
+      service: 'default',
+      translated: false,
     );
   }
 }

@@ -548,6 +548,8 @@ class ApiClient {
           return PinResponse.fromJson(value);
         case 'PrivacySettings':
           return PrivacySettings.fromJson(value);
+        case 'PublishedTrackFlags':
+          return PublishedTrackFlags.fromJson(value);
         case 'PublisherStatsResponse':
           return PublisherStatsResponse.fromJson(value);
         case 'PushPreferences':
@@ -606,6 +608,10 @@ class ApiClient {
           return RequestPermissionResponse.fromJson(value);
         case 'DurationResponse':
           return DurationResponse.fromJson(value);
+        case 'RingCallRequest':
+          return RingCallRequest.fromJson(value);
+        case 'RingCallResponse':
+          return RingCallResponse.fromJson(value);
         case 'RingSettingsRequest':
           return RingSettingsRequest.fromJson(value);
         case 'RingSettingsResponse':

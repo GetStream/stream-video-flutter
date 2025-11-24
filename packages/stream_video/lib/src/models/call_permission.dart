@@ -34,6 +34,7 @@ enum CallPermission {
   changeMaxDuration('change-max-duration'),
   startFrameRecordCall('start-frame-record-call'),
   stopFrameRecordCall('stop-frame-record-call'),
+  sendClosedCaptionsCall('send-closed-captions-call'),
   unknown('unknown');
 
   const CallPermission(this.alias);

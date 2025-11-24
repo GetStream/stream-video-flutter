@@ -715,6 +715,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
     required this.user,
     required this.participant,
     required this.duration,
+    this.reason,
   });
 
   @override
@@ -724,6 +725,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
   final CallUser user;
   final CallParticipant participant;
   final Duration duration;
+  final String? reason;
 
   @override
   List<Object?> get props => [
@@ -733,6 +735,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
     participant,
     user,
     duration,
+    reason,
   ];
 }
 
@@ -772,6 +775,9 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
     required this.speakerId,
     required this.text,
     required this.user,
+    required this.language,
+    required this.translated,
+    this.service,
   });
 
   @override
@@ -783,6 +789,10 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
   final String text;
   final CallUser user;
 
+  final String language;
+  final String? service;
+  final bool translated;
+
   @override
   List<Object?> get props => [
     ...super.props,
@@ -792,6 +802,9 @@ class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
     speakerId,
     text,
     user,
+    language,
+    translated,
+    service,
   ];
 }
 
@@ -1045,6 +1058,7 @@ class CoordinatorCallUserMutedEvent extends CoordinatorCallEvent {
     required this.createdAt,
     required this.fromUserId,
     required this.mutedUserIds,
+    this.reason,
   });
 
   @override
@@ -1052,6 +1066,7 @@ class CoordinatorCallUserMutedEvent extends CoordinatorCallEvent {
   final DateTime createdAt;
   final String fromUserId;
   final List<String> mutedUserIds;
+  final String? reason;
 
   @override
   List<Object?> get props => [
@@ -1059,6 +1074,7 @@ class CoordinatorCallUserMutedEvent extends CoordinatorCallEvent {
     createdAt,
     fromUserId,
     mutedUserIds,
+    reason,
   ];
 }
 

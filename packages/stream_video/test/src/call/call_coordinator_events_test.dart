@@ -1261,6 +1261,8 @@ void main() {
             speakerId: 'speaker1',
             text: 'Hello, this is a test caption',
             user: SampleCallData.testCallUser1,
+            language: 'en',
+            translated: false,
           ),
         );
 
@@ -1288,6 +1290,8 @@ void main() {
           speakerId: 'speaker1',
           text: 'Duplicate caption',
           user: SampleCallData.testCallUser1,
+          language: 'en',
+          translated: false,
         );
 
         // Emit the first caption
@@ -1325,6 +1329,8 @@ void main() {
               speakerId: 'speaker$i',
               text: 'Caption $i',
               user: SampleCallData.testCallUser1,
+              language: 'en',
+              translated: false,
             ),
           );
           await Future<void>.delayed(Duration.zero);
@@ -1353,6 +1359,8 @@ void main() {
             speakerId: 'speaker1',
             text: 'Temporary caption',
             user: SampleCallData.testCallUser1,
+            language: 'en',
+            translated: false,
           ),
         );
 
