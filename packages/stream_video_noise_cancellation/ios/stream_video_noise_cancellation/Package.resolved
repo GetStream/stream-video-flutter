@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "stream-video-noise-cancellation-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/GetStream/stream-video-noise-cancellation-swift.git",
+      "state" : {
+        "revision" : "bef7ed4316f7994aca107dbccf6ae0137d07962e",
+        "version" : "1.0.3"
+      }
+    }
+  ],
+  "version" : 2
+}

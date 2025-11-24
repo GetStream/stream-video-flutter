@@ -13,7 +13,7 @@ Official Screen Sharing Plugin for Stream Video.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'getstream.io' => 'support@getstream.io' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'stream_video_screen_sharing/Sources/stream_video_screen_sharing/**/*.swift'
   s.dependency 'Flutter'
   s.platform = :ios, '14.0'
 

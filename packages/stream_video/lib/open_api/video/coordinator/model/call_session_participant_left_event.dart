@@ -17,6 +17,7 @@ class CallSessionParticipantLeftEvent {
     required this.createdAt,
     required this.durationSeconds,
     required this.participant,
+    this.reason,
     required this.sessionId,
     this.type = 'call.session_participant_left',
   });
@@ -29,6 +30,15 @@ class CallSessionParticipantLeftEvent {
   int durationSeconds;
 
   CallParticipantResponse participant;
+
+  /// The reason why the participant left the session
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? reason;
 
   /// Call session ID
   String sessionId;
@@ -44,6 +54,7 @@ class CallSessionParticipantLeftEvent {
           other.createdAt == createdAt &&
           other.durationSeconds == durationSeconds &&
           other.participant == participant &&
+          other.reason == reason &&
           other.sessionId == sessionId &&
           other.type == type;
 
@@ -54,12 +65,13 @@ class CallSessionParticipantLeftEvent {
       (createdAt.hashCode) +
       (durationSeconds.hashCode) +
       (participant.hashCode) +
+      (reason == null ? 0 : reason!.hashCode) +
       (sessionId.hashCode) +
       (type.hashCode);
 
   @override
   String toString() =>
-      'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, durationSeconds=$durationSeconds, participant=$participant, sessionId=$sessionId, type=$type]';
+      'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, durationSeconds=$durationSeconds, participant=$participant, reason=$reason, sessionId=$sessionId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -67,6 +79,11 @@ class CallSessionParticipantLeftEvent {
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     json[r'duration_seconds'] = this.durationSeconds;
     json[r'participant'] = this.participant;
+    if (this.reason != null) {
+      json[r'reason'] = this.reason;
+    } else {
+      json[r'reason'] = null;
+    }
     json[r'session_id'] = this.sessionId;
     json[r'type'] = this.type;
     return json;
@@ -97,6 +114,7 @@ class CallSessionParticipantLeftEvent {
         createdAt: mapDateTime(json, r'created_at', r'')!,
         durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
+        reason: mapValueOfType<String>(json, r'reason'),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
       );

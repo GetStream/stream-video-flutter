@@ -29,7 +29,7 @@ class CallUpdatedEvent {
 
   DateTime createdAt;
 
-  /// The type of event: \"call.ended\" in this case
+  /// The type of event: \"call.updated\" in this case
   String type;
 
   @override

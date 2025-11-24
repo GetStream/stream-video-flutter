@@ -284,6 +284,24 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
+  Future<Result<List<String>>> ringCall({
+    required StreamCallCid callCid,
+    List<String> membersIds = const [],
+    bool? video,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.ringCall(
+        callCid: callCid,
+        membersIds: membersIds,
+        video: video,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('ringCall', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
   Future<Result<None>> acceptCall({required StreamCallCid cid}) {
     return _retryManager.execute(
       () => _delegate.acceptCall(cid: cid),

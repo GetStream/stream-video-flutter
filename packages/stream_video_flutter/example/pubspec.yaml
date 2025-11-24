@@ -25,12 +25,13 @@ dependencies:
   http: ^1.1.0
   intl: ^0.20.0
   path_provider: ^2.1.0
+  rxdart: ^0.28.0
   share_plus: ^11.0.0
   shared_preferences: ^2.5.3
   stream_video: ^0.11.2
   stream_video_flutter: ^0.11.2
   stream_video_push_notification: ^0.11.2
-  stream_webrtc_flutter: ^2.0.0
+  stream_webrtc_flutter: ^2.1.0
 
 dependency_overrides:
   stream_video:

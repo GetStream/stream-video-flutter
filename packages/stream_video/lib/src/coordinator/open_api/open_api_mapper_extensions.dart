@@ -133,6 +133,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           user: event.participant.user.toCallUser(),
           participant: event.participant.toCallParticipant(),
           duration: Duration(seconds: event.durationSeconds),
+          reason: event.reason,
         );
       case EventType.callSessionParticipantCountUpdated:
         final event = callSessionParticipantCountUpdated!;
@@ -327,6 +328,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           speakerId: event.closedCaption.speakerId,
           text: event.closedCaption.text,
           user: event.closedCaption.user.toCallUser(),
+          language: event.closedCaption.language,
+          translated: event.closedCaption.translated,
+          service: event.closedCaption.service,
         );
       case EventType.callFrameRecordingStarted:
         final event = callFrameRecordingStarted!;
@@ -382,6 +386,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: event.createdAt,
           fromUserId: event.fromUserId,
           mutedUserIds: event.mutedUserIds,
+          reason: event.reason,
         );
       case EventType.callRecordingReady:
         final event = callRecordingReady!;

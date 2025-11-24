@@ -15,6 +15,7 @@ class AudioSettingsResponse {
   AudioSettingsResponse({
     required this.accessRequestEnabled,
     required this.defaultDevice,
+    required this.hifiAudioEnabled,
     required this.micDefaultOn,
     this.noiseCancellation,
     required this.opusDtxEnabled,
@@ -25,6 +26,8 @@ class AudioSettingsResponse {
   bool accessRequestEnabled;
 
   AudioSettingsResponseDefaultDeviceEnum defaultDevice;
+
+  bool hifiAudioEnabled;
 
   bool micDefaultOn;
 
@@ -48,6 +51,7 @@ class AudioSettingsResponse {
       other is AudioSettingsResponse &&
           other.accessRequestEnabled == accessRequestEnabled &&
           other.defaultDevice == defaultDevice &&
+          other.hifiAudioEnabled == hifiAudioEnabled &&
           other.micDefaultOn == micDefaultOn &&
           other.noiseCancellation == noiseCancellation &&
           other.opusDtxEnabled == opusDtxEnabled &&
@@ -59,6 +63,7 @@ class AudioSettingsResponse {
       // ignore: unnecessary_parenthesis
       (accessRequestEnabled.hashCode) +
       (defaultDevice.hashCode) +
+      (hifiAudioEnabled.hashCode) +
       (micDefaultOn.hashCode) +
       (noiseCancellation == null ? 0 : noiseCancellation!.hashCode) +
       (opusDtxEnabled.hashCode) +
@@ -67,12 +72,13 @@ class AudioSettingsResponse {
 
   @override
   String toString() =>
-      'AudioSettingsResponse[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
+      'AudioSettingsResponse[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, hifiAudioEnabled=$hifiAudioEnabled, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'access_request_enabled'] = this.accessRequestEnabled;
     json[r'default_device'] = this.defaultDevice;
+    json[r'hifi_audio_enabled'] = this.hifiAudioEnabled;
     json[r'mic_default_on'] = this.micDefaultOn;
     if (this.noiseCancellation != null) {
       json[r'noise_cancellation'] = this.noiseCancellation;
@@ -110,6 +116,7 @@ class AudioSettingsResponse {
             mapValueOfType<bool>(json, r'access_request_enabled')!,
         defaultDevice: AudioSettingsResponseDefaultDeviceEnum.fromJson(
             json[r'default_device'])!,
+        hifiAudioEnabled: mapValueOfType<bool>(json, r'hifi_audio_enabled')!,
         micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on')!,
         noiseCancellation:
             NoiseCancellationSettings.fromJson(json[r'noise_cancellation']),
@@ -175,6 +182,7 @@ class AudioSettingsResponse {
   static const requiredKeys = <String>{
     'access_request_enabled',
     'default_device',
+    'hifi_audio_enabled',
     'mic_default_on',
     'opus_dtx_enabled',
     'redundant_coding_enabled',
