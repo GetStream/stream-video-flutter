@@ -1,3 +1,8 @@
+## Unreleased
+
+🐞 Fixed
+- Resolved an issue that could cause the StreamVideo instance to be disposed prematurely before ringing events were fully processed when handling ringing notifications in the terminated state.
+
 ## 0.11.2
 
 🐞 Fixed
