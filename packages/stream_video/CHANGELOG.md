@@ -3,6 +3,9 @@
 ✅ Added
 - Introduced a new method in the `Call` class that allows ringing individual members of an existing call. Use `call.ring(userId: ['userId'])` to have the backend send a VoIP/ringing push notification to the user's devices. Note: the user must first be a member of the call (use `call.addMembers()` if needed).
 
+🐞 Fixed
+- Resolved an issue that could cause the StreamVideo instance to be disposed prematurely before ringing events were fully processed when handling ringing notifications in the terminated state.
+
 ## 0.11.2
 
 🐞 Fixed
