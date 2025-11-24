@@ -1,6 +1,20 @@
-## Unreleased
+## 1.0.0
 
-🚧 Breaking changes
+### 🚧 Breaking changes
+
+#### CallKit/Ringing
+In this release, we removed the dependency on `flutter_callkit_incoming`, which introduces breaking changes in the CallKit and ringing functionality:
+
+* **API renames and type changes**
+    - `onCallKitEvent` is now `onRingingEvent`
+    - `observeCoreCallKitEvents` is now `observeCoreRingingEvents`
+    - `observeCallAcceptCallKitEvent` is now `observeCallAcceptRingingEvent`
+    - `observeCallDeclinedCallKitEvent` is now `observeCallDeclinedRingingEvent`
+    - `observeCallEndedCallKitEvent` is now `observeCallEndedRingingEvent`
+    - The `CallKitEvent` type is now `RingingEvent`
+
+#### Deprecated members
+
 - Removed deprecated APIs and parameters. Migrate as follows:
   - `StreamVideo.muteVideoWhenInBackground` → `StreamVideo.options.muteVideoWhenInBackground`
   - `StreamVideo.muteAudioWhenInBackground` → `StreamVideo.options.muteAudioWhenInBackground`
@@ -9,20 +23,12 @@
   - Removed deprecated `startRtmpBroadcasts` parameter from `Call.goLive()`
   - Removed `localParticipant` parameter from `AddReactionOption` constructor
   - Removed multiple deprecated builder callbacks in favor of [callbacks that don't provide the state object](https://github.com/GetStream/stream-video-flutter/pull/983); corresponding state object parameters in affected widgets have been removed.
+---
 
-### API renames and type changes
-
-- `onCallKitEvent` → `onRingingEvent`
-- `observeCoreCallKitEvents` → `observeCoreRingingEvents`
-- `observeCallAcceptCallKitEvent` → `observeCallAcceptRingingEvent`
-- `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
-- `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
-- `CallKitEvent` (type) → `RingingEvent`
-
-✅ Added
+### ✅ Added
 - Introduced a new method in the `Call` class that allows ringing individual members of an existing call. Use `call.ring(userId: ['userId'])` to have the backend send a VoIP/ringing push notification to the user's devices. Note: the user must first be a member of the call (use `call.addMembers()` if needed).
 
-🐞 Fixed
+### 🐞 Fixed
 - Resolved an issue that could cause the StreamVideo instance to be disposed prematurely before ringing events were fully processed when handling ringing notifications in the terminated state.
 
 ## 0.11.2

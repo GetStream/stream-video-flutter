@@ -1,23 +1,26 @@
-## Unreleased
+## 1.0.0
 
-🚧 Breaking changes
+### 🚧 Breaking changes
 
-In this release, we removed the dependency on `flutter_callkit_incoming`, which introduces breaking changes in the CallKit and ringing functionality:
+#### CallKit/Ringing
+This release removes the dependency on `flutter_callkit_incoming`, resulting in several breaking changes to CallKit and ringing functionality:
 
-* **CallKit/ringing configuration:** The setup flow has changed. Replace the `pushParams` parameter in `StreamVideoPushNotificationManager` with `pushConfiguration` (`StreamVideoPushConfiguration`). Refer to the documentation for detailed parameter mapping.
-* **Parameter renaming:** The `nameCaller` parameter has been renamed to `callerName` in various places.
+* **CallKit/ringing configuration:** The initialization process is updated. Replace the `pushParams` parameter in `StreamVideoPushNotificationManager` with the new `pushConfiguration` field (`StreamVideoPushConfiguration`).
+* **Parameter renaming:** The `nameCaller` parameter has been standardized and renamed to `callerName` across all relevant locations.
 * **Removed properties:**
-    * The deprecated `callerCustomizationCallback` and `backgroundVoipCallHandler` have been removed from `StreamVideoPushNotificationManager`.
-    * The `appName` previously used in `pushParams` configuration is now removed as it’s deprecated. The `ProductName` from build settings will be used instead (iOS only).
+    * The deprecated `callerCustomizationCallback` and `backgroundVoipCallHandler` have been fully removed from `StreamVideoPushNotificationManager`.
+    * The previously used `appName` field in `pushParams` has been removed as it was deprecated. On iOS, the app’s product name from build settings is now used instead.
+* **API renames and type changes**
+    - `onCallKitEvent` is now `onRingingEvent`
+    - `observeCoreCallKitEvents` is now `observeCoreRingingEvents`
+    - `observeCallAcceptCallKitEvent` is now `observeCallAcceptRingingEvent`
+    - `observeCallDeclinedCallKitEvent` is now `observeCallDeclinedRingingEvent`
+    - `observeCallEndedCallKitEvent` is now `observeCallEndedRingingEvent`
+    - The `CallKitEvent` type is now `RingingEvent`
+---
 
-### API renames and type changes
-
-- `onCallKitEvent` → `onRingingEvent`
-- `observeCoreCallKitEvents` → `observeCoreRingingEvents`
-- `observeCallAcceptCallKitEvent` → `observeCallAcceptRingingEvent`
-- `observeCallDeclinedCallKitEvent` → `observeCallDeclinedRingingEvent`
-- `observeCallEndedCallKitEvent` → `observeCallEndedRingingEvent`
-- `CallKitEvent` (type) → `RingingEvent`
+### 🍏 **Swift Package Manager (SPM)**
+- Added Swift Package Manager (SPM) support for iOS.
 
 ## 0.11.2
 * Sync version with `stream_video_flutter` 0.11.2
