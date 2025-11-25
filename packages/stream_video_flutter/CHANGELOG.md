@@ -1,7 +1,8 @@
-# Unreleased
+## 1.0.0
 
-🚧 Breaking changes
+### 🚧 Breaking changes
 
+#### CallKit/Ringing
 This release removes the dependency on `flutter_callkit_incoming`, resulting in several breaking changes to CallKit and ringing functionality:
 
 * **CallKit/ringing configuration:** The initialization process is updated. Replace the `pushParams` parameter in `StreamVideoPushNotificationManager` with the new `pushConfiguration` field (`StreamVideoPushConfiguration`).
@@ -9,26 +10,48 @@ This release removes the dependency on `flutter_callkit_incoming`, resulting in 
 * **Removed properties:**
     * The deprecated `callerCustomizationCallback` and `backgroundVoipCallHandler` have been fully removed from `StreamVideoPushNotificationManager`.
     * The previously used `appName` field in `pushParams` has been removed as it was deprecated. On iOS, the app’s product name from build settings is now used instead.
+* **API renames and type changes**
+    - `onCallKitEvent` is now `onRingingEvent`
+    - `observeCoreCallKitEvents` is now `observeCoreRingingEvents`
+    - `observeCallAcceptCallKitEvent` is now `observeCallAcceptRingingEvent`
+    - `observeCallDeclinedCallKitEvent` is now `observeCallDeclinedRingingEvent`
+    - `observeCallEndedCallKitEvent` is now `observeCallEndedRingingEvent`
+    - The `CallKitEvent` type is now `RingingEvent`
 
-### API renames and type changes
-
-- `onCallKitEvent` is now `onRingingEvent`
-- `observeCoreCallKitEvents` is now `observeCoreRingingEvents`
-- `observeCallAcceptCallKitEvent` is now `observeCallAcceptRingingEvent`
-- `observeCallDeclinedCallKitEvent` is now `observeCallDeclinedRingingEvent`
-- `observeCallEndedCallKitEvent` is now `observeCallEndedRingingEvent`
-- The `CallKitEvent` type is now `RingingEvent`
-
-### Video Filter
+#### Video Filter
 - The video filters feature, which enables blur and virtual backgrounds during calls, has been moved to a new package: `stream_video_filters`. To use video filters, add the package to your `pubspec.yaml` and update your relevant imports.
 
-✨ Improvements
+#### Deprecated members
+- Removed deprecated APIs and parameters. Migrate as follows:
+  - `StreamVideo.muteVideoWhenInBackground` → `StreamVideo.options.muteVideoWhenInBackground`
+  - `StreamVideo.muteAudioWhenInBackground` → `StreamVideo.options.muteAudioWhenInBackground`
+  - Default `StreamCallType()` constructor → `StreamCallType.defaultType()`
+  - `Call.setParticipantPinned()` → `Call.setParticipantPinnedLocally()` (local-only pin)
+  - Removed deprecated `startRtmpBroadcasts` parameter from `Call.goLive()`
+  - Removed `localParticipant` parameter from `AddReactionOption` constructor
+  - Removed multiple deprecated builder callbacks in favor of [callbacks that don't provide the state object](https://github.com/GetStream/stream-video-flutter/pull/983); corresponding state object parameters in affected widgets have been removed.
+  - Deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType` parameters in `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks()`
+---
+
+### 🍏 **Swift Package Manager (SPM)**
+- Added Swift Package Manager (SPM) support for iOS.
+> [!IMPORTANT]  
+> Flutter's iOS SPM is experimental and disabled by default. You can enable it via `flutter config --enable-swift-package-manager`. Flutter will fall back to CocoaPods for plugins that don't support SPM. See the [Flutter SPM docs](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
+
+### ✨ Improvements
 - [Android] Significantly improved video filter performance, resulting in smoother frame rates during calls.
 
-🐞 Fixed
+### ✅ Added
+- Added `Call.ring()` to ring specific members of an existing call. Example: `call.ring(userIds: ['<userId>'], video: true)`. Sends a ringing/VoIP push to the users’ devices. Users must already be members - use `call.addMembers()` first if needed.
+- Added `RtcMediaDeviceNotifier.pauseAudioPlayout()` / `RtcMediaDeviceNotifier.resumeAudioPlayout()` to mute and restore remote playback with platform-specific handling for iOS/macOS and Android.
+- [Android] Enhanced interruption handling via `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks()`.
+- [Android] Added `RtcMediaDeviceNotifier.regainAndroidAudioFocus()` to request audio focus when it was lost without automatic regain.
+
+### 🐞 Fixed
 * [iOS] Resolved an issue in Picture in Picture where video tracks might remain disabled after returning the app to the foreground.
 * [iOS] Addressed a problem where Picture in Picture was not exited properly if the call ended during PiP mode.
 * [iOS] Fixed a bug where quickly backgrounding the app right after ending a call could still activate PiP mode.
+* Resolved an issue that could cause the StreamVideo instance to be disposed prematurely before ringing events were fully processed when handling ringing notifications in the terminated state.
 
 ## 0.11.2
 
