@@ -25,7 +25,7 @@ dependencies:
   rate_limiter: ^1.0.0
   rxdart: ^0.28.0
   stream_video: ^0.11.2
-  stream_webrtc_flutter: ^2.1.0
+  stream_webrtc_flutter: ^2.2.0
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
