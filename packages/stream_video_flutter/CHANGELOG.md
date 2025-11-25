@@ -30,6 +30,7 @@ This release removes the dependency on `flutter_callkit_incoming`, resulting in 
   - Removed deprecated `startRtmpBroadcasts` parameter from `Call.goLive()`
   - Removed `localParticipant` parameter from `AddReactionOption` constructor
   - Removed multiple deprecated builder callbacks in favor of [callbacks that don't provide the state object](https://github.com/GetStream/stream-video-flutter/pull/983); corresponding state object parameters in affected widgets have been removed.
+  - Deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType` parameters in `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks()`
 ---
 
 ### 🍏 **Swift Package Manager (SPM)**
