@@ -34,12 +34,16 @@ This release removes the dependency on `flutter_callkit_incoming`, resulting in 
 
 ### 🍏 **Swift Package Manager (SPM)**
 - Added Swift Package Manager (SPM) support for iOS.
+    - Flutter’s iOS SPM is experimental (off by default). You can enable it with `flutter config --enable-swift-package-manager`. Flutter falls back to CocoaPods for plugins without SPM. See [Flutter SPM docs](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
 
 ### ✨ Improvements
 - [Android] Significantly improved video filter performance, resulting in smoother frame rates during calls.
 
 ### ✅ Added
-- Introduced a new method in the `Call` class that allows ringing individual members of an existing call. Use `call.ring(userIds: ['userId'])` to have the backend send a VoIP/ringing push notification to the user's devices. Note: the user must first be a member of the call (use `call.addMembers()` if needed).
+- Added `Call.ring()` to ring specific members of an existing call. Example: `call.ring(userIds: ['<userId>'], video: true)`. Sends a ringing/VoIP push to the users’ devices. Users must already be members - use `call.addMembers()` first if needed.
+- Added `RtcMediaDeviceNotifier.pauseAudioPlayout()` / `RtcMediaDeviceNotifier.resumeAudioPlayout()` to mute and restore remote playback with platform-specific handling for iOS/macOS and Android.
+- [Android] Enhanced interruption handling via `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks()`.
+- [Android] Added `RtcMediaDeviceNotifier.regainAndroidAudioFocus()` to request audio focus when it was lost without automatic regain.
 
 ### 🐞 Fixed
 * [iOS] Resolved an issue in Picture in Picture where video tracks might remain disabled after returning the app to the foreground.
