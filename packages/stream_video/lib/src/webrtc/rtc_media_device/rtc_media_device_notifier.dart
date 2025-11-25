@@ -44,8 +44,6 @@ class RtcMediaDeviceNotifier {
   /// [onInterruptionStart] is called when the call interruption begins.
   /// [onInterruptionEnd] is called when the call interruption ends.
   /// [androidInterruptionSource] specifies the source of the interruption on Android.
-  /// [androidAudioAttributesUsageType] and [androidAudioAttributesContentType] allow you to specify
-  /// the audio attributes that will be used when requesting audio focus.
   ///
   /// On iOS, interruptions can occur due to:
   /// - Incoming phone calls
@@ -71,15 +69,19 @@ class RtcMediaDeviceNotifier {
     void Function()? onInterruptionEnd,
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
+    @Deprecated(
+      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
+    )
     rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
+    @Deprecated(
+      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
+    )
     rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
   }) {
     return rtc.handleCallInterruptionCallbacks(
       onInterruptionStart,
       onInterruptionEnd,
       androidInterruptionSource: androidInterruptionSource,
-      androidAudioAttributesUsageType: androidAudioAttributesUsageType,
-      androidAudioAttributesContentType: androidAudioAttributesContentType,
     );
   }
 
@@ -172,5 +174,22 @@ class RtcMediaDeviceNotifier {
 
   Future<void> triggeriOSAudioRouteSelectionUI() {
     return rtc.Helper.triggeriOSAudioRouteSelectionUI();
+  }
+
+  /// Temporarily mutes all audio output (playout) from the app.
+  /// This does not affect the microphone or remote track subscriptions.
+  /// Use as a global "mute all sounds" toggle or when the app goes to background.
+  Future<void> pauseAudioPlayout() {
+    return rtc.Helper.pauseAudioPlayout();
+  }
+
+  /// Resumes audio output (playout) muted via [pauseAudioPlayout].
+  /// Does not change microphone state or remote track subscriptions.
+  Future<void> resumeAudioPlayout() {
+    return rtc.Helper.resumeAudioPlayout();
+  }
+
+  Future<void> regainAndroidAudioFocus() {
+    return rtc.Helper.regainAndroidAudioFocus();
   }
 }
