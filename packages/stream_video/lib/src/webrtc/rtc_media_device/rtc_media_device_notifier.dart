@@ -189,6 +189,11 @@ class RtcMediaDeviceNotifier {
     return rtc.Helper.resumeAudioPlayout();
   }
 
+  /// Regains Android audio focus if it was lost.
+  ///
+  /// Note: On Android, audio focus may not be restored automatically.
+  /// To ensure you receive `onInterruptionEnd`, explicitly call
+  /// [resumeAudioPlayout] (e.g., when the app resumes from background).
   Future<void> regainAndroidAudioFocus() {
     return rtc.Helper.regainAndroidAudioFocus();
   }
