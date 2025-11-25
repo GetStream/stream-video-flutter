@@ -21,7 +21,7 @@ This release removes the dependency on `flutter_callkit_incoming`, resulting in 
 
 ### 🍏 **Swift Package Manager (SPM)**
 - Added Swift Package Manager (SPM) support for iOS.
-    - Flutter’s iOS SPM is experimental (off by default). You can enable it with `flutter config --enable-swift-package-manager`. Flutter falls back to CocoaPods for plugins without SPM. See [Flutter SPM docs](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
+Note: Flutter’s iOS SPM is experimental and disabled by default. You can enable it via `flutter config --enable-swift-package-manager`. Flutter will fall back to CocoaPods for plugins that don’t support SPM. See the [Flutter SPM docs](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
 
 ## 0.11.2
 * Sync version with `stream_video_flutter` 0.11.2
