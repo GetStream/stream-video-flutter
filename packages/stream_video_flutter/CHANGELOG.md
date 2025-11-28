@@ -1,3 +1,10 @@
+## Unreleased
+
+#### LivestreamPlayer Improvements
+* Added support for Picture in Picture (PiP) mode, configurable via the `pictureInPictureConfiguration` parameter. For platform-specific setup, refer to the [documentation](https://getstream.io/video/docs/flutter/advanced/picture_in_picture/).
+* Introduced the `joinBehaviour` parameter, allowing control over whether and when the `LivestreamPlayer` automatically connects the user to a call.
+* Refactored `LivestreamPlayer` to leverage `call.partialState` for more efficient state management. New builder methods have been introduced to accommodate this change, and some previous builder methods are now deprecated.
+
 ## 1.0.0
 
 ### 🚧 Breaking changes

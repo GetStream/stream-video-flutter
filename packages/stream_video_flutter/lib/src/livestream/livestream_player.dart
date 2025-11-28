@@ -1,29 +1,40 @@
+// ignore_for_file: strict_raw_type, deprecated_member_use_from_same_package
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video_flutter.dart';
 
 typedef LivestreamEndedBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
+    Widget Function(BuildContext context, Call call, CallState callState);
 
 typedef LivestreamBackstageBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
+    Widget Function(BuildContext context, Call call, CallState callState);
 
 typedef LivestreamControlsBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
+    Widget Function(BuildContext context, Call call, CallState callState);
+
+typedef LivestreamEndedWidgetBuilder =
+    Widget Function(BuildContext context, Call call);
+
+typedef LivestreamBackstageWidgetBuilder =
+    Widget Function(BuildContext context, Call call);
+
+typedef LivestreamControlsWidgetBuilder =
+    Widget Function(BuildContext context, Call call);
+
+enum LivestreamJoinBehaviour {
+  /// Automatically join the livestream backstage or live call when the widget is initialized. Depending on permissions.
+  autoJoinAsap,
+
+  /// Automatically join the livestream when it goes live.
+  autoJoinWhenLive,
+
+  /// Do not automatically join the livestream.
+  manualJoin,
+}
 
 /// Creates a widget that allows a user to view a livestream.
 ///
@@ -55,11 +66,19 @@ class LivestreamPlayer extends StatefulWidget {
   const LivestreamPlayer({
     super.key,
     required this.call,
+    this.joinBehaviour = LivestreamJoinBehaviour.autoJoinAsap,
+    this.connectOptions,
     this.showParticipantCount = true,
     this.backButtonBuilder,
+    @Deprecated('Use livestreamEndedWidgetBuilder instead.')
     this.livestreamEndedBuilder,
+    this.livestreamEndedWidgetBuilder,
+    @Deprecated('Use livestreamBackstageWidgetBuilder instead.')
     this.livestreamBackstageBuilder,
+    this.livestreamBackstageWidgetBuilder,
+    @Deprecated('Use livestreamControlsWidgetBuilder instead.')
     this.livestreamControlsBuilder,
+    this.livestreamControlsWidgetBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
     this.livestreamHostsUnavailableBuilder,
@@ -69,10 +88,18 @@ class LivestreamPlayer extends StatefulWidget {
     this.onRecordingTapped,
     this.onFullscreenTapped,
     this.startInFullscreenMode = false,
+    this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
 
   /// The livestream call to display.
   final Call call;
+
+  /// Defines the behavior for automatically joining the livestream.
+  final LivestreamJoinBehaviour joinBehaviour;
+
+  /// Options used when joining the livestream.
+  /// If null, defaults to disabling camera and microphone.
+  final CallConnectOptions? connectOptions;
 
   /// Boolean to display participant count.
   ///
@@ -90,14 +117,33 @@ class LivestreamPlayer extends StatefulWidget {
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
+  ///
+  /// Recommend to use [livestreamEndedWidgetBuilder] and listen to the partialState of the call.
+  @Deprecated('Use participantsAvatarWidgetBuilder instead.')
   final LivestreamEndedBuilder? livestreamEndedBuilder;
 
+  /// The builder used to create a custom widget when the livestream has ended.
+  final LivestreamEndedWidgetBuilder? livestreamEndedWidgetBuilder;
+
   /// The builder used to create a custom widget when the livestream is in backstage mode.
+  ///
+  /// Recommend to use [livestreamBackstageWidgetBuilder] and listen to the partialState of the call.
+  @Deprecated('Use livestreamBackstageWidgetBuilder instead.')
   final LivestreamBackstageBuilder? livestreamBackstageBuilder;
+
+  /// The builder used to create a custom widget when the livestream is in backstage mode.
+  final LivestreamBackstageWidgetBuilder? livestreamBackstageWidgetBuilder;
 
   /// The builder used to create custom controls for the livestream player.
   /// This allows customization of the control UI elements displayed during the livestream.
+  ///
+  /// Recommend to use [livestreamControlsWidgetBuilder] and listen to the partialState of the call.
+  @Deprecated('Use livestreamControlsWidgetBuilder instead.')
   final LivestreamControlsBuilder? livestreamControlsBuilder;
+
+  /// The builder used to create custom controls for the livestream player.
+  /// This allows customization of the control UI elements displayed during the livestream.
+  final LivestreamControlsWidgetBuilder? livestreamControlsWidgetBuilder;
 
   /// Builder function used to build a video placeholder.
   final VideoPlaceholderBuilder? videoPlaceholderBuilder;
@@ -128,6 +174,9 @@ class LivestreamPlayer extends StatefulWidget {
   /// Defaults to false.
   final bool allowDiagnostics;
 
+  /// Configuration for picture-in-picture mode.
+  final PictureInPictureConfiguration pictureInPictureConfiguration;
+
   @override
   State<LivestreamPlayer> createState() => _LivestreamPlayerState();
 }
@@ -135,12 +184,17 @@ class LivestreamPlayer extends StatefulWidget {
 class _LivestreamPlayerState extends State<LivestreamPlayer>
     with SingleTickerProviderStateMixin {
   final _logger = taggedLogger(tag: 'SV:LivestreamPlayer');
-  StreamSubscription<CallState>? _callStateSubscription;
+
+  StreamSubscription? _joinSubscription;
+  StreamSubscription? _leaveSubscription;
+
+  final CompositeSubscription _compositeSubscription = CompositeSubscription();
 
   /// Represents a call.
   Call get call => widget.call;
 
   /// Holds information about the call.
+  @Deprecated(PartialStateDeprecationMessage.callState)
   late CallState _callState;
 
   /// Controls the visibility of diagnostic data.
@@ -152,126 +206,230 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   @override
   void initState() {
     super.initState();
-    _callStateSubscription = call.state.listen(_setState);
+
+    //Remove once partial state deprecation is complete.
     _callState = call.state.value;
+
     _fullscreen = widget.startInFullscreenMode;
 
-    _connect();
+    if (widget.joinBehaviour != LivestreamJoinBehaviour.manualJoin) {
+      _joinWhenPossible();
+    }
+
+    _leaveOnDisconnect();
+
+    // Only listen to call state if any of the builders that depend on it are provided.
+    // Remove once partial state deprecation is complete.
+    if (widget.livestreamEndedBuilder != null ||
+        widget.livestreamBackstageBuilder != null ||
+        widget.livestreamControlsBuilder != null) {
+      _compositeSubscription.add(
+        widget.call.state.listen((callState) {
+          setState(() {
+            _callState = callState;
+          });
+        }),
+      );
+    }
+  }
+
+  void _joinWhenPossible() {
+    final tickStream = Stream<DateTime>.periodic(
+      const Duration(seconds: 1),
+      (_) => DateTime.now().toUtc(),
+    );
+
+    final canJoinEarlyStream = call
+        .partialState(
+          (state) => (
+            startsAt: state.startsAt,
+            joinAheadSeconds: state.settings.backstage.joinAheadTimeSeconds,
+          ),
+        )
+        .switchMap((data) {
+          final startsAt = data.startsAt;
+          final joinAheadSeconds = data.joinAheadSeconds;
+
+          if (startsAt == null || joinAheadSeconds == null) {
+            return Stream<bool>.value(false);
+          }
+
+          final windowOpensAt = startsAt.subtract(
+            Duration(seconds: joinAheadSeconds),
+          );
+          final now = DateTime.now().toUtc();
+          final isWithinWindow = !now.isBefore(windowOpensAt);
+
+          if (isWithinWindow) {
+            return Stream<bool>.value(true);
+          }
+
+          // Not yet in the window: use the tick stream, filter with .where(),
+          // emit false initially, then true when the window opens and complete.
+          return tickStream
+              .where((nowTick) => !nowTick.isBefore(windowOpensAt))
+              .take(1)
+              .map((_) => true)
+              .startWith(false);
+        })
+        .distinct();
+
+    final callData = call.partialState(
+      (state) => (
+        isLive: !state.isBackstage,
+        canJoinBackstage: state.ownCapabilities.contains(
+          CallPermission.joinBackstage,
+        ),
+        status: state.status,
+      ),
+    );
+
+    _joinSubscription =
+        Rx.combineLatest2(
+          callData,
+          canJoinEarlyStream,
+          (callData, canJoinEarly) => (
+            canJoinAsap:
+                callData.isLive || callData.canJoinBackstage || canJoinEarly,
+            isLive: callData.isLive,
+          ),
+        ).listen((data) {
+          {
+            if (widget.joinBehaviour == LivestreamJoinBehaviour.autoJoinAsap &&
+                data.canJoinAsap) {
+              _connect();
+            } else if (widget.joinBehaviour ==
+                    LivestreamJoinBehaviour.autoJoinWhenLive &&
+                data.isLive) {
+              _connect();
+            }
+          }
+        });
+
+    _compositeSubscription.add(_joinSubscription!);
+  }
+
+  void _leaveOnDisconnect() {
+    _leaveSubscription = call.partialState((state) => state.status).listen((
+      status,
+    ) {
+      if (status.isDisconnected) {
+        _leaveSubscription?.cancel();
+
+        if (widget.onCallDisconnected != null) {
+          final disconnectedStatus = status as CallStatusDisconnected;
+          final disconnectedProperties = CallDisconnectedProperties(
+            reason: disconnectedStatus.reason,
+            call: call,
+          );
+
+          widget.onCallDisconnected?.call(disconnectedProperties);
+        } else {
+          _leave();
+        }
+      }
+    });
+
+    _compositeSubscription.add(_leaveSubscription!);
   }
 
   @override
   void dispose() {
-    _callStateSubscription?.cancel();
-    _callStateSubscription = null;
-
+    _compositeSubscription.dispose();
     super.dispose();
-  }
-
-  void _setState(CallState callState) {
-    _logger.v(() => '[setState] callState.status: ${callState.status}');
-    setState(() {
-      _callState = callState;
-    });
-
-    if (callState.status.isDisconnected) {
-      _callStateSubscription?.cancel();
-
-      if (widget.onCallDisconnected != null) {
-        final disconnectedStatus = callState.status as CallStatusDisconnected;
-        final disconnectedProperties = CallDisconnectedProperties(
-          reason: disconnectedStatus.reason,
-          call: call,
-        );
-
-        widget.onCallDisconnected?.call(disconnectedProperties);
-      } else {
-        _leave();
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isBackstage = _callState.isBackstage;
-    final hasEnded = _callState.endedAt != null;
+    return PartialCallStateBuilder(
+      call: call,
+      selector: (state) =>
+          (isBackstage: state.isBackstage, hasEnded: state.endedAt != null),
+      builder: (context, data) {
+        final isBackstage = data.isBackstage;
+        final hasEnded = data.hasEnded;
 
-    if (hasEnded) {
-      return widget.livestreamEndedBuilder?.call(
-            context,
-            call,
-            _callState,
-          ) ??
-          LivestreamEndedContent(
-            call: call,
-            onRecordingTapped: widget.onRecordingTapped,
-          );
-    }
-
-    if (isBackstage) {
-      return widget.livestreamBackstageBuilder?.call(
-            context,
-            call,
-            _callState,
-          ) ??
-          LivestreamBackstageContent(
-            callState: _callState,
-          );
-    }
-
-    return GestureDetector(
-      onDoubleTap: () {
-        if (widget.allowDiagnostics) {
-          setState(() {
-            _isStatsVisible = !_isStatsVisible;
-          });
+        if (hasEnded) {
+          return widget.livestreamEndedWidgetBuilder?.call(context, call) ??
+              widget.livestreamEndedBuilder?.call(context, call, _callState) ??
+              LivestreamEndedContent(
+                call: call,
+                onRecordingTapped: widget.onRecordingTapped,
+              );
         }
-      },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            LivestreamContent(
-              call: call,
-              callState: _callState,
-              backButtonBuilder: widget.backButtonBuilder,
-              videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
-              videoRendererBuilder: widget.videoRendererBuilder,
-              livestreamHostsUnavailableBuilder:
-                  widget.livestreamHostsUnavailableBuilder,
-              livestreamNotConnectedBuilder:
-                  widget.livestreamNotConnectedBuilder,
-              displayDiagnostics: _isStatsVisible,
-              videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
-            ),
-            widget.livestreamControlsBuilder?.call(context, call, _callState) ??
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: StreamBuilder<Duration>(
-                    stream: call.callDurationStream,
-                    builder: (context, snapshot) {
-                      final duration = snapshot.data ?? Duration.zero;
 
-                      return LivestreamInfo(
-                        call: call,
-                        callState: widget.call.state.value,
-                        fullscreen: _fullscreen,
-                        onFullscreenTapped: () {
-                          if (widget.onFullscreenTapped != null) {
-                            widget.onFullscreenTapped?.call();
-                          } else {
-                            setState(() {
-                              _fullscreen = !_fullscreen;
-                            });
-                          }
-                        },
-                        duration: duration,
-                        showParticipantCount: widget.showParticipantCount,
-                      );
-                    },
-                  ),
+        if (isBackstage) {
+          return widget.livestreamBackstageWidgetBuilder?.call(context, call) ??
+              widget.livestreamBackstageBuilder?.call(
+                context,
+                call,
+                _callState,
+              ) ??
+              LivestreamBackstageContent(call: widget.call);
+        }
+
+        return GestureDetector(
+          onDoubleTap: () {
+            if (widget.allowDiagnostics) {
+              setState(() {
+                _isStatsVisible = !_isStatsVisible;
+              });
+            }
+          },
+          child: Scaffold(
+            body: Stack(
+              children: [
+                LivestreamContent(
+                  call: call,
+                  callState: _callState,
+                  backButtonBuilder: widget.backButtonBuilder,
+                  videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+                  videoRendererBuilder: widget.videoRendererBuilder,
+                  livestreamHostsUnavailableBuilder:
+                      widget.livestreamHostsUnavailableBuilder,
+                  livestreamNotConnectedBuilder:
+                      widget.livestreamNotConnectedBuilder,
+                  displayDiagnostics: _isStatsVisible,
+                  videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
+                  pictureInPictureConfiguration:
+                      widget.pictureInPictureConfiguration,
                 ),
-          ],
-        ),
-      ),
+                widget.livestreamControlsWidgetBuilder?.call(context, call) ??
+                    widget.livestreamControlsBuilder?.call(
+                      context,
+                      call,
+                      _callState,
+                    ) ??
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: StreamBuilder<Duration>(
+                        stream: call.callDurationStream,
+                        builder: (context, snapshot) {
+                          final duration = snapshot.data ?? Duration.zero;
+
+                          return LivestreamInfo(
+                            call: call,
+                            fullscreen: _fullscreen,
+                            onFullscreenTapped: () {
+                              if (widget.onFullscreenTapped != null) {
+                                widget.onFullscreenTapped?.call();
+                              } else {
+                                setState(() {
+                                  _fullscreen = !_fullscreen;
+                                });
+                              }
+                            },
+                            duration: duration,
+                            showParticipantCount: widget.showParticipantCount,
+                          );
+                        },
+                      ),
+                    ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -279,29 +437,39 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   Future<void> _connect() async {
     try {
       _logger.d(() => '[connect] no args');
-      final connectOptions = CallConnectOptions(
-        camera: TrackOption.disabled(),
-        microphone: TrackOption.disabled(),
-      );
+      final connectOptions =
+          widget.connectOptions ??
+          CallConnectOptions(
+            camera: TrackOption.disabled(),
+            microphone: TrackOption.disabled(),
+          );
 
       final result = await call.join(connectOptions: connectOptions);
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {
       _logger.v(() => '[connect] failed: $e');
       await _leave();
+    } finally {
+      await _joinSubscription?.cancel();
+      _joinSubscription = null;
     }
   }
 
   Future<void> _leave() async {
-    _logger.d(() => '[leave] no args');
-    await call.leave();
-    // play tone
-    final bool popped;
-    if (mounted) {
-      popped = await Navigator.maybePop(context);
-    } else {
-      popped = false;
+    try {
+      _logger.d(() => '[leave] no args');
+      await call.leave();
+      // play tone
+      final bool popped;
+      if (mounted) {
+        popped = await Navigator.maybePop(context);
+      } else {
+        popped = false;
+      }
+      _logger.v(() => '[leave] popped: $popped');
+    } finally {
+      await _joinSubscription?.cancel();
+      _joinSubscription = null;
     }
-    _logger.v(() => '[leave] popped: $popped');
   }
 }
