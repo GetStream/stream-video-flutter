@@ -47,6 +47,10 @@ class _LivestreamBackstageContentState
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() {
         _timeLeft -= const Duration(seconds: 1);
+        if (_timeLeft <= Duration.zero) {
+          _timeLeft = Duration.zero;
+          _timer?.cancel();
+        }
       });
     });
   }

@@ -222,11 +222,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
         } else {
           final isMigrating = status.isMigrating;
           final isReconnecting = status.isReconnecting;
-          final statusText = isMigrating
-              ? 'Migrating'
-              : isReconnecting
-              ? 'Reconnecting'
-              : 'Connecting';
+          final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
 
           bodyWidget =
               widget.livestreamNotConnectedBuilder?.call(
