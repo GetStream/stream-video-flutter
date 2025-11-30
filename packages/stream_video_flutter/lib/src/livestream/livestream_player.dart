@@ -69,6 +69,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.joinBehaviour = LivestreamJoinBehaviour.autoJoinAsap,
     this.connectOptions,
     this.showParticipantCount = true,
+    this.showRecordingsWhenEnded = true,
     this.backButtonBuilder,
     @Deprecated('Use livestreamEndedWidgetBuilder instead.')
     this.livestreamEndedBuilder,
@@ -105,6 +106,11 @@ class LivestreamPlayer extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool showParticipantCount;
+
+  /// Boolean to display list of recordings when the livestream has ended.
+  ///
+  /// Defaults to true.
+  final bool showRecordingsWhenEnded;
 
   /// Determines whether the livestream should start in fullscreen mode.
   /// When true, the video will expand to cover the entire available space.
@@ -354,6 +360,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               widget.livestreamEndedBuilder?.call(context, call, _callState) ??
               LivestreamEndedContent(
                 call: call,
+                showRecordings: widget.showRecordingsWhenEnded,
                 onRecordingTapped: widget.onRecordingTapped,
               );
         }

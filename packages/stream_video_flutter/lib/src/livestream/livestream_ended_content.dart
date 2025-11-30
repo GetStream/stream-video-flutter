@@ -8,10 +8,12 @@ class LivestreamEndedContent extends StatefulWidget {
   const LivestreamEndedContent({
     super.key,
     required this.call,
+    this.showRecordings = true,
     this.onRecordingTapped,
   });
 
   final Call call;
+  final bool showRecordings;
   final FutureOr<void> Function(String)? onRecordingTapped;
 
   @override
@@ -35,42 +37,43 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
               translations.livestreamEndedStatus,
               style: liveTheme.liveEndedTextStyle,
             ),
-            FutureBuilder(
-              future: widget.call.listRecordings(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.isSuccess) {
-                  final recordings = snapshot.requireData.getDataOrNull();
+            if (widget.showRecordings)
+              FutureBuilder(
+                future: widget.call.listRecordings(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data!.isSuccess) {
+                    final recordings = snapshot.requireData.getDataOrNull();
 
-                  if (recordings == null || recordings.isEmpty) {
-                    return const SizedBox.shrink();
+                    if (recordings == null || recordings.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Column(
+                      children: [
+                        Text(translations.livestreamEndedWatchRecordings),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: recordings.length,
+                          itemBuilder: (context, index) {
+                            final recording = recordings[index];
+                            return ListTile(
+                              title: Text(
+                                recording.url,
+                                style: liveTheme.liveEndedRecordingsTextStyle,
+                              ),
+                              onTap: () {
+                                widget.onRecordingTapped?.call(recording.url);
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    );
                   }
 
-                  return Column(
-                    children: [
-                      Text(translations.livestreamEndedWatchRecordings),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: recordings.length,
-                        itemBuilder: (context, index) {
-                          final recording = recordings[index];
-                          return ListTile(
-                            title: Text(
-                              recording.url,
-                              style: liveTheme.liveEndedRecordingsTextStyle,
-                            ),
-                            onTap: () {
-                              widget.onRecordingTapped?.call(recording.url);
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
-            ),
+                  return const SizedBox.shrink();
+                },
+              ),
           ],
         ),
       ),
