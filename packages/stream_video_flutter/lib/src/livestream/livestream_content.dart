@@ -11,9 +11,7 @@ typedef LivestreamHostsUnavailableBuilder =
     );
 
 class LivestreamHostsUnavailableProperties {
-  LivestreamHostsUnavailableProperties(
-    this.call,
-  );
+  LivestreamHostsUnavailableProperties(this.call);
 
   final Call call;
 }
@@ -73,7 +71,7 @@ class LivestreamContent extends StatefulWidget {
   const LivestreamContent({
     super.key,
     required this.call,
-    required this.callState,
+    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.backButtonBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
@@ -81,13 +79,15 @@ class LivestreamContent extends StatefulWidget {
     this.livestreamNotConnectedBuilder,
     this.displayDiagnostics = false,
     this.videoFit = VideoFit.contain,
+    this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
 
   /// Represents a call.
   final Call call;
 
   /// Holds information about the call.
-  final CallState callState;
+  @Deprecated(PartialStateDeprecationMessage.callState)
+  final CallState? callState;
 
   /// [WidgetBuilder] used to build an action button on the top left side of
   /// the screen.
@@ -117,6 +117,9 @@ class LivestreamContent extends StatefulWidget {
   /// the whole size (cover).
   final VideoFit videoFit;
 
+  /// Configuration for picture-in-picture mode.
+  final PictureInPictureConfiguration pictureInPictureConfiguration;
+
   @override
   State<LivestreamContent> createState() => _LivestreamContentState();
 }
@@ -124,9 +127,6 @@ class LivestreamContent extends StatefulWidget {
 class _LivestreamContentState extends State<LivestreamContent> {
   /// Represents a call.
   Call get call => widget.call;
-
-  /// Holds information about the call.
-  CallState get callState => widget.callState;
 
   /// Denotes if the video fits the width (contain) or expands to
   /// the whole size (cover).
@@ -137,84 +137,127 @@ class _LivestreamContentState extends State<LivestreamContent> {
     final theme = StreamVideoTheme.of(context);
     final translations = context.translations;
 
-    late Widget bodyWidget;
-    if (callState.status.isConnected) {
-      final streamingParticipants = callState.callParticipants
-          .where((e) => e.isVideoEnabled)
-          .toList();
+    final pipEnabled =
+        widget.pictureInPictureConfiguration.enablePictureInPicture;
 
-      if (streamingParticipants.isEmpty) {
-        bodyWidget =
-            widget.livestreamHostsUnavailableBuilder?.call(
-              context,
-              LivestreamHostsUnavailableProperties(call),
-            ) ??
-            Center(
-              child: Text(
-                translations.livestreamHostNotAvailable,
-                style: theme.livestreamTheme.callStateButtonTextStyle,
-              ),
+    return PartialCallStateBuilder(
+      call: call,
+      selector: (state) =>
+          (callParticipants: state.callParticipants, status: state.status),
+      builder: (context, callData) {
+        final participants = callData.callParticipants;
+        final status = callData.status;
+
+        late Widget bodyWidget;
+        if (status.isConnected ||
+            status.isFastReconnecting ||
+            status.isMigrating) {
+          final streamingParticipants = participants
+              .where((e) => e.isVideoEnabled)
+              .toList();
+
+          if (streamingParticipants.isEmpty) {
+            bodyWidget =
+                widget.livestreamHostsUnavailableBuilder?.call(
+                  context,
+                  LivestreamHostsUnavailableProperties(call),
+                ) ??
+                Center(
+                  child: Text(
+                    translations.livestreamHostNotAvailable,
+                    style: theme.livestreamTheme.callStateButtonTextStyle,
+                  ),
+                );
+          } else {
+            final participant = streamingParticipants.first;
+
+            bodyWidget = Stack(
+              children: [
+                if (CurrentPlatform.isIos && pipEnabled)
+                  SizedBox(
+                    height: 600,
+                    width: 300,
+                    child: StreamPictureInPictureUiKitView(
+                      call: call,
+                      configuration: widget
+                          .pictureInPictureConfiguration
+                          .iOSPiPConfiguration,
+                      participantSort:
+                          widget.pictureInPictureConfiguration.sort,
+                    ),
+                  ),
+                if (CurrentPlatform.isAndroid && pipEnabled)
+                  StreamPictureInPictureAndroidView(
+                    call: call,
+                    configuration: widget.pictureInPictureConfiguration,
+                  ),
+                StreamCallParticipant(
+                  backgroundColor: theme.colorTheme.livestreamBackground,
+                  key: ValueKey(participant.uniqueParticipantKey),
+                  call: call,
+                  participant: participant,
+                  showConnectionQualityIndicator: false,
+                  showParticipantLabel: false,
+                  showSpeakerBorder: false,
+                  videoFit: videoFit,
+                  videoRendererBuilder: widget.videoRendererBuilder,
+                  videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+                ),
+                if (status.isFastReconnecting)
+                  const Positioned(
+                    top: 25,
+                    left: 25,
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
+              ],
             );
-      } else {
-        final participant = streamingParticipants.first;
+          }
+        } else {
+          final isMigrating = status.isMigrating;
+          final isReconnecting = status.isReconnecting;
+          final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
 
-        bodyWidget = StreamCallParticipant(
+          bodyWidget =
+              widget.livestreamNotConnectedBuilder?.call(
+                context,
+                LivestreamNotConnectedProperties(
+                  call,
+                  isMigrating: isMigrating,
+                  isReconnecting: isReconnecting,
+                ),
+              ) ??
+              Center(
+                child: Text(
+                  statusText,
+                  style: theme.livestreamTheme.callStateButtonTextStyle,
+                ),
+              );
+        }
+
+        return Scaffold(
           backgroundColor: theme.colorTheme.livestreamBackground,
-          key: ValueKey(participant.uniqueParticipantKey),
-          call: call,
-          participant: participant,
-          showConnectionQualityIndicator: false,
-          showParticipantLabel: false,
-          showSpeakerBorder: false,
-          videoFit: videoFit,
-          videoRendererBuilder: widget.videoRendererBuilder,
-          videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            leading: widget.backButtonBuilder?.call(context),
+          ),
+          extendBodyBehindAppBar: true,
+          body: Stack(
+            children: [
+              bodyWidget,
+              if (widget.displayDiagnostics) CallDiagnosticsContent(call: call),
+            ],
+          ),
         );
-      }
-    } else {
-      final isMigrating = callState.status.isMigrating;
-      final isReconnecting = callState.status.isReconnecting;
-      final statusText = isMigrating
-          ? 'Migrating'
-          : isReconnecting
-          ? 'Reconnecting'
-          : 'Connecting';
-
-      bodyWidget =
-          widget.livestreamNotConnectedBuilder?.call(
-            context,
-            LivestreamNotConnectedProperties(
-              call,
-              isMigrating: isMigrating,
-              isReconnecting: isReconnecting,
-            ),
-          ) ??
-          Center(
-            child: Text(
-              statusText,
-              style: theme.livestreamTheme.callStateButtonTextStyle,
-            ),
-          );
-    }
-
-    return Scaffold(
-      backgroundColor: theme.colorTheme.livestreamBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: widget.backButtonBuilder?.call(context),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          bodyWidget,
-          if (widget.displayDiagnostics)
-            CallDiagnosticsContent(
-              call: call,
-            ),
-        ],
-      ),
+      },
     );
   }
 }
