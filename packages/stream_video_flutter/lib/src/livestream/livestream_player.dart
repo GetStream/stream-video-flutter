@@ -125,7 +125,7 @@ class LivestreamPlayer extends StatefulWidget {
   /// The builder used to create a custom widget when the livestream has ended.
   ///
   /// Recommend to use [livestreamEndedWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use participantsAvatarWidgetBuilder instead.')
+  @Deprecated('Use livestreamEndedWidgetBuilder instead.')
   final LivestreamEndedBuilder? livestreamEndedBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
