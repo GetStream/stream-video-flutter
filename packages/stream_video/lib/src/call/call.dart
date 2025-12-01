@@ -2876,6 +2876,30 @@ class Call {
     return result.map((_) => none);
   }
 
+  /// Changes the camera capture target resolution during an active call.
+  Future<Result<None>> setCameraTargetResolution(
+    StreamTargetResolution targetResolution,
+  ) async {
+    connectOptions = _connectOptions.copyWith(
+      targetResolution: targetResolution,
+    );
+
+    if (_session?.rtcManager == null) {
+      return const Result.success(none);
+    }
+
+    final params = targetResolution.toVideoParams();
+    final result = await _session!.rtcManager!.setCameraVideoParameters(
+      params: params,
+    );
+
+    if (result.isSuccess) {
+      return const Result.success(none);
+    } else {
+      return result.map((_) => none);
+    }
+  }
+
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,

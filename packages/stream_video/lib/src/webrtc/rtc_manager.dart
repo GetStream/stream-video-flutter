@@ -1021,6 +1021,40 @@ extension PublisherRtcManager on RtcManager {
     tracks[updatedTrack.trackId] = updatedTrack;
     return Result.success(updatedTrack);
   }
+
+  Future<Result<RtcLocalCameraTrack>> setCameraVideoParameters({
+    required RtcVideoParameters params,
+  }) async {
+    final track = getPublisherTrackByType(SfuTrackType.video);
+
+    if (track == null) {
+      _logger.w(() => '[setCameraVideoParameters] rejected (track not found)');
+      return Result.error('Track not found');
+    }
+
+    if (track is! RtcLocalCameraTrack) {
+      _logger.w(
+        () => '[setCameraVideoParameters] rejected (track is not camera)',
+      );
+      return Result.error('Track is not camera');
+    }
+
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(track.trackId)
+        .toList();
+
+    final updatedTrack = await track.recreate(
+      transceivers,
+      mediaConstraints: track.mediaConstraints.copyWith(
+        params: track.mediaConstraints.params.copyWith(
+          dimension: params.dimension,
+        ),
+      ),
+    );
+
+    tracks[updatedTrack.trackId] = updatedTrack;
+    return Result.success(updatedTrack);
+  }
 }
 
 extension RtcManagerTrackHelper on RtcManager {

@@ -1,5 +1,8 @@
 ## Unreleased
 
+### ✅ Added
+* Added support for changing the camera target resolution during an ongoing call using the `call.setCameraTargetResolution()` method.
+
 #### LivestreamPlayer Improvements
 * Added support for Picture in Picture (PiP) mode, configurable via the `pictureInPictureConfiguration` parameter. For platform-specific setup, refer to the [documentation](https://getstream.io/video/docs/flutter/advanced/picture_in_picture/).
 * Introduced the `joinBehaviour` parameter, allowing control over whether and when the `LivestreamPlayer` automatically connects the user to a call.
