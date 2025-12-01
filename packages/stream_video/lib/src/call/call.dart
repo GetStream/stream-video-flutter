@@ -2880,11 +2880,11 @@ class Call {
   Future<Result<None>> setCameraTargetResolution(
     StreamTargetResolution targetResolution,
   ) async {
-    if (_session?.rtcManager == null) {
-      _connectOptions = _connectOptions.copyWith(
-        targetResolution: targetResolution,
-      );
+    connectOptions = _connectOptions.copyWith(
+      targetResolution: targetResolution,
+    );
 
+    if (_session?.rtcManager == null) {
       return const Result.success(none);
     }
 
@@ -2896,10 +2896,6 @@ class Call {
     if (result.isSuccess) {
       return const Result.success(none);
     } else {
-      _connectOptions = _connectOptions.copyWith(
-        targetResolution: targetResolution,
-      );
-
       return result.map((_) => none);
     }
   }
