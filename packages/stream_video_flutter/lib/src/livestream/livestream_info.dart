@@ -3,6 +3,7 @@ import 'package:stream_video/stream_video.dart';
 
 import '../l10n/localization_extension.dart';
 import '../theme/themes.dart';
+import '../widgets/partial_call_state_builder.dart';
 import 'livestream_speakerphone_option.dart';
 
 /// A control bar style widget meant for displaying livestream controls and
@@ -12,8 +13,6 @@ class LivestreamInfo extends StatelessWidget {
   ///
   /// * [call] is the livestream call intended to be viewed.
   ///
-  /// * [callState] is the livestream call state.
-  ///
   /// * [fullscreen] denotes if the video renderer is in cover or contain mode.
   ///
   /// * [onFullscreenTapped] is a callback function that notifies when the fullscreen button is tapped.
@@ -21,21 +20,20 @@ class LivestreamInfo extends StatelessWidget {
   /// * [duration] denotes the current call duration.
   ///
   /// * [showParticipantCount] defines if the call should show participant count.
+  ///
+  /// * [includeAnonymousParticipantsCount] defines if the participant count should include anonymous participants.
   const LivestreamInfo({
     super.key,
     required this.call,
-    required this.callState,
     required this.fullscreen,
     required this.onFullscreenTapped,
     required this.duration,
-    required this.showParticipantCount,
+    this.showParticipantCount = true,
+    this.includeAnonymousParticipantsCount = true,
   });
 
   /// The livestream call to display/modify.
   final Call call;
-
-  /// The livestream call state.
-  final CallState callState;
 
   /// Denotes if the video renderer is in cover or contain mode.
   final bool fullscreen;
@@ -50,6 +48,11 @@ class LivestreamInfo extends StatelessWidget {
   ///
   /// Defaults to true.
   final bool showParticipantCount;
+
+  /// Boolean to include anonymous participants in the count.
+  ///
+  /// Defaults to true.
+  final bool includeAnonymousParticipantsCount;
 
   @override
   Widget build(BuildContext context) {
@@ -80,100 +83,115 @@ class LivestreamInfo extends StatelessWidget {
     final formattedDuration =
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    return ColoredBox(
-      // ignore: deprecated_member_use
-      color: Colors.black.withOpacity(0.4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 8,
-                ),
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: theme.liveButtonColor,
-                ),
-                child: Text(
-                  callState.isBackstage
-                      ? translations.livestreamBackstage
-                      : translations.livestreamLive,
-                  style: theme.callStateButtonTextStyle,
-                ),
-              ),
-              if (showParticipantCount)
-                Row(
-                  children: [
-                    IconTheme(
-                      data: participantIconTheme,
-                      child: const Icon(
-                        Icons.remove_red_eye_outlined,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Text(
-                      callState.otherParticipants.length.toString(),
-                      style: theme.participantCountTextStyle,
-                    ),
-                  ],
-                ),
-            ],
-          ),
-          Row(
-            children: [
-              const CircleAvatar(
-                backgroundColor: Colors.red,
-                radius: 4,
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              Text(
-                formattedDuration,
-                style: theme.durationTextStyle,
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              LivestreamSpeakerphoneOption(
-                call: call,
-                enabledSpeakerphoneIconTheme: speakerphoneEnabledIconTheme,
-                disabledSpeakerphoneIconTheme: speakerphoneDisabledIconTheme,
-              ),
-              IconButton(
-                onPressed: onFullscreenTapped,
-                icon: AnimatedCrossFade(
-                  firstChild: IconTheme(
-                    data: contractIconTheme,
-                    child: const Icon(
-                      Icons.fullscreen_exit,
-                    ),
-                  ),
-                  secondChild: IconTheme(
-                    data: expandIconTheme,
-                    child: const Icon(
-                      Icons.fullscreen,
-                    ),
-                  ),
-                  crossFadeState: fullscreen
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  duration: const Duration(milliseconds: 300),
-                ),
-              ),
-            ],
-          ),
-        ],
+    return PartialCallStateBuilder(
+      call: call,
+      selector: (state) => (
+        isBackstage: state.isBackstage,
+        participantCount: state.participantCount,
+        anonymousParticipantCount: state.anonymousParticipantCount,
       ),
+      builder: (context, callData) {
+        return ColoredBox(
+          // ignore: deprecated_member_use
+          color: Colors.black.withOpacity(0.4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: theme.liveButtonColor,
+                    ),
+                    child: Text(
+                      callData.isBackstage
+                          ? translations.livestreamBackstage
+                          : translations.livestreamLive,
+                      style: theme.callStateButtonTextStyle,
+                    ),
+                  ),
+                  if (showParticipantCount)
+                    Row(
+                      children: [
+                        IconTheme(
+                          data: participantIconTheme,
+                          child: const Icon(
+                            Icons.remove_red_eye_outlined,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          includeAnonymousParticipantsCount
+                              ? (callData.participantCount +
+                                        callData.anonymousParticipantCount)
+                                    .toString()
+                              : callData.participantCount.toString(),
+                          style: theme.participantCountTextStyle,
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              Row(
+                children: [
+                  const CircleAvatar(
+                    backgroundColor: Colors.red,
+                    radius: 4,
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    formattedDuration,
+                    style: theme.durationTextStyle,
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  LivestreamSpeakerphoneOption(
+                    call: call,
+                    enabledSpeakerphoneIconTheme: speakerphoneEnabledIconTheme,
+                    disabledSpeakerphoneIconTheme:
+                        speakerphoneDisabledIconTheme,
+                  ),
+                  IconButton(
+                    onPressed: onFullscreenTapped,
+                    icon: AnimatedCrossFade(
+                      firstChild: IconTheme(
+                        data: contractIconTheme,
+                        child: const Icon(
+                          Icons.fullscreen_exit,
+                        ),
+                      ),
+                      secondChild: IconTheme(
+                        data: expandIconTheme,
+                        child: const Icon(
+                          Icons.fullscreen,
+                        ),
+                      ),
+                      crossFadeState: fullscreen
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
+                      duration: const Duration(milliseconds: 300),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
