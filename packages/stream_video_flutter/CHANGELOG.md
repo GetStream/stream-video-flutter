@@ -1,4 +1,4 @@
-## Unreleased
+## 1.0.1
 
 ### ✅ Added
 * Added support for changing the camera target resolution during an ongoing call using the `call.setCameraTargetResolution()` method.

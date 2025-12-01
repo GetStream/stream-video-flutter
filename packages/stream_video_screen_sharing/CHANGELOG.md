@@ -1,3 +1,6 @@
+## 1.0.1
+* Sync version with `stream_video_flutter` 1.0.1
+
 ## 1.0.0
 ### 🍏 **Swift Package Manager (SPM)**
 - Added Swift Package Manager (SPM) support for iOS.

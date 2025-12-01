@@ -5,7 +5,7 @@ description: An example project for the stream_video_flutter package.
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.8.0
@@ -28,9 +28,9 @@ dependencies:
   rxdart: ^0.28.0
   share_plus: ^11.0.0
   shared_preferences: ^2.5.3
-  stream_video: ^1.0.0
-  stream_video_flutter: ^1.0.0
-  stream_video_push_notification: ^1.0.0
+  stream_video: ^1.0.1
+  stream_video_flutter: ^1.0.1
+  stream_video_push_notification: ^1.0.1
   stream_webrtc_flutter: ^2.2.0
 
 dependency_overrides:
