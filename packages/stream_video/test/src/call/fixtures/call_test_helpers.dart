@@ -303,10 +303,12 @@ MockCallSession setupMockCallSession() {
   when(
     callSession.getTrace,
   ).thenReturn(
-    TraceSlice(
-      snapshot: [],
-      rollback: () {},
-    ),
+    [
+      TraceSlice(
+        snapshot: [],
+        rollback: () {},
+      ),
+    ],
   );
 
   when(
