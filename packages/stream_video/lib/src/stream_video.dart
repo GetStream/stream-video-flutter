@@ -457,6 +457,11 @@ class StreamVideo extends Disposable {
       await _client.disconnectUser();
     }
 
+    for (final timer in _incomingAutoRejectTimers.values) {
+      timer.cancel();
+    }
+    _incomingAutoRejectTimers.clear();
+
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
     await _state.clear();

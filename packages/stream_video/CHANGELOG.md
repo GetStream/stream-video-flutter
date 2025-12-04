@@ -1,7 +1,7 @@
 ## Unreleased
 
 🐞 Fixed
-* Fixed incoming call timout handling.
+* Fixed incoming call timeout handling.
 
 ## 1.0.1
 
