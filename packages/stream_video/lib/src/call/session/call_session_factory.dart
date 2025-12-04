@@ -78,7 +78,7 @@ class CallSessionFactory {
         leftoverTraceRecords
             .map(
               (r) => r.copyWith(
-                id: '${max(0, sessionSeq - 1)}',
+                id: '${max(0, sessionSeq - 1)}-$sfuName',
               ),
             )
             .toList(),

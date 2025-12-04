@@ -11,6 +11,7 @@ import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_layer_setting.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
+import '../utils/extensions.dart';
 import '../utils/string.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import 'data/events/sfu_events.dart';
@@ -109,10 +110,10 @@ extension SetPublisherRequestX on sfu.SetPublisherRequest {
 extension ClientDetailsX on sfu_models.ClientDetails {
   Map<String, dynamic> toJson() {
     return {
-      'sdk': sdk.toJson(),
-      'os': os.toJson(),
-      'browser': browser.toJson(),
-      'device': device.toJson(),
+      if (hasSdk()) 'sdk': sdk.toJson(),
+      if (hasOs()) 'os': os.toJson(),
+      if (hasBrowser()) 'browser': browser.toJson(),
+      if (hasDevice()) 'device': device.toJson(),
     };
   }
 }

@@ -999,6 +999,10 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setTrackFacingMode({
     required FacingMode facingMode,
   }) async {
+    _logger.d(
+      () => '[setTrackFacingMode] facingMode: $facingMode}',
+    );
+
     final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) return Result.error('Track not found');
 
@@ -1025,6 +1029,10 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setCameraVideoParameters({
     required RtcVideoParameters params,
   }) async {
+    _logger.d(
+      () => '[setCameraVideoParameters] params: $params}',
+    );
+
     final track = getPublisherTrackByType(SfuTrackType.video);
 
     if (track == null) {

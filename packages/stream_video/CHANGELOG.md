@@ -1,3 +1,7 @@
+## Unreleased
+
+* Improved SFU stats implementation.
+
 ## 1.0.1
 
 ### ✅ Added
