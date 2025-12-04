@@ -1487,7 +1487,7 @@ class Call {
         }
 
         _session?.trace('callReconnect', {
-          'strategy': strategy,
+          'strategy': strategy.name,
         });
 
         _stateManager.lifecycleCallConnecting(
@@ -1537,7 +1537,7 @@ class Call {
           }
 
           _session?.trace('callReconnectSuccess', {
-            'strategy': strategy,
+            'strategy': strategy.name,
           });
         } catch (error) {
           switch (error) {
@@ -1547,7 +1547,7 @@ class Call {
               _stateManager.lifecycleCallReconnectingFailed();
 
               _session?.trace('callReconnectFailed', {
-                'strategy': strategy,
+                'strategy': strategy.name,
                 'error': error.toString(),
               });
 
