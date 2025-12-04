@@ -45,7 +45,6 @@ const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 
 class CallSession extends Disposable {
-  bool _isLeavingOrClosed = false;
   CallSession({
     required this.callCid,
     required this.sessionSeq,
@@ -123,6 +122,7 @@ class CallSession extends Disposable {
   StatsReporter? statsReporter;
 
   Timer? _peerConnectionCheckTimer;
+  bool _isLeavingOrClosed = false;
 
   sfu_models.ClientDetails? _clientDetails;
 
