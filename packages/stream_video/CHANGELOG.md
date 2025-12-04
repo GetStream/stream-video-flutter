@@ -1,3 +1,9 @@
+## Unreleased
+
+🐞 Fixed
+* Fixed incoming call timeout handling.
+  - Use `streamVideo.observeCoreRingingEventsForBackground()` instead of `streamVideo.observeCallDeclinedRingingEvent()` in `firebaseMessagingBackgroundHandler` to support all necessary events.
+
 ## 1.0.1
 
 ### ✅ Added
