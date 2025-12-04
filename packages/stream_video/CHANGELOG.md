@@ -1,4 +1,4 @@
-## Unreleased
+## 1.0.2
 
 🐞 Fixed
 * Fixed incoming call timeout handling.
