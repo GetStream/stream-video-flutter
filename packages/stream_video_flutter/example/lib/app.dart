@@ -37,12 +37,10 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
     userToken: credentials.token,
   );
 
-  final subscription = client.observeCallDeclinedRingingEvent();
+  final subscription = client.observeCoreRingingEventsForBackground();
 
   client.disposeAfterResolvingRinging(
-    disposingCallback: () {
-      subscription?.cancel();
-    },
+    disposingCallback: subscription.cancel,
   );
 
   await client.handleRingingFlowNotifications(message.data);

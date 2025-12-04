@@ -37,11 +37,11 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       prefs.environment,
     );
 
-    final subscription = streamVideo.observeCallDeclinedRingingEvent();
+    final subscription = streamVideo.observeCoreRingingEventsForBackground();
 
     streamVideo.disposeAfterResolvingRinging(
       disposingCallback: () {
-        subscription?.cancel();
+        subscription.cancel();
         AppInjector.reset();
       },
     );

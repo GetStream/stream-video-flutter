@@ -42,6 +42,7 @@ import 'models/call_cid.dart';
 import 'models/call_preferences.dart';
 import 'models/call_received_data.dart';
 import 'models/call_ringing_data.dart';
+import 'models/call_status.dart';
 import 'models/guest_created_data.dart';
 import 'models/push_device.dart';
 import 'models/push_provider.dart';
@@ -277,6 +278,7 @@ class StreamVideo extends Disposable {
 
   final Map<String, bool> _mutedCameraByStateChange = {};
   final Map<String, bool> _mutedAudioByStateChange = {};
+  final Map<String, Timer> _incomingAutoRejectTimers = {};
 
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.info;
@@ -454,6 +456,11 @@ class StreamVideo extends Disposable {
     if (!_connectionState.isDisconnected) {
       await _client.disconnectUser();
     }
+
+    for (final timer in _incomingAutoRejectTimers.values) {
+      timer.cancel();
+    }
+    _incomingAutoRejectTimers.clear();
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
@@ -772,11 +779,15 @@ class StreamVideo extends Disposable {
     );
   }
 
+  /// Helper method to observe core ringing events.
+  /// Should be used as soon as the app is launched when handling incoming calls.
   CompositeSubscription observeCoreRingingEvents({
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
   }) {
     final ringingEventSubscriptions = CompositeSubscription();
+
+    observeCallIncomingRingingEvent()?.addTo(ringingEventSubscriptions);
 
     observeCallAcceptRingingEvent(
       onCallAccepted: onCallAccepted,
@@ -785,6 +796,17 @@ class StreamVideo extends Disposable {
 
     observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
     observeCallEndedRingingEvent()?.addTo(ringingEventSubscriptions);
+
+    return ringingEventSubscriptions;
+  }
+
+  /// Helper method to observe core ringing events for background.
+  /// Should be used in the background handler when handling incoming calls.
+  CompositeSubscription observeCoreRingingEventsForBackground() {
+    final ringingEventSubscriptions = CompositeSubscription();
+
+    observeCallIncomingRingingEvent()?.addTo(ringingEventSubscriptions);
+    observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
 
     return ringingEventSubscriptions;
   }
@@ -811,6 +833,10 @@ class StreamVideo extends Disposable {
         callPreferences: acceptCallPreferences,
       ),
     );
+  }
+
+  StreamSubscription<ActionCallIncoming>? observeCallIncomingRingingEvent() {
+    return onRingingEvent<ActionCallIncoming>(_onCallIncoming);
   }
 
   @Deprecated('Use observeCallDeclinedRingingEvent instead.')
@@ -842,6 +868,8 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
     final consumeResult = await consumeIncomingCall(
       uuid: uuid,
       cid: cid,
@@ -869,12 +897,33 @@ class StreamVideo extends Disposable {
     onCallAccepted?.call(callToJoin);
   }
 
+  Future<void> _onCallIncoming(ActionCallIncoming event) async {
+    _logger.d(() => '[onCallIncoming] event: $event');
+
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    final consumeResult = await consumeIncomingCall(
+      uuid: uuid,
+      cid: cid,
+    );
+
+    final incomingCall = consumeResult.getDataOrNull();
+    if (incomingCall == null) return;
+
+    final timeout = incomingCall.state.value.settings.ring.autoRejectTimeout;
+    _startIncomingAutoRejectTimer(incomingCall, timeout);
+  }
+
   Future<void> _onCallDecline(ActionCallDecline event) async {
     _logger.d(() => '[onCallDecline] event: $event');
 
     final uuid = event.data.uuid;
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
+
+    _cancelIncomingAutoRejectTimerByCid(cid);
 
     final call = await consumeIncomingCall(uuid: uuid, cid: cid);
     final callToReject = call.getDataOrNull();
@@ -902,6 +951,8 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
     final activeCall = activeCalls.firstWhereOrNull(
       (call) => call.callCid.value == cid,
     );
@@ -914,20 +965,45 @@ class StreamVideo extends Disposable {
         _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
       }
     } else if (incomingCall?.callCid.value == cid) {
-      final callResult = await consumeIncomingCall(uuid: uuid, cid: cid);
-      final callToReject = callResult.getDataOrNull();
-      if (callToReject == null) return;
-
-      final result = await callToReject.reject(
-        reason: CallRejectReason.decline(),
-      );
-
-      if (result is Failure) {
-        _logger.d(
-          () => '[onCallEnded] error rejecting incoming call: ${result.error}',
+      final status = incomingCall?.state.value.status;
+      if (status is CallStatusIncoming && !status.acceptedByMe) {
+        final result = await incomingCall?.reject(
+          reason: CallRejectReason.decline(),
         );
+        if (result is Failure) {
+          _logger.d(
+            () =>
+                '[onCallEnded] error rejecting incoming call: ${result.error}',
+          );
+        }
+      } else {
+        _logger.v(() => '[onCallEnded] skip reject (status: $status)');
       }
     }
+  }
+
+  void _startIncomingAutoRejectTimer(Call call, Duration timeout) {
+    if (timeout <= Duration.zero) return;
+    final cid = call.callCid.value;
+
+    _incomingAutoRejectTimers[cid]?.cancel();
+    _incomingAutoRejectTimers[cid] = Timer(timeout, () async {
+      try {
+        final status = call.state.value.status;
+        if (status is CallStatusIncoming && !status.acceptedByMe) {
+          await call.reject(reason: CallRejectReason.timeout());
+        }
+      } catch (e) {
+        _logger.e(() => '[incomingTimeout] failed cid: $cid: $e');
+      } finally {
+        _incomingAutoRejectTimers.remove(cid);
+      }
+    });
+  }
+
+  void _cancelIncomingAutoRejectTimerByCid(String cid) {
+    final timer = _incomingAutoRejectTimers.remove(cid);
+    timer?.cancel();
   }
 
   @Deprecated('Use handleRingingFlowNotifications instead.')
