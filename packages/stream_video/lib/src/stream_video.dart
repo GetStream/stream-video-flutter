@@ -893,11 +893,6 @@ class StreamVideo extends Disposable {
       return;
     }
 
-    // Clear any incoming placeholder once accepted to avoid reject-on-ended race.
-    if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
-      _state.incomingCall.value = null;
-    }
-
     unawaited(callToJoin.join());
     onCallAccepted?.call(callToJoin);
   }
@@ -970,7 +965,6 @@ class StreamVideo extends Disposable {
         _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
       }
     } else if (incomingCall?.callCid.value == cid) {
-      // Only reject if it's still a not-accepted incoming call.
       final status = incomingCall?.state.value.status;
       if (status is CallStatusIncoming && !status.acceptedByMe) {
         final result = await incomingCall?.reject(
