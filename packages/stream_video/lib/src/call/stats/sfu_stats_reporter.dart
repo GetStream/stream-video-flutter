@@ -188,11 +188,14 @@ class SfuStatsReporter {
           final publisherTrace = callSession.rtcManager?.publisher?.tracer
               .take();
           final sessionTrace = callSession.getTrace();
+          final mediaDeviceNotifierTrace = RtcMediaDeviceNotifier.instance
+              .getTrace();
 
           traces.addAll([
             if (subscriberTrace != null) subscriberTrace,
             if (publisherTrace != null) publisherTrace,
-            sessionTrace,
+            ...sessionTrace,
+            mediaDeviceNotifierTrace,
           ]);
         }
 

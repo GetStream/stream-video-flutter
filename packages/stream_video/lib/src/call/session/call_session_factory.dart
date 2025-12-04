@@ -72,18 +72,17 @@ class CallSessionFactory {
 
     _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
 
-    final tracer = Tracer('$sessionSeq')
+    final tracer = Tracer('$sessionSeq-$sfuName')
       ..setEnabled(statsOptions.enableRtcStats)
       ..traceMultiple(
         leftoverTraceRecords
             .map(
               (r) => r.copyWith(
-                id: '${max(0, sessionSeq - 1)}',
+                id: '${max(0, sessionSeq - 1)}-$sfuName',
               ),
             )
             .toList(),
-      )
-      ..trace('create', {'url': sfuName});
+      );
 
     return CallSession(
       sessionSeq: sessionSeq,

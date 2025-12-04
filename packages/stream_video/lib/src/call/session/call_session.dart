@@ -104,6 +104,7 @@ class CallSession extends Disposable {
   final InternetConnection networkMonitor;
   final StatsOptions statsOptions;
   final Tracer _tracer;
+  final Tracer _zonedTracer = Tracer(null);
   final StreamVideo _streamVideo;
 
   final Duration joinResponseTimeout;
@@ -121,6 +122,7 @@ class CallSession extends Disposable {
   StatsReporter? statsReporter;
 
   Timer? _peerConnectionCheckTimer;
+  bool _isLeavingOrClosed = false;
 
   sfu_models.ClientDetails? _clientDetails;
 
@@ -132,12 +134,13 @@ class CallSession extends Disposable {
     onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
   );
 
-  TraceSlice getTrace() {
-    return _tracer.take();
+  List<TraceSlice> getTrace() {
+    return [_tracer.take(), _zonedTracer.take()];
   }
 
   void setTraceEnabled(bool enabled) {
     _tracer.setEnabled(enabled);
+    _zonedTracer.setEnabled(enabled);
   }
 
   void trace(String tag, dynamic data) {
@@ -459,6 +462,12 @@ class CallSession extends Disposable {
           fastReconnectDeadline: event.fastReconnectDeadline,
         ),
       );
+    } on TimeoutException catch (e, stk) {
+      final message =
+          'Waiting for "joinResponse" has timed out after ${joinResponseTimeout.inMilliseconds}ms';
+      _tracer.trace('joinRequestTimeout', message);
+      _logger.e(() => '[start] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
     } catch (e, stk) {
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -585,6 +594,7 @@ class CallSession extends Disposable {
 
   void leave({String? reason}) {
     _logger.d(() => '[leave] no args');
+    _isLeavingOrClosed = true;
     sfuWS.leave(sessionId: sessionId, reason: reason);
   }
 
@@ -593,6 +603,7 @@ class CallSession extends Disposable {
     String? closeReason,
   }) async {
     _logger.d(() => '[close] code: $code, closeReason: $closeReason');
+    _isLeavingOrClosed = true;
 
     await _eventsSubscription?.cancel();
     await _networkStatusSubscription?.cancel();
@@ -614,6 +625,7 @@ class CallSession extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+    _isLeavingOrClosed = true;
 
     await close(StreamWebSocketCloseCode.normalClosure);
     return await super.dispose();
@@ -683,6 +695,7 @@ class CallSession extends Disposable {
       } else if (event is SfuParticipantLeftEvent) {
         stateManager.sfuParticipantLeft(event);
       } else if (event is SfuConnectionQualityChangedEvent) {
+        _tracer.trace('ConnectionQualityChanged', event.toJson());
         stateManager.sfuConnectionQualityChanged(event);
       } else if (event is SfuAudioLevelChangedEvent) {
         stateManager.sfuUpdateAudioLevelChanged(event);
@@ -905,7 +918,7 @@ class CallSession extends Disposable {
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
-    if (stateManager.callState.status.isDisconnected) {
+    if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(() => '[negotiate] call is disconnected');
       return;
     }
@@ -1037,7 +1050,7 @@ class CallSession extends Disposable {
     }
 
     final result = TracerZone.run(
-      _tracer,
+      _zonedTracer,
       ++zonedTracerSeq,
       () async {
         return rtcManager.setCameraEnabled(
@@ -1060,7 +1073,7 @@ class CallSession extends Disposable {
     }
 
     final result = TracerZone.run(
-      _tracer,
+      _zonedTracer,
       ++zonedTracerSeq,
       () async {
         return rtcManager.setMicrophoneEnabled(

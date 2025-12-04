@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
-import 'package:sdp_transform/sdp_transform.dart';
 
 import '../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
@@ -17,6 +14,8 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/string.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import 'data/events/sfu_events.dart';
+import 'data/models/sfu_connection_info.dart';
+import 'data/models/sfu_model_mapper_extensions.dart';
 import 'data/models/sfu_participant.dart';
 
 extension CodecX on sfu_models.Codec {
@@ -24,9 +23,9 @@ extension CodecX on sfu_models.Codec {
     return {
       'name': name,
       'fmtp': fmtp,
-      'clock_rate': clockRate,
-      'encoding_parameters': encodingParameters,
-      'payload_type': payloadType,
+      'clockRate': clockRate,
+      'encodingParameters': encodingParameters,
+      'payloadType': payloadType,
     };
   }
 }
@@ -68,8 +67,8 @@ extension SfuParticipantX on SfuParticipant {
 extension TrackInfoX on sfu_models.TrackInfo {
   Map<String, dynamic> toJson() {
     return {
-      'track_id': trackId,
-      'track_type': trackType.toString(),
+      'trackId': trackId,
+      'trackType': trackType.value,
       'layers': layers.map((layer) => layer.toJson()).toList(),
       'mid': mid,
       'dtx': dtx,
@@ -77,7 +76,7 @@ extension TrackInfoX on sfu_models.TrackInfo {
       'red': red,
       'muted': muted,
       'codec': codec.toJson(),
-      'publish_option_id': publishOptionId,
+      'publishOptionId': publishOptionId,
     };
   }
 }
@@ -86,24 +85,22 @@ extension VideoLayerX on sfu_models.VideoLayer {
   Map<String, dynamic> toJson() {
     return {
       'rid': rid,
-      'video_dimension': {
+      'videoDimension': {
         'width': videoDimension.width,
         'height': videoDimension.height,
       },
       'bitrate': bitrate,
       'fps': fps,
-      'quality': quality.toString(),
+      'quality': quality.value,
     };
   }
 }
 
 extension SetPublisherRequestX on sfu.SetPublisherRequest {
   Map<String, dynamic> toJson() {
-    final parsedSdp = parse(sdp);
-
     return {
-      'sdp': parsedSdp,
-      'session_id': sessionId,
+      'sdp': sdp,
+      'sessionId': sessionId,
       'tracks': tracks.map((track) => track.toJson()).toList(),
     };
   }
@@ -112,10 +109,10 @@ extension SetPublisherRequestX on sfu.SetPublisherRequest {
 extension ClientDetailsX on sfu_models.ClientDetails {
   Map<String, dynamic> toJson() {
     return {
-      'sdk': sdk.toJson(),
-      'os': os.toJson(),
-      'browser': browser.toJson(),
-      'device': device.toJson(),
+      if (hasSdk()) 'sdk': sdk.toJson(),
+      if (hasOs()) 'os': os.toJson(),
+      if (hasBrowser()) 'browser': browser.toJson(),
+      if (hasDevice()) 'device': device.toJson(),
     };
   }
 }
@@ -123,7 +120,7 @@ extension ClientDetailsX on sfu_models.ClientDetails {
 extension SdkX on sfu_models.Sdk {
   Map<String, dynamic> toJson() {
     return {
-      'type': type.toString(),
+      'type': type.value,
       'major': major,
       'minor': minor,
       'patch': patch,
@@ -161,11 +158,10 @@ extension DeviceX on sfu_models.Device {
 
 extension SendAnswerRequestX on sfu.SendAnswerRequest {
   Map<String, dynamic> toJson() {
-    final parsedSdp = parse(sdp);
     return {
-      'peer_type': peerType.toString(),
-      'sdp': parsedSdp,
-      'session_id': sessionId,
+      'peerType': peerType.value,
+      'sdp': sdp,
+      'sessionId': sessionId,
     };
   }
 }
@@ -173,9 +169,9 @@ extension SendAnswerRequestX on sfu.SendAnswerRequest {
 extension ICETrickleX on sfu_models.ICETrickle {
   Map<String, dynamic> toJson() {
     return {
-      'peer_type': peerType.toString(),
-      'ice_candidate': jsonDecode(iceCandidate),
-      'session_id': sessionId,
+      'peerType': peerType.value,
+      'iceCandidate': iceCandidate,
+      'sessionId': sessionId,
     };
   }
 }
@@ -183,8 +179,8 @@ extension ICETrickleX on sfu_models.ICETrickle {
 extension ICERestartRequestX on sfu.ICERestartRequest {
   Map<String, dynamic> toJson() {
     return {
-      'session_id': sessionId,
-      'peer_type': peerType.toString(),
+      'sessionId': sessionId,
+      'peerType': peerType.value,
     };
   }
 }
@@ -192,8 +188,8 @@ extension ICERestartRequestX on sfu.ICERestartRequest {
 extension UpdateMuteStatesRequestX on sfu.UpdateMuteStatesRequest {
   Map<String, dynamic> toJson() {
     return {
-      'session_id': sessionId,
-      'mute_states': muteStates.map((state) => state.toJson()).toList(),
+      'sessionId': sessionId,
+      'muteStates': muteStates.map((state) => state.toJson()).toList(),
     };
   }
 }
@@ -201,7 +197,7 @@ extension UpdateMuteStatesRequestX on sfu.UpdateMuteStatesRequest {
 extension TrackMuteStateX on sfu.TrackMuteState {
   Map<String, dynamic> toJson() {
     return {
-      'track_type': trackType.toString(),
+      'trackType': trackType.value,
       'muted': muted,
     };
   }
@@ -210,7 +206,7 @@ extension TrackMuteStateX on sfu.TrackMuteState {
 extension UpdateSubscriptionsRequestX on sfu.UpdateSubscriptionsRequest {
   Map<String, dynamic> toJson() {
     return {
-      'session_id': sessionId,
+      'sessionId': sessionId,
       'tracks': tracks.map((sub) => sub.toJson()).toList(),
     };
   }
@@ -219,9 +215,9 @@ extension UpdateSubscriptionsRequestX on sfu.UpdateSubscriptionsRequest {
 extension TrackSubscriptionDetailsX on sfu.TrackSubscriptionDetails {
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId,
-      'session_id': sessionId,
-      'track_type': trackType.toString(),
+      'userId': userId,
+      'sessionId': sessionId,
+      'trackType': trackType.value,
       'dimension': dimension.toJson(),
     };
   }
@@ -239,7 +235,7 @@ extension VideoDimensionX on sfu_models.VideoDimension {
 extension StartNoiseCancellationRequestX on sfu.StartNoiseCancellationRequest {
   Map<String, dynamic> toJson() {
     return {
-      'session_id': sessionId,
+      'sessionId': sessionId,
     };
   }
 }
@@ -247,7 +243,7 @@ extension StartNoiseCancellationRequestX on sfu.StartNoiseCancellationRequest {
 extension StopNoiseCancellationRequestX on sfu.StopNoiseCancellationRequest {
   Map<String, dynamic> toJson() {
     return {
-      'session_id': sessionId,
+      'sessionId': sessionId,
     };
   }
 }
@@ -255,14 +251,14 @@ extension StopNoiseCancellationRequestX on sfu.StopNoiseCancellationRequest {
 extension ReconnectDetailsX on sfu_events.ReconnectDetails {
   Map<String, dynamic> toJson() {
     return {
-      'strategy': strategy.toString(),
-      'announced_tracks': announcedTracks
+      'strategy': strategy.value,
+      'announcedTracks': announcedTracks
           .map((track) => track.toJson())
           .toList(),
       'subscriptions': subscriptions.map((sub) => sub.toJson()).toList(),
-      'reconnect_attempt': reconnectAttempt,
-      'from_sfu_id': fromSfuId,
-      'previous_session_id': previousSessionId,
+      'reconnectAttempt': reconnectAttempt,
+      'fromSfuId': fromSfuId,
+      'previousSessionId': previousSessionId,
       'reason': reason,
     };
   }
@@ -271,8 +267,8 @@ extension ReconnectDetailsX on sfu_events.ReconnectDetails {
 extension SfuChangePublishQualityEventJsonX on SfuChangePublishQualityEvent {
   Map<String, dynamic> toJson() {
     return {
-      'audio_senders': audioSenders.map((sender) => sender.toJson()).toList(),
-      'video_senders': videoSenders.map((sender) => sender.toJson()).toList(),
+      'audioSenders': audioSenders.map((sender) => sender.toJson()).toList(),
+      'videoSenders': videoSenders.map((sender) => sender.toJson()).toList(),
     };
   }
 }
@@ -280,7 +276,7 @@ extension SfuChangePublishQualityEventJsonX on SfuChangePublishQualityEvent {
 extension SfuChangePublishOptionsEventJsonX on SfuChangePublishOptionsEvent {
   Map<String, dynamic> toJson() {
     return {
-      'publish_options': publishOptions
+      'publishOptions': publishOptions
           .map((option) => option.toJson())
           .toList(),
       'reason': reason,
@@ -292,8 +288,8 @@ extension SfuAudioSenderJsonX on SfuAudioSender {
   Map<String, dynamic> toJson() {
     return {
       'codec': codec.toJson(),
-      'track_type': trackType.toString(),
-      'publish_option_id': publishOptionId,
+      'trackType': trackType.toDTO().value,
+      'publishOptionId': publishOptionId,
     };
   }
 }
@@ -303,8 +299,8 @@ extension SfuVideoSenderJsonX on SfuVideoSender {
     return {
       'codec': codec.toJson(),
       'layers': layers.map((layer) => layer.toJson()).toList(),
-      'track_type': trackType.toString(),
-      'publish_option_id': publishOptionId,
+      'trackType': trackType.toDTO().value,
+      'publishOptionId': publishOptionId,
     };
   }
 }
@@ -314,10 +310,11 @@ extension SfuPublishOptionsJsonX on SfuPublishOptions {
     return {
       'id': id,
       'codec': codec.toJson(),
-      'track_type': trackType.toString(),
-      'video_dimension': videoDimension?.toJson(),
-      'max_spatial_layers': maxSpatialLayers,
-      'max_temporal_layers': maxTemporalLayers,
+      'trackType': trackType.toDTO().value,
+      'videoDimension': videoDimension?.toJson(),
+      'maxSpatialLayers': maxSpatialLayers,
+      'maxTemporalLayers': maxTemporalLayers,
+      'useSingleLayer': useSingleLayer,
       'bitrate': bitrate,
       'fps': fps,
     };
@@ -327,11 +324,11 @@ extension SfuPublishOptionsJsonX on SfuPublishOptions {
 extension SfuCodecJsonX on SfuCodec {
   Map<String, dynamic> toJson() {
     return {
-      'payload_type': payloadType,
+      'payloadType': payloadType,
       'name': name,
-      'fmtp_line': fmtpLine,
-      'clock_rate': clockRate,
-      'encoding_parameters': encodingParameters,
+      'fmtp': fmtpLine,
+      'clockRate': clockRate,
+      'encodingParameters': encodingParameters,
     };
   }
 }
@@ -341,10 +338,10 @@ extension SfuVideoLayerSettingJsonX on SfuVideoLayerSetting {
     return {
       'name': name,
       'active': active,
-      'max_bitrate': maxBitrate,
-      'max_framerate': maxFramerate,
-      'scale_resolution_down_by': scaleResolutionDownBy,
-      'scalability_mode': scalabilityMode,
+      'maxBitrate': maxBitrate,
+      'maxFramerate': maxFramerate,
+      'scaleResolutionDownBy': scaleResolutionDownBy,
+      'scalabilityMode': scalabilityMode,
       'codec': codec.toJson(),
     };
   }
@@ -362,7 +359,7 @@ extension RtcVideoDimensionJsonX on RtcVideoDimension {
 extension SfuGoAwayEventJsonX on SfuGoAwayEvent {
   Map<String, dynamic> toJson() {
     return {
-      'go_away_reason': goAwayReason.toString(),
+      'goAwayReason': goAwayReason.toString(),
     };
   }
 }
@@ -380,8 +377,8 @@ extension SfuErrorJsonX on SfuError {
     return {
       'message': message,
       'code': code.toString(),
-      'should_retry': shouldRetry,
-      'reconnect_strategy': reconnectStrategy.toString(),
+      'shouldRetry': shouldRetry,
+      'reconnectStrategy': reconnectStrategy.toDto().value,
     };
   }
 }
@@ -389,7 +386,28 @@ extension SfuErrorJsonX on SfuError {
 extension SfuCallEndedEventJsonX on SfuCallEndedEvent {
   Map<String, dynamic> toJson() {
     return {
-      'call_ended_reason': callEndedReason.toString(),
+      'callEndedReason': callEndedReason.toString(),
+    };
+  }
+}
+
+extension SfuConnectionQualityChangedEventJsonX
+    on SfuConnectionQualityChangedEvent {
+  Map<String, dynamic> toJson() {
+    return {
+      'connectionQualityUpdates': connectionQualityUpdates
+          .map((codec) => codec.toJson())
+          .toList(),
+    };
+  }
+}
+
+extension SfuConnectionQualityInfoJsonX on SfuConnectionQualityInfo {
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'sessionId': sessionId,
+      'connectionQuality': connectionQuality.index,
     };
   }
 }
@@ -397,21 +415,19 @@ extension SfuCallEndedEventJsonX on SfuCallEndedEvent {
 extension SfuTrackPublishedEventJsonX on SfuTrackPublishedEvent {
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId,
-      'session_id': sessionId,
-      'track_type': trackType.toString(),
+      'userId': userId,
+      'sessionId': sessionId,
+      'trackType': trackType.toDTO().value,
       'participant': {
-        'user_id': participant.userId,
-        'session_id': participant.sessionId,
-        'user_name': participant.userName,
-        'user_image': participant.userImage,
-        'track_lookup_prefix': participant.trackLookupPrefix,
-        'published_tracks': participant.publishedTracks
+        'userId': participant.userId,
+        'sessionId': participant.sessionId,
+        'trackLookupPrefix': participant.trackLookupPrefix,
+        'publishedTracks': participant.publishedTracks
             .map((track) => track.toString())
             .toList(),
-        'is_speaking': participant.isSpeaking,
-        'is_dominant_speaker': participant.isDominantSpeaker,
-        'audio_level': participant.audioLevel,
+        'isSpeaking': participant.isSpeaking,
+        'isDominantSpeaker': participant.isDominantSpeaker,
+        'audioLevel': participant.audioLevel,
         'roles': participant.roles,
       },
     };
@@ -421,21 +437,19 @@ extension SfuTrackPublishedEventJsonX on SfuTrackPublishedEvent {
 extension SfuTrackUnpublishedEventJsonX on SfuTrackUnpublishedEvent {
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId,
-      'session_id': sessionId,
-      'track_type': trackType.toString(),
+      'userId': userId,
+      'sessionId': sessionId,
+      'trackType': trackType.toDTO().value,
       'participant': {
-        'user_id': participant.userId,
-        'session_id': participant.sessionId,
-        'user_name': participant.userName,
-        'user_image': participant.userImage,
-        'track_lookup_prefix': participant.trackLookupPrefix,
-        'published_tracks': participant.publishedTracks
+        'userId': participant.userId,
+        'sessionId': participant.sessionId,
+        'trackLookupPrefix': participant.trackLookupPrefix,
+        'publishedTracks': participant.publishedTracks
             .map((track) => track.toString())
             .toList(),
-        'is_speaking': participant.isSpeaking,
-        'is_dominant_speaker': participant.isDominantSpeaker,
-        'audio_level': participant.audioLevel,
+        'isSpeaking': participant.isSpeaking,
+        'isDominantSpeaker': participant.isDominantSpeaker,
+        'audioLevel': participant.audioLevel,
         'roles': participant.roles,
       },
     };
@@ -445,13 +459,13 @@ extension SfuTrackUnpublishedEventJsonX on SfuTrackUnpublishedEvent {
 extension PublishOptionX on sfu_models.PublishOption {
   Map<String, dynamic> toJson() {
     return {
-      'track_type': trackType.toString(),
+      'trackType': trackType.value,
       'codec': codec.toJson(),
       'bitrate': bitrate,
       'fps': fps,
-      'max_spatial_layers': maxSpatialLayers,
-      'max_temporal_layers': maxTemporalLayers,
-      'video_dimension': videoDimension.toJson(),
+      'maxSpatialLayers': maxSpatialLayers,
+      'maxTemporalLayers': maxTemporalLayers,
+      'videoDimension': videoDimension.toJson(),
       'id': id,
     };
   }
@@ -460,7 +474,7 @@ extension PublishOptionX on sfu_models.PublishOption {
 extension SubscribeOptionX on sfu_models.SubscribeOption {
   Map<String, dynamic> toJson() {
     return {
-      'track_type': trackType.toString(),
+      'trackType': trackType.value,
       'codecs': codecs.map((codec) => codec.toJson()).toList(),
     };
   }
@@ -468,23 +482,18 @@ extension SubscribeOptionX on sfu_models.SubscribeOption {
 
 extension JoinRequestX on sfu_events.JoinRequest {
   Map<String, dynamic> toJson() {
-    final subscriberSdpParsed = subscriberSdp.isNotEmpty
-        ? parse(subscriberSdp)
-        : null;
-    final publisherSdpParsed = publisherSdp.isNotEmpty
-        ? parse(publisherSdp)
-        : null;
     return {
       'token': token,
-      'session_id': sessionId,
-      'subscriber_sdp': subscriberSdpParsed,
-      'client_details': clientDetails.toJson(),
-      'reconnect_details': reconnectDetails.toJson(),
-      'publisher_sdp': publisherSdpParsed,
-      'preferred_publish_options': preferredPublishOptions
+      'sessionId': sessionId,
+      'unifiedSessionId': unifiedSessionId,
+      'subscriberSdp': subscriberSdp,
+      'publisherSdp': publisherSdp,
+      'clientDetails': clientDetails.toJson(),
+      'reconnectDetails': reconnectDetails.toJson(),
+      'preferredPublishOptions': preferredPublishOptions
           .map((option) => option.toJson())
           .toList(),
-      'preferred_subscribe_options': preferredSubscribeOptions
+      'preferredSubscribeOptions': preferredSubscribeOptions
           .map((option) => option.toJson())
           .toList(),
       'source': source.toString(),

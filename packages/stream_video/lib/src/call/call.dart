@@ -967,7 +967,12 @@ class Call {
         networkMonitor: networkMonitor,
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
-        leftoverTraceRecords: _previousSession?.getTrace().snapshot ?? [],
+        leftoverTraceRecords:
+            _previousSession
+                ?.getTrace()
+                .expand((slice) => slice.snapshot)
+                .toList() ??
+            const [],
         onReconnectionNeeded: (pc, strategy) {
           _session?.trace('pc_reconnection_needed', {
             'peerConnectionId': pc.type.name,
@@ -1481,8 +1486,8 @@ class Call {
           return;
         }
 
-        _session?.trace('call_reconnect', {
-          'strategy': _reconnectStrategy.name,
+        _session?.trace('callReconnect', {
+          'strategy': strategy.name,
         });
 
         _stateManager.lifecycleCallConnecting(
@@ -1531,8 +1536,8 @@ class Call {
               await _reconnectMigrate();
           }
 
-          _session?.trace('call_reconnect_success', {
-            'strategy': _reconnectStrategy.name,
+          _session?.trace('callReconnectSuccess', {
+            'strategy': strategy.name,
           });
         } catch (error) {
           switch (error) {
@@ -1541,8 +1546,8 @@ class Call {
               _logger.w(() => '[reconnect] unrecoverable error');
               _stateManager.lifecycleCallReconnectingFailed();
 
-              _session?.trace('call_reconnect_failed', {
-                'strategy': _reconnectStrategy.name,
+              _session?.trace('callReconnectFailed', {
+                'strategy': strategy.name,
                 'error': error.toString(),
               });
 

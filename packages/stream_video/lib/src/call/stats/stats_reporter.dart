@@ -46,6 +46,8 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
     return Stream.periodic(interval, (tick) => (collectStats(), tick)).asyncMap(
       (data) async {
         final stats = await data.$1;
+        if (!mounted) return stats;
+
         unawaited(_processStats(stats, data.$2));
         return stats;
       },
@@ -92,6 +94,8 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
     stats,
     int tick,
   ) async {
+    if (!mounted) return;
+
     var publisherStats = state?.publisher ?? PeerConnectionStats.empty();
     var subscriberStats = state?.subscriber ?? PeerConnectionStats.empty();
 
