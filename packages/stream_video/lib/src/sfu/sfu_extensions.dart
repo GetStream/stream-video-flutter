@@ -69,7 +69,7 @@ extension TrackInfoX on sfu_models.TrackInfo {
   Map<String, dynamic> toJson() {
     return {
       'trackId': trackId,
-      'trackType': trackType.toString(),
+      'trackType': trackType.value,
       'layers': layers.map((layer) => layer.toJson()).toList(),
       'mid': mid,
       'dtx': dtx,

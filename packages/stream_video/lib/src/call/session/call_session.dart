@@ -464,7 +464,7 @@ class CallSession extends Disposable {
       );
     } on TimeoutException catch (e, stk) {
       final message =
-          'Waiting for "joinResponse" has timed out after ${joinResponseTimeout}ms';
+          'Waiting for "joinResponse" has timed out after ${joinResponseTimeout.inMilliseconds}ms';
       _tracer.trace('joinRequestTimeout', message);
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));

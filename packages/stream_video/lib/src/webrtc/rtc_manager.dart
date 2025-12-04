@@ -1000,7 +1000,7 @@ extension PublisherRtcManager on RtcManager {
     required FacingMode facingMode,
   }) async {
     _logger.d(
-      () => '[setTrackFacingMode] facingMode: $facingMode}',
+      () => '[setTrackFacingMode] facingMode: $facingMode',
     );
 
     final track = getPublisherTrackByType(SfuTrackType.video);
@@ -1030,7 +1030,7 @@ extension PublisherRtcManager on RtcManager {
     required RtcVideoParameters params,
   }) async {
     _logger.d(
-      () => '[setCameraVideoParameters] params: $params}',
+      () => '[setCameraVideoParameters] params: $params',
     );
 
     final track = getPublisherTrackByType(SfuTrackType.video);
