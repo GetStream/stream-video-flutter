@@ -484,9 +484,7 @@ class VideoEvent {
         //MANUAL_EDIT mapCast
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
-            : mapCastOfType<String, List<String>>(
-                    json, r'capabilities_by_role') ??
-                const {},
+            : capabilitiesFromJson(json['capabilities_by_role']),
         notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
         userId: mapValueOfType<String>(json, r'user_id')!,
         message: mapValueOfType<String>(json, r'message')!,
@@ -538,6 +536,22 @@ class VideoEvent {
       );
     }
     return null;
+  }
+
+  // MANUAL_EDIT: capabilitiesFromJson
+  static Map<String, List<String>> capabilitiesFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final map = <String, List<String>>{};
+    if (json is Map && json.isNotEmpty) {
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
+      for (final entry in json.entries) {
+        map[entry.key] = entry.value.cast<String>();
+      }
+    }
+    return growable ? map : Map.unmodifiable(map);
   }
 
   static List<VideoEvent> listFromJson(
