@@ -128,6 +128,7 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
+    bool precacheGenericSdps = true,
   }) {
     final instance = StreamVideo._(
       apiKey,
@@ -137,6 +138,7 @@ class StreamVideo extends Disposable {
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
       pushNotificationManagerProvider: pushNotificationManagerProvider,
+      precacheGenericSdps: precacheGenericSdps,
     );
     return instance;
   }
@@ -149,6 +151,7 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
+    bool precacheGenericSdps = true,
   }) : _options = options,
        _state = MutableClientState(user, options) {
     _networkMonitor =
@@ -230,14 +233,36 @@ class StreamVideo extends Disposable {
     );
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
-    unawaited(_setClientDetails());
-    unawaited(RtcManager.cacheGenericSdp());
+
+    unawaited(
+      _setClientDetails().onError((dynamic error, StackTrace stackTrace) {
+        _logger.e(
+          () =>
+              '[StreamVideo] failed to set client details: $error with stackTrace: $stackTrace',
+        );
+
+        return null;
+      }),
+    );
+
+    if (precacheGenericSdps) {
+      unawaited(RtcManager.cacheGenericSdp());
+    }
 
     if (options.autoConnect) {
       unawaited(
         connect(
           includeUserDetails: options.includeUserDetailsForAutoConnect,
-        ),
+        ).onError((dynamic error, StackTrace stackTrace) {
+          _logger.e(
+            () =>
+                '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
+          );
+
+          return Result.error(
+            'Failed to auto connect: $error',
+          );
+        }),
       );
     }
   }
@@ -1326,7 +1351,7 @@ Future<String?> _setClientDetails() async {
       final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
       browser = sfu_models.Browser(
         name: browserInfo.browserName.name,
-        version: browserInfo.vendorSub,
+        version: browserInfo.appVersion,
       );
     }
 

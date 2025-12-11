@@ -2255,6 +2255,13 @@ class Call {
         unawaited(
           _applyCallSettingsToConnectOptions(
             callMetadata.settings,
+          ).catchError(
+            (dynamic error, StackTrace stackTrace) {
+              _logger.e(
+                () =>
+                    '[performGetOperation] failed to apply call settings: $error, stackTrace: $stackTrace',
+              );
+            },
           ),
         );
 
