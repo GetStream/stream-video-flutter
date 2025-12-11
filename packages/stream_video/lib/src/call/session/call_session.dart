@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
-import 'package:system_info2/system_info2.dart';
 
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -124,8 +122,6 @@ class CallSession extends Disposable {
   Timer? _peerConnectionCheckTimer;
   bool _isLeavingOrClosed = false;
 
-  sfu_models.ClientDetails? _clientDetails;
-
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
   late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
@@ -151,87 +147,6 @@ class CallSession extends Disposable {
     _networkStatusSubscription = networkMonitor.onStatusChange.listen((status) {
       _tracer.trace('network.changed', status.name);
     });
-  }
-
-  Future<void> _ensureClientDetails() async {
-    if (_clientDetails != null) return;
-
-    try {
-      sfu_models.Device? device;
-      sfu_models.Browser? browser;
-
-      var os = sfu_models.OS(
-        name: CurrentPlatform.name,
-      );
-
-      if (CurrentPlatform.isAndroid) {
-        final deviceInfo = await DeviceInfoPlugin().androidInfo;
-        os = sfu_models.OS(
-          name: CurrentPlatform.name,
-          version: deviceInfo.version.release,
-          architecture: SysInfo.rawKernelArchitecture,
-        );
-        device = sfu_models.Device(
-          name: '${deviceInfo.manufacturer} : ${deviceInfo.model}',
-        );
-      } else if (CurrentPlatform.isIos) {
-        final deviceInfo = await DeviceInfoPlugin().iosInfo;
-        os = sfu_models.OS(
-          name: CurrentPlatform.name,
-          version: deviceInfo.systemVersion,
-        );
-        device = sfu_models.Device(
-          name: deviceInfo.utsname.machine,
-        );
-      } else if (CurrentPlatform.isWeb) {
-        final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
-        browser = sfu_models.Browser(
-          name: browserInfo.browserName.name,
-          version: browserInfo.vendorSub,
-        );
-      } else if (CurrentPlatform.isMacOS) {
-        final deviceInfo = await DeviceInfoPlugin().macOsInfo;
-        os = sfu_models.OS(
-          name: CurrentPlatform.name,
-          version:
-              '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}',
-          architecture: deviceInfo.arch,
-        );
-        device = sfu_models.Device(
-          name: deviceInfo.model,
-          version: deviceInfo.osRelease,
-        );
-      } else if (CurrentPlatform.isWindows) {
-        final deviceInfo = await DeviceInfoPlugin().windowsInfo;
-        os = sfu_models.OS(
-          name: CurrentPlatform.name,
-          version:
-              '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}',
-          architecture: deviceInfo.buildLabEx,
-        );
-      } else if (CurrentPlatform.isLinux) {
-        final deviceInfo = await DeviceInfoPlugin().linuxInfo;
-        os = sfu_models.OS(
-          name: CurrentPlatform.name,
-          version: '${deviceInfo.name} ${deviceInfo.version}',
-        );
-      }
-
-      final versionSplit = streamVideoVersion.split('.');
-      _clientDetails = sfu_models.ClientDetails(
-        sdk: sfu_models.Sdk(
-          type: sfu_models.SdkType.SDK_TYPE_FLUTTER,
-          major: versionSplit.first,
-          minor: versionSplit.skip(1).first,
-          patch: versionSplit.last,
-        ),
-        os: os,
-        device: device,
-        browser: browser,
-      );
-    } catch (e) {
-      _logger.e(() => '[_ensureClientDetails] failed: $e');
-    }
   }
 
   Future<sfu_events.ReconnectDetails> getReconnectDetails(
@@ -273,8 +188,6 @@ class CallSession extends Disposable {
             '[start] reconnectDetails: $reconnectDetails, '
             'isAnonymousUser: $isAnonymousUser',
       );
-
-      await _ensureClientDetails();
 
       await _eventsSubscription?.cancel();
       await _rtcManagerSubject?.close();
@@ -338,7 +251,7 @@ class CallSession extends Disposable {
           : clientPublishOptions?.getPreferredSubscriberOptions();
 
       final joinRequest = sfu_events.JoinRequest(
-        clientDetails: _clientDetails,
+        clientDetails: clientDetails,
         token: config.sfuToken,
         sessionId: sessionId,
         subscriberSdp: subscriberSdp,
@@ -384,7 +297,7 @@ class CallSession extends Disposable {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
-                clientDetails: _clientDetails,
+                clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
               )
@@ -407,7 +320,7 @@ class CallSession extends Disposable {
                 sfuClient: sfuClient,
                 publisherId: localTrackId,
                 publishOptions: joinResponseEvent.publishOptions,
-                clientDetails: _clientDetails,
+                clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
                 callSessionConfig: config,
@@ -428,8 +341,10 @@ class CallSession extends Disposable {
       if (CurrentPlatform.isAndroid &&
           _streamVideo.options.androidAudioConfiguration != null) {
         try {
-          await rtc.Helper.setAndroidAudioConfiguration(
-            _streamVideo.options.androidAudioConfiguration!,
+          unawaited(
+            rtc.Helper.setAndroidAudioConfiguration(
+              _streamVideo.options.androidAudioConfiguration!,
+            ),
           );
         } catch (e) {
           _logger.w(
@@ -511,8 +426,6 @@ class CallSession extends Disposable {
         rtc.TransceiverDirection.SendOnly,
       );
 
-      await _ensureClientDetails();
-
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
       result;
 
@@ -523,7 +436,7 @@ class CallSession extends Disposable {
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
-            clientDetails: _clientDetails,
+            clientDetails: clientDetails,
             token: config.sfuToken,
             sessionId: sessionId,
             subscriberSdp: subscriberSdp,
