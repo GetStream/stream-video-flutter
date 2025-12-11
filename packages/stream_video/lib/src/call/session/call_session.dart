@@ -341,10 +341,8 @@ class CallSession extends Disposable {
       if (CurrentPlatform.isAndroid &&
           _streamVideo.options.androidAudioConfiguration != null) {
         try {
-          unawaited(
-            rtc.Helper.setAndroidAudioConfiguration(
-              _streamVideo.options.androidAudioConfiguration!,
-            ),
+          await rtc.Helper.setAndroidAudioConfiguration(
+            _streamVideo.options.androidAudioConfiguration!,
           );
         } catch (e) {
           _logger.w(
