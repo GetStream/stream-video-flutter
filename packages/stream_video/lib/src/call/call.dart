@@ -1307,7 +1307,17 @@ class Call {
       capabilities: _sfuClientCapabilities,
       onRtcManagerCreatedCallback: (_) async {
         _logger.v(() => '[startSession] applying connect options');
-        unawaited(_applyConnectOptions());
+        unawaited(
+          _applyConnectOptions().catchError((
+            dynamic error,
+            StackTrace stackTrace,
+          ) {
+            _logger.e(
+              () =>
+                  '[startSession] failed to apply connect options: $error, stackTrace: $stackTrace',
+            );
+          }),
+        );
       },
       isAnonymousUser:
           _streamVideo.state.currentUser.type == UserType.anonymous,
