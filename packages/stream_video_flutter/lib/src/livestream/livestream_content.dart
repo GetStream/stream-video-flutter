@@ -184,6 +184,9 @@ class _LivestreamContentState extends State<LivestreamContent> {
                           .iOSPiPConfiguration,
                       participantSort:
                           widget.pictureInPictureConfiguration.sort,
+                      prioritiseScreenSharingTrack: widget
+                          .pictureInPictureConfiguration
+                          .prioritiseScreenSharingTrack,
                     ),
                   ),
                 if (CurrentPlatform.isAndroid && pipEnabled)

@@ -151,6 +151,8 @@ class _StreamPictureInPictureAndroidViewState
             .configuration
             .androidPiPConfiguration
             .callPictureInPictureWidgetBuilder,
+        prioritiseScreenSharingTrack:
+            widget.configuration.prioritiseScreenSharingTrack,
       ),
     );
 

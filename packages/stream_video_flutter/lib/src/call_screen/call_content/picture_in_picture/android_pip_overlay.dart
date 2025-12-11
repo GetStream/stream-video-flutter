@@ -10,11 +10,13 @@ class AndroidPipOverlay extends StatefulWidget {
     required this.call,
     this.sort,
     this.customBuilder,
+    this.prioritiseScreenSharingTrack = true,
   });
 
   final Call call;
   final Comparator<CallParticipantState>? sort;
   final CallWidgetBuilder? customBuilder;
+  final bool prioritiseScreenSharingTrack;
 
   @override
   State<AndroidPipOverlay> createState() => _AndroidPipOverlayState();
@@ -32,6 +34,8 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay> {
               call: widget.call,
               layoutMode: ParticipantLayoutMode.pictureInPicture,
               sort: widget.sort,
+              prioritiseScreenSharingInPictureInPicture:
+                  widget.prioritiseScreenSharingTrack,
             ),
       ),
     );

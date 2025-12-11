@@ -146,6 +146,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
                 configuration:
                     widget.pictureInPictureConfiguration.iOSPiPConfiguration,
                 participantSort: widget.pictureInPictureConfiguration.sort,
+                prioritiseScreenSharingTrack: widget
+                    .pictureInPictureConfiguration
+                    .prioritiseScreenSharingTrack,
               ),
             ),
           if (CurrentPlatform.isAndroid && pipEnabled)

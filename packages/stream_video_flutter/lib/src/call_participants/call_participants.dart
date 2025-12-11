@@ -55,6 +55,7 @@ class StreamCallParticipants extends StatefulWidget {
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
+    this.prioritiseScreenSharingInPictureInPicture = true,
   }) : sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.
@@ -87,6 +88,9 @@ class StreamCallParticipants extends StatefulWidget {
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// Whether to prioritise the screen sharing track over the camera track in picture-in-picture mode.
+  final bool prioritiseScreenSharingInPictureInPicture;
 
   // The default participant filter.
   static bool _defaultFilter(CallParticipantState participant) => true;
@@ -199,20 +203,34 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
   Widget build(BuildContext context) {
     if (_participants.isNotEmpty &&
         widget.layoutMode == ParticipantLayoutMode.pictureInPicture) {
-      if (_screenShareParticipant != null) {
+      final pipParticipant = _participants.first;
+
+      final hasScreenShare =
+          pipParticipant.isScreenShareEnabled &&
+          pipParticipant.screenShareTrack != null;
+
+      // Show screen share if:
+      // 1. prioritise is true and screen share is available, OR
+      // 2. video is disabled but screen share is available (fallback)
+      final shouldShowScreenShare =
+          hasScreenShare &&
+          (widget.prioritiseScreenSharingInPictureInPicture ||
+              !pipParticipant.isVideoEnabled);
+
+      if (shouldShowScreenShare) {
         return ScreenShareContent(
           key: ValueKey(
-            '${_screenShareParticipant!.uniqueParticipantKey} - screenShareContent',
+            '${pipParticipant.uniqueParticipantKey} - screenShareContent',
           ),
           call: widget.call,
-          participant: _screenShareParticipant!,
+          participant: pipParticipant,
         );
       }
 
       return widget.callParticipantBuilder(
         context,
         widget.call,
-        _participants.first,
+        pipParticipant,
       );
     }
 

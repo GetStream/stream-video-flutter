@@ -41,11 +41,13 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
     required this.call,
     required this.configuration,
     this.participantSort,
+    this.prioritiseScreenSharingTrack = true,
   });
 
   final Call call;
   final Comparator<CallParticipantState>? participantSort;
   final IOSPictureInPictureConfiguration configuration;
+  final bool prioritiseScreenSharingTrack;
 
   @override
   State<StreamPictureInPictureUiKitView> createState() =>
@@ -79,26 +81,39 @@ class _StreamPictureInPictureUiKitViewState
     );
 
     if (sorted.isNotEmpty) {
-      final participant = sorted.first;
+      final pipParticipant = sorted.first;
+
+      final hasScreenShare =
+          pipParticipant.isScreenShareEnabled &&
+          pipParticipant.screenShareTrack != null;
+
+      // Show screen share if:
+      // 1. prioritise is true and screen share is available, OR
+      // 2. video is disabled but screen share is available (fallback)
+      final shouldShowScreenShare =
+          hasScreenShare &&
+          (widget.prioritiseScreenSharingTrack ||
+              !pipParticipant.isVideoEnabled);
+
+      final priorityTrack = shouldShowScreenShare
+          ? SfuTrackType.screenShare
+          : SfuTrackType.video;
 
       final videoTrack = widget.call.getTrack(
-        participant.trackIdPrefix,
-        participant.isScreenShareEnabled
-            ? SfuTrackType.screenShare
-            : SfuTrackType.video,
+        pipParticipant.trackIdPrefix,
+        priorityTrack,
       );
 
       if (videoTrack == null &&
-          (participant.isVideoEnabled || participant.isScreenShareEnabled)) {
+          (pipParticipant.isVideoEnabled ||
+              pipParticipant.isScreenShareEnabled)) {
         // If the video track is not available, we need to update the subscription
         // to ensure that the participant's video is displayed correctly.
         await widget.call.updateSubscription(
-          userId: participant.userId,
-          sessionId: participant.sessionId,
-          trackIdPrefix: participant.trackIdPrefix,
-          trackType: participant.isScreenShareEnabled
-              ? SfuTrackType.screenShare
-              : SfuTrackType.video,
+          userId: pipParticipant.userId,
+          sessionId: pipParticipant.sessionId,
+          trackIdPrefix: pipParticipant.trackIdPrefix,
+          trackType: priorityTrack,
           videoDimension: RtcVideoDimensionPresets.h360_169,
         );
 
@@ -109,15 +124,15 @@ class _StreamPictureInPictureUiKitViewState
         'updateParticipant',
         {
           'trackId': videoTrack?.mediaTrack.id,
-          'name': participant.name.isEmpty
-              ? participant.userId
-              : participant.name,
-          'imageUrl': participant.image,
-          'isAudioEnabled': participant.isAudioEnabled,
+          'name': pipParticipant.name.isEmpty
+              ? pipParticipant.userId
+              : pipParticipant.name,
+          'imageUrl': pipParticipant.image,
+          'isAudioEnabled': pipParticipant.isAudioEnabled,
           'isVideoEnabled':
               videoTrack != null &&
-              (participant.isVideoEnabled || participant.isScreenShareEnabled),
-          'connectionQuality': participant.connectionQuality.name,
+              (pipParticipant.isVideoEnabled || shouldShowScreenShare),
+          'connectionQuality': pipParticipant.connectionQuality.name,
           'showParticipantName': widget.configuration.showParticipantName,
           'showMicrophoneIndicator':
               widget.configuration.showMicrophoneIndicator,
