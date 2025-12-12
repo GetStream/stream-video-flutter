@@ -1,3 +1,8 @@
+## Upcoming
+
+### ✅ Added
+* Added `prioritiseScreenSharingTrack` parameter to `PictureInPictureConfiguration` to control whether screen sharing or camera track is preferred in PiP mode. When set to `false`, the camera track is preferred, but screen share will still be shown as a fallback if the camera is disabled.
+
 ## 1.0.2
 
 🐞 Fixed
