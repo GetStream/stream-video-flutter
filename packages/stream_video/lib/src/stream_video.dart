@@ -8,8 +8,10 @@ import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:system_info2/system_info2.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
@@ -61,6 +63,7 @@ import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
+import 'webrtc/rtc_manager.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -125,6 +128,7 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
+    bool precacheGenericSdps = true,
   }) {
     final instance = StreamVideo._(
       apiKey,
@@ -134,6 +138,7 @@ class StreamVideo extends Disposable {
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
       pushNotificationManagerProvider: pushNotificationManagerProvider,
+      precacheGenericSdps: precacheGenericSdps,
     );
     return instance;
   }
@@ -146,6 +151,7 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
+    bool precacheGenericSdps = true,
   }) : _options = options,
        _state = MutableClientState(user, options) {
     _networkMonitor =
@@ -227,13 +233,36 @@ class StreamVideo extends Disposable {
     );
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
-    unawaited(_setClientVersionDetails());
+
+    unawaited(
+      _setClientDetails().onError((dynamic error, StackTrace stackTrace) {
+        _logger.e(
+          () =>
+              '[StreamVideo] failed to set client details: $error with stackTrace: $stackTrace',
+        );
+
+        return null;
+      }),
+    );
+
+    if (precacheGenericSdps) {
+      unawaited(RtcManager.cacheGenericSdp());
+    }
 
     if (options.autoConnect) {
       unawaited(
         connect(
           includeUserDetails: options.includeUserDetailsForAutoConnect,
-        ),
+        ).onError((dynamic error, StackTrace stackTrace) {
+          _logger.e(
+            () =>
+                '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
+          );
+
+          return Result.error(
+            'Failed to auto connect: $error',
+          );
+        }),
       );
     }
   }
@@ -1259,42 +1288,94 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
   }
 }
 
-Future<String?> _setClientVersionDetails() async {
+Future<String?> _setClientDetails() async {
   try {
     final packageInfo = await PackageInfo.fromPlatform();
 
     final appName = packageInfo.appName;
     final appVersion = packageInfo.version;
 
-    var osVersion = '';
-    var deviceModel = '';
+    sfu_models.Device? device;
+    sfu_models.Browser? browser;
+
+    var os = sfu_models.OS(
+      name: CurrentPlatform.name,
+    );
 
     if (CurrentPlatform.isAndroid) {
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      osVersion = deviceInfo.version.release;
-      deviceModel = '${deviceInfo.manufacturer} ${deviceInfo.model}';
+      os = sfu_models.OS(
+        name: CurrentPlatform.name,
+        version: deviceInfo.version.release,
+        architecture: SysInfo.rawKernelArchitecture,
+      );
+      device = sfu_models.Device(
+        name: '${deviceInfo.manufacturer} : ${deviceInfo.model}',
+      );
     } else if (CurrentPlatform.isIos) {
       final deviceInfo = await DeviceInfoPlugin().iosInfo;
-      osVersion = deviceInfo.systemVersion;
-      deviceModel = deviceInfo.utsname.machine;
+      os = sfu_models.OS(
+        name: CurrentPlatform.name,
+        version: deviceInfo.systemVersion,
+      );
+      device = sfu_models.Device(
+        name: deviceInfo.utsname.machine,
+      );
     } else if (CurrentPlatform.isMacOS) {
       final deviceInfo = await DeviceInfoPlugin().macOsInfo;
-      osVersion =
-          '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}';
-      deviceModel = deviceInfo.model;
+      os = sfu_models.OS(
+        name: CurrentPlatform.name,
+        version:
+            '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}',
+        architecture: deviceInfo.arch,
+      );
+      device = sfu_models.Device(
+        name: deviceInfo.model,
+        version: deviceInfo.osRelease,
+      );
     } else if (CurrentPlatform.isWindows) {
       final deviceInfo = await DeviceInfoPlugin().windowsInfo;
-      osVersion =
-          '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}';
+      os = sfu_models.OS(
+        name: CurrentPlatform.name,
+        version:
+            '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}',
+        architecture: deviceInfo.buildLabEx,
+      );
     } else if (CurrentPlatform.isLinux) {
       final deviceInfo = await DeviceInfoPlugin().linuxInfo;
-      osVersion = '${deviceInfo.name} ${deviceInfo.version}';
+      os = sfu_models.OS(
+        name: CurrentPlatform.name,
+        version: '${deviceInfo.name} ${deviceInfo.version}',
+      );
+    } else if (CurrentPlatform.isWeb) {
+      final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
+      browser = sfu_models.Browser(
+        name: browserInfo.browserName.name,
+        version: browserInfo.appVersion,
+      );
     }
 
+    final versionSplit = streamVideoVersion.split('.');
+    clientDetails = sfu_models.ClientDetails(
+      sdk: sfu_models.Sdk(
+        type: sfu_models.SdkType.SDK_TYPE_FLUTTER,
+        major: versionSplit.first,
+        minor: versionSplit.skip(1).first,
+        patch: versionSplit.last,
+      ),
+      os: os,
+      device: device,
+      browser: browser,
+    );
+
+    final deviceName = (device?.name != null && device!.name.isNotEmpty)
+        ? device.name
+        : null;
+
     return clientVersionDetails ??=
-        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.name} $osVersion${deviceModel.isNotEmpty ? '|device_model=$deviceModel' : ''}';
+        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.name} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
   } catch (e) {
-    streamLog.e(_tag, () => '[_setupComposeVersion] failed: $e');
+    streamLog.e(_tag, () => '[_setClientDetails] failed: $e');
     return null;
   }
 }

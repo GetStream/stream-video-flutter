@@ -1,3 +1,9 @@
+## Upcoming
+
+### ⚡ Performance
+
+* Improved `call.join()` performance - reduced join time by optimizing WebRTC setup and deferring non-critical operations.
+
 ## 1.0.2
 
 🐞 Fixed
