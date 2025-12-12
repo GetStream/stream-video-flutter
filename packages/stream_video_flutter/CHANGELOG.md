@@ -1,3 +1,17 @@
+## Unreleased
+
+### ✅ Added
+* Livestream: Added multiple-host and screen sharing support in `LivestreamPlayer` and `LivestreamContent`.
+  - New flags: `showMultipleHosts`, `layoutMode`, `screenShareMode`.
+  - New builders: `livestreamHostsParticipantBuilder` and `livestreamHostsParticipantsFilter` to customize how hosts are selected and rendered.
+* `LivestreamPlayer`: added `videoFit` parameter to control contain/cover behavior when not in fullscreen.
+* Livestream reconnect UI customization:
+  - `LivestreamPlayer`/`LivestreamContent`: added `livestreamFastReconnectingOverlayBuilder` to customize the UI shown during fast reconnect.
+  - `LivestreamContent`: `livestreamNotConnectedBuilder` provides `isMigrating`/`isReconnecting` flags to tailor messaging when not connected.
+* Call screen reconnect UI customization:
+  - `StreamCallContent`: added `callFastReconnectingOverlayBuilder` to render a custom overlay while fast reconnecting.
+  - `StreamCallContent`: `callNotConnectedBuilder` now exposes `CallNotConnectedProperties` with `isMigrating`/`isReconnecting` to customize the not-connected/reconnecting view.
+
 ## 1.0.2
 
 🐞 Fixed

@@ -98,15 +98,31 @@ class CallMemberUpdatedPermissionEvent {
         //MANUAL_EDIT mapCast
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
-            : mapCastOfType<String, List<String>>(
-                    json, r'capabilities_by_role') ??
-                const {},
+            : capabilitiesFromJson(json['capabilities_by_role']),
         createdAt: mapDateTime(json, r'created_at', '')!,
         members: MemberResponse.listFromJson(json[r'members']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
+  }
+
+  // MANUAL_EDIT: capabilitiesFromJson
+  static Map<String, List<String>> capabilitiesFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final map = <String, List<String>>{};
+    if (json is Map && json.isNotEmpty) {
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
+      for (final entry in json.entries) {
+        if (entry.value is List) {
+          map[entry.key] = (entry.value as List).cast<String>();
+        }
+      }
+    }
+    return growable ? map : Map.unmodifiable(map);
   }
 
   static List<CallMemberUpdatedPermissionEvent> listFromJson(
