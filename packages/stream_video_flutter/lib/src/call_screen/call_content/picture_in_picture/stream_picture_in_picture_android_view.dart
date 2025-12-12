@@ -146,13 +146,7 @@ class _StreamPictureInPictureAndroidViewState
     _overlayEntry = OverlayEntry(
       builder: (context) => AndroidPipOverlay(
         call: call,
-        sort: widget.configuration.sort,
-        customBuilder: widget
-            .configuration
-            .androidPiPConfiguration
-            .callPictureInPictureWidgetBuilder,
-        prioritiseScreenSharingTrack:
-            widget.configuration.prioritiseScreenSharingTrack,
+        pictureInPictureConfiguration: widget.configuration,
       ),
     );
 

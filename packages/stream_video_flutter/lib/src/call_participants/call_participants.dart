@@ -113,24 +113,27 @@ class StreamCallParticipants extends StatefulWidget {
   State<StreamCallParticipants> createState() => _StreamCallParticipantsState();
 }
 
-class _StreamCallParticipantsState extends State<StreamCallParticipants> {
-  List<CallParticipantState> _participants = [];
-  CallParticipantState? _screenShareParticipant;
-
-  List<String> _sortedParticipantKeys = [];
-
+class _StreamCallParticipantsState extends State<StreamCallParticipants>
+    with CallParticipantsSortingMixin {
   StreamSubscription<List<CallParticipantState>?>? _participantsSubscription;
+
+  @override
+  Filter<CallParticipantState> get participantFilter => widget.filter;
+
+  @override
+  Sort<CallParticipantState> get participantSort => widget.sort;
 
   @override
   void initState() {
     super.initState();
-    _recalculateParticipants(
+    recalculateParticipants(
       widget.participants ?? widget.call.state.value.callParticipants,
     );
+
     if (widget.participants == null) {
       _participantsSubscription = widget.call
           .partialState((state) => state.callParticipants)
-          .listen(_recalculateParticipants);
+          .listen(recalculateParticipants);
     }
   }
 
@@ -145,100 +148,23 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
         widget.participants!.toList(),
         oldWidget.participants?.toList(),
       )) {
-        _recalculateParticipants(widget.participants!);
+        recalculateParticipants(widget.participants!);
       }
     } else if (widget.call != oldWidget.call) {
       _participantsSubscription?.cancel();
       _participantsSubscription = widget.call
           .partialState((state) => state.callParticipants)
-          .listen(_recalculateParticipants);
-    }
-  }
-
-  void _recalculateParticipants(List<CallParticipantState> newParticipants) {
-    final participants = [...newParticipants].where(widget.filter).toList();
-
-    for (final participant in participants) {
-      final index = _sortedParticipantKeys.indexOf(
-        participant.uniqueParticipantKey,
-      );
-      if (index == -1) {
-        _sortedParticipantKeys.add(participant.uniqueParticipantKey);
-      }
-    }
-
-    // First apply previous sorting on new participants list
-    participants.sort(
-      (a, b) => _sortedParticipantKeys
-          .indexOf(a.uniqueParticipantKey)
-          .compareTo(_sortedParticipantKeys.indexOf(b.uniqueParticipantKey)),
-    );
-
-    mergeSort(participants, compare: widget.sort);
-
-    final screenShareParticipant = participants.firstWhereOrNull(
-      (it) {
-        final screenShareTrack = it.screenShareTrack;
-        final isScreenShareEnabled = it.isScreenShareEnabled;
-
-        if (screenShareTrack == null || !isScreenShareEnabled) return false;
-
-        return true;
-      },
-    );
-
-    _sortedParticipantKeys = participants
-        .map((e) => e.uniqueParticipantKey)
-        .toList();
-
-    if (mounted) {
-      setState(() {
-        _participants = participants.toList();
-        _screenShareParticipant = screenShareParticipant;
-      });
+          .listen(recalculateParticipants);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_participants.isNotEmpty &&
-        widget.layoutMode == ParticipantLayoutMode.pictureInPicture) {
-      final pipParticipant = _participants.first;
-
-      final hasScreenShare =
-          pipParticipant.isScreenShareEnabled &&
-          pipParticipant.screenShareTrack != null;
-
-      // Show screen share if:
-      // 1. prioritise is true and screen share is available, OR
-      // 2. video is disabled but screen share is available (fallback)
-      final shouldShowScreenShare =
-          hasScreenShare &&
-          (widget.prioritiseScreenSharingInPictureInPicture ||
-              !pipParticipant.isVideoEnabled);
-
-      if (shouldShowScreenShare) {
-        return ScreenShareContent(
-          key: ValueKey(
-            '${pipParticipant.uniqueParticipantKey} - screenShareContent',
-          ),
-          call: widget.call,
-          participant: pipParticipant,
-        );
-      }
-
-      return widget.callParticipantBuilder(
-        context,
-        widget.call,
-        pipParticipant,
-      );
-    }
-
-    if (_screenShareParticipant != null) {
+    if (screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
         call: widget.call,
-        participants: _participants,
-        screenSharingParticipant: _screenShareParticipant!,
+        participants: sortedParticipants,
+        screenSharingParticipant: screenShareParticipant!,
         screenShareContentBuilder: widget.screenShareContentBuilder,
         screenShareParticipantBuilder: widget.screenShareParticipantBuilder,
       );
@@ -246,7 +172,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
 
     return RegularCallParticipantsContent(
       call: widget.call,
-      participants: _participants,
+      participants: sortedParticipants,
       layoutMode: widget.layoutMode,
       enableLocalVideo: widget.enableLocalVideo,
       callParticipantBuilder: widget.callParticipantBuilder,

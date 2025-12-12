@@ -9,12 +9,14 @@ typedef CallPictureInPictureBuilder =
       CallState callState,
     );
 
+enum PipTrackPriority { screenShare, camera }
+
 /// Configuration for picture-in-picture mode.
 class PictureInPictureConfiguration {
   const PictureInPictureConfiguration({
     this.enablePictureInPicture = false,
     this.disablePictureInPictureWhenScreenSharing = true,
-    this.prioritiseScreenSharingTrack = true,
+    this.pipTrackPriority = PipTrackPriority.screenShare,
     this.sort,
     this.androidPiPConfiguration = const AndroidPictureInPictureConfiguration(),
     this.iOSPiPConfiguration = const IOSPictureInPictureConfiguration(),
@@ -26,15 +28,16 @@ class PictureInPictureConfiguration {
   /// Whether to disable picture-in-picture mode during screen sharing on the device.
   final bool disablePictureInPictureWhenScreenSharing;
 
-  /// Whether to prioritise the screen sharing track over the camera track.
+  /// Determines which video track to prioritise in the PiP view.
   ///
-  /// If `true`, the screen sharing track will be displayed in the PiP view
-  /// if available for the first participant determined by the sorting function.
+  /// If [PipTrackPriority.screenShare], the screen sharing track will be
+  /// displayed in the PiP view if available for the first participant
+  /// determined by the sorting function.
   ///
-  /// If `false`, the camera track will be preferred. However, if the camera
-  /// track is disabled and screen sharing is available, the screen share
-  /// will be shown as a fallback.
-  final bool prioritiseScreenSharingTrack;
+  /// If [PipTrackPriority.camera], the camera track will be preferred.
+  /// However, if the camera track is disabled and screen sharing is available,
+  /// the screen share will be shown as a fallback.
+  final PipTrackPriority pipTrackPriority;
 
   /// Sorting function for participants in picture-in-picture mode.
   /// The first participant will be displayed in the PiP view.

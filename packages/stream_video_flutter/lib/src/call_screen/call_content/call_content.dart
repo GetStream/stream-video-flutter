@@ -143,12 +143,8 @@ class _StreamCallContentState extends State<StreamCallContent> {
               width: 300,
               child: StreamPictureInPictureUiKitView(
                 call: call,
-                configuration:
-                    widget.pictureInPictureConfiguration.iOSPiPConfiguration,
-                participantSort: widget.pictureInPictureConfiguration.sort,
-                prioritiseScreenSharingTrack: widget
-                    .pictureInPictureConfiguration
-                    .prioritiseScreenSharingTrack,
+                pictureInPictureConfiguration:
+                    widget.pictureInPictureConfiguration,
               ),
             ),
           if (CurrentPlatform.isAndroid && pipEnabled)
