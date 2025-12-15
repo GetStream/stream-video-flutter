@@ -56,6 +56,7 @@ void main() {
         options: const StreamVideoOptions(
           autoConnect: false,
         ),
+        precacheGenericSdps: false,
       );
     });
 
