@@ -284,31 +284,41 @@ private fun useSmallExLayout(): Boolean {
     ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 }
 
+/**
+ * Singleton holder for ImageLoader to avoid creating expensive OkHttpClient and ImageLoader instances
+ */
+private object ImageLoaderHolder {
+    @Volatile
+    private var imageLoader: ImageLoader? = null
+    
+    fun getImageLoader(context: Context): ImageLoader {
+        return imageLoader ?: synchronized(this) {
+            imageLoader ?: createImageLoader(context.applicationContext).also { imageLoader = it }
+        }
+    }
+    
+    private fun createImageLoader(context: Context): ImageLoader {
+        val client = OkHttpClient.Builder().build()
+        return ImageLoader.Builder(context)
+            .okHttpClient(client)
+            .build()
+    }
+}
+
 private fun Context.loadImageWithCoil(url: String, headers: Map<String, String>, target: coil.target.Target) {
     StreamLog.d(TAG) { "[loadImageWithCoil] headers: $headers" }
-    val client = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            StreamLog.v(TAG) { "[interceptRequest] request: ${chain.request()}" }
-            val newRequest = chain.request()
-                .newBuilder()
-            headers.forEach { (key, value) ->
-                newRequest.addHeader(key, value)
-            }
-            chain.proceed(newRequest.build())
-        }
-        .build()
     
-    val imageLoader = ImageLoader.Builder(this)
-        .okHttpClient(client)
-        .build()
-    
-    val request = ImageRequest.Builder(this)
+    val imageLoader = ImageLoaderHolder.getImageLoader(this)
+    val requestBuilder = ImageRequest.Builder(this)
         .data(url)
         .transformations(CircleTransform())
         .target(target)
-        .build()
     
-    imageLoader.enqueue(request)
+    headers.forEach { (key, value) ->
+        requestBuilder.addHeader(key, value)
+    }
+    
+    imageLoader.enqueue(requestBuilder.build())
 }
 
 class NotificationLayout(
