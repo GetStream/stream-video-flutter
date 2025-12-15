@@ -55,7 +55,6 @@ class StreamCallParticipants extends StatefulWidget {
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
-    this.prioritiseScreenSharingInPictureInPicture = true,
   }) : sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.
@@ -88,9 +87,6 @@ class StreamCallParticipants extends StatefulWidget {
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
-
-  /// Whether to prioritise the screen sharing track over the camera track in picture-in-picture mode.
-  final bool prioritiseScreenSharingInPictureInPicture;
 
   // The default participant filter.
   static bool _defaultFilter(CallParticipantState participant) => true;

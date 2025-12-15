@@ -51,6 +51,7 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
   @override
   void initState() {
     super.initState();
+    recalculateParticipants(widget.call.state.value.callParticipants);
 
     _participantsSubscription = widget.call
         .partialState((state) => state.callParticipants)
