@@ -76,8 +76,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     ),
   );
   late final _defaultApi = open.ProductvideoApi(_apiClient);
-  // ignore: unused_field
-  //late final _serverSideApi = open.ServerSideApi(_apiClient);
   late final _locationService = LocationService();
 
   @override
