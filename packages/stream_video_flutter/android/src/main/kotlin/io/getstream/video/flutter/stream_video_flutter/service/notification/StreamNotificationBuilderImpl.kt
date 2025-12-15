@@ -306,8 +306,6 @@ private object ImageLoaderHolder {
 }
 
 private fun Context.loadImageWithCoil(url: String, headers: Map<String, String>, target: coil.target.Target) {
-    StreamLog.d(TAG) { "[loadImageWithCoil] headers: $headers" }
-    
     val imageLoader = ImageLoaderHolder.getImageLoader(this)
     val requestBuilder = ImageRequest.Builder(this)
         .data(url)
