@@ -134,6 +134,12 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   }
 
   @override
+  void dispose() {
+    _participantsSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 

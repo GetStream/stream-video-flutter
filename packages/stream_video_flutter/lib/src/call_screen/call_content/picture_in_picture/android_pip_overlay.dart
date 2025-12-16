@@ -68,7 +68,14 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
   Widget build(BuildContext context) {
     Widget pipBody = const SizedBox.shrink();
 
-    if (sortedParticipants.isNotEmpty) {
+    final customBuilder =
+        widget
+            .pictureInPictureConfiguration
+            ?.androidPiPConfiguration
+            .callPictureInPictureWidgetBuilder ??
+        widget.customBuilder;
+
+    if (customBuilder != null && sortedParticipants.isNotEmpty) {
       final pipParticipant = sortedParticipants.first;
 
       final hasScreenShare =
@@ -101,13 +108,6 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
         );
       }
     }
-
-    final customBuilder =
-        widget
-            .pictureInPictureConfiguration
-            ?.androidPiPConfiguration
-            .callPictureInPictureWidgetBuilder ??
-        widget.customBuilder;
 
     return Material(
       color: Colors.black,
