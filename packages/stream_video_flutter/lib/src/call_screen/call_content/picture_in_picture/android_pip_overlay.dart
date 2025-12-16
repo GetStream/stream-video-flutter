@@ -75,7 +75,7 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
             .callPictureInPictureWidgetBuilder ??
         widget.customBuilder;
 
-    if (customBuilder != null && sortedParticipants.isNotEmpty) {
+    if (customBuilder == null && sortedParticipants.isNotEmpty) {
       final pipParticipant = sortedParticipants.first;
 
       final hasScreenShare =

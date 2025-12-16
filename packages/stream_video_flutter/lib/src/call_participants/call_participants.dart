@@ -157,6 +157,8 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       _participantsSubscription = widget.call
           .partialState((state) => state.callParticipants)
           .listen(recalculateParticipants);
+
+      recalculateParticipants(widget.call.state.value.callParticipants);
     }
   }
 
