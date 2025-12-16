@@ -1,3 +1,10 @@
+## Upcoming
+
+### ⚡ Performance
+
+* Improved `call.join()` performance - reduced join time by optimizing WebRTC setup and deferring non-critical operations.
+* Improved SFU allocation reliability.
+
 ## 1.0.2
 
 🐞 Fixed

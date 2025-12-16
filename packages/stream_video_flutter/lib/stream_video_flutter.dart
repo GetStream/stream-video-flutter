@@ -27,6 +27,7 @@ export 'src/call_controls/controls/toggle_screen_sharing_option.dart';
 export 'src/call_controls/controls/toggle_speakerphone_option.dart';
 export 'src/call_participants/call_participant.dart';
 export 'src/call_participants/call_participants.dart';
+export 'src/call_participants/call_participants_sorting_mixin.dart';
 export 'src/call_participants/layout/participant_layout_mode.dart';
 export 'src/call_participants/livestream_hosts.dart';
 export 'src/call_participants/local_video.dart';

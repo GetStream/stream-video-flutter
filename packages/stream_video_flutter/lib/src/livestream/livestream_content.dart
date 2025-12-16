@@ -268,11 +268,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
                     width: 300,
                     child: StreamPictureInPictureUiKitView(
                       call: call,
-                      configuration: widget
-                          .pictureInPictureConfiguration
-                          .iOSPiPConfiguration,
-                      participantSort:
-                          widget.pictureInPictureConfiguration.sort,
+                      pictureInPictureConfiguration:
+                          widget.pictureInPictureConfiguration,
                     ),
                   ),
                 if (CurrentPlatform.isAndroid && pipEnabled)

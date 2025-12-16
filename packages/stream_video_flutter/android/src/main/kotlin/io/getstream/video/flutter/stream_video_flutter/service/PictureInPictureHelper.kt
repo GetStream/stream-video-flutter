@@ -59,9 +59,12 @@ class PictureInPictureHelper {
                 if (activity.isInPictureInPictureMode) {
                     activity.moveTaskToBack(true) 
 
-                    val params = PictureInPictureParams.Builder()
-                    params.setAutoEnterEnabled(false)
-                    activity.setPictureInPictureParams(params.build())
+                    // setAutoEnterEnabled is only available on Android 12 (API 31) and above
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val params = PictureInPictureParams.Builder()
+                        params.setAutoEnterEnabled(false)
+                        activity.setPictureInPictureParams(params.build())
+                    }
                 }
             }
         }

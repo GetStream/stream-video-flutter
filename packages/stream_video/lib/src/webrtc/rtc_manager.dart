@@ -109,10 +109,25 @@ class RtcManager extends Disposable {
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
 
-  /// Returns a generic sdp.
+  static final Map<rtc.TransceiverDirection, String> _cachedGenericSdp = {};
+
+  static Future<void> cacheGenericSdp() async {
+    await Future.wait([
+      getGenericSdp(rtc.TransceiverDirection.RecvOnly),
+      getGenericSdp(rtc.TransceiverDirection.SendOnly),
+    ]);
+  }
+
+  /// Returns a generic sdp. Results are cached since device capabilities
+  /// don't change between calls.
   static Future<String> getGenericSdp(
     rtc.TransceiverDirection direction,
   ) async {
+    // Check cache first
+    if (_cachedGenericSdp.containsKey(direction)) {
+      return _cachedGenericSdp[direction]!;
+    }
+
     final tempPC = await rtc.createPeerConnection({});
 
     await tempPC.addTransceiver(
@@ -129,7 +144,14 @@ class RtcManager extends Disposable {
     final sdp = offer.sdp;
 
     await tempPC.dispose();
-    return sdp!;
+
+    if (sdp == null) {
+      taggedLogger(tag: _tag).e(() => '[getGenericSdp] sdp is null');
+      return '';
+    }
+
+    _cachedGenericSdp[direction] = sdp;
+    return sdp;
   }
 
   Future<String?> onSubscriberOffer(String offerSdp) async {
