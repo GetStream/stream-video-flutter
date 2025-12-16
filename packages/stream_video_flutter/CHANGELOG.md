@@ -1,4 +1,4 @@
-## Upcoming
+## 1.1.0
 
 ### ✅ Added
 * Added `pipTrackPriority` parameter to `PictureInPictureConfiguration` to control whether screen sharing or camera track is preferred in PiP mode. When set to `camera`, the camera track is preferred, but screen share will still be shown as a fallback if the camera is disabled.
@@ -16,6 +16,11 @@
 ### 🐞 Fixed
 * Fixed ANR (Application Not Responding) issue on Android that could happen when starting screen share service.
 * Fixed crash on Android versions below API 31 when disabling Picture-in-Picture mode.
+
+### ⚡ Performance
+
+* Improved `call.join()` performance - reduced join time by optimizing WebRTC setup and deferring non-critical operations.
+* Improved SFU allocation reliability.
 
 ## 1.0.2
 
