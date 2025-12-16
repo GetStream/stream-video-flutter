@@ -84,11 +84,18 @@ class LivestreamPlayer extends StatefulWidget {
     this.videoRendererBuilder,
     this.livestreamHostsUnavailableBuilder,
     this.livestreamNotConnectedBuilder,
+    this.livestreamFastReconnectingOverlayBuilder,
+    this.livestreamHostsParticipantBuilder,
+    this.livestreamHostsParticipantsFilter,
     this.allowDiagnostics = false,
     this.onCallDisconnected,
     this.onRecordingTapped,
     this.onFullscreenTapped,
     this.startInFullscreenMode = false,
+    this.showMultipleHosts = false,
+    this.layoutMode = ParticipantLayoutMode.grid,
+    this.screenShareMode = LivestreamScreenShareMode.spotlight,
+    this.videoFit = VideoFit.contain,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
 
@@ -166,6 +173,18 @@ class LivestreamPlayer extends StatefulWidget {
   /// used to show appropriate status messages.
   final LivestreamNotConnectedBuilder? livestreamNotConnectedBuilder;
 
+  /// Builder function used to create a custom widget when the livestream is fast reconnecting.
+  final LivestreamFastReconnectingOverlayBuilder?
+  livestreamFastReconnectingOverlayBuilder;
+
+  /// Builder function used to create a custom widget displaying the hosts video.
+  final LivestreamHostsParticipantBuilder? livestreamHostsParticipantBuilder;
+
+  /// Function used to select the hosts from all the call participants.
+  /// If null, participants that have video enabled will be treated as hosts.
+  /// If [showMultipleHosts] is false, only the first streaming participant will be shown.
+  final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
+
   /// The action to perform when the call is disconnected. By default, it pops the current route.
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
@@ -174,6 +193,25 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// The action to perform when dfullscreen button is tapped.
   final VoidCallback? onFullscreenTapped;
+
+  /// Denotes if the livestream allows multiple hosts.
+  /// Used with default [livestreamHostsParticipantBuilder] to display the hosts video.
+  ///
+  /// If yes, use [layoutMode] to set the participants layout.
+  /// If no, only the first streaming participant will be shown.
+  ///
+  /// Defaults to false.
+  final bool showMultipleHosts;
+
+  /// The layout mode used to display the hosts when [showMultipleHosts] is true.
+  final ParticipantLayoutMode layoutMode;
+
+  /// The screen share mode used to display the screen share host.
+  final LivestreamScreenShareMode screenShareMode;
+
+  /// Denotes if the video fits the width (contain) or expands to
+  /// the whole size (cover).
+  final VideoFit videoFit;
 
   /// Boolean to allow a user to double-tap a call to see diagnostic data.
   ///
@@ -396,8 +434,17 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                       widget.livestreamHostsUnavailableBuilder,
                   livestreamNotConnectedBuilder:
                       widget.livestreamNotConnectedBuilder,
+                  livestreamFastReconnectingOverlayBuilder:
+                      widget.livestreamFastReconnectingOverlayBuilder,
+                  livestreamHostsParticipantBuilder:
+                      widget.livestreamHostsParticipantBuilder,
+                  livestreamHostsParticipantsFilter:
+                      widget.livestreamHostsParticipantsFilter,
                   displayDiagnostics: _isStatsVisible,
-                  videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
+                  videoFit: _fullscreen ? VideoFit.cover : widget.videoFit,
+                  showMultipleHosts: widget.showMultipleHosts,
+                  layoutMode: widget.layoutMode,
+                  screenShareMode: widget.screenShareMode,
                   pictureInPictureConfiguration:
                       widget.pictureInPictureConfiguration,
                 ),

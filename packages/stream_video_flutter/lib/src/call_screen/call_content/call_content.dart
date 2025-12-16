@@ -8,6 +8,36 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
+typedef CallNotConnectedBuilder =
+    Widget Function(
+      BuildContext context,
+      CallNotConnectedProperties properties,
+    );
+
+typedef CallFastReconnectingOverlayBuilder =
+    Widget Function(
+      BuildContext context,
+      CallFastReconnectingProperties properties,
+    );
+
+class CallNotConnectedProperties {
+  CallNotConnectedProperties(
+    this.call, {
+    required this.isMigrating,
+    required this.isReconnecting,
+  });
+
+  final Call call;
+  final bool isMigrating;
+  final bool isReconnecting;
+}
+
+class CallFastReconnectingProperties {
+  CallFastReconnectingProperties(this.call);
+
+  final Call call;
+}
+
 /// Represents the UI in an active call that shows participants and their video,
 /// as well as some extra UI features to control the call settings, browse
 /// participants and more.
@@ -21,6 +51,8 @@ class StreamCallContent extends StatefulWidget {
     this.callAppBarWidgetBuilder,
     this.callParticipantsWidgetBuilder,
     this.callControlsWidgetBuilder,
+    this.callNotConnectedBuilder,
+    this.callFastReconnectingOverlayBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.extendBody = false,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
@@ -43,6 +75,12 @@ class StreamCallContent extends StatefulWidget {
 
   /// Builder used to create a custom call controls panel.
   final CallWidgetBuilder? callControlsWidgetBuilder;
+
+  /// Builder used to create a custom widget when the call is not connected.
+  final CallNotConnectedBuilder? callNotConnectedBuilder;
+
+  /// Builder used to create a custom widget when the call is fast reconnecting.
+  final CallFastReconnectingOverlayBuilder? callFastReconnectingOverlayBuilder;
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
@@ -161,13 +199,21 @@ class _StreamCallContentState extends State<StreamCallContent> {
       );
     } else {
       final isReconnecting = _status.isReconnecting;
-      final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
-      bodyWidget = Center(
-        child: Text(
-          statusText,
-          style: theme.textTheme.title3,
-        ),
-      );
+      bodyWidget =
+          widget.callNotConnectedBuilder?.call(
+            context,
+            CallNotConnectedProperties(
+              call,
+              isMigrating: _status.isMigrating,
+              isReconnecting: isReconnecting,
+            ),
+          ) ??
+          Center(
+            child: Text(
+              isReconnecting ? 'Reconnecting' : 'Connecting',
+              style: theme.textTheme.title3,
+            ),
+          );
     }
 
     return Scaffold(
@@ -193,18 +239,22 @@ class _StreamCallContentState extends State<StreamCallContent> {
             ),
           ),
           if (_status.isFastReconnecting)
-            const Positioned(
-              top: 25,
-              left: 25,
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
+            widget.callFastReconnectingOverlayBuilder?.call(
+                  context,
+                  CallFastReconnectingProperties(call),
+                ) ??
+                const Positioned(
+                  top: 25,
+                  left: 25,
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  ),
                 ),
-              ),
-            ),
         ],
       ),
       extendBody: widget.extendBody,

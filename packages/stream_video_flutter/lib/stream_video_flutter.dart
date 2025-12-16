@@ -29,6 +29,7 @@ export 'src/call_participants/call_participant.dart';
 export 'src/call_participants/call_participants.dart';
 export 'src/call_participants/call_participants_sorting_mixin.dart';
 export 'src/call_participants/layout/participant_layout_mode.dart';
+export 'src/call_participants/livestream_hosts.dart';
 export 'src/call_participants/local_video.dart';
 export 'src/call_screen/call_container.dart';
 export 'src/call_screen/call_content/call_app_bar.dart';
