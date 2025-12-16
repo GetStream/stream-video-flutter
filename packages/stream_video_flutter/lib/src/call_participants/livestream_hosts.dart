@@ -68,16 +68,18 @@ class StreamLivestreamHosts extends StatefulWidget {
   State<StreamLivestreamHosts> createState() => _StreamLivestreamHostsState();
 }
 
-class _StreamLivestreamHostsState extends State<StreamLivestreamHosts> {
-  List<CallParticipantState> _hosts = [];
-  CallParticipantState? _screenShareHost;
+class _StreamLivestreamHostsState extends State<StreamLivestreamHosts>
+    with CallParticipantsSortingMixin {
+  @override
+  Filter<CallParticipantState>? get participantFilter => null;
 
-  List<String> _sortedParticipantKeys = [];
+  @override
+  Sort<CallParticipantState>? get participantSort => widget.sort;
 
   @override
   void initState() {
     super.initState();
-    _recalculateParticipants(widget.hosts);
+    recalculateParticipants(widget.hosts);
   }
 
   @override
@@ -88,51 +90,7 @@ class _StreamLivestreamHostsState extends State<StreamLivestreamHosts> {
       widget.hosts.toList(),
       oldWidget.hosts.toList(),
     )) {
-      _recalculateParticipants(widget.hosts);
-    }
-  }
-
-  void _recalculateParticipants(List<CallParticipantState> newParticipants) {
-    final participants = [
-      ...newParticipants,
-    ].where((e) => e.isVideoEnabled || e.isScreenShareEnabled).toList();
-
-    for (final participant in participants) {
-      final index = _sortedParticipantKeys.indexOf(
-        participant.uniqueParticipantKey,
-      );
-      if (index == -1) {
-        _sortedParticipantKeys.add(participant.uniqueParticipantKey);
-      }
-    }
-
-    // First apply previous sorting on new participants list
-    participants.sort(
-      (a, b) => _sortedParticipantKeys
-          .indexOf(a.uniqueParticipantKey)
-          .compareTo(_sortedParticipantKeys.indexOf(b.uniqueParticipantKey)),
-    );
-
-    mergeSort(participants, compare: widget.sort);
-
-    final screenShareParticipant = participants.firstWhereOrNull((it) {
-      final screenShareTrack = it.screenShareTrack;
-      final isScreenShareEnabled = it.isScreenShareEnabled;
-
-      if (screenShareTrack == null || !isScreenShareEnabled) return false;
-
-      return true;
-    });
-
-    _sortedParticipantKeys = participants
-        .map((e) => e.uniqueParticipantKey)
-        .toList();
-
-    if (mounted) {
-      setState(() {
-        _hosts = participants.toList();
-        _screenShareHost = screenShareParticipant;
-      });
+      recalculateParticipants(widget.hosts);
     }
   }
 
@@ -151,8 +109,8 @@ class _StreamLivestreamHostsState extends State<StreamLivestreamHosts> {
     CallParticipantState host,
   ) {
     if (widget.screenShareMode == LivestreamScreenShareMode.grid &&
-        _screenShareHost?.userId == host.userId) {
-      return _buildScreenShareContent(_screenShareHost!);
+        screenShareParticipant?.userId == host.userId) {
+      return _buildScreenShareContent(screenShareParticipant!);
     }
 
     return widget.callParticipantBuilder(context, call, host);
@@ -163,19 +121,23 @@ class _StreamLivestreamHostsState extends State<StreamLivestreamHosts> {
     final livestreamTheme = StreamLivestreamTheme.of(context);
 
     if (widget.screenShareMode == LivestreamScreenShareMode.spotlight &&
-        _screenShareHost != null) {
-      return _buildScreenShareContent(_screenShareHost!);
+        screenShareParticipant != null) {
+      return _buildScreenShareContent(screenShareParticipant!);
     }
 
-    if (_hosts.isNotEmpty &&
+    if (sortedParticipants.isNotEmpty &&
         (widget.layoutMode == ParticipantLayoutMode.pictureInPicture ||
             widget.layoutMode == ParticipantLayoutMode.spotlight)) {
-      return widget.callParticipantBuilder(context, widget.call, _hosts.first);
+      return widget.callParticipantBuilder(
+        context,
+        widget.call,
+        sortedParticipants.first,
+      );
     }
 
     return CallParticipantsGridView(
       call: widget.call,
-      participants: _hosts,
+      participants: sortedParticipants,
       itemBuilder: _hostVideoContentBuilder,
       padding: livestreamTheme.hostsGridPadding,
       mainAxisSpacing: livestreamTheme.hostsGridMainAxisSpacing,

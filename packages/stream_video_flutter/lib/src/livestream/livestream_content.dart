@@ -17,6 +17,22 @@ class LivestreamHostsUnavailableProperties {
   final Call call;
 }
 
+class LivestreamFastReconnectingProperties {
+  LivestreamFastReconnectingProperties(this.call);
+
+  final Call call;
+}
+
+class LivestreamHostsParticipantProperties {
+  LivestreamHostsParticipantProperties({
+    required this.call,
+    required this.hosts,
+  });
+
+  final Call call;
+  final List<CallParticipantState> hosts;
+}
+
 typedef LivestreamNotConnectedBuilder =
     Widget Function(
       BuildContext context,
@@ -26,14 +42,13 @@ typedef LivestreamNotConnectedBuilder =
 typedef LivestreamFastReconnectingOverlayBuilder =
     Widget Function(
       BuildContext context,
-      Call call,
+      LivestreamFastReconnectingProperties properties,
     );
 
 typedef LivestreamHostsParticipantBuilder =
     Widget Function(
       BuildContext context,
-      Call call,
-      List<CallParticipantState> hosts,
+      LivestreamHostsParticipantProperties properties,
     );
 
 typedef LivestreamHostsParticipantsFilter =
@@ -205,13 +220,15 @@ class _LivestreamContentState extends State<LivestreamContent> {
       );
 
   LivestreamHostsParticipantBuilder get _defaultHostsParticipantBuilder =>
-      (context, call, hosts) => StreamLivestreamHosts(
-        call: call,
+      (context, properties) => StreamLivestreamHosts(
+        call: properties.call,
         layoutMode: widget.showMultipleHosts
             ? widget.layoutMode
             : ParticipantLayoutMode.spotlight,
         screenShareMode: widget.screenShareMode,
-        hosts: widget.showMultipleHosts ? hosts : [hosts.first],
+        hosts: widget.showMultipleHosts
+            ? properties.hosts
+            : [properties.hosts.first],
         callParticipantBuilder: _defaultParticipantBuilder,
         screenShareContentBuilder: (context, call, participant) =>
             ScreenShareContent(
@@ -279,18 +296,22 @@ class _LivestreamContentState extends State<LivestreamContent> {
                   ),
                 widget.livestreamHostsParticipantBuilder?.call(
                       context,
-                      call,
-                      streamingParticipants,
+                      LivestreamHostsParticipantProperties(
+                        call: call,
+                        hosts: streamingParticipants,
+                      ),
                     ) ??
                     _defaultHostsParticipantBuilder(
                       context,
-                      call,
-                      streamingParticipants,
+                      LivestreamHostsParticipantProperties(
+                        call: call,
+                        hosts: streamingParticipants,
+                      ),
                     ),
                 if (status.isFastReconnecting)
                   widget.livestreamFastReconnectingOverlayBuilder?.call(
                         context,
-                        call,
+                        LivestreamFastReconnectingProperties(call),
                       ) ??
                       const Positioned(
                         top: 25,

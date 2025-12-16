@@ -17,7 +17,7 @@ typedef CallNotConnectedBuilder =
 typedef CallFastReconnectingOverlayBuilder =
     Widget Function(
       BuildContext context,
-      Call call,
+      CallFastReconnectingProperties properties,
     );
 
 class CallNotConnectedProperties {
@@ -30,6 +30,12 @@ class CallNotConnectedProperties {
   final Call call;
   final bool isMigrating;
   final bool isReconnecting;
+}
+
+class CallFastReconnectingProperties {
+  CallFastReconnectingProperties(this.call);
+
+  final Call call;
 }
 
 /// Represents the UI in an active call that shows participants and their video,
@@ -233,7 +239,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
             ),
           ),
           if (_status.isFastReconnecting)
-            widget.callFastReconnectingOverlayBuilder?.call(context, call) ??
+            widget.callFastReconnectingOverlayBuilder?.call(
+                  context,
+                  CallFastReconnectingProperties(call),
+                ) ??
                 const Positioned(
                   top: 25,
                   left: 25,

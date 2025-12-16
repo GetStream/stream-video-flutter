@@ -1,24 +1,21 @@
-## Unreleased
+## Upcoming
 
 ### ✅ Added
-* Livestream: Added multiple-host and screen sharing support in `LivestreamPlayer` and `LivestreamContent`.
+* Added `pipTrackPriority` parameter to `PictureInPictureConfiguration` to control whether screen sharing or camera track is preferred in PiP mode. When set to `camera`, the camera track is preferred, but screen share will still be shown as a fallback if the camera is disabled.
+* Added multiple-host and screen sharing support in `LivestreamPlayer` and `LivestreamContent`.
   - New flags: `showMultipleHosts`, `layoutMode`, `screenShareMode`.
   - New builders: `livestreamHostsParticipantBuilder` and `livestreamHostsParticipantsFilter` to customize how hosts are selected and rendered.
-* `LivestreamPlayer`: added `videoFit` parameter to control contain/cover behavior when not in fullscreen.
+* Added `videoFit` parameter in `LivestreamPlayer` to control contain/cover behavior when not in fullscreen.
 * Livestream reconnect UI customization:
   - `LivestreamPlayer`/`LivestreamContent`: added `livestreamFastReconnectingOverlayBuilder` to customize the UI shown during fast reconnect.
   - `LivestreamContent`: `livestreamNotConnectedBuilder` provides `isMigrating`/`isReconnecting` flags to tailor messaging when not connected.
 * Call screen reconnect UI customization:
   - `StreamCallContent`: added `callFastReconnectingOverlayBuilder` to render a custom overlay while fast reconnecting.
   - `StreamCallContent`: `callNotConnectedBuilder` now exposes `CallNotConnectedProperties` with `isMigrating`/`isReconnecting` to customize the not-connected/reconnecting view.
-## Upcoming
 
 ### 🐞 Fixed
 * Fixed ANR (Application Not Responding) issue on Android that could happen when starting screen share service.
 * Fixed crash on Android versions below API 31 when disabling Picture-in-Picture mode.
-
-### ✅ Added
-* Added `prioritiseScreenSharingTrack` parameter to `PictureInPictureConfiguration` to control whether screen sharing or camera track is preferred in PiP mode. When set to `false`, the camera track is preferred, but screen share will still be shown as a fallback if the camera is disabled.
 
 ## 1.0.2
 

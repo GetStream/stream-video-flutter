@@ -86,7 +86,7 @@ void main() {
         ).thenThrow(Exception('Network error'));
 
         // When
-        final result = await service.getLocation(maxAttempts: 3);
+        final result = await service.getLocation();
 
         // Then
         expect(result, equals('ERR'));
@@ -169,7 +169,7 @@ void main() {
         });
 
         // When
-        final result = await service.getLocation(maxAttempts: 3);
+        final result = await service.getLocation();
 
         // Then
         expect(result, equals('SIN'));
