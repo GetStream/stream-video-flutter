@@ -4,6 +4,9 @@
 * Fixed ANR (Application Not Responding) issue on Android that could happen when starting screen share service.
 * Fixed crash on Android versions below API 31 when disabling Picture-in-Picture mode.
 
+### ✅ Added
+* Added `prioritiseScreenSharingTrack` parameter to `PictureInPictureConfiguration` to control whether screen sharing or camera track is preferred in PiP mode. When set to `false`, the camera track is preferred, but screen share will still be shown as a fallback if the camera is disabled.
+
 ## 1.0.2
 
 🐞 Fixed

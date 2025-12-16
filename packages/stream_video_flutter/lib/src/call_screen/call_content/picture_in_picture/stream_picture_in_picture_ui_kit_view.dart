@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -39,13 +41,26 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
   const StreamPictureInPictureUiKitView({
     super.key,
     required this.call,
-    required this.configuration,
+    @Deprecated(
+      'Pass PictureInPictureConfiguration [pictureInPictureConfiguration] instead',
+    )
+    this.configuration,
+    this.pictureInPictureConfiguration,
+    @Deprecated(
+      'Pass PictureInPictureConfiguration [pictureInPictureConfiguration] instead',
+    )
     this.participantSort,
-  });
+  }) : assert(
+         configuration != null || pictureInPictureConfiguration != null,
+         'Either configuration or pictureInPictureConfiguration must be provided',
+       );
 
   final Call call;
+  final PictureInPictureConfiguration? pictureInPictureConfiguration;
+  @Deprecated('Use [pictureInPictureConfiguration.sort] instead')
   final Comparator<CallParticipantState>? participantSort;
-  final IOSPictureInPictureConfiguration configuration;
+  @Deprecated('Use [pictureInPictureConfiguration.iOSPiPConfiguration] instead')
+  final IOSPictureInPictureConfiguration? configuration;
 
   @override
   State<StreamPictureInPictureUiKitView> createState() =>
@@ -75,30 +90,47 @@ class _StreamPictureInPictureUiKitViewState
     final sorted = List<CallParticipantState>.from(participants);
     mergeSort(
       sorted,
-      compare: widget.participantSort ?? CallParticipantSortingPresets.speaker,
+      compare:
+          widget.pictureInPictureConfiguration?.sort ??
+          widget.participantSort ??
+          CallParticipantSortingPresets.speaker,
     );
 
     if (sorted.isNotEmpty) {
-      final participant = sorted.first;
+      final pipParticipant = sorted.first;
+
+      final hasScreenShare =
+          pipParticipant.isScreenShareEnabled &&
+          pipParticipant.screenShareTrack != null;
+
+      // Show screen share if:
+      // 1. prioritise is true and screen share is available, OR
+      // 2. video is disabled but screen share is available (fallback)
+      final shouldShowScreenShare =
+          hasScreenShare &&
+          (widget.pictureInPictureConfiguration?.pipTrackPriority !=
+                  PipTrackPriority.camera ||
+              !pipParticipant.isVideoEnabled);
+
+      final priorityTrack = shouldShowScreenShare
+          ? SfuTrackType.screenShare
+          : SfuTrackType.video;
 
       final videoTrack = widget.call.getTrack(
-        participant.trackIdPrefix,
-        participant.isScreenShareEnabled
-            ? SfuTrackType.screenShare
-            : SfuTrackType.video,
+        pipParticipant.trackIdPrefix,
+        priorityTrack,
       );
 
       if (videoTrack == null &&
-          (participant.isVideoEnabled || participant.isScreenShareEnabled)) {
+          (pipParticipant.isVideoEnabled ||
+              pipParticipant.isScreenShareEnabled)) {
         // If the video track is not available, we need to update the subscription
         // to ensure that the participant's video is displayed correctly.
         await widget.call.updateSubscription(
-          userId: participant.userId,
-          sessionId: participant.sessionId,
-          trackIdPrefix: participant.trackIdPrefix,
-          trackType: participant.isScreenShareEnabled
-              ? SfuTrackType.screenShare
-              : SfuTrackType.video,
+          userId: pipParticipant.userId,
+          sessionId: pipParticipant.sessionId,
+          trackIdPrefix: pipParticipant.trackIdPrefix,
+          trackType: priorityTrack,
           videoDimension: RtcVideoDimensionPresets.h360_169,
         );
 
@@ -109,20 +141,33 @@ class _StreamPictureInPictureUiKitViewState
         'updateParticipant',
         {
           'trackId': videoTrack?.mediaTrack.id,
-          'name': participant.name.isEmpty
-              ? participant.userId
-              : participant.name,
-          'imageUrl': participant.image,
-          'isAudioEnabled': participant.isAudioEnabled,
+          'name': pipParticipant.name.isEmpty
+              ? pipParticipant.userId
+              : pipParticipant.name,
+          'imageUrl': pipParticipant.image,
+          'isAudioEnabled': pipParticipant.isAudioEnabled,
           'isVideoEnabled':
               videoTrack != null &&
-              (participant.isVideoEnabled || participant.isScreenShareEnabled),
-          'connectionQuality': participant.connectionQuality.name,
-          'showParticipantName': widget.configuration.showParticipantName,
+              (pipParticipant.isVideoEnabled || shouldShowScreenShare),
+          'connectionQuality': pipParticipant.connectionQuality.name,
+          'showParticipantName':
+              widget
+                  .pictureInPictureConfiguration
+                  ?.iOSPiPConfiguration
+                  .showParticipantName ??
+              widget.configuration?.showParticipantName,
           'showMicrophoneIndicator':
-              widget.configuration.showMicrophoneIndicator,
+              widget
+                  .pictureInPictureConfiguration
+                  ?.iOSPiPConfiguration
+                  .showMicrophoneIndicator ??
+              widget.configuration?.showMicrophoneIndicator,
           'showConnectionQualityIndicator':
-              widget.configuration.showConnectionQualityIndicator,
+              widget
+                  .pictureInPictureConfiguration
+                  ?.iOSPiPConfiguration
+                  .showConnectionQualityIndicator ??
+              widget.configuration?.showConnectionQualityIndicator,
         },
       );
     }
@@ -143,7 +188,12 @@ class _StreamPictureInPictureUiKitViewState
 
           _handleParticipantsChange(
             state.callParticipants,
-            widget.configuration.includeLocalParticipantVideo &&
+            (widget
+                        .pictureInPictureConfiguration
+                        ?.iOSPiPConfiguration
+                        .includeLocalParticipantVideo ??
+                    widget.configuration?.includeLocalParticipantVideo ??
+                    true) &&
                 widget.call.state.value.iOSMultitaskingCameraAccessEnabled,
           );
         },
@@ -222,6 +272,29 @@ class _StreamPictureInPictureUiKitViewState
         final track = widget.call.getTrack(
           participant.trackIdPrefix,
           SfuTrackType.video,
+        );
+        if (track != null) {
+          track.mediaTrack.enabled = enable;
+        }
+      }
+    }
+
+    for (final participant in participants.where(
+      (p) => p.isScreenShareEnabled,
+    )) {
+      if (!enable && participant.isSpeaking) {
+        // Do not disable video track of speaking participant
+        continue;
+      }
+
+      final screenShareTrackState =
+          participant.publishedTracks[SfuTrackType.screenShare];
+      if ((screenShareTrackState is RemoteTrackState &&
+              screenShareTrackState.subscribed) ||
+          participant.isLocal) {
+        final track = widget.call.getTrack(
+          participant.trackIdPrefix,
+          SfuTrackType.screenShare,
         );
         if (track != null) {
           track.mediaTrack.enabled = enable;
