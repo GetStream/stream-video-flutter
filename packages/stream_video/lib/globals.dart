@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as webrtc;
 
+import 'protobuf/video/sfu/models/models.pb.dart';
+
 const String streamSdkName = 'stream-flutter';
 const String streamVideoVersion = '1.0.2';
 const String openapiModelsVersion = '202.0.0';
@@ -15,3 +17,6 @@ final xStreamClientHeader = '$streamDefaultUserAgent|$clientVersionDetails';
 /// Details regarding app name, version, os and device. Is set during initialization of StreamVideo instance.
 @internal
 String? clientVersionDetails;
+
+@internal
+ClientDetails? clientDetails;

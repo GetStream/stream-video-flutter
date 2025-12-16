@@ -1045,9 +1045,11 @@ class Call {
     // make sure we only track connection timing if we are not calling this method as part of a migration flow
     connectionTimeStopwatch.stop();
     if (!performingMigration) {
-      await _sfuStatsReporter?.sendSfuStats(
-        reconnectionStrategy: _reconnectStrategy,
-        connectionTimeMs: connectionTimeStopwatch.elapsedMilliseconds,
+      unawaited(
+        _sfuStatsReporter?.sendSfuStats(
+          reconnectionStrategy: _reconnectStrategy,
+          connectionTimeMs: connectionTimeStopwatch.elapsedMilliseconds,
+        ),
       );
     }
 
@@ -1305,7 +1307,17 @@ class Call {
       capabilities: _sfuClientCapabilities,
       onRtcManagerCreatedCallback: (_) async {
         _logger.v(() => '[startSession] applying connect options');
-        await _applyConnectOptions();
+        unawaited(
+          _applyConnectOptions().catchError((
+            dynamic error,
+            StackTrace stackTrace,
+          ) {
+            _logger.e(
+              () =>
+                  '[startSession] failed to apply connect options: $error, stackTrace: $stackTrace',
+            );
+          }),
+        );
       },
       isAnonymousUser:
           _streamVideo.state.currentUser.type == UserType.anonymous,
@@ -1331,7 +1343,7 @@ class Call {
     }
 
     if (_sfuStatsOptions != null) {
-      await _sfuStatsReporter?.sendSfuStats();
+      unawaited(_sfuStatsReporter?.sendSfuStats());
       _sfuStatsReporter =
           SfuStatsReporter(
             callSession: session,
@@ -1381,7 +1393,7 @@ class Call {
         anonymousCount: sfuEvent.participantCount.anonymous,
       );
     } else if (sfuEvent is SfuCallEndedEvent) {
-      await _sfuStatsReporter?.sendSfuStats();
+      unawaited(_sfuStatsReporter?.sendSfuStats());
       _stateManager.sfuCallEnded(sfuEvent);
     }
 
@@ -1517,7 +1529,7 @@ class Call {
             return;
           }
 
-          await _sfuStatsReporter?.sendSfuStats();
+          unawaited(_sfuStatsReporter?.sendSfuStats());
 
           switch (_reconnectStrategy) {
             case SfuReconnectionStrategy.unspecified:
@@ -1638,9 +1650,11 @@ class Call {
 
     if (migrationResult.isSuccess) {
       migrateTimeStopwatch.stop();
-      await _sfuStatsReporter?.sendSfuStats(
-        connectionTimeMs: migrateTimeStopwatch.elapsedMilliseconds,
-        reconnectionStrategy: _reconnectStrategy,
+      unawaited(
+        _sfuStatsReporter?.sendSfuStats(
+          connectionTimeMs: migrateTimeStopwatch.elapsedMilliseconds,
+          reconnectionStrategy: _reconnectStrategy,
+        ),
       );
     }
   }
@@ -2238,8 +2252,17 @@ class Call {
         _logger.v(() => '[performGetOperation] success: $success');
 
         final callMetadata = onSuccess(success.data);
-        await _applyCallSettingsToConnectOptions(
-          callMetadata.settings,
+        unawaited(
+          _applyCallSettingsToConnectOptions(
+            callMetadata.settings,
+          ).catchError(
+            (dynamic error, StackTrace stackTrace) {
+              _logger.e(
+                () =>
+                    '[performGetOperation] failed to apply call settings: $error, stackTrace: $stackTrace',
+              );
+            },
+          ),
         );
 
         return success;

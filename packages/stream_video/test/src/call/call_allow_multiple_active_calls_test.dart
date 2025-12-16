@@ -78,6 +78,7 @@ void main() {
             allowMultipleActiveCalls: false,
             autoConnect: false,
           ),
+          precacheGenericSdps: false,
         );
 
         call1 = streamVideo.makeCall(
@@ -205,6 +206,7 @@ void main() {
             allowMultipleActiveCalls: true,
             autoConnect: false,
           ),
+          precacheGenericSdps: false,
         );
 
         call1 = streamVideo.makeCall(
