@@ -109,7 +109,8 @@ class _StreamLivestreamHostsState extends State<StreamLivestreamHosts>
     CallParticipantState host,
   ) {
     if (widget.screenShareMode == LivestreamScreenShareMode.grid &&
-        screenShareParticipant?.userId == host.userId) {
+        screenShareParticipant?.uniqueParticipantKey ==
+            host.uniqueParticipantKey) {
       return _buildScreenShareContent(screenShareParticipant!);
     }
 
