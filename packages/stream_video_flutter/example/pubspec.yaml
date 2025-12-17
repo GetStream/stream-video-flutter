@@ -31,7 +31,10 @@ dependencies:
   stream_video: ^1.2.2
   stream_video_flutter: ^1.2.2
   stream_video_push_notification: ^1.2.2
-  stream_webrtc_flutter: ^2.2.3
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 8640405f0c874a0d6bd41878549ae67aaa4b88da
 
 dependency_overrides:
   stream_video:
