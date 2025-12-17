@@ -1,3 +1,8 @@
+## Next release
+
+### 🐞 Fixed
+* [Android] Fixed an issue where the camera freezes for person using screen sharing without PiP enabled.
+
 ## 1.1.0
 
 ### ✅ Added
