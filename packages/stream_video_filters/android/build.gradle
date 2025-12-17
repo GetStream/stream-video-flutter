@@ -50,7 +50,7 @@ android {
     dependencies {
         implementation "io.github.crow-misia.libyuv:libyuv-android:0.43.0"
         implementation 'com.google.mlkit:segmentation-selfie:16.0.0-beta6'
-        implementation 'io.getstream:stream-video-webrtc-android:137.0.1'
+        implementation 'io.getstream:stream-video-webrtc-android-repackaged:137.1.1'
         implementation 'io.getstream:stream-video-renderscript-android:0.0.1'
     }
 

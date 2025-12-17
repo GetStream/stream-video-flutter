@@ -15,7 +15,10 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
   stream_video: ^1.1.0
-  stream_webrtc_flutter: ^2.2.1
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: f1ad9c813407f0e7603a90283befbabd9404dfcc
 
 dev_dependencies:
   flutter_lints: ^6.0.0

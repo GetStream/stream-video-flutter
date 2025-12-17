@@ -8,6 +8,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://central.sonatype.com/repository/maven-snapshots/"
+        }
     }
 }
 
@@ -44,7 +47,7 @@ android {
         implementation 'androidx.appcompat:appcompat:1.7.0'
         implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
         implementation "androidx.annotation:annotation:1.9.0"
-        implementation "io.getstream:stream-video-webrtc-android:137.0.1"
+        implementation "io.getstream:stream-video-webrtc-android-repackaged:137.1.1"
     }
 
     testOptions {

@@ -6,10 +6,10 @@ import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.util.Log
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.TextureBufferImpl
-import org.webrtc.VideoFrame
-import org.webrtc.YuvConverter
+import io.getstream.webrtc.SurfaceTextureHelper
+import io.getstream.webrtc.TextureBufferImpl
+import io.getstream.webrtc.VideoFrame
+import io.getstream.webrtc.YuvConverter
 
 // Original Sources
 // https://github.com/GetStream/stream-video-android/blob/9a3b8e92b74bc4408781b5274fc602034d616983/stream-video-android-core/src/main/kotlin/io/getstream/video/android/core/call/video/FilterVideoProcessor.kt
