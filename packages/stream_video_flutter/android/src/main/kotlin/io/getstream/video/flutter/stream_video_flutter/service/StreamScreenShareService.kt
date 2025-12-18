@@ -200,6 +200,7 @@ internal class StreamScreenShareService : Service() {
 
     companion object {
         internal const val ACTION_UPDATE = "UPDATE"
-        internal const val ACTION_STOP_SPECIFIC_CALL = "STOP_SPECIFIC_CALL" 
+        internal const val ACTION_STOP_SPECIFIC_CALL = "STOP_SPECIFIC_CALL"
+        internal const val TRIGGER_SHARE_SCREEN = "SHARE_SCREEN"
     }
 }

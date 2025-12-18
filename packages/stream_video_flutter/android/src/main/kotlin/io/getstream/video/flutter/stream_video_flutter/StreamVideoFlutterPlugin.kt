@@ -1,11 +1,7 @@
 package io.getstream.video.flutter.stream_video_flutter
 
-import androidx.annotation.NonNull
-
 import android.content.Intent
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -13,14 +9,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
-import io.getstream.video.flutter.stream_video_flutter.service.StreamCallService
 import io.getstream.video.flutter.stream_video_flutter.service.notification.IdentifiedNotification
 import io.getstream.video.flutter.stream_video_flutter.service.notification.registerNotificationActionReceiverAsFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 private const val TAG = "StreamVideoPlugin"
