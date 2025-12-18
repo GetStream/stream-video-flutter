@@ -1,3 +1,8 @@
+## Next release
+
+### 🐞 Fixed
+* [Android] Fixed active foreground service not being started when notification permission is denied.
+
 ## 1.1.0
 
 ### ✅ Added
