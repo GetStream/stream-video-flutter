@@ -252,6 +252,7 @@ class _CallScreenState extends State<CallScreen> {
                           call: call,
                           screenShareConstraints: const ScreenShareConstraints(
                             useiOSBroadcastExtension: true,
+                            captureScreenAudio: true,
                           ),
                           enabledScreenShareBackgroundColor:
                               AppColorPalette.primary,

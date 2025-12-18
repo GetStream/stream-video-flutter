@@ -1,3 +1,6 @@
+## Upcoming
+* Fixed unnecessary video filter reapplication when camera track is disabled.
+
 ## 1.1.0
 * Sync version with `stream_video_flutter` 1.1.0
 

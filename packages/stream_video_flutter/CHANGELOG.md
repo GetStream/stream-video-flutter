@@ -1,3 +1,11 @@
+# Upcoming
+
+### ✅ Added
+* Added support for screen audio sharing. To enable it set `captureScreenAudio` to true in `ScreenShareConstraints`.
+
+### 🐞 Fixed
+* Fixed unnecessary video filter reapplication when camera track is disabled.
+
 ## 1.1.0
 
 ### ✅ Added
