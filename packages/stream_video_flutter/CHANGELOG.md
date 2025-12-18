@@ -6,6 +6,7 @@
 ### 🐞 Fixed
 * Fixed unnecessary video filter reapplication when camera track is disabled.
 * [Android] Fixed an issue where the camera freezes for person using screen sharing without PiP enabled.
+* [Android] Fixed active foreground service not being started when notification permission is denied.
 
 ## 1.1.0
 

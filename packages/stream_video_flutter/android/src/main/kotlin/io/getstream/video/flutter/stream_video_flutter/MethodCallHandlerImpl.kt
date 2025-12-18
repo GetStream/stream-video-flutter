@@ -104,9 +104,8 @@ class MethodCallHandlerImpl(
                     activity.requestPermission {
                         val error = it.exceptionOrNull()
                         if (error != null) {
-                            logger.e { "[onMethodCall] #startService(type: $serviceType); permission failed: $error" }
-                            result.error("startService", error.toString(), null)
-                            return@requestPermission
+                            // No permission to show a notification, so background service will run without a visible notification
+                            logger.i { "[onMethodCall] #startService(type: $serviceType); permission failed: $error" }
                         }
 
                         val notificationPayload = call.extractNotificationPayload()
