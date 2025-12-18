@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:stream_video/stream_video.dart';
 
