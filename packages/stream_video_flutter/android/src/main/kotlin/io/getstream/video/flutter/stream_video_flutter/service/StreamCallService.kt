@@ -58,9 +58,10 @@ open class StreamCallService : Service() {
         }
 
         // Since Android U service type phone call requires own call permission
-        if (!hasOwnCallsPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            serviceTypes.add(ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val hasPermissionForForegroundServiceTypeCall =
+            hasOwnCallsPermission || Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hasPermissionForForegroundServiceTypeCall) {
             serviceTypes.add(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
         } else {
             // Before android Q we don't set any service types
