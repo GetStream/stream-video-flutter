@@ -216,16 +216,6 @@ class StreamBackgroundService {
 
     _logger.d(() => '<$callCid> [_startManagingCall] Starting management.');
     try {
-      // TODO: Why do we need to check this?
-      final micPermissionGranted = await Permission.microphone.isGranted;
-      if (!micPermissionGranted) {
-        _logger.d(
-          () =>
-              '<$callCid> [_startManagingCall] cannot start service, microphone permission not granted',
-        );
-        return;
-      }
-
       final options = optionsBuilder.call(call);
       final payload = NotificationPayload(
         callCid: callCid,
