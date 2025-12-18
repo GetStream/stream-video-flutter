@@ -1,10 +1,11 @@
 # Upcoming
 
 ### ✅ Added
-* Added support for screen audio sharing. To enable it set `captureScreenAudio` to true in `ScreenShareConstraints`.
+* [Android] Added support for screen audio sharing. To enable it set `captureScreenAudio` to true in `ScreenShareConstraints`.
 
 ### 🐞 Fixed
 * Fixed unnecessary video filter reapplication when camera track is disabled.
+* [Android] Fixed an issue where the camera freezes for person using screen sharing without PiP enabled.
 
 ## 1.1.0
 
