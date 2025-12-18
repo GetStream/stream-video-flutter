@@ -101,8 +101,9 @@ class StreamVideoEffectsManager {
     await _localVideoTrackSubscription?.cancel();
     _localVideoTrackSubscription = call
         .partialState((s) => s.localParticipant?.isVideoEnabled)
+        .where((enabled) => enabled ?? false)
         .listen(
-          (enabled) async {
+          (_) async {
             final trackId = await _getTrackId();
             if (trackId != null) {
               await rtc.setVideoEffects(
