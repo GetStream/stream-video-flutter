@@ -17,12 +17,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import io.getstream.log.taggedLogger
-import io.getstream.video.flutter.stream_video_flutter.service.PictureInPictureHelper
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceManager
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceManagerImpl
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
-import io.getstream.video.flutter.stream_video_flutter.service.StreamCallService
-import io.getstream.video.flutter.stream_video_flutter.service.StreamScreenShareService
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
 
 class MethodCallHandlerImpl(
@@ -33,7 +30,6 @@ class MethodCallHandlerImpl(
     private val logger by taggedLogger(tag = "StreamMethodHandler")
 
     private val serviceManager: ServiceManager = ServiceManagerImpl(appContext.applicationContext)
-    private val applicationContext = appContext.applicationContext
 
     private var permissionCallback: ((Result<Unit>) -> Unit)? = null
 

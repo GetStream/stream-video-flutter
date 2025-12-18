@@ -1,22 +1,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
 
-        <service android:name=".service.StreamCallService"
-            android:foregroundServiceType="microphone|phoneCall"
+        <service
+            android:name=".service.StreamCallService"
+            android:foregroundServiceType="microphone|phoneCall|camera|shortService|mediaPlayback"
             android:exported="false" />
 
-        <service android:name=".service.StreamScreenShareService"
+        <service
+            android:name=".service.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
 
     </application>
 </manifest>
