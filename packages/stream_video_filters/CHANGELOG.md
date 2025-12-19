@@ -1,4 +1,4 @@
-## Upcoming
+## 1.2.0
 * Fixed unnecessary video filter reapplication when camera track is disabled.
 
 ## 1.1.0

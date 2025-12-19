@@ -1,7 +1,7 @@
-# Upcoming
+## 1.2.0
 
 ### ✅ Added
-* [Android] Added support for screen audio sharing. To enable it set `captureScreenAudio` to true in `ScreenShareConstraints`.
+* [Android] Added support for screen audio sharing. To enable it set `captureScreenAudio` to true in `ScreenShareConstraints`. See [documentation](https://getstream.io/video/docs/flutter/advanced/screen_sharing/#screen-audio-sharing) for more details.
 
 ### 🐞 Fixed
 * Fixed unnecessary video filter reapplication when camera track is disabled.
