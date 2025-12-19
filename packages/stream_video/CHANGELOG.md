@@ -1,3 +1,6 @@
+## 1.2.0
+* Sync version with `stream_video_flutter` 1.2.0
+
 ## 1.1.0
 
 ### ⚡ Performance
