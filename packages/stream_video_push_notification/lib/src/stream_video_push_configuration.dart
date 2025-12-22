@@ -150,6 +150,8 @@ class IOSPushConfiguration {
     this.supportsGrouping,
     this.supportsUngrouping,
     this.ringtonePath,
+    this.includesCallsInRecents,
+    this.useDisplayNameAsHandle,
   });
 
   factory IOSPushConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -177,6 +179,14 @@ class IOSPushConfiguration {
   /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
   final String? ringtonePath;
 
+  /// Whether calls handled by this provider should be included in the system's Recents list.
+  /// Defaults to true. Set to false to prevent calls from appearing in Recents.
+  final bool? includesCallsInRecents;
+
+  /// When true, uses the caller's display name as the CallKit handle instead of the user ID.
+  /// Defaults to false.
+  final bool? useDisplayNameAsHandle;
+
   IOSPushConfiguration copyWith({
     String? iconName,
     String? handleType,
@@ -194,6 +204,8 @@ class IOSPushConfiguration {
     bool? supportsGrouping,
     bool? supportsUngrouping,
     String? ringtonePath,
+    bool? includesCallsInRecents,
+    bool? useDisplayNameAsHandle,
   }) {
     return IOSPushConfiguration(
       iconName: iconName ?? this.iconName,
@@ -218,6 +230,10 @@ class IOSPushConfiguration {
       supportsGrouping: supportsGrouping ?? this.supportsGrouping,
       supportsUngrouping: supportsUngrouping ?? this.supportsUngrouping,
       ringtonePath: ringtonePath ?? this.ringtonePath,
+      includesCallsInRecents:
+          includesCallsInRecents ?? this.includesCallsInRecents,
+      useDisplayNameAsHandle:
+          useDisplayNameAsHandle ?? this.useDisplayNameAsHandle,
     );
   }
 
@@ -242,6 +258,8 @@ class IOSPushConfiguration {
       supportsGrouping: other.supportsGrouping,
       supportsUngrouping: other.supportsUngrouping,
       ringtonePath: other.ringtonePath,
+      includesCallsInRecents: other.includesCallsInRecents,
+      useDisplayNameAsHandle: other.useDisplayNameAsHandle,
     );
   }
 
