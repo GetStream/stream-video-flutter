@@ -337,9 +337,53 @@ class StreamBackgroundService {
       options: options,
     );
 
-    await StreamVideoFlutterBackground.startService(
-      payload,
-      ServiceType.screenSharing,
+    try {
+      await StreamVideoFlutterBackground.startService(
+        payload,
+        ServiceType.screenSharing,
+      );
+    } catch (e) {
+      _logger.w(
+        () =>
+            '<$callCid> [startScreenSharingNotificationService] Failed to start screen sharing service $e.',
+      );
+
+      return;
+    }
+
+    // Wait for the foreground service to be fully ready.
+    // Android requires FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION to be running
+    // before screen sharing can be started.
+    if (CurrentPlatform.isAndroid) {
+      await _waitForScreenShareServiceReady(callCid);
+    }
+  }
+
+  Future<void> _waitForScreenShareServiceReady(String callCid) async {
+    const timeout = Duration(seconds: 3);
+    const interval = Duration(milliseconds: 50);
+    final stopwatch = Stopwatch()..start();
+
+    while (stopwatch.elapsed < timeout) {
+      final isRunning = await StreamVideoFlutterBackground.isServiceRunning(
+        ServiceType.screenSharing,
+        callCid: callCid,
+      );
+
+      if (isRunning) {
+        _logger.d(
+          () =>
+              '<$callCid> [_waitForScreenShareServiceReady] Screen sharing service ready after ${stopwatch.elapsedMilliseconds}ms',
+        );
+        return;
+      }
+
+      await Future<void>.delayed(interval);
+    }
+
+    _logger.w(
+      () =>
+          '<$callCid> [_waitForScreenShareServiceReady] Timeout waiting for service to be ready',
     );
   }
 
