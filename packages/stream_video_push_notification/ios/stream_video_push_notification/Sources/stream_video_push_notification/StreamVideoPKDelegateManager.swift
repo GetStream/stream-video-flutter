@@ -85,9 +85,16 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
         }
 
         data.uuid = callUUID
-        data.callerName =
-            nonEmptyString(callDisplayName) ?? nonEmptyString(createdByName) ?? defaultCallText
-        data.handle = createdById ?? defaultCallText
+        let displayName = nonEmptyString(callDisplayName) ?? nonEmptyString(createdByName) ?? defaultCallText
+        data.callerName = displayName
+        
+        // Use display name as handle if configured, otherwise use user ID
+        if defaultConfiguration?.useDisplayNameAsHandle == true {
+            data.handle = displayName
+        } else {
+            data.handle = createdById ?? defaultCallText
+        }
+        
         data.type = videoData
         data.extra = ["callCid": callCid]
         data.iconName =

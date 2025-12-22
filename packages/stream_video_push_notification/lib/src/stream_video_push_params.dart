@@ -237,6 +237,8 @@ class IOSParams {
     this.supportsGrouping,
     this.supportsUngrouping,
     this.ringtonePath,
+    this.includesCallsInRecents,
+    this.useDisplayNameAsHandle,
   });
 
   factory IOSParams.fromPushConfiguration(IOSPushConfiguration configuration) =>
@@ -259,6 +261,8 @@ class IOSParams {
         supportsGrouping: configuration.supportsGrouping,
         supportsUngrouping: configuration.supportsUngrouping,
         ringtonePath: configuration.ringtonePath,
+        includesCallsInRecents: configuration.includesCallsInRecents,
+        useDisplayNameAsHandle: configuration.useDisplayNameAsHandle,
       );
 
   factory IOSParams.fromJson(Map<String, dynamic> json) =>
@@ -286,6 +290,14 @@ class IOSParams {
   /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
   final String? ringtonePath;
 
+  /// Whether calls handled by this provider should be included in the system's Recents list.
+  /// Defaults to true. Set to false to prevent calls from appearing in Recents.
+  final bool? includesCallsInRecents;
+
+  /// When true, uses the caller's display name as the CallKit handle instead of the user ID.
+  /// Defaults to false.
+  final bool? useDisplayNameAsHandle;
+
   IOSParams copyWith({
     String? iconName,
     String? handleType,
@@ -303,6 +315,8 @@ class IOSParams {
     bool? supportsGrouping,
     bool? supportsUngrouping,
     String? ringtonePath,
+    bool? includesCallsInRecents,
+    bool? useDisplayNameAsHandle,
   }) {
     return IOSParams(
       iconName: iconName ?? this.iconName,
@@ -327,6 +341,10 @@ class IOSParams {
       supportsGrouping: supportsGrouping ?? this.supportsGrouping,
       supportsUngrouping: supportsUngrouping ?? this.supportsUngrouping,
       ringtonePath: ringtonePath ?? this.ringtonePath,
+      includesCallsInRecents:
+          includesCallsInRecents ?? this.includesCallsInRecents,
+      useDisplayNameAsHandle:
+          useDisplayNameAsHandle ?? this.useDisplayNameAsHandle,
     );
   }
 
@@ -351,6 +369,8 @@ class IOSParams {
       supportsGrouping: other.supportsGrouping,
       supportsUngrouping: other.supportsUngrouping,
       ringtonePath: other.ringtonePath,
+      includesCallsInRecents: other.includesCallsInRecents,
+      useDisplayNameAsHandle: other.useDisplayNameAsHandle,
     );
   }
 

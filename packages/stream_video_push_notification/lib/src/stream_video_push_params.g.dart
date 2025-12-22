@@ -97,6 +97,8 @@ IOSParams _$IOSParamsFromJson(Map<String, dynamic> json) => IOSParams(
   supportsGrouping: json['supportsGrouping'] as bool?,
   supportsUngrouping: json['supportsUngrouping'] as bool?,
   ringtonePath: json['ringtonePath'] as String?,
+  includesCallsInRecents: json['includesCallsInRecents'] as bool?,
+  useDisplayNameAsHandle: json['useDisplayNameAsHandle'] as bool?,
 );
 
 Map<String, dynamic> _$IOSParamsToJson(IOSParams instance) => <String, dynamic>{
@@ -117,6 +119,8 @@ Map<String, dynamic> _$IOSParamsToJson(IOSParams instance) => <String, dynamic>{
   'supportsGrouping': instance.supportsGrouping,
   'supportsUngrouping': instance.supportsUngrouping,
   'ringtonePath': instance.ringtonePath,
+  'includesCallsInRecents': instance.includesCallsInRecents,
+  'useDisplayNameAsHandle': instance.useDisplayNameAsHandle,
 };
 
 MissedCallNotificationParams _$MissedCallNotificationParamsFromJson(
