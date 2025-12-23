@@ -2,13 +2,17 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 
 class NetworkMonitorSettings {
   const NetworkMonitorSettings({
-    this.checkInterval = const Duration(seconds: 2),
+    this.checkInterval = const Duration(seconds: 5),
+    this.offlineCheckInterval = const Duration(seconds: 2),
     this.customEndpoints = const [],
     this.internetConnectionInstance,
   });
 
   /// The interval between connection checks.
   final Duration checkInterval;
+
+  /// The interval between connection checks when offline.
+  final Duration offlineCheckInterval;
 
   /// A list of custom options for checking internet connectivity.
   ///
