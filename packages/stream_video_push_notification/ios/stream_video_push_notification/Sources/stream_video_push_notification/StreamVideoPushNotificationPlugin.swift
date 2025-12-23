@@ -2,16 +2,16 @@ import Flutter
 import UIKit
 
 public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
-    private let devicePushTokenVoIP = "DevicePushTokenVoIP"
+    private static let devicePushTokenVoIPKey = "DevicePushTokenVoIP"
 
     let persistentState: UserDefaults = UserDefaults.standard
 
-    @objc public private(set) static var sharedInstance: StreamVideoPushNotificationPlugin!
+    @objc public private(set) static var sharedInstance: StreamVideoPushNotificationPlugin?
 
     private var callKitManager: StreamVideoCallkitManager
 
-    public init(callKitManager: StreamVideoCallkitManager) {
-        self.callKitManager = callKitManager
+    private override init() {
+        self.callKitManager = StreamVideoCallkitManager.shared
         super.init()
     }
 
@@ -24,10 +24,10 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         let eventsHandler = EventCallbackHandler()
         eventChannel.setStreamHandler(eventsHandler)
 
-        let callKitManager = StreamVideoCallkitManager(eventHandler: eventsHandler)
-        sharedInstance = StreamVideoPushNotificationPlugin(callKitManager: callKitManager)
+        StreamVideoCallkitManager.shared.setEventHandler(eventsHandler)
 
-        registrar.addMethodCallDelegate(sharedInstance, channel: mainChannel)
+        sharedInstance = StreamVideoPushNotificationPlugin()
+        registrar.addMethodCallDelegate(sharedInstance!, channel: mainChannel)
 
         StreamVideoPKDelegateManager.shared.initChannel(mainChannel: mainChannel)
     }
@@ -59,35 +59,34 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     }
 
     @objc public static func setDevicePushTokenVoIP(deviceToken: String) {
-        sharedInstance.setDevicePushTokenVoIP(deviceToken: deviceToken)
-        //TODO: send event? //ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP
+        sharedInstance?.setDevicePushTokenVoIP(deviceToken: deviceToken)
     }
 
     @objc public static func startOutgoingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        sharedInstance.callKitManager.startCall(data, fromPushKit: fromPushKit)
+        StreamVideoCallkitManager.shared.startCall(data, fromPushKit: fromPushKit)
     }
 
     @objc public static func showIncomingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        sharedInstance.callKitManager.showIncomingCall(
+        StreamVideoCallkitManager.shared.showIncomingCall(
             data, fromPushKit: fromPushKit)
     }
 
     @objc public static func activeCalls() -> [[String: Any]]? {
-        sharedInstance.callKitManager.activeCalls()
+        return StreamVideoCallkitManager.shared.activeCalls()
     }
 
     @objc public func setDevicePushTokenVoIP(deviceToken: String) {
-        persistentState.set(deviceToken, forKey: devicePushTokenVoIP)
+        persistentState.set(deviceToken, forKey: Self.devicePushTokenVoIPKey)
     }
 
     @objc public func getDevicePushTokenVoIP() -> String {
-        return persistentState.string(forKey: devicePushTokenVoIP) ?? ""
+        return persistentState.string(forKey: Self.devicePushTokenVoIPKey) ?? ""
     }
 }
 
