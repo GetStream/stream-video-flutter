@@ -1,3 +1,10 @@
+## Upcoming
+
+### 🐞 Fixed
+* [Android] Improved screen sharing foreground service reliability:
+  - Added proper synchronization to ensure the foreground service is fully started before initiating media projection.
+  - `startScreenSharingNotificationService` now returns a boolean indicating success/failure, preventing screen share attempts when the service fails to start.
+
 ## 1.2.0
 
 ### ✅ Added
