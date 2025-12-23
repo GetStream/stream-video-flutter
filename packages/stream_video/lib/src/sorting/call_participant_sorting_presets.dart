@@ -37,4 +37,16 @@ mixin CallParticipantSortingPresets {
       byRole(['admin', 'host', 'speaker']),
     ],
   );
+
+  /// The sorting preset for PiP layout.
+  /// For picture in picture we don't rely on visibility as it's a separate view not related to the main one.
+  static final pictureInPicture = combineComparators<CallParticipantState>([
+    pinned,
+    screenSharing,
+    dominantSpeaker,
+    speaking,
+    byVideoIngressSource(),
+    publishingVideo,
+    publishingAudio,
+  ]);
 }

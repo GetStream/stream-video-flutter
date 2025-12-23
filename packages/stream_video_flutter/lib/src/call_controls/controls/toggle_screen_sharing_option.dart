@@ -91,8 +91,12 @@ class ToggleScreenShareOption extends StatelessWidget {
               return;
             }
 
-            await StreamBackgroundService()
+            final serviceStarted = await StreamBackgroundService()
                 .startScreenSharingNotificationService(call);
+
+            if (!serviceStarted) {
+              return;
+            }
           } else {
             await StreamBackgroundService()
                 .stopScreenSharingNotificationService(
