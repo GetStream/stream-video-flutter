@@ -6,9 +6,10 @@ import UIKit
 @available(iOS 10.0, *)
 public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
-    @objc public private(set) static var sharedInstance: StreamVideoCallkitManager!
+    @objc public static let shared = StreamVideoCallkitManager()
 
-    private var eventHandler: EventCallbackHandler
+    private var eventHandler: EventCallbackHandler?
+    private var pendingEvents: [(event: String, body: [String: Any?]?)] = []
 
     private var callController: StreamCallKitCallController
 
@@ -21,25 +22,44 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     private var isFromPushKit: Bool = false
     private var silenceEvents: Bool = false
 
-    public init(
-        eventHandler: EventCallbackHandler
-    ) {
-        self.eventHandler = eventHandler
+    private override init() {
         callController = StreamCallKitCallController()
+        super.init()
+    }
+
+    public func setEventHandler(_ handler: EventCallbackHandler) {
+        self.eventHandler = handler
+        flushPendingEvents()
+    }
+
+    private func flushPendingEvents() {
+        guard let eventHandler = eventHandler else { return }
+
+        for pendingEvent in pendingEvents {
+            eventHandler.send(pendingEvent.event, pendingEvent.body ?? [:])
+        }
+
+        pendingEvents.removeAll()
     }
 
     private func sendEvent(_ event: String, _ body: [String: Any?]?) {
         if silenceEvents {
             print(event, " silenced")
             return
-        } else {
-            eventHandler.send(event, body ?? [:])
         }
 
+        guard let eventHandler = eventHandler else {
+            pendingEvents.append((event: event, body: body))
+            return
+        }
+
+        eventHandler.send(event, body ?? [:])
     }
 
     @objc public func sendEventCustom(_ event: String, body: NSDictionary?) {
-        eventHandler.send(event, body ?? [:])
+        // Convert NSDictionary to [String: Any?] for queueing if needed
+        let bodyDict = body as? [String: Any?]
+        sendEvent(event, bodyDict)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
