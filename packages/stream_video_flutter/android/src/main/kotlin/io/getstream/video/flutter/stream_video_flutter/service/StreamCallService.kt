@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
 import io.getstream.video.flutter.stream_video_flutter.service.notification.StreamNotificationBuilder
@@ -177,14 +178,11 @@ open class StreamCallService : Service() {
     }
 
     private fun getPayloadFromIntent(intent: Intent): NotificationPayload? {
-        @Suppress("DEPRECATION")
-        val payload = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("notificationPayload", NotificationPayload::class.java)
-        } else {
-            intent.getParcelableExtra("notificationPayload")
-        }
-
-        return payload
+        return IntentCompat.getParcelableExtra(
+            intent,
+            "notificationPayload",
+            NotificationPayload::class.java
+        )
     }
 
     private fun startNewCall(callCid: String, payload: NotificationPayload, startId: Int) {

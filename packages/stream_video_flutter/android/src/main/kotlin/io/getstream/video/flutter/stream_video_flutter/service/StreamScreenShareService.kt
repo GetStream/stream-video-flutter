@@ -4,8 +4,8 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
+import androidx.core.content.IntentCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.R
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
@@ -107,12 +107,11 @@ internal class StreamScreenShareService : Service() {
     }
 
     private fun getPayloadFromIntent(intent: Intent): NotificationPayload? {
-        @Suppress("DEPRECATION")
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("notificationPayload", NotificationPayload::class.java)
-        } else {
-            intent.getParcelableExtra("notificationPayload")
-        }
+        return IntentCompat.getParcelableExtra(
+            intent,
+            "notificationPayload",
+            NotificationPayload::class.java
+        )
     }
 
     private fun startNewScreenShare(callCid: String, payload: NotificationPayload, startId: Int) {
