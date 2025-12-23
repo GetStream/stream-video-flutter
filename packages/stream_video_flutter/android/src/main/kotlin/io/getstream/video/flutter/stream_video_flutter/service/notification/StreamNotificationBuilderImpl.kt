@@ -97,21 +97,13 @@ internal class StreamNotificationBuilderImpl(
             PendingIntent.FLAG_UPDATE_CURRENT
         }
 
-        val contentIntent = if(type == ServiceType.call) {
-            PendingIntent.getActivity(
-                    context,
-                    0,
-                    intent,
-                    flags,
-            )
-        } else {
-            PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE,
-            )
-        }
+        // Both call and screen share notifications should open the app when tapped
+        val contentIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            flags,
+        )
 
         val channelId = getNotificationChannelId()
 
