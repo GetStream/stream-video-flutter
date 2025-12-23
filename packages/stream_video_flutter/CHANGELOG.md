@@ -1,4 +1,4 @@
-## Upcoming
+## 1.2.1
 
 ### ✅ Added
 * Added default sorting preset for Picture-in-Picture mode to prioritize the most relevant participant.

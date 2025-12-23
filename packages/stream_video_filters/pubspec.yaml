@@ -1,7 +1,7 @@
 name: stream_video_filters
 description: The Official package for Stream Video, providing video filters
   feature for video calls.
-version: 1.2.0
+version: 1.2.1
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
-  stream_video: ^1.2.0
+  stream_video: ^1.2.1
   stream_webrtc_flutter: ^2.2.3
 
 dev_dependencies:

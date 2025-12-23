@@ -1,4 +1,4 @@
-## Upcoming
+## 1.2.1
 
 🐞 Fixed
 * [iOS/macOS] Fixed crash when VoIP push is received before Flutter fully initializes from the terminated state.
