@@ -317,8 +317,9 @@ class StreamBackgroundService {
     }
   }
 
-  // Screen sharing methods
-  Future<void> startScreenSharingNotificationService(Call call) async {
+  /// Starts the screen sharing notification service.
+  /// Returns true if the service was started successfully, false otherwise.
+  Future<bool> startScreenSharingNotificationService(Call call) async {
     final callCid = call.callCid.value;
 
     _logger.d(
@@ -348,18 +349,29 @@ class StreamBackgroundService {
             '<$callCid> [startScreenSharingNotificationService] Failed to start screen sharing service $e.',
       );
 
-      return;
+      return false;
     }
 
     // Wait for the foreground service to be fully ready.
     // Android requires FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION to be running
     // before screen sharing can be started.
     if (CurrentPlatform.isAndroid) {
-      await _waitForScreenShareServiceReady(callCid);
+      final isReady = await _waitForScreenShareServiceReady(callCid);
+      if (!isReady) {
+        _logger.e(
+          () =>
+              '<$callCid> [startScreenSharingNotificationService] Service failed to start.',
+        );
+        return false;
+      }
     }
+
+    return true;
   }
 
-  Future<void> _waitForScreenShareServiceReady(String callCid) async {
+  /// Waits for the screen share service to be ready.
+  /// Returns true if ready, false if timeout.
+  Future<bool> _waitForScreenShareServiceReady(String callCid) async {
     const timeout = Duration(seconds: 3);
     const interval = Duration(milliseconds: 50);
     final stopwatch = Stopwatch()..start();
@@ -375,7 +387,8 @@ class StreamBackgroundService {
           () =>
               '<$callCid> [_waitForScreenShareServiceReady] Screen sharing service ready after ${stopwatch.elapsedMilliseconds}ms',
         );
-        return;
+
+        return true;
       }
 
       await Future<void>.delayed(interval);
@@ -385,6 +398,8 @@ class StreamBackgroundService {
       () =>
           '<$callCid> [_waitForScreenShareServiceReady] Timeout waiting for service to be ready',
     );
+
+    return false;
   }
 
   Future<void> stopScreenSharingNotificationService(String callCid) async {
