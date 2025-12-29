@@ -116,20 +116,33 @@ class StreamBackgroundService {
     StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed((
       String callCid,
     ) async {
-      final context = _instance._managedCalls[callCid];
-      if (context == null) {
-        _instance._logger.w(
+      // When the platform UI layer is destroyed (Activity destroyed on Android),
+      // we need to leave all active calls to properly close WebSocket/WebRTC connections.
+      // This is called when the app is swiped from recents or the Activity is destroyed.
+
+      if (callCid.isEmpty) {
+        // No specific callCid provided - leave ALL managed calls
+        _instance._logger.i(
           () =>
-              '<$callCid> [onPlatformUiLayerDestroyed] no managed call for callCid',
+              '[onPlatformUiLayerDestroyed] UI layer destroyed, leaving all ${_instance._managedCalls.length} active calls',
         );
+
+        final callContexts = _instance._managedCalls.values.toList();
+        for (final callContext in callContexts) {
+          try {
+            await onPlatformUiLayerDestroyed?.call(callContext.call);
+            if (onPlatformUiLayerDestroyed == null) {
+              await callContext.call.leave();
+            }
+          } catch (e) {
+            _instance._logger.e(
+              () =>
+                  '<${callContext.call.callCid.value}> [onPlatformUiLayerDestroyed] failed to leave: $e',
+            );
+          }
+        }
         return;
       }
-
-      _instance._logger.d(
-        () =>
-            '<$callCid> [onPlatformUiLayerDestroyed] handling UI layer destroyed',
-      );
-      await onPlatformUiLayerDestroyed?.call(context.call);
     });
 
     _subscriptions.cancelAll();
