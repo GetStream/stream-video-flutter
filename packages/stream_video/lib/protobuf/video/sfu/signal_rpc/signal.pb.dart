@@ -8,7 +8,7 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
 
 import 'dart:async' as $async;
 import 'dart:core' as $core;
@@ -62,8 +62,6 @@ class StartNoiseCancellationRequest extends $pb.GeneratedMessage {
       StartNoiseCancellationRequest._();
   @$core.override
   StartNoiseCancellationRequest createEmptyInstance() => create();
-  static $pb.PbList<StartNoiseCancellationRequest> createRepeated() =>
-      $pb.PbList<StartNoiseCancellationRequest>();
   @$core.pragma('dart2js:noInline')
   static StartNoiseCancellationRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<StartNoiseCancellationRequest>(create);
@@ -123,8 +121,6 @@ class StartNoiseCancellationResponse extends $pb.GeneratedMessage {
       StartNoiseCancellationResponse._();
   @$core.override
   StartNoiseCancellationResponse createEmptyInstance() => create();
-  static $pb.PbList<StartNoiseCancellationResponse> createRepeated() =>
-      $pb.PbList<StartNoiseCancellationResponse>();
   @$core.pragma('dart2js:noInline')
   static StartNoiseCancellationResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<StartNoiseCancellationResponse>(create);
@@ -185,8 +181,6 @@ class StopNoiseCancellationRequest extends $pb.GeneratedMessage {
       StopNoiseCancellationRequest._();
   @$core.override
   StopNoiseCancellationRequest createEmptyInstance() => create();
-  static $pb.PbList<StopNoiseCancellationRequest> createRepeated() =>
-      $pb.PbList<StopNoiseCancellationRequest>();
   @$core.pragma('dart2js:noInline')
   static StopNoiseCancellationRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<StopNoiseCancellationRequest>(create);
@@ -246,8 +240,6 @@ class StopNoiseCancellationResponse extends $pb.GeneratedMessage {
       StopNoiseCancellationResponse._();
   @$core.override
   StopNoiseCancellationResponse createEmptyInstance() => create();
-  static $pb.PbList<StopNoiseCancellationResponse> createRepeated() =>
-      $pb.PbList<StopNoiseCancellationResponse>();
   @$core.pragma('dart2js:noInline')
   static StopNoiseCancellationResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<StopNoiseCancellationResponse>(create);
@@ -309,8 +301,6 @@ class Reconnection extends $pb.GeneratedMessage {
   static Reconnection create() => Reconnection._();
   @$core.override
   Reconnection createEmptyInstance() => create();
-  static $pb.PbList<Reconnection> createRepeated() =>
-      $pb.PbList<Reconnection>();
   @$core.pragma('dart2js:noInline')
   static Reconnection getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<Reconnection>(create);
@@ -388,7 +378,6 @@ class Telemetry extends $pb.GeneratedMessage {
   static Telemetry create() => Telemetry._();
   @$core.override
   Telemetry createEmptyInstance() => create();
-  static $pb.PbList<Telemetry> createRepeated() => $pb.PbList<Telemetry>();
   @$core.pragma('dart2js:noInline')
   static Telemetry getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Telemetry>(create);
@@ -420,6 +409,140 @@ class Telemetry extends $pb.GeneratedMessage {
   void clearReconnection() => $_clearField(2);
   @$pb.TagNumber(2)
   Reconnection ensureReconnection() => $_ensure(1);
+}
+
+class SendMetricsRequest extends $pb.GeneratedMessage {
+  factory SendMetricsRequest({
+    $core.String? sessionId,
+    $core.String? unifiedSessionId,
+    $core.Iterable<$0.InboundRtp>? inbounds,
+    $core.Iterable<$0.OutboundRtp>? outbounds,
+    $core.Iterable<$0.RemoteInboundRtp>? remoteInbounds,
+    $core.Iterable<$0.RemoteOutboundRtp>? remoteOutbounds,
+  }) {
+    final result = create();
+    if (sessionId != null) result.sessionId = sessionId;
+    if (unifiedSessionId != null) result.unifiedSessionId = unifiedSessionId;
+    if (inbounds != null) result.inbounds.addAll(inbounds);
+    if (outbounds != null) result.outbounds.addAll(outbounds);
+    if (remoteInbounds != null) result.remoteInbounds.addAll(remoteInbounds);
+    if (remoteOutbounds != null) result.remoteOutbounds.addAll(remoteOutbounds);
+    return result;
+  }
+
+  SendMetricsRequest._();
+
+  factory SendMetricsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SendMetricsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SendMetricsRequest',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.signal'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'sessionId')
+    ..aOS(2, _omitFieldNames ? '' : 'unifiedSessionId')
+    ..pPM<$0.InboundRtp>(3, _omitFieldNames ? '' : 'inbounds',
+        subBuilder: $0.InboundRtp.create)
+    ..pPM<$0.OutboundRtp>(4, _omitFieldNames ? '' : 'outbounds',
+        subBuilder: $0.OutboundRtp.create)
+    ..pPM<$0.RemoteInboundRtp>(5, _omitFieldNames ? '' : 'remoteInbounds',
+        subBuilder: $0.RemoteInboundRtp.create)
+    ..pPM<$0.RemoteOutboundRtp>(6, _omitFieldNames ? '' : 'remoteOutbounds',
+        subBuilder: $0.RemoteOutboundRtp.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SendMetricsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SendMetricsRequest copyWith(void Function(SendMetricsRequest) updates) =>
+      super.copyWith((message) => updates(message as SendMetricsRequest))
+          as SendMetricsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SendMetricsRequest create() => SendMetricsRequest._();
+  @$core.override
+  SendMetricsRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SendMetricsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SendMetricsRequest>(create);
+  static SendMetricsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get sessionId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set sessionId($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSessionId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSessionId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get unifiedSessionId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set unifiedSessionId($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasUnifiedSessionId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUnifiedSessionId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$0.InboundRtp> get inbounds => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $pb.PbList<$0.OutboundRtp> get outbounds => $_getList(3);
+
+  @$pb.TagNumber(5)
+  $pb.PbList<$0.RemoteInboundRtp> get remoteInbounds => $_getList(4);
+
+  @$pb.TagNumber(6)
+  $pb.PbList<$0.RemoteOutboundRtp> get remoteOutbounds => $_getList(5);
+}
+
+class SendMetricsResponse extends $pb.GeneratedMessage {
+  factory SendMetricsResponse() => create();
+
+  SendMetricsResponse._();
+
+  factory SendMetricsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SendMetricsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SendMetricsResponse',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.signal'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SendMetricsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SendMetricsResponse copyWith(void Function(SendMetricsResponse) updates) =>
+      super.copyWith((message) => updates(message as SendMetricsResponse))
+          as SendMetricsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SendMetricsResponse create() => SendMetricsResponse._();
+  @$core.override
+  SendMetricsResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SendMetricsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SendMetricsResponse>(create);
+  static SendMetricsResponse? _defaultInstance;
 }
 
 enum SendStatsRequest_DeviceState { android, apple, notSet }
@@ -533,8 +656,6 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   static SendStatsRequest create() => SendStatsRequest._();
   @$core.override
   SendStatsRequest createEmptyInstance() => create();
-  static $pb.PbList<SendStatsRequest> createRepeated() =>
-      $pb.PbList<SendStatsRequest>();
   @$core.pragma('dart2js:noInline')
   static SendStatsRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SendStatsRequest>(create);
@@ -765,8 +886,6 @@ class SendStatsResponse extends $pb.GeneratedMessage {
   static SendStatsResponse create() => SendStatsResponse._();
   @$core.override
   SendStatsResponse createEmptyInstance() => create();
-  static $pb.PbList<SendStatsResponse> createRepeated() =>
-      $pb.PbList<SendStatsResponse>();
   @$core.pragma('dart2js:noInline')
   static SendStatsResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SendStatsResponse>(create);
@@ -828,8 +947,6 @@ class ICERestartRequest extends $pb.GeneratedMessage {
   static ICERestartRequest create() => ICERestartRequest._();
   @$core.override
   ICERestartRequest createEmptyInstance() => create();
-  static $pb.PbList<ICERestartRequest> createRepeated() =>
-      $pb.PbList<ICERestartRequest>();
   @$core.pragma('dart2js:noInline')
   static ICERestartRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ICERestartRequest>(create);
@@ -895,8 +1012,6 @@ class ICERestartResponse extends $pb.GeneratedMessage {
   static ICERestartResponse create() => ICERestartResponse._();
   @$core.override
   ICERestartResponse createEmptyInstance() => create();
-  static $pb.PbList<ICERestartResponse> createRepeated() =>
-      $pb.PbList<ICERestartResponse>();
   @$core.pragma('dart2js:noInline')
   static ICERestartResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ICERestartResponse>(create);
@@ -959,8 +1074,6 @@ class UpdateMuteStatesRequest extends $pb.GeneratedMessage {
   static UpdateMuteStatesRequest create() => UpdateMuteStatesRequest._();
   @$core.override
   UpdateMuteStatesRequest createEmptyInstance() => create();
-  static $pb.PbList<UpdateMuteStatesRequest> createRepeated() =>
-      $pb.PbList<UpdateMuteStatesRequest>();
   @$core.pragma('dart2js:noInline')
   static UpdateMuteStatesRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<UpdateMuteStatesRequest>(create);
@@ -1021,8 +1134,6 @@ class UpdateMuteStatesResponse extends $pb.GeneratedMessage {
   static UpdateMuteStatesResponse create() => UpdateMuteStatesResponse._();
   @$core.override
   UpdateMuteStatesResponse createEmptyInstance() => create();
-  static $pb.PbList<UpdateMuteStatesResponse> createRepeated() =>
-      $pb.PbList<UpdateMuteStatesResponse>();
   @$core.pragma('dart2js:noInline')
   static UpdateMuteStatesResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<UpdateMuteStatesResponse>(create);
@@ -1084,8 +1195,6 @@ class TrackMuteState extends $pb.GeneratedMessage {
   static TrackMuteState create() => TrackMuteState._();
   @$core.override
   TrackMuteState createEmptyInstance() => create();
-  static $pb.PbList<TrackMuteState> createRepeated() =>
-      $pb.PbList<TrackMuteState>();
   @$core.pragma('dart2js:noInline')
   static TrackMuteState getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<TrackMuteState>(create);
@@ -1150,8 +1259,6 @@ class AudioMuteChanged extends $pb.GeneratedMessage {
   static AudioMuteChanged create() => AudioMuteChanged._();
   @$core.override
   AudioMuteChanged createEmptyInstance() => create();
-  static $pb.PbList<AudioMuteChanged> createRepeated() =>
-      $pb.PbList<AudioMuteChanged>();
   @$core.pragma('dart2js:noInline')
   static AudioMuteChanged getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<AudioMuteChanged>(create);
@@ -1207,8 +1314,6 @@ class VideoMuteChanged extends $pb.GeneratedMessage {
   static VideoMuteChanged create() => VideoMuteChanged._();
   @$core.override
   VideoMuteChanged createEmptyInstance() => create();
-  static $pb.PbList<VideoMuteChanged> createRepeated() =>
-      $pb.PbList<VideoMuteChanged>();
   @$core.pragma('dart2js:noInline')
   static VideoMuteChanged getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<VideoMuteChanged>(create);
@@ -1270,8 +1375,6 @@ class UpdateSubscriptionsRequest extends $pb.GeneratedMessage {
   static UpdateSubscriptionsRequest create() => UpdateSubscriptionsRequest._();
   @$core.override
   UpdateSubscriptionsRequest createEmptyInstance() => create();
-  static $pb.PbList<UpdateSubscriptionsRequest> createRepeated() =>
-      $pb.PbList<UpdateSubscriptionsRequest>();
   @$core.pragma('dart2js:noInline')
   static UpdateSubscriptionsRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<UpdateSubscriptionsRequest>(create);
@@ -1334,8 +1437,6 @@ class UpdateSubscriptionsResponse extends $pb.GeneratedMessage {
       UpdateSubscriptionsResponse._();
   @$core.override
   UpdateSubscriptionsResponse createEmptyInstance() => create();
-  static $pb.PbList<UpdateSubscriptionsResponse> createRepeated() =>
-      $pb.PbList<UpdateSubscriptionsResponse>();
   @$core.pragma('dart2js:noInline')
   static UpdateSubscriptionsResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<UpdateSubscriptionsResponse>(create);
@@ -1405,8 +1506,6 @@ class TrackSubscriptionDetails extends $pb.GeneratedMessage {
   static TrackSubscriptionDetails create() => TrackSubscriptionDetails._();
   @$core.override
   TrackSubscriptionDetails createEmptyInstance() => create();
-  static $pb.PbList<TrackSubscriptionDetails> createRepeated() =>
-      $pb.PbList<TrackSubscriptionDetails>();
   @$core.pragma('dart2js:noInline')
   static TrackSubscriptionDetails getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<TrackSubscriptionDetails>(create);
@@ -1498,8 +1597,6 @@ class SendAnswerRequest extends $pb.GeneratedMessage {
   static SendAnswerRequest create() => SendAnswerRequest._();
   @$core.override
   SendAnswerRequest createEmptyInstance() => create();
-  static $pb.PbList<SendAnswerRequest> createRepeated() =>
-      $pb.PbList<SendAnswerRequest>();
   @$core.pragma('dart2js:noInline')
   static SendAnswerRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SendAnswerRequest>(create);
@@ -1574,8 +1671,6 @@ class SendAnswerResponse extends $pb.GeneratedMessage {
   static SendAnswerResponse create() => SendAnswerResponse._();
   @$core.override
   SendAnswerResponse createEmptyInstance() => create();
-  static $pb.PbList<SendAnswerResponse> createRepeated() =>
-      $pb.PbList<SendAnswerResponse>();
   @$core.pragma('dart2js:noInline')
   static SendAnswerResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SendAnswerResponse>(create);
@@ -1634,8 +1729,6 @@ class ICETrickleResponse extends $pb.GeneratedMessage {
   static ICETrickleResponse create() => ICETrickleResponse._();
   @$core.override
   ICETrickleResponse createEmptyInstance() => create();
-  static $pb.PbList<ICETrickleResponse> createRepeated() =>
-      $pb.PbList<ICETrickleResponse>();
   @$core.pragma('dart2js:noInline')
   static ICETrickleResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ICETrickleResponse>(create);
@@ -1700,8 +1793,6 @@ class SetPublisherRequest extends $pb.GeneratedMessage {
   static SetPublisherRequest create() => SetPublisherRequest._();
   @$core.override
   SetPublisherRequest createEmptyInstance() => create();
-  static $pb.PbList<SetPublisherRequest> createRepeated() =>
-      $pb.PbList<SetPublisherRequest>();
   @$core.pragma('dart2js:noInline')
   static SetPublisherRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SetPublisherRequest>(create);
@@ -1780,8 +1871,6 @@ class SetPublisherResponse extends $pb.GeneratedMessage {
   static SetPublisherResponse create() => SetPublisherResponse._();
   @$core.override
   SetPublisherResponse createEmptyInstance() => create();
-  static $pb.PbList<SetPublisherResponse> createRepeated() =>
-      $pb.PbList<SetPublisherResponse>();
   @$core.pragma('dart2js:noInline')
   static SetPublisherResponse getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SetPublisherResponse>(create);
@@ -1868,6 +1957,10 @@ class SignalServerApi {
           $pb.ClientContext? ctx, SendStatsRequest request) =>
       _client.invoke<SendStatsResponse>(
           ctx, 'SignalServer', 'SendStats', request, SendStatsResponse());
+  $async.Future<SendMetricsResponse> sendMetrics(
+          $pb.ClientContext? ctx, SendMetricsRequest request) =>
+      _client.invoke<SendMetricsResponse>(
+          ctx, 'SignalServer', 'SendMetrics', request, SendMetricsResponse());
   $async.Future<StartNoiseCancellationResponse> startNoiseCancellation(
           $pb.ClientContext? ctx, StartNoiseCancellationRequest request) =>
       _client.invoke<StartNoiseCancellationResponse>(ctx, 'SignalServer',

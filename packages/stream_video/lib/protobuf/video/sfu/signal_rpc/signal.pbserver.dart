@@ -8,7 +8,7 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
 
 import 'dart:async' as $async;
 import 'dart:core' as $core;
@@ -36,6 +36,8 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $1.ICERestartRequest request);
   $async.Future<$1.SendStatsResponse> sendStats(
       $pb.ServerContext ctx, $1.SendStatsRequest request);
+  $async.Future<$1.SendMetricsResponse> sendMetrics(
+      $pb.ServerContext ctx, $1.SendMetricsRequest request);
   $async.Future<$1.StartNoiseCancellationResponse> startNoiseCancellation(
       $pb.ServerContext ctx, $1.StartNoiseCancellationRequest request);
   $async.Future<$1.StopNoiseCancellationResponse> stopNoiseCancellation(
@@ -57,6 +59,8 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
         return $1.ICERestartRequest();
       case 'SendStats':
         return $1.SendStatsRequest();
+      case 'SendMetrics':
+        return $1.SendMetricsRequest();
       case 'StartNoiseCancellation':
         return $1.StartNoiseCancellationRequest();
       case 'StopNoiseCancellation':
@@ -84,6 +88,8 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
         return iceRestart(ctx, request as $1.ICERestartRequest);
       case 'SendStats':
         return sendStats(ctx, request as $1.SendStatsRequest);
+      case 'SendMetrics':
+        return sendMetrics(ctx, request as $1.SendMetricsRequest);
       case 'StartNoiseCancellation':
         return startNoiseCancellation(
             ctx, request as $1.StartNoiseCancellationRequest);

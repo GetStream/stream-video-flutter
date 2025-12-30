@@ -13,7 +13,7 @@ environment:
 
 dependencies:
   cupertino_icons: ^1.0.5
-  device_info_plus: ^12.1.0
+  device_info_plus: ^12.3.0
   envied: ^1.2.1
   firebase_core: ^4.1.0
   firebase_messaging: ^16.0.1
@@ -22,7 +22,7 @@ dependencies:
   flutter_local_notifications: ^17.2.1
   flutter_svg: ^2.0.7
   google_fonts: ^5.1.0
-  http: ^1.1.0
+  http: ^1.6.0
   intl: ^0.20.0
   path_provider: ^2.1.0
   rxdart: ^0.28.0

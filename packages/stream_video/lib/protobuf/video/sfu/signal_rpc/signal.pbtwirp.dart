@@ -39,6 +39,11 @@ abstract class SignalServer {
 
   Future<SendStatsResponse> sendStats(twirp.Context ctx, SendStatsRequest req);
 
+  Future<SendMetricsResponse> sendMetrics(
+    twirp.Context ctx,
+    SendMetricsRequest req,
+  );
+
   Future<StartNoiseCancellationResponse> startNoiseCancellation(
     twirp.Context ctx,
     StartNoiseCancellationRequest req,
@@ -278,6 +283,36 @@ class SignalServerJSONClient implements SignalServer {
       );
       final data = await doJSONRequest(ctx, url, hooks, req);
       final SendStatsResponse res = SendStatsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<SendMetricsResponse> sendMetrics(
+    twirp.Context ctx,
+    SendMetricsRequest req,
+  ) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'SendMetrics');
+    return interceptor((ctx, req) {
+      return callSendMetrics(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<SendMetricsResponse> callSendMetrics(
+    twirp.Context ctx,
+    SendMetricsRequest req,
+  ) async {
+    try {
+      Uri url = Uri.parse(
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendMetrics',
+      );
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final SendMetricsResponse res = SendMetricsResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -580,6 +615,36 @@ class SignalServerProtobufClient implements SignalServer {
       );
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final SendStatsResponse res = SendStatsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<SendMetricsResponse> sendMetrics(
+    twirp.Context ctx,
+    SendMetricsRequest req,
+  ) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'SendMetrics');
+    return interceptor((ctx, req) {
+      return callSendMetrics(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<SendMetricsResponse> callSendMetrics(
+    twirp.Context ctx,
+    SendMetricsRequest req,
+  ) async {
+    try {
+      Uri url = Uri.parse(
+        baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendMetrics',
+      );
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final SendMetricsResponse res = SendMetricsResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

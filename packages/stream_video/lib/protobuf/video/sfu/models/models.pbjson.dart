@@ -8,7 +8,8 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -311,13 +312,15 @@ const ClientCapability$json = {
   '2': [
     {'1': 'CLIENT_CAPABILITY_UNSPECIFIED', '2': 0},
     {'1': 'CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE', '2': 1},
+    {'1': 'CLIENT_CAPABILITY_COORDINATOR_STATS', '2': 2},
   ],
 };
 
 /// Descriptor for `ClientCapability`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List clientCapabilityDescriptor = $convert.base64Decode(
     'ChBDbGllbnRDYXBhYmlsaXR5EiEKHUNMSUVOVF9DQVBBQklMSVRZX1VOU1BFQ0lGSUVEEAASLA'
-    'ooQ0xJRU5UX0NBUEFCSUxJVFlfU1VCU0NSSUJFUl9WSURFT19QQVVTRRAB');
+    'ooQ0xJRU5UX0NBUEFCSUxJVFlfU1VCU0NSSUJFUl9WSURFT19QQVVTRRABEicKI0NMSUVOVF9D'
+    'QVBBQklMSVRZX0NPT1JESU5BVE9SX1NUQVRTEAI=');
 
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = {
@@ -1112,3 +1115,163 @@ final $typed_data.Uint8List performanceStatsDescriptor = $convert.base64Decode(
     'IOYXZnRnJhbWVUaW1lTXMSFwoHYXZnX2ZwcxgEIAEoAlIGYXZnRnBzElAKD3ZpZGVvX2RpbWVu'
     'c2lvbhgFIAEoCzInLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvRGltZW5zaW9uUg52aW'
     'Rlb0RpbWVuc2lvbhIlCg50YXJnZXRfYml0cmF0ZRgGIAEoBVINdGFyZ2V0Qml0cmF0ZQ==');
+
+@$core.Deprecated('Use rtpBaseDescriptor instead')
+const RtpBase$json = {
+  '1': 'RtpBase',
+  '2': [
+    {'1': 'ssrc', '3': 1, '4': 1, '5': 13, '10': 'ssrc'},
+    {'1': 'kind', '3': 2, '4': 1, '5': 9, '10': 'kind'},
+    {'1': 'timestamp_ms', '3': 3, '4': 1, '5': 1, '10': 'timestampMs'},
+  ],
+};
+
+/// Descriptor for `RtpBase`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rtpBaseDescriptor = $convert.base64Decode(
+    'CgdSdHBCYXNlEhIKBHNzcmMYASABKA1SBHNzcmMSEgoEa2luZBgCIAEoCVIEa2luZBIhCgx0aW'
+    '1lc3RhbXBfbXMYAyABKAFSC3RpbWVzdGFtcE1z');
+
+@$core.Deprecated('Use inboundRtpDescriptor instead')
+const InboundRtp$json = {
+  '1': 'InboundRtp',
+  '2': [
+    {
+      '1': 'base',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RtpBase',
+      '10': 'base'
+    },
+    {'1': 'jitter_seconds', '3': 2, '4': 1, '5': 1, '10': 'jitterSeconds'},
+    {'1': 'packets_received', '3': 3, '4': 1, '5': 4, '10': 'packetsReceived'},
+    {'1': 'packets_lost', '3': 4, '4': 1, '5': 4, '10': 'packetsLost'},
+    {
+      '1': 'packet_loss_percent',
+      '3': 5,
+      '4': 1,
+      '5': 1,
+      '10': 'packetLossPercent'
+    },
+    {
+      '1': 'concealment_events',
+      '3': 10,
+      '4': 1,
+      '5': 13,
+      '10': 'concealmentEvents'
+    },
+    {
+      '1': 'concealment_percent',
+      '3': 11,
+      '4': 1,
+      '5': 1,
+      '10': 'concealmentPercent'
+    },
+    {'1': 'fps', '3': 20, '4': 1, '5': 1, '10': 'fps'},
+    {
+      '1': 'freeze_duration_seconds',
+      '3': 21,
+      '4': 1,
+      '5': 1,
+      '10': 'freezeDurationSeconds'
+    },
+    {
+      '1': 'avg_decode_time_seconds',
+      '3': 22,
+      '4': 1,
+      '5': 1,
+      '10': 'avgDecodeTimeSeconds'
+    },
+    {'1': 'min_dimension_px', '3': 23, '4': 1, '5': 13, '10': 'minDimensionPx'},
+  ],
+};
+
+/// Descriptor for `InboundRtp`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List inboundRtpDescriptor = $convert.base64Decode(
+    'CgpJbmJvdW5kUnRwEjQKBGJhc2UYASABKAsyIC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5SdH'
+    'BCYXNlUgRiYXNlEiUKDmppdHRlcl9zZWNvbmRzGAIgASgBUg1qaXR0ZXJTZWNvbmRzEikKEHBh'
+    'Y2tldHNfcmVjZWl2ZWQYAyABKARSD3BhY2tldHNSZWNlaXZlZBIhCgxwYWNrZXRzX2xvc3QYBC'
+    'ABKARSC3BhY2tldHNMb3N0Ei4KE3BhY2tldF9sb3NzX3BlcmNlbnQYBSABKAFSEXBhY2tldExv'
+    'c3NQZXJjZW50Ei0KEmNvbmNlYWxtZW50X2V2ZW50cxgKIAEoDVIRY29uY2VhbG1lbnRFdmVudH'
+    'MSLwoTY29uY2VhbG1lbnRfcGVyY2VudBgLIAEoAVISY29uY2VhbG1lbnRQZXJjZW50EhAKA2Zw'
+    'cxgUIAEoAVIDZnBzEjYKF2ZyZWV6ZV9kdXJhdGlvbl9zZWNvbmRzGBUgASgBUhVmcmVlemVEdX'
+    'JhdGlvblNlY29uZHMSNQoXYXZnX2RlY29kZV90aW1lX3NlY29uZHMYFiABKAFSFGF2Z0RlY29k'
+    'ZVRpbWVTZWNvbmRzEigKEG1pbl9kaW1lbnNpb25fcHgYFyABKA1SDm1pbkRpbWVuc2lvblB4');
+
+@$core.Deprecated('Use outboundRtpDescriptor instead')
+const OutboundRtp$json = {
+  '1': 'OutboundRtp',
+  '2': [
+    {
+      '1': 'base',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RtpBase',
+      '10': 'base'
+    },
+    {'1': 'fps', '3': 10, '4': 1, '5': 1, '10': 'fps'},
+    {
+      '1': 'avg_encode_time_seconds',
+      '3': 11,
+      '4': 1,
+      '5': 1,
+      '10': 'avgEncodeTimeSeconds'
+    },
+    {'1': 'bitrate_bps', '3': 12, '4': 1, '5': 1, '10': 'bitrateBps'},
+    {'1': 'min_dimension_px', '3': 13, '4': 1, '5': 13, '10': 'minDimensionPx'},
+  ],
+};
+
+/// Descriptor for `OutboundRtp`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List outboundRtpDescriptor = $convert.base64Decode(
+    'CgtPdXRib3VuZFJ0cBI0CgRiYXNlGAEgASgLMiAuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUn'
+    'RwQmFzZVIEYmFzZRIQCgNmcHMYCiABKAFSA2ZwcxI1ChdhdmdfZW5jb2RlX3RpbWVfc2Vjb25k'
+    'cxgLIAEoAVIUYXZnRW5jb2RlVGltZVNlY29uZHMSHwoLYml0cmF0ZV9icHMYDCABKAFSCmJpdH'
+    'JhdGVCcHMSKAoQbWluX2RpbWVuc2lvbl9weBgNIAEoDVIObWluRGltZW5zaW9uUHg=');
+
+@$core.Deprecated('Use remoteInboundRtpDescriptor instead')
+const RemoteInboundRtp$json = {
+  '1': 'RemoteInboundRtp',
+  '2': [
+    {
+      '1': 'base',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RtpBase',
+      '10': 'base'
+    },
+    {'1': 'jitter_seconds', '3': 2, '4': 1, '5': 1, '10': 'jitterSeconds'},
+    {'1': 'round_trip_time_s', '3': 3, '4': 1, '5': 1, '10': 'roundTripTimeS'},
+  ],
+};
+
+/// Descriptor for `RemoteInboundRtp`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List remoteInboundRtpDescriptor = $convert.base64Decode(
+    'ChBSZW1vdGVJbmJvdW5kUnRwEjQKBGJhc2UYASABKAsyIC5zdHJlYW0udmlkZW8uc2Z1Lm1vZG'
+    'Vscy5SdHBCYXNlUgRiYXNlEiUKDmppdHRlcl9zZWNvbmRzGAIgASgBUg1qaXR0ZXJTZWNvbmRz'
+    'EikKEXJvdW5kX3RyaXBfdGltZV9zGAMgASgBUg5yb3VuZFRyaXBUaW1lUw==');
+
+@$core.Deprecated('Use remoteOutboundRtpDescriptor instead')
+const RemoteOutboundRtp$json = {
+  '1': 'RemoteOutboundRtp',
+  '2': [
+    {
+      '1': 'base',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RtpBase',
+      '10': 'base'
+    },
+    {'1': 'jitter_seconds', '3': 2, '4': 1, '5': 1, '10': 'jitterSeconds'},
+    {'1': 'round_trip_time_s', '3': 3, '4': 1, '5': 1, '10': 'roundTripTimeS'},
+  ],
+};
+
+/// Descriptor for `RemoteOutboundRtp`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List remoteOutboundRtpDescriptor = $convert.base64Decode(
+    'ChFSZW1vdGVPdXRib3VuZFJ0cBI0CgRiYXNlGAEgASgLMiAuc3RyZWFtLnZpZGVvLnNmdS5tb2'
+    'RlbHMuUnRwQmFzZVIEYmFzZRIlCg5qaXR0ZXJfc2Vjb25kcxgCIAEoAVINaml0dGVyU2Vjb25k'
+    'cxIpChFyb3VuZF90cmlwX3RpbWVfcxgDIAEoAVIOcm91bmRUcmlwVGltZVM=');
