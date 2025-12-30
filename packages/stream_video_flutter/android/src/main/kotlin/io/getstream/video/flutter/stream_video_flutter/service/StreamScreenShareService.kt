@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import androidx.core.content.IntentCompat
 import io.getstream.log.taggedLogger
@@ -103,7 +104,7 @@ internal class StreamScreenShareService : Service() {
                 stopSelfResult(startId)
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun getPayloadFromIntent(intent: Intent): NotificationPayload? {
@@ -187,17 +188,27 @@ internal class StreamScreenShareService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         logger.i { "[onTaskRemoved] Task removed. Stopping all screen shares and self." }
-        val currentScreenShareCids = activeScreenShares.keys.toList() 
-        currentScreenShareCids.forEach { cid ->
-             val data = activeScreenShares.remove(cid)
-             if (data != null) {
-                notificationManager.cancel(data.notificationId)
-             }
+        stopService()
+
+        // Sync delay to ensure the WebSocket/WebRTC connections are terminated.
+        Thread.sleep(1000)
+    }
+    
+    private fun stopService() {
+        activeScreenShares.values.forEach { data ->
+            markServiceAsStopped(data.callCid)
+            notificationManager.cancel(data.notificationId)
         }
-        if (activeScreenShares.isEmpty()) {
-             stopForeground(STOP_FOREGROUND_REMOVE) 
-             stopSelf()
-        }
+
+        activeScreenShares.clear()
+        scope.cancel()
+        
+        // Stop foreground service - this removes the foreground state
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } 
+        
+        stopSelf()
     }
     
     override fun onBind(intent: Intent?): IBinder? = null
