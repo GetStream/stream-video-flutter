@@ -57,10 +57,8 @@ class StreamLivestreamHosts extends StatefulWidget {
     CallParticipantState host,
   ) {
     return StreamCallParticipant(
-      key: ValueKey(
-        '${host.uniqueParticipantKey} - livehost',
-      ),
-      rendererScopePrefix: 'livehost',
+      // We use the sessionId as the key to map the state to the participant.
+      key: Key(host.uniqueParticipantKey),
       call: call,
       participant: host,
     );
@@ -99,7 +97,7 @@ class _StreamLivestreamHostsState extends State<StreamLivestreamHosts>
   Widget _buildScreenShareContent(CallParticipantState host) {
     return widget.screenShareContentBuilder?.call(context, widget.call, host) ??
         ScreenShareContent(
-          key: ValueKey('${host.uniqueParticipantKey} - livehost'),
+          key: ValueKey('${host.uniqueParticipantKey} - screenShareContent'),
           call: widget.call,
           participant: host,
         );

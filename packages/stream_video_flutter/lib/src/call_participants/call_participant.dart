@@ -29,7 +29,6 @@ class StreamCallParticipant extends StatelessWidget {
     super.key,
     required this.call,
     required this.participant,
-    this.rendererScopePrefix,
     this.videoFit,
     this.backgroundColor,
     this.borderRadius,
@@ -122,9 +121,6 @@ class StreamCallParticipant extends StatelessWidget {
   /// Callback that is called when the size of the participant widget changes.
   final ValueSetter<Size>? onSizeChanged;
 
-  /// Optional prefix to scope renderer keys (e.g. PiP vs main view).
-  final String? rendererScopePrefix;
-
   @override
   Widget build(BuildContext context) {
     final theme = StreamCallParticipantTheme.of(context);
@@ -198,10 +194,6 @@ class StreamCallParticipant extends StatelessWidget {
               return Stack(
                 children: [
                   StreamVideoRenderer(
-                    key: ValueKey(
-                      '${rendererScopePrefix != null ? '$rendererScopePrefix-' : ''}${participant.uniqueParticipantKey}-video',
-                    ),
-                    rendererScopePrefix: rendererScopePrefix,
                     call: call,
                     participant: participant,
                     videoTrackType: SfuTrackType.video,

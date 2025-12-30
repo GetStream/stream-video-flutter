@@ -96,18 +96,15 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
       if (shouldShowScreenShare) {
         pipBody = ScreenShareContent(
           key: ValueKey(
-            '${pipParticipant.uniqueParticipantKey} - pip',
+            '${pipParticipant.uniqueParticipantKey} - screenShareContent',
           ),
-          rendererScopePrefix: 'pip',
           call: widget.call,
           participant: pipParticipant,
         );
       } else {
         pipBody = StreamCallParticipant(
-          key: ValueKey(
-            '${pipParticipant.uniqueParticipantKey} - pip',
-          ),
-          rendererScopePrefix: 'pip',
+          // We use the sessionId as the key to map the state to the participant.
+          key: Key(pipParticipant.uniqueParticipantKey),
           call: widget.call,
           participant: pipParticipant,
         );
