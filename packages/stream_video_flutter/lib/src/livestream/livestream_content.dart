@@ -205,12 +205,15 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
   CallParticipantBuilder get _defaultParticipantBuilder =>
       (context, call, participant) => StreamCallParticipant(
+        key: ValueKey(
+          '${participant.uniqueParticipantKey} - livecontent',
+        ),
+        rendererScopePrefix: 'livecontent',
         call: call,
         participant: participant,
         backgroundColor: StreamVideoTheme.of(
           context,
         ).colorTheme.livestreamBackground,
-        key: ValueKey(participant.uniqueParticipantKey),
         showConnectionQualityIndicator: false,
         showParticipantLabel: false,
         showSpeakerBorder: false,
@@ -232,6 +235,9 @@ class _LivestreamContentState extends State<LivestreamContent> {
         callParticipantBuilder: _defaultParticipantBuilder,
         screenShareContentBuilder: (context, call, participant) =>
             ScreenShareContent(
+              key: ValueKey(
+                '${participant.uniqueParticipantKey} - livecontent',
+              ),
               call: call,
               participant: participant,
               backgroundColor: StreamVideoTheme.of(

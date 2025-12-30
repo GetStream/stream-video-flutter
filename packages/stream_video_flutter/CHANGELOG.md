@@ -2,6 +2,7 @@
 
 ### 🐞 Fixed
 * [Android] Fixed WebSocket/WebRTC connections persisting after app is killed from recents. Foreground services now properly terminate and leave calls when the app task is removed.
+* [Android] Fixed Picture-in-Picture flickering between camera and screen share by scoping renderer keys, preventing visibility-detector dropping subscriptions.
 
 ## 1.2.1
 

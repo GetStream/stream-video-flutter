@@ -19,6 +19,7 @@ class StreamVideoRenderer extends StatefulWidget {
     this.videoFit = VideoFit.cover,
     this.onSizeChanged,
     this.persistTrackIfNotVisible = false,
+    this.rendererScopePrefix,
   });
 
   /// Represents a call.
@@ -43,6 +44,9 @@ class StreamVideoRenderer extends StatefulWidget {
   /// This is useful for screen sharing, where the track should be persisted even when not visible.
   /// Defaults to false.
   final bool persistTrackIfNotVisible;
+
+  /// Optional prefix to scope renderer keys (e.g. PiP vs main view).
+  final String? rendererScopePrefix;
 
   @override
   State<StreamVideoRenderer> createState() => _StreamVideoRendererState();
@@ -105,7 +109,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
 
     return VisibilityDetector(
       key: Key(
-        '${widget.participant.uniqueParticipantKey}${widget.videoTrackType}',
+        '${widget.rendererScopePrefix ?? ''}${widget.participant.uniqueParticipantKey}${widget.videoTrackType}-visibility',
       ),
       onVisibilityChanged: (info) =>
           _onVisibilityChanged(info, widget.participant.userId),
