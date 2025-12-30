@@ -1,4 +1,4 @@
-## Upcoming
+## 1.2.2
 
 ### 🐞 Fixed
 * [Android] Fixed WebSocket/WebRTC connections persisting after app is killed from recents. Foreground services now properly terminate and leave calls when the app task is removed.
