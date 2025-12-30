@@ -25,7 +25,7 @@ dependencies:
   internet_connection_checker_plus: ^2.9.1+2
   intl: ">=0.18.1 <=0.21.0"
   jose: ^0.3.4
-  meta: ^1.17.0
+  meta: ^1.16.0
   package_info_plus: ^9.0.0
   protobuf: ^6.0.0
   rxdart: ^0.28.0
