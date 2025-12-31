@@ -38,7 +38,10 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
     CallParticipantState participant,
   ) {
     return StreamCallParticipant(
-      key: ValueKey(participant.uniqueParticipantKey),
+      key: ValueKey(
+        '${participant.uniqueParticipantKey}-screenshare-video',
+      ),
+      rendererScopePrefix: 'screenshareContent',
       call: call,
       participant: participant,
     );
@@ -74,8 +77,9 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
           children: [
             ScreenShareContent(
               key: ValueKey(
-                '${participant.uniqueParticipantKey} - screenShareContent',
+                '${participant.uniqueParticipantKey}-screenShareContent',
               ),
+              rendererScopePrefix: 'screenshareContent',
               call: call,
               participant: participant,
             ),
@@ -118,6 +122,7 @@ class ScreenShareContent extends StatefulWidget {
     super.key,
     required this.call,
     required this.participant,
+    this.rendererScopePrefix,
     this.backgroundColor = const Color(0xFF272A30),
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
   });
@@ -127,6 +132,9 @@ class ScreenShareContent extends StatefulWidget {
 
   /// The participant that shares their screen.
   final CallParticipantState participant;
+
+  /// Optional prefix to scope renderer keys (e.g. PiP vs main view).
+  final String? rendererScopePrefix;
 
   /// The background color for the video.
   final Color backgroundColor;
@@ -171,6 +179,10 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
                 }
               },
               child: StreamVideoRenderer(
+                key: ValueKey(
+                  '${widget.rendererScopePrefix ?? ''}${widget.participant.uniqueParticipantKey}-screen-share',
+                ),
+                rendererScopePrefix: widget.rendererScopePrefix,
                 call: widget.call,
                 participant: widget.participant,
                 videoFit: VideoFit.contain,
