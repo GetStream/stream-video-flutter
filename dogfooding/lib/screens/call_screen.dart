@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 // � Package imports:
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
@@ -50,11 +51,17 @@ class _CallScreenState extends State<CallScreen> {
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
   bool _moreMenuVisible = false;
+  final _androidPipManager = AndroidPipManager.instance();
+  late bool _isInPictureInPictureMode =
+      _androidPipManager.isInPictureInPictureMode;
 
   @override
   void initState() {
     super.initState();
     _connectChatChannel();
+    _androidPipManager.addOnPictureInPictureModeChangedListener(
+      _handlePictureInPictureModeChanged,
+    );
   }
 
   @override
@@ -62,7 +69,16 @@ class _CallScreenState extends State<CallScreen> {
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
+    _androidPipManager.removeOnPictureInPictureModeChangedListener(
+      _handlePictureInPictureModeChanged,
+    );
     super.dispose();
+  }
+
+  void _handlePictureInPictureModeChanged(bool isInPictureInPictureMode) {
+    setState(() {
+      _isInPictureInPictureMode = isInPictureInPictureMode;
+    });
   }
 
   Future<void> _connectChatChannel() async {
@@ -135,163 +151,34 @@ class _CallScreenState extends State<CallScreen> {
             }
           },
           callContentWidgetBuilder: (BuildContext context, Call call) {
-            return StreamCallContent(
+            return PartialCallStateBuilder(
               call: call,
-              layoutMode: _currentLayoutMode,
-              pictureInPictureConfiguration:
-                  const PictureInPictureConfiguration(
-                    enablePictureInPicture: true,
-                  ),
-              callParticipantsWidgetBuilder: (context, call) {
+              selector: (state) => state.callParticipants.firstWhereOrNull(
+                (p) => p.isScreenShareEnabled,
+              ),
+              builder: (context, participant) {
+                if (participant == null) {
+                  return const SizedBox.shrink();
+                }
+
                 return Stack(
                   children: [
-                    Column(
-                      children: [
-                        Expanded(
-                          child: StreamCallParticipants(
-                            call: call,
-                            layoutMode: _currentLayoutMode,
-                          ),
-                        ),
-                        ClosedCaptionsWidget(call: call),
-                      ],
+                    StreamPictureInPictureAndroidView(
+                      call: call,
+                      configuration: const PictureInPictureConfiguration(
+                        enablePictureInPicture: true,
+                        pipTrackPriority: PipTrackPriority.camera,
+                        disablePictureInPictureWhenScreenSharing: false,
+                      ),
                     ),
-                    if (_moreMenuVisible) ...[
-                      GestureDetector(
-                        onTap: () => setState(() => _moreMenuVisible = false),
-                        child: Container(color: Colors.black12),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Align(
-                          alignment: Alignment.bottomLeft,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500),
-                            child: SettingsMenu(
-                              call: call,
-                              videoEffectsManager: _videoEffectsManager,
-                              onReactionSend: (_) =>
-                                  setState(() => _moreMenuVisible = false),
-                              onStatsPressed: () => setState(() {
-                                showStats(context);
-                                _moreMenuVisible = false;
-                              }),
-                              onAudioOutputChange: (_, {closeMenu = true}) {
-                                if (closeMenu) {
-                                  setState(() => _moreMenuVisible = false);
-                                }
-                              },
-                              onAudioInputChange: (_) =>
-                                  setState(() => _moreMenuVisible = false),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (!_moreMenuVisible)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: PartialCallStateBuilder(
-                          call: call,
-                          selector: (state) => state.otherParticipants.isEmpty,
-                          builder: (context, isEmpty) => isEmpty
-                              ? ShareCallWelcomeCard(callId: call.id)
-                              : const SizedBox.shrink(),
-                        ),
+                    if (!_isInPictureInPictureMode)
+                      StreamVideoRenderer(
+                        call: widget.call,
+                        participant: participant,
+                        videoTrackType: SfuTrackType.screenShare,
+                        videoFit: VideoFit.contain,
                       ),
                   ],
-                );
-              },
-              callAppBarWidgetBuilder: (context, call) {
-                return CallAppBar(
-                  call: call,
-                  leadingWidth: 120,
-                  leading: Row(
-                    children: [
-                      ToggleLayoutOption(
-                        onLayoutModeChanged: (layout) {
-                          setState(() {
-                            _currentLayoutMode = layout;
-                          });
-                        },
-                      ),
-                      PartialCallStateBuilder(
-                        call: call,
-                        selector: (state) => state.localParticipant != null,
-                        builder: (context, hasLocalParticipant) =>
-                            hasLocalParticipant
-                            ? FlipCameraOption(call: call)
-                            : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                  title: CallDurationTitle(call: call),
-                );
-              },
-              callControlsWidgetBuilder: (BuildContext context, Call call) {
-                return Container(
-                  padding: const EdgeInsets.only(top: 16, left: 8, bottom: 8),
-                  color: Colors.black,
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        CallControlOption(
-                          icon: const Icon(Icons.more_vert),
-                          backgroundColor: _moreMenuVisible
-                              ? AppColorPalette.primary
-                              : AppColorPalette.buttonSecondary,
-                          onPressed: () {
-                            toggleMoreMenu(context);
-                          },
-                        ),
-                        ToggleScreenShareOption(
-                          call: call,
-                          screenShareConstraints: const ScreenShareConstraints(
-                            useiOSBroadcastExtension: true,
-                            captureScreenAudio: true,
-                          ),
-                          enabledScreenShareBackgroundColor:
-                              AppColorPalette.primary,
-                          disabledScreenShareIcon: Icons.screen_share,
-                          desktopScreenSelectorBuilder:
-                              // ignore: avoid_redundant_argument_values
-                              _useCustomDesktopScreenShareOption
-                              ? _customDesktopScreenShareSelector
-                              : null,
-                        ),
-                        ToggleMicrophoneOption(
-                          call: call,
-                          disabledMicrophoneBackgroundColor:
-                              AppColorPalette.appRed,
-                        ),
-                        ToggleCameraOption(
-                          call: call,
-                          disabledCameraBackgroundColor: AppColorPalette.appRed,
-                        ),
-                        const Spacer(),
-                        PartialCallStateBuilder(
-                          call: call,
-                          selector: (state) => state.callParticipants.length,
-                          builder: (context, length) {
-                            return BadgedCallOption(
-                              callControlOption: CallControlOption(
-                                icon: const Icon(Icons.people),
-                                onPressed: _channel != null
-                                    ? () => showParticipants(context)
-                                    : null,
-                              ),
-                              badgeCount: length,
-                            );
-                          },
-                        ),
-                        _ShowChatButton(channel: _channel),
-                      ],
-                    ),
-                  ),
                 );
               },
             );
