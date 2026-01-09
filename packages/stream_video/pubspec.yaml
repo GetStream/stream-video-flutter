@@ -31,7 +31,11 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_webrtc_flutter: ^2.2.3
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/stream-video-flutter.git
+      path: packages/stream_video
+      ref: e11688bdc7fb84dec4e4feac78103feb6df17b1e
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.6.0
