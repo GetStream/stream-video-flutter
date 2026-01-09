@@ -17,8 +17,7 @@ dependencies:
   stream_video: ^1.2.2
   stream_webrtc_flutter:
     git:
-      url: https://github.com/GetStream/stream-video-flutter.git
-      path: packages/stream_video
+      url: https://github.com/GetStream/webrtc-flutter
       ref: e11688bdc7fb84dec4e4feac78103feb6df17b1e
 
 dev_dependencies:
