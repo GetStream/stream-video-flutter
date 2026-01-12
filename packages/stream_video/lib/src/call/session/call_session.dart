@@ -153,6 +153,7 @@ class CallSession extends Disposable {
     SfuReconnectionStrategy strategy, {
     String? migratingFromSfuId,
     int? reconnectAttempts,
+    String? reason,
   }) async {
     final announcedTracks = await rtcManager?.getAnnouncedTracksForReconnect();
 
@@ -171,6 +172,7 @@ class CallSession extends Disposable {
           : null,
       fromSfuId: migratingFromSfuId,
       reconnectAttempt: reconnectAttempts,
+      reason: reason,
     );
   }
 
@@ -405,15 +407,12 @@ class CallSession extends Disposable {
 
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
   fastReconnect({
+    required sfu_events.ReconnectDetails reconnectDetails,
     Set<SfuClientCapability> capabilities = const {},
     String? unifiedSessionId,
   }) async {
     try {
       _logger.d(() => '[fastReconnect] no args');
-
-      final reconnectDetails = await getReconnectDetails(
-        SfuReconnectionStrategy.fast,
-      );
 
       _tracer.trace('fastReconnect', reconnectDetails.toJson());
 

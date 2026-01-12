@@ -148,6 +148,7 @@ void main() {
 
         verifyNever(
           () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),
@@ -160,6 +161,7 @@ void main() {
 
         verify(
           () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),
@@ -195,6 +197,7 @@ void main() {
         var fastReconnectCallCount = 0;
         when(
           () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),

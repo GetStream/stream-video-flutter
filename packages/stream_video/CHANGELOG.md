@@ -1,3 +1,13 @@
+## Upcoming
+
+### 🐞 Fixed
+
+* Improved reconnection reliability:
+  * Added exponential backoff with jitter to fast reconnect attempts.
+  * Fixed fast reconnect deadline check to correctly trigger fallback to rejoin.
+  * Fixed network availability verification during subsequent fast reconnect attempts.
+  * Added `reconnectReason` to reconnect details for sfu logs.
+
 ## 1.2.2
 * Sync version with `stream_video_flutter` 1.2.2
 
