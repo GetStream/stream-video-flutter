@@ -8,5 +8,10 @@ dependencies:
   flutter:
     sdk: flutter
   stream_video: ^1.2.2
+  stream_video_noise_cancellation: ^1.2.2
+
+dependency_overrides:
+  stream_video:
+    path: ../../stream_video
   stream_video_noise_cancellation:
-    path: ../
+    path: ../../stream_video_noise_cancellation

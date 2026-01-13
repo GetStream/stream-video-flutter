@@ -35,18 +35,6 @@ runs:
             path: ../stream_video
         PUBSPEC_EOF
 
-        # --- stream_video_flutter example ---
-        cat >> packages/stream_video_flutter/example/pubspec.yaml << 'PUBSPEC_EOF'
-
-        dependency_overrides:
-          stream_video:
-            path: ../../stream_video
-          stream_video_flutter:
-            path: ..
-          stream_video_push_notification:
-            path: ../../stream_video_push_notification
-        PUBSPEC_EOF
-
         # --- stream_video_push_notification ---
         cat >> packages/stream_video_push_notification/pubspec.yaml << 'PUBSPEC_EOF'
 
@@ -57,34 +45,12 @@ runs:
             path: ../stream_video_flutter
         PUBSPEC_EOF
 
-        # --- stream_video_push_notification example ---
-        cat >> packages/stream_video_push_notification/example/pubspec.yaml << 'PUBSPEC_EOF'
-
-        dependency_overrides:
-          stream_video:
-            path: ../../stream_video
-          stream_video_flutter:
-            path: ../../stream_video_flutter
-          stream_video_push_notification:
-            path: ..
-        PUBSPEC_EOF
-
         # --- stream_video_noise_cancellation ---
         cat >> packages/stream_video_noise_cancellation/pubspec.yaml << 'PUBSPEC_EOF'
 
         dependency_overrides:
           stream_video:
             path: ../stream_video
-        PUBSPEC_EOF
-
-        # --- stream_video_noise_cancellation example ---
-        cat >> packages/stream_video_noise_cancellation/example/pubspec.yaml << 'PUBSPEC_EOF'
-
-        dependency_overrides:
-          stream_video:
-            path: ../../stream_video
-          stream_video_noise_cancellation:
-            path: ..
         PUBSPEC_EOF
 
     - name: Install Flutter
