@@ -411,6 +411,9 @@ class CallSession extends Disposable {
     Set<SfuClientCapability> capabilities = const {},
     String? unifiedSessionId,
   }) async {
+    rtcManager?.subscriber.setReconnecting(true);
+    rtcManager?.publisher?.setReconnecting(true);
+
     try {
       _logger.d(() => '[fastReconnect] no args');
 
@@ -499,6 +502,9 @@ class CallSession extends Disposable {
       _logger.e(() => '[fastReconnect] failed: $e');
       _tracer.trace('fastReconnect.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
+    } finally {
+      rtcManager?.subscriber.setReconnecting(false);
+      rtcManager?.publisher?.setReconnecting(false);
     }
   }
 

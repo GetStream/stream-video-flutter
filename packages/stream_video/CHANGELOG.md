@@ -7,6 +7,7 @@
   * Fixed fast reconnect deadline check to correctly trigger fallback to rejoin.
   * Fixed network availability verification during subsequent fast reconnect attempts.
   * Added `reconnectReason` to reconnect details for sfu logs.
+  * Fixed race condition where automatic ICE restart could interfere with fast reconnect, causing subscriber video to not recover.
 
 ## 1.2.2
 * Sync version with `stream_video_flutter` 1.2.2
