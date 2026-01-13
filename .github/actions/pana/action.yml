@@ -28,58 +28,64 @@ runs:
         # This preserves the original YAML formatting by appending to files
 
         # --- stream_video_flutter ---
-        echo '
-dependency_overrides:
-  stream_video:
-    path: ../stream_video
-' >> packages/stream_video_flutter/pubspec.yaml
+        cat >> packages/stream_video_flutter/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../stream_video
+        PUBSPEC_EOF
 
         # --- stream_video_flutter example ---
-        echo '
-dependency_overrides:
-  stream_video:
-    path: ../../stream_video
-  stream_video_flutter:
-    path: ..
-  stream_video_push_notification:
-    path: ../../stream_video_push_notification
-' >> packages/stream_video_flutter/example/pubspec.yaml
+        cat >> packages/stream_video_flutter/example/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../../stream_video
+          stream_video_flutter:
+            path: ..
+          stream_video_push_notification:
+            path: ../../stream_video_push_notification
+        PUBSPEC_EOF
 
         # --- stream_video_push_notification ---
-        echo '
-dependency_overrides:
-  stream_video:
-    path: ../stream_video
-  stream_video_flutter:
-    path: ../stream_video_flutter
-' >> packages/stream_video_push_notification/pubspec.yaml
+        cat >> packages/stream_video_push_notification/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../stream_video
+          stream_video_flutter:
+            path: ../stream_video_flutter
+        PUBSPEC_EOF
 
         # --- stream_video_push_notification example ---
-        echo '
-dependency_overrides:
-  stream_video:
-    path: ../../stream_video
-  stream_video_flutter:
-    path: ../../stream_video_flutter
-  stream_video_push_notification:
-    path: ..
-' >> packages/stream_video_push_notification/example/pubspec.yaml
+        cat >> packages/stream_video_push_notification/example/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../../stream_video
+          stream_video_flutter:
+            path: ../../stream_video_flutter
+          stream_video_push_notification:
+            path: ..
+        PUBSPEC_EOF
 
         # --- stream_video_noise_cancellation ---
-        echo '
-dependency_overrides:
-  stream_video:
-    path: ../stream_video
-' >> packages/stream_video_noise_cancellation/pubspec.yaml
+        cat >> packages/stream_video_noise_cancellation/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../stream_video
+        PUBSPEC_EOF
 
         # --- stream_video_noise_cancellation example ---
-        echo '
-dependency_overrides:
-  stream_video:
-    path: ../../stream_video
-  stream_video_noise_cancellation:
-    path: ..
-' >> packages/stream_video_noise_cancellation/example/pubspec.yaml
+        cat >> packages/stream_video_noise_cancellation/example/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../../stream_video
+          stream_video_noise_cancellation:
+            path: ..
+        PUBSPEC_EOF
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
