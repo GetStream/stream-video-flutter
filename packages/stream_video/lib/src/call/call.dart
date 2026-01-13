@@ -1728,13 +1728,13 @@ class Call {
           .timeout(
             state.value.preferences.networkAvailabilityTimeout,
             onTimeout: () {
-              _logger.w(() => '[awaitNetworkAwailable] timeout');
+              _logger.w(() => '[_awaitNetworkAvailable] timeout');
               return InternetStatus.disconnected;
             },
           );
 
       final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
-        _logger.w(() => '[awaitNetworkAwailable] call was left');
+        _logger.w(() => '[_awaitNetworkAvailable] call was left');
         return InternetStatus.disconnected;
       });
 
