@@ -1,8 +1,18 @@
+/// This library provides [NoiseCancellationAudioProcessor], an [AudioProcessor]
+/// implementation that applies real-time noise cancellation to audio streams
+/// during video calls.
+library;
+
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 import 'stream_video_noise_cancellation.dart';
 
+/// An [AudioProcessor] implementation that provides real-time noise cancellation.
+///
+/// Note: Noise cancellation is only supported on iOS and Android platforms.
+/// On unsupported platforms, methods will return appropriate fallback values.
 class NoiseCancellationAudioProcessor extends AudioProcessor {
+  /// Creates a new [NoiseCancellationAudioProcessor] instance.
   NoiseCancellationAudioProcessor() {
     _init();
   }
@@ -21,6 +31,7 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
     }
   }
 
+  /// Returns whether noise cancellation is currently enabled.
   @override
   Future<Result<bool>> isEnabled() async {
     try {
@@ -37,6 +48,7 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
     }
   }
 
+  /// Enables or disables noise cancellation.
   @override
   Future<Result<None>> setEnabled(bool enabled) async {
     try {
@@ -55,6 +67,7 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
     }
   }
 
+  /// Checks if the current device supports advanced audio processing.
   @override
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     try {
