@@ -426,7 +426,10 @@ class Call {
         (status) {
           if (status == InternetStatus.disconnected) {
             _logger.d(() => '[observeReconnectEvents] network disconnected');
-            _reconnect(SfuReconnectionStrategy.fast);
+            _reconnect(
+              SfuReconnectionStrategy.fast,
+              reconnectReason: 'network disconnected',
+            );
           }
         },
       ),

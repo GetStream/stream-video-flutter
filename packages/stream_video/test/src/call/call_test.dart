@@ -155,7 +155,7 @@ void main() {
         );
 
         internetStatusController.add(InternetStatus.disconnected);
-        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration(microseconds: 100));
         internetStatusController.add(InternetStatus.connected);
         await Future<void>.delayed(Duration.zero);
 
