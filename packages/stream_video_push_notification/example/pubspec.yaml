@@ -1,4 +1,4 @@
-name: stream_video_push_notificaiton_example
+name: stream_video_push_notification_example
 
 environment:
   sdk: ^3.8.0
