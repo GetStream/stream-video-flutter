@@ -11,7 +11,6 @@ import 'stream_video_noise_cancellation_platform_interface.dart';
 /// This class serves as the main entry point for interacting with
 /// platform-specific noise cancellation features. It delegates all
 /// operations to the appropriate platform implementation.
-/// ```
 class StreamVideoNoiseCancellation {
   /// Registers the noise cancellation processor with the native platform.
   ///
