@@ -8,7 +8,8 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -140,6 +141,73 @@ final $typed_data.Uint8List telemetryDescriptor = $convert.base64Decode(
     'CglUZWxlbWV0cnkSOAoXY29ubmVjdGlvbl90aW1lX3NlY29uZHMYASABKAJIAFIVY29ubmVjdG'
     'lvblRpbWVTZWNvbmRzEksKDHJlY29ubmVjdGlvbhgCIAEoCzIlLnN0cmVhbS52aWRlby5zZnUu'
     'c2lnbmFsLlJlY29ubmVjdGlvbkgAUgxyZWNvbm5lY3Rpb25CBgoEZGF0YQ==');
+
+@$core.Deprecated('Use sendMetricsRequestDescriptor instead')
+const SendMetricsRequest$json = {
+  '1': 'SendMetricsRequest',
+  '2': [
+    {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
+    {
+      '1': 'unified_session_id',
+      '3': 2,
+      '4': 1,
+      '5': 9,
+      '10': 'unifiedSessionId'
+    },
+    {
+      '1': 'inbounds',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.InboundRtp',
+      '10': 'inbounds'
+    },
+    {
+      '1': 'outbounds',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.OutboundRtp',
+      '10': 'outbounds'
+    },
+    {
+      '1': 'remote_inbounds',
+      '3': 5,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RemoteInboundRtp',
+      '10': 'remoteInbounds'
+    },
+    {
+      '1': 'remote_outbounds',
+      '3': 6,
+      '4': 3,
+      '5': 11,
+      '6': '.stream.video.sfu.models.RemoteOutboundRtp',
+      '10': 'remoteOutbounds'
+    },
+  ],
+};
+
+/// Descriptor for `SendMetricsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendMetricsRequestDescriptor = $convert.base64Decode(
+    'ChJTZW5kTWV0cmljc1JlcXVlc3QSHQoKc2Vzc2lvbl9pZBgBIAEoCVIJc2Vzc2lvbklkEiwKEn'
+    'VuaWZpZWRfc2Vzc2lvbl9pZBgCIAEoCVIQdW5pZmllZFNlc3Npb25JZBI/CghpbmJvdW5kcxgD'
+    'IAMoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkluYm91bmRSdHBSCGluYm91bmRzEkIKCW'
+    '91dGJvdW5kcxgEIAMoCzIkLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLk91dGJvdW5kUnRwUglv'
+    'dXRib3VuZHMSUgoPcmVtb3RlX2luYm91bmRzGAUgAygLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2'
+    'RlbHMuUmVtb3RlSW5ib3VuZFJ0cFIOcmVtb3RlSW5ib3VuZHMSVQoQcmVtb3RlX291dGJvdW5k'
+    'cxgGIAMoCzIqLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlJlbW90ZU91dGJvdW5kUnRwUg9yZW'
+    '1vdGVPdXRib3VuZHM=');
+
+@$core.Deprecated('Use sendMetricsResponseDescriptor instead')
+const SendMetricsResponse$json = {
+  '1': 'SendMetricsResponse',
+};
+
+/// Descriptor for `SendMetricsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendMetricsResponseDescriptor =
+    $convert.base64Decode('ChNTZW5kTWV0cmljc1Jlc3BvbnNl');
 
 @$core.Deprecated('Use sendStatsRequestDescriptor instead')
 const SendStatsRequest$json = {
@@ -643,6 +711,11 @@ const $core.Map<$core.String, $core.dynamic> SignalServerServiceBase$json = {
       '3': '.stream.video.sfu.signal.SendStatsResponse'
     },
     {
+      '1': 'SendMetrics',
+      '2': '.stream.video.sfu.signal.SendMetricsRequest',
+      '3': '.stream.video.sfu.signal.SendMetricsResponse'
+    },
+    {
       '1': 'StartNoiseCancellation',
       '2': '.stream.video.sfu.signal.StartNoiseCancellationRequest',
       '3': '.stream.video.sfu.signal.StartNoiseCancellationResponse'
@@ -691,6 +764,13 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.stream.video.sfu.models.RTMPIngress': $0.RTMPIngress$json,
   '.stream.video.sfu.models.PerformanceStats': $0.PerformanceStats$json,
   '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
+  '.stream.video.sfu.signal.SendMetricsRequest': SendMetricsRequest$json,
+  '.stream.video.sfu.models.InboundRtp': $0.InboundRtp$json,
+  '.stream.video.sfu.models.RtpBase': $0.RtpBase$json,
+  '.stream.video.sfu.models.OutboundRtp': $0.OutboundRtp$json,
+  '.stream.video.sfu.models.RemoteInboundRtp': $0.RemoteInboundRtp$json,
+  '.stream.video.sfu.models.RemoteOutboundRtp': $0.RemoteOutboundRtp$json,
+  '.stream.video.sfu.signal.SendMetricsResponse': SendMetricsResponse$json,
   '.stream.video.sfu.signal.StartNoiseCancellationRequest':
       StartNoiseCancellationRequest$json,
   '.stream.video.sfu.signal.StartNoiseCancellationResponse':
@@ -717,9 +797,10 @@ final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decod
     'duYWwuSUNFUmVzdGFydFJlcXVlc3QaKy5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5JQ0VSZXN0'
     'YXJ0UmVzcG9uc2USYgoJU2VuZFN0YXRzEikuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2VuZF'
     'N0YXRzUmVxdWVzdBoqLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRTdGF0c1Jlc3BvbnNl'
-    'EokBChZTdGFydE5vaXNlQ2FuY2VsbGF0aW9uEjYuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU3'
-    'RhcnROb2lzZUNhbmNlbGxhdGlvblJlcXVlc3QaNy5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5T'
-    'dGFydE5vaXNlQ2FuY2VsbGF0aW9uUmVzcG9uc2UShgEKFVN0b3BOb2lzZUNhbmNlbGxhdGlvbh'
-    'I1LnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlN0b3BOb2lzZUNhbmNlbGxhdGlvblJlcXVlc3Qa'
-    'Ni5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TdG9wTm9pc2VDYW5jZWxsYXRpb25SZXNwb25zZQ'
-    '==');
+    'EmgKC1NlbmRNZXRyaWNzEisuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2VuZE1ldHJpY3NSZX'
+    'F1ZXN0Giwuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2VuZE1ldHJpY3NSZXNwb25zZRKJAQoW'
+    'U3RhcnROb2lzZUNhbmNlbGxhdGlvbhI2LnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlN0YXJ0Tm'
+    '9pc2VDYW5jZWxsYXRpb25SZXF1ZXN0Gjcuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU3RhcnRO'
+    'b2lzZUNhbmNlbGxhdGlvblJlc3BvbnNlEoYBChVTdG9wTm9pc2VDYW5jZWxsYXRpb24SNS5zdH'
+    'JlYW0udmlkZW8uc2Z1LnNpZ25hbC5TdG9wTm9pc2VDYW5jZWxsYXRpb25SZXF1ZXN0GjYuc3Ry'
+    'ZWFtLnZpZGVvLnNmdS5zaWduYWwuU3RvcE5vaXNlQ2FuY2VsbGF0aW9uUmVzcG9uc2U=');
