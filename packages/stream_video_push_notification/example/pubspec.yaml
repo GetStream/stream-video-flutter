@@ -1,0 +1,12 @@
+name: stream_video_push_notificaiton_example
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  stream_video: ^1.2.2
+  stream_video_push_notification:
+    path: ../
