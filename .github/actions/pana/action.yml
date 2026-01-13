@@ -22,37 +22,64 @@ runs:
   using: "composite"
   steps:
     - name: Temporary Override Local Dependencies
-      uses: mikefarah/yq@master
-      with:
-        cmd: |
-          # --- stream_video_flutter ---
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+      shell: bash
+      run: |
+        # Add dependency_overrides to use local paths instead of pub.dev versions
+        # This preserves the original YAML formatting by appending to files
 
-          # --- stream_video_push_notification ---
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+        # --- stream_video_flutter ---
+        echo '
+dependency_overrides:
+  stream_video:
+    path: ../stream_video
+' >> packages/stream_video_flutter/pubspec.yaml
 
-          # --- stream_video_push_notification example ---
-          yq eval '.dependencies.stream_video = {"path": "../../stream_video"}' -i packages/stream_video_push_notification/example/pubspec.yaml
-          yq eval '.dependencies.stream_video_push_notification = {"path": ".."}' -i packages/stream_video_push_notification/example/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../../stream_video"}' -i packages/stream_video_push_notification/example/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../../stream_video_flutter"}' -i packages/stream_video_push_notification/example/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_push_notification = {"path": ".."}' -i packages/stream_video_push_notification/example/pubspec.yaml
+        # --- stream_video_flutter example ---
+        echo '
+dependency_overrides:
+  stream_video:
+    path: ../../stream_video
+  stream_video_flutter:
+    path: ..
+  stream_video_push_notification:
+    path: ../../stream_video_push_notification
+' >> packages/stream_video_flutter/example/pubspec.yaml
 
-          # --- stream_video_noise_cancellation ---
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+        # --- stream_video_push_notification ---
+        echo '
+dependency_overrides:
+  stream_video:
+    path: ../stream_video
+  stream_video_flutter:
+    path: ../stream_video_flutter
+' >> packages/stream_video_push_notification/pubspec.yaml
 
-          # --- stream_video_noise_cancellation example ---
-          yq eval '.dependencies.stream_video = {"path": "../../stream_video"}' -i packages/stream_video_noise_cancellation/example/pubspec.yaml
-          yq eval '.dependencies.stream_video_noise_cancellation = {"path": ".."}' -i packages/stream_video_noise_cancellation/example/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../../stream_video"}' -i packages/stream_video_noise_cancellation/example/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_noise_cancellation = {"path": ".."}' -i packages/stream_video_noise_cancellation/example/pubspec.yaml
+        # --- stream_video_push_notification example ---
+        echo '
+dependency_overrides:
+  stream_video:
+    path: ../../stream_video
+  stream_video_flutter:
+    path: ../../stream_video_flutter
+  stream_video_push_notification:
+    path: ..
+' >> packages/stream_video_push_notification/example/pubspec.yaml
+
+        # --- stream_video_noise_cancellation ---
+        echo '
+dependency_overrides:
+  stream_video:
+    path: ../stream_video
+' >> packages/stream_video_noise_cancellation/pubspec.yaml
+
+        # --- stream_video_noise_cancellation example ---
+        echo '
+dependency_overrides:
+  stream_video:
+    path: ../../stream_video
+  stream_video_noise_cancellation:
+    path: ..
+' >> packages/stream_video_noise_cancellation/example/pubspec.yaml
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
