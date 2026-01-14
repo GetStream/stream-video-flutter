@@ -153,6 +153,7 @@ class CallSession extends Disposable {
     SfuReconnectionStrategy strategy, {
     String? migratingFromSfuId,
     int? reconnectAttempts,
+    String? reason,
   }) async {
     final announcedTracks = await rtcManager?.getAnnouncedTracksForReconnect();
 
@@ -171,6 +172,7 @@ class CallSession extends Disposable {
           : null,
       fromSfuId: migratingFromSfuId,
       reconnectAttempt: reconnectAttempts,
+      reason: reason,
     );
   }
 
@@ -405,15 +407,15 @@ class CallSession extends Disposable {
 
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
   fastReconnect({
+    required sfu_events.ReconnectDetails reconnectDetails,
     Set<SfuClientCapability> capabilities = const {},
     String? unifiedSessionId,
   }) async {
+    rtcManager?.subscriber.setReconnecting(true);
+    rtcManager?.publisher?.setReconnecting(true);
+
     try {
       _logger.d(() => '[fastReconnect] no args');
-
-      final reconnectDetails = await getReconnectDetails(
-        SfuReconnectionStrategy.fast,
-      );
 
       _tracer.trace('fastReconnect', reconnectDetails.toJson());
 
@@ -500,6 +502,9 @@ class CallSession extends Disposable {
       _logger.e(() => '[fastReconnect] failed: $e');
       _tracer.trace('fastReconnect.failure', e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
+    } finally {
+      rtcManager?.subscriber.setReconnecting(false);
+      rtcManager?.publisher?.setReconnecting(false);
     }
   }
 
