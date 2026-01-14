@@ -12,7 +12,7 @@ import '../../../utils/none.dart';
 import '../../../utils/result.dart';
 import '../../call_connect_options.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordNotifier');
+final _logger = taggedLogger(tag: 'SV:CallState:Lifecycle');
 
 mixin StateLifecycleMixin on StateNotifier<CallState> {
   void _logWithState(String methodName, [String? params]) {
@@ -76,6 +76,12 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       'ringing: $ringing, notify: $notify',
     );
 
+    // Only update call participants if the call is not already joined
+    // After joining sync participants only from SFU events
+    final callParticipants = state.status.isAlreadyJoined
+        ? state.callParticipants
+        : data.metadata.toCallParticipants(state);
+
     state = state.copyWith(
       status: data.toCallStatus(state: state, ringing: ringing),
       isBackstage: data.metadata.details.backstage,
@@ -97,7 +103,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       rtmpIngress: data.metadata.details.rtmpIngress,
       settings: data.metadata.settings,
       ownCapabilities: data.metadata.details.ownCapabilities.toList(),
-      callParticipants: data.metadata.toCallParticipants(state),
+      callParticipants: callParticipants,
       liveStartedAt: data.metadata.session.liveStartedAt,
       liveEndedAt: data.metadata.session.liveEndedAt,
       callMembers: data.metadata.toCallMembers(),

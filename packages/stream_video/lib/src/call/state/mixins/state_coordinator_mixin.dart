@@ -11,7 +11,7 @@ import '../../../models/disconnect_reason.dart';
 import '../../call_events.dart';
 import '../../call_reject_reason.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordNotifier');
+final _logger = taggedLogger(tag: 'SV:CallState:Coordinator');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
   void callMetadataChanged(
