@@ -1,0 +1,17 @@
+name: stream_video_noise_cancellation_example
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  stream_video: ^1.2.2
+  stream_video_noise_cancellation: ^1.2.2
+
+dependency_overrides:
+  stream_video:
+    path: ../../stream_video
+  stream_video_noise_cancellation:
+    path: ../../stream_video_noise_cancellation

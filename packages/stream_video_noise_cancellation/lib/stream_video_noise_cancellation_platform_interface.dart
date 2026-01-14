@@ -1,7 +1,12 @@
+/// Platform interface for Stream Video noise cancellation.
+library;
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'stream_video_noise_cancellation_method_channel.dart';
 
+/// The interface that platform-specific implementations of noise cancellation
+/// must extend.
 abstract class StreamVideoNoiseCancellationPlatform extends PlatformInterface {
   /// Constructs a StreamVideoNoiseCancellationPlatform.
   StreamVideoNoiseCancellationPlatform() : super(token: _token);
@@ -24,18 +29,22 @@ abstract class StreamVideoNoiseCancellationPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// Registers the noise cancellation processor with the native platform.
   Future<void> registerProcessor() {
     throw UnimplementedError('registerProcessor() has not been implemented.');
   }
 
+  /// Returns whether noise cancellation is currently enabled.
   Future<bool?> isEnabled() {
     throw UnimplementedError('isEnabled() has not been implemented.');
   }
 
+  /// Enables or disables noise cancellation.
   Future<void> setEnabled(bool enabled) {
     throw UnimplementedError('setEnabled() has not been implemented.');
   }
 
+  /// Checks if the device supports advanced audio processing.
   Future<bool?> deviceSupportsAdvancedAudioProcessing() {
     throw UnimplementedError(
       'deviceSupportsAdvancedAudioProcessing() has not been implemented.',
