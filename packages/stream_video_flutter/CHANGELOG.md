@@ -1,3 +1,20 @@
+## 1.2.2
+
+### 🐞 Fixed
+* [Android] Fixed WebSocket/WebRTC connections persisting after app is killed from recents. Foreground services now properly terminate and leave calls when the app task is removed.
+
+## 1.2.1
+
+### ✅ Added
+* Added default sorting preset for Picture-in-Picture mode to prioritize the most relevant participant.
+
+### 🐞 Fixed
+* [Android] Fixed screen share notification tap not opening the app.
+* [Android] Improved screen sharing foreground service reliability:
+  - Added proper synchronization to ensure the foreground service is fully started before initiating media projection.
+  - `startScreenSharingNotificationService` now returns a boolean indicating success/failure, preventing screen share attempts when the service fails to start.
+* [iOS/macOS] Fixed crash when VoIP push is received before Flutter fully initializes from the terminated state.
+
 ## 1.2.0
 
 ### ✅ Added

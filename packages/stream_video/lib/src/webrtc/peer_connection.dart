@@ -86,6 +86,19 @@ class StreamPeerConnection extends Disposable {
 
   Timer? iceRestartTimeout;
 
+  /// Flag to indicate that a reconnect is in progress.
+  bool _isReconnecting = false;
+
+  void setReconnecting(bool value) {
+    _logger.v(() => '[setReconnecting] #$type; value: $value');
+    _isReconnecting = value;
+
+    if (value) {
+      iceRestartTimeout?.cancel();
+      iceRestartTimeout = null;
+    }
+  }
+
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
 
@@ -107,7 +120,19 @@ class StreamPeerConnection extends Disposable {
   /// If the restart fails, this method will trigger onReconnectionNeeded with
   /// the appropriate reconnection strategy based on the error.
   void _tryRestartIce() {
-    _logger.v(() => '[restartIce] no args');
+    _logger.v(
+      () => '[_tryRestartIce] #$type; isReconnecting: $_isReconnecting',
+    );
+
+    // Skip automatic ICE restart if a reconnect is in progress.
+    if (_isReconnecting) {
+      _logger.i(
+        () =>
+            '[_tryRestartIce] skipping - reconnect in progress for subscriber',
+      );
+      return;
+    }
+
     restartIce().then((result) {
       if (result.isFailure) {
         final error = result.getErrorOrNull();

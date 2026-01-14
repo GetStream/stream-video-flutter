@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
 import io.getstream.video.flutter.stream_video_flutter.service.notification.StreamNotificationBuilder
@@ -173,18 +174,15 @@ open class StreamCallService : Service() {
             }
         }
 
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun getPayloadFromIntent(intent: Intent): NotificationPayload? {
-        @Suppress("DEPRECATION")
-        val payload = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("notificationPayload", NotificationPayload::class.java)
-        } else {
-            intent.getParcelableExtra("notificationPayload")
-        }
-
-        return payload
+        return IntentCompat.getParcelableExtra(
+            intent,
+            "notificationPayload",
+            NotificationPayload::class.java
+        )
     }
 
     private fun startNewCall(callCid: String, payload: NotificationPayload, startId: Int) {
@@ -274,6 +272,9 @@ open class StreamCallService : Service() {
         super.onTaskRemoved(rootIntent)
         logger.i { "[onTaskRemoved] Task removed. Stopping all calls and self." }
         stopService()
+
+        // Sync delay to ensure the WebSocket/WebRTC connections are terminated.
+        Thread.sleep(1000)
     }
 
     private fun stopService() {
@@ -284,6 +285,9 @@ open class StreamCallService : Service() {
                 notificationManager.cancel(callData.notificationId)
             }
         }
+
+        scope.cancel()
+
         if (activeCalls.isEmpty()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 stopForeground(STOP_FOREGROUND_REMOVE)

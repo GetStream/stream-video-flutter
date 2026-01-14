@@ -148,18 +148,20 @@ void main() {
 
         verifyNever(
           () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),
         );
 
         internetStatusController.add(InternetStatus.disconnected);
-        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration(microseconds: 100));
         internetStatusController.add(InternetStatus.connected);
         await Future<void>.delayed(Duration.zero);
 
         verify(
           () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),
@@ -195,6 +197,7 @@ void main() {
         var fastReconnectCallCount = 0;
         when(
           () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),

@@ -1,3 +1,9 @@
+## 1.2.2
+* Sync version with `stream_video_flutter` 1.2.2
+
+## 1.2.1
+* Sync version with `stream_video_flutter` 1.2.1
+
 ## 1.2.0
 * [Android] Added support for screen audio sharing. To enable it set `captureScreenAudio` to true in `ScreenShareConstraints`. See [documentation](https://getstream.io/video/docs/flutter/advanced/screen_sharing/#screen-audio-sharing) for more details.
 

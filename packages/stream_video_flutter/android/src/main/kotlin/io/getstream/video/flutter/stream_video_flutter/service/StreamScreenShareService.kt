@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import androidx.core.content.IntentCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.R
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
@@ -103,16 +104,15 @@ internal class StreamScreenShareService : Service() {
                 stopSelfResult(startId)
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun getPayloadFromIntent(intent: Intent): NotificationPayload? {
-        @Suppress("DEPRECATION")
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("notificationPayload", NotificationPayload::class.java)
-        } else {
-            intent.getParcelableExtra("notificationPayload")
-        }
+        return IntentCompat.getParcelableExtra(
+            intent,
+            "notificationPayload",
+            NotificationPayload::class.java
+        )
     }
 
     private fun startNewScreenShare(callCid: String, payload: NotificationPayload, startId: Int) {
@@ -132,12 +132,15 @@ internal class StreamScreenShareService : Service() {
         if (activeScreenShares.size == 1) {
             try {
                 super.startForeground(notificationId, notification)
+                markServiceAsStarted(callCid)
                 logger.i { "[startNewScreenShare] Service started in foreground for screen share (callCid: $callCid), notificationId: $notificationId" }
             } catch (e: Exception) {
                 logger.e(e) { "[startNewScreenShare] Exception starting foreground for screen share $callCid. Error: ${e.message}" }
                 activeScreenShares.remove(callCid)
             }
         } else {
+            // Service is already in foreground, just mark this callCid as ready
+            markServiceAsStarted(callCid)
             notificationManager.notify(notificationId, notification)
             logger.i { "[startNewScreenShare] Additional screen share notification for callCid: $callCid, notificationId: $notificationId" }
         }
@@ -156,6 +159,7 @@ internal class StreamScreenShareService : Service() {
         logger.i { "[stopScreenShare] Attempting to stop screen share for callCid: $callCid. Active shares: ${activeScreenShares.size}" }
         val screenShareData = activeScreenShares.remove(callCid)
         if (screenShareData != null) {
+            markServiceAsStopped(callCid)
             notificationManager.cancel(screenShareData.notificationId)
             logger.i { "[stopScreenShare] Cancelled notification and removed screen share for callCid: $callCid. Remaining: ${activeScreenShares.size}" }
         } else {
@@ -174,6 +178,7 @@ internal class StreamScreenShareService : Service() {
         super.onDestroy()
         logger.i { "[onDestroy] Service destroying. Clearing ${activeScreenShares.size} screen shares and notifications." }
         activeScreenShares.values.forEach { data ->
+            markServiceAsStopped(data.callCid)
             notificationManager.cancel(data.notificationId)
         }
         activeScreenShares.clear()
@@ -183,17 +188,27 @@ internal class StreamScreenShareService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         logger.i { "[onTaskRemoved] Task removed. Stopping all screen shares and self." }
-        val currentScreenShareCids = activeScreenShares.keys.toList() 
-        currentScreenShareCids.forEach { cid ->
-             val data = activeScreenShares.remove(cid)
-             if (data != null) {
-                notificationManager.cancel(data.notificationId)
-             }
+        stopService()
+
+        // Sync delay to ensure the WebSocket/WebRTC connections are terminated.
+        Thread.sleep(1000)
+    }
+    
+    private fun stopService() {
+        activeScreenShares.values.forEach { data ->
+            markServiceAsStopped(data.callCid)
+            notificationManager.cancel(data.notificationId)
         }
-        if (activeScreenShares.isEmpty()) {
-             stopForeground(STOP_FOREGROUND_REMOVE) 
-             stopSelf()
-        }
+
+        activeScreenShares.clear()
+        scope.cancel()
+        
+        // Stop foreground service - this removes the foreground state
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } 
+        
+        stopSelf()
     }
     
     override fun onBind(intent: Intent?): IBinder? = null
@@ -202,5 +217,22 @@ internal class StreamScreenShareService : Service() {
         internal const val ACTION_UPDATE = "UPDATE"
         internal const val ACTION_STOP_SPECIFIC_CALL = "STOP_SPECIFIC_CALL"
         internal const val TRIGGER_SHARE_SCREEN = "SHARE_SCREEN"
+        
+        private val startedServicesCallCids = mutableSetOf<String>()
+        
+        @Synchronized
+        internal fun isServiceRunning(callCid: String): Boolean {
+            return startedServicesCallCids.contains(callCid)
+        }
+        
+        @Synchronized
+        private fun markServiceAsStarted(callCid: String) {
+            startedServicesCallCids.add(callCid)
+        }
+        
+        @Synchronized
+        private fun markServiceAsStopped(callCid: String) {
+            startedServicesCallCids.remove(callCid)
+        }
     }
 }

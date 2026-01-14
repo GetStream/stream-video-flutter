@@ -116,20 +116,33 @@ class StreamBackgroundService {
     StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed((
       String callCid,
     ) async {
-      final context = _instance._managedCalls[callCid];
-      if (context == null) {
-        _instance._logger.w(
+      // When the platform UI layer is destroyed (Activity destroyed on Android),
+      // we need to leave all active calls to properly close WebSocket/WebRTC connections.
+      // This is called when the app is swiped from recents or the Activity is destroyed.
+
+      if (callCid.isEmpty) {
+        // No specific callCid provided - leave ALL managed calls
+        _instance._logger.i(
           () =>
-              '<$callCid> [onPlatformUiLayerDestroyed] no managed call for callCid',
+              '[onPlatformUiLayerDestroyed] UI layer destroyed, leaving all ${_instance._managedCalls.length} active calls',
         );
+
+        final callContexts = _instance._managedCalls.values.toList();
+        for (final callContext in callContexts) {
+          try {
+            await onPlatformUiLayerDestroyed?.call(callContext.call);
+            if (onPlatformUiLayerDestroyed == null) {
+              await callContext.call.leave();
+            }
+          } catch (e) {
+            _instance._logger.e(
+              () =>
+                  '<${callContext.call.callCid.value}> [onPlatformUiLayerDestroyed] failed to leave: $e',
+            );
+          }
+        }
         return;
       }
-
-      _instance._logger.d(
-        () =>
-            '<$callCid> [onPlatformUiLayerDestroyed] handling UI layer destroyed',
-      );
-      await onPlatformUiLayerDestroyed?.call(context.call);
     });
 
     _subscriptions.cancelAll();
@@ -317,8 +330,9 @@ class StreamBackgroundService {
     }
   }
 
-  // Screen sharing methods
-  Future<void> startScreenSharingNotificationService(Call call) async {
+  /// Starts the screen sharing notification service.
+  /// Returns true if the service was started successfully, false otherwise.
+  Future<bool> startScreenSharingNotificationService(Call call) async {
     final callCid = call.callCid.value;
 
     _logger.d(
@@ -337,10 +351,68 @@ class StreamBackgroundService {
       options: options,
     );
 
-    await StreamVideoFlutterBackground.startService(
-      payload,
-      ServiceType.screenSharing,
+    try {
+      await StreamVideoFlutterBackground.startService(
+        payload,
+        ServiceType.screenSharing,
+      );
+    } catch (e) {
+      _logger.w(
+        () =>
+            '<$callCid> [startScreenSharingNotificationService] Failed to start screen sharing service $e.',
+      );
+
+      return false;
+    }
+
+    // Wait for the foreground service to be fully ready.
+    // Android requires FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION to be running
+    // before screen sharing can be started.
+    if (CurrentPlatform.isAndroid) {
+      final isReady = await _waitForScreenShareServiceReady(callCid);
+      if (!isReady) {
+        _logger.e(
+          () =>
+              '<$callCid> [startScreenSharingNotificationService] Service failed to start.',
+        );
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /// Waits for the screen share service to be ready.
+  /// Returns true if ready, false if timeout.
+  Future<bool> _waitForScreenShareServiceReady(String callCid) async {
+    const timeout = Duration(seconds: 3);
+    const interval = Duration(milliseconds: 50);
+    final stopwatch = Stopwatch()..start();
+
+    while (stopwatch.elapsed < timeout) {
+      final isRunning = await StreamVideoFlutterBackground.isServiceRunning(
+        ServiceType.screenSharing,
+        callCid: callCid,
+      );
+
+      if (isRunning) {
+        _logger.d(
+          () =>
+              '<$callCid> [_waitForScreenShareServiceReady] Screen sharing service ready after ${stopwatch.elapsedMilliseconds}ms',
+        );
+
+        return true;
+      }
+
+      await Future<void>.delayed(interval);
+    }
+
+    _logger.w(
+      () =>
+          '<$callCid> [_waitForScreenShareServiceReady] Timeout waiting for service to be ready',
     );
+
+    return false;
   }
 
   Future<void> stopScreenSharingNotificationService(String callCid) async {

@@ -567,6 +567,8 @@ class StreamVideo extends Disposable {
           await _client.closeConnection();
         } else if (activeCalls.isNotEmpty) {
           for (final activeCall in activeCalls) {
+            activeCall.traceSessionLog('device.stateChange', 'paused');
+
             final callState = activeCall.state.value;
             final isVideoEnabled =
                 callState.localParticipant?.isVideoEnabled ?? false;
@@ -592,6 +594,8 @@ class StreamVideo extends Disposable {
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
 
         for (final activeCall in activeCalls) {
+          activeCall.traceSessionLog('device.stateChange', 'resumed');
+
           final wasCameraMuted =
               _mutedCameraByStateChange[activeCall.callCid.value] ?? false;
           if (wasCameraMuted) {

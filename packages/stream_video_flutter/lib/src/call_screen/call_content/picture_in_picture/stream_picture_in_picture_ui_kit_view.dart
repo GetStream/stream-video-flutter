@@ -93,7 +93,7 @@ class _StreamPictureInPictureUiKitViewState
       compare:
           widget.pictureInPictureConfiguration?.sort ??
           widget.participantSort ??
-          CallParticipantSortingPresets.speaker,
+          CallParticipantSortingPresets.pictureInPicture,
     );
 
     if (sorted.isNotEmpty) {

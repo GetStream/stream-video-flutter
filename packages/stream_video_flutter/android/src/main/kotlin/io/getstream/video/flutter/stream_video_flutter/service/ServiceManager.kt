@@ -33,8 +33,13 @@ class ServiceManagerImpl(
         val serviceKey = "$callCid-$type"
         
         if (activeServices.containsKey(serviceKey)) {
-            logger.w { "[start] Service for callCid: $callCid, type: $type already running." }
-            return true
+            if (type == ServiceType.screenSharing && !StreamScreenShareService.isServiceRunning(callCid)) {
+                logger.w { "[start] Service for callCid: $callCid was in activeServices but not in foreground mode. Retrying." }
+                activeServices.remove(serviceKey)
+            } else {
+                logger.w { "[start] Service for callCid: $callCid, type: $type already running." }
+                return true
+            }
         }
         try {
             val nIntent = when(type){
@@ -176,7 +181,14 @@ class ServiceManagerImpl(
         }
         
         val serviceKey = "$actualCallCid-$type"
-        val running = activeServices.containsKey(serviceKey)
+        val inActiveServices = activeServices.containsKey(serviceKey)
+        
+        val running = if (type == ServiceType.screenSharing) {
+            inActiveServices && StreamScreenShareService.isServiceRunning(actualCallCid)
+        } else {
+            inActiveServices
+        }
+        
         logger.d { "[isRunning] callCid: $actualCallCid, type: $type. Result: $running" }
         return running
     }

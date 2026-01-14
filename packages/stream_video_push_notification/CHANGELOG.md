@@ -1,3 +1,11 @@
+## 1.2.2
+* Sync version with `stream_video_flutter` 1.2.2
+
+## 1.2.1
+
+🐞 Fixed
+* [iOS/macOS] Fixed crash when VoIP push is received before Flutter fully initializes from the terminated state.
+
 ## 1.2.0
 * Sync version with `stream_video_flutter` 1.2.0
 
