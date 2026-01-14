@@ -22,24 +22,36 @@ runs:
   using: "composite"
   steps:
     - name: Temporary Override Local Dependencies
-      uses: mikefarah/yq@master
-      with:
-        cmd: |
-          # --- stream_video_flutter ---
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
+      shell: bash
+      run: |
+        # Add dependency_overrides to use local paths instead of pub.dev versions
+        # This preserves the original YAML formatting by appending to files
 
-          # --- stream_video_push_notification ---
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_push_notification/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+        # --- stream_video_flutter ---
+        cat >> packages/stream_video_flutter/pubspec.yaml << 'PUBSPEC_EOF'
 
-          # --- stream_video_noise_cancellation ---
-          yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
-          yq eval '.dependency_overrides.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+        dependency_overrides:
+          stream_video:
+            path: ../stream_video
+        PUBSPEC_EOF
+
+        # --- stream_video_push_notification ---
+        cat >> packages/stream_video_push_notification/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../stream_video
+          stream_video_flutter:
+            path: ../stream_video_flutter
+        PUBSPEC_EOF
+
+        # --- stream_video_noise_cancellation ---
+        cat >> packages/stream_video_noise_cancellation/pubspec.yaml << 'PUBSPEC_EOF'
+
+        dependency_overrides:
+          stream_video:
+            path: ../stream_video
+        PUBSPEC_EOF
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2

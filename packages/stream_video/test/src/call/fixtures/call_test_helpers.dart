@@ -38,6 +38,7 @@ void registerMockFallbackValues() {
   registerFallbackValue(SfuReconnectionStrategy.fast);
   registerFallbackValue(SampleCallData.defaultMediaDevice);
   registerFallbackValue(MockStreamVideo());
+  registerFallbackValue(sfu_events.ReconnectDetails());
 }
 
 Call createStubCall({
@@ -165,6 +166,7 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
   final effectiveClientState = clientState ?? setupMockClientState();
 
   when(() => streamVideo.state).thenReturn(effectiveClientState);
+  when(() => streamVideo.options).thenReturn(const StreamVideoOptions());
   when(
     () => streamVideo.currentUser,
   ).thenReturn(SampleCallData.defaultUserInfo);
@@ -316,11 +318,13 @@ MockCallSession setupMockCallSession() {
       any(),
       migratingFromSfuId: any(named: 'migratingFromSfuId'),
       reconnectAttempts: any(named: 'reconnectAttempts'),
+      reason: any(named: 'reason'),
     ),
   ).thenAnswer((_) => Future.value(sfu_events.ReconnectDetails()));
 
   when(
     () => callSession.fastReconnect(
+      reconnectDetails: any(named: 'reconnectDetails'),
       capabilities: any(named: 'capabilities'),
       unifiedSessionId: any(named: 'unifiedSessionId'),
     ),

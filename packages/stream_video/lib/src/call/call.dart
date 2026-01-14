@@ -426,7 +426,10 @@ class Call {
         (status) {
           if (status == InternetStatus.disconnected) {
             _logger.d(() => '[observeReconnectEvents] network disconnected');
-            _reconnect(SfuReconnectionStrategy.fast);
+            _reconnect(
+              SfuReconnectionStrategy.fast,
+              reconnectReason: 'network disconnected',
+            );
           }
         },
       ),
@@ -625,6 +628,11 @@ class Call {
     }
   }
 
+  @internal
+  void traceSessionLog(String tag, dynamic data) {
+    _session?.trace(tag, data);
+  }
+
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
     _stateManager.updateCallPreferences(preferences);
@@ -802,6 +810,7 @@ class Call {
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
+    String? reconnectReason,
   }) async {
     if (_callJoinLock.locked) {
       _logger.w(() => '[join] rejected (already joining)');
@@ -818,6 +827,7 @@ class Call {
             connectOptions: connectOptions,
             membersLimit: membersLimit,
             sfuToForceExclude: sfuToForceExclude,
+            reconnectReason: reconnectReason,
           ),
         );
 
@@ -879,6 +889,7 @@ class Call {
     CallConnectOptions? connectOptions,
     int? membersLimit,
     String? sfuToForceExclude,
+    String? reconnectReason,
   }) async {
     _logger.d(() => '[join] options: $_connectOptions');
     final connectionTimeStopwatch = Stopwatch()..start();
@@ -948,6 +959,7 @@ class Call {
         : await _previousSession?.getReconnectDetails(
             _reconnectStrategy,
             reconnectAttempts: _reconnectAttempts,
+            reason: reconnectReason,
           );
 
     if (!performingFastReconnect) {
@@ -978,7 +990,11 @@ class Call {
             'peerConnectionId': pc.type.name,
             'reconnectionStrategy': strategy.name,
           });
-          _reconnect(strategy);
+
+          _reconnect(
+            strategy,
+            reconnectReason: '${pc.type.name} pc disconnected',
+          );
         },
         clientPublishOptions:
             _stateManager.callState.preferences.clientPublishOptions,
@@ -1026,6 +1042,7 @@ class Call {
 
       _logger.d(() => '[join] fast reconnecting');
       final result = await _session!.fastReconnect(
+        reconnectDetails: reconnectDetails!,
         capabilities: _sfuClientCapabilities,
         unifiedSessionId: _unifiedSessionId,
       );
@@ -1070,10 +1087,6 @@ class Call {
     }
 
     _logger.v(() => '[join] completed');
-
-    // reset the reconnect strategy to unspecified after a successful reconnection
-    _reconnectStrategy = SfuReconnectionStrategy.unspecified;
-
     return const Result.success(none);
   }
 
@@ -1410,7 +1423,11 @@ class Call {
           'closeCode': sfuEvent.reason.closeCode,
           'closeReason': sfuEvent.reason.closeReason,
         });
-        await _reconnect(SfuReconnectionStrategy.fast);
+        await _reconnect(
+          SfuReconnectionStrategy.fast,
+          reconnectReason:
+              'sfu socket disconnected, closeCode: ${sfuEvent.reason.closeCode}, closeReason: ${sfuEvent.reason.closeReason}',
+        );
       } else if (_leaveCallTriggered) {
         _logger.d(
           () =>
@@ -1422,13 +1439,19 @@ class Call {
       _session?.trace('sfu_socket_failed', {
         'error': sfuEvent.error.message,
       });
-      await _reconnect(SfuReconnectionStrategy.fast);
+      await _reconnect(
+        SfuReconnectionStrategy.fast,
+        reconnectReason: 'sfu socket failed: ${sfuEvent.error.message}',
+      );
     } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
       _session?.trace('sfu_go_away', {
         'reason': sfuEvent.goAwayReason.name,
       });
-      await _reconnect(SfuReconnectionStrategy.migrate);
+      await _reconnect(
+        SfuReconnectionStrategy.migrate,
+        reconnectReason: 'go away',
+      );
     }
     // error event
     else if (sfuEvent is SfuErrorEvent) {
@@ -1443,7 +1466,10 @@ class Call {
           _session?.trace('sfu_error', {
             'error': sfuEvent.error.message,
           });
-          await _reconnect(sfuEvent.error.reconnectStrategy);
+          await _reconnect(
+            sfuEvent.error.reconnectStrategy,
+            reconnectReason: 'sfu error: ${sfuEvent.error.message}',
+          );
           break;
         case SfuReconnectionStrategy.disconnect:
           _logger.w(
@@ -1458,7 +1484,10 @@ class Call {
     }
   }
 
-  Future<void> _reconnect(SfuReconnectionStrategy strategy) async {
+  Future<void> _reconnect(
+    SfuReconnectionStrategy strategy, {
+    String? reconnectReason,
+  }) async {
     if (_callJoinLock.inLock) {
       _logger.w(() => '[_reconnect] skipping reconnect (join in progress)');
       return;
@@ -1478,12 +1507,14 @@ class Call {
     }
 
     await _callReconnectLock.synchronized(() async {
+      _reconnectAttempts = 0;
       _reconnectStrategy = strategy;
-      _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
 
       final reconnectStartTime = DateTime.now();
-      var attempt = 0;
+      var fastReconnectAttemptsCount = 0;
       do {
+        _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
+
         if (state.value.preferences.reconnectTimeout > Duration.zero) {
           final elapsed = DateTime.now().difference(reconnectStartTime);
           if (elapsed > state.value.preferences.reconnectTimeout) {
@@ -1500,6 +1531,7 @@ class Call {
 
         _session?.trace('callReconnect', {
           'strategy': strategy.name,
+          'reason': reconnectReason,
         });
 
         _stateManager.lifecycleCallConnecting(
@@ -1518,6 +1550,10 @@ class Call {
 
           if (networkStatus == InternetStatus.disconnected) {
             _logger.w(() => '[reconnect] reconnection timeout');
+            _session?.trace('callReconnectFailed', {
+              'strategy': strategy.name,
+              'error': 'reconnection timeout',
+            });
             _stateManager.lifecycleCallReconnectingFailed();
             return;
           }
@@ -1526,6 +1562,10 @@ class Call {
             _logger.w(
               () => '[reconnect] rejected (call was left during network wait)',
             );
+            _session?.trace('callReconnectFailed', {
+              'strategy': strategy.name,
+              'error': 'call was left',
+            });
             return;
           }
 
@@ -1539,13 +1579,13 @@ class Call {
               );
             case SfuReconnectionStrategy.fast:
               _logger.v(() => '[reconnect] fast reconnect');
-              await _reconnectFast();
+              await _reconnectFast(reason: reconnectReason);
             case SfuReconnectionStrategy.rejoin:
               _logger.v(() => '[reconnect] rejoin');
-              await _reconnectRejoin();
+              await _reconnectRejoin(reason: reconnectReason);
             case SfuReconnectionStrategy.migrate:
               _logger.v(() => '[reconnect] migrate');
-              await _reconnectMigrate();
+              await _reconnectMigrate(reason: reconnectReason);
           }
 
           _session?.trace('callReconnectSuccess', {
@@ -1570,25 +1610,38 @@ class Call {
                     '[reconnect] reconnect failed, error: $error, strategy: $_reconnectStrategy, attempt: $_reconnectAttempts. Attempting with Rejoin strategy',
               );
 
-              await Future<void>.delayed(
-                _retryPolicy.backoff(_reconnectAttempts),
-              );
+              if (_reconnectStrategy == SfuReconnectionStrategy.fast) {
+                await Future<void>.delayed(
+                  _retryPolicy.backoff(fastReconnectAttemptsCount),
+                );
+              } else {
+                await Future<void>.delayed(
+                  _retryPolicy.backoff(_reconnectAttempts),
+                );
+              }
 
               final wasMigrating =
                   _reconnectStrategy == SfuReconnectionStrategy.migrate;
+
+              final mustPerformRejoin =
+                  DateTime.now().difference(reconnectStartTime) >
+                  _fastReconnectDeadline;
 
               // don't immediately switch to the REJOIN strategy, but instead attempt
               // to reconnect with the FAST strategy for a few times before switching.
               // in some cases, we immediately switch to the REJOIN strategy.
               final shouldRejoin =
+                  mustPerformRejoin ||
                   wasMigrating || // if we were migrating, but the migration failed
-                  attempt >= 3 || // after 3 failed attempts
+                  fastReconnectAttemptsCount >= 2 || // after 3 failed attempts
                   !(_session?.rtcManager?.publisher?.isHealthy() ??
                       true) || // if the publisher is not healthy
                   !(_session?.rtcManager?.subscriber.isHealthy() ??
                       true); // if the subscriber is not healthy
 
-              attempt++;
+              if (!shouldRejoin) {
+                fastReconnectAttemptsCount++;
+              }
 
               final nextStrategy = shouldRejoin
                   ? SfuReconnectionStrategy.rejoin
@@ -1600,26 +1653,29 @@ class Call {
       } while (state.value.status is! CallStatusConnected &&
           state.value.status is! CallStatusDisconnected &&
           state.value.status is! CallStatusReconnectionFailed);
+
+      // reset the reconnect strategy to unspecified after a successful reconnection
+      _reconnectStrategy = SfuReconnectionStrategy.unspecified;
     });
   }
 
-  Future<void> _reconnectFast() async {
+  Future<void> _reconnectFast({String? reason}) async {
     _reconnectStrategy = SfuReconnectionStrategy.fast;
-    await _join();
+    await _join(reconnectReason: reason);
   }
 
-  Future<void> _reconnectRejoin() async {
+  Future<void> _reconnectRejoin({String? reason}) async {
     _reconnectAttempts++;
     _reconnectStrategy = SfuReconnectionStrategy.rejoin;
-    await _join();
+    await _join(reconnectReason: reason);
   }
 
-  Future<void> _reconnectMigrate() async {
+  Future<void> _reconnectMigrate({String? reason}) async {
     final migrateTimeStopwatch = Stopwatch()..start();
 
     _reconnectAttempts++;
     _reconnectStrategy = SfuReconnectionStrategy.migrate;
-    final joinResult = await _join();
+    final joinResult = await _join(reconnectReason: reason);
 
     if (joinResult.isFailure) {
       _logger.e(() => '[reconnectMigrate] join failed: $joinResult');
@@ -1660,48 +1716,42 @@ class Call {
   }
 
   Future<InternetStatus> _awaitNetworkAvailable() async {
-    _logger.v(() => '[awaitNetworkAwailable] starting timer');
-    final fastReconnectTimer = Timer(_fastReconnectDeadline, () {
-      _logger.w(() => '[awaitNetworkAwailable] too late for fast reconnect');
-      if (_reconnectStrategy == SfuReconnectionStrategy.fast) {
-        _reconnectStrategy = SfuReconnectionStrategy.rejoin;
-      }
-    });
-
     final previousCheckInterval = networkMonitor.checkInterval;
-    networkMonitor.setIntervalAndResetTimer(const Duration(seconds: 1));
+    try {
+      networkMonitor.setIntervalAndResetTimer(
+        _streamVideo.options.networkMonitorSettings.offlineCheckInterval,
+      );
 
-    final networkFuture = networkMonitor.onStatusChange
-        .startWithFuture(networkMonitor.internetStatus)
-        .firstWhere((status) => status == InternetStatus.connected)
-        .timeout(
-          state.value.preferences.networkAvailabilityTimeout,
-          onTimeout: () {
-            _logger.w(() => '[awaitNetworkAwailable] timeout');
-            return InternetStatus.disconnected;
-          },
-        );
+      final networkFuture = networkMonitor.onStatusChange
+          .startWithFuture(networkMonitor.internetStatus)
+          .firstWhere((status) => status == InternetStatus.connected)
+          .timeout(
+            state.value.preferences.networkAvailabilityTimeout,
+            onTimeout: () {
+              _logger.w(() => '[_awaitNetworkAvailable] timeout');
+              return InternetStatus.disconnected;
+            },
+          );
 
-    final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
-      _logger.w(() => '[awaitNetworkAwailable] call was left');
-      return InternetStatus.disconnected;
-    });
+      final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
+        _logger.w(() => '[_awaitNetworkAvailable] call was left');
+        return InternetStatus.disconnected;
+      });
 
-    // Race the network future against the call lifecycle cancellable
-    // to ensure we don't wait for the network if the call was left
-    final connectionStatus =
-        await Future.any([
-              networkFuture,
-              lifecycleFuture,
-            ])
-            .asCancelable()
-            .storeIn(_idFastReconnectTimeout, _cancelables)
-            .valueOrDefault(InternetStatus.disconnected);
-
-    fastReconnectTimer.cancel();
-    networkMonitor.setIntervalAndResetTimer(previousCheckInterval);
-
-    return connectionStatus;
+      // Race the network future against the call lifecycle cancellable
+      // to ensure we don't wait for the network if the call was left
+      final connectionStatus =
+          await Future.any([
+                networkFuture,
+                lifecycleFuture,
+              ])
+              .asCancelable()
+              .storeIn(_idFastReconnectTimeout, _cancelables)
+              .valueOrDefault(InternetStatus.disconnected);
+      return connectionStatus;
+    } finally {
+      networkMonitor.setIntervalAndResetTimer(previousCheckInterval);
+    }
   }
 
   Future<Result<None>> _awaitIfNeeded() async {
