@@ -8,14 +8,16 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
+import 'package:protobuf/well_known_types/google/protobuf/struct.pb.dart' as $1;
+import 'package:protobuf/well_known_types/google/protobuf/timestamp.pb.dart'
+    as $0;
 
-import '../../../google/protobuf/struct.pb.dart' as $1;
-import '../../../google/protobuf/timestamp.pb.dart' as $0;
 import 'models.pbenum.dart';
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
@@ -75,7 +77,6 @@ class CallState extends $pb.GeneratedMessage {
   static CallState create() => CallState._();
   @$core.override
   CallState createEmptyInstance() => create();
-  static $pb.PbList<CallState> createRepeated() => $pb.PbList<CallState>();
   @$core.pragma('dart2js:noInline')
   static CallState getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallState>(create);
@@ -162,8 +163,6 @@ class ParticipantCount extends $pb.GeneratedMessage {
   static ParticipantCount create() => ParticipantCount._();
   @$core.override
   ParticipantCount createEmptyInstance() => create();
-  static $pb.PbList<ParticipantCount> createRepeated() =>
-      $pb.PbList<ParticipantCount>();
   @$core.pragma('dart2js:noInline')
   static ParticipantCount getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ParticipantCount>(create);
@@ -233,7 +232,6 @@ class Pin extends $pb.GeneratedMessage {
   static Pin create() => Pin._();
   @$core.override
   Pin createEmptyInstance() => create();
-  static $pb.PbList<Pin> createRepeated() => $pb.PbList<Pin>();
   @$core.pragma('dart2js:noInline')
   static Pin getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Pin>(create);
@@ -348,7 +346,6 @@ class Participant extends $pb.GeneratedMessage {
   static Participant create() => Participant._();
   @$core.override
   Participant createEmptyInstance() => create();
-  static $pb.PbList<Participant> createRepeated() => $pb.PbList<Participant>();
   @$core.pragma('dart2js:noInline')
   static Participant getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<Participant>(create);
@@ -518,8 +515,6 @@ class StreamQuality extends $pb.GeneratedMessage {
   static StreamQuality create() => StreamQuality._();
   @$core.override
   StreamQuality createEmptyInstance() => create();
-  static $pb.PbList<StreamQuality> createRepeated() =>
-      $pb.PbList<StreamQuality>();
   @$core.pragma('dart2js:noInline')
   static StreamQuality getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<StreamQuality>(create);
@@ -587,8 +582,6 @@ class VideoDimension extends $pb.GeneratedMessage {
   static VideoDimension create() => VideoDimension._();
   @$core.override
   VideoDimension createEmptyInstance() => create();
-  static $pb.PbList<VideoDimension> createRepeated() =>
-      $pb.PbList<VideoDimension>();
   @$core.pragma('dart2js:noInline')
   static VideoDimension getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<VideoDimension>(create);
@@ -666,7 +659,6 @@ class VideoLayer extends $pb.GeneratedMessage {
   static VideoLayer create() => VideoLayer._();
   @$core.override
   VideoLayer createEmptyInstance() => create();
-  static $pb.PbList<VideoLayer> createRepeated() => $pb.PbList<VideoLayer>();
   @$core.pragma('dart2js:noInline')
   static VideoLayer getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<VideoLayer>(create);
@@ -767,8 +759,6 @@ class SubscribeOption extends $pb.GeneratedMessage {
   static SubscribeOption create() => SubscribeOption._();
   @$core.override
   SubscribeOption createEmptyInstance() => create();
-  static $pb.PbList<SubscribeOption> createRepeated() =>
-      $pb.PbList<SubscribeOption>();
   @$core.pragma('dart2js:noInline')
   static SubscribeOption getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SubscribeOption>(create);
@@ -861,8 +851,6 @@ class PublishOption extends $pb.GeneratedMessage {
   static PublishOption create() => PublishOption._();
   @$core.override
   PublishOption createEmptyInstance() => create();
-  static $pb.PbList<PublishOption> createRepeated() =>
-      $pb.PbList<PublishOption>();
   @$core.pragma('dart2js:noInline')
   static PublishOption getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PublishOption>(create);
@@ -1045,7 +1033,6 @@ class Codec extends $pb.GeneratedMessage {
   static Codec create() => Codec._();
   @$core.override
   Codec createEmptyInstance() => create();
-  static $pb.PbList<Codec> createRepeated() => $pb.PbList<Codec>();
   @$core.pragma('dart2js:noInline')
   static Codec getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Codec>(create);
@@ -1143,7 +1130,6 @@ class ICETrickle extends $pb.GeneratedMessage {
   static ICETrickle create() => ICETrickle._();
   @$core.override
   ICETrickle createEmptyInstance() => create();
-  static $pb.PbList<ICETrickle> createRepeated() => $pb.PbList<ICETrickle>();
   @$core.pragma('dart2js:noInline')
   static ICETrickle getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ICETrickle>(create);
@@ -1221,8 +1207,6 @@ class AudioBitrate extends $pb.GeneratedMessage {
   static AudioBitrate create() => AudioBitrate._();
   @$core.override
   AudioBitrate createEmptyInstance() => create();
-  static $pb.PbList<AudioBitrate> createRepeated() =>
-      $pb.PbList<AudioBitrate>();
   @$core.pragma('dart2js:noInline')
   static AudioBitrate getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<AudioBitrate>(create);
@@ -1315,7 +1299,6 @@ class TrackInfo extends $pb.GeneratedMessage {
   static TrackInfo create() => TrackInfo._();
   @$core.override
   TrackInfo createEmptyInstance() => create();
-  static $pb.PbList<TrackInfo> createRepeated() => $pb.PbList<TrackInfo>();
   @$core.pragma('dart2js:noInline')
   static TrackInfo getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackInfo>(create);
@@ -1455,7 +1438,6 @@ class Error extends $pb.GeneratedMessage {
   static Error create() => Error._();
   @$core.override
   Error createEmptyInstance() => create();
-  static $pb.PbList<Error> createRepeated() => $pb.PbList<Error>();
   @$core.pragma('dart2js:noInline')
   static Error getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Error>(create);
@@ -1539,8 +1521,6 @@ class ClientDetails extends $pb.GeneratedMessage {
   static ClientDetails create() => ClientDetails._();
   @$core.override
   ClientDetails createEmptyInstance() => create();
-  static $pb.PbList<ClientDetails> createRepeated() =>
-      $pb.PbList<ClientDetails>();
   @$core.pragma('dart2js:noInline')
   static ClientDetails getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ClientDetails>(create);
@@ -1639,7 +1619,6 @@ class Sdk extends $pb.GeneratedMessage {
   static Sdk create() => Sdk._();
   @$core.override
   Sdk createEmptyInstance() => create();
-  static $pb.PbList<Sdk> createRepeated() => $pb.PbList<Sdk>();
   @$core.pragma('dart2js:noInline')
   static Sdk getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Sdk>(create);
@@ -1727,7 +1706,6 @@ class OS extends $pb.GeneratedMessage {
   static OS create() => OS._();
   @$core.override
   OS createEmptyInstance() => create();
-  static $pb.PbList<OS> createRepeated() => $pb.PbList<OS>();
   @$core.pragma('dart2js:noInline')
   static OS getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OS>(create);
@@ -1803,7 +1781,6 @@ class Browser extends $pb.GeneratedMessage {
   static Browser create() => Browser._();
   @$core.override
   Browser createEmptyInstance() => create();
-  static $pb.PbList<Browser> createRepeated() => $pb.PbList<Browser>();
   @$core.pragma('dart2js:noInline')
   static Browser getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Browser>(create);
@@ -1886,7 +1863,6 @@ class RTMPIngress extends $pb.GeneratedMessage {
   static RTMPIngress create() => RTMPIngress._();
   @$core.override
   RTMPIngress createEmptyInstance() => create();
-  static $pb.PbList<RTMPIngress> createRepeated() => $pb.PbList<RTMPIngress>();
   @$core.pragma('dart2js:noInline')
   static RTMPIngress getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<RTMPIngress>(create);
@@ -2001,7 +1977,6 @@ class Device extends $pb.GeneratedMessage {
   static Device create() => Device._();
   @$core.override
   Device createEmptyInstance() => create();
-  static $pb.PbList<Device> createRepeated() => $pb.PbList<Device>();
   @$core.pragma('dart2js:noInline')
   static Device getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Device>(create);
@@ -2086,7 +2061,6 @@ class Call extends $pb.GeneratedMessage {
   static Call create() => Call._();
   @$core.override
   Call createEmptyInstance() => create();
-  static $pb.PbList<Call> createRepeated() => $pb.PbList<Call>();
   @$core.pragma('dart2js:noInline')
   static Call getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Call>(create);
@@ -2213,7 +2187,6 @@ class CallGrants extends $pb.GeneratedMessage {
   static CallGrants create() => CallGrants._();
   @$core.override
   CallGrants createEmptyInstance() => create();
-  static $pb.PbList<CallGrants> createRepeated() => $pb.PbList<CallGrants>();
   @$core.pragma('dart2js:noInline')
   static CallGrants getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<CallGrants>(create);
@@ -2294,8 +2267,6 @@ class InputDevices extends $pb.GeneratedMessage {
   static InputDevices create() => InputDevices._();
   @$core.override
   InputDevices createEmptyInstance() => create();
-  static $pb.PbList<InputDevices> createRepeated() =>
-      $pb.PbList<InputDevices>();
   @$core.pragma('dart2js:noInline')
   static InputDevices getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<InputDevices>(create);
@@ -2367,8 +2338,6 @@ class AndroidState extends $pb.GeneratedMessage {
   static AndroidState create() => AndroidState._();
   @$core.override
   AndroidState createEmptyInstance() => create();
-  static $pb.PbList<AndroidState> createRepeated() =>
-      $pb.PbList<AndroidState>();
   @$core.pragma('dart2js:noInline')
   static AndroidState getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<AndroidState>(create);
@@ -2437,7 +2406,6 @@ class AppleState extends $pb.GeneratedMessage {
   static AppleState create() => AppleState._();
   @$core.override
   AppleState createEmptyInstance() => create();
-  static $pb.PbList<AppleState> createRepeated() => $pb.PbList<AppleState>();
   @$core.pragma('dart2js:noInline')
   static AppleState getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<AppleState>(create);
@@ -2522,8 +2490,6 @@ class PerformanceStats extends $pb.GeneratedMessage {
   static PerformanceStats create() => PerformanceStats._();
   @$core.override
   PerformanceStats createEmptyInstance() => create();
-  static $pb.PbList<PerformanceStats> createRepeated() =>
-      $pb.PbList<PerformanceStats>();
   @$core.pragma('dart2js:noInline')
   static PerformanceStats getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PerformanceStats>(create);
@@ -2592,6 +2558,555 @@ class PerformanceStats extends $pb.GeneratedMessage {
   $core.bool hasTargetBitrate() => $_has(5);
   @$pb.TagNumber(6)
   void clearTargetBitrate() => $_clearField(6);
+}
+
+/// ===================================================================
+/// BASE (shared by all RTP directions)
+/// ===================================================================
+class RtpBase extends $pb.GeneratedMessage {
+  factory RtpBase({
+    $core.int? ssrc,
+    $core.String? kind,
+    $core.double? timestampMs,
+  }) {
+    final result = create();
+    if (ssrc != null) result.ssrc = ssrc;
+    if (kind != null) result.kind = kind;
+    if (timestampMs != null) result.timestampMs = timestampMs;
+    return result;
+  }
+
+  RtpBase._();
+
+  factory RtpBase.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RtpBase.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RtpBase',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'ssrc', fieldType: $pb.PbFieldType.OU3)
+    ..aOS(2, _omitFieldNames ? '' : 'kind')
+    ..aD(3, _omitFieldNames ? '' : 'timestampMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RtpBase clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RtpBase copyWith(void Function(RtpBase) updates) =>
+      super.copyWith((message) => updates(message as RtpBase)) as RtpBase;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RtpBase create() => RtpBase._();
+  @$core.override
+  RtpBase createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RtpBase getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RtpBase>(create);
+  static RtpBase? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get ssrc => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set ssrc($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSsrc() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSsrc() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get kind => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set kind($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasKind() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearKind() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get timestampMs => $_getN(2);
+  @$pb.TagNumber(3)
+  set timestampMs($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasTimestampMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTimestampMs() => $_clearField(3);
+}
+
+/// ===================================================================
+/// INBOUND (SUBSCRIBER RECEIVING MEDIA)
+/// ===================================================================
+class InboundRtp extends $pb.GeneratedMessage {
+  factory InboundRtp({
+    RtpBase? base,
+    $core.double? jitterSeconds,
+    $fixnum.Int64? packetsReceived,
+    $fixnum.Int64? packetsLost,
+    $core.double? packetLossPercent,
+    $core.int? concealmentEvents,
+    $core.double? concealmentPercent,
+    $core.double? fps,
+    $core.double? freezeDurationSeconds,
+    $core.double? avgDecodeTimeSeconds,
+    $core.int? minDimensionPx,
+  }) {
+    final result = create();
+    if (base != null) result.base = base;
+    if (jitterSeconds != null) result.jitterSeconds = jitterSeconds;
+    if (packetsReceived != null) result.packetsReceived = packetsReceived;
+    if (packetsLost != null) result.packetsLost = packetsLost;
+    if (packetLossPercent != null) result.packetLossPercent = packetLossPercent;
+    if (concealmentEvents != null) result.concealmentEvents = concealmentEvents;
+    if (concealmentPercent != null)
+      result.concealmentPercent = concealmentPercent;
+    if (fps != null) result.fps = fps;
+    if (freezeDurationSeconds != null)
+      result.freezeDurationSeconds = freezeDurationSeconds;
+    if (avgDecodeTimeSeconds != null)
+      result.avgDecodeTimeSeconds = avgDecodeTimeSeconds;
+    if (minDimensionPx != null) result.minDimensionPx = minDimensionPx;
+    return result;
+  }
+
+  InboundRtp._();
+
+  factory InboundRtp.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory InboundRtp.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'InboundRtp',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..aOM<RtpBase>(1, _omitFieldNames ? '' : 'base', subBuilder: RtpBase.create)
+    ..aD(2, _omitFieldNames ? '' : 'jitterSeconds')
+    ..a<$fixnum.Int64>(
+        3, _omitFieldNames ? '' : 'packetsReceived', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(
+        4, _omitFieldNames ? '' : 'packetsLost', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aD(5, _omitFieldNames ? '' : 'packetLossPercent')
+    ..aI(10, _omitFieldNames ? '' : 'concealmentEvents',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aD(11, _omitFieldNames ? '' : 'concealmentPercent')
+    ..aD(20, _omitFieldNames ? '' : 'fps')
+    ..aD(21, _omitFieldNames ? '' : 'freezeDurationSeconds')
+    ..aD(22, _omitFieldNames ? '' : 'avgDecodeTimeSeconds')
+    ..aI(23, _omitFieldNames ? '' : 'minDimensionPx',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InboundRtp clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  InboundRtp copyWith(void Function(InboundRtp) updates) =>
+      super.copyWith((message) => updates(message as InboundRtp)) as InboundRtp;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static InboundRtp create() => InboundRtp._();
+  @$core.override
+  InboundRtp createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static InboundRtp getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<InboundRtp>(create);
+  static InboundRtp? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  RtpBase get base => $_getN(0);
+  @$pb.TagNumber(1)
+  set base(RtpBase value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasBase() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBase() => $_clearField(1);
+  @$pb.TagNumber(1)
+  RtpBase ensureBase() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.double get jitterSeconds => $_getN(1);
+  @$pb.TagNumber(2)
+  set jitterSeconds($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasJitterSeconds() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearJitterSeconds() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get packetsReceived => $_getI64(2);
+  @$pb.TagNumber(3)
+  set packetsReceived($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasPacketsReceived() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPacketsReceived() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get packetsLost => $_getI64(3);
+  @$pb.TagNumber(4)
+  set packetsLost($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasPacketsLost() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPacketsLost() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.double get packetLossPercent => $_getN(4);
+  @$pb.TagNumber(5)
+  set packetLossPercent($core.double value) => $_setDouble(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasPacketLossPercent() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearPacketLossPercent() => $_clearField(5);
+
+  /// -------- AUDIO METRICS --------
+  @$pb.TagNumber(10)
+  $core.int get concealmentEvents => $_getIZ(5);
+  @$pb.TagNumber(10)
+  set concealmentEvents($core.int value) => $_setUnsignedInt32(5, value);
+  @$pb.TagNumber(10)
+  $core.bool hasConcealmentEvents() => $_has(5);
+  @$pb.TagNumber(10)
+  void clearConcealmentEvents() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.double get concealmentPercent => $_getN(6);
+  @$pb.TagNumber(11)
+  set concealmentPercent($core.double value) => $_setDouble(6, value);
+  @$pb.TagNumber(11)
+  $core.bool hasConcealmentPercent() => $_has(6);
+  @$pb.TagNumber(11)
+  void clearConcealmentPercent() => $_clearField(11);
+
+  /// -------- VIDEO METRICS --------
+  @$pb.TagNumber(20)
+  $core.double get fps => $_getN(7);
+  @$pb.TagNumber(20)
+  set fps($core.double value) => $_setDouble(7, value);
+  @$pb.TagNumber(20)
+  $core.bool hasFps() => $_has(7);
+  @$pb.TagNumber(20)
+  void clearFps() => $_clearField(20);
+
+  @$pb.TagNumber(21)
+  $core.double get freezeDurationSeconds => $_getN(8);
+  @$pb.TagNumber(21)
+  set freezeDurationSeconds($core.double value) => $_setDouble(8, value);
+  @$pb.TagNumber(21)
+  $core.bool hasFreezeDurationSeconds() => $_has(8);
+  @$pb.TagNumber(21)
+  void clearFreezeDurationSeconds() => $_clearField(21);
+
+  @$pb.TagNumber(22)
+  $core.double get avgDecodeTimeSeconds => $_getN(9);
+  @$pb.TagNumber(22)
+  set avgDecodeTimeSeconds($core.double value) => $_setDouble(9, value);
+  @$pb.TagNumber(22)
+  $core.bool hasAvgDecodeTimeSeconds() => $_has(9);
+  @$pb.TagNumber(22)
+  void clearAvgDecodeTimeSeconds() => $_clearField(22);
+
+  @$pb.TagNumber(23)
+  $core.int get minDimensionPx => $_getIZ(10);
+  @$pb.TagNumber(23)
+  set minDimensionPx($core.int value) => $_setUnsignedInt32(10, value);
+  @$pb.TagNumber(23)
+  $core.bool hasMinDimensionPx() => $_has(10);
+  @$pb.TagNumber(23)
+  void clearMinDimensionPx() => $_clearField(23);
+}
+
+/// ===================================================================
+/// OUTBOUND (PUBLISHER SENDING MEDIA)
+/// ===================================================================
+class OutboundRtp extends $pb.GeneratedMessage {
+  factory OutboundRtp({
+    RtpBase? base,
+    $core.double? fps,
+    $core.double? avgEncodeTimeSeconds,
+    $core.double? bitrateBps,
+    $core.int? minDimensionPx,
+  }) {
+    final result = create();
+    if (base != null) result.base = base;
+    if (fps != null) result.fps = fps;
+    if (avgEncodeTimeSeconds != null)
+      result.avgEncodeTimeSeconds = avgEncodeTimeSeconds;
+    if (bitrateBps != null) result.bitrateBps = bitrateBps;
+    if (minDimensionPx != null) result.minDimensionPx = minDimensionPx;
+    return result;
+  }
+
+  OutboundRtp._();
+
+  factory OutboundRtp.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OutboundRtp.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OutboundRtp',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..aOM<RtpBase>(1, _omitFieldNames ? '' : 'base', subBuilder: RtpBase.create)
+    ..aD(10, _omitFieldNames ? '' : 'fps')
+    ..aD(11, _omitFieldNames ? '' : 'avgEncodeTimeSeconds')
+    ..aD(12, _omitFieldNames ? '' : 'bitrateBps')
+    ..aI(13, _omitFieldNames ? '' : 'minDimensionPx',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OutboundRtp clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OutboundRtp copyWith(void Function(OutboundRtp) updates) =>
+      super.copyWith((message) => updates(message as OutboundRtp))
+          as OutboundRtp;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OutboundRtp create() => OutboundRtp._();
+  @$core.override
+  OutboundRtp createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OutboundRtp getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<OutboundRtp>(create);
+  static OutboundRtp? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  RtpBase get base => $_getN(0);
+  @$pb.TagNumber(1)
+  set base(RtpBase value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasBase() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBase() => $_clearField(1);
+  @$pb.TagNumber(1)
+  RtpBase ensureBase() => $_ensure(0);
+
+  @$pb.TagNumber(10)
+  $core.double get fps => $_getN(1);
+  @$pb.TagNumber(10)
+  set fps($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(10)
+  $core.bool hasFps() => $_has(1);
+  @$pb.TagNumber(10)
+  void clearFps() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.double get avgEncodeTimeSeconds => $_getN(2);
+  @$pb.TagNumber(11)
+  set avgEncodeTimeSeconds($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(11)
+  $core.bool hasAvgEncodeTimeSeconds() => $_has(2);
+  @$pb.TagNumber(11)
+  void clearAvgEncodeTimeSeconds() => $_clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.double get bitrateBps => $_getN(3);
+  @$pb.TagNumber(12)
+  set bitrateBps($core.double value) => $_setDouble(3, value);
+  @$pb.TagNumber(12)
+  $core.bool hasBitrateBps() => $_has(3);
+  @$pb.TagNumber(12)
+  void clearBitrateBps() => $_clearField(12);
+
+  @$pb.TagNumber(13)
+  $core.int get minDimensionPx => $_getIZ(4);
+  @$pb.TagNumber(13)
+  set minDimensionPx($core.int value) => $_setUnsignedInt32(4, value);
+  @$pb.TagNumber(13)
+  $core.bool hasMinDimensionPx() => $_has(4);
+  @$pb.TagNumber(13)
+  void clearMinDimensionPx() => $_clearField(13);
+}
+
+/// ===================================================================
+/// SFU FEEDBACK: REMOTE-INBOUND (Publisher receives feedback)
+/// ===================================================================
+class RemoteInboundRtp extends $pb.GeneratedMessage {
+  factory RemoteInboundRtp({
+    RtpBase? base,
+    $core.double? jitterSeconds,
+    $core.double? roundTripTimeS,
+  }) {
+    final result = create();
+    if (base != null) result.base = base;
+    if (jitterSeconds != null) result.jitterSeconds = jitterSeconds;
+    if (roundTripTimeS != null) result.roundTripTimeS = roundTripTimeS;
+    return result;
+  }
+
+  RemoteInboundRtp._();
+
+  factory RemoteInboundRtp.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RemoteInboundRtp.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RemoteInboundRtp',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..aOM<RtpBase>(1, _omitFieldNames ? '' : 'base', subBuilder: RtpBase.create)
+    ..aD(2, _omitFieldNames ? '' : 'jitterSeconds')
+    ..aD(3, _omitFieldNames ? '' : 'roundTripTimeS')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RemoteInboundRtp clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RemoteInboundRtp copyWith(void Function(RemoteInboundRtp) updates) =>
+      super.copyWith((message) => updates(message as RemoteInboundRtp))
+          as RemoteInboundRtp;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RemoteInboundRtp create() => RemoteInboundRtp._();
+  @$core.override
+  RemoteInboundRtp createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RemoteInboundRtp getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RemoteInboundRtp>(create);
+  static RemoteInboundRtp? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  RtpBase get base => $_getN(0);
+  @$pb.TagNumber(1)
+  set base(RtpBase value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasBase() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBase() => $_clearField(1);
+  @$pb.TagNumber(1)
+  RtpBase ensureBase() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.double get jitterSeconds => $_getN(1);
+  @$pb.TagNumber(2)
+  set jitterSeconds($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasJitterSeconds() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearJitterSeconds() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get roundTripTimeS => $_getN(2);
+  @$pb.TagNumber(3)
+  set roundTripTimeS($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRoundTripTimeS() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRoundTripTimeS() => $_clearField(3);
+}
+
+/// ===================================================================
+/// SFU FEEDBACK: REMOTE-OUTBOUND (Subscriber receives feedback)
+/// ===================================================================
+class RemoteOutboundRtp extends $pb.GeneratedMessage {
+  factory RemoteOutboundRtp({
+    RtpBase? base,
+    $core.double? jitterSeconds,
+    $core.double? roundTripTimeS,
+  }) {
+    final result = create();
+    if (base != null) result.base = base;
+    if (jitterSeconds != null) result.jitterSeconds = jitterSeconds;
+    if (roundTripTimeS != null) result.roundTripTimeS = roundTripTimeS;
+    return result;
+  }
+
+  RemoteOutboundRtp._();
+
+  factory RemoteOutboundRtp.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RemoteOutboundRtp.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RemoteOutboundRtp',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'stream.video.sfu.models'),
+      createEmptyInstance: create)
+    ..aOM<RtpBase>(1, _omitFieldNames ? '' : 'base', subBuilder: RtpBase.create)
+    ..aD(2, _omitFieldNames ? '' : 'jitterSeconds')
+    ..aD(3, _omitFieldNames ? '' : 'roundTripTimeS')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RemoteOutboundRtp clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RemoteOutboundRtp copyWith(void Function(RemoteOutboundRtp) updates) =>
+      super.copyWith((message) => updates(message as RemoteOutboundRtp))
+          as RemoteOutboundRtp;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RemoteOutboundRtp create() => RemoteOutboundRtp._();
+  @$core.override
+  RemoteOutboundRtp createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RemoteOutboundRtp getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RemoteOutboundRtp>(create);
+  static RemoteOutboundRtp? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  RtpBase get base => $_getN(0);
+  @$pb.TagNumber(1)
+  set base(RtpBase value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasBase() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBase() => $_clearField(1);
+  @$pb.TagNumber(1)
+  RtpBase ensureBase() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.double get jitterSeconds => $_getN(1);
+  @$pb.TagNumber(2)
+  set jitterSeconds($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasJitterSeconds() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearJitterSeconds() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get roundTripTimeS => $_getN(2);
+  @$pb.TagNumber(3)
+  set roundTripTimeS($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRoundTripTimeS() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRoundTripTimeS() => $_clearField(3);
 }
 
 const $core.bool _omitFieldNames =
