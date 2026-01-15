@@ -91,6 +91,9 @@ abstract class CallStatus extends Equatable {
 
   bool get isJoined => this is CallStatusJoined;
 
+  bool get isAlreadyJoined =>
+      isReconnecting || isMigrating || isConnected || isJoined;
+
   /// Returns human readable text representation of [CallStatus].
   String toStatusString() {
     if (isIdle) {

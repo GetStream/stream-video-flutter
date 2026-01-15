@@ -11,6 +11,7 @@ import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
 import 'mixins/state_participant_mixin.dart';
+import 'mixins/state_pending_tracks_mixin.dart';
 import 'mixins/state_rtc_mixin.dart';
 import 'mixins/state_sfu_mixin.dart';
 
@@ -19,6 +20,7 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateCoordinatorMixin,
         StateLifecycleMixin,
         StateParticipantMixin,
+        StatePendingTracksMixin,
         StateRtcMixin,
         StateSfuMixin,
         StateCallActionsMixin {
