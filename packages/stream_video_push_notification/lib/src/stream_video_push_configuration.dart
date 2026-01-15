@@ -151,7 +151,6 @@ class IOSPushConfiguration {
     this.supportsUngrouping,
     this.ringtonePath,
     this.includesCallsInRecents,
-    this.useDisplayNameAsHandle,
   });
 
   factory IOSPushConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -160,9 +159,19 @@ class IOSPushConfiguration {
   /// App's Icon. using for display inside Callkit(iOS)
   final String? iconName;
 
-  /// Type handle call `generic`, `number`, `email`
+  /// Type of handle CallKit should expect. The SDK sets the user ID as the
+  /// handle value, so choose the type that matches your user ID format:
+  /// - `generic`: arbitrary identifier (default).
+  /// - `number`: phone-like digits, it's formatted as a number in CallKit.
+  /// - `email`: an email address, it's displayed as an email in CallKit.
   final String? handleType;
+
+  /// When true, wraps callerName/handle/extra into an encrypted JSON blob
+  /// before sending to CallKit. Use this to hide raw IDs,
+  /// but note the visible handle (ex. in Recents) will look like encoded text. Leave
+  /// false for a clean, user-friendly handle string.
   final bool? useComplexHandle;
+
   final bool? supportsVideo;
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
@@ -183,10 +192,6 @@ class IOSPushConfiguration {
   /// Defaults to true. Set to false to prevent calls from appearing in Recents.
   final bool? includesCallsInRecents;
 
-  /// When true, uses the caller's display name as the CallKit handle instead of the user ID.
-  /// Defaults to false.
-  final bool? useDisplayNameAsHandle;
-
   IOSPushConfiguration copyWith({
     String? iconName,
     String? handleType,
@@ -205,7 +210,6 @@ class IOSPushConfiguration {
     bool? supportsUngrouping,
     String? ringtonePath,
     bool? includesCallsInRecents,
-    bool? useDisplayNameAsHandle,
   }) {
     return IOSPushConfiguration(
       iconName: iconName ?? this.iconName,
@@ -232,8 +236,6 @@ class IOSPushConfiguration {
       ringtonePath: ringtonePath ?? this.ringtonePath,
       includesCallsInRecents:
           includesCallsInRecents ?? this.includesCallsInRecents,
-      useDisplayNameAsHandle:
-          useDisplayNameAsHandle ?? this.useDisplayNameAsHandle,
     );
   }
 
@@ -259,7 +261,6 @@ class IOSPushConfiguration {
       supportsUngrouping: other.supportsUngrouping,
       ringtonePath: other.ringtonePath,
       includesCallsInRecents: other.includesCallsInRecents,
-      useDisplayNameAsHandle: other.useDisplayNameAsHandle,
     );
   }
 

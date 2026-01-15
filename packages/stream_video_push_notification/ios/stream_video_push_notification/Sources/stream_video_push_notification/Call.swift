@@ -146,7 +146,6 @@ public class Call: NSObject {
     @objc public var audioSessionActive: Bool
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
-    @objc public var useDisplayNameAsHandle: Bool
 
     @objc public init(id: String, callerName: String, handle: String, type: Int) {
         self.uuid = id
@@ -173,7 +172,6 @@ public class Call: NSObject {
         self.audioSessionActive = true
         self.audioSessionPreferredSampleRate = 44100.0
         self.audioSessionPreferredIOBufferDuration = 0.005
-        self.useDisplayNameAsHandle = false
     }
 
     @objc public convenience init(args: NSDictionary) {
@@ -214,7 +212,6 @@ public class Call: NSObject {
                 ios["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
             self.audioSessionPreferredIOBufferDuration =
                 ios["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
-            self.useDisplayNameAsHandle = ios["useDisplayNameAsHandle"] as? Bool ?? false
         } else {
             self.iconName = args["iconName"] as? String ?? "AppLogo"
             self.handleType = args["handleType"] as? String ?? ""
@@ -235,7 +232,6 @@ public class Call: NSObject {
                 args["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
             self.audioSessionPreferredIOBufferDuration =
                 args["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
-            self.useDisplayNameAsHandle = args["useDisplayNameAsHandle"] as? Bool ?? false
         }
     }
 
@@ -258,7 +254,6 @@ public class Call: NSObject {
             "audioSessionActive": audioSessionActive,
             "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
             "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
-            "useDisplayNameAsHandle": useDisplayNameAsHandle,
         ]
         let map: [String: Any] = [
             "uuid": uuid,
