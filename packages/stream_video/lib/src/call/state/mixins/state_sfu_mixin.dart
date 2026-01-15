@@ -6,10 +6,11 @@ import '../../../models/call_participant_pin.dart';
 import '../../../sfu/data/events/sfu_events.dart';
 import '../../../sfu/data/models/sfu_pin.dart';
 import '../../../sfu/sfu_extensions.dart';
+import 'state_pending_tracks_mixin.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordNotifier');
+final _logger = taggedLogger(tag: 'SV:CallState:Sfu');
 
-mixin StateSfuMixin on StateNotifier<CallState> {
+mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   void sfuParticipantLeft(
     SfuParticipantLeftEvent event,
   ) {
@@ -24,6 +25,8 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     state = state.copyWith(
       callParticipants: callParticipants,
     );
+
+    clearPendingTracks(event.participant.trackLookupPrefix);
   }
 
   void sfuJoinResponse(
@@ -87,26 +90,36 @@ mixin StateSfuMixin on StateNotifier<CallState> {
   ) {
     _logger.d(() => '[sfuTrackPublished] ${state.sessionId}; event: $event');
 
-    state = state.copyWith(
-      callParticipants: state.callParticipants.map((participant) {
-        if (participant.userId == event.userId &&
-            participant.sessionId == event.sessionId) {
-          _logger.v(() => '[sfuTrackPublished] pFound: $participant');
+    final participant = state.callParticipants.firstWhereOrNull(
+      (p) => p.userId == event.userId && p.sessionId == event.sessionId,
+    );
 
-          final trackState =
-              participant.publishedTracks[event.trackType]?.copyWith(
-                muted: false,
-              ) ??
-              TrackState.base(isLocal: participant.isLocal);
-          return participant.copyWith(
+    if (participant == null) {
+      addPendingTrack(
+        event.participant.trackLookupPrefix,
+        event.trackType,
+      );
+      return;
+    }
+
+    final trackState =
+        participant.publishedTracks[event.trackType]?.copyWith(
+          muted: false,
+        ) ??
+        TrackState.base(isLocal: participant.isLocal);
+
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((p) {
+        if (p.userId == event.userId && p.sessionId == event.sessionId) {
+          _logger.v(() => '[sfuTrackPublished] pFound: $p');
+          return p.copyWith(
             publishedTracks: {
-              ...participant.publishedTracks,
+              ...p.publishedTracks,
               event.trackType: trackState,
             },
           );
         } else {
-          _logger.v(() => '[sfuTrackPublished] pSame: $participant');
-          return participant;
+          return p;
         }
       }).toList(),
     );
@@ -221,9 +234,12 @@ mixin StateSfuMixin on StateNotifier<CallState> {
       image: event.participant.userImage,
       sessionId: event.participant.sessionId,
       trackIdPrefix: event.participant.trackLookupPrefix,
+      publishedTracks:
+          consumePendingTracks(event.participant.trackLookupPrefix) ?? {},
       isLocal: isLocal,
       isOnline: !isLocal,
     );
+
     var isExisting = false;
     final participants = state.callParticipants.map((it) {
       if (it.userId == participant.userId &&
@@ -234,6 +250,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
         return it;
       }
     });
+
     state = state.copyWith(
       callParticipants: [
         ...participants,
