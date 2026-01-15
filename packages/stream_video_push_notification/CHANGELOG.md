@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+* [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
+
 ## 1.2.2
 * Sync version with `stream_video_flutter` 1.2.2
 
