@@ -5,7 +5,8 @@ import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/src/stream_video_push_notification.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
-class _FakePushNotificationPlatform extends StreamVideoPushNotificationPlatform {
+class _FakePushNotificationPlatform
+    extends StreamVideoPushNotificationPlatform {
   final StreamController<RingingEvent?> _controller =
       StreamController<RingingEvent?>.broadcast();
 
@@ -42,9 +43,11 @@ void main() {
   });
 
   test('suppresses all events within window', () async {
-    RingingEventBroadcaster().suppressEvent(window: const Duration(
-      milliseconds: 50,
-    ));
+    RingingEventBroadcaster().suppressEvent(
+      window: const Duration(
+        milliseconds: 50,
+      ),
+    );
 
     platform.emit(ActionCallIncoming(data: _callData()));
     await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -64,7 +67,10 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     expect(events.length, 1);
-    expect(events.first, const ActionCallToggleMute(uuid: 'uuid-1', isMuted: false));
+    expect(
+      events.first,
+      const ActionCallToggleMute(uuid: 'uuid-1', isMuted: false),
+    );
   });
 
   test('suppression expires after window', () async {
@@ -79,7 +85,10 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     expect(events.length, 1);
-    expect(events.first, const ActionCallToggleMute(uuid: 'uuid-1', isMuted: true));
+    expect(
+      events.first,
+      const ActionCallToggleMute(uuid: 'uuid-1', isMuted: true),
+    );
   });
 
   test('suppression applies to multiple matching events in window', () async {
