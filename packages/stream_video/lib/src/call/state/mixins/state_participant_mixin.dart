@@ -11,7 +11,7 @@ import '../../../webrtc/model/rtc_video_dimension.dart';
 import '../../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../../../webrtc/rtc_track/rtc_local_track.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordNotifier');
+final _logger = taggedLogger(tag: 'SV:CallState:Participant');
 
 mixin StateParticipantMixin on StateNotifier<CallState> {
   void setParticipantPinned({

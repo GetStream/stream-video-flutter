@@ -2,6 +2,7 @@
 
 ### 🐞 Fixed
 
+* Fixed race condition where remote tracks could arrive before participant join events, causing track state to be lost.
 * Improved reconnection reliability:
   * Added exponential backoff with jitter to fast reconnect attempts.
   * Fixed fast reconnect deadline check to correctly trigger fallback to rejoin.
