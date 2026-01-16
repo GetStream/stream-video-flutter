@@ -1848,6 +1848,12 @@ class Call {
       }
     }
 
+    try {
+      await _rtcMediaDeviceNotifier.pauseAudioPlayout();
+    } catch (e) {
+      _logger.w(() => '[clear] pauseAudioPlayout failed: $e');
+    }
+
     for (final timer in [
       ..._reactionTimers.values,
       ..._captionsTimers.values,
