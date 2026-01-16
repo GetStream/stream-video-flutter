@@ -1,3 +1,8 @@
+## Upcoming
+
+### 🐞 Fixed
+* [Android] Fixed video flickering in Skia renderer by scoping renderer keys with prefix and using stable participant-based keys.
+
 ## 1.2.2
 
 ### 🐞 Fixed
