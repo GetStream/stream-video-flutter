@@ -1,5 +1,9 @@
 ## Upcoming
 
+### ⚡ Performance
+
+* Improved `call.leave()` performance
+
 ### 🐞 Fixed
 
 * Fixed race condition where remote tracks could arrive before participant join events, causing track state to be lost.

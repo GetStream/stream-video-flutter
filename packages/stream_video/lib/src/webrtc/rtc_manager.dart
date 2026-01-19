@@ -456,11 +456,14 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+
     await _screenSharingStartedSubscription?.cancel();
     _screenSharingStartedSubscription = null;
-    for (final trackSid in [...tracks.keys]) {
-      await unpublishTrack(trackId: trackSid);
-    }
+
+    final trackIds = [...tracks.keys];
+    await Future.wait(
+      trackIds.map((trackId) => unpublishTrack(trackId: trackId)),
+    );
 
     tracks.clear();
 
@@ -468,8 +471,10 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
-    await publisher?.dispose();
-    await subscriber.dispose();
+    await Future.wait([
+      if (publisher != null) publisher!.dispose(),
+      subscriber.dispose(),
+    ]);
 
     return super.dispose();
   }

@@ -524,18 +524,23 @@ class CallSession extends Disposable {
     await _eventsSubscription?.cancel();
     await _networkStatusSubscription?.cancel();
 
-    await sfuWS.disconnect(
-      code.value,
-      'dart-client: $closeReason',
-    );
-
     statsReporter?.dispose();
     statsReporter = null;
 
-    await rtcManager?.dispose();
-    rtcManager = null;
     _tracer.dispose();
     _peerConnectionCheckTimer?.cancel();
+
+    unawaited(
+      sfuWS.disconnect(
+        code.value,
+        'dart-client: $closeReason',
+      ),
+    );
+
+    if (rtcManager != null) {
+      unawaited(rtcManager!.dispose());
+      rtcManager = null;
+    }
   }
 
   @override
