@@ -140,11 +140,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               () =>
                   '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}',
             );
-            await StreamVideoPushNotificationPlatform.instance.silenceEvents();
+
+            // Call was already accepted, end the CallKit call silently
+            RingingEventBroadcaster().suppressEvent();
             await endCallByCid(event.callCid.toString());
-            await Future<void>.delayed(const Duration(milliseconds: 300));
-            await StreamVideoPushNotificationPlatform.instance
-                .unsilenceEvents();
           }
         }),
       );
@@ -453,13 +452,16 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         .toList();
 
     for (final call in calls) {
-      // Silence events to avoid infinite loop
-      await StreamVideoPushNotificationPlatform.instance.silenceEvents();
+      // Suppress CallKit event to avoid loop
+      RingingEventBroadcaster().suppressEvent(
+        eventType: ActionCallToggleMute,
+        valueKey: isMuted.toString(),
+      );
+
       await StreamVideoPushNotificationPlatform.instance.muteCall(
         call.uuid!,
         isMuted: isMuted,
       );
-      await StreamVideoPushNotificationPlatform.instance.unsilenceEvents();
     }
   }
 
@@ -549,6 +551,24 @@ CallData _callDataFromJson(Map<String, dynamic> json) {
   );
 }
 
+class _RingingEventSuppression {
+  const _RingingEventSuppression({
+    required this.eventType,
+    required this.valueKey,
+    required this.timestamp,
+    required this.window,
+  });
+
+  final Type? eventType;
+  final String? valueKey;
+  final DateTime timestamp;
+  final Duration window;
+
+  bool isValid() {
+    return DateTime.now().difference(timestamp) <= window;
+  }
+}
+
 /// Wrapper class to support multiple subscriptions to the
 /// [StreamVideoPushNotificationPlatform.onEvent] stream.
 final class RingingEventBroadcaster {
@@ -557,9 +577,11 @@ final class RingingEventBroadcaster {
 
   RingingEventBroadcaster._();
 
+  static const _ringingEventSuppressionWindow = Duration(milliseconds: 500);
   static RingingEventBroadcaster? _singleton;
 
   StreamController<RingingEvent>? _controller;
+  final List<_RingingEventSuppression> _suppressions = [];
 
   /// Returns a Stream of [RingingEvent].
   Stream<RingingEvent> get onEvent {
@@ -570,18 +592,62 @@ final class RingingEventBroadcaster {
     return _controller!.stream;
   }
 
+  /// Suppresses upcoming Ringing events.
+  ///
+  /// - If [eventType] is null, all events are suppressed.
+  /// - If [valueKey] is provided, it must match the event value to suppress.
+  void suppressEvent({
+    Type? eventType,
+    String? valueKey,
+    Duration window = _ringingEventSuppressionWindow,
+  }) {
+    _suppressions.add(
+      _RingingEventSuppression(
+        eventType: eventType,
+        valueKey: valueKey,
+        timestamp: DateTime.now(),
+        window: window,
+      ),
+    );
+  }
+
   StreamSubscription<RingingEvent?>? _eventSubscription;
 
   Future<void> _startListenEvent() async {
     _eventSubscription ??= StreamVideoPushNotificationPlatform.instance.onEvent
         .distinct()
         .listen((event) {
-          if (event != null) _controller?.add(event);
+          if (event == null) return;
+          if (_shouldSuppressEvent(event)) return;
+          _controller?.add(event);
         });
   }
 
   Future<void> _stopListenEvent() async {
     await _eventSubscription?.cancel();
     _eventSubscription = null;
+  }
+
+  bool _shouldSuppressEvent(RingingEvent event) {
+    _suppressions.removeWhere((suppression) => !suppression.isValid());
+    if (_suppressions.isEmpty) {
+      return false;
+    }
+
+    final valueKey = _eventValueKey(event);
+    return _suppressions.any(
+      (suppression) =>
+          suppression.eventType == null ||
+          (event.runtimeType == suppression.eventType &&
+              suppression.valueKey == valueKey),
+    );
+  }
+
+  String? _eventValueKey(RingingEvent event) {
+    return switch (event) {
+      ActionCallToggleMute(:final isMuted) => isMuted.toString(),
+      ActionCallToggleHold(:final isOnHold) => isOnHold.toString(),
+      _ => null,
+    };
   }
 }
