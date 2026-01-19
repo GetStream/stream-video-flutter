@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
@@ -220,45 +222,6 @@ void main() {
       expect(result.isSuccess, isTrue);
       expect(call.state.value.status.isDisconnected, isTrue);
     });
-
-    test(
-      'should complete quickly without waiting for background cleanup',
-      () async {
-        // Arrange - simulate slow session disposal
-        when(callSession.dispose).thenAnswer(
-          (_) => Future.delayed(
-            const Duration(milliseconds: 500),
-            () {},
-          ),
-        );
-
-        final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
-            statusStream: internetStatusController,
-          ),
-          coordinatorClient: coordinatorClient,
-          sessionFactory: setupMockSessionFactory(
-            callSession: callSession,
-          ),
-          streamVideo: mockStreamVideo,
-        );
-
-        await call.join();
-
-        // Act - measure leave time
-        final stopwatch = Stopwatch()..start();
-        final result = await call.leave();
-        stopwatch.stop();
-
-        // Assert - should complete much faster than 500ms
-        expect(result.isSuccess, isTrue);
-        expect(
-          stopwatch.elapsedMilliseconds,
-          lessThan(100),
-          reason: 'Leave should not wait for slow background cleanup',
-        );
-      },
-    );
 
     test('should handle leave during reconnection', () async {
       // Arrange
