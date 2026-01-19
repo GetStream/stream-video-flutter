@@ -88,6 +88,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
         data.callerName =
             nonEmptyString(callDisplayName) ?? nonEmptyString(createdByName) ?? defaultCallText
         data.handle = createdById ?? defaultCallText
+
         data.type = videoData
         data.extra = ["callCid": callCid]
         data.iconName =

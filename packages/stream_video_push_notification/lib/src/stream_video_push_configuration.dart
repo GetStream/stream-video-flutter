@@ -150,6 +150,7 @@ class IOSPushConfiguration {
     this.supportsGrouping,
     this.supportsUngrouping,
     this.ringtonePath,
+    this.includesCallsInRecents,
   });
 
   factory IOSPushConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -158,9 +159,19 @@ class IOSPushConfiguration {
   /// App's Icon. using for display inside Callkit(iOS)
   final String? iconName;
 
-  /// Type handle call `generic`, `number`, `email`
+  /// Type of handle CallKit should expect. The SDK sets the user ID as the
+  /// handle value, so choose the type that matches your user ID format:
+  /// - `generic`: arbitrary identifier (default).
+  /// - `number`: phone-like digits, it's formatted as a number in CallKit.
+  /// - `email`: an email address, it's displayed as an email in CallKit.
   final String? handleType;
+
+  /// When true, wraps callerName/handle/extra into an encrypted JSON blob
+  /// before sending to CallKit. Use this to hide raw IDs,
+  /// but note the visible handle (ex. in Recents) will look like encoded text. Leave
+  /// false for a clean, user-friendly handle string.
   final bool? useComplexHandle;
+
   final bool? supportsVideo;
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
@@ -176,6 +187,10 @@ class IOSPushConfiguration {
 
   /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
   final String? ringtonePath;
+
+  /// Whether calls handled by this provider should be included in the system's Recents list.
+  /// Defaults to true. Set to false to prevent calls from appearing in Recents.
+  final bool? includesCallsInRecents;
 
   IOSPushConfiguration copyWith({
     String? iconName,
@@ -194,6 +209,7 @@ class IOSPushConfiguration {
     bool? supportsGrouping,
     bool? supportsUngrouping,
     String? ringtonePath,
+    bool? includesCallsInRecents,
   }) {
     return IOSPushConfiguration(
       iconName: iconName ?? this.iconName,
@@ -218,6 +234,8 @@ class IOSPushConfiguration {
       supportsGrouping: supportsGrouping ?? this.supportsGrouping,
       supportsUngrouping: supportsUngrouping ?? this.supportsUngrouping,
       ringtonePath: ringtonePath ?? this.ringtonePath,
+      includesCallsInRecents:
+          includesCallsInRecents ?? this.includesCallsInRecents,
     );
   }
 
@@ -242,6 +260,7 @@ class IOSPushConfiguration {
       supportsGrouping: other.supportsGrouping,
       supportsUngrouping: other.supportsUngrouping,
       ringtonePath: other.ringtonePath,
+      includesCallsInRecents: other.includesCallsInRecents,
     );
   }
 
