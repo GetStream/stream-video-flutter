@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:stream_video/stream_video.dart' show taggedLogger;
 
 import '../../../../stream_video_flutter.dart';
 

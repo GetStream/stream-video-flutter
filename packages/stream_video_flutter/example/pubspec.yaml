@@ -34,7 +34,7 @@ dependencies:
   stream_webrtc_flutter:
     git:
       url: https://github.com/GetStream/webrtc-flutter
-      ref: dea5ac608a35647e349a16c5ba66abafa48c3cc1
+      ref: 8e8c1e0bf0e509ef37d78273d85002e628fdbbb0
 
 dependency_overrides:
   stream_video:

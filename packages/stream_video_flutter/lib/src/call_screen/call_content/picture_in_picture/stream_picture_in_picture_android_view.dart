@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../stream_video_flutter.dart';
-import 'android_pip_manager.dart';
 
 /// Android implementation of Picture-in-Picture functionality.
 /// This widget handles all PiP logic internally and provides a clean interface
@@ -26,11 +24,9 @@ class StreamPictureInPictureAndroidView extends StatefulWidget {
 
 class _StreamPictureInPictureAndroidViewState
     extends State<StreamPictureInPictureAndroidView> {
-  final _logger = taggedLogger(tag: 'SV:StreamPictureInPictureAndroidView');
-
   OverlayEntry? _overlayEntry;
   bool _isOverlayVisible = false;
-  AndroidPipManager _androidPipManager = AndroidPipManager.instance();
+  final AndroidPipManager _androidPipManager = AndroidPipManager.instance();
 
   StreamSubscription<(CallStatus, bool?)>? _callStateSubscription;
 
