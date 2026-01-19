@@ -462,7 +462,16 @@ class RtcManager extends Disposable {
 
     final trackIds = [...tracks.keys];
     await Future.wait(
-      trackIds.map((trackId) => unpublishTrack(trackId: trackId)),
+      trackIds.map(
+        (trackId) => unpublishTrack(trackId: trackId).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
+          _logger.e(
+            () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
+          );
+        }),
+      ),
     );
 
     tracks.clear();
@@ -472,8 +481,17 @@ class RtcManager extends Disposable {
     onRemoteTrackReceived = null;
 
     await Future.wait([
-      if (publisher != null) publisher!.dispose(),
-      subscriber.dispose(),
+      if (publisher != null)
+        publisher!.dispose().catchError((Object e, StackTrace stk) {
+          _logger.e(
+            () => '[dispose] publisher.dispose failed: $e\n$stk',
+          );
+        }),
+      subscriber.dispose().catchError((Object e, StackTrace stk) {
+        _logger.e(
+          () => '[dispose] subscriber.dispose failed: $e\n$stk',
+        );
+      }),
     ]);
 
     return super.dispose();

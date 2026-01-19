@@ -531,14 +531,24 @@ class CallSession extends Disposable {
     _peerConnectionCheckTimer?.cancel();
 
     unawaited(
-      sfuWS.disconnect(
-        code.value,
-        'dart-client: $closeReason',
-      ),
+      sfuWS
+          .disconnect(
+            code.value,
+            'dart-client: $closeReason',
+          )
+          .catchError((Object e, StackTrace stk) {
+            _logger.w(() => '[close] sfuWS.disconnect failed: $e');
+            return const Result.success(none);
+          }),
     );
 
     if (rtcManager != null) {
-      unawaited(rtcManager!.dispose());
+      unawaited(
+        rtcManager!.dispose().catchError((Object e, StackTrace stk) {
+          _logger.w(() => '[close] rtcManager.dispose failed: $e');
+        }),
+      );
+
       rtcManager = null;
     }
   }
