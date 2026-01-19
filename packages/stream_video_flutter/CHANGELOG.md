@@ -1,17 +1,16 @@
-
 ## Upcoming
 
 ### ✅ Added
 * Added `includesCallsInRecents` to iOS push configuration to control whether CallKit calls appear in Recents.
 
 ### 🐞 Fixed
-
 * Improved reconnection reliability:
   * Added exponential backoff with jitter to fast reconnect attempts.
   * Fixed fast reconnect deadline check to correctly trigger fallback to rejoin.
   * Fixed network availability verification during subsequent fast reconnect attempts.
   * Added `reconnectReason` to reconnect details for sfu logs.
   * Fixed race condition where automatic ICE restart could interfere with fast reconnect, causing subscriber video to not recover.
+* [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
 
 ## 1.2.2
 
