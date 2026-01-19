@@ -1,3 +1,11 @@
+## Upcoming
+
+### ✅ Added
+* Added `includesCallsInRecents` to iOS push configuration to control whether CallKit calls appear in Recents.
+
+### 🐞 Fixed
+* [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
+
 ## 1.2.2
 * Sync version with `stream_video_flutter` 1.2.2
 

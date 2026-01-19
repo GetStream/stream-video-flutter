@@ -1,8 +1,10 @@
 name: stream_video_noise_cancellation_example
+description: "A new Flutter project."
+publish_to: "none"
+version: 0.1.0
 
 environment:
-  sdk: ^3.8.0
-  flutter: ">=3.32.0"
+  sdk: ^3.9.2
 
 dependencies:
   flutter:
@@ -10,8 +12,16 @@ dependencies:
   stream_video: ^1.2.2
   stream_video_noise_cancellation: ^1.2.2
 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
 dependency_overrides:
   stream_video:
     path: ../../stream_video
   stream_video_noise_cancellation:
     path: ../../stream_video_noise_cancellation
+
+flutter:
+  uses-material-design: true

@@ -20,6 +20,7 @@ import Foundation
     @objc public var supportsGrouping: Bool
     @objc public var supportsUngrouping: Bool
     @objc public var ringtonePath: String
+    @objc public var includesCallsInRecents: Bool
 
     @objc public init(headers: NSDictionary) {
         self.headers = headers
@@ -41,6 +42,7 @@ import Foundation
         self.supportsGrouping = true
         self.supportsUngrouping = true
         self.ringtonePath = ""
+        self.includesCallsInRecents = true
     }
 
     @objc public convenience init(args: NSDictionary) {
@@ -76,6 +78,7 @@ import Foundation
             self.supportsGrouping = ios["supportsGrouping"] as? Bool ?? true
             self.supportsUngrouping = ios["supportsUngrouping"] as? Bool ?? true
             self.ringtonePath = ios["ringtonePath"] as? String ?? ""
+            self.includesCallsInRecents = ios["includesCallsInRecents"] as? Bool ?? true
         } else {
             // Fallback to top-level properties if ios object doesn't exist
             self.iconName = args["iconName"] as? String ?? "CallKitLogo"
@@ -96,6 +99,7 @@ import Foundation
             self.supportsGrouping = args["supportsGrouping"] as? Bool ?? true
             self.supportsUngrouping = args["supportsUngrouping"] as? Bool ?? true
             self.ringtonePath = args["ringtonePath"] as? String ?? ""
+            self.includesCallsInRecents = args["includesCallsInRecents"] as? Bool ?? true
         }
     }
 
@@ -117,6 +121,7 @@ import Foundation
             "supportsGrouping": supportsGrouping,
             "supportsUngrouping": supportsUngrouping,
             "ringtonePath": ringtonePath,
+            "includesCallsInRecents": includesCallsInRecents,
         ]
 
         let result: [String: Any] = [
