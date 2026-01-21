@@ -302,9 +302,7 @@ MockCallSession setupMockCallSession() {
       rtcConfig: const RTCConfiguration(),
     ),
   );
-  when(
-    callSession.getTrace,
-  ).thenReturn(
+  when(callSession.getTrace).thenReturn(
     [
       TraceSlice(
         snapshot: [],
@@ -338,6 +336,8 @@ MockCallSession setupMockCallSession() {
       ),
     ),
   );
+
+  when(callSession.dispose).thenAnswer((_) => Future.value());
 
   return callSession;
 }

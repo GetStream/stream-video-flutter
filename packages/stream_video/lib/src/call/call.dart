@@ -1839,15 +1839,6 @@ class Call {
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
 
-    if (state.value.settings.audio.noiseCancellation?.mode ==
-        NoiceCancellationSettingsMode.autoOn) {
-      try {
-        await stopAudioProcessing();
-      } catch (e) {
-        _logger.w(() => '[clear] stopAudioProcessing failed: $e');
-      }
-    }
-
     for (final timer in [
       ..._reactionTimers.values,
       ..._captionsTimers.values,
@@ -1863,10 +1854,22 @@ class Call {
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
 
-    try {
-      await _session?.dispose();
-    } catch (e) {
-      _logger.w(() => '[clear] stop dispose failed: $e');
+    if (state.value.settings.audio.noiseCancellation?.mode ==
+        NoiceCancellationSettingsMode.autoOn) {
+      unawaited(
+        stopAudioProcessing().catchError((Object e) {
+          _logger.w(() => '[clear] stopAudioProcessing failed: $e');
+          return const Result.success(none);
+        }),
+      );
+    }
+
+    if (_session != null) {
+      unawaited(
+        _session!.dispose().catchError((Object e) {
+          _logger.w(() => '[clear] session dispose failed: $e');
+        }),
+      );
     }
 
     await dynascaleManager.dispose();
@@ -2108,16 +2111,19 @@ class Call {
       if (mediaConstraints is AudioConstraints) {
         _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
         await setMicrophoneEnabled(
-          enabled: true,
+          enabled: track.mediaTrack.enabled,
           constraints: mediaConstraints,
         );
       } else if (mediaConstraints is CameraConstraints) {
         _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
-        await setCameraEnabled(enabled: true, constraints: mediaConstraints);
+        await setCameraEnabled(
+          enabled: track.mediaTrack.enabled,
+          constraints: mediaConstraints,
+        );
       } else if (mediaConstraints is ScreenShareConstraints) {
         _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
         await setScreenShareEnabled(
-          enabled: true,
+          enabled: track.mediaTrack.enabled,
           constraints: mediaConstraints,
         );
       } else {
