@@ -17,7 +17,7 @@ private fun initInstance(context: Context) {
 
 
 fun addCall(context: Context?, data: Data, isAccepted: Boolean = false) {
-    val json = getString(context, "ACTIVE_CALLS", "[]")
+    val json = getString(context, "ACTIVE_CALLS", "[]") ?: "[]"
     val arrayData: ArrayList<Data> = Utils.getGsonInstance()
         .readValue(json, object : TypeReference<ArrayList<Data>>() {})
     val currentData = arrayData.find { it == data }
@@ -31,7 +31,7 @@ fun addCall(context: Context?, data: Data, isAccepted: Boolean = false) {
 }
 
 fun removeCall(context: Context?, data: Data) {
-    val json = getString(context, "ACTIVE_CALLS", "[]")
+    val json = getString(context, "ACTIVE_CALLS", "[]") ?: "[]"
     val arrayData: ArrayList<Data> = Utils.getGsonInstance()
         .readValue(json, object : TypeReference<ArrayList<Data>>() {})
     arrayData.remove(data)
@@ -44,13 +44,13 @@ fun removeAllCalls(context: Context?) {
 }
 
 fun getDataActiveCalls(context: Context?): ArrayList<Data> {
-    val json = getString(context, "ACTIVE_CALLS", "[]")
+    val json = getString(context, "ACTIVE_CALLS", "[]") ?: "[]"
     return Utils.getGsonInstance()
         .readValue(json, object : TypeReference<ArrayList<Data>>() {})
 }
 
 fun getDataActiveCallsForFlutter(context: Context?): ArrayList<Map<String, Any?>> {
-    val json = getString(context, "ACTIVE_CALLS", "[]")
+    val json = getString(context, "ACTIVE_CALLS", "[]") ?: "[]"
     return Utils.getGsonInstance().readValue(json, object : TypeReference<ArrayList<Map<String, Any?>>>() {})
 }
 
