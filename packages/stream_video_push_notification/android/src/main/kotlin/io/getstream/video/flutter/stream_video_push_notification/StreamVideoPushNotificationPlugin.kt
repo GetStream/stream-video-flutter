@@ -67,8 +67,9 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 instance = StreamVideoPushNotificationPlugin()
                 instance.incomingCallSoundPlayerManager = IncomingCallSoundPlayerManager(context)
                 instance.incomingCallNotificationManager = IncomingCallNotificationManager(context, instance.incomingCallSoundPlayerManager)
-                instance.context = context
             }
+            // Always update context to ensure it's valid for the current engine
+            instance.context = context
 
             val channel = MethodChannel(binaryMessenger, "stream_video_push_notification")
             methodChannels[binaryMessenger] = channel
