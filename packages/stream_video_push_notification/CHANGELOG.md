@@ -5,6 +5,7 @@
 
 ### 🐞 Fixed
 * [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
+* Fixed device registration to force verification on first call each app session while preventing duplicate API calls during the same session.
 
 ## 1.2.2
 * Sync version with `stream_video_flutter` 1.2.2
