@@ -237,6 +237,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   List<Call> currentActiveCalls = [];
 
+  bool _deviceRegistrationEnsured = false;
+
   @override
   void registerDevice() {
     final pushProvider = switch (CurrentPlatform.type) {
@@ -254,7 +256,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
 
       final storedToken = _sharedPreferences.getString(tokenKey);
-      if (storedToken == token) return;
+      if (storedToken == token && _deviceRegistrationEnsured) return;
 
       await _client
           .createDevice(
@@ -266,6 +268,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
           .then((result) {
             if (result is Success) {
               _sharedPreferences.setString(tokenKey, token);
+              _deviceRegistrationEnsured = true;
             }
           });
     }
