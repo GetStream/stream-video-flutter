@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 
 import '../../stream_video.dart' show DisconnectReason, StreamVideoOptions;
 import '../call/call.dart';
+import '../lifecycle/lifecycle_state.dart';
 import '../models/user.dart';
 import '../state_emitter.dart';
 import 'connection_state.dart';
@@ -49,6 +50,9 @@ abstract class ClientState {
   /// Removes the call from the list of active calls.
   /// It won't `leave` the call, just removes it from the list.
   Future<void> removeActiveCall(Call call);
+
+  // Current app's lifecycle state.
+  StateEmitter<LifecycleState?> get appLifecycleState;
 }
 
 class MutableClientState implements ClientState {
@@ -61,7 +65,8 @@ class MutableClientState implements ClientState {
       outgoingCall = MutableStateEmitterImpl(null),
       connection = MutableStateEmitterImpl(
         ConnectionState.disconnected(user.id),
-      );
+      ),
+      appLifecycleState = MutableStateEmitterImpl(null);
 
   final StreamVideoOptions options;
 
@@ -88,6 +93,9 @@ class MutableClientState implements ClientState {
 
   @override
   User get currentUser => user.value;
+
+  @override
+  final MutableStateEmitter<LifecycleState?> appLifecycleState;
 
   Future<void> clear() async {
     activeCalls.value = [];

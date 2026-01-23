@@ -51,7 +51,10 @@ fun getDataActiveCalls(context: Context?): ArrayList<Data> {
 
 fun getDataActiveCallsForFlutter(context: Context?): ArrayList<Map<String, Any?>> {
     val json = getString(context, "ACTIVE_CALLS", "[]")
-    return Utils.getGsonInstance().readValue(json, object : TypeReference<ArrayList<Map<String, Any?>>>() {})
+    
+    // If context is null, getString returns null, so we need to handle that case
+    val safeJson = json ?: "[]"
+    return Utils.getGsonInstance().readValue(safeJson, object : TypeReference<ArrayList<Map<String, Any?>>>() {})
 }
 
 fun putString(context: Context?, key: String, value: String?) {

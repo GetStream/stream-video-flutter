@@ -557,6 +557,7 @@ class StreamVideo extends Disposable {
     _logger.d(() => '[onAppState] state: $state');
     try {
       final activeCalls = _state.activeCalls.value;
+      _state.appLifecycleState.value = state;
 
       if (state.isPaused) {
         // Handle app paused state
@@ -860,11 +861,18 @@ class StreamVideo extends Disposable {
     CallPreferences? acceptCallPreferences,
   }) {
     return onRingingEvent<ActionCallAccept>(
-      (event) => _onCallAccept(
-        event,
-        onCallAccepted: onCallAccepted,
-        callPreferences: acceptCallPreferences,
-      ),
+      (event) {
+        // Ignore call accept event when app is in detached state on Android.
+        // The call flow should be handled by consuming the call like in the terminated state.
+        if (!CurrentPlatform.isAndroid ||
+            _state.appLifecycleState.value != LifecycleState.detached) {
+          _onCallAccept(
+            event,
+            onCallAccepted: onCallAccepted,
+            callPreferences: acceptCallPreferences,
+          );
+        }
+      },
     );
   }
 

@@ -375,7 +375,6 @@ override fun onDetachedFromActivityForConfigChanges() {
     }
 
     override fun onDetachedFromActivity() {
-        instance.context = null
         instance.activity = null
     }
 
