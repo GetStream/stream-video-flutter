@@ -295,6 +295,24 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[start] sfu joined: $event');
 
+      // Ensure WebRTC initialization completes before creating rtcManager
+      await _streamVideo.webrtcInitializationCompleter.future;
+
+      // Set Android audio configuration before creating rtcManager
+      if (CurrentPlatform.isAndroid &&
+          _streamVideo.options.androidAudioConfiguration != null) {
+        try {
+          await rtc.Helper.setAndroidAudioConfiguration(
+            _streamVideo.options.androidAudioConfiguration!,
+          );
+          _logger.v(() => '[start] Android audio configuration applied');
+        } catch (e) {
+          _logger.w(
+            () => '[start] Failed to set Android audio configuration: $e',
+          );
+        }
+      }
+
       if (isAnonymousUser) {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
@@ -338,20 +356,6 @@ class CallSession extends Disposable {
 
       await onRtcManagerCreatedCallback?.call(rtcManager!);
       _rtcManagerSubject!.add(rtcManager!);
-
-      // Set Android audio configuration right after creating rtcManager
-      if (CurrentPlatform.isAndroid &&
-          _streamVideo.options.androidAudioConfiguration != null) {
-        try {
-          await rtc.Helper.setAndroidAudioConfiguration(
-            _streamVideo.options.androidAudioConfiguration!,
-          );
-        } catch (e) {
-          _logger.w(
-            () => '[start] Failed to set Android audio configuration: $e',
-          );
-        }
-      }
 
       stateManager.sfuPinsUpdated(event.callState.pins);
 
