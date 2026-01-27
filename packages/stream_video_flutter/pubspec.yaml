@@ -28,7 +28,7 @@ dependencies:
   stream_webrtc_flutter:
     git:
       url: https://github.com/GetStream/webrtc-flutter
-      ref: 975f8f835b5d3fceacb1bb235a67e16062a14d8c
+      ref: c8ede8b431d30bf459555665807f30c3a928cec4
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
