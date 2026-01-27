@@ -149,6 +149,25 @@ class CallSession extends Disposable {
     });
   }
 
+  Future<void> _ensureAndroidAudioConfiguration() async {
+    if (CurrentPlatform.isAndroid &&
+        _streamVideo.options.androidAudioConfiguration != null) {
+      try {
+        await rtc.Helper.setAndroidAudioConfiguration(
+          _streamVideo.options.androidAudioConfiguration!,
+        );
+        _logger.v(
+          () => '[_ensureAndroidAudioConfiguration] Configuration applied',
+        );
+      } catch (e) {
+        _logger.w(
+          () =>
+              '[_ensureAndroidAudioConfiguration] Failed to apply Android audio configuration: $e',
+        );
+      }
+    }
+  }
+
   Future<sfu_events.ReconnectDetails> getReconnectDetails(
     SfuReconnectionStrategy strategy, {
     String? migratingFromSfuId,
@@ -297,21 +316,7 @@ class CallSession extends Disposable {
 
       // Ensure WebRTC initialization completes before creating rtcManager
       await _streamVideo.webrtcInitializationCompleter.future;
-
-      // Set Android audio configuration before creating rtcManager
-      if (CurrentPlatform.isAndroid &&
-          _streamVideo.options.androidAudioConfiguration != null) {
-        try {
-          await rtc.Helper.setAndroidAudioConfiguration(
-            _streamVideo.options.androidAudioConfiguration!,
-          );
-          _logger.v(() => '[start] Android audio configuration applied');
-        } catch (e) {
-          _logger.w(
-            () => '[start] Failed to set Android audio configuration: $e',
-          );
-        }
-      }
+      await _ensureAndroidAudioConfiguration();
 
       if (isAnonymousUser) {
         rtcManager =
@@ -467,6 +472,8 @@ class CallSession extends Disposable {
         _logger.v(() => '[fastReconnect] fast-reconnect done');
 
         stateManager.sfuPinsUpdated(event.callState.pins);
+
+        await _ensureAndroidAudioConfiguration();
 
         result = Result.success(
           (
@@ -700,6 +707,10 @@ class CallSession extends Disposable {
     // Only start remote tracks. Local tracks are started by the user.
     if (track is! RtcRemoteTrack) return;
 
+    if (track.isAudioTrack) {
+      await _ensureAndroidAudioConfiguration();
+    }
+
     await track.start();
   }
 
@@ -904,19 +915,8 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
 
-    if (CurrentPlatform.isAndroid &&
-        remoteTrack.isAudioTrack &&
-        _streamVideo.options.androidAudioConfiguration != null) {
-      try {
-        await rtc.Helper.setAndroidAudioConfiguration(
-          _streamVideo.options.androidAudioConfiguration!,
-        );
-      } catch (e) {
-        _logger.w(
-          () =>
-              '[onRemoteTrackReceived] Failed to apply Android audio configuration: $e',
-        );
-      }
+    if (remoteTrack.isAudioTrack) {
+      await _ensureAndroidAudioConfiguration();
     }
 
     // Start the track.
@@ -972,7 +972,13 @@ class CallSession extends Disposable {
       return Result.error('Unable to set speaker device, Call not connected');
     }
 
-    return rtcManager.setAudioOutputDevice(device: device);
+    final result = await rtcManager.setAudioOutputDevice(device: device);
+
+    if (result.isSuccess && CurrentPlatform.isAndroid) {
+      await _ensureAndroidAudioConfiguration();
+    }
+
+    return result;
   }
 
   Future<Result<RtcLocalTrack>> setCameraEnabled(
