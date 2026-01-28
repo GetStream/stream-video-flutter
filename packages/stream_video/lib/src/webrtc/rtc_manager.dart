@@ -480,6 +480,14 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
+    if (CurrentPlatform.isIos) {
+      try {
+        await RtcMediaDeviceNotifier.instance.pauseAudioPlayout();
+      } catch (e) {
+        _logger.w(() => '[dispose] pauseAudioPlayout failed: $e');
+      }
+    }
+
     await Future.wait([
       if (publisher != null)
         publisher!.dispose().catchError((Object e, StackTrace stk) {
