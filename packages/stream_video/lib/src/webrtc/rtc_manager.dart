@@ -456,11 +456,23 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+
     await _screenSharingStartedSubscription?.cancel();
     _screenSharingStartedSubscription = null;
-    for (final trackSid in [...tracks.keys]) {
-      await unpublishTrack(trackId: trackSid);
-    }
+
+    final trackIds = [...tracks.keys];
+    await Future.wait(
+      trackIds.map(
+        (trackId) => unpublishTrack(trackId: trackId).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
+          _logger.e(
+            () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
+          );
+        }),
+      ),
+    );
 
     tracks.clear();
 
@@ -468,8 +480,27 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
-    await publisher?.dispose();
-    await subscriber.dispose();
+    if (CurrentPlatform.isIos) {
+      try {
+        await RtcMediaDeviceNotifier.instance.pauseAudioPlayout();
+      } catch (e) {
+        _logger.w(() => '[dispose] pauseAudioPlayout failed: $e');
+      }
+    }
+
+    await Future.wait([
+      if (publisher != null)
+        publisher!.dispose().catchError((Object e, StackTrace stk) {
+          _logger.e(
+            () => '[dispose] publisher.dispose failed: $e\n$stk',
+          );
+        }),
+      subscriber.dispose().catchError((Object e, StackTrace stk) {
+        _logger.e(
+          () => '[dispose] subscriber.dispose failed: $e\n$stk',
+        );
+      }),
+    ]);
 
     return super.dispose();
   }
