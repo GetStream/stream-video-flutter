@@ -23,10 +23,7 @@ dependencies:
   shared_preferences: ^2.5.3
   stream_video: ^1.2.2
   stream_video_flutter: ^1.2.2
-  stream_webrtc_flutter:
-    git:
-      url: https://github.com/GetStream/webrtc-flutter
-      ref: 8e8c1e0bf0e509ef37d78273d85002e628fdbbb0
+  stream_webrtc_flutter: ^2.2.4
   uuid: ^4.5.1
 
 dev_dependencies:
