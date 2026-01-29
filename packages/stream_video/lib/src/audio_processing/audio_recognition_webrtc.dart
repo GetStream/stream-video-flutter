@@ -7,7 +7,6 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../../stream_video.dart';
-import '../webrtc/model/stats/rtc_audio_source.dart';
 import '../webrtc/model/stats/rtc_stats_mapper.dart';
 
 class AudioRecognitionWebRTC implements AudioRecognition {
