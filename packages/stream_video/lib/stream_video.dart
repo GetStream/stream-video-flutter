@@ -48,6 +48,7 @@ export 'src/utils/subscriptions.dart';
 export 'src/webrtc/media/media_constraints.dart';
 export 'src/webrtc/model/rtc_video_dimension.dart';
 export 'src/webrtc/model/rtc_video_parameters.dart';
+export 'src/webrtc/model/stats/rtc_stats_models.dart';
 export 'src/webrtc/peer_type.dart';
 export 'src/webrtc/rtc_media_device/rtc_media_device.dart';
 export 'src/webrtc/rtc_media_device/rtc_media_device_notifier.dart';
