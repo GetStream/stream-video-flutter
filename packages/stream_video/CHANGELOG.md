@@ -1,11 +1,9 @@
-## Upcoming
+## 1.2.3
 
 ### ⚡ Performance
-
 * Improved `call.leave()` performance
 
 ### 🐞 Fixed
-
 * Fixed race condition where remote tracks could arrive before participant join events, causing track state to be lost.
 * Improved reconnection reliability:
   * Added exponential backoff with jitter to fast reconnect attempts.

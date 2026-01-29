@@ -1,15 +1,20 @@
-## Upcoming
+## 1.2.3
+
+### ⚡ Performance
+* Improved `call.leave()` performance
 
 ### ✅ Added
 * Added `includesCallsInRecents` to iOS push configuration to control whether CallKit calls appear in Recents.
 
 ### 🐞 Fixed
+* Fixed race condition where remote tracks could arrive before participant join events, causing track state to be lost.
 * Improved reconnection reliability:
   * Added exponential backoff with jitter to fast reconnect attempts.
   * Fixed fast reconnect deadline check to correctly trigger fallback to rejoin.
   * Fixed network availability verification during subsequent fast reconnect attempts.
   * Added `reconnectReason` to reconnect details for sfu logs.
   * Fixed race condition where automatic ICE restart could interfere with fast reconnect, causing subscriber video to not recover.
+* [iOS] Fixed audio session not being released when leaving a call, which prevented other audio packages from using the microphone.
 * [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
 * [Android] Fixed issues when accepting incoming calls from detached state (app exited via back button).
 * [Android] Fixed incoming call notifications not showing when the app is in a detached state (e.g., after pressing the back button).
