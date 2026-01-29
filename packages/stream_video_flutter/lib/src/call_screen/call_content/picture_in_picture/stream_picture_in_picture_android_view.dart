@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../stream_video_flutter.dart';
 
@@ -25,13 +24,9 @@ class StreamPictureInPictureAndroidView extends StatefulWidget {
 
 class _StreamPictureInPictureAndroidViewState
     extends State<StreamPictureInPictureAndroidView> {
-  static const String _pipChannel = 'stream_video_flutter_android_pip';
-  static const MethodChannel _methodChannel = MethodChannel(_pipChannel);
-
-  final _logger = taggedLogger(tag: 'SV:StreamPictureInPictureAndroidView');
-
   OverlayEntry? _overlayEntry;
   bool _isOverlayVisible = false;
+  final AndroidPipManager _androidPipManager = AndroidPipManager.instance();
 
   StreamSubscription<(CallStatus, bool?)>? _callStateSubscription;
 
@@ -102,31 +97,14 @@ class _StreamPictureInPictureAndroidViewState
   }
 
   /// Updates the Android side about whether PiP should be allowed based on current call state
-  Future<void> _setPictureInPictureAllowed(bool isAllowed) async {
-    try {
-      await _methodChannel.invokeMethod(
-        'setPictureInPictureAllowed',
-        isAllowed,
-      );
-    } catch (e) {
-      _logger.e(
-        () =>
-            '[_setPictureInPictureAllowed] Failed to set picture in picture allowed: $e',
-      );
-    }
+  Future<void> _setPictureInPictureAllowed(bool isAllowed) {
+    return _androidPipManager.setPictureInPictureAllowed(isAllowed);
   }
 
   void _setupPictureInPictureListener() {
-    _methodChannel.setMethodCallHandler(_handleMethodCall);
-  }
-
-  Future<void> _handleMethodCall(MethodCall call) async {
-    switch (call.method) {
-      case 'onPictureInPictureModeChanged':
-        final isInPictureInPictureMode = call.arguments as bool;
-        _handlePictureInPictureModeChanged(isInPictureInPictureMode);
-        break;
-    }
+    _androidPipManager.addOnPictureInPictureModeChangedListener(
+      _handlePictureInPictureModeChanged,
+    );
   }
 
   void _handlePictureInPictureModeChanged(bool isInPictureInPictureMode) {
@@ -143,7 +121,9 @@ class _StreamPictureInPictureAndroidViewState
   }
 
   void _cleanupPictureInPictureListener() {
-    _methodChannel.setMethodCallHandler(null);
+    _androidPipManager.removeOnPictureInPictureModeChangedListener(
+      _handlePictureInPictureModeChanged,
+    );
   }
 
   /// Shows the fullscreen PiP overlay
