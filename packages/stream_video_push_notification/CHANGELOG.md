@@ -1,4 +1,4 @@
-## Upcoming
+## 1.2.3
 
 ### ✅ Added
 * Added `includesCallsInRecents` to iOS push configuration to control whether CallKit calls appear in Recents.

@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stream_video: ^1.2.2
-  stream_video_noise_cancellation: ^1.2.2
+  stream_video: ^1.2.3
+  stream_video_noise_cancellation: ^1.2.3
 
 dev_dependencies:
   flutter_test:
