@@ -35,6 +35,7 @@ class _StreamDogFoodingAppContentState
 
   final _compositeSubscription = CompositeSubscription();
   bool? _microphoneEnabledBeforeInterruption;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -46,11 +47,14 @@ class _StreamDogFoodingAppContentState
 
     _userAuthController.addListener(() {
       if (_userAuthController.currentUser != null) {
-        _compositeSubscription.clear();
-        initPushNotificationManagerIfAvailable();
-        _handleMobileAudioInterruptions();
+        // Ensure we only initialize and observe events once
+        if (!_isInitialized) {
+          _compositeSubscription.clear();
+          initPushNotificationManagerIfAvailable();
+        }
       } else {
         _compositeSubscription.clear();
+        _isInitialized = false;
       }
     });
 
@@ -68,6 +72,10 @@ class _StreamDogFoodingAppContentState
     _observeDeepLinks();
     // Observe FCM messages.
     _observeFcmMessages();
+
+    _handleMobileAudioInterruptions();
+
+    _isInitialized = true;
   }
 
   void _handleMobileAudioInterruptions() {
