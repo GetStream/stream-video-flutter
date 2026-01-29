@@ -11,6 +11,7 @@
   * Added `reconnectReason` to reconnect details for sfu logs.
   * Fixed race condition where automatic ICE restart could interfere with fast reconnect, causing subscriber video to not recover.
 * [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
+* [Android] Fixed video flickering in Skia renderer by scoping renderer keys with prefix and using stable participant-based keys.
 
 ## 1.2.2
 
