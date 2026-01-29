@@ -560,6 +560,10 @@ class StreamVideo extends Disposable {
       _state.appLifecycleState.value = state;
 
       if (state.isPaused) {
+        for (final activeCall in activeCalls) {
+          activeCall.traceSessionLog('device.stateChange', 'paused');
+        }
+
         // Handle app paused state
         if (activeCalls.isEmpty &&
             !_options.keepConnectionsAliveWhenInBackground) {
@@ -568,8 +572,6 @@ class StreamVideo extends Disposable {
           await _client.closeConnection();
         } else if (activeCalls.isNotEmpty) {
           for (final activeCall in activeCalls) {
-            activeCall.traceSessionLog('device.stateChange', 'paused');
-
             final callState = activeCall.state.value;
             final isVideoEnabled =
                 callState.localParticipant?.isVideoEnabled ?? false;

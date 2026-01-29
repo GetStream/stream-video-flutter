@@ -13,6 +13,7 @@
 * [iOS] Fixed CallKit event suppression to avoid repeated mute toggle loops.
 * [Android] Fixed issues when accepting incoming calls from detached state (app exited via back button).
 * [Android] Fixed incoming call notifications not showing when the app is in a detached state (e.g., after pressing the back button).
+* [Android] Fixed video flickering in Skia renderer by scoping renderer keys with prefix and using stable participant-based keys.
 
 ## 1.2.2
 

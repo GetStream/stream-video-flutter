@@ -105,6 +105,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
   late bool _isScreenShareEnabled;
   late CallStatus _status;
 
+  final _androidPipManager = AndroidPipManager.instance();
+  late bool _isInPictureInPictureMode =
+      _androidPipManager.isInPictureInPictureMode;
+
   StreamSubscription<({CallStatus status, bool isScreenShareEnabled})>?
   _callStateSubscription;
 
@@ -115,6 +119,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
   void initState() {
     super.initState();
     _startListeningToCallState();
+
+    _androidPipManager.addOnPictureInPictureModeChangedListener(
+      _handlePictureInPictureModeChanged,
+    );
   }
 
   @override
@@ -130,7 +138,16 @@ class _StreamCallContentState extends State<StreamCallContent> {
   @override
   void dispose() {
     _callStateSubscription?.cancel();
+    _androidPipManager.removeOnPictureInPictureModeChangedListener(
+      _handlePictureInPictureModeChanged,
+    );
     super.dispose();
+  }
+
+  void _handlePictureInPictureModeChanged(bool isInPictureInPictureMode) {
+    setState(() {
+      _isInPictureInPictureMode = isInPictureInPictureMode;
+    });
   }
 
   void _startListeningToCallState() {
@@ -190,11 +207,12 @@ class _StreamCallContentState extends State<StreamCallContent> {
               call: call,
               configuration: widget.pictureInPictureConfiguration,
             ),
-          widget.callParticipantsWidgetBuilder?.call(context, call) ??
-              StreamCallParticipants(
-                call: call,
-                layoutMode: widget.layoutMode,
-              ),
+          if (!_isInPictureInPictureMode)
+            widget.callParticipantsWidgetBuilder?.call(context, call) ??
+                StreamCallParticipants(
+                  call: call,
+                  layoutMode: widget.layoutMode,
+                ),
         ],
       );
     } else {
