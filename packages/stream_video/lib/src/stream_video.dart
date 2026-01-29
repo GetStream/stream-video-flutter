@@ -188,16 +188,16 @@ class StreamVideo extends Disposable {
     _state.user.value = user;
 
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) {
-      unawaited(
-        rtc.WebRTC.initialize(
-          options: {
-            if (CurrentPlatform.isAndroid &&
-                options.androidAudioConfiguration != null)
-              'androidAudioConfiguration': options.androidAudioConfiguration!
-                  .toMap(),
-          },
-        ),
-      );
+      rtc.WebRTC.initialize(
+        options: {
+          if (CurrentPlatform.isAndroid &&
+              options.androidAudioConfiguration != null)
+            'androidAudioConfiguration': options.androidAudioConfiguration!
+                .toMap(),
+        },
+      ).then((_) {
+        webrtcInitializationCompleter.complete();
+      });
     }
 
     final tokenProvider = switch (user.type) {
@@ -297,6 +297,9 @@ class StreamVideo extends Disposable {
   final MutableClientState _state;
 
   StreamVideoOptions get options => _options;
+
+  @internal
+  Completer<void> webrtcInitializationCompleter = Completer();
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
