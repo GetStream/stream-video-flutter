@@ -4,11 +4,11 @@ import 'package:stream_video/stream_video.dart';
 
 mixin DefaultVideoOptions {
   static StreamVideoOptions get remote {
-    return const StreamVideoOptions();
+    return StreamVideoOptions();
   }
 
   static StreamVideoOptions get local {
-    return const StreamVideoOptions(
+    return StreamVideoOptions(
       coordinatorRpcUrl: 'http://10.0.0.53:3030/video',
       coordinatorWsUrl: 'ws://10.0.0.53:8800/video/connect',
     );
@@ -45,17 +45,17 @@ mixin DefaultVideoOptions {
     }
   }
 
-  static const StreamVideoOptions _web = StreamVideoOptions(
+  static final StreamVideoOptions _web = StreamVideoOptions(
     coordinatorRpcUrl: 'http://localhost:3030/video',
     coordinatorWsUrl: 'ws://localhost:8800/video/connect',
   );
 
-  static const StreamVideoOptions _android = StreamVideoOptions(
+  static final StreamVideoOptions _android = StreamVideoOptions(
     coordinatorRpcUrl: 'http://10.0.2.2:3030/video',
     coordinatorWsUrl: 'ws://10.0.2.2:8800/video/connect',
   );
 
-  static const StreamVideoOptions _ios = StreamVideoOptions(
+  static final StreamVideoOptions _ios = StreamVideoOptions(
     coordinatorRpcUrl: 'http://localhost:3030/video',
     coordinatorWsUrl: 'ws://localhost:8800/video/connect',
   );

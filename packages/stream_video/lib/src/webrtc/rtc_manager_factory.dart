@@ -1,11 +1,8 @@
-import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart';
+import '../../stream_video.dart';
 import '../call/session/call_session_config.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_cid.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/sfu_client.dart';
-import '../types/other.dart';
 import 'peer_connection_factory.dart';
 import 'rtc_manager.dart';
 import 'sdp/editor/sdp_editor.dart';
@@ -33,6 +30,7 @@ class RtcManagerFactory {
 
   Future<RtcManager> makeRtcManager({
     required SfuClient sfuClient,
+    required StreamVideo streamVideo,
     ClientDetails? clientDetails,
     String? publisherId,
     int? sessionSequence,
@@ -71,6 +69,7 @@ class RtcManagerFactory {
       publisher: publisher,
       subscriber: subscriber,
       publishOptions: publishOptions,
+      streamVideo: streamVideo,
     );
   }
 }
