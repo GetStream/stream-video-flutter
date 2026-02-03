@@ -1,3 +1,8 @@
+## 1.2.4
+
+### 🐞 Fixed
+* [Web] Fixed an issue with call being stuck during Connecting state.
+
 ## 1.2.3
 
 ### ⚡ Performance

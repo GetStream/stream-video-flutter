@@ -198,6 +198,8 @@ class StreamVideo extends Disposable {
       ).then((_) {
         webrtcInitializationCompleter.complete();
       });
+    } else {
+      webrtcInitializationCompleter.complete();
     }
 
     final tokenProvider = switch (user.type) {
