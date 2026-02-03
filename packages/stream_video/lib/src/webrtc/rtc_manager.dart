@@ -6,36 +6,22 @@ import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-import '../../open_api/video/coordinator/api.dart';
+import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../logger/stream_log.dart';
-import '../models/models.dart';
-import '../platform_detector/platform_detector.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
-import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/extensions.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
-import 'media/media_constraints.dart';
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
-import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_encoding.dart';
-import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
-import 'peer_type.dart';
 import 'rtc_audio_api/rtc_audio_api.dart'
     show checkIfAudioOutputChangeSupported;
-import 'rtc_media_device/rtc_media_device.dart';
-import 'rtc_media_device/rtc_media_device_notifier.dart';
 import 'rtc_parser.dart';
-import 'rtc_track/rtc_track.dart';
 import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
 
@@ -68,7 +54,8 @@ class RtcManager extends Disposable {
     required this.publisher,
     required this.subscriber,
     required this.publishOptions,
-  }) {
+    required StreamVideo streamVideo,
+  }) : _streamVideo = streamVideo {
     subscriber.onTrack = _onRemoteTrack;
   }
 
@@ -79,6 +66,7 @@ class RtcManager extends Disposable {
   final String? publisherId;
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
+  final StreamVideo _streamVideo;
 
   final transceiversManager = TransceiverManager();
   List<SfuPublishOptions> publishOptions;
@@ -1236,9 +1224,12 @@ extension RtcManagerTrackHelper on RtcManager {
           )) {
         await setAppleAudioConfiguration(
           speakerOn: true,
+          policy: _streamVideo.options.audioConfigurationPolicy,
         );
       } else {
-        await setAppleAudioConfiguration();
+        await setAppleAudioConfiguration(
+          policy: _streamVideo.options.audioConfigurationPolicy,
+        );
       }
 
       // Change the audio output device for all remote audio tracks.
@@ -1477,23 +1468,26 @@ extension RtcManagerTrackHelper on RtcManager {
   }
 
   Future<Result<None>> setAppleAudioConfiguration({
+    required AudioConfigurationPolicy policy,
     bool speakerOn = false,
   }) async {
     try {
       await rtc.Helper.setAppleAudioConfiguration(
-        rtc.AppleAudioConfiguration(
-          appleAudioMode: speakerOn
-              ? rtc.AppleAudioMode.videoChat
-              : rtc.AppleAudioMode.voiceChat,
-          appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
-          appleAudioCategoryOptions: {
-            if (speakerOn) rtc.AppleAudioCategoryOption.defaultToSpeaker,
-            rtc.AppleAudioCategoryOption.mixWithOthers,
-            rtc.AppleAudioCategoryOption.allowBluetooth,
-            rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
-            rtc.AppleAudioCategoryOption.allowAirPlay,
-          },
-        ),
+        policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  /// Applies the Android audio configuration from the policy.
+  Future<Result<None>> setAndroidAudioConfiguration({
+    required AudioConfigurationPolicy policy,
+  }) async {
+    try {
+      await rtc.Helper.setAndroidAudioConfiguration(
+        policy.getAndroidConfiguration(),
       );
       return const Result.success(none);
     } catch (e, stk) {

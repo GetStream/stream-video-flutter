@@ -150,11 +150,11 @@ class CallSession extends Disposable {
   }
 
   Future<void> _ensureAndroidAudioConfiguration() async {
-    if (CurrentPlatform.isAndroid &&
-        _streamVideo.options.androidAudioConfiguration != null) {
+    if (CurrentPlatform.isAndroid) {
       try {
         await rtc.Helper.setAndroidAudioConfiguration(
-          _streamVideo.options.androidAudioConfiguration!,
+          _streamVideo.options.audioConfigurationPolicy
+              .getAndroidConfiguration(),
         );
         _logger.v(
           () => '[_ensureAndroidAudioConfiguration] Configuration applied',
@@ -322,6 +322,7 @@ class CallSession extends Disposable {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
+                streamVideo: _streamVideo,
                 clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
@@ -343,6 +344,7 @@ class CallSession extends Disposable {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
+                streamVideo: _streamVideo,
                 publisherId: localTrackId,
                 publishOptions: joinResponseEvent.publishOptions,
                 clientDetails: clientDetails,

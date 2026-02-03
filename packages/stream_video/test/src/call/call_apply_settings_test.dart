@@ -53,7 +53,7 @@ void main() {
         'test-api-key',
         user: user,
         userToken: userToken,
-        options: const StreamVideoOptions(
+        options: const StreamVideoOptions.constant(
           autoConnect: false,
         ),
         precacheGenericSdps: false,

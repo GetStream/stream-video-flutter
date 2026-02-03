@@ -2022,6 +2022,7 @@ class Call {
       if (CurrentPlatform.isIos) {
         await _session?.rtcManager?.setAppleAudioConfiguration(
           speakerOn: _connectOptions.speakerDefaultOn,
+          policy: _streamVideo.options.audioConfigurationPolicy,
         );
       }
     }
@@ -2994,11 +2995,9 @@ class Call {
 
     if (enabled && CurrentPlatform.isAndroid) {
       try {
-        if (_streamVideo.options.androidAudioConfiguration != null) {
-          await rtc.Helper.setAndroidAudioConfiguration(
-            _streamVideo.options.androidAudioConfiguration!,
-          );
-        }
+        await rtc.Helper.setAndroidAudioConfiguration(
+          _streamVideo.options.audioConfigurationPolicy.getAndroidConfiguration(),
+        );
       } catch (e) {
         _logger.w(
           () =>
