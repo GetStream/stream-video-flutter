@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stream_video: ^1.2.3
-  stream_video_push_notification: ^1.2.3
+  stream_video: ^1.2.4
+  stream_video_push_notification: ^1.2.4
 
 dev_dependencies:
   flutter_test:
