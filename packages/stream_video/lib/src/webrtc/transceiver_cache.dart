@@ -4,17 +4,20 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import 'rtc_track/rtc_track.dart';
+import 'rtc_track/rtc_track_publish_options.dart';
 
 class TransceiverCache {
   TransceiverCache({
     required this.track,
     required this.publishOption,
     required this.transceiver,
+    required this.trackPublishOptions,
   });
 
   RtcLocalTrack track;
   SfuPublishOptions publishOption;
   RTCRtpTransceiver transceiver;
+  RtcTrackPublishOptions trackPublishOptions;
 
   @override
   String toString() {
@@ -41,12 +44,14 @@ class TransceiverManager {
     RtcLocalTrack track,
     SfuPublishOptions publishOption,
     RTCRtpTransceiver transceiver,
+    RtcTrackPublishOptions trackPublishOptions,
   ) {
     _transceivers.add(
       TransceiverCache(
         track: track,
         publishOption: publishOption,
         transceiver: transceiver,
+        trackPublishOptions: trackPublishOptions,
       ),
     );
 
@@ -54,11 +59,11 @@ class TransceiverManager {
   }
 
   /// Gets the transceiver for the given publish option.
-  RTCRtpTransceiver? get(SfuPublishOptions publishOption) {
+  TransceiverCache? get(SfuPublishOptions publishOption) {
     return _findTransceiver(
       publishOption.trackType,
       publishOption.id,
-    )?.transceiver;
+    );
   }
 
   /// Gets the last transceiver for the given track type and publish option id.

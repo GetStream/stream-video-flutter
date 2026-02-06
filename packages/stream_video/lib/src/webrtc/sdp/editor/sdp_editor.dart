@@ -8,5 +8,7 @@ abstract class SdpEditor {
 
   set opusRedEnabled(bool value);
 
+  set opusStereoEnabled(bool value);
+
   String? edit(Sdp? sdp);
 }

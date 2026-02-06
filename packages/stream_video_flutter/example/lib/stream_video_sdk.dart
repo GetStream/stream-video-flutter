@@ -10,7 +10,7 @@ class StreamVideoSdk {
     required String apiKey,
     required UserInfo user,
     required UserToken userToken,
-    StreamVideoOptions options = const StreamVideoOptions(),
+    StreamVideoOptions options = const StreamVideoOptions.constant(),
   }) async {
     if (StreamVideo.isInitialized()) {
       streamLog.d(_tag, () => '[initialize] reset instance');

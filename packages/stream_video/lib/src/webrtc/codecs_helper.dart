@@ -5,9 +5,12 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
+import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_parameters.dart';
+import 'rtc_track/rtc_track_publish_options.dart';
 
 class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
   RTCRtpEncodingWithDimensions({
@@ -28,6 +31,7 @@ class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
   final double height;
 }
 
+/// Determines the most optimal video layers for the given track.
 List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   required RtcVideoDimension dimensions,
   required SfuPublishOptions publishOptions,
@@ -180,3 +184,23 @@ bool isSvcCodec(String? codecOrMimeType) {
 
 String toScalabilityMode(int spatialLayers, int temporalLayers) =>
     'L${spatialLayers}T$temporalLayers${spatialLayers > 1 ? '_KEY' : ''}';
+
+/// Prepares the audio layer for the given track.
+/// Based on the provided audio bitrate profile, we apply the appropriate bitrate.
+List<rtc.RTCRtpEncoding> findOptimalAudioLayers({
+  required SfuPublishOptions publishOptions,
+  required RtcTrackPublishOptions trackPublishOptions,
+}) {
+  final profileConfig = publishOptions.audioBitrateProfiles?.firstWhereOrNull(
+    (config) => config.profile == trackPublishOptions.audioBitrateProfile,
+  );
+  final maxBitrate =
+      profileConfig?.bitrate ??
+      {
+        SfuAudioBitrateProfile.voiceStandard: AudioBitrate.voiceStandard,
+        SfuAudioBitrateProfile.voiceHighQuality: AudioBitrate.voiceHighQuality,
+        SfuAudioBitrateProfile.musicHighQuality: AudioBitrate.musicHighQuality,
+      }[trackPublishOptions.audioBitrateProfile];
+
+  return [rtc.RTCRtpEncoding(maxBitrate: maxBitrate)];
+}
