@@ -30,6 +30,7 @@ export 'src/network_monitor_settings.dart';
 export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/retry/retry_policy.dart';
+export 'src/sfu/data/models/sfu_audio_bitrate.dart';
 export 'src/sfu/data/models/sfu_client_capability.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
 export 'src/sfu/data/models/sfu_error.dart';

@@ -6,6 +6,7 @@ import '../../editor/rule/rule_set_opus_red_enabled.dart';
 import '../../sdp.dart';
 import 'rule_prioritize_codec.dart';
 import 'rule_set_opus_dtx_enabled.dart';
+import 'rule_set_opus_stereo_enabled.dart';
 
 abstract class SdpMungingRule with EquatableMixin {
   const SdpMungingRule({
@@ -30,6 +31,12 @@ abstract class SdpMungingRule with EquatableMixin {
     List<PlatformType> platforms,
     List<SdpType> types,
   }) = SetOpusRedEnabledRule;
+
+  const factory SdpMungingRule.setOpusStereoEnabled({
+    required bool enabled,
+    List<PlatformType> platforms,
+    List<SdpType> types,
+  }) = SetOpusStereoEnabledRule;
 
   String get key;
 

@@ -4,13 +4,10 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-import '../../../open_api/video/coordinator/api.dart';
+import '../../../stream_video.dart';
 import '../../call/stats/tracer.dart';
 import '../../errors/video_error_composer.dart';
-import '../../platform_detector/platform_detector.dart';
 import '../../utils/extensions.dart';
-import '../../utils/result.dart';
-import 'rtc_media_device.dart';
 
 abstract class InterruptionEvent {}
 
@@ -214,5 +211,22 @@ class RtcMediaDeviceNotifier {
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace('navigator.mediaDevices.regainAndroidAudioFocus', null);
     return rtc.Helper.regainAndroidAudioFocus();
+  }
+
+  /// Reinitializes the audio configuration for the WebRTC instance.
+  ///
+  /// This is used to reinitialize the audio configuration when the audio configuration policy changes.
+  /// When called after initial setup, it will automatically
+  /// dispose all existing peer connections, tracks, and streams, then recreate
+  /// the audio device module and peer connection factory with the new parameters.
+  Future<void> reinitializeAudioConfiguration(AudioConfigurationPolicy policy) {
+    return rtc.WebRTC.initialize(
+      options: {
+        'reinitialize': true,
+        'bypassVoiceProcessing': policy.bypassVoiceProcessing,
+        if (CurrentPlatform.isAndroid)
+          'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
+      },
+    );
   }
 }

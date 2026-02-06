@@ -5,8 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../stream_video.dart';
+import '../call/state/call_state_notifier.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
@@ -15,13 +17,13 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/extensions.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
-import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
 import 'peer_connection.dart';
 import 'rtc_audio_api/rtc_audio_api.dart'
     show checkIfAudioOutputChangeSupported;
 import 'rtc_parser.dart';
+import 'rtc_track/rtc_track_publish_options.dart';
 import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
 
@@ -54,6 +56,7 @@ class RtcManager extends Disposable {
     required this.publisher,
     required this.subscriber,
     required this.publishOptions,
+    required this.stateManager,
     required StreamVideo streamVideo,
   }) : _streamVideo = streamVideo {
     subscriber.onTrack = _onRemoteTrack;
@@ -64,12 +67,14 @@ class RtcManager extends Disposable {
   final String sessionId;
   final StreamCallCid callCid;
   final String? publisherId;
+  final CallStateNotifier stateManager;
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
   final StreamVideo _streamVideo;
 
   final transceiversManager = TransceiverManager();
   List<SfuPublishOptions> publishOptions;
+  AudioConstraints _defaultAudioConstraints = const AudioConstraints();
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
@@ -203,6 +208,21 @@ class RtcManager extends Disposable {
     _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
   }
 
+  Future<void> changeDefaultAudioConstraints(
+    AudioConstraints constraints,
+  ) async {
+    _defaultAudioConstraints = constraints;
+
+    final localAudioTracks = tracks.values.whereType<RtcLocalAudioTrack>();
+    for (final track in localAudioTracks) {
+      await muteTrack(trackId: track.trackId, stopTrackOnMute: true);
+    }
+
+    for (final track in localAudioTracks) {
+      await unmuteTrack(trackId: track.trackId);
+    }
+  }
+
   Future<void> unpublishTrack({required String trackId}) async {
     final publishedTrack = tracks.remove(trackId);
 
@@ -227,7 +247,7 @@ class RtcManager extends Disposable {
       for (final publishOption in publishOptions) {
         if (publishOption.trackType != publishedTrack.trackType) continue;
 
-        final transceiver = transceiversManager.get(publishOption);
+        final transceiver = transceiversManager.get(publishOption)?.transceiver;
 
         try {
           if (transceiver != null) {
@@ -303,7 +323,11 @@ class RtcManager extends Disposable {
 
       // take the track from the existing transceiver for the same track type,
       // and publish it with the new publish options
-      final result = await _addTransceiver(item.track, publishOption);
+      final result = await _addTransceiver(
+        item.track,
+        publishOption,
+        item.trackPublishOptions,
+      );
 
       if (result is Success) {
         final localTrack = tracks[item.track.trackId] as RtcLocalTrack?;
@@ -335,7 +359,7 @@ class RtcManager extends Disposable {
 
       // it is safe to stop the track here, it is a clone
       await item.transceiver.sender.track?.stop();
-      await item.transceiver.sender.replaceTrack(null);
+      await _updateTransceiver(item.transceiver, null, publishOption.trackType);
     }
   }
 
@@ -602,6 +626,11 @@ extension PublisherRtcManager on RtcManager {
     );
 
     if (track is RtcLocalAudioTrack) {
+      final audioSettings = stateManager.callState.settings.audio;
+      final stereo =
+          track.trackType == SfuTrackType.screenShareAudio ||
+          audioSettings.hifiAudioEnabled;
+
       return RtcTrackInfo(
         trackId: track.mediaTrack.id,
         trackType: track.trackType,
@@ -614,6 +643,9 @@ extension PublisherRtcManager on RtcManager {
         layers: [],
         codec: transceiverCache.publishOption.codec,
         muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
+        stereo: stereo,
+        dtx: audioSettings.opusDtxEnabled,
+        red: audioSettings.redundantCodingEnabled,
       );
     } else if (track is RtcLocalVideoTrack) {
       final encodings = codecs.findOptimalVideoLayers(
@@ -630,6 +662,9 @@ extension PublisherRtcManager on RtcManager {
           transceiverInitialIndex,
           sdp,
         ),
+        dtx: false,
+        red: false,
+        stereo: false,
         codec: transceiverCache.publishOption.codec,
         muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
         layers: encodings.map((it) {
@@ -695,22 +730,43 @@ extension PublisherRtcManager on RtcManager {
     tracks[track.trackId] = track;
     var updatedTrack = track.copyWith(stopTrackOnMute: stopTrackOnMute);
 
-    final transceivers = <rtc.RTCRtpTransceiver>[];
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 
-      final transceiverResult = await _addTransceiver(track, option);
-      if (transceiverResult is Failure) return transceiverResult;
-      transceivers.add(transceiverResult.getDataOrNull()!.transceiver);
+      final cashedTransceiver = transceiversManager.get(option)?.transceiver;
+      if (cashedTransceiver == null) {
+        final transceiverResult = await _addTransceiver(
+          track,
+          option,
+          RtcTrackPublishOptions(
+            audioBitrateProfile: stateManager.callState.audioBitrateProfile,
+          ),
+        );
 
-      _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
+        if (transceiverResult is Failure) return transceiverResult;
 
-      updatedTrack = updatedTrack.copyWith(
-        clonedTracks: [
-          ...updatedTrack.clonedTracks,
-          transceiverResult.getDataOrNull()!.mediaTrack,
-        ],
-      );
+        _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
+
+        updatedTrack = updatedTrack.copyWith(
+          clonedTracks: [
+            ...updatedTrack.clonedTracks,
+            transceiverResult.getDataOrNull()!.mediaTrack,
+          ],
+        );
+      } else {
+        await _updateTransceiver(
+          cashedTransceiver,
+          track,
+          track.trackType,
+          trackPublishOptions: RtcTrackPublishOptions(
+            audioBitrateProfile: stateManager.callState.audioBitrateProfile,
+          ),
+        );
+
+        _logger.v(
+          () => '[publishAudioTrack] cached transceiver: $cashedTransceiver',
+        );
+      }
     }
 
     // Notify listeners.
@@ -751,9 +807,14 @@ extension PublisherRtcManager on RtcManager {
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 
-      final cashedTransceiver = transceiversManager.get(option);
+      final cashedTransceiver = transceiversManager.get(option)?.transceiver;
       if (cashedTransceiver == null) {
-        final transceiverResult = await _addTransceiver(track, option);
+        final transceiverResult = await _addTransceiver(
+          track,
+          option,
+          const RtcTrackPublishOptions(),
+        );
+
         if (transceiverResult is Failure) return transceiverResult;
 
         updatedTrack = updatedTrack.copyWith(
@@ -767,14 +828,11 @@ extension PublisherRtcManager on RtcManager {
           () => '[publishVideoTrack] new transceiver: $transceiverResult',
         );
       } else {
-        final previousTrack = cashedTransceiver.sender.track;
-
-        // don't stop the track if we are re-publishing the same track
-        if (previousTrack != null && previousTrack != track.mediaTrack) {
-          await previousTrack.stop();
-        }
-
-        await cashedTransceiver.sender.replaceTrack(track.mediaTrack);
+        await _updateTransceiver(
+          cashedTransceiver,
+          track,
+          track.trackType,
+        );
 
         _logger.v(
           () => '[publishVideoTrack] cached transceiver: $cashedTransceiver',
@@ -846,6 +904,7 @@ extension PublisherRtcManager on RtcManager {
   _addTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
+    RtcTrackPublishOptions trackPublishOptions,
   ) async {
     if (publisher == null) {
       return Result.error('Publisher is not created, cannot add transceiver');
@@ -863,11 +922,13 @@ extension PublisherRtcManager on RtcManager {
     );
 
     if (track is RtcLocalAudioTrack) {
+      final audioEncodings = codecs.findOptimalAudioLayers(
+        publishOptions: publishOptions,
+        trackPublishOptions: trackPublishOptions,
+      );
       transceiverResult = await publisher!.addAudioTransceiver(
         track: mediaTrackClone,
-        encodings: [
-          rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
-        ],
+        encodings: audioEncodings,
       );
     } else if (track is RtcLocalVideoTrack) {
       final videoEncodings = codecs.findOptimalVideoLayers(
@@ -899,6 +960,7 @@ extension PublisherRtcManager on RtcManager {
       track.copyWith(mediaTrack: mediaTrackClone),
       publishOptions,
       transceiver,
+      trackPublishOptions,
     );
 
     return Result.success(
@@ -909,17 +971,82 @@ extension PublisherRtcManager on RtcManager {
     );
   }
 
-  Future<Result<RtcLocalTrack>> muteTrack({required String trackId}) async {
-    final track = tracks[trackId];
-    if (track == null) {
+  Future<void> _updateTransceiver(
+    RTCRtpTransceiver transceiver,
+    RtcLocalTrack? track,
+    SfuTrackType trackType, {
+    RtcTrackPublishOptions? trackPublishOptions,
+  }) async {
+    final previousTrack = transceiver.sender.track;
+
+    // don't stop the track if we are re-publishing the same track
+    if (previousTrack != null && previousTrack != track?.mediaTrack) {
+      await previousTrack.stop();
+    }
+
+    await transceiver.sender.replaceTrack(track?.mediaTrack);
+
+    if (track is RtcLocalAudioTrack) {
+      await _updateAudioPublishOptions(
+        track.trackType,
+        trackPublishOptions ?? const RtcTrackPublishOptions(),
+      );
+    }
+  }
+
+  Future<void> _updateAudioPublishOptions(
+    SfuTrackType trackType,
+    RtcTrackPublishOptions options,
+  ) async {
+    for (final publishOption in publishOptions) {
+      if (publishOption.trackType != trackType) continue;
+      final transceiverBundle = transceiversManager.get(publishOption);
+      if (transceiverBundle == null) continue;
+
+      final transceiver = transceiverBundle.transceiver;
+      final current = transceiverBundle.trackPublishOptions;
+      if (current.audioBitrateProfile != options.audioBitrateProfile) {
+        final encodings = codecs.findOptimalAudioLayers(
+          publishOptions: publishOption,
+          trackPublishOptions: options,
+        );
+
+        if (encodings.isNotEmpty) {
+          final params = transceiver.sender.parameters;
+          if (params.encodings != null && params.encodings!.isNotEmpty) {
+            final currentEncoding = params.encodings!.first;
+            final targetEncoding = encodings.first;
+            if (currentEncoding.maxBitrate != targetEncoding.maxBitrate) {
+              currentEncoding.maxBitrate = targetEncoding.maxBitrate;
+            }
+
+            await transceiver.sender.setParameters(params);
+          }
+        }
+      }
+
+      transceiverBundle.trackPublishOptions = options;
+    }
+  }
+
+  Future<Result<RtcLocalTrack>> muteTrack({
+    required String trackId,
+    bool? stopTrackOnMute,
+  }) async {
+    final originalTrack = tracks[trackId];
+
+    if (originalTrack == null) {
       _logger.w(() => 'muteTrack: track not found');
       return Result.error('Track not found');
     }
 
-    if (track is! RtcLocalTrack) {
+    if (originalTrack is! RtcLocalTrack) {
       _logger.w(() => 'muteTrack: track is not local');
       return Result.error('Track is not local');
     }
+
+    final track = originalTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
+    tracks[trackId] = track;
 
     track.disable();
     if (track.stopTrackOnMute) {
@@ -949,7 +1076,22 @@ extension PublisherRtcManager on RtcManager {
           .getTransceiversForTrack(track.trackId)
           .toList();
 
-      final updatedTrack = await track.recreate(transceivers);
+      final updatedTrack = await track.recreate(
+        transceivers,
+        mediaConstraints: track.trackType == SfuTrackType.audio
+            ? _defaultAudioConstraints
+            : null,
+      );
+
+      if (track is RtcLocalAudioTrack) {
+        await _updateAudioPublishOptions(
+          track.trackType,
+          RtcTrackPublishOptions(
+            audioBitrateProfile: stateManager.callState.audioBitrateProfile,
+          ),
+        );
+      }
+
       tracks[trackId] = updatedTrack;
       onLocalTrackMuted?.call(updatedTrack, false);
 
@@ -964,9 +1106,9 @@ extension PublisherRtcManager on RtcManager {
   }
 
   Future<Result<RtcLocalAudioTrack>> createAudioTrack({
-    AudioConstraints constraints = const AudioConstraints(),
+    AudioConstraints? constraints,
   }) async {
-    _logger.d(() => '[createAudioTrack] constraints: ${constraints.toMap()}');
+    _logger.d(() => '[createAudioTrack] constraints: ${constraints?.toMap()}');
 
     if (publisher == null || publisherId == null) {
       return Result.error(
@@ -977,7 +1119,7 @@ extension PublisherRtcManager on RtcManager {
     try {
       final audioTrack = await RtcLocalTrack.audio(
         trackIdPrefix: publisherId!,
-        constraints: constraints,
+        constraints: constraints ?? _defaultAudioConstraints,
       );
 
       return Result.success(audioTrack);
@@ -1413,7 +1555,7 @@ extension RtcManagerTrackHelper on RtcManager {
 
       final audioTrackResult = await createAudioTrack(
         constraints:
-            (constraints ?? const AudioConstraints()) as AudioConstraints,
+            (constraints ?? _defaultAudioConstraints) as AudioConstraints,
       );
       return audioTrackResult.fold(
         success: (it) => publishAudioTrack(track: it.data),
@@ -1474,20 +1616,6 @@ extension RtcManagerTrackHelper on RtcManager {
     try {
       await rtc.Helper.setAppleAudioConfiguration(
         policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
-      );
-      return const Result.success(none);
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
-  }
-
-  /// Applies the Android audio configuration from the policy.
-  Future<Result<None>> setAndroidAudioConfiguration({
-    required AudioConfigurationPolicy policy,
-  }) async {
-    try {
-      await rtc.Helper.setAndroidAudioConfiguration(
-        policy.getAndroidConfiguration(),
       );
       return const Result.success(none);
     } catch (e, stk) {

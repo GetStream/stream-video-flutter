@@ -31,7 +31,10 @@ dependencies:
   stream_video: ^1.2.4
   stream_video_flutter: ^1.2.4
   stream_video_push_notification: ^1.2.4
-  stream_webrtc_flutter: ^2.2.4
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: feat/hifi-stereo-playout
 
 dependency_overrides:
   stream_video:

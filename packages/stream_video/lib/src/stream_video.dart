@@ -65,6 +65,7 @@ import 'utils/result.dart';
 import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/rtc_manager.dart';
+import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -189,16 +190,15 @@ class StreamVideo extends Disposable {
     _state.user.value = user;
 
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) {
-      rtc.WebRTC.initialize(
-        options: {
-          if (CurrentPlatform.isAndroid)
-            'androidAudioConfiguration': options.audioConfigurationPolicy
-                .getAndroidConfiguration()
-                .toMap(),
-        },
-      ).then((_) {
-        webrtcInitializationCompleter.complete();
-      });
+      RtcMediaDeviceNotifier.instance
+          .reinitializeAudioConfiguration(options.audioConfigurationPolicy)
+          .then((_) {
+            if (precacheGenericSdps) {
+              unawaited(RtcManager.cacheGenericSdp());
+            }
+
+            webrtcInitializationCompleter.complete();
+          });
     } else {
       webrtcInitializationCompleter.complete();
     }
@@ -241,10 +241,6 @@ class StreamVideo extends Disposable {
         return null;
       }),
     );
-
-    if (precacheGenericSdps) {
-      unawaited(RtcManager.cacheGenericSdp());
-    }
 
     if (options.autoConnect) {
       unawaited(
@@ -1377,7 +1373,8 @@ class StreamVideoOptions {
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
     this.defaultCallPreferences,
-    this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
+    //TODO: Allow sdp munging for development purposees, remove it before merging
+    this.sdpPolicy = const SdpPolicy(),
     this.audioProcessor,
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
@@ -1392,7 +1389,8 @@ class StreamVideoOptions {
       'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
     )
     this.androidAudioConfiguration,
-    AudioConfigurationPolicy audioConfigurationPolicy = const CallAudioPolicy(),
+    AudioConfigurationPolicy audioConfigurationPolicy =
+        const BroadcasterAudioPolicy(),
   }) : audioConfigurationPolicy = androidAudioConfiguration == null
            ? audioConfigurationPolicy
            : CustomAudioPolicy(androidConfiguration: androidAudioConfiguration);
@@ -1406,7 +1404,8 @@ class StreamVideoOptions {
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
     this.defaultCallPreferences,
-    this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
+    //TODO: Allow sdp munging for development purposees, remove it before merging
+    this.sdpPolicy = const SdpPolicy(),
     this.audioProcessor,
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
@@ -1421,7 +1420,7 @@ class StreamVideoOptions {
       'Use audioConfigurationPolicy instead. Usage of this parameter will be ignored in this constructor.',
     )
     this.androidAudioConfiguration,
-    this.audioConfigurationPolicy = const CallAudioPolicy(),
+    this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
   });
 
   final String coordinatorRpcUrl;
@@ -1457,13 +1456,26 @@ class StreamVideoOptions {
 
   /// The audio configuration policy for the SDK.
   ///
-  /// Use predefined policies:
-  /// - [AudioConfigurationPolicy.call] - Optimized for voice/video calls (default)
-  /// - [AudioConfigurationPolicy.livestream] - Optimized for livestream playback
+  /// **Broadcaster Policy** (default) - For active participation:
+  /// - Use for: meeting participants, livestream hosts, active speakers
+  /// - Enables echo cancellation and noise suppression
+  /// - Volume buttons control call volume (Android)
+  /// - Optimized for voice clarity
   ///
-  /// Or create a custom configuration:
+  /// **Viewer Policy** - For passive consumption:
+  /// - Use for: livestream viewers, watch-only audience
+  /// - Disables audio processing for higher fidelity
+  /// - Volume buttons control media volume (Android)
+  /// - Optimized for audio quality
+  /// - Enables stereo playout
+  ///
+  /// Use predefined policies:
+  /// - [AudioConfigurationPolicy.broadcaster] - Voice/video calls (default)
+  /// - [AudioConfigurationPolicy.viewer] - Livestream playback
   /// - [AudioConfigurationPolicy.custom] - Full control over platform settings
   ///
-  /// Defaults to [CallAudioPolicy].
+  /// Defaults to [BroadcasterAudioPolicy].
+  /// Once set it will be applied for all calls.
+  /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
   final AudioConfigurationPolicy audioConfigurationPolicy;
 }

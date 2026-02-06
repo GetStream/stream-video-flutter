@@ -1,6 +1,7 @@
 import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../../stream_video.dart';
 import '../call/session/call_session_config.dart';
+import '../call/state/call_state_notifier.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/sfu_client.dart';
 import 'peer_connection_factory.dart';
@@ -30,6 +31,7 @@ class RtcManagerFactory {
 
   Future<RtcManager> makeRtcManager({
     required SfuClient sfuClient,
+    required CallStateNotifier stateManager,
     required StreamVideo streamVideo,
     ClientDetails? clientDetails,
     String? publisherId,
@@ -69,6 +71,7 @@ class RtcManagerFactory {
       publisher: publisher,
       subscriber: subscriber,
       publishOptions: publishOptions,
+      stateManager: stateManager,
       streamVideo: streamVideo,
     );
   }

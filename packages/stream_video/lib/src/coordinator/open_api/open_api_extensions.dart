@@ -171,6 +171,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         micDefaultOn: audio.micDefaultOn,
         speakerDefaultOn: audio.speakerDefaultOn,
         noiseCancellation: audio.noiseCancellation?.toSettingsDomain(),
+        hifiAudioEnabled: audio.hifiAudioEnabled,
       ),
       video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,

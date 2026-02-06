@@ -29,6 +29,7 @@ import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
+import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_track_type.dart';
@@ -2993,19 +2994,6 @@ class Call {
       return Result.error('Missing permission to send audio');
     }
 
-    if (enabled && CurrentPlatform.isAndroid) {
-      try {
-        await rtc.Helper.setAndroidAudioConfiguration(
-          _streamVideo.options.audioConfigurationPolicy.getAndroidConfiguration(),
-        );
-      } catch (e) {
-        _logger.w(
-          () =>
-              '[setMicrophoneEnabled] Failed to set Android audio configuration: $e',
-        );
-      }
-    }
-
     final result =
         await _session?.setMicrophoneEnabled(
           enabled,
@@ -3150,6 +3138,35 @@ class Call {
     }
 
     return result;
+  }
+
+  void setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
+    if (!state.value.settings.audio.hifiAudioEnabled) {
+      throw ArgumentError('High Fidelity audio is not enabled for this call');
+    }
+
+    if (_streamVideo.isAudioProcessorConfigured()) {
+      final disableAudioProcessing =
+          profile == SfuAudioBitrateProfile.musicHighQuality;
+
+      if (disableAudioProcessing) {
+        unawaited(stopAudioProcessing());
+      } else {
+        unawaited(startAudioProcessing());
+      }
+    }
+
+    _stateManager.setAudioBitrateProfile(profile);
+
+    final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;
+    _session?.rtcManager?.changeDefaultAudioConstraints(
+      AudioConstraints(
+        noiseSuppression: !stereo,
+        echoCancellation: !stereo,
+        autoGainControl: !stereo,
+        channelCount: stereo ? 2 : 1,
+      ),
+    );
   }
 
   bool checkIfAudioOutputChangeSupported() {
