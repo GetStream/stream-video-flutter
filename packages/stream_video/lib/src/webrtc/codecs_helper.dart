@@ -125,8 +125,8 @@ List<RTCRtpEncodingWithDimensions> withSimulcastConstraints({
     // provide only one layer 320x240 (q), the one with the highest quality
     layers = optimalVideoLayers.where((layer) => layer.rid == 'f').toList();
   } else if (size <= 640) {
-    // provide two layers, 160x120 (q) and 640x480 (h)
-    layers = optimalVideoLayers.where((layer) => layer.rid != 'h').toList();
+    // provide two layers, 320x240 (h) and 640x480 (f)
+    layers = optimalVideoLayers.where((layer) => layer.rid != 'q').toList();
   } else {
     // provide three layers for sizes > 640x480
     layers = optimalVideoLayers;

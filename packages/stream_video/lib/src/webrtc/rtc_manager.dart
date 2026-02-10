@@ -642,7 +642,7 @@ extension PublisherRtcManager on RtcManager {
         ),
         layers: [],
         codec: transceiverCache.publishOption.codec,
-        muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
+        muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
         stereo: stereo,
         dtx: audioSettings.opusDtxEnabled,
         red: audioSettings.redundantCodingEnabled,
@@ -666,7 +666,7 @@ extension PublisherRtcManager on RtcManager {
         red: false,
         stereo: false,
         codec: transceiverCache.publishOption.codec,
-        muted: transceiverCache.transceiver.sender.track?.enabled ?? true,
+        muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
         layers: encodings.map((it) {
           return RtcVideoLayer(
             rid: it.rid ?? '',

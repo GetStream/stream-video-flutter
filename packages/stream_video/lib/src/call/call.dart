@@ -3140,9 +3140,9 @@ class Call {
     return result;
   }
 
-  void setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
+  Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
     if (!state.value.settings.audio.hifiAudioEnabled) {
-      throw ArgumentError('High Fidelity audio is not enabled for this call');
+      return Result.error('High Fidelity audio is not enabled for this call');
     }
 
     if (_streamVideo.isAudioProcessorConfigured()) {
@@ -3173,6 +3173,8 @@ class Call {
         channelCount: stereo ? 2 : 1,
       ),
     );
+
+    return const Result.success(none);
   }
 
   bool checkIfAudioOutputChangeSupported() {
