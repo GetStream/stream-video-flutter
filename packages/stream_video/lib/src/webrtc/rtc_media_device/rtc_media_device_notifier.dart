@@ -33,6 +33,8 @@ class RtcMediaDeviceNotifier {
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
     // Triggers the initial device change event to get the devices list.
     _onDeviceChange(null);
+
+    _listenForAudioProcessingStateChanges();
   }
 
   static final instance = RtcMediaDeviceNotifier._internal();
@@ -113,6 +115,37 @@ class RtcMediaDeviceNotifier {
         })
         .whereNotNull()
         .asBroadcastStream();
+  }
+
+  void _listenForAudioProcessingStateChanges() {
+    rtc.eventStream.listen((data) {
+      if (data.isEmpty) return;
+
+      final event = data.keys.first;
+      if (event != 'onAudioProcessingStateChanged') return;
+
+      final values = data.values.first;
+      if (values is! Map<dynamic, dynamic>) return;
+
+      final stereoPlayoutEnabled =
+          values['stereoPlayoutEnabled'] as bool? ?? false;
+      final voiceProcessingEnabled =
+          values['voiceProcessingEnabled'] as bool? ?? false;
+      final voiceProcessingBypassed =
+          values['voiceProcessingBypassed'] as bool? ?? false;
+      final voiceProcessingAGCEnabled =
+          values['voiceProcessingAGCEnabled'] as bool? ?? false;
+
+      _tracer.trace(
+        'audioProcessingStateChanged',
+        {
+          'stereoPlayoutEnabled': stereoPlayoutEnabled,
+          'voiceProcessingEnabled': voiceProcessingEnabled,
+          'voiceProcessingBypassed': voiceProcessingBypassed,
+          'voiceProcessingAGCEnabled': voiceProcessingAGCEnabled,
+        },
+      );
+    });
   }
 
   Future<void> _onDeviceChange(_) async {
@@ -219,8 +252,10 @@ class RtcMediaDeviceNotifier {
   /// When called after initial setup, it will automatically
   /// dispose all existing peer connections, tracks, and streams, then recreate
   /// the audio device module and peer connection factory with the new parameters.
-  Future<void> reinitializeAudioConfiguration(AudioConfigurationPolicy policy) {
-    return rtc.WebRTC.initialize(
+  Future<void> reinitializeAudioConfiguration(
+    AudioConfigurationPolicy policy,
+  ) async {
+    await rtc.WebRTC.initialize(
       options: {
         'reinitialize': true,
         'bypassVoiceProcessing': policy.bypassVoiceProcessing,
@@ -228,5 +263,14 @@ class RtcMediaDeviceNotifier {
           'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
       },
     );
+
+    // On iOS, configure stereo playout preference based on the policy.
+    // When voice processing is bypassed (e.g. ViewerAudioPolicy), stereo
+    // playout is preferred for high-fidelity audio.
+    if (CurrentPlatform.isIos) {
+      await rtc.Helper.setStereoPlayoutPreferred(
+        policy.bypassVoiceProcessing,
+      );
+    }
   }
 }

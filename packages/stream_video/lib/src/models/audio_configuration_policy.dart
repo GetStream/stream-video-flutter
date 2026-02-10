@@ -156,7 +156,6 @@ class ViewerAudioPolicy extends AudioConfigurationPolicy {
       appleAudioCategoryOptions: const {
         rtc.AppleAudioCategoryOption.defaultToSpeaker,
         rtc.AppleAudioCategoryOption.mixWithOthers,
-        rtc.AppleAudioCategoryOption.allowBluetooth,
         rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
         rtc.AppleAudioCategoryOption.allowAirPlay,
       },

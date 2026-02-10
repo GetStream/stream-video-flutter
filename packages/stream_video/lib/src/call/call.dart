@@ -3159,6 +3159,12 @@ class Call {
     _stateManager.setAudioBitrateProfile(profile);
 
     final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;
+
+    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
+    if (CurrentPlatform.isIos) {
+      unawaited(rtc.Helper.setStereoPlayoutPreferred(stereo));
+    }
+
     _session?.rtcManager?.changeDefaultAudioConstraints(
       AudioConstraints(
         noiseSuppression: !stereo,
