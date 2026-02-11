@@ -202,6 +202,11 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         );
       case sfu_events.SfuEvent_EventPayload.participantMigrationComplete:
         return const SfuParticipantMigrationCompleteEvent();
+      case sfu_events.SfuEvent_EventPayload.iceRestart:
+        final payload = iceRestart;
+        return SfuIceRestartEvent(
+          peerType: payload.peerType.toDomain(),
+        );
       default:
         return const SfuUnknownEvent();
     }

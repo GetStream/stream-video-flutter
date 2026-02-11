@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+* Added handling for SFU `iceRestart` event — the client now correctly performs ICE restart and renegotiation when instructed by the SFU, improving fast reconnect reliability.
+* Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
+
 ## 1.2.4
 
 ### 🐞 Fixed
