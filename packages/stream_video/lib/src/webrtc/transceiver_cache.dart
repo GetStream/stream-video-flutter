@@ -62,8 +62,8 @@ class TransceiverManager {
   }
 
   /// Gets the last transceiver for the given track type and publish option id.
-  RTCRtpTransceiver? getWith(SfuTrackType trackType, int id) {
-    return _findTransceiver(trackType, id)?.transceiver;
+  RTCRtpTransceiver? getWith(SfuTrackType trackType, int publishOptionId) {
+    return _findTransceiver(trackType, publishOptionId)?.transceiver;
   }
 
   /// Checks if the cache has the given publish option.
