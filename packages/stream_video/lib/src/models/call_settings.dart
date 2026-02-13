@@ -99,6 +99,7 @@ class StreamAudioSettings extends MediaSettings {
     this.micDefaultOn = true,
     this.speakerDefaultOn = true,
     this.noiseCancellation,
+    this.hifiAudioEnabled = false,
   });
 
   final bool opusDtxEnabled;
@@ -107,6 +108,7 @@ class StreamAudioSettings extends MediaSettings {
   final bool micDefaultOn;
   final bool speakerDefaultOn;
   final StreamNoiceCancellingSettings? noiseCancellation;
+  final bool hifiAudioEnabled;
 
   @override
   List<Object?> get props => [
@@ -117,6 +119,7 @@ class StreamAudioSettings extends MediaSettings {
     micDefaultOn,
     speakerDefaultOn,
     noiseCancellation,
+    hifiAudioEnabled,
   ];
 
   AudioSettingsRequest toOpenDto() {
@@ -128,6 +131,7 @@ class StreamAudioSettings extends MediaSettings {
       micDefaultOn: micDefaultOn,
       speakerDefaultOn: speakerDefaultOn,
       noiseCancellation: noiseCancellation?.toOpenDto(),
+      hifiAudioEnabled: hifiAudioEnabled,
     );
   }
 }

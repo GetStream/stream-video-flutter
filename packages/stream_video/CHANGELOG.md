@@ -1,3 +1,14 @@
+## Upcoming
+
+### ✅ Added
+* Added `audioConfigurationPolicy` to `StreamVideoOptions` - a unified audio configuration for both iOS and Android platforms. Includes predefined policies:
+  * `AudioConfigurationPolicy.call()` - Optimized for voice/video calls (default)
+  * `AudioConfigurationPolicy.livestream()` - Optimized for livestream playback
+  * `AudioConfigurationPolicy.custom()` - Full control over platform-specific settings with optional `basePolicy` fallback
+
+### ⚠️ Deprecated
+* Deprecated `androidAudioConfiguration` in `StreamVideoOptions`. Use `audioConfigurationPolicy` instead.
+
 ## 1.2.4
 
 ### 🐞 Fixed

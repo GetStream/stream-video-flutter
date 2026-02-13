@@ -14,6 +14,7 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../utils/string.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import 'data/events/sfu_events.dart';
+import 'data/models/sfu_audio_bitrate.dart';
 import 'data/models/sfu_connection_info.dart';
 import 'data/models/sfu_model_mapper_extensions.dart';
 import 'data/models/sfu_participant.dart';
@@ -317,6 +318,10 @@ extension SfuPublishOptionsJsonX on SfuPublishOptions {
       'useSingleLayer': useSingleLayer,
       'bitrate': bitrate,
       'fps': fps,
+      'use_single_layer': useSingleLayer,
+      'audio_bitrate_profiles': audioBitrateProfiles
+          ?.map((it) => it.toJson())
+          .toList(),
     };
   }
 }
@@ -329,6 +334,15 @@ extension SfuCodecJsonX on SfuCodec {
       'fmtp': fmtpLine,
       'clockRate': clockRate,
       'encodingParameters': encodingParameters,
+    };
+  }
+}
+
+extension SfuAudioBitrateX on SfuAudioBitrate {
+  Map<String, dynamic> toJson() {
+    return {
+      'profile': profile.toString(),
+      'bitrate': bitrate,
     };
   }
 }

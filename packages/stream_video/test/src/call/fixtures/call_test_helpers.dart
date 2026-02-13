@@ -166,7 +166,7 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
   final effectiveClientState = clientState ?? setupMockClientState();
 
   when(() => streamVideo.state).thenReturn(effectiveClientState);
-  when(() => streamVideo.options).thenReturn(const StreamVideoOptions());
+  when(() => streamVideo.options).thenReturn(StreamVideoOptions());
   when(
     () => streamVideo.currentUser,
   ).thenReturn(SampleCallData.defaultUserInfo);

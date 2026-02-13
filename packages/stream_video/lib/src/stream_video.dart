@@ -40,6 +40,7 @@ import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
 import 'logger/stream_logger.dart';
+import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
 import 'models/call_preferences.dart';
 import 'models/call_received_data.dart';
@@ -64,6 +65,7 @@ import 'utils/result.dart';
 import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/rtc_manager.dart';
+import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -92,7 +94,7 @@ class StreamVideo extends Disposable {
   /// If [failIfSingletonExists] is set to false, the new instance will override and disconnect the existing singleton instance.
   factory StreamVideo(
     String apiKey, {
-    StreamVideoOptions options = const StreamVideoOptions(),
+    StreamVideoOptions options = const StreamVideoOptions.constant(),
     required User user,
     String? userToken,
     TokenLoader? tokenLoader,
@@ -123,7 +125,7 @@ class StreamVideo extends Disposable {
   factory StreamVideo.create(
     String apiKey, {
     required User user,
-    StreamVideoOptions options = const StreamVideoOptions(),
+    StreamVideoOptions options = const StreamVideoOptions.constant(),
     String? userToken,
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
@@ -188,16 +190,15 @@ class StreamVideo extends Disposable {
     _state.user.value = user;
 
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) {
-      rtc.WebRTC.initialize(
-        options: {
-          if (CurrentPlatform.isAndroid &&
-              options.androidAudioConfiguration != null)
-            'androidAudioConfiguration': options.androidAudioConfiguration!
-                .toMap(),
-        },
-      ).then((_) {
-        webrtcInitializationCompleter.complete();
-      });
+      RtcMediaDeviceNotifier.instance
+          .reinitializeAudioConfiguration(options.audioConfigurationPolicy)
+          .then((_) {
+            if (precacheGenericSdps) {
+              unawaited(RtcManager.cacheGenericSdp());
+            }
+
+            webrtcInitializationCompleter.complete();
+          });
     } else {
       webrtcInitializationCompleter.complete();
     }
@@ -212,27 +213,21 @@ class StreamVideo extends Disposable {
         UserToken.anonymous(),
         onTokenUpdated: onTokenUpdated,
       ),
-      UserType.guest => TokenProvider.dynamic(
-        (userId) async {
-          final result = await _client.loadGuest(id: userId);
-          if (result is! Success<GuestCreatedData>) {
-            throw (result as Failure).error;
-          }
-          final updatedUser = result.data.user;
-          _state.user.value = User(
-            type: user.type,
-            info: updatedUser.toUserInfo(),
-          );
-          return result.data.accessToken;
-        },
-        onTokenUpdated: onTokenUpdated,
-      ),
+      UserType.guest => TokenProvider.dynamic((userId) async {
+        final result = await _client.loadGuest(id: userId);
+        if (result is! Success<GuestCreatedData>) {
+          throw (result as Failure).error;
+        }
+        final updatedUser = result.data.user;
+        _state.user.value = User(
+          type: user.type,
+          info: updatedUser.toUserInfo(),
+        );
+        return result.data.accessToken;
+      }, onTokenUpdated: onTokenUpdated),
     };
 
-    _tokenManager.setTokenProvider(
-      user.id,
-      tokenProvider: tokenProvider,
-    );
+    _tokenManager.setTokenProvider(user.id, tokenProvider: tokenProvider);
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
@@ -247,10 +242,6 @@ class StreamVideo extends Disposable {
       }),
     );
 
-    if (precacheGenericSdps) {
-      unawaited(RtcManager.cacheGenericSdp());
-    }
-
     if (options.autoConnect) {
       unawaited(
         connect(
@@ -261,9 +252,7 @@ class StreamVideo extends Disposable {
                 '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
           );
 
-          return Result.error(
-            'Failed to auto connect: $error',
-          );
+          return Result.error('Failed to auto connect: $error');
         }),
       );
     }
@@ -374,12 +363,10 @@ class StreamVideo extends Disposable {
 
     return _connectOperation!
         .valueOrDefault(Result.error('connect was cancelled'))
-        .whenComplete(
-          () {
-            _logger.i(() => '[connect] clear shared operation');
-            _connectOperation = null;
-          },
-        );
+        .whenComplete(() {
+          _logger.i(() => '[connect] clear shared operation');
+          _connectOperation = null;
+        });
   }
 
   /// Disconnects the user from the Stream Video service.
@@ -408,9 +395,7 @@ class StreamVideo extends Disposable {
       return Result.success(token);
     }
 
-    _connectionState = ConnectionState.connecting(
-      _state.currentUser.id,
-    );
+    _connectionState = ConnectionState.connecting(_state.currentUser.id);
 
     // guest user will be updated when token gets fetched
     final tokenResult = await _tokenManager.getToken();
@@ -439,9 +424,7 @@ class StreamVideo extends Disposable {
         );
         return result;
       }
-      _connectionState = ConnectionState.connected(
-        _state.currentUser.id,
-      );
+      _connectionState = ConnectionState.connected(_state.currentUser.id);
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
 
@@ -523,14 +506,10 @@ class StreamVideo extends Disposable {
       _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
-      _connectionState = ConnectionState.connected(
-        _state.currentUser.id,
-      );
+      _connectionState = ConnectionState.connected(_state.currentUser.id);
     } else if (event is CoordinatorDisconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] disconnected ${event.userId}');
-      _connectionState = ConnectionState.disconnected(
-        _state.currentUser.id,
-      );
+      _connectionState = ConnectionState.disconnected(_state.currentUser.id);
     } else if (event is CoordinatorReconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
       if (state.watchedCalls.value.isNotEmpty) {
@@ -545,14 +524,12 @@ class StreamVideo extends Disposable {
                     .toList(),
               },
             },
-          ).onError(
-            (error, stackTrace) {
-              _logger.e(
-                () => '[onCoordinatorEvent] re-watching calls failed: $error',
-              );
-              return Result.failure(VideoErrors.compose(error, stackTrace));
-            },
-          ),
+          ).onError((error, stackTrace) {
+            _logger.e(
+              () => '[onCoordinatorEvent] re-watching calls failed: $error',
+            );
+            return Result.failure(VideoErrors.compose(error, stackTrace));
+          }),
         );
       }
     }
@@ -650,10 +627,7 @@ class StreamVideo extends Disposable {
     CallPreferences? preferences,
   }) {
     return Call(
-      callCid: StreamCallCid.from(
-        type: callType,
-        id: id,
-      ),
+      callCid: StreamCallCid.from(type: callType, id: id),
       coordinatorClient: _client,
       streamVideo: this,
       networkMonitor: _networkMonitor,
@@ -724,9 +698,7 @@ class StreamVideo extends Disposable {
   }
 
   /// Removes a device used to receive push notifications.
-  Future<Result<None>> removeDevice({
-    required String pushToken,
-  }) {
+  Future<Result<None>> removeDevice({required String pushToken}) {
     _logger.d(() => '[removeDevice] pushToken: $pushToken');
     return _client.deleteDevice(id: pushToken, userId: currentUser.id);
   }
@@ -759,20 +731,18 @@ class StreamVideo extends Disposable {
   StreamSubscription<RingingEvent>? disposeAfterResolvingRinging({
     void Function()? disposingCallback,
   }) {
-    return onRingingEvent(
-      (event) {
-        if (event is ActionCallAccept ||
-            event is ActionCallDecline ||
-            event is ActionCallTimeout ||
-            event is ActionCallEnded) {
-          // Delay the callback to ensure the call is fully resolved.
-          Future<void>.delayed(const Duration(seconds: 1), () {
-            disposingCallback?.call();
-            dispose();
-          });
-        }
-      },
-    );
+    return onRingingEvent((event) {
+      if (event is ActionCallAccept ||
+          event is ActionCallDecline ||
+          event is ActionCallTimeout ||
+          event is ActionCallEnded) {
+        // Delay the callback to ensure the call is fully resolved.
+        Future<void>.delayed(const Duration(seconds: 1), () {
+          disposingCallback?.call();
+          dispose();
+        });
+      }
+    });
   }
 
   Future<bool> consumeAndAcceptActiveCall({
@@ -867,20 +837,18 @@ class StreamVideo extends Disposable {
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
   }) {
-    return onRingingEvent<ActionCallAccept>(
-      (event) {
-        // Ignore call accept event when app is in detached state on Android.
-        // The call flow should be handled by consuming the call like in the terminated state.
-        if (!CurrentPlatform.isAndroid ||
-            _state.appLifecycleState.value != LifecycleState.detached) {
-          _onCallAccept(
-            event,
-            onCallAccepted: onCallAccepted,
-            callPreferences: acceptCallPreferences,
-          );
-        }
-      },
-    );
+    return onRingingEvent<ActionCallAccept>((event) {
+      // Ignore call accept event when app is in detached state on Android.
+      // The call flow should be handled by consuming the call like in the terminated state.
+      if (!CurrentPlatform.isAndroid ||
+          _state.appLifecycleState.value != LifecycleState.detached) {
+        _onCallAccept(
+          event,
+          onCallAccepted: onCallAccepted,
+          callPreferences: acceptCallPreferences,
+        );
+      }
+    });
   }
 
   StreamSubscription<ActionCallIncoming>? observeCallIncomingRingingEvent() {
@@ -925,9 +893,7 @@ class StreamVideo extends Disposable {
     );
 
     if (consumeResult.isFailure) {
-      _logger.w(
-        () => '[onCallAccept] error consuming incoming call}',
-      );
+      _logger.w(() => '[onCallAccept] error consuming incoming call}');
       return;
     }
 
@@ -952,10 +918,7 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    final consumeResult = await consumeIncomingCall(
-      uuid: uuid,
-      cid: cid,
-    );
+    final consumeResult = await consumeIncomingCall(uuid: uuid, cid: cid);
 
     final incomingCall = consumeResult.getDataOrNull();
     if (incomingCall == null) return;
@@ -1154,10 +1117,7 @@ class StreamVideo extends Disposable {
     required StreamCallType callType,
     required String id,
   }) async {
-    final call = makeCall(
-      callType: callType,
-      id: id,
-    );
+    final call = makeCall(callType: callType, id: id);
     final callResult = await call.get(watch: false);
 
     return callResult.fold(
@@ -1317,9 +1277,7 @@ Future<String?> _setClientDetails() async {
     sfu_models.Device? device;
     sfu_models.Browser? browser;
 
-    var os = sfu_models.OS(
-      name: CurrentPlatform.name,
-    );
+    var os = sfu_models.OS(name: CurrentPlatform.name);
 
     if (CurrentPlatform.isAndroid) {
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
@@ -1337,9 +1295,7 @@ Future<String?> _setClientDetails() async {
         name: CurrentPlatform.name,
         version: deviceInfo.systemVersion,
       );
-      device = sfu_models.Device(
-        name: deviceInfo.utsname.machine,
-      );
+      device = sfu_models.Device(name: deviceInfo.utsname.machine);
     } else if (CurrentPlatform.isMacOS) {
       final deviceInfo = await DeviceInfoPlugin().macOsInfo;
       os = sfu_models.OS(
@@ -1411,13 +1367,14 @@ void _defaultLogHandler(
 }
 
 class StreamVideoOptions {
-  const StreamVideoOptions({
+  StreamVideoOptions({
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
     this.defaultCallPreferences,
-    this.sdpPolicy = const SdpPolicy(spdEditingEnabled: false),
+    //TODO: Allow sdp munging for development purposees, remove it before merging
+    this.sdpPolicy = const SdpPolicy(),
     this.audioProcessor,
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
@@ -1428,7 +1385,42 @@ class StreamVideoOptions {
     this.keepConnectionsAliveWhenInBackground = false,
     this.networkMonitorSettings = const NetworkMonitorSettings(),
     this.allowMultipleActiveCalls = false,
+    @Deprecated(
+      'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
+    )
     this.androidAudioConfiguration,
+    AudioConfigurationPolicy audioConfigurationPolicy =
+        const BroadcasterAudioPolicy(),
+  }) : audioConfigurationPolicy = androidAudioConfiguration == null
+           ? audioConfigurationPolicy
+           : CustomAudioPolicy(androidConfiguration: androidAudioConfiguration);
+
+  /// Use this constructor when you need a compile-time constant. Note that [androidAudioConfiguration]
+  /// will be ignored in this constructor - use [audioConfigurationPolicy] instead.
+  //TODO: Remove this constructor in the next major release while removing androidAudioConfiguration.
+  const StreamVideoOptions.constant({
+    this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    this.latencySettings = const LatencySettings(),
+    this.retryPolicy = const RetryPolicy(),
+    this.defaultCallPreferences,
+    //TODO: Allow sdp munging for development purposees, remove it before merging
+    this.sdpPolicy = const SdpPolicy(),
+    this.audioProcessor,
+    this.logPriority = Priority.none,
+    this.logHandlerFunction = _defaultLogHandler,
+    this.muteVideoWhenInBackground = false,
+    this.muteAudioWhenInBackground = false,
+    this.autoConnect = true,
+    this.includeUserDetailsForAutoConnect = true,
+    this.keepConnectionsAliveWhenInBackground = false,
+    this.networkMonitorSettings = const NetworkMonitorSettings(),
+    this.allowMultipleActiveCalls = false,
+    @Deprecated(
+      'Use audioConfigurationPolicy instead. Usage of this parameter will be ignored in this constructor.',
+    )
+    this.androidAudioConfiguration,
+    this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
   });
 
   final String coordinatorRpcUrl;
@@ -1457,5 +1449,33 @@ class StreamVideoOptions {
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;
 
+  @Deprecated(
+    'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
+  )
   final rtc.AndroidAudioConfiguration? androidAudioConfiguration;
+
+  /// The audio configuration policy for the SDK.
+  ///
+  /// **Broadcaster Policy** (default) - For active participation:
+  /// - Use for: meeting participants, livestream hosts, active speakers
+  /// - Enables echo cancellation and noise suppression
+  /// - Volume buttons control call volume (Android)
+  /// - Optimized for voice clarity
+  ///
+  /// **Viewer Policy** - For passive consumption:
+  /// - Use for: livestream viewers, watch-only audience
+  /// - Disables audio processing for higher fidelity
+  /// - Volume buttons control media volume (Android)
+  /// - Optimized for audio quality
+  /// - Enables stereo playout
+  ///
+  /// Use predefined policies:
+  /// - [AudioConfigurationPolicy.broadcaster] - Voice/video calls (default)
+  /// - [AudioConfigurationPolicy.viewer] - Livestream playback
+  /// - [AudioConfigurationPolicy.custom] - Full control over platform settings
+  ///
+  /// Defaults to [BroadcasterAudioPolicy].
+  /// Once set it will be applied for all calls.
+  /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  final AudioConfigurationPolicy audioConfigurationPolicy;
 }

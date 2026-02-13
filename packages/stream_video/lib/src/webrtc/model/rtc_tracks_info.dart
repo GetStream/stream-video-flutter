@@ -11,6 +11,9 @@ class RtcTrackInfo {
     required this.codec,
     required this.muted,
     required this.publishOptionId,
+    required this.dtx,
+    required this.stereo,
+    required this.red,
   });
 
   final String? trackId;
@@ -21,10 +24,15 @@ class RtcTrackInfo {
   final bool muted;
   final int publishOptionId;
 
+  final bool dtx;
+  final bool stereo;
+  final bool red;
+
   @override
   String toString() {
     return 'RtcTrackInfo{trackId: $trackId, trackType: $trackType, '
-        'mid: $mid, layers: $layers, codec: $codec, muted: $muted, publishOptionId: $publishOptionId}';
+        'mid: $mid, layers: $layers, codec: $codec, muted: $muted, publishOptionId: $publishOptionId, '
+        'dtx: $dtx, stereo: $stereo, red: $red}';
   }
 }
 

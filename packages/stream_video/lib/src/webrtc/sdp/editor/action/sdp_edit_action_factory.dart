@@ -6,10 +6,12 @@ import '../../specification/media_description.dart';
 import '../rule/rule_prioritize_codec.dart';
 import '../rule/rule_set_opus_dtx_enabled.dart';
 import '../rule/rule_set_opus_red_enabled.dart';
+import '../rule/rule_set_opus_stereo_enabled.dart';
 import '../rule/sdp_munging_rule.dart';
 import 'action_prioritize_codec.dart';
 import 'action_set_opus_dtx_enabled.dart';
 import 'action_set_opus_red_enabled.dart';
+import 'action_set_opus_stereo_enabled.dart';
 import 'sdp_edit_action.dart';
 
 @internal
@@ -35,6 +37,12 @@ class SdpEditActionFactory {
       return SetOpusRedEnabledAction(
         enabled: rule.enabled,
         mediaDescriptionParser: _mediaDescriptionParser,
+        rtpmapParser: _rtpmapParser,
+        fmtpParser: _fmtpParser,
+      );
+    } else if (rule is SetOpusStereoEnabledRule) {
+      return SetOpusStereoEnabledAction(
+        enabled: rule.enabled,
         rtpmapParser: _rtpmapParser,
         fmtpParser: _fmtpParser,
       );

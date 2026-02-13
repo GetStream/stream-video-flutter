@@ -149,25 +149,6 @@ class CallSession extends Disposable {
     });
   }
 
-  Future<void> _ensureAndroidAudioConfiguration() async {
-    if (CurrentPlatform.isAndroid &&
-        _streamVideo.options.androidAudioConfiguration != null) {
-      try {
-        await rtc.Helper.setAndroidAudioConfiguration(
-          _streamVideo.options.androidAudioConfiguration!,
-        );
-        _logger.v(
-          () => '[_ensureAndroidAudioConfiguration] Configuration applied',
-        );
-      } catch (e) {
-        _logger.w(
-          () =>
-              '[_ensureAndroidAudioConfiguration] Failed to apply Android audio configuration: $e',
-        );
-      }
-    }
-  }
-
   Future<sfu_events.ReconnectDetails> getReconnectDetails(
     SfuReconnectionStrategy strategy, {
     String? migratingFromSfuId,
@@ -316,15 +297,18 @@ class CallSession extends Disposable {
 
       // Ensure WebRTC initialization completes before creating rtcManager
       await _streamVideo.webrtcInitializationCompleter.future;
-      await _ensureAndroidAudioConfiguration();
 
       if (isAnonymousUser) {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
+                streamVideo: _streamVideo,
+                stateManager: stateManager,
                 clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
+                callSessionConfig: config,
+                publishOptions: joinResponseEvent.publishOptions,
               )
               ..onSubscriberIceCandidate = _onLocalIceCandidate
               ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -343,6 +327,8 @@ class CallSession extends Disposable {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
+                streamVideo: _streamVideo,
+                stateManager: stateManager,
                 publisherId: localTrackId,
                 publishOptions: joinResponseEvent.publishOptions,
                 clientDetails: clientDetails,
@@ -472,8 +458,6 @@ class CallSession extends Disposable {
         _logger.v(() => '[fastReconnect] fast-reconnect done');
 
         stateManager.sfuPinsUpdated(event.callState.pins);
-
-        await _ensureAndroidAudioConfiguration();
 
         result = Result.success(
           (
@@ -706,11 +690,6 @@ class CallSession extends Disposable {
 
     // Only start remote tracks. Local tracks are started by the user.
     if (track is! RtcRemoteTrack) return;
-
-    if (track.isAudioTrack) {
-      await _ensureAndroidAudioConfiguration();
-    }
-
     await track.start();
   }
 
@@ -915,10 +894,6 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
 
-    if (remoteTrack.isAudioTrack) {
-      await _ensureAndroidAudioConfiguration();
-    }
-
     // Start the track.
     await remoteTrack.start();
 
@@ -973,11 +948,6 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setAudioOutputDevice(device: device);
-
-    if (result.isSuccess && CurrentPlatform.isAndroid) {
-      await _ensureAndroidAudioConfiguration();
-    }
-
     return result;
   }
 
@@ -1118,6 +1088,9 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
         mid: info.mid,
         publishOptionId: info.publishOptionId,
         codec: info.codec?.toDTO(),
+        dtx: info.dtx,
+        stereo: info.stereo,
+        red: info.red,
         layers: info.layers?.map((layer) {
           return sfu_models.VideoLayer(
             rid: layer.rid,
