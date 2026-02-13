@@ -3162,7 +3162,7 @@ class Call {
 
     // On iOS, toggle stereo playout preference when switching HiFi audio modes.
     if (CurrentPlatform.isIos) {
-      unawaited(rtc.Helper.setStereoPlayoutPreferred(stereo));
+      unawaited(rtc.Helper.setiOSStereoPlayoutPreferred(stereo));
     }
 
     _session?.rtcManager?.changeDefaultAudioConstraints(

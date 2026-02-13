@@ -268,7 +268,7 @@ class RtcMediaDeviceNotifier {
     // When voice processing is bypassed (e.g. ViewerAudioPolicy), stereo
     // playout is preferred for high-fidelity audio.
     if (CurrentPlatform.isIos) {
-      await rtc.Helper.setStereoPlayoutPreferred(
+      await rtc.Helper.setiOSStereoPlayoutPreferred(
         policy.bypassVoiceProcessing,
       );
     }
