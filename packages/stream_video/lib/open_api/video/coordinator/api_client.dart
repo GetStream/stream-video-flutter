@@ -620,8 +620,9 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
-        case 'Response':
-          return Response.fromJson(value);
+        //MANUAL_EDIT
+        case 'DurationResponse':
+          return DurationResponse.fromJson(value);
         case 'RingCallRequest':
           return RingCallRequest.fromJson(value);
         case 'RingCallResponse':
