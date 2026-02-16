@@ -22,6 +22,15 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 ///
 /// This policy treats the call as **media playback**.
 ///
+/// ### HiFi Policy
+/// [AudioConfigurationPolicy.hiFi] is designed for **broadcasting high-fidelity
+/// audio**, such as:
+/// - Live music streaming
+/// - Screen sharing with stereo audio
+///
+/// This policy bypasses voice processing to enable stereo I/O and
+/// treats the session as media on both platforms.
+///
 /// ## Platform-Specific Differences
 ///
 /// ### Android
@@ -38,6 +47,11 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 /// - Always uses speaker/media output path
 /// - Treated as regular media playback
 ///
+/// **HiFi Policy:**
+/// - Same audio settings as Viewer Policy (media volume, no processing)
+/// - Enables stereo input and output on the Audio Device Module
+/// - Optimized for broadcasting high-fidelity / stereo audio
+///
 /// ### iOS
 ///
 /// **Broadcaster Policy:**
@@ -50,6 +64,11 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 /// - Always uses speaker by default
 /// - Optimized for music/media quality
 ///
+/// **HiFi Policy:**
+/// - Voice processing **bypassed** for pure, high-fidelity audio
+/// - Uses `playAndRecord` category for active microphone use
+/// - Always uses speaker by default
+///
 /// ## Custom Configuration
 /// - [AudioConfigurationPolicy.custom] - Full control over platform settings
 sealed class AudioConfigurationPolicy {
@@ -58,6 +77,8 @@ sealed class AudioConfigurationPolicy {
   const factory AudioConfigurationPolicy.broadcaster() = BroadcasterAudioPolicy;
 
   const factory AudioConfigurationPolicy.viewer() = ViewerAudioPolicy;
+
+  const factory AudioConfigurationPolicy.hiFi() = HiFiAudioPolicy;
 
   /// Custom policy allowing full control over platform-specific settings.
   ///
@@ -145,6 +166,64 @@ class BroadcasterAudioPolicy extends AudioConfigurationPolicy {
 /// See [AudioConfigurationPolicy] for detailed platform-specific behavior.
 class ViewerAudioPolicy extends AudioConfigurationPolicy {
   const ViewerAudioPolicy();
+
+  @override
+  rtc.AppleAudioConfiguration getAppleConfiguration({
+    bool defaultToSpeaker = false,
+  }) {
+    return rtc.AppleAudioConfiguration(
+      appleAudioMode: rtc.AppleAudioMode.default_,
+      appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
+      appleAudioCategoryOptions: const {
+        rtc.AppleAudioCategoryOption.defaultToSpeaker,
+        rtc.AppleAudioCategoryOption.mixWithOthers,
+        rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
+        rtc.AppleAudioCategoryOption.allowAirPlay,
+      },
+    );
+  }
+
+  @override
+  rtc.AndroidAudioConfiguration getAndroidConfiguration() {
+    return rtc.AndroidAudioConfiguration(
+      androidAudioMode: rtc.AndroidAudioMode.normal,
+      androidAudioStreamType: rtc.AndroidAudioStreamType.music,
+      androidAudioAttributesUsageType:
+          rtc.AndroidAudioAttributesUsageType.media,
+      androidAudioAttributesContentType:
+          rtc.AndroidAudioAttributesContentType.music,
+      androidAudioFocusMode: rtc.AndroidAudioFocusMode.gain,
+      forceHandleAudioRouting: false,
+    );
+  }
+
+  @override
+  bool get bypassVoiceProcessing => true;
+}
+
+/// Audio policy optimized for broadcasting high-fidelity audio.
+///
+/// Use this policy when users need to **send** high-quality audio such as:
+/// - Live music streaming or karaoke hosts
+/// - Podcast hosts or professional streamers
+/// - Screen sharing with stereo audio content
+///
+/// This policy bypasses voice processing (echo cancellation, noise suppression)
+/// and configures the audio layer for stereo I/O and media-quality output.
+///
+/// On Android, this enables stereo input and output on the Audio Device Module
+/// (ADM), which is required for capturing and sending stereo audio. Screen share
+/// audio also benefits from this — it will be captured in stereo when this
+/// policy is active.
+///
+/// **Requirements for stereo capture on Android:**
+/// 1. The call type must have HiFi audio enabled (Stream Dashboard)
+/// 2. The audio bitrate profile must be set to `musicHighQuality`
+/// 3. This policy (or any policy with `bypassVoiceProcessing: true`) must be set
+///
+/// See [AudioConfigurationPolicy] for detailed platform-specific behavior.
+class HiFiAudioPolicy extends AudioConfigurationPolicy {
+  const HiFiAudioPolicy();
 
   @override
   rtc.AppleAudioConfiguration getAppleConfiguration({
