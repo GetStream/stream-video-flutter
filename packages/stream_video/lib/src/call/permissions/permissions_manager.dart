@@ -148,15 +148,18 @@ class PermissionsManager {
   }
 
   Future<Result<None>> startRecording({
+    RecordingType recordingType = RecordingType.composite,
     String? recordingExternalStorage,
   }) async {
-    if (!hasPermission(CallPermission.startRecordCall)) {
+    final permission = _startRecordPermission(recordingType);
+    if (!hasPermission(permission)) {
       _logger.w(() => '[startRecording] rejected (no permission)');
       return Result.error('Cannot start recording (no permission)');
     }
-    _logger.d(() => '[startRecording] no args');
+    _logger.d(() => '[startRecording] recordingType: $recordingType');
     final result = await coordinatorClient.startRecording(
       callCid,
+      recordingType: recordingType,
       recordingExternalStorage: recordingExternalStorage,
     );
     _logger.v(() => '[startRecording] result: $result');
@@ -170,13 +173,19 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> stopRecording() async {
-    if (!hasPermission(CallPermission.stopRecordCall)) {
+  Future<Result<None>> stopRecording({
+    RecordingType recordingType = RecordingType.composite,
+  }) async {
+    final permission = _stopRecordPermission(recordingType);
+    if (!hasPermission(permission)) {
       _logger.w(() => '[stopRecording] rejected (no permission)');
       return Result.error('Cannot stop recording (no permission)');
     }
-    _logger.d(() => '[stopRecording] no args');
-    final result = await coordinatorClient.stopRecording(callCid);
+    _logger.d(() => '[stopRecording] recordingType: $recordingType');
+    final result = await coordinatorClient.stopRecording(
+      callCid,
+      recordingType: recordingType,
+    );
     _logger.v(() => '[stopRecording] result: $result');
     return result;
   }
@@ -455,5 +464,27 @@ class PermissionsManager {
       return false;
     }
     return capabilities.contains(permission);
+  }
+
+  CallPermission _startRecordPermission(RecordingType recordingType) {
+    switch (recordingType) {
+      case RecordingType.individual:
+        return CallPermission.startIndividualRecordCall;
+      case RecordingType.raw:
+        return CallPermission.startRawRecordCall;
+      case RecordingType.composite:
+        return CallPermission.startRecordCall;
+    }
+  }
+
+  CallPermission _stopRecordPermission(RecordingType recordingType) {
+    switch (recordingType) {
+      case RecordingType.individual:
+        return CallPermission.stopIndividualRecordCall;
+      case RecordingType.raw:
+        return CallPermission.stopRawRecordCall;
+      case RecordingType.composite:
+        return CallPermission.stopRecordCall;
+    }
   }
 }

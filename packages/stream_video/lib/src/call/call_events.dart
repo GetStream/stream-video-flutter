@@ -959,6 +959,64 @@ class StreamCallClosedCaptionsEvent extends StreamCallEvent {
   ];
 }
 
+/// Event that is triggered when a user's video stream is being blurred
+/// by moderation.
+class StreamCallModerationBlurEvent extends StreamCallEvent {
+  const StreamCallModerationBlurEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.userId,
+    this.custom = const {},
+  });
+
+  final DateTime createdAt;
+
+  /// The user ID whose video stream is being blurred
+  final String userId;
+
+  /// Custom data associated with the moderation action
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    userId,
+    custom,
+  ];
+}
+
+/// Event that is triggered when a user receives a moderation warning.
+class StreamCallModerationWarningEvent extends StreamCallEvent {
+  const StreamCallModerationWarningEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.userId,
+    required this.message,
+    this.custom = const {},
+  });
+
+  final DateTime createdAt;
+
+  /// The user ID who is receiving the warning
+  final String userId;
+
+  /// The warning message
+  final String message;
+
+  /// Custom data associated with the moderation action
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    userId,
+    message,
+    custom,
+  ];
+}
+
 /// Event that is triggered when the broadcasting is started for a call.
 class StreamCallBroadcastingStartedEvent extends StreamCallEvent {
   const StreamCallBroadcastingStartedEvent(
@@ -1638,6 +1696,21 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           sessionId: event.sessionId,
           startTime: event.startTime,
           url: event.url,
+        ),
+      final CoordinatorCallModerationBlurEvent event =>
+        StreamCallModerationBlurEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          userId: event.userId,
+          custom: event.custom,
+        ),
+      final CoordinatorCallModerationWarningEvent event =>
+        StreamCallModerationWarningEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          userId: event.userId,
+          message: event.message,
+          custom: event.custom,
         ),
       // Ignore other events as they are internal to Coordinator logic
       _ => null,

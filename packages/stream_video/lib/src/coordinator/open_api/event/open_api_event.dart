@@ -56,6 +56,8 @@ class OpenApiEvent with EquatableMixin {
     this.callFrameRecordingFailed,
     this.callFrameRecordingStopped,
     this.callFrameRecordingFrameReady,
+    this.callModerationBlur,
+    this.callModerationWarning,
     this.custom,
     this.unknown,
   });
@@ -213,6 +215,12 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callFrameRecordingReady:
         final event = open.CallFrameRecordingFrameReadyEvent.fromJson(jsonObj);
         return result.copyWith(callFrameRecordingFrameReady: event);
+      case EventType.callModerationBlur:
+        final event = open.CallModerationBlurEvent.fromJson(jsonObj);
+        return result.copyWith(callModerationBlur: event);
+      case EventType.callModerationWarning:
+        final event = open.CallModerationWarningEvent.fromJson(jsonObj);
+        return result.copyWith(callModerationWarning: event);
       case EventType.unknown:
         streamLog.d(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -267,6 +275,8 @@ class OpenApiEvent with EquatableMixin {
   final open.CallFrameRecordingFailedEvent? callFrameRecordingFailed;
   final open.CallFrameRecordingStoppedEvent? callFrameRecordingStopped;
   final open.CallFrameRecordingFrameReadyEvent? callFrameRecordingFrameReady;
+  final open.CallModerationBlurEvent? callModerationBlur;
+  final open.CallModerationWarningEvent? callModerationWarning;
   final Object? unknown;
 
   OpenApiEvent copyWith({
@@ -318,6 +328,8 @@ class OpenApiEvent with EquatableMixin {
     open.CallFrameRecordingFailedEvent? callFrameRecordingFailed,
     open.CallFrameRecordingStoppedEvent? callFrameRecordingStopped,
     open.CallFrameRecordingFrameReadyEvent? callFrameRecordingFrameReady,
+    open.CallModerationBlurEvent? callModerationBlur,
+    open.CallModerationWarningEvent? callModerationWarning,
     Object? unknown,
   }) {
     return OpenApiEvent(
@@ -387,6 +399,9 @@ class OpenApiEvent with EquatableMixin {
           callFrameRecordingStopped ?? this.callFrameRecordingStopped,
       callFrameRecordingFrameReady:
           callFrameRecordingFrameReady ?? this.callFrameRecordingFrameReady,
+      callModerationBlur: callModerationBlur ?? this.callModerationBlur,
+      callModerationWarning:
+          callModerationWarning ?? this.callModerationWarning,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
     );
@@ -442,6 +457,8 @@ class OpenApiEvent with EquatableMixin {
     callFrameRecordingFailed,
     callFrameRecordingStopped,
     callFrameRecordingFrameReady,
+    callModerationBlur,
+    callModerationWarning,
     custom,
     unknown,
   ];

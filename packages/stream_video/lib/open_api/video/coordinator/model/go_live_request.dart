@@ -15,7 +15,10 @@ class GoLiveRequest {
   GoLiveRequest({
     this.recordingStorageName,
     this.startClosedCaption,
+    this.startCompositeRecording,
     this.startHls,
+    this.startIndividualRecording,
+    this.startRawRecording,
     this.startRecording,
     this.startTranscription,
     this.transcriptionStorageName,
@@ -43,7 +46,31 @@ class GoLiveRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  bool? startCompositeRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   bool? startHls;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? startIndividualRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? startRawRecording;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -75,7 +102,10 @@ class GoLiveRequest {
       other is GoLiveRequest &&
           other.recordingStorageName == recordingStorageName &&
           other.startClosedCaption == startClosedCaption &&
+          other.startCompositeRecording == startCompositeRecording &&
           other.startHls == startHls &&
+          other.startIndividualRecording == startIndividualRecording &&
+          other.startRawRecording == startRawRecording &&
           other.startRecording == startRecording &&
           other.startTranscription == startTranscription &&
           other.transcriptionStorageName == transcriptionStorageName;
@@ -85,7 +115,14 @@ class GoLiveRequest {
       // ignore: unnecessary_parenthesis
       (recordingStorageName == null ? 0 : recordingStorageName!.hashCode) +
       (startClosedCaption == null ? 0 : startClosedCaption!.hashCode) +
+      (startCompositeRecording == null
+          ? 0
+          : startCompositeRecording!.hashCode) +
       (startHls == null ? 0 : startHls!.hashCode) +
+      (startIndividualRecording == null
+          ? 0
+          : startIndividualRecording!.hashCode) +
+      (startRawRecording == null ? 0 : startRawRecording!.hashCode) +
       (startRecording == null ? 0 : startRecording!.hashCode) +
       (startTranscription == null ? 0 : startTranscription!.hashCode) +
       (transcriptionStorageName == null
@@ -94,7 +131,7 @@ class GoLiveRequest {
 
   @override
   String toString() =>
-      'GoLiveRequest[recordingStorageName=$recordingStorageName, startClosedCaption=$startClosedCaption, startHls=$startHls, startRecording=$startRecording, startTranscription=$startTranscription, transcriptionStorageName=$transcriptionStorageName]';
+      'GoLiveRequest[recordingStorageName=$recordingStorageName, startClosedCaption=$startClosedCaption, startCompositeRecording=$startCompositeRecording, startHls=$startHls, startIndividualRecording=$startIndividualRecording, startRawRecording=$startRawRecording, startRecording=$startRecording, startTranscription=$startTranscription, transcriptionStorageName=$transcriptionStorageName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -108,10 +145,25 @@ class GoLiveRequest {
     } else {
       json[r'start_closed_caption'] = null;
     }
+    if (this.startCompositeRecording != null) {
+      json[r'start_composite_recording'] = this.startCompositeRecording;
+    } else {
+      json[r'start_composite_recording'] = null;
+    }
     if (this.startHls != null) {
       json[r'start_hls'] = this.startHls;
     } else {
       json[r'start_hls'] = null;
+    }
+    if (this.startIndividualRecording != null) {
+      json[r'start_individual_recording'] = this.startIndividualRecording;
+    } else {
+      json[r'start_individual_recording'] = null;
+    }
+    if (this.startRawRecording != null) {
+      json[r'start_raw_recording'] = this.startRawRecording;
+    } else {
+      json[r'start_raw_recording'] = null;
     }
     if (this.startRecording != null) {
       json[r'start_recording'] = this.startRecording;
@@ -155,7 +207,12 @@ class GoLiveRequest {
         recordingStorageName:
             mapValueOfType<String>(json, r'recording_storage_name'),
         startClosedCaption: mapValueOfType<bool>(json, r'start_closed_caption'),
+        startCompositeRecording:
+            mapValueOfType<bool>(json, r'start_composite_recording'),
         startHls: mapValueOfType<bool>(json, r'start_hls'),
+        startIndividualRecording:
+            mapValueOfType<bool>(json, r'start_individual_recording'),
+        startRawRecording: mapValueOfType<bool>(json, r'start_raw_recording'),
         startRecording: mapValueOfType<bool>(json, r'start_recording'),
         startTranscription: mapValueOfType<bool>(json, r'start_transcription'),
         transcriptionStorageName:

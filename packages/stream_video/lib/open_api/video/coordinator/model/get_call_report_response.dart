@@ -16,6 +16,7 @@ class GetCallReportResponse {
     this.chatActivity,
     required this.duration,
     required this.report,
+    this.session,
     required this.sessionId,
     this.videoReactions = const [],
   });
@@ -33,6 +34,14 @@ class GetCallReportResponse {
 
   ReportResponse report;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  CallSessionResponse? session;
+
   String sessionId;
 
   List<VideoReactionsResponse> videoReactions;
@@ -44,6 +53,7 @@ class GetCallReportResponse {
           other.chatActivity == chatActivity &&
           other.duration == duration &&
           other.report == report &&
+          other.session == session &&
           other.sessionId == sessionId &&
           _deepEquality.equals(other.videoReactions, videoReactions);
 
@@ -53,12 +63,13 @@ class GetCallReportResponse {
       (chatActivity == null ? 0 : chatActivity!.hashCode) +
       (duration.hashCode) +
       (report.hashCode) +
+      (session == null ? 0 : session!.hashCode) +
       (sessionId.hashCode) +
       (videoReactions.hashCode);
 
   @override
   String toString() =>
-      'GetCallReportResponse[chatActivity=$chatActivity, duration=$duration, report=$report, sessionId=$sessionId, videoReactions=$videoReactions]';
+      'GetCallReportResponse[chatActivity=$chatActivity, duration=$duration, report=$report, session=$session, sessionId=$sessionId, videoReactions=$videoReactions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -69,6 +80,11 @@ class GetCallReportResponse {
     }
     json[r'duration'] = this.duration;
     json[r'report'] = this.report;
+    if (this.session != null) {
+      json[r'session'] = this.session;
+    } else {
+      json[r'session'] = null;
+    }
     json[r'session_id'] = this.sessionId;
     json[r'video_reactions'] = this.videoReactions;
     return json;
@@ -99,6 +115,7 @@ class GetCallReportResponse {
             ChatActivityStatsResponse.fromJson(json[r'chat_activity']),
         duration: mapValueOfType<String>(json, r'duration')!,
         report: ReportResponse.fromJson(json[r'report'])!,
+        session: CallSessionResponse.fromJson(json[r'session']),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         videoReactions:
             VideoReactionsResponse.listFromJson(json[r'video_reactions']),

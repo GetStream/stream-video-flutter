@@ -15,6 +15,7 @@ class CallRecording {
   CallRecording({
     required this.endTime,
     required this.filename,
+    required this.recordingType,
     required this.sessionId,
     required this.startTime,
     required this.url,
@@ -23,6 +24,8 @@ class CallRecording {
   DateTime endTime;
 
   String filename;
+
+  String recordingType;
 
   String sessionId;
 
@@ -36,6 +39,7 @@ class CallRecording {
       other is CallRecording &&
           other.endTime == endTime &&
           other.filename == filename &&
+          other.recordingType == recordingType &&
           other.sessionId == sessionId &&
           other.startTime == startTime &&
           other.url == url;
@@ -45,18 +49,20 @@ class CallRecording {
       // ignore: unnecessary_parenthesis
       (endTime.hashCode) +
       (filename.hashCode) +
+      (recordingType.hashCode) +
       (sessionId.hashCode) +
       (startTime.hashCode) +
       (url.hashCode);
 
   @override
   String toString() =>
-      'CallRecording[endTime=$endTime, filename=$filename, sessionId=$sessionId, startTime=$startTime, url=$url]';
+      'CallRecording[endTime=$endTime, filename=$filename, recordingType=$recordingType, sessionId=$sessionId, startTime=$startTime, url=$url]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'end_time'] = this.endTime.toUtc().toIso8601String();
     json[r'filename'] = this.filename;
+    json[r'recording_type'] = this.recordingType;
     json[r'session_id'] = this.sessionId;
     json[r'start_time'] = this.startTime.toUtc().toIso8601String();
     json[r'url'] = this.url;
@@ -86,6 +92,7 @@ class CallRecording {
       return CallRecording(
         endTime: mapDateTime(json, r'end_time', r'')!,
         filename: mapValueOfType<String>(json, r'filename')!,
+        recordingType: mapValueOfType<String>(json, r'recording_type')!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         startTime: mapDateTime(json, r'start_time', r'')!,
         url: mapValueOfType<String>(json, r'url')!,
@@ -147,6 +154,7 @@ class CallRecording {
   static const requiredKeys = <String>{
     'end_time',
     'filename',
+    'recording_type',
     'session_id',
     'start_time',
     'url',

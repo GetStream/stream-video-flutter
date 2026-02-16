@@ -191,8 +191,12 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required StreamCallCid callCid,
     bool? startHls,
     bool? startRecording,
+    bool? startCompositeRecording,
+    bool? startIndividualRecording,
+    bool? startRawRecording,
     bool? startTranscription,
     bool? startClosedCaption,
+    String? recordingStorageName,
     String? transcriptionStorageName,
   }) {
     return _retryManager.execute(
@@ -200,8 +204,12 @@ class CoordinatorClientRetry extends CoordinatorClient {
         callCid: callCid,
         startHls: startHls,
         startRecording: startRecording,
+        startCompositeRecording: startCompositeRecording,
+        startIndividualRecording: startIndividualRecording,
+        startRawRecording: startRawRecording,
         startTranscription: startTranscription,
         startClosedCaption: startClosedCaption,
+        recordingStorageName: recordingStorageName,
         transcriptionStorageName: transcriptionStorageName,
       ),
       (error, nextAttemptDelay) async {
@@ -555,11 +563,13 @@ class CoordinatorClientRetry extends CoordinatorClient {
   @override
   Future<Result<None>> startRecording(
     StreamCallCid callCid, {
+    RecordingType recordingType = RecordingType.composite,
     String? recordingExternalStorage,
   }) {
     return _retryManager.execute(
       () => _delegate.startRecording(
         callCid,
+        recordingType: recordingType,
         recordingExternalStorage: recordingExternalStorage,
       ),
       (error, nextAttemptDelay) async {
@@ -591,9 +601,29 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<CallMetadata>> stopLive(StreamCallCid callCid) {
+  Future<Result<CallMetadata>> stopLive(
+    StreamCallCid callCid, {
+    bool? continueClosedCaption,
+    bool? continueCompositeRecording,
+    bool? continueHls,
+    bool? continueIndividualRecording,
+    bool? continueRawRecording,
+    bool? continueRecording,
+    bool? continueRtmpBroadcasts,
+    bool? continueTranscription,
+  }) {
     return _retryManager.execute(
-      () => _delegate.stopLive(callCid),
+      () => _delegate.stopLive(
+        callCid,
+        continueClosedCaption: continueClosedCaption,
+        continueCompositeRecording: continueCompositeRecording,
+        continueHls: continueHls,
+        continueIndividualRecording: continueIndividualRecording,
+        continueRawRecording: continueRawRecording,
+        continueRecording: continueRecording,
+        continueRtmpBroadcasts: continueRtmpBroadcasts,
+        continueTranscription: continueTranscription,
+      ),
       (error, nextAttemptDelay) async {
         _logRetry('stopLive', error, nextAttemptDelay);
       },
@@ -601,9 +631,15 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> stopRecording(StreamCallCid callCid) {
+  Future<Result<None>> stopRecording(
+    StreamCallCid callCid, {
+    RecordingType recordingType = RecordingType.composite,
+  }) {
     return _retryManager.execute(
-      () => _delegate.stopRecording(callCid),
+      () => _delegate.stopRecording(
+        callCid,
+        recordingType: recordingType,
+      ),
       (error, nextAttemptDelay) async {
         _logRetry('stopRecording', error, nextAttemptDelay);
       },
@@ -715,6 +751,8 @@ class CoordinatorClientRetry extends CoordinatorClient {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
   }) {
     return _retryManager.execute(
@@ -733,6 +771,8 @@ class CoordinatorClientRetry extends CoordinatorClient {
         limits: limits,
         session: session,
         frameRecording: frameRecording,
+        individualRecording: individualRecording,
+        rawRecording: rawRecording,
         ingress: ingress,
       ),
       (error, nextAttemptDelay) async {

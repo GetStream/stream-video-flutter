@@ -14,7 +14,10 @@ class StopLiveRequest {
   /// Returns a new [StopLiveRequest] instance.
   StopLiveRequest({
     this.continueClosedCaption,
+    this.continueCompositeRecording,
     this.continueHls,
+    this.continueIndividualRecording,
+    this.continueRawRecording,
     this.continueRecording,
     this.continueRtmpBroadcasts,
     this.continueTranscription,
@@ -34,7 +37,31 @@ class StopLiveRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  bool? continueCompositeRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   bool? continueHls;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? continueIndividualRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? continueRawRecording;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -65,7 +92,10 @@ class StopLiveRequest {
       identical(this, other) ||
       other is StopLiveRequest &&
           other.continueClosedCaption == continueClosedCaption &&
+          other.continueCompositeRecording == continueCompositeRecording &&
           other.continueHls == continueHls &&
+          other.continueIndividualRecording == continueIndividualRecording &&
+          other.continueRawRecording == continueRawRecording &&
           other.continueRecording == continueRecording &&
           other.continueRtmpBroadcasts == continueRtmpBroadcasts &&
           other.continueTranscription == continueTranscription;
@@ -74,14 +104,21 @@ class StopLiveRequest {
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (continueClosedCaption == null ? 0 : continueClosedCaption!.hashCode) +
+      (continueCompositeRecording == null
+          ? 0
+          : continueCompositeRecording!.hashCode) +
       (continueHls == null ? 0 : continueHls!.hashCode) +
+      (continueIndividualRecording == null
+          ? 0
+          : continueIndividualRecording!.hashCode) +
+      (continueRawRecording == null ? 0 : continueRawRecording!.hashCode) +
       (continueRecording == null ? 0 : continueRecording!.hashCode) +
       (continueRtmpBroadcasts == null ? 0 : continueRtmpBroadcasts!.hashCode) +
       (continueTranscription == null ? 0 : continueTranscription!.hashCode);
 
   @override
   String toString() =>
-      'StopLiveRequest[continueClosedCaption=$continueClosedCaption, continueHls=$continueHls, continueRecording=$continueRecording, continueRtmpBroadcasts=$continueRtmpBroadcasts, continueTranscription=$continueTranscription]';
+      'StopLiveRequest[continueClosedCaption=$continueClosedCaption, continueCompositeRecording=$continueCompositeRecording, continueHls=$continueHls, continueIndividualRecording=$continueIndividualRecording, continueRawRecording=$continueRawRecording, continueRecording=$continueRecording, continueRtmpBroadcasts=$continueRtmpBroadcasts, continueTranscription=$continueTranscription]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -90,10 +127,25 @@ class StopLiveRequest {
     } else {
       json[r'continue_closed_caption'] = null;
     }
+    if (this.continueCompositeRecording != null) {
+      json[r'continue_composite_recording'] = this.continueCompositeRecording;
+    } else {
+      json[r'continue_composite_recording'] = null;
+    }
     if (this.continueHls != null) {
       json[r'continue_hls'] = this.continueHls;
     } else {
       json[r'continue_hls'] = null;
+    }
+    if (this.continueIndividualRecording != null) {
+      json[r'continue_individual_recording'] = this.continueIndividualRecording;
+    } else {
+      json[r'continue_individual_recording'] = null;
+    }
+    if (this.continueRawRecording != null) {
+      json[r'continue_raw_recording'] = this.continueRawRecording;
+    } else {
+      json[r'continue_raw_recording'] = null;
     }
     if (this.continueRecording != null) {
       json[r'continue_recording'] = this.continueRecording;
@@ -136,7 +188,13 @@ class StopLiveRequest {
       return StopLiveRequest(
         continueClosedCaption:
             mapValueOfType<bool>(json, r'continue_closed_caption'),
+        continueCompositeRecording:
+            mapValueOfType<bool>(json, r'continue_composite_recording'),
         continueHls: mapValueOfType<bool>(json, r'continue_hls'),
+        continueIndividualRecording:
+            mapValueOfType<bool>(json, r'continue_individual_recording'),
+        continueRawRecording:
+            mapValueOfType<bool>(json, r'continue_raw_recording'),
         continueRecording: mapValueOfType<bool>(json, r'continue_recording'),
         continueRtmpBroadcasts:
             mapValueOfType<bool>(json, r'continue_rtmp_broadcasts'),

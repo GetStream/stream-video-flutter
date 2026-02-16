@@ -212,6 +212,16 @@ extension CallSettingsExt on open.CallSettingsResponse {
         maxParticipantsExcludeOwner: limits.maxParticipantsExcludeOwner,
         maxParticipantsExcludeRoles: limits.maxParticipantsExcludeRoles,
       ),
+      individualRecording: StreamIndividualRecordingSettings(
+        mode: IndividualRecordingSettingsMode.fromString(
+          individualRecording.mode.value,
+        ),
+      ),
+      rawRecording: StreamRawRecordingSettings(
+        mode: RawRecordingSettingsMode.fromString(
+          rawRecording.mode.value,
+        ),
+      ),
       ingress: ingress?.toSettingsDomain(),
     );
   }

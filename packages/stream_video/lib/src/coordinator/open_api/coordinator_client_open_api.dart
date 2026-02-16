@@ -827,6 +827,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startRecording(
     StreamCallCid callCid, {
+    RecordingType recordingType = RecordingType.composite,
     String? recordingExternalStorage,
   }) async {
     try {
@@ -838,6 +839,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       await _defaultApi.startRecording(
         callCid.type.value,
         callCid.id,
+        recordingType.toOpenDto(),
         open.StartRecordingRequest(
           recordingExternalStorage: recordingExternalStorage,
         ),
@@ -869,14 +871,22 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> stopRecording(StreamCallCid callCid) async {
+  Future<Result<None>> stopRecording(
+    StreamCallCid callCid, {
+    RecordingType recordingType = RecordingType.composite,
+  }) async {
     try {
       final connectionResult = await _waitUntilConnected();
       if (connectionResult is Failure) {
         _logger.e(() => '[stopRecording] no connection established');
         return connectionResult;
       }
-      await _defaultApi.stopRecording(callCid.type.value, callCid.id);
+      await _defaultApi.stopRecording(
+        callCid.type.value,
+        callCid.id,
+        recordingType.toOpenDto(),
+        Object(),
+      );
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -1248,8 +1258,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid callCid,
     bool? startHls,
     bool? startRecording,
+    bool? startCompositeRecording,
+    bool? startIndividualRecording,
+    bool? startRawRecording,
     bool? startTranscription,
     bool? startClosedCaption,
+    String? recordingStorageName,
     String? transcriptionStorageName,
   }) async {
     try {
@@ -1264,8 +1278,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         open.GoLiveRequest(
           startHls: startHls,
           startRecording: startRecording,
+          startCompositeRecording: startCompositeRecording,
+          startIndividualRecording: startIndividualRecording,
+          startRawRecording: startRawRecording,
           startTranscription: startTranscription,
           startClosedCaption: startClosedCaption,
+          recordingStorageName: recordingStorageName,
           transcriptionStorageName: transcriptionStorageName,
         ),
       );
@@ -1283,7 +1301,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<CallMetadata>> stopLive(
     StreamCallCid callCid, {
     bool? continueClosedCaption,
+    bool? continueCompositeRecording,
     bool? continueHls,
+    bool? continueIndividualRecording,
+    bool? continueRawRecording,
     bool? continueRecording,
     bool? continueRtmpBroadcasts,
     bool? continueTranscription,
@@ -1299,7 +1320,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         callCid.id,
         open.StopLiveRequest(
           continueClosedCaption: continueClosedCaption,
+          continueCompositeRecording: continueCompositeRecording,
           continueHls: continueHls,
+          continueIndividualRecording: continueIndividualRecording,
+          continueRawRecording: continueRawRecording,
           continueRecording: continueRecording,
           continueRtmpBroadcasts: continueRtmpBroadcasts,
           continueTranscription: continueTranscription,
@@ -1368,6 +1392,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
   }) async {
     try {
@@ -1395,6 +1421,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             broadcasting: broadcasting?.toOpenDto(),
             session: session?.toOpenDto(),
             frameRecording: frameRecording?.toOpenDto(),
+            individualRecording: individualRecording?.toOpenDto(),
+            rawRecording: rawRecording?.toOpenDto(),
             ingress: ingress?.toOpenDto(),
           ),
         ),
