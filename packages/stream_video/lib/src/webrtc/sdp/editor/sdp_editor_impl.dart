@@ -10,7 +10,6 @@ import '../sdp.dart';
 import 'action/sdp_edit_action_factory.dart';
 import 'rule/rule_set_opus_dtx_enabled.dart';
 import 'rule/rule_set_opus_red_enabled.dart';
-import 'rule/rule_set_opus_stereo_enabled.dart';
 import 'rule/rule_toggle.dart';
 import 'rule/sdp_munging_rule.dart';
 import 'sdp_editor.dart';
@@ -22,9 +21,6 @@ class NoOpSdpEditor implements SdpEditor {
 
   @override
   set opusRedEnabled(bool value) {}
-
-  @override
-  set opusStereoEnabled(bool value) {}
 
   @override
   String? edit(Sdp? sdp) {
@@ -67,16 +63,6 @@ class SdpEditorImpl implements SdpEditor {
   }
 
   @override
-  set opusStereoEnabled(bool value) {
-    for (final toggle in internalRules) {
-      if (toggle.rule is SetOpusStereoEnabledRule) {
-        toggle.enabled = value;
-        break;
-      }
-    }
-  }
-
-  @override
   String? edit(Sdp? sdp) {
     if (sdp == null) {
       _logger.w(() => '[edit] rejected (sdp is null)');
@@ -90,7 +76,7 @@ class SdpEditorImpl implements SdpEditor {
 
     _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
-    applyRules(sdp.type, lines);
+    applyRules(sdp.type, lines, sdp: sdp);
 
     if (policy.mungingEnabled) {
       policy.munging(sdp.type, lines);
@@ -103,8 +89,9 @@ class SdpEditorImpl implements SdpEditor {
 
   void applyRules(
     SdpType sdpType,
-    List<SdpLine> lines,
-  ) {
+    List<SdpLine> lines, {
+    Sdp? sdp,
+  }) {
     for (final toggle in internalRules) {
       _logger.d(() => '[edit] rule: $toggle');
       if (!toggle.enabled) {
@@ -120,7 +107,7 @@ class SdpEditorImpl implements SdpEditor {
         _logger.w(() => '[edit] rejected (mismatched sdpType): $sdpType');
         continue;
       }
-      _actionFactory.create(rule).execute(lines);
+      _actionFactory.create(rule, sdp: sdp).execute(lines);
     }
   }
 }
@@ -161,9 +148,8 @@ List<SdpRuleToggle> _createRules() {
     ),
     SdpRuleToggle(
       enabled: true,
-      rule: const SdpMungingRule.setOpusStereoEnabled(
-        enabled: true,
-        types: [SdpType.remoteOffer, SdpType.localAnswer],
+      rule: const SdpMungingRule.mirrorSpropStereo(
+        types: [SdpType.localAnswer],
       ),
     ),
   ];

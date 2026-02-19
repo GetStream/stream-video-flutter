@@ -73,6 +73,7 @@ class RtcManager extends Disposable {
   final StreamVideo _streamVideo;
 
   final transceiversManager = TransceiverManager();
+
   List<SfuPublishOptions> publishOptions;
   AudioConstraints _defaultAudioConstraints = const AudioConstraints();
 
@@ -151,7 +152,7 @@ class RtcManager extends Disposable {
     final result = await subscriber.setRemoteOffer(offerSdp);
     if (result.isFailure) return null;
 
-    final rtcAnswer = await subscriber.createAnswer();
+    final rtcAnswer = await subscriber.createAnswer(offerSdp);
     return rtcAnswer.getDataOrNull()?.sdp;
   }
 

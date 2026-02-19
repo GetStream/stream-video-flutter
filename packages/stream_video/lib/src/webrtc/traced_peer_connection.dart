@@ -397,12 +397,13 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   }
 
   @override
-  Future<Result<rtc.RTCSessionDescription>> createAnswer([
+  Future<Result<rtc.RTCSessionDescription>> createAnswer(
+    String offerSdp, [
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
     tracer.trace('createAnswer', mediaConstraints);
 
-    final result = await super.createAnswer(mediaConstraints);
+    final result = await super.createAnswer(offerSdp, mediaConstraints);
 
     if (result.isSuccess) {
       tracer.trace('createAnswer.success', result.getDataOrNull()?.toMap());
