@@ -1373,7 +1373,6 @@ class StreamVideoOptions {
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
     this.defaultCallPreferences,
-    //TODO: Allow sdp munging for development purposees, remove it before merging
     this.sdpPolicy = const SdpPolicy(),
     this.audioProcessor,
     this.logPriority = Priority.none,
@@ -1404,7 +1403,6 @@ class StreamVideoOptions {
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
     this.defaultCallPreferences,
-    //TODO: Allow sdp munging for development purposees, remove it before merging
     this.sdpPolicy = const SdpPolicy(),
     this.audioProcessor,
     this.logPriority = Priority.none,
