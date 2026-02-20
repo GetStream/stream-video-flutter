@@ -1,3 +1,8 @@
+## Upcoming
+
+### ✅ Added
+* Added video moderation support by providing `VideoModerationConfig` in `CallPreferences`. Chech [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-moderation/) for more details.
+
 ## 1.2.4
 
 ### 🐞 Fixed

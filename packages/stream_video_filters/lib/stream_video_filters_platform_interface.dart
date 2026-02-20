@@ -43,4 +43,10 @@ abstract class StreamVideoFiltersPlatform extends PlatformInterface {
       'registerImageEffectProcessors has not been implemented.',
     );
   }
+
+  Future<void> registerFullFrameBlurEffectProcessor() {
+    throw UnimplementedError(
+      'registerFullFrameBlurEffectProcessor has not been implemented.',
+    );
+  }
 }

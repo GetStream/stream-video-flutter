@@ -17,9 +17,18 @@ enum BlurIntensity {
 }
 
 class StreamVideoEffectsManager {
-  StreamVideoEffectsManager(this.call);
+  StreamVideoEffectsManager(this.call) {
+    if (call.state.value.preferences.videoModerationConfig.applyBlur) {
+      // ignore: invalid_use_of_internal_member
+      call.setModerationBlurEffectHandlers(
+        onApply: applyFullFrameBlurFilter,
+        onClear: disableAllFilters,
+      );
+    }
+  }
 
   static bool isBlurRegistered = false;
+  static bool isFullFrameBlurRegistered = false;
   static Map<String, bool> isImageRegistered = <String, bool>{};
   static Map<String, bool> isCustomEffectRegistered = <String, bool>{};
 
@@ -53,6 +62,18 @@ class StreamVideoEffectsManager {
 
     await ensureBlurEffectRegistered();
     await applyVideoEffects([blurIntensity.name], track: track);
+  }
+
+  /// Applies a full-frame blur filter to the local participant video stream.
+  Future<void> applyFullFrameBlurFilter({
+    RtcLocalTrack? track,
+  }) async {
+    if (!(await isSupported())) {
+      return;
+    }
+
+    await ensureFullFrameBlurEffectRegistered();
+    await applyVideoEffects(['FullFrameBlur'], track: track);
   }
 
   /// Applies a background image filter to the local participant video stream.
@@ -134,6 +155,14 @@ class StreamVideoEffectsManager {
     if (!isBlurRegistered) {
       await StreamVideoFilters().registerBlurEffectProcessors();
       isBlurRegistered = true;
+    }
+  }
+
+  /// Ensures that the full-frame blur effect processor is registered.
+  Future<void> ensureFullFrameBlurEffectRegistered() async {
+    if (!isFullFrameBlurRegistered) {
+      await StreamVideoFilters().registerFullFrameBlurEffectProcessor();
+      isFullFrameBlurRegistered = true;
     }
   }
 
