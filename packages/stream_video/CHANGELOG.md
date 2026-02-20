@@ -5,7 +5,7 @@
   * `SfuAudioBitrateProfile.voiceStandard` – Standard voice (64 kbps, default)
   * `SfuAudioBitrateProfile.voiceHighQuality` – High-quality voice (128 kbps)
   * `SfuAudioBitrateProfile.musicHighQuality` – HiFi music mode (128 kbps, audio processing disabled)
-* Added stereo playout and capture (Android only) support with new `audioConfigurationPolicy` in `StreamVideoOptions`. Includes predefined policies:
+* Added stereo playout (iOS and Android) and capture (Android only) support with new `audioConfigurationPolicy` in `StreamVideoOptions`. Includes predefined policies:
   * `AudioConfigurationPolicy.broadcaster()` – Mono playout with voice processing enabled (default)
   * `AudioConfigurationPolicy.viewer()` – Stereo playout with voice processing disabled, ideal for passive listeners
   * `AudioConfigurationPolicy.hiFi()` – Stereo capture and playout with voice processing disabled, ideal for hosts streaming high-fidelity audio

@@ -734,8 +734,8 @@ extension PublisherRtcManager on RtcManager {
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 
-      final cashedTransceiver = transceiversManager.get(option)?.transceiver;
-      if (cashedTransceiver == null) {
+      final cachedTransceiver = transceiversManager.get(option)?.transceiver;
+      if (cachedTransceiver == null) {
         final transceiverResult = await _addTransceiver(
           track,
           option,
@@ -756,7 +756,7 @@ extension PublisherRtcManager on RtcManager {
         );
       } else {
         await _updateTransceiver(
-          cashedTransceiver,
+          cachedTransceiver,
           track,
           track.trackType,
           trackPublishOptions: RtcTrackPublishOptions(
@@ -765,7 +765,7 @@ extension PublisherRtcManager on RtcManager {
         );
 
         _logger.v(
-          () => '[publishAudioTrack] cached transceiver: $cashedTransceiver',
+          () => '[publishAudioTrack] cached transceiver: $cachedTransceiver',
         );
       }
     }
@@ -808,8 +808,8 @@ extension PublisherRtcManager on RtcManager {
     for (final option in publishOptions) {
       if (option.trackType != track.trackType) continue;
 
-      final cashedTransceiver = transceiversManager.get(option)?.transceiver;
-      if (cashedTransceiver == null) {
+      final cachedTransceiver = transceiversManager.get(option)?.transceiver;
+      if (cachedTransceiver == null) {
         final transceiverResult = await _addTransceiver(
           track,
           option,
@@ -830,13 +830,13 @@ extension PublisherRtcManager on RtcManager {
         );
       } else {
         await _updateTransceiver(
-          cashedTransceiver,
+          cachedTransceiver,
           track,
           track.trackType,
         );
 
         _logger.v(
-          () => '[publishVideoTrack] cached transceiver: $cashedTransceiver',
+          () => '[publishVideoTrack] cached transceiver: $cachedTransceiver',
         );
       }
     }

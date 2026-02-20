@@ -198,6 +198,9 @@ class StreamVideo extends Disposable {
             }
 
             webrtcInitializationCompleter.complete();
+          })
+          .onError((_, _) {
+            webrtcInitializationCompleter.complete();
           });
     } else {
       webrtcInitializationCompleter.complete();
