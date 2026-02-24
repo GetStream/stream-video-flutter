@@ -94,7 +94,7 @@ class StreamVideo extends Disposable {
   /// If [failIfSingletonExists] is set to false, the new instance will override and disconnect the existing singleton instance.
   factory StreamVideo(
     String apiKey, {
-    StreamVideoOptions options = const StreamVideoOptions.constant(),
+    StreamVideoOptions? options,
     required User user,
     String? userToken,
     TokenLoader? tokenLoader,
@@ -104,7 +104,7 @@ class StreamVideo extends Disposable {
   }) {
     final instance = StreamVideo._(
       apiKey,
-      options: options,
+      options: options ?? StreamVideoOptions(),
       user: user,
       userToken: userToken,
       tokenLoader: tokenLoader,
@@ -125,7 +125,7 @@ class StreamVideo extends Disposable {
   factory StreamVideo.create(
     String apiKey, {
     required User user,
-    StreamVideoOptions options = const StreamVideoOptions.constant(),
+    StreamVideoOptions? options,
     String? userToken,
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
@@ -135,7 +135,7 @@ class StreamVideo extends Disposable {
     final instance = StreamVideo._(
       apiKey,
       user: user,
-      options: options,
+      options: options ?? StreamVideoOptions(),
       userToken: userToken,
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
@@ -1396,33 +1396,6 @@ class StreamVideoOptions {
   }) : audioConfigurationPolicy = androidAudioConfiguration == null
            ? audioConfigurationPolicy
            : CustomAudioPolicy(androidConfiguration: androidAudioConfiguration);
-
-  /// Use this constructor when you need a compile-time constant. Note that [androidAudioConfiguration]
-  /// will be ignored in this constructor - use [audioConfigurationPolicy] instead.
-  //TODO: Remove this constructor in the next major release while removing androidAudioConfiguration.
-  const StreamVideoOptions.constant({
-    this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    this.latencySettings = const LatencySettings(),
-    this.retryPolicy = const RetryPolicy(),
-    this.defaultCallPreferences,
-    this.sdpPolicy = const SdpPolicy(),
-    this.audioProcessor,
-    this.logPriority = Priority.none,
-    this.logHandlerFunction = _defaultLogHandler,
-    this.muteVideoWhenInBackground = false,
-    this.muteAudioWhenInBackground = false,
-    this.autoConnect = true,
-    this.includeUserDetailsForAutoConnect = true,
-    this.keepConnectionsAliveWhenInBackground = false,
-    this.networkMonitorSettings = const NetworkMonitorSettings(),
-    this.allowMultipleActiveCalls = false,
-    @Deprecated(
-      'Use audioConfigurationPolicy instead. Usage of this parameter will be ignored in this constructor.',
-    )
-    this.androidAudioConfiguration,
-    this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
-  });
 
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
