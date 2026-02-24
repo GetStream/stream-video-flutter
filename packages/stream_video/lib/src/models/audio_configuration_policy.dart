@@ -92,6 +92,7 @@ sealed class AudioConfigurationPolicy {
     rtc.AppleAudioConfiguration Function({bool defaultToSpeaker})?
     appleConfiguration,
     rtc.AndroidAudioConfiguration? androidConfiguration,
+    bool bypassVoiceProcessing,
   }) = CustomAudioPolicy;
 
   rtc.AppleAudioConfiguration getAppleConfiguration({

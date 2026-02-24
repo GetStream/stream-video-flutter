@@ -343,6 +343,8 @@ class RtcManager extends Disposable {
             ],
           );
         }
+      } else {
+        await mediaTrackClone.stop();
       }
     }
 
@@ -752,7 +754,10 @@ extension PublisherRtcManager on RtcManager {
           ),
         );
 
-        if (transceiverResult is Failure) return transceiverResult;
+        if (transceiverResult is Failure) {
+          await mediaTrackClone.stop();
+          return transceiverResult;
+        }
 
         _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
       } else {
@@ -835,7 +840,10 @@ extension PublisherRtcManager on RtcManager {
           const RtcTrackPublishOptions(),
         );
 
-        if (transceiverResult is Failure) return transceiverResult;
+        if (transceiverResult is Failure) {
+          await mediaTrackClone.stop();
+          return transceiverResult;
+        }
 
         _logger.v(
           () => '[publishVideoTrack] new transceiver: $transceiverResult',
