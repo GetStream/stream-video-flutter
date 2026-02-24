@@ -175,8 +175,8 @@ class ViewerAudioPolicy extends AudioConfigurationPolicy {
     return rtc.AppleAudioConfiguration(
       appleAudioMode: rtc.AppleAudioMode.default_,
       appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
-      appleAudioCategoryOptions: const {
-        rtc.AppleAudioCategoryOption.defaultToSpeaker,
+      appleAudioCategoryOptions: {
+        if (defaultToSpeaker) rtc.AppleAudioCategoryOption.defaultToSpeaker,
         rtc.AppleAudioCategoryOption.mixWithOthers,
         rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
         rtc.AppleAudioCategoryOption.allowAirPlay,
@@ -233,8 +233,8 @@ class HiFiAudioPolicy extends AudioConfigurationPolicy {
     return rtc.AppleAudioConfiguration(
       appleAudioMode: rtc.AppleAudioMode.default_,
       appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
-      appleAudioCategoryOptions: const {
-        rtc.AppleAudioCategoryOption.defaultToSpeaker,
+      appleAudioCategoryOptions: {
+        if (defaultToSpeaker) rtc.AppleAudioCategoryOption.defaultToSpeaker,
         rtc.AppleAudioCategoryOption.mixWithOthers,
         rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
         rtc.AppleAudioCategoryOption.allowAirPlay,

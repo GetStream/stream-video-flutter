@@ -71,6 +71,20 @@ class TransceiverManager {
     return _findTransceiver(trackType, id)?.transceiver;
   }
 
+  /// Updates the cached bundle for the given publish option.
+  void update(
+    SfuPublishOptions publishOption, {
+    RtcLocalTrack? track,
+    RtcTrackPublishOptions? trackPublishOptions,
+  }) {
+    final bundle = get(publishOption);
+    if (bundle == null) return;
+    if (track != null) bundle.track = track;
+    if (trackPublishOptions != null) {
+      bundle.trackPublishOptions = trackPublishOptions;
+    }
+  }
+
   /// Checks if the cache has the given publish option.
   bool has(SfuPublishOptions publishOption) {
     return get(publishOption) != null;

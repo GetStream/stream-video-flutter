@@ -757,15 +757,22 @@ extension PublisherRtcManager on RtcManager {
         _logger.v(() => '[publishAudioTrack] transceiver: $transceiverResult');
       } else {
         final previousTrack = cachedTransceiver.sender.track;
+        final publishOptions = RtcTrackPublishOptions(
+          audioBitrateProfile: stateManager.callState.audioBitrateProfile,
+        );
         await _updateTransceiver(
           cachedTransceiver,
           trackToPublish,
           track.trackType,
-          trackPublishOptions: RtcTrackPublishOptions(
-            audioBitrateProfile: stateManager.callState.audioBitrateProfile,
-          ),
+          trackPublishOptions: publishOptions,
         );
         await previousTrack?.stop();
+
+        transceiversManager.update(
+          option,
+          track: trackToPublish,
+          trackPublishOptions: publishOptions,
+        );
 
         _logger.v(
           () => '[publishAudioTrack] cached transceiver: $cachedTransceiver',
@@ -841,6 +848,8 @@ extension PublisherRtcManager on RtcManager {
           track.trackType,
         );
         await previousTrack?.stop();
+
+        transceiversManager.update(option, track: trackToPublish);
 
         _logger.v(
           () => '[publishVideoTrack] cached transceiver: $cachedTransceiver',
