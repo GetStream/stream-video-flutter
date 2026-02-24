@@ -89,7 +89,8 @@ sealed class AudioConfigurationPolicy {
   /// and use [basePolicy] to define defaults for the other platform.
   const factory AudioConfigurationPolicy.custom({
     AudioConfigurationPolicy basePolicy,
-    rtc.AppleAudioConfiguration? appleConfiguration,
+    rtc.AppleAudioConfiguration Function({bool defaultToSpeaker})?
+    appleConfiguration,
     rtc.AndroidAudioConfiguration? androidConfiguration,
   }) = CustomAudioPolicy;
 
@@ -275,7 +276,8 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
   /// is not provided. Defaults to [BroadcasterAudioPolicy].
   final AudioConfigurationPolicy basePolicy;
 
-  final rtc.AppleAudioConfiguration? appleConfiguration;
+  final rtc.AppleAudioConfiguration Function({bool defaultToSpeaker})?
+  appleConfiguration;
 
   final rtc.AndroidAudioConfiguration? androidConfiguration;
 
@@ -286,7 +288,7 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
   rtc.AppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
-    return appleConfiguration ??
+    return appleConfiguration?.call(defaultToSpeaker: defaultToSpeaker) ??
         basePolicy.getAppleConfiguration(defaultToSpeaker: defaultToSpeaker);
   }
 
