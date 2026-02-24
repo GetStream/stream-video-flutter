@@ -896,7 +896,10 @@ class StreamVideo extends Disposable {
     );
 
     if (consumeResult.isFailure) {
-      _logger.w(() => '[onCallAccept] error consuming incoming call}');
+      _logger.w(
+        () =>
+            '[onCallAccept] error consuming incoming call: ${consumeResult.getErrorOrNull()}',
+      );
       return;
     }
 
