@@ -23,9 +23,12 @@ class RtcTrackInfo {
   final SfuCodec? codec;
   final bool muted;
   final int publishOptionId;
-
-  final bool dtx;
   final bool stereo;
+
+  /// When true, the call will optimize bandwidth usage by disabling audio when participants are not speaking via discontinuous transmission (DTX).
+  final bool dtx;
+
+  /// When true, the call will send additional audio streams to ensure calls are more resistant to poor network conditions.
   final bool red;
 
   @override

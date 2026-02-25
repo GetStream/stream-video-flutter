@@ -1394,10 +1394,9 @@ class StreamVideoOptions {
       'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
     )
     this.androidAudioConfiguration,
-    AudioConfigurationPolicy audioConfigurationPolicy =
-        const BroadcasterAudioPolicy(),
+    AudioConfigurationPolicy? audioConfigurationPolicy,
   }) : audioConfigurationPolicy = androidAudioConfiguration == null
-           ? audioConfigurationPolicy
+           ? audioConfigurationPolicy ?? const BroadcasterAudioPolicy()
            : CustomAudioPolicy(androidConfiguration: androidAudioConfiguration);
 
   final String coordinatorRpcUrl;
