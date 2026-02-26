@@ -35,6 +35,16 @@ class SfuUnknownEvent extends SfuEvent {
 }
 
 @internal
+class SfuIceRestartEvent extends SfuEvent {
+  const SfuIceRestartEvent({required this.peerType});
+
+  final StreamPeerType peerType;
+
+  @override
+  List<Object?> get props => [peerType];
+}
+
+@internal
 class SfuJoinResponseEvent extends SfuEvent {
   const SfuJoinResponseEvent({
     required this.callState,
