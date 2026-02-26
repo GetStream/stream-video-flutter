@@ -1,6 +1,7 @@
 import 'package:state_notifier/state_notifier.dart';
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../sfu/data/models/sfu_audio_bitrate.dart';
 
 final _logger = taggedLogger(tag: 'SV:CallState:CallActions');
 
@@ -59,6 +60,14 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     state = state.copyWith(
       isBroadcasting: isBroadcasting,
       egress: newEgress,
+    );
+  }
+
+  void setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
+    _logger.v(() => '[setAudioBitrateProfile] profile:$profile');
+
+    state = state.copyWith(
+      audioBitrateProfile: profile,
     );
   }
 }

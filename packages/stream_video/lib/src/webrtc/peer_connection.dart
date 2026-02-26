@@ -179,9 +179,19 @@ class StreamPeerConnection extends Disposable {
     try {
       final localOffer = await pc.createOffer(mediaConstraints);
       final modifiedSdp = sdpEditor.edit(localOffer.sdp?.let(Sdp.localOffer));
+
+      if (modifiedSdp == null || modifiedSdp.isEmpty) {
+        _logger.w(() => '[createOffer] rejected (SDP is null/empty)');
+        return Result.error('createOffer produced null/empty SDP');
+      }
+
       final modifiedOffer = localOffer.copyWith(sdp: modifiedSdp);
 
-      await setLocalDescription(modifiedOffer);
+      final setResult = await setLocalDescription(modifiedOffer);
+      if (setResult is Failure) {
+        return Result.failure(setResult.error);
+      }
+
       return Result.success(modifiedOffer);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -190,8 +200,13 @@ class StreamPeerConnection extends Disposable {
 
   /// Creates an answer and sets it as the local description.
   ///
+  /// The [offerSdp] is the remote offer that prompted this answer. It is
+  /// passed through to the SDP editor so rules (e.g. stereo mirroring) can
+  /// inspect the offer when processing the local answer.
+  ///
   /// The remote description must be set before calling this method.
-  Future<Result<rtc.RTCSessionDescription>> createAnswer([
+  Future<Result<rtc.RTCSessionDescription>> createAnswer(
+    String offerSdp, [
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
     try {
@@ -199,12 +214,29 @@ class StreamPeerConnection extends Disposable {
         () => '[createLocalAnswer] #$type; mediaConstraints: $mediaConstraints',
       );
       final localAnswer = await pc.createAnswer(mediaConstraints);
-      final modifiedSdp = sdpEditor.edit(localAnswer.sdp?.let(Sdp.localAnswer));
+      final sdp = localAnswer.sdp;
+
+      final modifiedSdp = sdp != null
+          ? sdpEditor.edit(Sdp.localAnswer(sdp, offerSdp: offerSdp))
+          : null;
+      
+      if (modifiedSdp == null || modifiedSdp.isEmpty) {
+        _logger.w(
+          () => '[createLocalAnswer] #$type; rejected (SDP is null/empty)',
+        );
+        return Result.error('createAnswer produced null/empty SDP');
+      }
+      
       final modifiedAnswer = localAnswer.copyWith(sdp: modifiedSdp);
+
       _logger.v(
         () => '[createLocalAnswer] #$type; sdp:\n${modifiedAnswer.sdp}',
       );
-      await setLocalDescription(modifiedAnswer);
+
+      final setResult = await setLocalDescription(modifiedAnswer);
+      if (setResult is Failure) {
+        return Result.failure(setResult.error);
+      }
       return Result.success(modifiedAnswer);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -257,6 +289,29 @@ class StreamPeerConnection extends Disposable {
       final result = await pc.setLocalDescription(description);
       return Result.success(result);
     } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  /// Rolls back the local description to the stable state if the peer
+  /// connection is currently in the `have-local-offer` signaling state.
+  Future<Result<void>> rollbackLocalDescription() async {
+    try {
+      final state = pc.signalingState;
+      if (state != rtc.RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
+        return const Result.success(null);
+      }
+
+      await pc.setLocalDescription(
+        rtc.RTCSessionDescription('', 'rollback'),
+      );
+
+      return const Result.success(null);
+    } catch (e, stk) {
+      _logger.w(
+        () => '[rollbackLocalDescription] #$type; failed: $e',
+      );
+
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -316,6 +371,11 @@ class StreamPeerConnection extends Disposable {
           sendEncodings: encodings,
         ),
       );
+
+      final params = transceiver.sender.parameters;
+      params.degradationPreference =
+          rtc.RTCDegradationPreference.MAINTAIN_FRAMERATE;
+      await transceiver.sender.setParameters(params);
 
       return Result.success(transceiver);
     } catch (e, stk) {
