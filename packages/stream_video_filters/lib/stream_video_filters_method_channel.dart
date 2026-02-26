@@ -31,4 +31,11 @@ class MethodChannelStreamVideoFilters extends StreamVideoFiltersPlatform {
       'backgroundImageUrl': backgroundImageUrl,
     });
   }
+
+  @override
+  Future<void> registerFullFrameBlurEffectProcessor() {
+    return methodChannel.invokeMethod(
+      'registerFullFrameBlurEffectProcessor',
+    );
+  }
 }

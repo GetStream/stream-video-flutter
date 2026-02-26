@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.getstream.webrtc.flutter.videoEffects.ProcessorProvider
 import io.getstream.video.flutter.stream_video_filters.factories.BackgroundBlurFactory
 import io.getstream.video.flutter.stream_video_filters.factories.BlurIntensity
+import io.getstream.video.flutter.stream_video_filters.factories.FullFrameBlurFactory
 import io.getstream.video.flutter.stream_video_filters.factories.VirtualBackgroundFactory
 
 /** 
@@ -62,6 +63,14 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
                         VirtualBackgroundFactory(applicationContext, backgroundImageUrl)
                     )
                 }
+
+                result.success(null)
+            }
+      "registerFullFrameBlurEffectProcessor" -> {
+                ProcessorProvider.addProcessor(
+                    "FullFrameBlur",
+                    FullFrameBlurFactory()
+                )
 
                 result.success(null)
             }

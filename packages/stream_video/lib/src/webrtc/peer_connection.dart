@@ -219,14 +219,14 @@ class StreamPeerConnection extends Disposable {
       final modifiedSdp = sdp != null
           ? sdpEditor.edit(Sdp.localAnswer(sdp, offerSdp: offerSdp))
           : null;
-      
+
       if (modifiedSdp == null || modifiedSdp.isEmpty) {
         _logger.w(
           () => '[createLocalAnswer] #$type; rejected (SDP is null/empty)',
         );
         return Result.error('createAnswer produced null/empty SDP');
       }
-      
+
       final modifiedAnswer = localAnswer.copyWith(sdp: modifiedSdp);
 
       _logger.v(

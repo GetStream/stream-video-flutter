@@ -297,6 +297,9 @@ class Call {
 
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
+  Timer? _videoModerationTimer;
+  void Function()? _onModerationBlurApply;
+  void Function()? _onModerationBlurClear;
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
   final Set<SfuClientCapability> _sfuClientCapabilities = {
     SfuClientCapability.subscriberVideoPause, // on by default
@@ -624,9 +627,77 @@ class Call {
           event.metadata,
           updateMembers: false,
         );
+      case StreamCallModerationWarningEvent _:
+        return _handleModerationWarningEvent(event);
+      case StreamCallModerationBlurEvent _:
+        return _handleModerationBlurEvent(event);
       default:
         break;
     }
+  }
+
+  void _handleModerationWarningEvent(
+    StreamCallModerationWarningEvent event,
+  ) {
+    final config = state.value.preferences.videoModerationConfig;
+    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
+      return;
+    }
+
+    config.onWarning?.call(event.message);
+  }
+
+  Future<void> _handleModerationBlurEvent(
+    StreamCallModerationBlurEvent event,
+  ) async {
+    final config = state.value.preferences.videoModerationConfig;
+    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
+      return;
+    }
+
+    _stateManager.coordinatorCallModerationBlur(event.userId);
+
+    _videoModerationTimer?.cancel();
+    _videoModerationTimer = null;
+    if (config.duration != null) {
+      _videoModerationTimer = Timer(config.duration!, clearModerationBlur);
+    }
+
+    if (config.muteAudio) await setMicrophoneEnabled(enabled: false);
+    if (config.muteVideo) await setCameraEnabled(enabled: false);
+    if (config.applyBlur) _onModerationBlurApply?.call();
+    config.onApply?.call();
+  }
+
+  /// Clears the moderation action, restoring normal operation.
+  ///
+  /// When [VideoModerationConfig.muteAudio] / [VideoModerationConfig.muteVideo]
+  /// were active, re-enabling mic/camera is allowed again but they stay off
+  /// until the user manually re-enables them.
+  void clearModerationBlur() {
+    _videoModerationTimer?.cancel();
+    _videoModerationTimer = null;
+
+    if (!state.value.isVideoModerated) return;
+
+    final config = state.value.preferences.videoModerationConfig;
+    _stateManager.clearModerationBlur();
+
+    if (config.applyBlur) _onModerationBlurClear?.call();
+    config.onClear?.call();
+  }
+
+  /// Registers handlers for the native blur effect pipeline.
+  ///
+  /// Called automatically by `StreamVideoEffectsManager` from
+  /// `stream_video_filters` when [VideoModerationConfig.applyBlur] is true.
+  @internal
+  void setModerationBlurEffectHandlers({
+    required void Function() onApply,
+    required void Function() onClear,
+  }) {
+    _onModerationBlurApply = onApply;
+    _onModerationBlurClear = onClear;
   }
 
   @internal
@@ -1852,6 +1923,8 @@ class Call {
     ]) {
       timer.cancel();
     }
+    _videoModerationTimer?.cancel();
+    _videoModerationTimer = null;
 
     for (final operation in _sfuStatsTimers) {
       await operation.cancel();
@@ -2932,6 +3005,12 @@ class Call {
     required bool enabled,
     CameraConstraints? constraints,
   }) async {
+    if (enabled &&
+        state.value.isVideoModerated &&
+        state.value.preferences.videoModerationConfig.muteVideo) {
+      _logger.w(() => '[setCameraEnabled] blocked by video moderation');
+      return Result.error('Blocked by video moderation');
+    }
     if (enabled && !hasPermission(CallPermission.sendVideo)) {
       return Result.error('Missing permission to send video');
     }
@@ -3008,6 +3087,12 @@ class Call {
     required bool enabled,
     AudioConstraints? constraints,
   }) async {
+    if (enabled &&
+        state.value.isVideoModerated &&
+        state.value.preferences.videoModerationConfig.muteAudio) {
+      _logger.w(() => '[setMicrophoneEnabled] blocked by video moderation');
+      return Result.error('Blocked by video moderation');
+    }
     if (enabled && !hasPermission(CallPermission.sendAudio)) {
       return Result.error('Missing permission to send audio');
     }

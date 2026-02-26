@@ -61,6 +61,15 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
       )
 
       result(nil)
+    case "registerFullFrameBlurEffectProcessor":
+      if #available(iOS 15.0, *) {
+        ProcessorProvider.addProcessor(
+          FullFrameBlurVideoFrameProcessor(),
+          forName: "FullFrameBlur")
+      } else {
+        print("Full frame blur effect is not supported on iOS versions earlier than 15.0")
+      }
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }

@@ -1,3 +1,4 @@
+import '../../open_api/video/coordinator/api.dart';
 import '../errors/video_error.dart';
 import '../utils/result.dart';
 import 'retry_policy.dart';
@@ -30,8 +31,30 @@ class RpcRetryManager {
         delegate,
       );
       retryAttempt++;
-    } while (result.isFailure && retryAttempt < policy.config.rpcMaxRetries);
+    } while (result.isFailure &&
+        retryAttempt < policy.config.rpcMaxRetries &&
+        _isRetryable(result));
 
     return result;
+  }
+
+  /// Returns false for permanent client errors (4xx except 408/429)
+  /// that should not be retried.
+  bool _isRetryable(Result<dynamic> result) {
+    if (result is! Failure) return true;
+
+    final error = result.error;
+    if (error is! VideoErrorWithCause) return true;
+
+    final cause = error.cause;
+    if (cause is! ApiException) return true;
+
+    final statusCode = cause.code;
+    if (statusCode >= 400 && statusCode < 500) {
+      // 408 Request Timeout and 429 Too Many Requests are retryable
+      return statusCode == 408 || statusCode == 429;
+    }
+
+    return true;
   }
 }

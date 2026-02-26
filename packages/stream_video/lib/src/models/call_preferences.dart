@@ -1,4 +1,5 @@
 import 'call_client_publish_options.dart';
+import 'moderation_blur_config.dart';
 
 abstract class CallPreferences {
   /// The maximum duration to wait when establishing a connection to the call.
@@ -49,6 +50,10 @@ abstract class CallPreferences {
   /// The maximum number of closed caption lines that can be visible
   /// simultaneously on screen.
   int get closedCaptionsVisibleCaptions;
+
+  /// Configuration for how the SDK handles call moderation events.
+  /// Defaults to [VideoModerationConfig.disabled].
+  VideoModerationConfig get videoModerationConfig;
 }
 
 class DefaultCallPreferences implements CallPreferences {
@@ -62,6 +67,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.clientPublishOptions,
     this.closedCaptionsVisibilityDurationMs = 2700,
     this.closedCaptionsVisibleCaptions = 2,
+    this.videoModerationConfig = const VideoModerationConfig.disabled(),
   });
 
   /// The maximum duration to wait when establishing a connection to the call.
@@ -137,4 +143,10 @@ class DefaultCallPreferences implements CallPreferences {
   /// Defaults to 2 lines.
   @override
   final int closedCaptionsVisibleCaptions;
+
+  /// Configuration for how the SDK handles call moderation events.
+  ///
+  /// Defaults to [VideoModerationConfig.disabled].
+  @override
+  final VideoModerationConfig videoModerationConfig;
 }
