@@ -4,6 +4,7 @@ import '../../../../platform_detector/platform_detector.dart';
 import '../../codec/sdp_codec.dart';
 import '../../editor/rule/rule_set_opus_red_enabled.dart';
 import '../../sdp.dart';
+import 'rule_mirror_sprop_stereo.dart';
 import 'rule_prioritize_codec.dart';
 import 'rule_set_opus_dtx_enabled.dart';
 
@@ -30,6 +31,11 @@ abstract class SdpMungingRule with EquatableMixin {
     List<PlatformType> platforms,
     List<SdpType> types,
   }) = SetOpusRedEnabledRule;
+
+  const factory SdpMungingRule.mirrorSpropStereo({
+    List<PlatformType> platforms,
+    List<SdpType> types,
+  }) = MirrorSpropStereoRule;
 
   String get key;
 

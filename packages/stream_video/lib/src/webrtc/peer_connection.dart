@@ -200,8 +200,13 @@ class StreamPeerConnection extends Disposable {
 
   /// Creates an answer and sets it as the local description.
   ///
+  /// The [offerSdp] is the remote offer that prompted this answer. It is
+  /// passed through to the SDP editor so rules (e.g. stereo mirroring) can
+  /// inspect the offer when processing the local answer.
+  ///
   /// The remote description must be set before calling this method.
-  Future<Result<rtc.RTCSessionDescription>> createAnswer([
+  Future<Result<rtc.RTCSessionDescription>> createAnswer(
+    String offerSdp, [
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
     try {
@@ -209,16 +214,21 @@ class StreamPeerConnection extends Disposable {
         () => '[createLocalAnswer] #$type; mediaConstraints: $mediaConstraints',
       );
       final localAnswer = await pc.createAnswer(mediaConstraints);
-      final modifiedSdp = sdpEditor.edit(localAnswer.sdp?.let(Sdp.localAnswer));
+      final sdp = localAnswer.sdp;
 
+      final modifiedSdp = sdp != null
+          ? sdpEditor.edit(Sdp.localAnswer(sdp, offerSdp: offerSdp))
+          : null;
+      
       if (modifiedSdp == null || modifiedSdp.isEmpty) {
         _logger.w(
           () => '[createLocalAnswer] #$type; rejected (SDP is null/empty)',
         );
         return Result.error('createAnswer produced null/empty SDP');
       }
-
+      
       final modifiedAnswer = localAnswer.copyWith(sdp: modifiedSdp);
+
       _logger.v(
         () => '[createLocalAnswer] #$type; sdp:\n${modifiedAnswer.sdp}',
       );

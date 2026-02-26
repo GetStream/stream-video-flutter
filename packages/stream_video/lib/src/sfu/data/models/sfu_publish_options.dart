@@ -1,4 +1,5 @@
 import '../../../webrtc/model/rtc_video_dimension.dart';
+import 'sfu_audio_bitrate.dart';
 import 'sfu_codec.dart';
 import 'sfu_track_type.dart';
 
@@ -13,6 +14,7 @@ class SfuPublishOptions {
     this.bitrate,
     this.fps,
     this.useSingleLayer = false,
+    this.audioBitrateProfiles,
   });
 
   /// The unique identifier for the publish request.
@@ -67,8 +69,10 @@ class SfuPublishOptions {
   /// For SVC codecs, prefer using the L1T3 (single spatial, 3 temporal layers) mode instead.
   final bool useSingleLayer;
 
+  final List<SfuAudioBitrate>? audioBitrateProfiles;
+
   @override
   String toString() {
-    return 'SfuPublishOptions{id: $id, codec: $codec, trackType: $trackType, videoDimension: $videoDimension, maxSpatialLayers: $maxSpatialLayers, maxTemporalLayers: $maxTemporalLayers, bitrate: $bitrate, fps: $fps, useSingleLayer: $useSingleLayer}';
+    return 'SfuPublishOptions{id: $id, codec: $codec, trackType: $trackType, videoDimension: $videoDimension, maxSpatialLayers: $maxSpatialLayers, maxTemporalLayers: $maxTemporalLayers, bitrate: $bitrate, fps: $fps, useSingleLayer: $useSingleLayer, audioBitrateProfiles: $audioBitrateProfiles}';
   }
 }

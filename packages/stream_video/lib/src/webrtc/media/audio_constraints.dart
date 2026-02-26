@@ -10,6 +10,7 @@ class AudioConstraints extends MediaConstraints {
     this.autoGainControl = true,
     this.highPassFilter = false,
     this.typingNoiseDetection = true,
+    this.channelCount = 1,
   });
 
   /// Attempt to use noiseSuppression option (if supported by the platform)
@@ -35,6 +36,9 @@ class AudioConstraints extends MediaConstraints {
   /// Defaults to true.
   final bool typingNoiseDetection;
 
+  /// The number of audio channels to use.
+  final int channelCount;
+
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{};
@@ -54,6 +58,7 @@ class AudioConstraints extends MediaConstraints {
         {'googHighpassFilter': highPassFilter},
         {'googTypingNoiseDetection': typingNoiseDetection},
         {'DtlsSrtpKeyAgreement': true},
+        {'channelCount': channelCount},
       ];
     }
 
@@ -80,6 +85,7 @@ class AudioConstraints extends MediaConstraints {
     bool? autoGainControl,
     bool? highPassFilter,
     bool? typingNoiseDetection,
+    int? channelCount,
   }) => AudioConstraints(
     deviceId: deviceId ?? this.deviceId,
     noiseSuppression: noiseSuppression ?? this.noiseSuppression,
@@ -87,5 +93,6 @@ class AudioConstraints extends MediaConstraints {
     autoGainControl: autoGainControl ?? this.autoGainControl,
     highPassFilter: highPassFilter ?? this.highPassFilter,
     typingNoiseDetection: typingNoiseDetection ?? this.typingNoiseDetection,
+    channelCount: channelCount ?? this.channelCount,
   );
 }
