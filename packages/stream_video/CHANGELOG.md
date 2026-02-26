@@ -5,7 +5,7 @@
 * Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
 
 ### ✅ Added
-* Added video moderation support by providing `VideoModerationConfig` in `CallPreferences`. Chech [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-moderation/) for more details.
+* Added video moderation support by providing `VideoModerationConfig` in `CallPreferences`. Check [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-moderation/) for more details.
 * Added HiFi audio mode for high-fidelity scenarios such as live music, podcasts, and professional streaming. Use `SfuAudioBitrateProfile` to select an audio quality profile before joining a call:
   * `SfuAudioBitrateProfile.voiceStandard` – Standard voice (64 kbps, default)
   * `SfuAudioBitrateProfile.voiceHighQuality` – High-quality voice (128 kbps)

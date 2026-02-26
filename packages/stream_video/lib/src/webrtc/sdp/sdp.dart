@@ -10,8 +10,7 @@ sealed class Sdp {
   static LocalAnswerSdp localAnswer(
     String sdp, {
     String? offerSdp,
-  }) =>
-      LocalAnswerSdp(sdp, offerSdp: offerSdp);
+  }) => LocalAnswerSdp(sdp, offerSdp: offerSdp);
 
   static RemoteOfferSdp remoteOffer(String sdp) => RemoteOfferSdp(sdp);
 

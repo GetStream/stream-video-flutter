@@ -651,7 +651,9 @@ class Call {
     StreamCallModerationBlurEvent event,
   ) async {
     final config = state.value.preferences.videoModerationConfig;
-    if (config.isDisabled) return;
+    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
+      return;
+    }
 
     _stateManager.coordinatorCallModerationBlur(event.userId);
 
