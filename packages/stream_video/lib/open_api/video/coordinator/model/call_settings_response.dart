@@ -18,8 +18,10 @@ class CallSettingsResponse {
     required this.broadcasting,
     required this.frameRecording,
     required this.geofencing,
+    required this.individualRecording,
     this.ingress,
     required this.limits,
+    required this.rawRecording,
     required this.recording,
     required this.ring,
     required this.screensharing,
@@ -39,6 +41,8 @@ class CallSettingsResponse {
 
   GeofenceSettingsResponse geofencing;
 
+  IndividualRecordingSettingsResponse individualRecording;
+
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -48,6 +52,8 @@ class CallSettingsResponse {
   IngressSettingsResponse? ingress;
 
   LimitsSettingsResponse limits;
+
+  RawRecordingSettingsResponse rawRecording;
 
   RecordSettingsResponse recording;
 
@@ -72,8 +78,10 @@ class CallSettingsResponse {
           other.broadcasting == broadcasting &&
           other.frameRecording == frameRecording &&
           other.geofencing == geofencing &&
+          other.individualRecording == individualRecording &&
           other.ingress == ingress &&
           other.limits == limits &&
+          other.rawRecording == rawRecording &&
           other.recording == recording &&
           other.ring == ring &&
           other.screensharing == screensharing &&
@@ -90,8 +98,10 @@ class CallSettingsResponse {
       (broadcasting.hashCode) +
       (frameRecording.hashCode) +
       (geofencing.hashCode) +
+      (individualRecording.hashCode) +
       (ingress == null ? 0 : ingress!.hashCode) +
       (limits.hashCode) +
+      (rawRecording.hashCode) +
       (recording.hashCode) +
       (ring.hashCode) +
       (screensharing.hashCode) +
@@ -102,7 +112,7 @@ class CallSettingsResponse {
 
   @override
   String toString() =>
-      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, ingress=$ingress, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, individualRecording=$individualRecording, ingress=$ingress, limits=$limits, rawRecording=$rawRecording, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -111,12 +121,14 @@ class CallSettingsResponse {
     json[r'broadcasting'] = this.broadcasting;
     json[r'frame_recording'] = this.frameRecording;
     json[r'geofencing'] = this.geofencing;
+    json[r'individual_recording'] = this.individualRecording;
     if (this.ingress != null) {
       json[r'ingress'] = this.ingress;
     } else {
       json[r'ingress'] = null;
     }
     json[r'limits'] = this.limits;
+    json[r'raw_recording'] = this.rawRecording;
     json[r'recording'] = this.recording;
     json[r'ring'] = this.ring;
     json[r'screensharing'] = this.screensharing;
@@ -155,8 +167,12 @@ class CallSettingsResponse {
         frameRecording:
             FrameRecordingSettingsResponse.fromJson(json[r'frame_recording'])!,
         geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
+        individualRecording: IndividualRecordingSettingsResponse.fromJson(
+            json[r'individual_recording'])!,
         ingress: IngressSettingsResponse.fromJson(json[r'ingress']),
         limits: LimitsSettingsResponse.fromJson(json[r'limits'])!,
+        rawRecording:
+            RawRecordingSettingsResponse.fromJson(json[r'raw_recording'])!,
         recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
         ring: RingSettingsResponse.fromJson(json[r'ring'])!,
         screensharing:
@@ -227,7 +243,9 @@ class CallSettingsResponse {
     'broadcasting',
     'frame_recording',
     'geofencing',
+    'individual_recording',
     'limits',
+    'raw_recording',
     'recording',
     'ring',
     'screensharing',

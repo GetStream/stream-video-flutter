@@ -19,6 +19,8 @@ class CallSettings with EquatableMixin {
     this.limits = const StreamLimitsSettings(),
     this.session = const StreamSessionSettings(),
     this.frameRecording = const StreamFrameRecordingSettings(),
+    this.individualRecording = const StreamIndividualRecordingSettings(),
+    this.rawRecording = const StreamRawRecordingSettings(),
     this.ingress,
   });
 
@@ -34,6 +36,8 @@ class CallSettings with EquatableMixin {
   final StreamLimitsSettings limits;
   final StreamSessionSettings session;
   final StreamFrameRecordingSettings frameRecording;
+  final StreamIndividualRecordingSettings individualRecording;
+  final StreamRawRecordingSettings rawRecording;
   final StreamIngressSettings? ingress;
 
   @override
@@ -54,6 +58,8 @@ class CallSettings with EquatableMixin {
     StreamLimitsSettings? limits,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
   }) {
     return CallSettings(
@@ -69,6 +75,8 @@ class CallSettings with EquatableMixin {
       limits: limits ?? this.limits,
       session: session ?? this.session,
       frameRecording: frameRecording ?? this.frameRecording,
+      individualRecording: individualRecording ?? this.individualRecording,
+      rawRecording: rawRecording ?? this.rawRecording,
       ingress: ingress ?? this.ingress,
     );
   }
@@ -366,6 +374,40 @@ class StreamRecordingSettings extends AbstractSettings {
       audioOnly: audioOnly,
       mode: mode.toOpenDto(),
       quality: quality.toOpenDto(),
+    );
+  }
+}
+
+class StreamIndividualRecordingSettings extends AbstractSettings {
+  const StreamIndividualRecordingSettings({
+    this.mode = IndividualRecordingSettingsMode.disabled,
+  });
+
+  final IndividualRecordingSettingsMode mode;
+
+  @override
+  List<Object?> get props => [mode];
+
+  IndividualRecordingSettingsRequest toOpenDto() {
+    return IndividualRecordingSettingsRequest(
+      mode: mode.toOpenDto(),
+    );
+  }
+}
+
+class StreamRawRecordingSettings extends AbstractSettings {
+  const StreamRawRecordingSettings({
+    this.mode = RawRecordingSettingsMode.disabled,
+  });
+
+  final RawRecordingSettingsMode mode;
+
+  @override
+  List<Object?> get props => [mode];
+
+  RawRecordingSettingsRequest toOpenDto() {
+    return RawRecordingSettingsRequest(
+      mode: mode.toOpenDto(),
     );
   }
 }
@@ -719,6 +761,72 @@ enum RecordSettingsMode {
   }
 }
 
+enum IndividualRecordingSettingsMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  IndividualRecordingSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case IndividualRecordingSettingsMode.available:
+        return IndividualRecordingSettingsRequestModeEnum.available;
+      case IndividualRecordingSettingsMode.disabled:
+        return IndividualRecordingSettingsRequestModeEnum.disabled;
+      case IndividualRecordingSettingsMode.autoOn:
+        return IndividualRecordingSettingsRequestModeEnum.autoOn;
+    }
+  }
+
+  static IndividualRecordingSettingsMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return IndividualRecordingSettingsMode.available;
+      case 'disabled':
+        return IndividualRecordingSettingsMode.disabled;
+      case 'auto-on':
+        return IndividualRecordingSettingsMode.autoOn;
+      default:
+        return IndividualRecordingSettingsMode.disabled;
+    }
+  }
+}
+
+enum RawRecordingSettingsMode {
+  available,
+  disabled,
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  RawRecordingSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case RawRecordingSettingsMode.available:
+        return RawRecordingSettingsRequestModeEnum.available;
+      case RawRecordingSettingsMode.disabled:
+        return RawRecordingSettingsRequestModeEnum.disabled;
+      case RawRecordingSettingsMode.autoOn:
+        return RawRecordingSettingsRequestModeEnum.autoOn;
+    }
+  }
+
+  static RawRecordingSettingsMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return RawRecordingSettingsMode.available;
+      case 'disabled':
+        return RawRecordingSettingsMode.disabled;
+      case 'auto-on':
+        return RawRecordingSettingsMode.autoOn;
+      default:
+        return RawRecordingSettingsMode.disabled;
+    }
+  }
+}
+
 enum FrameRecordingSettingsMode {
   available,
   disabled,
@@ -1009,6 +1117,39 @@ enum ClosedCaptionSettingsMode {
         return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
       case ClosedCaptionSettingsMode.autoOn:
         return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
+    }
+  }
+}
+
+enum RecordingType {
+  composite,
+  individual,
+  raw;
+
+  @override
+  String toString() => name;
+
+  String toOpenDto() {
+    switch (this) {
+      case RecordingType.composite:
+        return 'composite';
+      case RecordingType.individual:
+        return 'individual';
+      case RecordingType.raw:
+        return 'raw';
+    }
+  }
+
+  static RecordingType fromString(String value) {
+    switch (value) {
+      case 'composite':
+        return RecordingType.composite;
+      case 'individual':
+        return RecordingType.individual;
+      case 'raw':
+        return RecordingType.raw;
+      default:
+        return RecordingType.composite;
     }
   }
 }

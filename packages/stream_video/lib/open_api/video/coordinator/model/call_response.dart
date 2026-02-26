@@ -28,6 +28,7 @@ class CallResponse {
     required this.ingress,
     this.joinAheadTimeSeconds,
     required this.recording,
+    this.routingNumber,
     this.session,
     required this.settings,
     this.startsAt,
@@ -91,6 +92,15 @@ class CallResponse {
   int? joinAheadTimeSeconds;
 
   bool recording;
+
+  /// 10-digit routing number for SIP routing
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? routingNumber;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -156,6 +166,7 @@ class CallResponse {
           other.ingress == ingress &&
           other.joinAheadTimeSeconds == joinAheadTimeSeconds &&
           other.recording == recording &&
+          other.routingNumber == routingNumber &&
           other.session == session &&
           other.settings == settings &&
           other.startsAt == startsAt &&
@@ -184,6 +195,7 @@ class CallResponse {
       (ingress.hashCode) +
       (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode) +
       (recording.hashCode) +
+      (routingNumber == null ? 0 : routingNumber!.hashCode) +
       (session == null ? 0 : session!.hashCode) +
       (settings.hashCode) +
       (startsAt == null ? 0 : startsAt!.hashCode) +
@@ -196,7 +208,7 @@ class CallResponse {
 
   @override
   String toString() =>
-      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, channelCid=$channelCid, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, translating=$translating, type=$type, updatedAt=$updatedAt]';
+      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, captioning=$captioning, channelCid=$channelCid, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, routingNumber=$routingNumber, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, translating=$translating, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -227,6 +239,11 @@ class CallResponse {
       json[r'join_ahead_time_seconds'] = null;
     }
     json[r'recording'] = this.recording;
+    if (this.routingNumber != null) {
+      json[r'routing_number'] = this.routingNumber;
+    } else {
+      json[r'routing_number'] = null;
+    }
     if (this.session != null) {
       json[r'session'] = this.session;
     } else {
@@ -296,6 +313,7 @@ class CallResponse {
         joinAheadTimeSeconds:
             mapValueOfType<int>(json, r'join_ahead_time_seconds'),
         recording: mapValueOfType<bool>(json, r'recording')!,
+        routingNumber: mapValueOfType<String>(json, r'routing_number'),
         session: CallSessionResponse.fromJson(json[r'session']),
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         startsAt: mapDateTime(json, r'starts_at', r''),

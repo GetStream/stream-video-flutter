@@ -54,6 +54,7 @@ class CallState extends Equatable {
       anonymousParticipantCount: 0,
       iOSMultitaskingCameraAccessEnabled: false,
       custom: const {},
+      isVideoModerated: false,
     );
   }
 
@@ -95,6 +96,7 @@ class CallState extends Equatable {
     required this.anonymousParticipantCount,
     required this.iOSMultitaskingCameraAccessEnabled,
     required this.custom,
+    required this.isVideoModerated,
   });
 
   final CallPreferences preferences;
@@ -134,6 +136,9 @@ class CallState extends Equatable {
   final int anonymousParticipantCount;
   final bool iOSMultitaskingCameraAccessEnabled;
   final Map<String, Object> custom;
+
+  /// Whether the local user's video is currently blurred by moderation.
+  final bool isVideoModerated;
 
   String get callId => callCid.id;
 
@@ -206,6 +211,7 @@ class CallState extends Equatable {
     int? anonymousParticipantCount,
     bool? iOSMultitaskingCameraAccessEnabled,
     Map<String, Object>? custom,
+    bool? isVideoModerated,
   }) {
     return CallState._(
       preferences: preferences ?? this.preferences,
@@ -248,6 +254,7 @@ class CallState extends Equatable {
           iOSMultitaskingCameraAccessEnabled ??
           this.iOSMultitaskingCameraAccessEnabled,
       custom: custom ?? this.custom,
+      isVideoModerated: isVideoModerated ?? this.isVideoModerated,
     );
   }
 
@@ -321,6 +328,7 @@ class CallState extends Equatable {
     anonymousParticipantCount,
     iOSMultitaskingCameraAccessEnabled,
     custom,
+    isVideoModerated,
   ];
 
   @override
@@ -328,6 +336,7 @@ class CallState extends Equatable {
     return 'CallState(status: $status, currentUserId: $currentUserId,'
         ' callCid: $callCid, createdByUser: $createdByUser,'
         ' sessionId: $sessionId, isRecording: $isRecording,'
+        ' isVideoModerated: $isVideoModerated,'
         ' settings: $settings, egress: $egress, '
         ' videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'

@@ -297,6 +297,9 @@ class Call {
 
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
+  Timer? _videoModerationTimer;
+  void Function()? _onModerationBlurApply;
+  void Function()? _onModerationBlurClear;
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
   final Set<SfuClientCapability> _sfuClientCapabilities = {
     SfuClientCapability.subscriberVideoPause, // on by default
@@ -624,9 +627,77 @@ class Call {
           event.metadata,
           updateMembers: false,
         );
+      case StreamCallModerationWarningEvent _:
+        return _handleModerationWarningEvent(event);
+      case StreamCallModerationBlurEvent _:
+        return _handleModerationBlurEvent(event);
       default:
         break;
     }
+  }
+
+  void _handleModerationWarningEvent(
+    StreamCallModerationWarningEvent event,
+  ) {
+    final config = state.value.preferences.videoModerationConfig;
+    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
+      return;
+    }
+
+    config.onWarning?.call(event.message);
+  }
+
+  Future<void> _handleModerationBlurEvent(
+    StreamCallModerationBlurEvent event,
+  ) async {
+    final config = state.value.preferences.videoModerationConfig;
+    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
+      return;
+    }
+
+    _stateManager.coordinatorCallModerationBlur(event.userId);
+
+    _videoModerationTimer?.cancel();
+    _videoModerationTimer = null;
+    if (config.duration != null) {
+      _videoModerationTimer = Timer(config.duration!, clearModerationBlur);
+    }
+
+    if (config.muteAudio) await setMicrophoneEnabled(enabled: false);
+    if (config.muteVideo) await setCameraEnabled(enabled: false);
+    if (config.applyBlur) _onModerationBlurApply?.call();
+    config.onApply?.call();
+  }
+
+  /// Clears the moderation action, restoring normal operation.
+  ///
+  /// When [VideoModerationConfig.muteAudio] / [VideoModerationConfig.muteVideo]
+  /// were active, re-enabling mic/camera is allowed again but they stay off
+  /// until the user manually re-enables them.
+  void clearModerationBlur() {
+    _videoModerationTimer?.cancel();
+    _videoModerationTimer = null;
+
+    if (!state.value.isVideoModerated) return;
+
+    final config = state.value.preferences.videoModerationConfig;
+    _stateManager.clearModerationBlur();
+
+    if (config.applyBlur) _onModerationBlurClear?.call();
+    config.onClear?.call();
+  }
+
+  /// Registers handlers for the native blur effect pipeline.
+  ///
+  /// Called automatically by `StreamVideoEffectsManager` from
+  /// `stream_video_filters` when [VideoModerationConfig.applyBlur] is true.
+  @internal
+  void setModerationBlurEffectHandlers({
+    required void Function() onApply,
+    required void Function() onClear,
+  }) {
+    _onModerationBlurApply = onApply;
+    _onModerationBlurClear = onClear;
   }
 
   @internal
@@ -1247,6 +1318,8 @@ class Call {
   /// - [broadcasting]: Broadcasting settings for the call.
   /// - [session]: Session settings for the call.
   /// - [frameRecording]: Frame recording settings for the call.
+  /// - [individualRecording]: Individual recording settings for the call.
+  /// - [rawRecording]: Raw recording settings for the call.
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
     DateTime? startsAt,
@@ -1262,6 +1335,8 @@ class Call {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
   }) {
     return _coordinatorClient.updateCall(
@@ -1280,6 +1355,8 @@ class Call {
       broadcasting: broadcasting,
       session: session,
       frameRecording: frameRecording,
+      individualRecording: individualRecording,
+      rawRecording: rawRecording,
       ingress: ingress,
     );
   }
@@ -1846,6 +1923,8 @@ class Call {
     ]) {
       timer.cancel();
     }
+    _videoModerationTimer?.cancel();
+    _videoModerationTimer = null;
 
     for (final operation in _sfuStatsTimers) {
       await operation.cancel();
@@ -2394,6 +2473,8 @@ class Call {
   /// - [broadcasting]: Broadcasting settings for the call.
   /// - [session]: Session settings for the call.
   /// - [frameRecording]: Frame recording settings for the call.
+  /// - [individualRecording]: Individual recording settings for the call.
+  /// - [rawRecording]: Raw recording settings for the call.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     List<MemberRequest> members = const [],
@@ -2417,6 +2498,8 @@ class Call {
     StreamSessionSettings? session,
     StreamIngressSettings? ingress,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     Map<String, Object> custom = const {},
   }) async {
     final settingsOverride = CallSettingsRequest(
@@ -2433,6 +2516,8 @@ class Call {
       session: session?.toOpenDto(),
       ingress: ingress?.toOpenDto(),
       frameRecording: frameRecording?.toOpenDto(),
+      individualRecording: individualRecording?.toOpenDto(),
+      rawRecording: rawRecording?.toOpenDto(),
     );
 
     final aggregatedMembers = [
@@ -2532,9 +2617,11 @@ class Call {
   }
 
   Future<Result<None>> startRecording({
+    RecordingType recordingType = RecordingType.composite,
     String? recordingExternalStorage,
   }) async {
     final result = await _permissionsManager.startRecording(
+      recordingType: recordingType,
       recordingExternalStorage: recordingExternalStorage,
     );
 
@@ -2549,8 +2636,12 @@ class Call {
     return _permissionsManager.listRecordings();
   }
 
-  Future<Result<None>> stopRecording() async {
-    final result = await _permissionsManager.stopRecording();
+  Future<Result<None>> stopRecording({
+    RecordingType recordingType = RecordingType.composite,
+  }) async {
+    final result = await _permissionsManager.stopRecording(
+      recordingType: recordingType,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallRecording(isRecording: false);
@@ -2914,6 +3005,12 @@ class Call {
     required bool enabled,
     CameraConstraints? constraints,
   }) async {
+    if (enabled &&
+        state.value.isVideoModerated &&
+        state.value.preferences.videoModerationConfig.muteVideo) {
+      _logger.w(() => '[setCameraEnabled] blocked by video moderation');
+      return Result.error('Blocked by video moderation');
+    }
     if (enabled && !hasPermission(CallPermission.sendVideo)) {
       return Result.error('Missing permission to send video');
     }
@@ -2990,6 +3087,12 @@ class Call {
     required bool enabled,
     AudioConstraints? constraints,
   }) async {
+    if (enabled &&
+        state.value.isVideoModerated &&
+        state.value.preferences.videoModerationConfig.muteAudio) {
+      _logger.w(() => '[setMicrophoneEnabled] blocked by video moderation');
+      return Result.error('Blocked by video moderation');
+    }
     if (enabled && !hasPermission(CallPermission.sendAudio)) {
       return Result.error('Missing permission to send audio');
     }
@@ -3236,16 +3339,24 @@ class Call {
   Future<Result<CallMetadata>> goLive({
     bool? startHls,
     bool? startRecording,
+    bool? startCompositeRecording,
+    bool? startIndividualRecording,
+    bool? startRawRecording,
     bool? startTranscription,
     bool? startClosedCaption,
+    String? recordingStorageName,
     String? transcriptionStorageName,
   }) async {
     final result = await _coordinatorClient.goLive(
       callCid: callCid,
       startHls: startHls,
       startRecording: startRecording,
+      startCompositeRecording: startCompositeRecording,
+      startIndividualRecording: startIndividualRecording,
+      startRawRecording: startRawRecording,
       startTranscription: startTranscription,
       startClosedCaption: startClosedCaption,
+      recordingStorageName: recordingStorageName,
       transcriptionStorageName: transcriptionStorageName,
     );
 
@@ -3257,8 +3368,27 @@ class Call {
   }
 
   /// Stops the livestreaming of the call.
-  Future<Result<CallMetadata>> stopLive() async {
-    final result = await _coordinatorClient.stopLive(callCid);
+  Future<Result<CallMetadata>> stopLive({
+    bool? continueClosedCaption,
+    bool? continueCompositeRecording,
+    bool? continueHls,
+    bool? continueIndividualRecording,
+    bool? continueRawRecording,
+    bool? continueRecording,
+    bool? continueRtmpBroadcasts,
+    bool? continueTranscription,
+  }) async {
+    final result = await _coordinatorClient.stopLive(
+      callCid,
+      continueClosedCaption: continueClosedCaption,
+      continueCompositeRecording: continueCompositeRecording,
+      continueHls: continueHls,
+      continueIndividualRecording: continueIndividualRecording,
+      continueRawRecording: continueRawRecording,
+      continueRecording: continueRecording,
+      continueRtmpBroadcasts: continueRtmpBroadcasts,
+      continueTranscription: continueTranscription,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallLive(isLive: false);

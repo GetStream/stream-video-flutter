@@ -305,6 +305,10 @@ class ApiClient {
           return CallMemberUpdatedPermissionEvent.fromJson(value);
         case 'CallMissedEvent':
           return CallMissedEvent.fromJson(value);
+        case 'CallModerationBlurEvent':
+          return CallModerationBlurEvent.fromJson(value);
+        case 'CallModerationWarningEvent':
+          return CallModerationWarningEvent.fromJson(value);
         case 'CallNotificationEvent':
           return CallNotificationEvent.fromJson(value);
         case 'CallParticipantCountReport':
@@ -476,6 +480,12 @@ class ApiClient {
           return HealthCheckEvent.fromJson(value);
         case 'ICEServer':
           return ICEServer.fromJson(value);
+        case 'IndividualRecordingResponse':
+          return IndividualRecordingResponse.fromJson(value);
+        case 'IndividualRecordingSettingsRequest':
+          return IndividualRecordingSettingsRequest.fromJson(value);
+        case 'IndividualRecordingSettingsResponse':
+          return IndividualRecordingSettingsResponse.fromJson(value);
         case 'IngressAudioEncodingOptionsRequest':
           return IngressAudioEncodingOptionsRequest.fromJson(value);
         case 'IngressAudioEncodingResponse':
@@ -552,8 +562,8 @@ class ApiClient {
           return PublishedTrackFlags.fromJson(value);
         case 'PublisherStatsResponse':
           return PublisherStatsResponse.fromJson(value);
-        case 'PushPreferences':
-          return PushPreferences.fromJson(value);
+        case 'PushPreferencesResponse':
+          return PushPreferencesResponse.fromJson(value);
         case 'QualityScoreReport':
           return QualityScoreReport.fromJson(value);
         case 'QualityScoreReportResponse':
@@ -586,6 +596,10 @@ class ApiClient {
           return RTMPSettingsRequest.fromJson(value);
         case 'RTMPSettingsResponse':
           return RTMPSettingsResponse.fromJson(value);
+        case 'RawRecordingSettingsRequest':
+          return RawRecordingSettingsRequest.fromJson(value);
+        case 'RawRecordingSettingsResponse':
+          return RawRecordingSettingsResponse.fromJson(value);
         case 'ReactionResponse':
           return ReactionResponse.fromJson(value);
         case 'ReadReceipts':
@@ -606,6 +620,7 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
+        //MANUAL_EDIT
         case 'DurationResponse':
           return DurationResponse.fromJson(value);
         case 'RingCallRequest':

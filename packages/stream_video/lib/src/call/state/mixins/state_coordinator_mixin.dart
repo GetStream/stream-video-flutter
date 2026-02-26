@@ -518,4 +518,26 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           .toList(),
     );
   }
+
+  void coordinatorCallModerationBlur(
+    String userId,
+  ) {
+    if (userId != state.currentUserId) {
+      _logger.i(
+        () => '[coordinatorCallModeration] rejected (not current user)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isVideoModerated: true,
+    );
+  }
+
+  void clearModerationBlur() {
+    _logger.i(() => '[clearModerationBlur]');
+    state = state.copyWith(
+      isVideoModerated: false,
+    );
+  }
 }

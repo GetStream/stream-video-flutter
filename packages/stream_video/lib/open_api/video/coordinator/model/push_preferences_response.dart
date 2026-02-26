@@ -10,12 +10,14 @@
 
 part of openapi.api;
 
-class PushPreferences {
-  /// Returns a new [PushPreferences] instance.
-  PushPreferences({
+class PushPreferencesResponse {
+  /// Returns a new [PushPreferencesResponse] instance.
+  PushPreferencesResponse({
     this.callLevel,
     this.chatLevel,
     this.disabledUntil,
+    this.feedsLevel,
+    this.feedsPreferences,
   });
 
   ///
@@ -42,24 +44,44 @@ class PushPreferences {
   ///
   DateTime? disabledUntil;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? feedsLevel;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  FeedsPreferencesResponse? feedsPreferences;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PushPreferences &&
+      other is PushPreferencesResponse &&
           other.callLevel == callLevel &&
           other.chatLevel == chatLevel &&
-          other.disabledUntil == disabledUntil;
+          other.disabledUntil == disabledUntil &&
+          other.feedsLevel == feedsLevel &&
+          other.feedsPreferences == feedsPreferences;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (callLevel == null ? 0 : callLevel!.hashCode) +
       (chatLevel == null ? 0 : chatLevel!.hashCode) +
-      (disabledUntil == null ? 0 : disabledUntil!.hashCode);
+      (disabledUntil == null ? 0 : disabledUntil!.hashCode) +
+      (feedsLevel == null ? 0 : feedsLevel!.hashCode) +
+      (feedsPreferences == null ? 0 : feedsPreferences!.hashCode);
 
   @override
   String toString() =>
-      'PushPreferences[callLevel=$callLevel, chatLevel=$chatLevel, disabledUntil=$disabledUntil]';
+      'PushPreferencesResponse[callLevel=$callLevel, chatLevel=$chatLevel, disabledUntil=$disabledUntil, feedsLevel=$feedsLevel, feedsPreferences=$feedsPreferences]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -78,13 +100,23 @@ class PushPreferences {
     } else {
       json[r'disabled_until'] = null;
     }
+    if (this.feedsLevel != null) {
+      json[r'feeds_level'] = this.feedsLevel;
+    } else {
+      json[r'feeds_level'] = null;
+    }
+    if (this.feedsPreferences != null) {
+      json[r'feeds_preferences'] = this.feedsPreferences;
+    } else {
+      json[r'feeds_preferences'] = null;
+    }
     return json;
   }
 
-  /// Returns a new [PushPreferences] instance and imports its values from
+  /// Returns a new [PushPreferencesResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static PushPreferences? fromJson(dynamic value) {
+  static PushPreferencesResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -94,30 +126,33 @@ class PushPreferences {
       assert(() {
         requiredKeys.forEach((key) {
           assert(json.containsKey(key),
-              'Required key "PushPreferences[$key]" is missing from JSON.');
+              'Required key "PushPreferencesResponse[$key]" is missing from JSON.');
           assert(json[key] != null,
-              'Required key "PushPreferences[$key]" has a null value in JSON.');
+              'Required key "PushPreferencesResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return PushPreferences(
+      return PushPreferencesResponse(
         callLevel: mapValueOfType<String>(json, r'call_level'),
         chatLevel: mapValueOfType<String>(json, r'chat_level'),
         disabledUntil: mapDateTime(json, r'disabled_until', r''),
+        feedsLevel: mapValueOfType<String>(json, r'feeds_level'),
+        feedsPreferences:
+            FeedsPreferencesResponse.fromJson(json[r'feeds_preferences']),
       );
     }
     return null;
   }
 
-  static List<PushPreferences> listFromJson(
+  static List<PushPreferencesResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <PushPreferences>[];
+    final result = <PushPreferencesResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = PushPreferences.fromJson(row);
+        final value = PushPreferencesResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -126,12 +161,12 @@ class PushPreferences {
     return result.toList(growable: growable);
   }
 
-  static Map<String, PushPreferences> mapFromJson(dynamic json) {
-    final map = <String, PushPreferences>{};
+  static Map<String, PushPreferencesResponse> mapFromJson(dynamic json) {
+    final map = <String, PushPreferencesResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = PushPreferences.fromJson(entry.value);
+        final value = PushPreferencesResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -140,17 +175,17 @@ class PushPreferences {
     return map;
   }
 
-  // maps a json object with a list of PushPreferences-objects as value to a dart map
-  static Map<String, List<PushPreferences>> mapListFromJson(
+  // maps a json object with a list of PushPreferencesResponse-objects as value to a dart map
+  static Map<String, List<PushPreferencesResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<PushPreferences>>{};
+    final map = <String, List<PushPreferencesResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PushPreferences.listFromJson(
+        map[entry.key] = PushPreferencesResponse.listFromJson(
           entry.value,
           growable: growable,
         );

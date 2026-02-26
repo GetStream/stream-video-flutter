@@ -23,6 +23,10 @@ class VideoEvent {
     required this.user,
     required this.call,
     this.members = const [],
+    required this.digit,
+    required this.durationMs,
+    required this.seqNumber,
+    required this.timestamp,
     required this.reason,
     required this.egressId,
     required this.capturedAt,
@@ -36,6 +40,7 @@ class VideoEvent {
     required this.userId,
     required this.message,
     required this.reaction,
+    required this.recordingType,
     required this.callRecording,
     required this.video,
     required this.name,
@@ -54,6 +59,12 @@ class VideoEvent {
     required this.connectionId,
     required this.me,
     required this.cid,
+    this.code,
+    required this.ingressStreamId,
+    this.clientIp,
+    this.clientName,
+    required this.publisherType,
+    this.version,
     this.kickedByUser,
     this.permissions = const [],
     this.ownCapabilities = const [],
@@ -102,6 +113,18 @@ class VideoEvent {
   /// Call members
   List<MemberResponse> members;
 
+  /// The DTMF digit (0-9, *, #, A-D)
+  String digit;
+
+  /// Duration of the digit press in milliseconds
+  int durationMs;
+
+  /// Monotonically increasing sequence number for ordering DTMF events within a session
+  int seqNumber;
+
+  /// When the digit press ended and was detected
+  DateTime timestamp;
+
   String reason;
 
   String egressId;
@@ -128,13 +151,16 @@ class VideoEvent {
 
   bool notifyUser;
 
-  /// The user ID who is receiving the warning
+  /// User who was streaming
   String userId;
 
   /// The warning message
   String message;
 
   ReactionResponse reaction;
+
+  /// The type of recording
+  VideoEventRecordingTypeEnum recordingType;
 
   CallRecording callRecording;
 
@@ -152,7 +178,8 @@ class VideoEvent {
   /// The duration participant was in the session in seconds
   int durationSeconds;
 
-  APIError error;
+  /// Human-readable error message
+  String error;
 
   CallTranscription callTranscription;
 
@@ -186,6 +213,48 @@ class VideoEvent {
   OwnUserResponse me;
 
   String cid;
+
+  /// Error code
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? code;
+
+  /// Unique identifier for the stream
+  String ingressStreamId;
+
+  /// Client IP address
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? clientIp;
+
+  /// Streaming client software name (e.g., 'OBS Studio')
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? clientName;
+
+  /// Streaming protocol (e.g., 'rtmps', 'srt', 'rtmp', 'rtsp')
+  String publisherType;
+
+  /// Client software version
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? version;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -249,6 +318,10 @@ class VideoEvent {
           other.user == user &&
           other.call == call &&
           _deepEquality.equals(other.members, members) &&
+          other.digit == digit &&
+          other.durationMs == durationMs &&
+          other.seqNumber == seqNumber &&
+          other.timestamp == timestamp &&
           other.reason == reason &&
           other.egressId == egressId &&
           other.capturedAt == capturedAt &&
@@ -262,6 +335,7 @@ class VideoEvent {
           other.userId == userId &&
           other.message == message &&
           other.reaction == reaction &&
+          other.recordingType == recordingType &&
           other.callRecording == callRecording &&
           other.video == video &&
           other.name == name &&
@@ -281,6 +355,12 @@ class VideoEvent {
           other.connectionId == connectionId &&
           other.me == me &&
           other.cid == cid &&
+          other.code == code &&
+          other.ingressStreamId == ingressStreamId &&
+          other.clientIp == clientIp &&
+          other.clientName == clientName &&
+          other.publisherType == publisherType &&
+          other.version == version &&
           other.kickedByUser == kickedByUser &&
           _deepEquality.equals(other.permissions, permissions) &&
           _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
@@ -306,6 +386,10 @@ class VideoEvent {
       (user.hashCode) +
       (call.hashCode) +
       (members.hashCode) +
+      (digit.hashCode) +
+      (durationMs.hashCode) +
+      (seqNumber.hashCode) +
+      (timestamp.hashCode) +
       (reason.hashCode) +
       (egressId.hashCode) +
       (capturedAt.hashCode) +
@@ -319,6 +403,7 @@ class VideoEvent {
       (userId.hashCode) +
       (message.hashCode) +
       (reaction.hashCode) +
+      (recordingType.hashCode) +
       (callRecording.hashCode) +
       (video.hashCode) +
       (name.hashCode) +
@@ -337,6 +422,12 @@ class VideoEvent {
       (connectionId.hashCode) +
       (me.hashCode) +
       (cid.hashCode) +
+      (code == null ? 0 : code!.hashCode) +
+      (ingressStreamId.hashCode) +
+      (clientIp == null ? 0 : clientIp!.hashCode) +
+      (clientName == null ? 0 : clientName!.hashCode) +
+      (publisherType.hashCode) +
+      (version == null ? 0 : version!.hashCode) +
       (kickedByUser == null ? 0 : kickedByUser!.hashCode) +
       (permissions.hashCode) +
       (ownCapabilities.hashCode) +
@@ -351,7 +442,7 @@ class VideoEvent {
 
   @override
   String toString() =>
-      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, error=$error, callTranscription=$callTranscription, rating=$rating, sdk=$sdk, sdkVersion=$sdkVersion, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, kickedByUser=$kickedByUser, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
+      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, digit=$digit, durationMs=$durationMs, seqNumber=$seqNumber, timestamp=$timestamp, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, recordingType=$recordingType, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, error=$error, callTranscription=$callTranscription, rating=$rating, sdk=$sdk, sdkVersion=$sdkVersion, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, code=$code, ingressStreamId=$ingressStreamId, clientIp=$clientIp, clientName=$clientName, publisherType=$publisherType, version=$version, kickedByUser=$kickedByUser, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -373,6 +464,10 @@ class VideoEvent {
     json[r'user'] = this.user;
     json[r'call'] = this.call;
     json[r'members'] = this.members;
+    json[r'digit'] = this.digit;
+    json[r'duration_ms'] = this.durationMs;
+    json[r'seq_number'] = this.seqNumber;
+    json[r'timestamp'] = this.timestamp.toUtc().toIso8601String();
     json[r'reason'] = this.reason;
     json[r'egress_id'] = this.egressId;
     json[r'captured_at'] = this.capturedAt.toUtc().toIso8601String();
@@ -386,6 +481,7 @@ class VideoEvent {
     json[r'user_id'] = this.userId;
     json[r'message'] = this.message;
     json[r'reaction'] = this.reaction;
+    json[r'recording_type'] = this.recordingType;
     json[r'call_recording'] = this.callRecording;
     json[r'video'] = this.video;
     json[r'name'] = this.name;
@@ -412,6 +508,28 @@ class VideoEvent {
     json[r'connection_id'] = this.connectionId;
     json[r'me'] = this.me;
     json[r'cid'] = this.cid;
+    if (this.code != null) {
+      json[r'code'] = this.code;
+    } else {
+      json[r'code'] = null;
+    }
+    json[r'ingress_stream_id'] = this.ingressStreamId;
+    if (this.clientIp != null) {
+      json[r'client_ip'] = this.clientIp;
+    } else {
+      json[r'client_ip'] = null;
+    }
+    if (this.clientName != null) {
+      json[r'client_name'] = this.clientName;
+    } else {
+      json[r'client_name'] = null;
+    }
+    json[r'publisher_type'] = this.publisherType;
+    if (this.version != null) {
+      json[r'version'] = this.version;
+    } else {
+      json[r'version'] = null;
+    }
     if (this.kickedByUser != null) {
       json[r'kicked_by_user'] = this.kickedByUser;
     } else {
@@ -473,6 +591,10 @@ class VideoEvent {
         user: UserResponsePrivacyFields.fromJson(json[r'user'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members']),
+        digit: mapValueOfType<String>(json, r'digit')!,
+        durationMs: mapValueOfType<int>(json, r'duration_ms')!,
+        seqNumber: mapValueOfType<int>(json, r'seq_number')!,
+        timestamp: mapDateTime(json, r'timestamp', r'')!,
         reason: mapValueOfType<String>(json, r'reason')!,
         egressId: mapValueOfType<String>(json, r'egress_id')!,
         capturedAt: mapDateTime(json, r'captured_at', r'')!,
@@ -489,6 +611,8 @@ class VideoEvent {
         userId: mapValueOfType<String>(json, r'user_id')!,
         message: mapValueOfType<String>(json, r'message')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+        recordingType:
+            VideoEventRecordingTypeEnum.fromJson(json[r'recording_type'])!,
         callRecording: CallRecording.fromJson(json[r'call_recording'])!,
         video: mapValueOfType<bool>(json, r'video')!,
         name: mapValueOfType<String>(json, r'name')!,
@@ -498,7 +622,7 @@ class VideoEvent {
             mapCastOfType<String, int>(json, r'participants_count_by_role')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
-        error: APIError.fromJson(json[r'error'])!,
+        error: mapValueOfType<String>(json, r'error')!,
         callTranscription:
             CallTranscription.fromJson(json[r'call_transcription'])!,
         rating: mapValueOfType<int>(json, r'rating')!,
@@ -514,6 +638,12 @@ class VideoEvent {
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
         cid: mapValueOfType<String>(json, r'cid')!,
+        code: mapValueOfType<String>(json, r'code'),
+        ingressStreamId: mapValueOfType<String>(json, r'ingress_stream_id')!,
+        clientIp: mapValueOfType<String>(json, r'client_ip'),
+        clientName: mapValueOfType<String>(json, r'client_name'),
+        publisherType: mapValueOfType<String>(json, r'publisher_type')!,
+        version: mapValueOfType<String>(json, r'version'),
         kickedByUser: UserResponse.fromJson(json[r'kicked_by_user']),
         permissions: json[r'permissions'] is Iterable
             ? (json[r'permissions'] as Iterable)
@@ -615,6 +745,10 @@ class VideoEvent {
     'user',
     'call',
     'members',
+    'digit',
+    'duration_ms',
+    'seq_number',
+    'timestamp',
     'reason',
     'egress_id',
     'captured_at',
@@ -628,6 +762,7 @@ class VideoEvent {
     'user_id',
     'message',
     'reaction',
+    'recording_type',
     'call_recording',
     'video',
     'name',
@@ -644,6 +779,8 @@ class VideoEvent {
     'connection_id',
     'me',
     'cid',
+    'ingress_stream_id',
+    'publisher_type',
     'permissions',
     'own_capabilities',
     'channel_id',
@@ -651,4 +788,88 @@ class VideoEvent {
     'created_by',
     'shadow',
   };
+}
+
+/// The type of recording
+class VideoEventRecordingTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const VideoEventRecordingTypeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const composite = VideoEventRecordingTypeEnum._(r'composite');
+  static const individual = VideoEventRecordingTypeEnum._(r'individual');
+  static const raw = VideoEventRecordingTypeEnum._(r'raw');
+
+  /// List of all possible values in this [enum][VideoEventRecordingTypeEnum].
+  static const values = <VideoEventRecordingTypeEnum>[
+    composite,
+    individual,
+    raw,
+  ];
+
+  static VideoEventRecordingTypeEnum? fromJson(dynamic value) =>
+      VideoEventRecordingTypeEnumTypeTransformer().decode(value);
+
+  static List<VideoEventRecordingTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <VideoEventRecordingTypeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = VideoEventRecordingTypeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [VideoEventRecordingTypeEnum] to String,
+/// and [decode] dynamic data back to [VideoEventRecordingTypeEnum].
+class VideoEventRecordingTypeEnumTypeTransformer {
+  factory VideoEventRecordingTypeEnumTypeTransformer() =>
+      _instance ??= const VideoEventRecordingTypeEnumTypeTransformer._();
+
+  const VideoEventRecordingTypeEnumTypeTransformer._();
+
+  String encode(VideoEventRecordingTypeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a VideoEventRecordingTypeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  VideoEventRecordingTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'composite':
+          return VideoEventRecordingTypeEnum.composite;
+        case r'individual':
+          return VideoEventRecordingTypeEnum.individual;
+        case r'raw':
+          return VideoEventRecordingTypeEnum.raw;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [VideoEventRecordingTypeEnumTypeTransformer] instance.
+  static VideoEventRecordingTypeEnumTypeTransformer? _instance;
 }

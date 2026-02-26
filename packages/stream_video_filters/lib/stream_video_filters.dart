@@ -19,4 +19,9 @@ class StreamVideoFilters {
       backgroundImageUrl: backgroundImageUrl,
     );
   }
+
+  Future<void> registerFullFrameBlurEffectProcessor() {
+    return StreamVideoFiltersPlatform.instance
+        .registerFullFrameBlurEffectProcessor();
+  }
 }
