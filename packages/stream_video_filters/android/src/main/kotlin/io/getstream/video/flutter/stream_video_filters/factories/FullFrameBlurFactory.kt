@@ -25,6 +25,6 @@ private class FullFrameBlurFilter : BitmapVideoFilter() {
     }
 
     companion object {
-        private const val BLUR_RADIUS = 50
+        private const val BLUR_RADIUS = 25
     }
 }
