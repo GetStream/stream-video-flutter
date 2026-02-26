@@ -1,6 +1,7 @@
 import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../webrtc/model/rtc_video_dimension.dart';
+import '../models/sfu_audio_bitrate.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
 import '../models/sfu_call_ended_reason.dart';
@@ -202,6 +203,11 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         );
       case sfu_events.SfuEvent_EventPayload.participantMigrationComplete:
         return const SfuParticipantMigrationCompleteEvent();
+      case sfu_events.SfuEvent_EventPayload.iceRestart:
+        final payload = iceRestart;
+        return SfuIceRestartEvent(
+          peerType: payload.peerType.toDomain(),
+        );
       default:
         return const SfuUnknownEvent();
     }
@@ -335,6 +341,36 @@ extension SfuCallEndedReasonExtension on sfu_models.CallEndedReason {
       default:
         return SfuCallEndedReason.unspecified;
     }
+  }
+}
+
+extension SfuAudioBitrateExtension on sfu_models.AudioBitrateProfile {
+  SfuAudioBitrateProfile toDomain() {
+    switch (this) {
+      case sfu_models
+          .AudioBitrateProfile
+          .AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED:
+        return SfuAudioBitrateProfile.voiceStandard;
+      case sfu_models
+          .AudioBitrateProfile
+          .AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY:
+        return SfuAudioBitrateProfile.voiceHighQuality;
+      case sfu_models
+          .AudioBitrateProfile
+          .AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY:
+        return SfuAudioBitrateProfile.musicHighQuality;
+      default:
+        return SfuAudioBitrateProfile.voiceStandard;
+    }
+  }
+}
+
+extension SfuAudioBitrateExtension2 on sfu_models.AudioBitrate {
+  SfuAudioBitrate toDomain() {
+    return SfuAudioBitrate(
+      profile: profile.toDomain(),
+      bitrate: bitrate,
+    );
   }
 }
 
@@ -498,6 +534,9 @@ extension on sfu_models.PublishOption {
       bitrate: bitrate,
       fps: fps,
       useSingleLayer: useSingleLayer,
+      audioBitrateProfiles: audioBitrateProfiles
+          .map((it) => it.toDomain())
+          .toList(),
     );
   }
 }

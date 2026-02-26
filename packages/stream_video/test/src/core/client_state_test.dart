@@ -59,7 +59,7 @@ void main() {
           'test-api-key',
           user: user,
           userToken: userToken,
-          options: const StreamVideoOptions(
+          options: StreamVideoOptions(
             allowMultipleActiveCalls: false,
             autoConnect: false,
           ),
@@ -180,7 +180,7 @@ void main() {
           'test-api-key',
           user: user,
           userToken: userToken,
-          options: const StreamVideoOptions(
+          options: StreamVideoOptions(
             allowMultipleActiveCalls: true,
             autoConnect: false,
           ),

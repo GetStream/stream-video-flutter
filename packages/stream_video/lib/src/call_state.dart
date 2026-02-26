@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'call/call_type.dart';
 import 'models/call_member_state.dart';
 import 'models/models.dart';
+import 'sfu/data/models/sfu_audio_bitrate.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
 /// Represents the call's state.
@@ -29,6 +30,7 @@ class CallState extends Equatable {
       isCaptioning: false,
       isBackstage: false,
       isAudioProcessing: false,
+      audioBitrateProfile: SfuAudioBitrateProfile.voiceStandard,
       settings: const CallSettings(),
       egress: const CallEgress(),
       rtmpIngress: '',
@@ -69,6 +71,7 @@ class CallState extends Equatable {
     required this.isCaptioning,
     required this.isBackstage,
     required this.isAudioProcessing,
+    required this.audioBitrateProfile,
     required this.settings,
     required this.egress,
     required this.rtmpIngress,
@@ -110,6 +113,7 @@ class CallState extends Equatable {
   final bool isCaptioning;
   final bool isBackstage;
   final bool isAudioProcessing;
+  final SfuAudioBitrateProfile audioBitrateProfile;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
   final RtcMediaDevice? audioOutputDevice;
@@ -178,6 +182,7 @@ class CallState extends Equatable {
     bool? isCaptioning,
     bool? isBackstage,
     bool? isAudioProcessing,
+    SfuAudioBitrateProfile? audioBitrateProfile,
     CallSettings? settings,
     CallEgress? egress,
     String? rtmpIngress,
@@ -216,6 +221,7 @@ class CallState extends Equatable {
       isCaptioning: isCaptioning ?? this.isCaptioning,
       isBackstage: isBackstage ?? this.isBackstage,
       isAudioProcessing: isAudioProcessing ?? this.isAudioProcessing,
+      audioBitrateProfile: audioBitrateProfile ?? this.audioBitrateProfile,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
       rtmpIngress: rtmpIngress ?? this.rtmpIngress,
@@ -291,6 +297,7 @@ class CallState extends Equatable {
     isBroadcasting,
     isBackstage,
     isAudioProcessing,
+    audioBitrateProfile,
     settings,
     egress,
     rtmpIngress,

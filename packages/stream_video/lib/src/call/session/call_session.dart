@@ -149,25 +149,6 @@ class CallSession extends Disposable {
     });
   }
 
-  Future<void> _ensureAndroidAudioConfiguration() async {
-    if (CurrentPlatform.isAndroid &&
-        _streamVideo.options.androidAudioConfiguration != null) {
-      try {
-        await rtc.Helper.setAndroidAudioConfiguration(
-          _streamVideo.options.androidAudioConfiguration!,
-        );
-        _logger.v(
-          () => '[_ensureAndroidAudioConfiguration] Configuration applied',
-        );
-      } catch (e) {
-        _logger.w(
-          () =>
-              '[_ensureAndroidAudioConfiguration] Failed to apply Android audio configuration: $e',
-        );
-      }
-    }
-  }
-
   Future<sfu_events.ReconnectDetails> getReconnectDetails(
     SfuReconnectionStrategy strategy, {
     String? migratingFromSfuId,
@@ -316,15 +297,18 @@ class CallSession extends Disposable {
 
       // Ensure WebRTC initialization completes before creating rtcManager
       await _streamVideo.webrtcInitializationCompleter.future;
-      await _ensureAndroidAudioConfiguration();
 
       if (isAnonymousUser) {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
+                streamVideo: _streamVideo,
+                stateManager: stateManager,
                 clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
+                callSessionConfig: config,
+                publishOptions: joinResponseEvent.publishOptions,
               )
               ..onSubscriberIceCandidate = _onLocalIceCandidate
               ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -343,6 +327,8 @@ class CallSession extends Disposable {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
+                streamVideo: _streamVideo,
+                stateManager: stateManager,
                 publisherId: localTrackId,
                 publishOptions: joinResponseEvent.publishOptions,
                 clientDetails: clientDetails,
@@ -473,8 +459,6 @@ class CallSession extends Disposable {
 
         stateManager.sfuPinsUpdated(event.callState.pins);
 
-        await _ensureAndroidAudioConfiguration();
-
         result = Result.success(
           (
             callState: event.callState,
@@ -490,6 +474,12 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[fastReconnect] restarting ICE');
       await rtcManager?.publisher?.pc.restartIce();
+
+      final publisher = rtcManager?.publisher;
+      if (publisher != null) {
+        _logger.v(() => '[fastReconnect] triggering publisher renegotiation');
+        await _onRenegotiationNeeded(publisher);
+      }
 
       final remoteTracks = rtcManager!.tracks.values
           .whereType<RtcRemoteTrack>()
@@ -620,6 +610,8 @@ class CallSession extends Disposable {
       } else if (event is SfuChangePublishOptionsEvent) {
         _tracer.trace('PublishOptionsChanged', event.toJson());
         await _onPublishOptionsChanged(event);
+      } else if (event is SfuIceRestartEvent) {
+        await _onIceRestart(event);
       } else if (event is SfuGoAwayEvent) {
         _tracer.trace('GoAway', event.toJson());
       } else if (event is SfuErrorEvent) {
@@ -706,11 +698,6 @@ class CallSession extends Disposable {
 
     // Only start remote tracks. Local tracks are started by the user.
     if (track is! RtcRemoteTrack) return;
-
-    if (track.isAudioTrack) {
-      await _ensureAndroidAudioConfiguration();
-    }
-
     await track.start();
   }
 
@@ -767,6 +754,13 @@ class CallSession extends Disposable {
   }
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
+    if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
+      _logger.w(
+        () => '[onSubscriberOffer] rejected (session is disconnecting)',
+      );
+      return;
+    }
+
     final offerSdp = event.sdp;
     _logger.v(() => '[onSubscriberOffer] event: $event');
 
@@ -784,6 +778,42 @@ class CallSession extends Disposable {
       ),
     );
     _logger.v(() => '[onSubscriberOffer] result: $result');
+  }
+
+  Future<void> _onIceRestart(SfuIceRestartEvent event) async {
+    _logger.d(() => '[onIceRestart] event: $event');
+
+    final peerType = event.peerType;
+
+    if (peerType == StreamPeerType.publisher) {
+      final publisher = rtcManager?.publisher;
+      if (publisher == null) {
+        _logger.w(() => '[onIceRestart] publisher peer connection is null');
+        return;
+      }
+
+      _logger.i(() => '[onIceRestart] restarting ICE for publisher');
+      final result = await publisher.restartIce();
+      _logger.d(() => '[onIceRestart] publisher ICE restart result: $result');
+
+      // After marking ICE restart, explicitly trigger renegotiation to create
+      // a new offer with fresh ICE credentials and send it to the SFU.
+      // pc.restartIce() only sets a flag; we must create and send the offer.
+      _logger.i(() => '[onIceRestart] triggering publisher renegotiation');
+      await _onRenegotiationNeeded(publisher);
+    } else if (peerType == StreamPeerType.subscriber) {
+      final subscriber = rtcManager?.subscriber;
+      if (subscriber == null) {
+        _logger.w(() => '[onIceRestart] subscriber peer connection is null');
+        return;
+      }
+
+      _logger.i(() => '[onIceRestart] restarting ICE for subscriber');
+      final result = await subscriber.restartIce();
+      _logger.d(() => '[onIceRestart] subscriber ICE restart result: $result');
+    } else {
+      _logger.w(() => '[onIceRestart] unknown peer type: $peerType');
+    }
   }
 
   void _onLocalTrackMuted(RtcLocalTrack track, bool muted) {
@@ -863,17 +893,21 @@ class CallSession extends Disposable {
     _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 
-  Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
+  Future<Result<void>> _onRenegotiationNeeded(StreamPeerConnection pc) async {
     if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(() => '[negotiate] call is disconnected');
-      return;
+      return Result.error('Call is disconnected');
     }
 
     await _negotiationLock.synchronized(() async {
       _logger.d(() => '[negotiate] type: ${pc.type}');
 
       final offer = await pc.createOffer();
-      if (offer is! Success<rtc.RTCSessionDescription>) return;
+      if (offer is! Success<rtc.RTCSessionDescription>) {
+        return Result<void>.error(
+          'Failed to create offer: ${offer.getErrorOrNull()}',
+        );
+      }
 
       final sdp = offer.data.sdp;
       final tracksInfo = await rtcManager?.getAnnouncedTracks(sdp: sdp) ?? [];
@@ -882,31 +916,40 @@ class CallSession extends Disposable {
         _logger.w(
           () => '[negotiate] rejected(tracksInfo is empty): $tracksInfo',
         );
-        return;
+        return pc.rollbackLocalDescription();
       }
 
       _logger.v(() => '[negotiate] announcing tracks: $tracksInfo');
 
-      final pubResult = await sfuClient.setPublisher(
-        sfu.SetPublisherRequest(
-          sdp: sdp,
-          sessionId: sessionId,
-          tracks: tracksInfo.toDTO(),
-        ),
-      );
+      try {
+        final pubResult = await sfuClient.setPublisher(
+          sfu.SetPublisherRequest(
+            sdp: sdp,
+            sessionId: sessionId,
+            tracks: tracksInfo.toDTO(),
+          ),
+        );
 
-      if (pubResult is! Success<sfu.SetPublisherResponse>) {
-        _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
-        return;
-      }
-
-      if (pubResult.data.hasSdp()) {
-        final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
-        if (ansResult is! Success<void>) {
-          _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
+        if (pubResult is! Success<sfu.SetPublisherResponse>) {
+          _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
+          return pc.rollbackLocalDescription();
         }
+
+        if (pubResult.data.hasSdp()) {
+          final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
+          if (ansResult is! Success<void>) {
+            _logger.w(
+              () => '[negotiate] #setRemoteAnswer; failed: $ansResult',
+            );
+          }
+        }
+      } catch (e, stk) {
+        _logger.e(() => '[negotiate] failed: $e\n$stk');
+        return pc.rollbackLocalDescription();
       }
     });
+
+    return const Result.success(null);
   }
 
   Future<void> _onRemoteTrackReceived(
@@ -914,10 +957,6 @@ class CallSession extends Disposable {
     RtcRemoteTrack remoteTrack,
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
-
-    if (remoteTrack.isAudioTrack) {
-      await _ensureAndroidAudioConfiguration();
-    }
 
     // Start the track.
     await remoteTrack.start();
@@ -973,11 +1012,6 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setAudioOutputDevice(device: device);
-
-    if (result.isSuccess && CurrentPlatform.isAndroid) {
-      await _ensureAndroidAudioConfiguration();
-    }
-
     return result;
   }
 
@@ -1118,6 +1152,9 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
         mid: info.mid,
         publishOptionId: info.publishOptionId,
         codec: info.codec?.toDTO(),
+        dtx: info.dtx,
+        stereo: info.stereo,
+        red: info.red,
         layers: info.layers?.map((layer) {
           return sfu_models.VideoLayer(
             rid: layer.rid,

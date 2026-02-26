@@ -2,6 +2,7 @@ import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
+import 'sfu_audio_bitrate.dart';
 import 'sfu_client_capability.dart';
 import 'sfu_codec.dart';
 import 'sfu_publish_options.dart';
@@ -89,6 +90,34 @@ extension SfuCodecMapper on SfuCodec {
   }
 }
 
+extension SfuAudioBitrateProfileMapper on SfuAudioBitrateProfile {
+  sfu_models.AudioBitrateProfile toDTO() {
+    switch (this) {
+      case SfuAudioBitrateProfile.voiceStandard:
+        return sfu_models
+            .AudioBitrateProfile
+            .AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED;
+      case SfuAudioBitrateProfile.voiceHighQuality:
+        return sfu_models
+            .AudioBitrateProfile
+            .AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY;
+      case SfuAudioBitrateProfile.musicHighQuality:
+        return sfu_models
+            .AudioBitrateProfile
+            .AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY;
+    }
+  }
+}
+
+extension SfuAudioBitrateMapper on SfuAudioBitrate {
+  sfu_models.AudioBitrate toDTO() {
+    return sfu_models.AudioBitrate(
+      profile: profile.toDTO(),
+      bitrate: bitrate,
+    );
+  }
+}
+
 extension SfuPublishOptionsMapper on SfuPublishOptions {
   sfu_models.PublishOption toDTO() {
     return sfu_models.PublishOption(
@@ -103,6 +132,10 @@ extension SfuPublishOptionsMapper on SfuPublishOptions {
         width: videoDimension?.width,
         height: videoDimension?.height,
       ),
+      useSingleLayer: useSingleLayer,
+      audioBitrateProfiles: audioBitrateProfiles
+          ?.map((it) => it.toDTO())
+          .toList(),
     );
   }
 }
