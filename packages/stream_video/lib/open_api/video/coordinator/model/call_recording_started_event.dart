@@ -16,6 +16,7 @@ class CallRecordingStartedEvent {
     required this.callCid,
     required this.createdAt,
     required this.egressId,
+    required this.recordingType,
     this.type = 'call.recording_started',
   });
 
@@ -24,6 +25,9 @@ class CallRecordingStartedEvent {
   DateTime createdAt;
 
   String egressId;
+
+  /// The type of recording
+  CallRecordingStartedEventRecordingTypeEnum recordingType;
 
   /// The type of event: \"call.recording_started\" in this case
   String type;
@@ -35,6 +39,7 @@ class CallRecordingStartedEvent {
           other.callCid == callCid &&
           other.createdAt == createdAt &&
           other.egressId == egressId &&
+          other.recordingType == recordingType &&
           other.type == type;
 
   @override
@@ -43,17 +48,19 @@ class CallRecordingStartedEvent {
       (callCid.hashCode) +
       (createdAt.hashCode) +
       (egressId.hashCode) +
+      (recordingType.hashCode) +
       (type.hashCode);
 
   @override
   String toString() =>
-      'CallRecordingStartedEvent[callCid=$callCid, createdAt=$createdAt, egressId=$egressId, type=$type]';
+      'CallRecordingStartedEvent[callCid=$callCid, createdAt=$createdAt, egressId=$egressId, recordingType=$recordingType, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call_cid'] = this.callCid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     json[r'egress_id'] = this.egressId;
+    json[r'recording_type'] = this.recordingType;
     json[r'type'] = this.type;
     return json;
   }
@@ -82,6 +89,8 @@ class CallRecordingStartedEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         egressId: mapValueOfType<String>(json, r'egress_id')!,
+        recordingType: CallRecordingStartedEventRecordingTypeEnum.fromJson(
+            json[r'recording_type'])!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -142,6 +151,95 @@ class CallRecordingStartedEvent {
     'call_cid',
     'created_at',
     'egress_id',
+    'recording_type',
     'type',
   };
+}
+
+/// The type of recording
+class CallRecordingStartedEventRecordingTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const CallRecordingStartedEventRecordingTypeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const composite =
+      CallRecordingStartedEventRecordingTypeEnum._(r'composite');
+  static const individual =
+      CallRecordingStartedEventRecordingTypeEnum._(r'individual');
+  static const raw = CallRecordingStartedEventRecordingTypeEnum._(r'raw');
+
+  /// List of all possible values in this [enum][CallRecordingStartedEventRecordingTypeEnum].
+  static const values = <CallRecordingStartedEventRecordingTypeEnum>[
+    composite,
+    individual,
+    raw,
+  ];
+
+  static CallRecordingStartedEventRecordingTypeEnum? fromJson(dynamic value) =>
+      CallRecordingStartedEventRecordingTypeEnumTypeTransformer().decode(value);
+
+  static List<CallRecordingStartedEventRecordingTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <CallRecordingStartedEventRecordingTypeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = CallRecordingStartedEventRecordingTypeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [CallRecordingStartedEventRecordingTypeEnum] to String,
+/// and [decode] dynamic data back to [CallRecordingStartedEventRecordingTypeEnum].
+class CallRecordingStartedEventRecordingTypeEnumTypeTransformer {
+  factory CallRecordingStartedEventRecordingTypeEnumTypeTransformer() =>
+      _instance ??=
+          const CallRecordingStartedEventRecordingTypeEnumTypeTransformer._();
+
+  const CallRecordingStartedEventRecordingTypeEnumTypeTransformer._();
+
+  String encode(CallRecordingStartedEventRecordingTypeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a CallRecordingStartedEventRecordingTypeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  CallRecordingStartedEventRecordingTypeEnum? decode(dynamic data,
+      {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'composite':
+          return CallRecordingStartedEventRecordingTypeEnum.composite;
+        case r'individual':
+          return CallRecordingStartedEventRecordingTypeEnum.individual;
+        case r'raw':
+          return CallRecordingStartedEventRecordingTypeEnum.raw;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [CallRecordingStartedEventRecordingTypeEnumTypeTransformer] instance.
+  static CallRecordingStartedEventRecordingTypeEnumTypeTransformer? _instance;
 }

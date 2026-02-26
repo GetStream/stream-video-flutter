@@ -156,6 +156,7 @@ abstract class CoordinatorClient {
   /// Starts recording for the call described by the given [callCid].
   Future<Result<None>> startRecording(
     StreamCallCid callCid, {
+    RecordingType recordingType = RecordingType.composite,
     String? recordingExternalStorage,
   });
 
@@ -165,7 +166,10 @@ abstract class CoordinatorClient {
   );
 
   /// Stops recording for the call described by the given [callCid].
-  Future<Result<None>> stopRecording(StreamCallCid callCid);
+  Future<Result<None>> stopRecording(
+    StreamCallCid callCid, {
+    RecordingType recordingType = RecordingType.composite,
+  });
 
   /// Starts transcription for the call described by the given [callCid].
   Future<Result<None>> startTranscription(
@@ -252,12 +256,26 @@ abstract class CoordinatorClient {
     required StreamCallCid callCid,
     bool? startHls,
     bool? startRecording,
+    bool? startCompositeRecording,
+    bool? startIndividualRecording,
+    bool? startRawRecording,
     bool? startTranscription,
     bool? startClosedCaption,
+    String? recordingStorageName,
     String? transcriptionStorageName,
   });
 
-  Future<Result<CallMetadata>> stopLive(StreamCallCid callCid);
+  Future<Result<CallMetadata>> stopLive(
+    StreamCallCid callCid, {
+    bool? continueClosedCaption,
+    bool? continueCompositeRecording,
+    bool? continueHls,
+    bool? continueIndividualRecording,
+    bool? continueRawRecording,
+    bool? continueRecording,
+    bool? continueRtmpBroadcasts,
+    bool? continueTranscription,
+  });
 
   Future<Result<None>> muteUsers({
     required StreamCallCid callCid,
@@ -284,6 +302,8 @@ abstract class CoordinatorClient {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
   });
 

@@ -682,6 +682,7 @@ void main() {
           CoordinatorCallRecordingStartedEvent(
             callCid: setup.call.callCid,
             createdAt: DateTime.now(),
+            recordingType: RecordingType.composite,
           ),
         );
 
@@ -701,6 +702,7 @@ void main() {
           CoordinatorCallRecordingStartedEvent(
             callCid: setup.call.callCid,
             createdAt: DateTime.now(),
+            recordingType: RecordingType.composite,
           ),
         );
         await Future<void>.delayed(Duration.zero);
@@ -711,6 +713,7 @@ void main() {
           CoordinatorCallRecordingStoppedEvent(
             callCid: setup.call.callCid,
             createdAt: DateTime.now(),
+            recordingType: RecordingType.composite,
           ),
         );
 
@@ -730,6 +733,7 @@ void main() {
           CoordinatorCallRecordingStartedEvent(
             callCid: setup.call.callCid,
             createdAt: DateTime.now(),
+            recordingType: RecordingType.composite,
           ),
         );
         await Future<void>.delayed(Duration.zero);
@@ -740,6 +744,7 @@ void main() {
           CoordinatorCallRecordingFailedEvent(
             callCid: setup.call.callCid,
             createdAt: DateTime.now(),
+            recordingType: RecordingType.composite,
           ),
         );
 

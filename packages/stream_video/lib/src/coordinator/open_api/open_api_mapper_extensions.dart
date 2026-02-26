@@ -4,6 +4,7 @@ import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_ringing_data.dart';
+import '../../models/call_settings.dart';
 import '../models/coordinator_events.dart';
 import 'event/event_type.dart';
 import 'event/open_api_event.dart';
@@ -169,6 +170,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallRecordingStartedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
+          recordingType: RecordingType.fromString(event.recordingType.value),
         );
       case EventType.callRecordingStopped:
         final event = callRecordingStopped!;
@@ -176,6 +178,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallRecordingStoppedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
+          recordingType: RecordingType.fromString(event.recordingType.value),
         );
       case EventType.callRecordingFailed:
         final event = callRecordingFailed!;
@@ -183,6 +186,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallRecordingFailedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
+          recordingType: RecordingType.fromString(event.recordingType.value),
         );
       case EventType.callBroadcastingStarted:
         final event = callBroadcastingStarted!;
@@ -396,9 +400,27 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           url: event.callRecording.url,
           endTime: event.callRecording.endTime,
           filename: event.callRecording.filename,
+          recordingType: RecordingType.fromString(event.recordingType.value),
           sessionId: event.callRecording.sessionId,
           startTime: event.callRecording.startTime,
           egressId: event.egressId,
+        );
+      case EventType.callModerationBlur:
+        final event = callModerationBlur!;
+        return CoordinatorCallModerationBlurEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          userId: event.userId,
+          custom: event.custom,
+        );
+      case EventType.callModerationWarning:
+        final event = callModerationWarning!;
+        return CoordinatorCallModerationWarningEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          userId: event.userId,
+          message: event.message,
+          custom: event.custom,
         );
       case EventType.custom:
         final event = custom!;

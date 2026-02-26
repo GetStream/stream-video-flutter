@@ -18,8 +18,10 @@ class CallSettingsRequest {
     this.broadcasting,
     this.frameRecording,
     this.geofencing,
+    this.individualRecording,
     this.ingress,
     this.limits,
+    this.rawRecording,
     this.recording,
     this.ring,
     this.screensharing,
@@ -75,6 +77,14 @@ class CallSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  IndividualRecordingSettingsRequest? individualRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   IngressSettingsRequest? ingress;
 
   ///
@@ -84,6 +94,14 @@ class CallSettingsRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   LimitsSettingsRequest? limits;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  RawRecordingSettingsRequest? rawRecording;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -150,8 +168,10 @@ class CallSettingsRequest {
           other.broadcasting == broadcasting &&
           other.frameRecording == frameRecording &&
           other.geofencing == geofencing &&
+          other.individualRecording == individualRecording &&
           other.ingress == ingress &&
           other.limits == limits &&
+          other.rawRecording == rawRecording &&
           other.recording == recording &&
           other.ring == ring &&
           other.screensharing == screensharing &&
@@ -168,8 +188,10 @@ class CallSettingsRequest {
       (broadcasting == null ? 0 : broadcasting!.hashCode) +
       (frameRecording == null ? 0 : frameRecording!.hashCode) +
       (geofencing == null ? 0 : geofencing!.hashCode) +
+      (individualRecording == null ? 0 : individualRecording!.hashCode) +
       (ingress == null ? 0 : ingress!.hashCode) +
       (limits == null ? 0 : limits!.hashCode) +
+      (rawRecording == null ? 0 : rawRecording!.hashCode) +
       (recording == null ? 0 : recording!.hashCode) +
       (ring == null ? 0 : ring!.hashCode) +
       (screensharing == null ? 0 : screensharing!.hashCode) +
@@ -180,7 +202,7 @@ class CallSettingsRequest {
 
   @override
   String toString() =>
-      'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, ingress=$ingress, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+      'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, individualRecording=$individualRecording, ingress=$ingress, limits=$limits, rawRecording=$rawRecording, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -209,6 +231,11 @@ class CallSettingsRequest {
     } else {
       json[r'geofencing'] = null;
     }
+    if (this.individualRecording != null) {
+      json[r'individual_recording'] = this.individualRecording;
+    } else {
+      json[r'individual_recording'] = null;
+    }
     if (this.ingress != null) {
       json[r'ingress'] = this.ingress;
     } else {
@@ -218,6 +245,11 @@ class CallSettingsRequest {
       json[r'limits'] = this.limits;
     } else {
       json[r'limits'] = null;
+    }
+    if (this.rawRecording != null) {
+      json[r'raw_recording'] = this.rawRecording;
+    } else {
+      json[r'raw_recording'] = null;
     }
     if (this.recording != null) {
       json[r'recording'] = this.recording;
@@ -284,8 +316,12 @@ class CallSettingsRequest {
         frameRecording:
             FrameRecordingSettingsRequest.fromJson(json[r'frame_recording']),
         geofencing: GeofenceSettingsRequest.fromJson(json[r'geofencing']),
+        individualRecording: IndividualRecordingSettingsRequest.fromJson(
+            json[r'individual_recording']),
         ingress: IngressSettingsRequest.fromJson(json[r'ingress']),
         limits: LimitsSettingsRequest.fromJson(json[r'limits']),
+        rawRecording:
+            RawRecordingSettingsRequest.fromJson(json[r'raw_recording']),
         recording: RecordSettingsRequest.fromJson(json[r'recording']),
         ring: RingSettingsRequest.fromJson(json[r'ring']),
         screensharing:

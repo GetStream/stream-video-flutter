@@ -7,6 +7,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_ringing_data.dart';
 import '../../models/call_session_data.dart';
+import '../../models/call_settings.dart';
 
 /// Represents the events coming in from the socket.
 @immutable
@@ -335,16 +336,19 @@ class CoordinatorCallRecordingStartedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRecordingStartedEvent({
     required this.callCid,
     required this.createdAt,
+    required this.recordingType,
   });
 
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
+  final RecordingType recordingType;
 
   @override
   List<Object?> get props => [
     ...super.props,
     createdAt,
+    recordingType,
   ];
 }
 
@@ -352,16 +356,19 @@ class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRecordingStoppedEvent({
     required this.callCid,
     required this.createdAt,
+    required this.recordingType,
   });
 
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
+  final RecordingType recordingType;
 
   @override
   List<Object?> get props => [
     ...super.props,
     createdAt,
+    recordingType,
   ];
 }
 
@@ -369,16 +376,19 @@ class CoordinatorCallRecordingFailedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRecordingFailedEvent({
     required this.callCid,
     required this.createdAt,
+    required this.recordingType,
   });
 
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
+  final RecordingType recordingType;
 
   @override
   List<Object?> get props => [
     ...super.props,
     createdAt,
+    recordingType,
   ];
 }
 
@@ -1085,6 +1095,7 @@ class CoordinatorCallRecordingReadyEvent extends CoordinatorCallEvent {
     required this.egressId,
     required this.endTime,
     required this.filename,
+    required this.recordingType,
     required this.sessionId,
     required this.startTime,
     required this.url,
@@ -1096,6 +1107,7 @@ class CoordinatorCallRecordingReadyEvent extends CoordinatorCallEvent {
   final String egressId;
   final DateTime endTime;
   final String filename;
+  final RecordingType recordingType;
   final String sessionId;
   final DateTime startTime;
   final String url;
@@ -1107,9 +1119,59 @@ class CoordinatorCallRecordingReadyEvent extends CoordinatorCallEvent {
     egressId,
     endTime,
     filename,
+    recordingType,
     sessionId,
     startTime,
     url,
+  ];
+}
+
+class CoordinatorCallModerationBlurEvent extends CoordinatorCallEvent {
+  const CoordinatorCallModerationBlurEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.userId,
+    this.custom = const {},
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String userId;
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    userId,
+    custom,
+  ];
+}
+
+class CoordinatorCallModerationWarningEvent extends CoordinatorCallEvent {
+  const CoordinatorCallModerationWarningEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.userId,
+    required this.message,
+    this.custom = const {},
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String userId;
+  final String message;
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    userId,
+    message,
+    custom,
   ];
 }
 

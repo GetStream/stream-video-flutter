@@ -48,6 +48,8 @@ enum EventType {
   callFrameRecordingStopped('call.frame_recording_stopped'),
   callFrameRecordingFailed('call.frame_recording_failed'),
   callFrameRecordingReady('call.frame_recording_ready'),
+  callModerationBlur('call.moderation_blur'),
+  callModerationWarning('call.moderation_warning'),
   custom('custom'),
   unknown('unknown');
 

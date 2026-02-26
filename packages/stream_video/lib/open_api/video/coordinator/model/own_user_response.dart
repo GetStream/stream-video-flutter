@@ -108,7 +108,7 @@ class OwnUserResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PushPreferences? pushPreferences;
+  PushPreferencesResponse? pushPreferences;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -278,7 +278,8 @@ class OwnUserResponse {
         lastActive: mapDateTime(json, r'last_active', r''),
         name: mapValueOfType<String>(json, r'name'),
         privacySettings: mapValueOfType<Object>(json, r'privacy_settings'),
-        pushPreferences: PushPreferences.fromJson(json[r'push_preferences']),
+        pushPreferences:
+            PushPreferencesResponse.fromJson(json[r'push_preferences']),
         revokeTokensIssuedBefore:
             mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,

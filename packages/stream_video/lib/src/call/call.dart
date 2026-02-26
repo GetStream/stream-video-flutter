@@ -1247,6 +1247,8 @@ class Call {
   /// - [broadcasting]: Broadcasting settings for the call.
   /// - [session]: Session settings for the call.
   /// - [frameRecording]: Frame recording settings for the call.
+  /// - [individualRecording]: Individual recording settings for the call.
+  /// - [rawRecording]: Raw recording settings for the call.
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
     DateTime? startsAt,
@@ -1262,6 +1264,8 @@ class Call {
     StreamBroadcastingSettings? broadcasting,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
   }) {
     return _coordinatorClient.updateCall(
@@ -1280,6 +1284,8 @@ class Call {
       broadcasting: broadcasting,
       session: session,
       frameRecording: frameRecording,
+      individualRecording: individualRecording,
+      rawRecording: rawRecording,
       ingress: ingress,
     );
   }
@@ -2394,6 +2400,8 @@ class Call {
   /// - [broadcasting]: Broadcasting settings for the call.
   /// - [session]: Session settings for the call.
   /// - [frameRecording]: Frame recording settings for the call.
+  /// - [individualRecording]: Individual recording settings for the call.
+  /// - [rawRecording]: Raw recording settings for the call.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     List<MemberRequest> members = const [],
@@ -2417,6 +2425,8 @@ class Call {
     StreamSessionSettings? session,
     StreamIngressSettings? ingress,
     StreamFrameRecordingSettings? frameRecording,
+    StreamIndividualRecordingSettings? individualRecording,
+    StreamRawRecordingSettings? rawRecording,
     Map<String, Object> custom = const {},
   }) async {
     final settingsOverride = CallSettingsRequest(
@@ -2433,6 +2443,8 @@ class Call {
       session: session?.toOpenDto(),
       ingress: ingress?.toOpenDto(),
       frameRecording: frameRecording?.toOpenDto(),
+      individualRecording: individualRecording?.toOpenDto(),
+      rawRecording: rawRecording?.toOpenDto(),
     );
 
     final aggregatedMembers = [
@@ -2532,9 +2544,11 @@ class Call {
   }
 
   Future<Result<None>> startRecording({
+    RecordingType recordingType = RecordingType.composite,
     String? recordingExternalStorage,
   }) async {
     final result = await _permissionsManager.startRecording(
+      recordingType: recordingType,
       recordingExternalStorage: recordingExternalStorage,
     );
 
@@ -2549,8 +2563,12 @@ class Call {
     return _permissionsManager.listRecordings();
   }
 
-  Future<Result<None>> stopRecording() async {
-    final result = await _permissionsManager.stopRecording();
+  Future<Result<None>> stopRecording({
+    RecordingType recordingType = RecordingType.composite,
+  }) async {
+    final result = await _permissionsManager.stopRecording(
+      recordingType: recordingType,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallRecording(isRecording: false);
@@ -3236,16 +3254,24 @@ class Call {
   Future<Result<CallMetadata>> goLive({
     bool? startHls,
     bool? startRecording,
+    bool? startCompositeRecording,
+    bool? startIndividualRecording,
+    bool? startRawRecording,
     bool? startTranscription,
     bool? startClosedCaption,
+    String? recordingStorageName,
     String? transcriptionStorageName,
   }) async {
     final result = await _coordinatorClient.goLive(
       callCid: callCid,
       startHls: startHls,
       startRecording: startRecording,
+      startCompositeRecording: startCompositeRecording,
+      startIndividualRecording: startIndividualRecording,
+      startRawRecording: startRawRecording,
       startTranscription: startTranscription,
       startClosedCaption: startClosedCaption,
+      recordingStorageName: recordingStorageName,
       transcriptionStorageName: transcriptionStorageName,
     );
 
@@ -3257,8 +3283,27 @@ class Call {
   }
 
   /// Stops the livestreaming of the call.
-  Future<Result<CallMetadata>> stopLive() async {
-    final result = await _coordinatorClient.stopLive(callCid);
+  Future<Result<CallMetadata>> stopLive({
+    bool? continueClosedCaption,
+    bool? continueCompositeRecording,
+    bool? continueHls,
+    bool? continueIndividualRecording,
+    bool? continueRawRecording,
+    bool? continueRecording,
+    bool? continueRtmpBroadcasts,
+    bool? continueTranscription,
+  }) async {
+    final result = await _coordinatorClient.stopLive(
+      callCid,
+      continueClosedCaption: continueClosedCaption,
+      continueCompositeRecording: continueCompositeRecording,
+      continueHls: continueHls,
+      continueIndividualRecording: continueIndividualRecording,
+      continueRawRecording: continueRawRecording,
+      continueRecording: continueRecording,
+      continueRtmpBroadcasts: continueRtmpBroadcasts,
+      continueTranscription: continueTranscription,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallLive(isLive: false);

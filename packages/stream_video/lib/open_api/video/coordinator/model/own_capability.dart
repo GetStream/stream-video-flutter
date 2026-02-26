@@ -48,6 +48,9 @@ class OwnCapability {
       OwnCapability._(r'start-closed-captions-call');
   static const startFrameRecordCall =
       OwnCapability._(r'start-frame-record-call');
+  static const startIndividualRecordCall =
+      OwnCapability._(r'start-individual-record-call');
+  static const startRawRecordCall = OwnCapability._(r'start-raw-record-call');
   static const startRecordCall = OwnCapability._(r'start-record-call');
   static const startTranscriptionCall =
       OwnCapability._(r'start-transcription-call');
@@ -55,6 +58,9 @@ class OwnCapability {
   static const stopClosedCaptionsCall =
       OwnCapability._(r'stop-closed-captions-call');
   static const stopFrameRecordCall = OwnCapability._(r'stop-frame-record-call');
+  static const stopIndividualRecordCall =
+      OwnCapability._(r'stop-individual-record-call');
+  static const stopRawRecordCall = OwnCapability._(r'stop-raw-record-call');
   static const stopRecordCall = OwnCapability._(r'stop-record-call');
   static const stopTranscriptionCall =
       OwnCapability._(r'stop-transcription-call');
@@ -87,11 +93,15 @@ class OwnCapability {
     startBroadcastCall,
     startClosedCaptionsCall,
     startFrameRecordCall,
+    startIndividualRecordCall,
+    startRawRecordCall,
     startRecordCall,
     startTranscriptionCall,
     stopBroadcastCall,
     stopClosedCaptionsCall,
     stopFrameRecordCall,
+    stopIndividualRecordCall,
+    stopRawRecordCall,
     stopRecordCall,
     stopTranscriptionCall,
     updateCall,
@@ -183,6 +193,10 @@ class OwnCapabilityTypeTransformer {
           return OwnCapability.startClosedCaptionsCall;
         case r'start-frame-record-call':
           return OwnCapability.startFrameRecordCall;
+        case r'start-individual-record-call':
+          return OwnCapability.startIndividualRecordCall;
+        case r'start-raw-record-call':
+          return OwnCapability.startRawRecordCall;
         case r'start-record-call':
           return OwnCapability.startRecordCall;
         case r'start-transcription-call':
@@ -193,6 +207,10 @@ class OwnCapabilityTypeTransformer {
           return OwnCapability.stopClosedCaptionsCall;
         case r'stop-frame-record-call':
           return OwnCapability.stopFrameRecordCall;
+        case r'stop-individual-record-call':
+          return OwnCapability.stopIndividualRecordCall;
+        case r'stop-raw-record-call':
+          return OwnCapability.stopRawRecordCall;
         case r'stop-record-call':
           return OwnCapability.stopRecordCall;
         case r'stop-transcription-call':

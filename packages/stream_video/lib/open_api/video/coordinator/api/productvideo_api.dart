@@ -2765,17 +2765,21 @@ class ProductvideoApi {
   ///
   /// * [String] id (required):
   ///
+  /// * [String] recordingType (required):
+  ///
   /// * [StartRecordingRequest] startRecordingRequest (required):
   ///   StartRecordingRequest
   Future<Response> startRecordingWithHttpInfo(
     String type,
     String id,
+    String recordingType,
     StartRecordingRequest startRecordingRequest,
   ) async {
     // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/start_recording'
+    final path = r'/video/call/{type}/{id}/recordings/{recording_type}/start'
         .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
+        .replaceAll('{id}', id)
+        .replaceAll('{recording_type}', recordingType);
 
     // ignore: prefer_final_locals
     Object? postBody = startRecordingRequest;
@@ -2807,16 +2811,20 @@ class ProductvideoApi {
   ///
   /// * [String] id (required):
   ///
+  /// * [String] recordingType (required):
+  ///
   /// * [StartRecordingRequest] startRecordingRequest (required):
   ///   StartRecordingRequest
   Future<StartRecordingResponse?> startRecording(
     String type,
     String id,
+    String recordingType,
     StartRecordingRequest startRecordingRequest,
   ) async {
     final response = await startRecordingWithHttpInfo(
       type,
       id,
+      recordingType,
       startRecordingRequest,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
@@ -3397,23 +3405,30 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
+  ///
+  /// * [String] recordingType (required):
+  ///
+  /// * [Object] body (required):
   Future<Response> stopRecordingWithHttpInfo(
     String type,
     String id,
+    String recordingType,
+    Object body,
   ) async {
     // ignore: prefer_const_declarations
-    final path = r'/video/call/{type}/{id}/stop_recording'
+    final path = r'/video/call/{type}/{id}/recordings/{recording_type}/stop'
         .replaceAll('{type}', type)
-        .replaceAll('{id}', id);
+        .replaceAll('{id}', id)
+        .replaceAll('{recording_type}', recordingType);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = body;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
     return apiClient.invokeAPI(
       path,
@@ -3435,13 +3450,21 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
+  ///
+  /// * [String] recordingType (required):
+  ///
+  /// * [Object] body (required):
   Future<StopRecordingResponse?> stopRecording(
     String type,
     String id,
+    String recordingType,
+    Object body,
   ) async {
     final response = await stopRecordingWithHttpInfo(
       type,
       id,
+      recordingType,
+      body,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
