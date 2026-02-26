@@ -76,7 +76,7 @@ class SdpEditorImpl implements SdpEditor {
 
     _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
-    applyRules(sdp.type, lines);
+    applyRules(sdp.type, lines, sdp: sdp);
 
     if (policy.mungingEnabled) {
       policy.munging(sdp.type, lines);
@@ -89,8 +89,9 @@ class SdpEditorImpl implements SdpEditor {
 
   void applyRules(
     SdpType sdpType,
-    List<SdpLine> lines,
-  ) {
+    List<SdpLine> lines, {
+    Sdp? sdp,
+  }) {
     for (final toggle in internalRules) {
       _logger.d(() => '[edit] rule: $toggle');
       if (!toggle.enabled) {
@@ -106,7 +107,7 @@ class SdpEditorImpl implements SdpEditor {
         _logger.w(() => '[edit] rejected (mismatched sdpType): $sdpType');
         continue;
       }
-      _actionFactory.create(rule).execute(lines);
+      _actionFactory.create(rule, sdp: sdp).execute(lines);
     }
   }
 }
@@ -126,7 +127,7 @@ extension on StringBuffer {
 List<SdpRuleToggle> _createRules() {
   return <SdpRuleToggle>[
     SdpRuleToggle(
-      enabled: true,
+      enabled: false,
       rule: const SdpMungingRule.prioritizeCodec(
         platforms: [PlatformType.android],
         types: [SdpType.localOffer],
@@ -135,14 +136,20 @@ List<SdpRuleToggle> _createRules() {
     ),
     SdpRuleToggle(
       rule: const SdpMungingRule.setOpusDtxEnabled(
-        enabled: true,
+        enabled: false,
         types: [SdpType.localOffer],
       ),
     ),
     SdpRuleToggle(
       rule: const SdpMungingRule.setOpusRedEnabled(
-        enabled: true,
+        enabled: false,
         types: [SdpType.localOffer],
+      ),
+    ),
+    SdpRuleToggle(
+      enabled: true,
+      rule: const SdpMungingRule.mirrorSpropStereo(
+        types: [SdpType.localAnswer],
       ),
     ),
   ];

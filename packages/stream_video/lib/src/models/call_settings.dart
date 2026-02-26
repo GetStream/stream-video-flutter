@@ -99,14 +99,22 @@ class StreamAudioSettings extends MediaSettings {
     this.micDefaultOn = true,
     this.speakerDefaultOn = true,
     this.noiseCancellation,
+    this.hifiAudioEnabled = false,
   });
 
+  /// When true, the call will optimize bandwidth usage by disabling audio when participants are not speaking via discontinuous transmission (DTX).
   final bool opusDtxEnabled;
+
+  /// When true, the call will send additional audio streams to ensure calls are more resistant to poor network conditions.
   final bool redundantCodingEnabled;
+
   final AudioSettingsRequestDefaultDeviceEnum defaultDevice;
   final bool micDefaultOn;
   final bool speakerDefaultOn;
   final StreamNoiceCancellingSettings? noiseCancellation;
+
+  /// When true, the call will use high-fidelity audio for better audio quality.
+  final bool hifiAudioEnabled;
 
   @override
   List<Object?> get props => [
@@ -117,6 +125,7 @@ class StreamAudioSettings extends MediaSettings {
     micDefaultOn,
     speakerDefaultOn,
     noiseCancellation,
+    hifiAudioEnabled,
   ];
 
   AudioSettingsRequest toOpenDto() {
@@ -128,6 +137,7 @@ class StreamAudioSettings extends MediaSettings {
       micDefaultOn: micDefaultOn,
       speakerDefaultOn: speakerDefaultOn,
       noiseCancellation: noiseCancellation?.toOpenDto(),
+      hifiAudioEnabled: hifiAudioEnabled,
     );
   }
 }
