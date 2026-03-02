@@ -1,8 +1,4 @@
-## Upcoming
-
-### 🐞 Fixed
-* Added handling for SFU `iceRestart` event — the client now correctly performs ICE restart and renegotiation when instructed by the SFU, improving fast reconnect reliability.
-* Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
+## 1.3.0
 
 ### ✅ Added
 * Added video moderation support by providing `VideoModerationConfig` in `CallPreferences`. Check [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-moderation/) for more details.
@@ -21,6 +17,10 @@ See the [documentation](https://getstream.io/video/docs/flutter/guides/camera-an
 
 ### ⚠️ Deprecated
 * Deprecated `androidAudioConfiguration` in `StreamVideoOptions`. Use `audioConfigurationPolicy` instead.
+
+### 🐞 Fixed
+* Added handling for SFU `iceRestart` event — the client now correctly performs ICE restart and renegotiation when instructed by the SFU, improving fast reconnect reliability.
+* Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
 
 ## 1.2.4
 
