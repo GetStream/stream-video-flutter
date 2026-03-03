@@ -1476,9 +1476,17 @@ class Call {
           callParticipants.first.userId == _streamVideo.currentUser.id &&
           state.value.isRingingFlow &&
           _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
-        await end(
+        final endResult = await end(
           reason: 'last participant left the call (ringing flow)',
         );
+
+        if (endResult.isFailure) {
+          _logger.w(
+            () =>
+                '[onSfuEvent] auto-end failed while alone in ringing flow: $endResult',
+          );
+          await leave(reason: DisconnectReason.lastParticipantLeft());
+        }
       }
     } else if (sfuEvent is SfuHealthCheckResponseEvent) {
       _stateManager.setParticipantsCount(
