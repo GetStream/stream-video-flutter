@@ -791,7 +791,7 @@ class Call {
   }
 
   /// Ends the call for all participants.
-  Future<Result<None>> end() async {
+  Future<Result<None>> end({String? reason}) async {
     final state = this.state.value;
     _logger.d(() => '[end] status: ${state.status}');
 
@@ -800,7 +800,7 @@ class Call {
       return Result.error('invalid status: ${state.status}');
     }
 
-    _session?.leave(reason: 'user is ending the call');
+    _session?.leave(reason: reason ?? 'user is ending the call');
     await _clear('end');
 
     final result = await _permissionsManager.endCall();
@@ -1476,7 +1476,17 @@ class Call {
           callParticipants.first.userId == _streamVideo.currentUser.id &&
           state.value.isRingingFlow &&
           _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
-        await leave(reason: DisconnectReason.lastParticipantLeft());
+        final endResult = await end(
+          reason: 'last participant left the call (ringing flow)',
+        );
+
+        if (endResult.isFailure) {
+          _logger.w(
+            () =>
+                '[onSfuEvent] auto-end failed while alone in ringing flow: $endResult',
+          );
+          await leave(reason: DisconnectReason.lastParticipantLeft());
+        }
       }
     } else if (sfuEvent is SfuHealthCheckResponseEvent) {
       _stateManager.setParticipantsCount(

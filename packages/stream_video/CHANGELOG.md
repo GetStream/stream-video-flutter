@@ -1,5 +1,10 @@
 ## 1.3.0
 
+### 🐞 Fixed
+* Added handling for SFU `iceRestart` event — the client now correctly performs ICE restart and renegotiation when instructed by the SFU, improving fast reconnect reliability.
+* Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
+* When `dropIfAloneInRingingFlow` is set to true in `CallPreferences` the call will now end when the last participant leave the call.
+
 ### ✅ Added
 * Added video moderation support by providing `VideoModerationConfig` in `CallPreferences`. Check [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-moderation/) for more details.
 * Added HiFi audio mode for high-fidelity scenarios such as live music, podcasts, and professional streaming. Use `SfuAudioBitrateProfile` to select an audio quality profile before joining a call:
