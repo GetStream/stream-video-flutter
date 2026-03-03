@@ -21,6 +21,7 @@ See the [documentation](https://getstream.io/video/docs/flutter/guides/camera-an
 ### 🐞 Fixed
 * Added handling for SFU `iceRestart` event — the client now correctly performs ICE restart and renegotiation when instructed by the SFU, improving fast reconnect reliability.
 * Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
+* When `dropIfAloneInRingingFlow` is set to true in `CallPreferences` the call will now end when the last participant leave the call.
 
 ## 1.2.4
 
