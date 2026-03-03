@@ -1,3 +1,28 @@
+## 1.3.0
+
+### ✅ Added
+* Added video moderation support by providing `VideoModerationConfig` in `CallPreferences`. Check [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/call-moderation/) for more details.
+* Added HiFi audio mode for high-fidelity scenarios such as live music, podcasts, and professional streaming. Use `SfuAudioBitrateProfile` to select an audio quality profile before joining a call:
+  * `SfuAudioBitrateProfile.voiceStandard` – Standard voice (64 kbps, default)
+  * `SfuAudioBitrateProfile.voiceHighQuality` – High-quality voice (128 kbps)
+  * `SfuAudioBitrateProfile.musicHighQuality` – HiFi music mode (128 kbps, audio processing disabled)
+* Added stereo playout (iOS and Android) and capture (Android only) support with new `audioConfigurationPolicy` in `StreamVideoOptions`. Includes predefined policies:
+  * `AudioConfigurationPolicy.broadcaster()` – Mono playout with voice processing enabled (default)
+  * `AudioConfigurationPolicy.viewer()` – Stereo playout with voice processing disabled, ideal for passive listeners
+  * `AudioConfigurationPolicy.hiFi()` – Stereo capture and playout with voice processing disabled, ideal for hosts streaming high-fidelity audio
+  * `AudioConfigurationPolicy.custom()` – Full control over platform-specific audio settings with optional `basePolicy` fallback
+* Added `RtcMediaDeviceNotifier.reinitializeAudioConfiguration()` to switch audio configuration policy at runtime (must be called before starting a call).
+
+See the [documentation](https://getstream.io/video/docs/flutter/guides/camera-and-microphone/high-fidelity-audio/) for details.
+
+### ⚠️ Deprecated
+* Deprecated `androidAudioConfiguration` in `StreamVideoOptions`. Use `audioConfigurationPolicy` instead.
+
+### 🐞 Fixed
+* Added handling for SFU `iceRestart` event — the client now correctly performs ICE restart and renegotiation when instructed by the SFU, improving fast reconnect reliability.
+* Added PeerConnection SDP rollback on failed remote answer to prevent the publisher from getting stuck in an inconsistent signaling state.
+* When `dropIfAloneInRingingFlow` is set to true in `CallPreferences` the call will now end when the last participant leaves the call.
+
 ## 1.2.4
 
 ### 🐞 Fixed
