@@ -844,7 +844,7 @@ class Call {
         timeLimit: _stateManager.callState.preferences.connectTimeout,
       );
 
-      if (status is! CallStatusConnected) {
+      if (status.status is! CallStatusConnected) {
         return const Result.success(none);
       } else {
         _logger.e(() => '[join] original "connect" failed');
