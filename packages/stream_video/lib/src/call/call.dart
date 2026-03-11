@@ -837,18 +837,28 @@ class Call {
     }
 
     if (state.value.status is CallStatusConnecting) {
-      _logger.v(() => '[join] await "connecting" change');
+      _logger.v(() => '[join] await ongoing connect to resolve');
 
-      final status = await state.firstWhere(
-        (it) => it.status is CallStatusConnected,
-        timeLimit: _stateManager.callState.preferences.connectTimeout,
-      );
+      try {
+        final currentState = await state.firstWhere(
+          (it) => it.status is! CallStatusConnecting,
+          timeLimit: _stateManager.callState.preferences.connectTimeout,
+        );
 
-      if (status.status is! CallStatusConnected) {
-        return const Result.success(none);
-      } else {
-        _logger.e(() => '[join] original "connect" failed');
-        return Result.error('original "connect" failed');
+        if (currentState.status is CallStatusConnected) {
+          _logger.v(() => '[join] ongoing connect succeeded');
+          return const Result.success(none);
+        } else {
+          _logger.e(
+            () => '[join] ongoing connect failed: ${currentState.status}',
+          );
+          return Result.error(
+            'ongoing connect failed: ${currentState.status}',
+          );
+        }
+      } on TimeoutException {
+        _logger.e(() => '[join] timed out waiting for ongoing connect');
+        return Result.error('timed out waiting for ongoing connect');
       }
     }
 
