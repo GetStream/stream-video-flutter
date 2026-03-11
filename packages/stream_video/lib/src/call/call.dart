@@ -836,16 +836,20 @@ class Call {
       return Result.error('a call with the same cid is in progress');
     }
 
-    if (state.value.status is CallStatusConnecting) {
+    if (state.value.status is CallStatusConnecting ||
+        state.value.status is CallStatusJoining) {
       _logger.v(() => '[join] await ongoing connect to resolve');
 
       try {
         final currentState = await state.firstWhere(
-          (it) => it.status is! CallStatusConnecting,
+          (it) =>
+              it.status is! CallStatusConnecting &&
+              it.status is! CallStatusJoining,
           timeLimit: _stateManager.callState.preferences.connectTimeout,
         );
 
-        if (currentState.status is CallStatusConnected) {
+        if (currentState.status is CallStatusConnected ||
+            currentState.status is CallStatusJoined) {
           _logger.v(() => '[join] ongoing connect succeeded');
           return const Result.success(none);
         } else {
