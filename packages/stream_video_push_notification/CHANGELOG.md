@@ -1,4 +1,4 @@
-## Upcoming
+## 1.3.1
 
 ### 🐞 Fixed
 * [iOS] Fixed race condition where push notification events could be lost if the Flutter EventChannel listener wasn't registered yet.
