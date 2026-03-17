@@ -213,6 +213,7 @@ MockCoordinatorClient setupMockCoordinatorClient({
       callCid: any(named: 'callCid'),
       create: any(named: 'create'),
       migratingFrom: any(named: 'migratingFrom'),
+      migratingFromList: any(named: 'migratingFromList'),
       video: any(named: 'video'),
       membersLimit: any(named: 'membersLimit'),
     ),

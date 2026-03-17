@@ -49,6 +49,11 @@ enum SfuErrorCode {
   sfuShuttingDown,
   sfuFull;
 
+  bool get isJoinErrorCode =>
+      this == SfuErrorCode.sfuFull ||
+      this == SfuErrorCode.sfuShuttingDown ||
+      this == SfuErrorCode.callParticipantLimitReached;
+
   @override
   String toString() => name;
 }

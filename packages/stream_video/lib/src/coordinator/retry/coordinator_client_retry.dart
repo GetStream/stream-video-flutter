@@ -274,6 +274,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     bool? ringing,
     bool? create,
     String? migratingFrom,
+    List<String> migratingFromList = const [],
     bool? video,
     int? membersLimit,
   }) {
@@ -283,6 +284,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         ringing: ringing,
         create: create,
         migratingFrom: migratingFrom,
+        migratingFromList: migratingFromList,
         video: video,
       ),
       (error, nextAttemptDelay) async {

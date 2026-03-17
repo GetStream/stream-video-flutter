@@ -1282,6 +1282,7 @@ Future<String?> _setClientDetails() async {
 
     sfu_models.Device? device;
     sfu_models.Browser? browser;
+    String? webrtcVersion;
 
     var os = sfu_models.OS(name: CurrentPlatform.name);
 
@@ -1295,6 +1296,7 @@ Future<String?> _setClientDetails() async {
       device = sfu_models.Device(
         name: '${deviceInfo.manufacturer} : ${deviceInfo.model}',
       );
+      webrtcVersion = androidWebRTCVersion;
     } else if (CurrentPlatform.isIos) {
       final deviceInfo = await DeviceInfoPlugin().iosInfo;
       os = sfu_models.OS(
@@ -1302,6 +1304,7 @@ Future<String?> _setClientDetails() async {
         version: deviceInfo.systemVersion,
       );
       device = sfu_models.Device(name: deviceInfo.utsname.machine);
+      webrtcVersion = iosWebRTCVersion;
     } else if (CurrentPlatform.isMacOS) {
       final deviceInfo = await DeviceInfoPlugin().macOsInfo;
       os = sfu_models.OS(
@@ -1347,6 +1350,7 @@ Future<String?> _setClientDetails() async {
       os: os,
       device: device,
       browser: browser,
+      webrtcVersion: webrtcVersion,
     );
 
     final deviceName = (device?.name != null && device!.name.isNotEmpty)
