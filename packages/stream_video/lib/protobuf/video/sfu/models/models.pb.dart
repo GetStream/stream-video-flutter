@@ -1477,12 +1477,14 @@ class ClientDetails extends $pb.GeneratedMessage {
     OS? os,
     Browser? browser,
     Device? device,
+    $core.String? webrtcVersion,
   }) {
     final result = create();
     if (sdk != null) result.sdk = sdk;
     if (os != null) result.os = os;
     if (browser != null) result.browser = browser;
     if (device != null) result.device = device;
+    if (webrtcVersion != null) result.webrtcVersion = webrtcVersion;
     return result;
   }
 
@@ -1505,6 +1507,7 @@ class ClientDetails extends $pb.GeneratedMessage {
     ..aOM<Browser>(3, _omitFieldNames ? '' : 'browser',
         subBuilder: Browser.create)
     ..aOM<Device>(4, _omitFieldNames ? '' : 'device', subBuilder: Device.create)
+    ..aOS(5, _omitFieldNames ? '' : 'webrtcVersion')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1569,6 +1572,15 @@ class ClientDetails extends $pb.GeneratedMessage {
   void clearDevice() => $_clearField(4);
   @$pb.TagNumber(4)
   Device ensureDevice() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.String get webrtcVersion => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set webrtcVersion($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasWebrtcVersion() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearWebrtcVersion() => $_clearField(5);
 }
 
 class Sdk extends $pb.GeneratedMessage {

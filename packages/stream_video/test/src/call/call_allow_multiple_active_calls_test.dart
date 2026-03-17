@@ -58,6 +58,7 @@ void main() {
           ringing: any(named: 'ringing'),
           create: any(named: 'create'),
           migratingFrom: any(named: 'migratingFrom'),
+          migratingFromList: any(named: 'migratingFromList'),
           video: any(named: 'video'),
           membersLimit: any(named: 'membersLimit'),
         ),

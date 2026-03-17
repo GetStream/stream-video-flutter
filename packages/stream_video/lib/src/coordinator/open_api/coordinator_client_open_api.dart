@@ -514,6 +514,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? ringing,
     bool? create,
     String? migratingFrom,
+    List<String> migratingFromList = const [],
     bool? video,
     int? membersLimit,
   }) async {
@@ -540,6 +541,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           location: location,
           membersLimit: membersLimit,
           migratingFrom: migratingFrom,
+          migratingFromList: migratingFromList,
           video: video,
         ),
       );
