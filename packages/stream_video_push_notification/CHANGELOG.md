@@ -1,3 +1,8 @@
+## Upcoming
+
+### 🐞 Fixed
+* [iOS] Fixed race condition where push notification events could be lost if the Flutter EventChannel listener wasn't registered yet.
+
 ## 1.3.0
 * Sync version with `stream_video_flutter` 1.3.0
 
