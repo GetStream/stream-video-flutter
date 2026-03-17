@@ -937,6 +937,9 @@ class Call {
               _logger.e(
                 () => '[join] unrecoverable SFU error, not retrying',
               );
+              await leave(
+                reason: DisconnectReason.failure(error),
+              );
               return result;
             }
 
