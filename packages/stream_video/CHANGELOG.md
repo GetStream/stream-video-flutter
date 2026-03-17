@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+* Fixed race condition in `Call.join` when another connect is already in progress, with proper timeout handling.
+* Fixed `consumeAndAcceptActiveCall` to ensure the coordinator WS is connected before consuming incoming calls during cold start.
+
 ## 1.3.0
 
 ### 🐞 Fixed

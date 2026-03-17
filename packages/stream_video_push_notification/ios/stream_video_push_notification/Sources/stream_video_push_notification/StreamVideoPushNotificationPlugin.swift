@@ -92,6 +92,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
 public class EventCallbackHandler: NSObject, FlutterStreamHandler {
     private var eventSink: FlutterEventSink?
+    private var pendingEvents: [[String: Any]] = []
 
     public func send(_ event: String, _ body: Any) {
         let data: [String: Any] = [
@@ -100,7 +101,12 @@ public class EventCallbackHandler: NSObject, FlutterStreamHandler {
         ]
 
         DispatchQueue.main.async { [weak self] in
-            self?.eventSink?(data)
+            guard let self = self else { return }
+            if let eventSink = self.eventSink {
+                eventSink(data)
+            } else {
+                self.pendingEvents.append(data)
+            }
         }
     }
 
@@ -110,6 +116,10 @@ public class EventCallbackHandler: NSObject, FlutterStreamHandler {
         -> FlutterError?
     {
         self.eventSink = events
+        for event in pendingEvents {
+            events(event)
+        }
+        pendingEvents.removeAll()
         return nil
     }
 
