@@ -1,3 +1,8 @@
+## Upcoming
+
+### 🐞 Fixed
+* Improved SFU join, recovery and migration logic to reduce failed joins with reconnec loops when joining full or shutting down SFU 
+
 ## 1.3.0
 
 ### 🐞 Fixed
