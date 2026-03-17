@@ -498,14 +498,6 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
-    if (CurrentPlatform.isIos) {
-      try {
-        await RtcMediaDeviceNotifier.instance.pauseAudioPlayout();
-      } catch (e) {
-        _logger.w(() => '[dispose] pauseAudioPlayout failed: $e');
-      }
-    }
-
     await Future.wait([
       if (publisher != null)
         publisher!.dispose().catchError((Object e, StackTrace stk) {
@@ -725,24 +717,26 @@ extension PublisherRtcManager on RtcManager {
     required RtcLocalAudioTrack track,
     bool stopTrackOnMute = true,
   }) async {
+    var audioTrack = track;
+
     // Add publisherId to the trackIdPrefix if it's a local track.
-    if (track.trackIdPrefix == kLocalTrackIdPrefix) {
-      track = track.copyWith(trackIdPrefix: publisherId);
+    if (audioTrack.trackIdPrefix == kLocalTrackIdPrefix) {
+      audioTrack = audioTrack.copyWith(trackIdPrefix: publisherId);
     }
 
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
-    _logger.i(() => '[publishAudioTrack] track: $track');
-    tracks[track.trackId] = track;
-    var updatedTrack = track.copyWith(stopTrackOnMute: stopTrackOnMute);
+    _logger.i(() => '[publishAudioTrack] track: $audioTrack');
+    tracks[audioTrack.trackId] = audioTrack;
+    var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
 
     for (final option in publishOptions) {
-      if (option.trackType != track.trackType) continue;
+      if (option.trackType != audioTrack.trackType) continue;
 
       // Create a clone of the track so each transceiver has a unique trackId
       // in the SDP, matching the JS SDK pattern.
-      final mediaTrackClone = await track.mediaTrack.clone();
-      final trackToPublish = track.copyWith(mediaTrack: mediaTrackClone);
+      final mediaTrackClone = await audioTrack.mediaTrack.clone();
+      final trackToPublish = audioTrack.copyWith(mediaTrack: mediaTrackClone);
 
       final cachedTransceiver = transceiversManager.get(option)?.transceiver;
       if (cachedTransceiver == null) {
@@ -768,7 +762,7 @@ extension PublisherRtcManager on RtcManager {
         await _updateTransceiver(
           cachedTransceiver,
           trackToPublish,
-          track.trackType,
+          audioTrack.trackType,
           trackPublishOptions: publishOptions,
         );
         await previousTrack?.stop();
@@ -800,37 +794,39 @@ extension PublisherRtcManager on RtcManager {
     required RtcLocalVideoTrack track,
     bool stopTrackOnMute = true,
   }) async {
+    var videoTrack = track;
+
     // Add publisherId to the trackIdPrefix if it's a local track.
-    if (track.trackIdPrefix == kLocalTrackIdPrefix) {
-      track = track.copyWith(trackIdPrefix: publisherId);
+    if (videoTrack.trackIdPrefix == kLocalTrackIdPrefix) {
+      videoTrack = videoTrack.copyWith(trackIdPrefix: publisherId);
     }
 
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
-    _logger.i(() => '[publishVideoTrack] track: $track');
-    tracks[track.trackId] = track;
-    var updatedTrack = track.copyWith(
-      videoDimension: _getTrackDimension(track),
+    _logger.i(() => '[publishVideoTrack] track: $videoTrack');
+    tracks[videoTrack.trackId] = videoTrack;
+    var updatedTrack = videoTrack.copyWith(
+      videoDimension: _getTrackDimension(videoTrack),
       stopTrackOnMute: stopTrackOnMute,
     );
 
-    if (!publishOptions.any((o) => o.trackType == track.trackType)) {
+    if (!publishOptions.any((o) => o.trackType == videoTrack.trackType)) {
       _logger.w(
         () =>
-            '[publishVideoTrack] No publish options found for track type: ${track.trackType}',
+            '[publishVideoTrack] No publish options found for track type: ${videoTrack.trackType}',
       );
       return Result.error(
-        'No publish options found for track type: ${track.trackType}',
+        'No publish options found for track type: ${videoTrack.trackType}',
       );
     }
 
     for (final option in publishOptions) {
-      if (option.trackType != track.trackType) continue;
+      if (option.trackType != videoTrack.trackType) continue;
 
       // Create a clone of the track so each transceiver has a unique trackId
       // in the SDP, matching the JS SDK pattern.
-      final mediaTrackClone = await track.mediaTrack.clone();
-      final trackToPublish = track.copyWith(mediaTrack: mediaTrackClone);
+      final mediaTrackClone = await videoTrack.mediaTrack.clone();
+      final trackToPublish = videoTrack.copyWith(mediaTrack: mediaTrackClone);
 
       final cachedTransceiver = transceiversManager.get(option)?.transceiver;
       if (cachedTransceiver == null) {
@@ -853,7 +849,7 @@ extension PublisherRtcManager on RtcManager {
         await _updateTransceiver(
           cachedTransceiver,
           trackToPublish,
-          track.trackType,
+          videoTrack.trackType,
         );
         await previousTrack?.stop();
 

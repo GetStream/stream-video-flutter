@@ -87,6 +87,7 @@ abstract class CoordinatorClient {
     bool? ringing,
     bool? create,
     String? migratingFrom,
+    List<String> migratingFromList = const [],
     bool? video,
     int? membersLimit,
   });

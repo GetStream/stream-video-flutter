@@ -283,6 +283,10 @@ class SdkType extends $pb.ProtobufEnum {
       SdkType._(8, _omitEnumNames ? '' : 'SDK_TYPE_GO');
   static const SdkType SDK_TYPE_PLAIN_JAVASCRIPT =
       SdkType._(9, _omitEnumNames ? '' : 'SDK_TYPE_PLAIN_JAVASCRIPT');
+  static const SdkType SDK_TYPE_PYTHON =
+      SdkType._(10, _omitEnumNames ? '' : 'SDK_TYPE_PYTHON');
+  static const SdkType SDK_TYPE_VISION_AGENTS =
+      SdkType._(11, _omitEnumNames ? '' : 'SDK_TYPE_VISION_AGENTS');
 
   static const $core.List<SdkType> values = <SdkType>[
     SDK_TYPE_UNSPECIFIED,
@@ -295,10 +299,12 @@ class SdkType extends $pb.ProtobufEnum {
     SDK_TYPE_UNITY,
     SDK_TYPE_GO,
     SDK_TYPE_PLAIN_JAVASCRIPT,
+    SDK_TYPE_PYTHON,
+    SDK_TYPE_VISION_AGENTS,
   ];
 
   static final $core.List<SdkType?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 9);
+      $pb.ProtobufEnum.$_initByValueList(values, 11);
   static SdkType? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
