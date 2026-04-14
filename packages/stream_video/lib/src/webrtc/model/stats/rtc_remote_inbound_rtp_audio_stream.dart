@@ -45,13 +45,13 @@ class RtcRemoteInboundRtpAudioStream extends RtcRemoteInboundRtp {
         kind: value['kind'],
         outboundId: value['localId'],
         codecId: value['codecId'],
-        ssrc: value['ssrc'],
+        ssrc: (value['ssrc'] as num?)?.toInt(),
         jitter: value['jitter'],
-        roundTripTimeMeasurements: value['roundTripTimeMeasurements'],
+        roundTripTimeMeasurements: (value['roundTripTimeMeasurements'] as num?)?.toInt(),
         roundTripTime: value['roundTripTime'],
         totalRoundTripTime: value['totalRoundTripTime'],
         fractionLost: value['fractionLost'],
-        packetsLost: value['packetsLost'],
+        packetsLost: (value['packetsLost'] as num?)?.toInt(),
       );
     }
     return null;

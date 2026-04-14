@@ -1640,10 +1640,10 @@ extension on RtcLocalTrack<VideoConstraints> {
         final settings = mediaTrack.getSettings();
         streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
         if (settings['width'] is int) {
-          dimension = dimension.copyWith(width: settings['width'] as int);
+          dimension = dimension.copyWith(width: (settings['width'] as num).toInt());
         }
         if (settings['height'] is int) {
-          dimension = dimension.copyWith(height: settings['height'] as int);
+          dimension = dimension.copyWith(height: (settings['height'] as num).toInt());
         }
       } catch (_) {
         streamLog.w(
