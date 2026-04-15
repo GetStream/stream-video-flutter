@@ -1,3 +1,8 @@
+## Upcoming
+
+### 🐞 Fixed
+* Fixed `consumeAndAcceptActiveCall` auto-accepting incoming calls on Android when the user opens the app without pressing the Accept button on the notification. The method now only consumes calls that the user explicitly accepted.
+
 ## 1.3.1
 
 ### 🐞 Fixed

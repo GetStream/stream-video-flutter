@@ -548,6 +548,7 @@ CallData _callDataFromJson(Map<String, dynamic> json) {
     callerName: json['callerName'] as String?,
     hasVideo: json['type'] == 1,
     extraData: extraData,
+    isAccepted: json['isAccepted'] as bool? ?? false,
   );
 }
 

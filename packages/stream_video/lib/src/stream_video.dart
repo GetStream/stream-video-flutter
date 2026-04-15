@@ -752,7 +752,10 @@ class StreamVideo extends Disposable {
     void Function(Call)? onCallAccepted,
     CallPreferences? callPreferences,
   }) async {
-    final calls = await pushNotificationManager?.activeCalls();
+    final allCalls = await pushNotificationManager?.activeCalls();
+    
+    // Only consume calls that the user explicitly accepted via the native notification UI.
+    final calls = allCalls?.where((c) => c.isAccepted).toList();
     if (calls == null || calls.isEmpty) return false;
 
     // Ensure the coordinator WS is connected before proceeding.
