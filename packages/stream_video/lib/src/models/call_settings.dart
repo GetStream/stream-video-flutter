@@ -517,10 +517,7 @@ class StreamHlsSettings extends AbstractSettings {
     // ignore: deprecated_member_use_from_same_package
     if (qualityTracks.isNotEmpty) {
       // ignore: deprecated_member_use_from_same_package
-      return qualityTracks
-          .map(StreamVideoQuality.fromAlias)
-          .nonNulls
-          .toList();
+      return qualityTracks.map(StreamVideoQuality.fromAlias).nonNulls.toList();
     }
     return const [];
   }

@@ -128,8 +128,9 @@ Map<String, List<List<double>>> _mapListListDoubleFromJson(dynamic json) {
       final value = entry.value;
       if (value is List) {
         map[key] = value
-            .map<List<double>>((inner) =>
-                (inner as List).map<double>((e) => (e as num).toDouble()).toList())
+            .map<List<double>>((inner) => (inner as List)
+                .map<double>((e) => (e as num).toDouble())
+                .toList())
             .toList();
       }
     }
