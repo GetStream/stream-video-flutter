@@ -56,12 +56,14 @@ class UnpinRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UnpinRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UnpinRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'session_id'),
+            'Required key "UnpinRequest[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "UnpinRequest[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'user_id'),
+            'Required key "UnpinRequest[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "UnpinRequest[user_id]" has a null value in JSON.');
         return true;
       }());
 

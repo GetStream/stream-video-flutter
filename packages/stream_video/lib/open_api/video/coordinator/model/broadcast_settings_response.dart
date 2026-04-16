@@ -60,12 +60,18 @@ class BroadcastSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "BroadcastSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "BroadcastSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'enabled'),
+            'Required key "BroadcastSettingsResponse[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "BroadcastSettingsResponse[enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'hls'),
+            'Required key "BroadcastSettingsResponse[hls]" is missing from JSON.');
+        assert(json[r'hls'] != null,
+            'Required key "BroadcastSettingsResponse[hls]" has a null value in JSON.');
+        assert(json.containsKey(r'rtmp'),
+            'Required key "BroadcastSettingsResponse[rtmp]" is missing from JSON.');
+        assert(json[r'rtmp'] != null,
+            'Required key "BroadcastSettingsResponse[rtmp]" has a null value in JSON.');
         return true;
       }());
 

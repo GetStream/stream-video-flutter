@@ -108,12 +108,38 @@ class CallClosedCaption {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallClosedCaption[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallClosedCaption[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'end_time'),
+            'Required key "CallClosedCaption[end_time]" is missing from JSON.');
+        assert(json[r'end_time'] != null,
+            'Required key "CallClosedCaption[end_time]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "CallClosedCaption[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "CallClosedCaption[id]" has a null value in JSON.');
+        assert(json.containsKey(r'language'),
+            'Required key "CallClosedCaption[language]" is missing from JSON.');
+        assert(json[r'language'] != null,
+            'Required key "CallClosedCaption[language]" has a null value in JSON.');
+        assert(json.containsKey(r'speaker_id'),
+            'Required key "CallClosedCaption[speaker_id]" is missing from JSON.');
+        assert(json[r'speaker_id'] != null,
+            'Required key "CallClosedCaption[speaker_id]" has a null value in JSON.');
+        assert(json.containsKey(r'start_time'),
+            'Required key "CallClosedCaption[start_time]" is missing from JSON.');
+        assert(json[r'start_time'] != null,
+            'Required key "CallClosedCaption[start_time]" has a null value in JSON.');
+        assert(json.containsKey(r'text'),
+            'Required key "CallClosedCaption[text]" is missing from JSON.');
+        assert(json[r'text'] != null,
+            'Required key "CallClosedCaption[text]" has a null value in JSON.');
+        assert(json.containsKey(r'translated'),
+            'Required key "CallClosedCaption[translated]" is missing from JSON.');
+        assert(json[r'translated'] != null,
+            'Required key "CallClosedCaption[translated]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "CallClosedCaption[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "CallClosedCaption[user]" has a null value in JSON.');
         return true;
       }());
 

@@ -80,12 +80,30 @@ class CallRecording {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRecording[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRecording[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'end_time'),
+            'Required key "CallRecording[end_time]" is missing from JSON.');
+        assert(json[r'end_time'] != null,
+            'Required key "CallRecording[end_time]" has a null value in JSON.');
+        assert(json.containsKey(r'filename'),
+            'Required key "CallRecording[filename]" is missing from JSON.');
+        assert(json[r'filename'] != null,
+            'Required key "CallRecording[filename]" has a null value in JSON.');
+        assert(json.containsKey(r'recording_type'),
+            'Required key "CallRecording[recording_type]" is missing from JSON.');
+        assert(json[r'recording_type'] != null,
+            'Required key "CallRecording[recording_type]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "CallRecording[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "CallRecording[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'start_time'),
+            'Required key "CallRecording[start_time]" is missing from JSON.');
+        assert(json[r'start_time'] != null,
+            'Required key "CallRecording[start_time]" has a null value in JSON.');
+        assert(json.containsKey(r'url'),
+            'Required key "CallRecording[url]" is missing from JSON.');
+        assert(json[r'url'] != null,
+            'Required key "CallRecording[url]" has a null value in JSON.');
         return true;
       }());
 

@@ -100,12 +100,22 @@ class HealthCheckEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "HealthCheckEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "HealthCheckEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'connection_id'),
+            'Required key "HealthCheckEvent[connection_id]" is missing from JSON.');
+        assert(json[r'connection_id'] != null,
+            'Required key "HealthCheckEvent[connection_id]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "HealthCheckEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "HealthCheckEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "HealthCheckEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "HealthCheckEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "HealthCheckEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "HealthCheckEvent[type]" has a null value in JSON.');
         return true;
       }());
 

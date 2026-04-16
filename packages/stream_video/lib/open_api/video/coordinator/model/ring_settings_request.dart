@@ -84,12 +84,14 @@ class RingSettingsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RingSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RingSettingsRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'auto_cancel_timeout_ms'),
+            'Required key "RingSettingsRequest[auto_cancel_timeout_ms]" is missing from JSON.');
+        assert(json[r'auto_cancel_timeout_ms'] != null,
+            'Required key "RingSettingsRequest[auto_cancel_timeout_ms]" has a null value in JSON.');
+        assert(json.containsKey(r'incoming_call_timeout_ms'),
+            'Required key "RingSettingsRequest[incoming_call_timeout_ms]" is missing from JSON.');
+        assert(json[r'incoming_call_timeout_ms'] != null,
+            'Required key "RingSettingsRequest[incoming_call_timeout_ms]" has a null value in JSON.');
         return true;
       }());
 

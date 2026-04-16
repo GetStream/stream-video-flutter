@@ -55,12 +55,14 @@ class TrackStatsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "TrackStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "TrackStatsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration_seconds'),
+            'Required key "TrackStatsResponse[duration_seconds]" is missing from JSON.');
+        assert(json[r'duration_seconds'] != null,
+            'Required key "TrackStatsResponse[duration_seconds]" has a null value in JSON.');
+        assert(json.containsKey(r'track_type'),
+            'Required key "TrackStatsResponse[track_type]" is missing from JSON.');
+        assert(json[r'track_type'] != null,
+            'Required key "TrackStatsResponse[track_type]" has a null value in JSON.');
         return true;
       }());
 

@@ -75,12 +75,26 @@ class CallFrameRecordingStartedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallFrameRecordingStartedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallFrameRecordingStartedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallFrameRecordingStartedEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallFrameRecordingStartedEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallFrameRecordingStartedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallFrameRecordingStartedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallFrameRecordingStartedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallFrameRecordingStartedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'egress_id'),
+            'Required key "CallFrameRecordingStartedEvent[egress_id]" is missing from JSON.');
+        assert(json[r'egress_id'] != null,
+            'Required key "CallFrameRecordingStartedEvent[egress_id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallFrameRecordingStartedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallFrameRecordingStartedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

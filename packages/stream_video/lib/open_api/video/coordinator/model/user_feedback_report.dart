@@ -55,12 +55,14 @@ class UserFeedbackReport {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserFeedbackReport[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserFeedbackReport[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'count_by_rating'),
+            'Required key "UserFeedbackReport[count_by_rating]" is missing from JSON.');
+        assert(json[r'count_by_rating'] != null,
+            'Required key "UserFeedbackReport[count_by_rating]" has a null value in JSON.');
+        assert(json.containsKey(r'unreported_count'),
+            'Required key "UserFeedbackReport[unreported_count]" is missing from JSON.');
+        assert(json[r'unreported_count'] != null,
+            'Required key "UserFeedbackReport[unreported_count]" has a null value in JSON.');
         return true;
       }());
 

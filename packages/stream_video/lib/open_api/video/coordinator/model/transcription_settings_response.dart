@@ -16,6 +16,8 @@ class TranscriptionSettingsResponse {
     required this.closedCaptionMode,
     required this.language,
     required this.mode,
+    this.speechSegmentConfig,
+    this.translation,
   });
 
   TranscriptionSettingsResponseClosedCaptionModeEnum closedCaptionMode;
@@ -24,28 +26,60 @@ class TranscriptionSettingsResponse {
 
   TranscriptionSettingsResponseModeEnum mode;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  SpeechSegmentConfig? speechSegmentConfig;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  TranslationSettings? translation;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TranscriptionSettingsResponse &&
           other.closedCaptionMode == closedCaptionMode &&
           other.language == language &&
-          other.mode == mode;
+          other.mode == mode &&
+          other.speechSegmentConfig == speechSegmentConfig &&
+          other.translation == translation;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (closedCaptionMode.hashCode) + (language.hashCode) + (mode.hashCode);
+      (closedCaptionMode.hashCode) +
+      (language.hashCode) +
+      (mode.hashCode) +
+      (speechSegmentConfig == null ? 0 : speechSegmentConfig!.hashCode) +
+      (translation == null ? 0 : translation!.hashCode);
 
   @override
   String toString() =>
-      'TranscriptionSettingsResponse[closedCaptionMode=$closedCaptionMode, language=$language, mode=$mode]';
+      'TranscriptionSettingsResponse[closedCaptionMode=$closedCaptionMode, language=$language, mode=$mode, speechSegmentConfig=$speechSegmentConfig, translation=$translation]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'closed_caption_mode'] = this.closedCaptionMode;
     json[r'language'] = this.language;
     json[r'mode'] = this.mode;
+    if (this.speechSegmentConfig != null) {
+      json[r'speech_segment_config'] = this.speechSegmentConfig;
+    } else {
+      json[r'speech_segment_config'] = null;
+    }
+    if (this.translation != null) {
+      json[r'translation'] = this.translation;
+    } else {
+      json[r'translation'] = null;
+    }
     return json;
   }
 
@@ -60,12 +94,18 @@ class TranscriptionSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "TranscriptionSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "TranscriptionSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'closed_caption_mode'),
+            'Required key "TranscriptionSettingsResponse[closed_caption_mode]" is missing from JSON.');
+        assert(json[r'closed_caption_mode'] != null,
+            'Required key "TranscriptionSettingsResponse[closed_caption_mode]" has a null value in JSON.');
+        assert(json.containsKey(r'language'),
+            'Required key "TranscriptionSettingsResponse[language]" is missing from JSON.');
+        assert(json[r'language'] != null,
+            'Required key "TranscriptionSettingsResponse[language]" has a null value in JSON.');
+        assert(json.containsKey(r'mode'),
+            'Required key "TranscriptionSettingsResponse[mode]" is missing from JSON.');
+        assert(json[r'mode'] != null,
+            'Required key "TranscriptionSettingsResponse[mode]" has a null value in JSON.');
         return true;
       }());
 
@@ -73,11 +113,12 @@ class TranscriptionSettingsResponse {
         closedCaptionMode:
             TranscriptionSettingsResponseClosedCaptionModeEnum.fromJson(
                 json[r'closed_caption_mode'])!,
-        //MANUAL_EDIT: default value added since sometimes language came as an empty string
         language: TranscriptionSettingsResponseLanguageEnum.fromJson(
-                json[r'language']) ??
-            TranscriptionSettingsResponseLanguageEnum.auto,
+            json[r'language'])!,
         mode: TranscriptionSettingsResponseModeEnum.fromJson(json[r'mode'])!,
+        speechSegmentConfig:
+            SpeechSegmentConfig.fromJson(json[r'speech_segment_config']),
+        translation: TranslationSettings.fromJson(json[r'translation']),
       );
     }
     return null;

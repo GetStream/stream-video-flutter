@@ -60,12 +60,18 @@ class SFUResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SFUResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SFUResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'edge_name'),
+            'Required key "SFUResponse[edge_name]" is missing from JSON.');
+        assert(json[r'edge_name'] != null,
+            'Required key "SFUResponse[edge_name]" has a null value in JSON.');
+        assert(json.containsKey(r'url'),
+            'Required key "SFUResponse[url]" is missing from JSON.');
+        assert(json[r'url'] != null,
+            'Required key "SFUResponse[url]" has a null value in JSON.');
+        assert(json.containsKey(r'ws_endpoint'),
+            'Required key "SFUResponse[ws_endpoint]" is missing from JSON.');
+        assert(json[r'ws_endpoint'] != null,
+            'Required key "SFUResponse[ws_endpoint]" has a null value in JSON.');
         return true;
       }());
 

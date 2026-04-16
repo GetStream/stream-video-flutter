@@ -1,3 +1,12 @@
+## Upcoming
+
+### 🔄 Changed
+* Regenerated OpenAPI models to match the latest backend schema.
+* Fixed broadcasting status updates not being wired through to call state.
+
+### ⚠️ Deprecated
+* `StreamHlsSettings.qualityTracks` (`List<String>`) is deprecated — use `StreamHlsSettings.qualities` (`List<StreamVideoQuality>`) instead.
+
 ## 1.3.1
 
 ### 🐞 Fixed

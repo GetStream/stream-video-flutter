@@ -55,12 +55,14 @@ class RTMPSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RTMPSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RTMPSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'enabled'),
+            'Required key "RTMPSettingsResponse[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "RTMPSettingsResponse[enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'quality'),
+            'Required key "RTMPSettingsResponse[quality]" is missing from JSON.');
+        assert(json[r'quality'] != null,
+            'Required key "RTMPSettingsResponse[quality]" has a null value in JSON.');
         return true;
       }());
 

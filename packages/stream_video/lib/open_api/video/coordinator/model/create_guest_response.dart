@@ -62,12 +62,18 @@ class CreateGuestResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CreateGuestResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CreateGuestResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'access_token'),
+            'Required key "CreateGuestResponse[access_token]" is missing from JSON.');
+        assert(json[r'access_token'] != null,
+            'Required key "CreateGuestResponse[access_token]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "CreateGuestResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "CreateGuestResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "CreateGuestResponse[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "CreateGuestResponse[user]" has a null value in JSON.');
         return true;
       }());
 

@@ -56,12 +56,14 @@ class ListTranscriptionsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ListTranscriptionsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ListTranscriptionsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "ListTranscriptionsResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "ListTranscriptionsResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'transcriptions'),
+            'Required key "ListTranscriptionsResponse[transcriptions]" is missing from JSON.');
+        assert(json[r'transcriptions'] != null,
+            'Required key "ListTranscriptionsResponse[transcriptions]" has a null value in JSON.');
         return true;
       }());
 

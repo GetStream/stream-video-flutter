@@ -74,12 +74,26 @@ class ParticipantCountByMinuteResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ParticipantCountByMinuteResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ParticipantCountByMinuteResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'first'),
+            'Required key "ParticipantCountByMinuteResponse[first]" is missing from JSON.');
+        assert(json[r'first'] != null,
+            'Required key "ParticipantCountByMinuteResponse[first]" has a null value in JSON.');
+        assert(json.containsKey(r'last'),
+            'Required key "ParticipantCountByMinuteResponse[last]" is missing from JSON.');
+        assert(json[r'last'] != null,
+            'Required key "ParticipantCountByMinuteResponse[last]" has a null value in JSON.');
+        assert(json.containsKey(r'max'),
+            'Required key "ParticipantCountByMinuteResponse[max]" is missing from JSON.');
+        assert(json[r'max'] != null,
+            'Required key "ParticipantCountByMinuteResponse[max]" has a null value in JSON.');
+        assert(json.containsKey(r'min'),
+            'Required key "ParticipantCountByMinuteResponse[min]" is missing from JSON.');
+        assert(json[r'min'] != null,
+            'Required key "ParticipantCountByMinuteResponse[min]" has a null value in JSON.');
+        assert(json.containsKey(r'start_ts'),
+            'Required key "ParticipantCountByMinuteResponse[start_ts]" is missing from JSON.');
+        assert(json[r'start_ts'] != null,
+            'Required key "ParticipantCountByMinuteResponse[start_ts]" has a null value in JSON.');
         return true;
       }());
 

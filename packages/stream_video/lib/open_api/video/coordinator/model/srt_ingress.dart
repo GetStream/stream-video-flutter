@@ -10,41 +10,36 @@
 
 part of openapi.api;
 
-class VideoDimension {
-  /// Returns a new [VideoDimension] instance.
-  VideoDimension({
-    required this.height,
-    required this.width,
+class SRTIngress {
+  /// Returns a new [SRTIngress] instance.
+  SRTIngress({
+    required this.address,
   });
 
-  int height;
-
-  int width;
+  String address;
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoDimension && other.height == height && other.width == width;
+      identical(this, other) || other is SRTIngress && other.address == address;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (height.hashCode) + (width.hashCode);
+      (address.hashCode);
 
   @override
-  String toString() => 'VideoDimension[height=$height, width=$width]';
+  String toString() => 'SRTIngress[address=$address]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'height'] = this.height;
-    json[r'width'] = this.width;
+    json[r'address'] = this.address;
     return json;
   }
 
-  /// Returns a new [VideoDimension] instance and imports its values from
+  /// Returns a new [SRTIngress] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static VideoDimension? fromJson(dynamic value) {
+  static SRTIngress? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -52,31 +47,28 @@ class VideoDimension {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoDimension[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoDimension[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'address'),
+            'Required key "SRTIngress[address]" is missing from JSON.');
+        assert(json[r'address'] != null,
+            'Required key "SRTIngress[address]" has a null value in JSON.');
         return true;
       }());
 
-      return VideoDimension(
-        height: mapValueOfType<int>(json, r'height')!,
-        width: mapValueOfType<int>(json, r'width')!,
+      return SRTIngress(
+        address: mapValueOfType<String>(json, r'address')!,
       );
     }
     return null;
   }
 
-  static List<VideoDimension> listFromJson(
+  static List<SRTIngress> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <VideoDimension>[];
+    final result = <SRTIngress>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = VideoDimension.fromJson(row);
+        final value = SRTIngress.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -85,12 +77,12 @@ class VideoDimension {
     return result.toList(growable: growable);
   }
 
-  static Map<String, VideoDimension> mapFromJson(dynamic json) {
-    final map = <String, VideoDimension>{};
+  static Map<String, SRTIngress> mapFromJson(dynamic json) {
+    final map = <String, SRTIngress>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = VideoDimension.fromJson(entry.value);
+        final value = SRTIngress.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -99,17 +91,17 @@ class VideoDimension {
     return map;
   }
 
-  // maps a json object with a list of VideoDimension-objects as value to a dart map
-  static Map<String, List<VideoDimension>> mapListFromJson(
+  // maps a json object with a list of SRTIngress-objects as value to a dart map
+  static Map<String, List<SRTIngress>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<VideoDimension>>{};
+    final map = <String, List<SRTIngress>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = VideoDimension.listFromJson(
+        map[entry.key] = SRTIngress.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -120,7 +112,6 @@ class VideoDimension {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'height',
-    'width',
+    'address',
   };
 }

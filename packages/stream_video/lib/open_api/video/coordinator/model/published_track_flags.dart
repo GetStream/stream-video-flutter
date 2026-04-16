@@ -68,12 +68,22 @@ class PublishedTrackFlags {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PublishedTrackFlags[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PublishedTrackFlags[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'audio'),
+            'Required key "PublishedTrackFlags[audio]" is missing from JSON.');
+        assert(json[r'audio'] != null,
+            'Required key "PublishedTrackFlags[audio]" has a null value in JSON.');
+        assert(json.containsKey(r'screenshare'),
+            'Required key "PublishedTrackFlags[screenshare]" is missing from JSON.');
+        assert(json[r'screenshare'] != null,
+            'Required key "PublishedTrackFlags[screenshare]" has a null value in JSON.');
+        assert(json.containsKey(r'screenshare_audio'),
+            'Required key "PublishedTrackFlags[screenshare_audio]" is missing from JSON.');
+        assert(json[r'screenshare_audio'] != null,
+            'Required key "PublishedTrackFlags[screenshare_audio]" has a null value in JSON.');
+        assert(json.containsKey(r'video'),
+            'Required key "PublishedTrackFlags[video]" is missing from JSON.');
+        assert(json[r'video'] != null,
+            'Required key "PublishedTrackFlags[video]" has a null value in JSON.');
         return true;
       }());
 

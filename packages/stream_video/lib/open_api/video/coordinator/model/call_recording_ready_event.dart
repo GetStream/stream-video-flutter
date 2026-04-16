@@ -82,12 +82,30 @@ class CallRecordingReadyEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRecordingReadyEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRecordingReadyEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallRecordingReadyEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallRecordingReadyEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'call_recording'),
+            'Required key "CallRecordingReadyEvent[call_recording]" is missing from JSON.');
+        assert(json[r'call_recording'] != null,
+            'Required key "CallRecordingReadyEvent[call_recording]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallRecordingReadyEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallRecordingReadyEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'egress_id'),
+            'Required key "CallRecordingReadyEvent[egress_id]" is missing from JSON.');
+        assert(json[r'egress_id'] != null,
+            'Required key "CallRecordingReadyEvent[egress_id]" has a null value in JSON.');
+        assert(json.containsKey(r'recording_type'),
+            'Required key "CallRecordingReadyEvent[recording_type]" is missing from JSON.');
+        assert(json[r'recording_type'] != null,
+            'Required key "CallRecordingReadyEvent[recording_type]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallRecordingReadyEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallRecordingReadyEvent[type]" has a null value in JSON.');
         return true;
       }());
 

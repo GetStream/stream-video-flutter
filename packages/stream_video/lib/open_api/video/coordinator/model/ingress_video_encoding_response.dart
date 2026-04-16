@@ -14,27 +14,33 @@ class IngressVideoEncodingResponse {
   /// Returns a new [IngressVideoEncodingResponse] instance.
   IngressVideoEncodingResponse({
     this.layers = const [],
+    required this.source_,
   });
 
   List<IngressVideoLayerResponse> layers;
+
+  IngressSourceResponse source_;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is IngressVideoEncodingResponse &&
-          _deepEquality.equals(other.layers, layers);
+          _deepEquality.equals(other.layers, layers) &&
+          other.source_ == source_;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (layers.hashCode);
+      (layers.hashCode) + (source_.hashCode);
 
   @override
-  String toString() => 'IngressVideoEncodingResponse[layers=$layers]';
+  String toString() =>
+      'IngressVideoEncodingResponse[layers=$layers, source_=$source_]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'layers'] = this.layers;
+    json[r'source'] = this.source_;
     return json;
   }
 
@@ -49,17 +55,20 @@ class IngressVideoEncodingResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "IngressVideoEncodingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "IngressVideoEncodingResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'layers'),
+            'Required key "IngressVideoEncodingResponse[layers]" is missing from JSON.');
+        assert(json[r'layers'] != null,
+            'Required key "IngressVideoEncodingResponse[layers]" has a null value in JSON.');
+        assert(json.containsKey(r'source'),
+            'Required key "IngressVideoEncodingResponse[source]" is missing from JSON.');
+        assert(json[r'source'] != null,
+            'Required key "IngressVideoEncodingResponse[source]" has a null value in JSON.');
         return true;
       }());
 
       return IngressVideoEncodingResponse(
         layers: IngressVideoLayerResponse.listFromJson(json[r'layers']),
+        source_: IngressSourceResponse.fromJson(json[r'source'])!,
       );
     }
     return null;
@@ -117,5 +126,6 @@ class IngressVideoEncodingResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'layers',
+    'source',
   };
 }

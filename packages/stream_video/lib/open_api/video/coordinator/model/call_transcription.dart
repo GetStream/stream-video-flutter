@@ -74,12 +74,26 @@ class CallTranscription {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallTranscription[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallTranscription[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'end_time'),
+            'Required key "CallTranscription[end_time]" is missing from JSON.');
+        assert(json[r'end_time'] != null,
+            'Required key "CallTranscription[end_time]" has a null value in JSON.');
+        assert(json.containsKey(r'filename'),
+            'Required key "CallTranscription[filename]" is missing from JSON.');
+        assert(json[r'filename'] != null,
+            'Required key "CallTranscription[filename]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "CallTranscription[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "CallTranscription[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'start_time'),
+            'Required key "CallTranscription[start_time]" is missing from JSON.');
+        assert(json[r'start_time'] != null,
+            'Required key "CallTranscription[start_time]" has a null value in JSON.');
+        assert(json.containsKey(r'url'),
+            'Required key "CallTranscription[url]" is missing from JSON.');
+        assert(json[r'url'] != null,
+            'Required key "CallTranscription[url]" has a null value in JSON.');
         return true;
       }());
 

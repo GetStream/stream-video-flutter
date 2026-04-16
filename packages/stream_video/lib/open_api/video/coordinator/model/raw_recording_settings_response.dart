@@ -13,26 +13,43 @@ part of openapi.api;
 class RawRecordingSettingsResponse {
   /// Returns a new [RawRecordingSettingsResponse] instance.
   RawRecordingSettingsResponse({
+    this.audioOnly,
     required this.mode,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? audioOnly;
 
   RawRecordingSettingsResponseModeEnum mode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is RawRecordingSettingsResponse && other.mode == mode;
+      other is RawRecordingSettingsResponse &&
+          other.audioOnly == audioOnly &&
+          other.mode == mode;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (mode.hashCode);
+      (audioOnly == null ? 0 : audioOnly!.hashCode) + (mode.hashCode);
 
   @override
-  String toString() => 'RawRecordingSettingsResponse[mode=$mode]';
+  String toString() =>
+      'RawRecordingSettingsResponse[audioOnly=$audioOnly, mode=$mode]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.audioOnly != null) {
+      json[r'audio_only'] = this.audioOnly;
+    } else {
+      json[r'audio_only'] = null;
+    }
     json[r'mode'] = this.mode;
     return json;
   }
@@ -48,16 +65,15 @@ class RawRecordingSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RawRecordingSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RawRecordingSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'mode'),
+            'Required key "RawRecordingSettingsResponse[mode]" is missing from JSON.');
+        assert(json[r'mode'] != null,
+            'Required key "RawRecordingSettingsResponse[mode]" has a null value in JSON.');
         return true;
       }());
 
       return RawRecordingSettingsResponse(
+        audioOnly: mapValueOfType<bool>(json, r'audio_only'),
         mode: RawRecordingSettingsResponseModeEnum.fromJson(json[r'mode'])!,
       );
     }

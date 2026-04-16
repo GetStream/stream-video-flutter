@@ -61,12 +61,18 @@ class CallHLSBroadcastingStoppedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallHLSBroadcastingStoppedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallHLSBroadcastingStoppedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallHLSBroadcastingStoppedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallHLSBroadcastingStoppedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallHLSBroadcastingStoppedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallHLSBroadcastingStoppedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallHLSBroadcastingStoppedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallHLSBroadcastingStoppedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

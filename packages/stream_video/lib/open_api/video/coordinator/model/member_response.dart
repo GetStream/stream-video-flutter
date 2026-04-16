@@ -110,12 +110,26 @@ class MemberResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "MemberResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "MemberResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'created_at'),
+            'Required key "MemberResponse[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "MemberResponse[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "MemberResponse[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "MemberResponse[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'updated_at'),
+            'Required key "MemberResponse[updated_at]" is missing from JSON.');
+        assert(json[r'updated_at'] != null,
+            'Required key "MemberResponse[updated_at]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "MemberResponse[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "MemberResponse[user]" has a null value in JSON.');
+        assert(json.containsKey(r'user_id'),
+            'Required key "MemberResponse[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "MemberResponse[user_id]" has a null value in JSON.');
         return true;
       }());
 

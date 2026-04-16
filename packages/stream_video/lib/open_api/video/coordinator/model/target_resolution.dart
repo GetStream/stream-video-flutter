@@ -77,12 +77,14 @@ class TargetResolution {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "TargetResolution[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "TargetResolution[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'height'),
+            'Required key "TargetResolution[height]" is missing from JSON.');
+        assert(json[r'height'] != null,
+            'Required key "TargetResolution[height]" has a null value in JSON.');
+        assert(json.containsKey(r'width'),
+            'Required key "TargetResolution[width]" is missing from JSON.');
+        assert(json[r'width'] != null,
+            'Required key "TargetResolution[width]" has a null value in JSON.');
         return true;
       }());
 

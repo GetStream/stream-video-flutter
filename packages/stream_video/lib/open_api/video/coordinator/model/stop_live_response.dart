@@ -54,12 +54,14 @@ class StopLiveResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StopLiveResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StopLiveResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "StopLiveResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "StopLiveResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "StopLiveResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "StopLiveResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

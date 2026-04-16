@@ -15,9 +15,10 @@ class SortParamRequest {
   SortParamRequest({
     this.direction,
     this.field,
+    this.type,
   });
 
-  /// Direction of sorting, 1 for Ascending, -1 for Descending, default is 1
+  /// Direction of sorting, 1 for Ascending, -1 for Descending, default is 1. One of: -1, 1
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -35,21 +36,33 @@ class SortParamRequest {
   ///
   String? field;
 
+  /// Type of field to sort by. Empty string or omitted means string type (default). One of: number, boolean
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? type;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is SortParamRequest &&
           other.direction == direction &&
-          other.field == field;
+          other.field == field &&
+          other.type == type;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (direction == null ? 0 : direction!.hashCode) +
-      (field == null ? 0 : field!.hashCode);
+      (field == null ? 0 : field!.hashCode) +
+      (type == null ? 0 : type!.hashCode);
 
   @override
-  String toString() => 'SortParamRequest[direction=$direction, field=$field]';
+  String toString() =>
+      'SortParamRequest[direction=$direction, field=$field, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -62,6 +75,11 @@ class SortParamRequest {
       json[r'field'] = this.field;
     } else {
       json[r'field'] = null;
+    }
+    if (this.type != null) {
+      json[r'type'] = this.type;
+    } else {
+      json[r'type'] = null;
     }
     return json;
   }
@@ -77,18 +95,13 @@ class SortParamRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SortParamRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SortParamRequest[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
       return SortParamRequest(
         direction: mapValueOfType<int>(json, r'direction'),
         field: mapValueOfType<String>(json, r'field'),
+        type: mapValueOfType<String>(json, r'type'),
       );
     }
     return null;

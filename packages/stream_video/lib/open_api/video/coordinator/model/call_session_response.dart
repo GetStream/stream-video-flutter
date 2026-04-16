@@ -167,12 +167,34 @@ class CallSessionResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSessionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSessionResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'accepted_by'),
+            'Required key "CallSessionResponse[accepted_by]" is missing from JSON.');
+        assert(json[r'accepted_by'] != null,
+            'Required key "CallSessionResponse[accepted_by]" has a null value in JSON.');
+        assert(json.containsKey(r'anonymous_participant_count'),
+            'Required key "CallSessionResponse[anonymous_participant_count]" is missing from JSON.');
+        assert(json[r'anonymous_participant_count'] != null,
+            'Required key "CallSessionResponse[anonymous_participant_count]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "CallSessionResponse[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "CallSessionResponse[id]" has a null value in JSON.');
+        assert(json.containsKey(r'missed_by'),
+            'Required key "CallSessionResponse[missed_by]" is missing from JSON.');
+        assert(json[r'missed_by'] != null,
+            'Required key "CallSessionResponse[missed_by]" has a null value in JSON.');
+        assert(json.containsKey(r'participants'),
+            'Required key "CallSessionResponse[participants]" is missing from JSON.');
+        assert(json[r'participants'] != null,
+            'Required key "CallSessionResponse[participants]" has a null value in JSON.');
+        assert(json.containsKey(r'participants_count_by_role'),
+            'Required key "CallSessionResponse[participants_count_by_role]" is missing from JSON.');
+        assert(json[r'participants_count_by_role'] != null,
+            'Required key "CallSessionResponse[participants_count_by_role]" has a null value in JSON.');
+        assert(json.containsKey(r'rejected_by'),
+            'Required key "CallSessionResponse[rejected_by]" is missing from JSON.');
+        assert(json[r'rejected_by'] != null,
+            'Required key "CallSessionResponse[rejected_by]" has a null value in JSON.');
         return true;
       }());
 

@@ -14,16 +14,15 @@ class UserDeactivatedEvent {
   /// Returns a new [UserDeactivatedEvent] instance.
   UserDeactivatedEvent({
     required this.createdAt,
-    required this.createdBy,
+    this.createdBy,
+    this.custom = const {},
+    this.receivedAt,
     this.type = 'user.deactivated',
-    this.user,
+    required this.user,
   });
 
+  /// Date/time of creation
   DateTime createdAt;
-
-  User createdBy;
-
-  String type;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -31,7 +30,22 @@ class UserDeactivatedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  User? user;
+  UserResponseCommonFields? createdBy;
+
+  Map<String, Object> custom;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? receivedAt;
+
+  /// The type of event: \"user.deactivated\" in this case
+  String type;
+
+  UserResponseCommonFields user;
 
   @override
   bool operator ==(Object other) =>
@@ -39,6 +53,8 @@ class UserDeactivatedEvent {
       other is UserDeactivatedEvent &&
           other.createdAt == createdAt &&
           other.createdBy == createdBy &&
+          _deepEquality.equals(other.custom, custom) &&
+          other.receivedAt == receivedAt &&
           other.type == type &&
           other.user == user;
 
@@ -46,24 +62,32 @@ class UserDeactivatedEvent {
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (createdAt.hashCode) +
-      (createdBy.hashCode) +
+      (createdBy == null ? 0 : createdBy!.hashCode) +
+      (custom.hashCode) +
+      (receivedAt == null ? 0 : receivedAt!.hashCode) +
       (type.hashCode) +
-      (user == null ? 0 : user!.hashCode);
+      (user.hashCode);
 
   @override
   String toString() =>
-      'UserDeactivatedEvent[createdAt=$createdAt, createdBy=$createdBy, type=$type, user=$user]';
+      'UserDeactivatedEvent[createdAt=$createdAt, createdBy=$createdBy, custom=$custom, receivedAt=$receivedAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'created_by'] = this.createdBy;
-    json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
+    if (this.createdBy != null) {
+      json[r'created_by'] = this.createdBy;
     } else {
-      json[r'user'] = null;
+      json[r'created_by'] = null;
     }
+    json[r'custom'] = this.custom;
+    if (this.receivedAt != null) {
+      json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'received_at'] = null;
+    }
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -78,20 +102,32 @@ class UserDeactivatedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserDeactivatedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserDeactivatedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'created_at'),
+            'Required key "UserDeactivatedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "UserDeactivatedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "UserDeactivatedEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "UserDeactivatedEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "UserDeactivatedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "UserDeactivatedEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "UserDeactivatedEvent[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "UserDeactivatedEvent[user]" has a null value in JSON.');
         return true;
       }());
 
       return UserDeactivatedEvent(
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: User.fromJson(json[r'created_by'])!,
+        createdBy: UserResponseCommonFields.fromJson(json[r'created_by']),
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        receivedAt: mapDateTime(json, r'received_at', r''),
         type: mapValueOfType<String>(json, r'type')!,
-        user: User.fromJson(json[r'user']),
+        user: UserResponseCommonFields.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -149,7 +185,8 @@ class UserDeactivatedEvent {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'created_at',
-    'created_by',
+    'custom',
     'type',
+    'user',
   };
 }
