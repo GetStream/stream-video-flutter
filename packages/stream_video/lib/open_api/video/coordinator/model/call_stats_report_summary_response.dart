@@ -122,12 +122,26 @@ class CallStatsReportSummaryResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallStatsReportSummaryResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallStatsReportSummaryResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallStatsReportSummaryResponse[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallStatsReportSummaryResponse[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'call_duration_seconds'),
+            'Required key "CallStatsReportSummaryResponse[call_duration_seconds]" is missing from JSON.');
+        assert(json[r'call_duration_seconds'] != null,
+            'Required key "CallStatsReportSummaryResponse[call_duration_seconds]" has a null value in JSON.');
+        assert(json.containsKey(r'call_session_id'),
+            'Required key "CallStatsReportSummaryResponse[call_session_id]" is missing from JSON.');
+        assert(json[r'call_session_id'] != null,
+            'Required key "CallStatsReportSummaryResponse[call_session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'call_status'),
+            'Required key "CallStatsReportSummaryResponse[call_status]" is missing from JSON.');
+        assert(json[r'call_status'] != null,
+            'Required key "CallStatsReportSummaryResponse[call_status]" has a null value in JSON.');
+        assert(json.containsKey(r'first_stats_time'),
+            'Required key "CallStatsReportSummaryResponse[first_stats_time]" is missing from JSON.');
+        assert(json[r'first_stats_time'] != null,
+            'Required key "CallStatsReportSummaryResponse[first_stats_time]" has a null value in JSON.');
         return true;
       }());
 

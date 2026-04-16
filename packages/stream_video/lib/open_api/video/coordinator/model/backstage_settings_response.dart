@@ -66,12 +66,10 @@ class BackstageSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "BackstageSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "BackstageSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'enabled'),
+            'Required key "BackstageSettingsResponse[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "BackstageSettingsResponse[enabled]" has a null value in JSON.');
         return true;
       }());
 

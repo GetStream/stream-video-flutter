@@ -49,12 +49,10 @@ class StopRTMPBroadcastsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StopRTMPBroadcastsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StopRTMPBroadcastsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "StopRTMPBroadcastsResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "StopRTMPBroadcastsResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

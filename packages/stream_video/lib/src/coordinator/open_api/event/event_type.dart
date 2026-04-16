@@ -27,6 +27,9 @@ enum EventType {
   callBroadcastingStarted('call.hls_broadcasting_started'),
   callBroadcastingStopped('call.hls_broadcasting_stopped'),
   callBroadcastingFailed('call.hls_broadcasting_failed'),
+  callRtmpBroadcastStarted('call.rtmp_broadcast_started'),
+  callRtmpBroadcastStopped('call.rtmp_broadcast_stopped'),
+  callRtmpBroadcastFailed('call.rtmp_broadcast_failed'),
   callLiveStarted('call.live_started'),
   callMemberAdded('call.member_added'),
   callMemberRemoved('call.member_removed'),
@@ -50,6 +53,12 @@ enum EventType {
   callFrameRecordingReady('call.frame_recording_ready'),
   callModerationBlur('call.moderation_blur'),
   callModerationWarning('call.moderation_warning'),
+  callDeleted('call.deleted'),
+  callUserFeedbackSubmitted('call.user_feedback_submitted'),
+  callTranscriptionReady('call.transcription_ready'),
+  ingressStarted('ingress.started'),
+  ingressStopped('ingress.stopped'),
+  ingressError('ingress.error'),
   custom('custom'),
   unknown('unknown');
 

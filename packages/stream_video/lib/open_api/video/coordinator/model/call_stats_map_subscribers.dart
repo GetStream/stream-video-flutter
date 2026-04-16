@@ -10,37 +10,44 @@
 
 part of openapi.api;
 
-class ReadReceipts {
-  /// Returns a new [ReadReceipts] instance.
-  ReadReceipts({
-    required this.enabled,
+class CallStatsMapSubscribers {
+  /// Returns a new [CallStatsMapSubscribers] instance.
+  CallStatsMapSubscribers({
+    this.locations = const [],
+    this.participants = const [],
   });
 
-  bool enabled;
+  List<CallStatsMapLocation> locations;
+
+  List<CallStatsMapSubscriber> participants;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ReadReceipts && other.enabled == enabled;
+      other is CallStatsMapSubscribers &&
+          _deepEquality.equals(other.locations, locations) &&
+          _deepEquality.equals(other.participants, participants);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (enabled.hashCode);
+      (locations.hashCode) + (participants.hashCode);
 
   @override
-  String toString() => 'ReadReceipts[enabled=$enabled]';
+  String toString() =>
+      'CallStatsMapSubscribers[locations=$locations, participants=$participants]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'enabled'] = this.enabled;
+    json[r'locations'] = this.locations;
+    json[r'participants'] = this.participants;
     return json;
   }
 
-  /// Returns a new [ReadReceipts] instance and imports its values from
+  /// Returns a new [CallStatsMapSubscribers] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static ReadReceipts? fromJson(dynamic value) {
+  static CallStatsMapSubscribers? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -48,30 +55,30 @@ class ReadReceipts {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ReadReceipts[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ReadReceipts[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'locations'),
+            'Required key "CallStatsMapSubscribers[locations]" is missing from JSON.');
+        assert(json[r'locations'] != null,
+            'Required key "CallStatsMapSubscribers[locations]" has a null value in JSON.');
         return true;
       }());
 
-      return ReadReceipts(
-        enabled: mapValueOfType<bool>(json, r'enabled')!,
+      return CallStatsMapSubscribers(
+        locations: CallStatsMapLocation.listFromJson(json[r'locations']),
+        participants:
+            CallStatsMapSubscriber.listFromJson(json[r'participants']),
       );
     }
     return null;
   }
 
-  static List<ReadReceipts> listFromJson(
+  static List<CallStatsMapSubscribers> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <ReadReceipts>[];
+    final result = <CallStatsMapSubscribers>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = ReadReceipts.fromJson(row);
+        final value = CallStatsMapSubscribers.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -80,12 +87,12 @@ class ReadReceipts {
     return result.toList(growable: growable);
   }
 
-  static Map<String, ReadReceipts> mapFromJson(dynamic json) {
-    final map = <String, ReadReceipts>{};
+  static Map<String, CallStatsMapSubscribers> mapFromJson(dynamic json) {
+    final map = <String, CallStatsMapSubscribers>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = ReadReceipts.fromJson(entry.value);
+        final value = CallStatsMapSubscribers.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -94,17 +101,17 @@ class ReadReceipts {
     return map;
   }
 
-  // maps a json object with a list of ReadReceipts-objects as value to a dart map
-  static Map<String, List<ReadReceipts>> mapListFromJson(
+  // maps a json object with a list of CallStatsMapSubscribers-objects as value to a dart map
+  static Map<String, List<CallStatsMapSubscribers>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<ReadReceipts>>{};
+    final map = <String, List<CallStatsMapSubscribers>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ReadReceipts.listFromJson(
+        map[entry.key] = CallStatsMapSubscribers.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -115,6 +122,6 @@ class ReadReceipts {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'enabled',
+    'locations',
   };
 }

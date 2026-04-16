@@ -55,12 +55,14 @@ class GoLiveResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GoLiveResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GoLiveResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "GoLiveResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "GoLiveResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "GoLiveResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "GoLiveResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

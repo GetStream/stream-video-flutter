@@ -61,12 +61,18 @@ class CallClosedCaptionsStoppedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallClosedCaptionsStoppedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallClosedCaptionsStoppedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallClosedCaptionsStoppedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallClosedCaptionsStoppedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallClosedCaptionsStoppedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallClosedCaptionsStoppedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallClosedCaptionsStoppedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallClosedCaptionsStoppedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

@@ -68,12 +68,22 @@ class CallParticipantResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallParticipantResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallParticipantResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'joined_at'),
+            'Required key "CallParticipantResponse[joined_at]" is missing from JSON.');
+        assert(json[r'joined_at'] != null,
+            'Required key "CallParticipantResponse[joined_at]" has a null value in JSON.');
+        assert(json.containsKey(r'role'),
+            'Required key "CallParticipantResponse[role]" is missing from JSON.');
+        assert(json[r'role'] != null,
+            'Required key "CallParticipantResponse[role]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "CallParticipantResponse[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "CallParticipantResponse[user]" has a null value in JSON.');
+        assert(json.containsKey(r'user_session_id'),
+            'Required key "CallParticipantResponse[user_session_id]" is missing from JSON.');
+        assert(json[r'user_session_id'] != null,
+            'Required key "CallParticipantResponse[user_session_id]" has a null value in JSON.');
         return true;
       }());
 

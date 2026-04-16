@@ -92,12 +92,14 @@ class CreateDeviceRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CreateDeviceRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CreateDeviceRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'),
+            'Required key "CreateDeviceRequest[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "CreateDeviceRequest[id]" has a null value in JSON.');
+        assert(json.containsKey(r'push_provider'),
+            'Required key "CreateDeviceRequest[push_provider]" is missing from JSON.');
+        assert(json[r'push_provider'] != null,
+            'Required key "CreateDeviceRequest[push_provider]" has a null value in JSON.');
         return true;
       }());
 

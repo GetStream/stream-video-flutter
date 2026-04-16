@@ -27,7 +27,7 @@ class StartTranscriptionRequest {
   ///
   bool? enableClosedCaptions;
 
-  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
   StartTranscriptionRequestLanguageEnum? language;
 
   /// Store transcriptions in this external storage
@@ -92,12 +92,6 @@ class StartTranscriptionRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StartTranscriptionRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StartTranscriptionRequest[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
@@ -166,7 +160,7 @@ class StartTranscriptionRequest {
   static const requiredKeys = <String>{};
 }
 
-/// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+/// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
 class StartTranscriptionRequestLanguageEnum {
   /// Instantiate a new enum with the provided [value].
   const StartTranscriptionRequestLanguageEnum._(this.value);

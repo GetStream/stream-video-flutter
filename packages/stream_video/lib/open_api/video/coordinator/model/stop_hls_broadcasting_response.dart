@@ -49,12 +49,10 @@ class StopHLSBroadcastingResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StopHLSBroadcastingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StopHLSBroadcastingResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "StopHLSBroadcastingResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "StopHLSBroadcastingResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

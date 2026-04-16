@@ -36,6 +36,9 @@ class OpenApiEvent with EquatableMixin {
     this.callBroadcastingStarted,
     this.callBroadcastingStopped,
     this.callBroadcastingFailed,
+    this.callRtmpBroadcastStarted,
+    this.callRtmpBroadcastStopped,
+    this.callRtmpBroadcastFailed,
     this.callLiveStarted,
     this.callMemberAdded,
     this.callMemberRemoved,
@@ -58,6 +61,12 @@ class OpenApiEvent with EquatableMixin {
     this.callFrameRecordingFrameReady,
     this.callModerationBlur,
     this.callModerationWarning,
+    this.callDeleted,
+    this.callUserFeedbackSubmitted,
+    this.callTranscriptionReady,
+    this.ingressStarted,
+    this.ingressStopped,
+    this.ingressError,
     this.custom,
     this.unknown,
   });
@@ -143,6 +152,15 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callBroadcastingFailed:
         final event = open.CallHLSBroadcastingFailedEvent.fromJson(jsonObj);
         return result.copyWith(callBroadcastingFailed: event);
+      case EventType.callRtmpBroadcastStarted:
+        final event = open.CallRtmpBroadcastStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callRtmpBroadcastStarted: event);
+      case EventType.callRtmpBroadcastStopped:
+        final event = open.CallRtmpBroadcastStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(callRtmpBroadcastStopped: event);
+      case EventType.callRtmpBroadcastFailed:
+        final event = open.CallRtmpBroadcastFailedEvent.fromJson(jsonObj);
+        return result.copyWith(callRtmpBroadcastFailed: event);
       case EventType.callLiveStarted:
         final event = open.CallLiveStartedEvent.fromJson(jsonObj);
         return result.copyWith(callLiveStarted: event);
@@ -221,6 +239,24 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callModerationWarning:
         final event = open.CallModerationWarningEvent.fromJson(jsonObj);
         return result.copyWith(callModerationWarning: event);
+      case EventType.callDeleted:
+        final event = open.CallDeletedEvent.fromJson(jsonObj);
+        return result.copyWith(callDeleted: event);
+      case EventType.callUserFeedbackSubmitted:
+        final event = open.CallUserFeedbackSubmittedEvent.fromJson(jsonObj);
+        return result.copyWith(callUserFeedbackSubmitted: event);
+      case EventType.callTranscriptionReady:
+        final event = open.CallTranscriptionReadyEvent.fromJson(jsonObj);
+        return result.copyWith(callTranscriptionReady: event);
+      case EventType.ingressStarted:
+        final event = open.IngressStartedEvent.fromJson(jsonObj);
+        return result.copyWith(ingressStarted: event);
+      case EventType.ingressStopped:
+        final event = open.IngressStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(ingressStopped: event);
+      case EventType.ingressError:
+        final event = open.IngressErrorEvent.fromJson(jsonObj);
+        return result.copyWith(ingressError: event);
       case EventType.unknown:
         streamLog.d(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -254,6 +290,9 @@ class OpenApiEvent with EquatableMixin {
   final open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted;
   final open.CallHLSBroadcastingStoppedEvent? callBroadcastingStopped;
   final open.CallHLSBroadcastingFailedEvent? callBroadcastingFailed;
+  final open.CallRtmpBroadcastStartedEvent? callRtmpBroadcastStarted;
+  final open.CallRtmpBroadcastStoppedEvent? callRtmpBroadcastStopped;
+  final open.CallRtmpBroadcastFailedEvent? callRtmpBroadcastFailed;
   final open.CallLiveStartedEvent? callLiveStarted;
   final open.CallMemberAddedEvent? callMemberAdded;
   final open.CallMemberRemovedEvent? callMemberRemoved;
@@ -277,6 +316,12 @@ class OpenApiEvent with EquatableMixin {
   final open.CallFrameRecordingFrameReadyEvent? callFrameRecordingFrameReady;
   final open.CallModerationBlurEvent? callModerationBlur;
   final open.CallModerationWarningEvent? callModerationWarning;
+  final open.CallDeletedEvent? callDeleted;
+  final open.CallUserFeedbackSubmittedEvent? callUserFeedbackSubmitted;
+  final open.CallTranscriptionReadyEvent? callTranscriptionReady;
+  final open.IngressStartedEvent? ingressStarted;
+  final open.IngressStoppedEvent? ingressStopped;
+  final open.IngressErrorEvent? ingressError;
   final Object? unknown;
 
   OpenApiEvent copyWith({
@@ -307,6 +352,9 @@ class OpenApiEvent with EquatableMixin {
     open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted,
     open.CallHLSBroadcastingStoppedEvent? callBroadcastingStopped,
     open.CallHLSBroadcastingFailedEvent? callBroadcastingFailed,
+    open.CallRtmpBroadcastStartedEvent? callRtmpBroadcastStarted,
+    open.CallRtmpBroadcastStoppedEvent? callRtmpBroadcastStopped,
+    open.CallRtmpBroadcastFailedEvent? callRtmpBroadcastFailed,
     open.CallLiveStartedEvent? callLiveStarted,
     open.CallMemberAddedEvent? callMemberAdded,
     open.CallMemberRemovedEvent? callMemberRemoved,
@@ -330,6 +378,12 @@ class OpenApiEvent with EquatableMixin {
     open.CallFrameRecordingFrameReadyEvent? callFrameRecordingFrameReady,
     open.CallModerationBlurEvent? callModerationBlur,
     open.CallModerationWarningEvent? callModerationWarning,
+    open.CallDeletedEvent? callDeleted,
+    open.CallUserFeedbackSubmittedEvent? callUserFeedbackSubmitted,
+    open.CallTranscriptionReadyEvent? callTranscriptionReady,
+    open.IngressStartedEvent? ingressStarted,
+    open.IngressStoppedEvent? ingressStopped,
+    open.IngressErrorEvent? ingressError,
     Object? unknown,
   }) {
     return OpenApiEvent(
@@ -368,6 +422,12 @@ class OpenApiEvent with EquatableMixin {
           callBroadcastingStopped ?? this.callBroadcastingStopped,
       callBroadcastingFailed:
           callBroadcastingFailed ?? this.callBroadcastingFailed,
+      callRtmpBroadcastStarted:
+          callRtmpBroadcastStarted ?? this.callRtmpBroadcastStarted,
+      callRtmpBroadcastStopped:
+          callRtmpBroadcastStopped ?? this.callRtmpBroadcastStopped,
+      callRtmpBroadcastFailed:
+          callRtmpBroadcastFailed ?? this.callRtmpBroadcastFailed,
       callLiveStarted: callLiveStarted ?? this.callLiveStarted,
       callMemberAdded: callMemberAdded ?? this.callMemberAdded,
       callMemberRemoved: callMemberRemoved ?? this.callMemberRemoved,
@@ -402,6 +462,14 @@ class OpenApiEvent with EquatableMixin {
       callModerationBlur: callModerationBlur ?? this.callModerationBlur,
       callModerationWarning:
           callModerationWarning ?? this.callModerationWarning,
+      callDeleted: callDeleted ?? this.callDeleted,
+      callUserFeedbackSubmitted:
+          callUserFeedbackSubmitted ?? this.callUserFeedbackSubmitted,
+      callTranscriptionReady:
+          callTranscriptionReady ?? this.callTranscriptionReady,
+      ingressStarted: ingressStarted ?? this.ingressStarted,
+      ingressStopped: ingressStopped ?? this.ingressStopped,
+      ingressError: ingressError ?? this.ingressError,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
     );
@@ -437,6 +505,9 @@ class OpenApiEvent with EquatableMixin {
     callRecordingStopped,
     callBroadcastingStarted,
     callBroadcastingStopped,
+    callRtmpBroadcastStarted,
+    callRtmpBroadcastStopped,
+    callRtmpBroadcastFailed,
     callLiveStarted,
     callMemberAdded,
     callMemberRemoved,
@@ -459,6 +530,12 @@ class OpenApiEvent with EquatableMixin {
     callFrameRecordingFrameReady,
     callModerationBlur,
     callModerationWarning,
+    callDeleted,
+    callUserFeedbackSubmitted,
+    callTranscriptionReady,
+    ingressStarted,
+    ingressStopped,
+    ingressError,
     custom,
     unknown,
   ];

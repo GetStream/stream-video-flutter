@@ -84,12 +84,30 @@ class CallModerationWarningEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallModerationWarningEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallModerationWarningEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallModerationWarningEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallModerationWarningEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallModerationWarningEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallModerationWarningEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "CallModerationWarningEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "CallModerationWarningEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'message'),
+            'Required key "CallModerationWarningEvent[message]" is missing from JSON.');
+        assert(json[r'message'] != null,
+            'Required key "CallModerationWarningEvent[message]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallModerationWarningEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallModerationWarningEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user_id'),
+            'Required key "CallModerationWarningEvent[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "CallModerationWarningEvent[user_id]" has a null value in JSON.');
         return true;
       }());
 

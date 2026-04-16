@@ -79,12 +79,18 @@ class CallStateResponseFields {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallStateResponseFields[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallStateResponseFields[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallStateResponseFields[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallStateResponseFields[call]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "CallStateResponseFields[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "CallStateResponseFields[members]" has a null value in JSON.');
+        assert(json.containsKey(r'own_capabilities'),
+            'Required key "CallStateResponseFields[own_capabilities]" is missing from JSON.');
+        assert(json[r'own_capabilities'] != null,
+            'Required key "CallStateResponseFields[own_capabilities]" has a null value in JSON.');
         return true;
       }());
 

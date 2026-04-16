@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class SendReactionRequest {
-  /// Returns a new [SendReactionRequest] instance.
-  SendReactionRequest({
+class SendVideoReactionRequest {
+  /// Returns a new [SendVideoReactionRequest] instance.
+  SendVideoReactionRequest({
     this.custom = const {},
     this.emojiCode,
     required this.type,
@@ -33,7 +33,7 @@ class SendReactionRequest {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SendReactionRequest &&
+      other is SendVideoReactionRequest &&
           _deepEquality.equals(other.custom, custom) &&
           other.emojiCode == emojiCode &&
           other.type == type;
@@ -47,7 +47,7 @@ class SendReactionRequest {
 
   @override
   String toString() =>
-      'SendReactionRequest[custom=$custom, emojiCode=$emojiCode, type=$type]';
+      'SendVideoReactionRequest[custom=$custom, emojiCode=$emojiCode, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -61,10 +61,10 @@ class SendReactionRequest {
     return json;
   }
 
-  /// Returns a new [SendReactionRequest] instance and imports its values from
+  /// Returns a new [SendVideoReactionRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static SendReactionRequest? fromJson(dynamic value) {
+  static SendVideoReactionRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -72,16 +72,14 @@ class SendReactionRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SendReactionRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SendReactionRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'type'),
+            'Required key "SendVideoReactionRequest[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "SendVideoReactionRequest[type]" has a null value in JSON.');
         return true;
       }());
 
-      return SendReactionRequest(
+      return SendVideoReactionRequest(
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         emojiCode: mapValueOfType<String>(json, r'emoji_code'),
         type: mapValueOfType<String>(json, r'type')!,
@@ -90,14 +88,14 @@ class SendReactionRequest {
     return null;
   }
 
-  static List<SendReactionRequest> listFromJson(
+  static List<SendVideoReactionRequest> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <SendReactionRequest>[];
+    final result = <SendVideoReactionRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = SendReactionRequest.fromJson(row);
+        final value = SendVideoReactionRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -106,12 +104,12 @@ class SendReactionRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, SendReactionRequest> mapFromJson(dynamic json) {
-    final map = <String, SendReactionRequest>{};
+  static Map<String, SendVideoReactionRequest> mapFromJson(dynamic json) {
+    final map = <String, SendVideoReactionRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = SendReactionRequest.fromJson(entry.value);
+        final value = SendVideoReactionRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -120,17 +118,17 @@ class SendReactionRequest {
     return map;
   }
 
-  // maps a json object with a list of SendReactionRequest-objects as value to a dart map
-  static Map<String, List<SendReactionRequest>> mapListFromJson(
+  // maps a json object with a list of SendVideoReactionRequest-objects as value to a dart map
+  static Map<String, List<SendVideoReactionRequest>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<SendReactionRequest>>{};
+    final map = <String, List<SendVideoReactionRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SendReactionRequest.listFromJson(
+        map[entry.key] = SendVideoReactionRequest.listFromJson(
           entry.value,
           growable: growable,
         );

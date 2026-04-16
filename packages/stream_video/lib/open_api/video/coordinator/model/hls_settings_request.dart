@@ -18,6 +18,7 @@ class HLSSettingsRequest {
     this.qualityTracks = const [],
   });
 
+  /// Whether HLS broadcasting should start automatically
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -26,6 +27,7 @@ class HLSSettingsRequest {
   ///
   bool? autoOn;
 
+  /// Whether HLS broadcasting is enabled
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -34,7 +36,8 @@ class HLSSettingsRequest {
   ///
   bool? enabled;
 
-  List<String> qualityTracks;
+  /// Quality tracks for HLS. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
+  List<HLSSettingsRequestQualityTracksEnum> qualityTracks;
 
   @override
   bool operator ==(Object other) =>
@@ -82,23 +85,18 @@ class HLSSettingsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "HLSSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "HLSSettingsRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'quality_tracks'),
+            'Required key "HLSSettingsRequest[quality_tracks]" is missing from JSON.');
+        assert(json[r'quality_tracks'] != null,
+            'Required key "HLSSettingsRequest[quality_tracks]" has a null value in JSON.');
         return true;
       }());
 
       return HLSSettingsRequest(
         autoOn: mapValueOfType<bool>(json, r'auto_on'),
         enabled: mapValueOfType<bool>(json, r'enabled'),
-        qualityTracks: json[r'quality_tracks'] is Iterable
-            ? (json[r'quality_tracks'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
+        qualityTracks: HLSSettingsRequestQualityTracksEnum.listFromJson(
+            json[r'quality_tracks']),
       );
     }
     return null;
@@ -157,4 +155,121 @@ class HLSSettingsRequest {
   static const requiredKeys = <String>{
     'quality_tracks',
   };
+}
+
+class HLSSettingsRequestQualityTracksEnum {
+  /// Instantiate a new enum with the provided [value].
+  const HLSSettingsRequestQualityTracksEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const n360p = HLSSettingsRequestQualityTracksEnum._(r'360p');
+  static const n480p = HLSSettingsRequestQualityTracksEnum._(r'480p');
+  static const n720p = HLSSettingsRequestQualityTracksEnum._(r'720p');
+  static const n1080p = HLSSettingsRequestQualityTracksEnum._(r'1080p');
+  static const n1440p = HLSSettingsRequestQualityTracksEnum._(r'1440p');
+  static const portrait360x640 =
+      HLSSettingsRequestQualityTracksEnum._(r'portrait-360x640');
+  static const portrait480x854 =
+      HLSSettingsRequestQualityTracksEnum._(r'portrait-480x854');
+  static const portrait720x1280 =
+      HLSSettingsRequestQualityTracksEnum._(r'portrait-720x1280');
+  static const portrait1080x1920 =
+      HLSSettingsRequestQualityTracksEnum._(r'portrait-1080x1920');
+  static const portrait1440x2560 =
+      HLSSettingsRequestQualityTracksEnum._(r'portrait-1440x2560');
+
+  /// List of all possible values in this [enum][HLSSettingsRequestQualityTracksEnum].
+  static const values = <HLSSettingsRequestQualityTracksEnum>[
+    n360p,
+    n480p,
+    n720p,
+    n1080p,
+    n1440p,
+    portrait360x640,
+    portrait480x854,
+    portrait720x1280,
+    portrait1080x1920,
+    portrait1440x2560,
+  ];
+
+  static HLSSettingsRequestQualityTracksEnum? fromJson(dynamic value) =>
+      HLSSettingsRequestQualityTracksEnumTypeTransformer().decode(value);
+
+  static List<HLSSettingsRequestQualityTracksEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <HLSSettingsRequestQualityTracksEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = HLSSettingsRequestQualityTracksEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [HLSSettingsRequestQualityTracksEnum] to String,
+/// and [decode] dynamic data back to [HLSSettingsRequestQualityTracksEnum].
+class HLSSettingsRequestQualityTracksEnumTypeTransformer {
+  factory HLSSettingsRequestQualityTracksEnumTypeTransformer() => _instance ??=
+      const HLSSettingsRequestQualityTracksEnumTypeTransformer._();
+
+  const HLSSettingsRequestQualityTracksEnumTypeTransformer._();
+
+  String encode(HLSSettingsRequestQualityTracksEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a HLSSettingsRequestQualityTracksEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  HLSSettingsRequestQualityTracksEnum? decode(dynamic data,
+      {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'360p':
+          return HLSSettingsRequestQualityTracksEnum.n360p;
+        case r'480p':
+          return HLSSettingsRequestQualityTracksEnum.n480p;
+        case r'720p':
+          return HLSSettingsRequestQualityTracksEnum.n720p;
+        case r'1080p':
+          return HLSSettingsRequestQualityTracksEnum.n1080p;
+        case r'1440p':
+          return HLSSettingsRequestQualityTracksEnum.n1440p;
+        case r'portrait-360x640':
+          return HLSSettingsRequestQualityTracksEnum.portrait360x640;
+        case r'portrait-480x854':
+          return HLSSettingsRequestQualityTracksEnum.portrait480x854;
+        case r'portrait-720x1280':
+          return HLSSettingsRequestQualityTracksEnum.portrait720x1280;
+        case r'portrait-1080x1920':
+          return HLSSettingsRequestQualityTracksEnum.portrait1080x1920;
+        case r'portrait-1440x2560':
+          return HLSSettingsRequestQualityTracksEnum.portrait1440x2560;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [HLSSettingsRequestQualityTracksEnumTypeTransformer] instance.
+  static HLSSettingsRequestQualityTracksEnumTypeTransformer? _instance;
 }

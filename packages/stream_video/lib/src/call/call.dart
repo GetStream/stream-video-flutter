@@ -13,7 +13,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart' hide User;
+import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
@@ -79,6 +79,7 @@ typedef SetOutgoingCall = Future<void> Function(Call?);
 typedef GetActiveCall = Call? Function();
 typedef GetOutgoingCall = Call? Function();
 typedef CallStateSelector<T> = T Function(CallState state);
+typedef VideoDimension = RtcVideoDimension;
 
 const _idState = 1;
 const _idUserId = 2;
@@ -566,6 +567,14 @@ class Call {
         return _stateManager.coordinatorCallBroadcastingStopped(event);
       case StreamCallBroadcastingFailedEvent _:
         return _stateManager.coordinatorCallBroadcastingFailed(event);
+      case StreamCallRtmpBroadcastStartedEvent _:
+        return _stateManager.coordinatorCallRtmpBroadcastStarted(event);
+      case StreamCallRtmpBroadcastStoppedEvent _:
+        return _stateManager.coordinatorCallRtmpBroadcastStopped(event);
+      case StreamCallRtmpBroadcastFailedEvent _:
+        return _stateManager.coordinatorCallRtmpBroadcastFailed(event);
+      case StreamCallDeletedEvent _:
+        return _stateManager.coordinatorCallDeleted(event);
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
@@ -2901,6 +2910,32 @@ class Call {
     }
 
     return result;
+  }
+
+  /// Starts RTMP broadcasts for the call to the provided [broadcasts]
+  /// destinations.
+  Future<Result<None>> startRtmpBroadcasts({
+    required List<StreamRtmpBroadcastRequest> broadcasts,
+  }) {
+    return _coordinatorClient.startRtmpBroadcasts(
+      state.value.callCid,
+      broadcasts: broadcasts,
+    );
+  }
+
+  /// Stops a single RTMP broadcast identified by [name].
+  Future<Result<None>> stopRtmpBroadcast({required String name}) {
+    return _coordinatorClient.stopRtmpBroadcast(
+      state.value.callCid,
+      name: name,
+    );
+  }
+
+  /// Stops all RTMP broadcasts for this call.
+  Future<Result<None>> stopAllRtmpBroadcasts() {
+    return _coordinatorClient.stopAllRtmpBroadcasts(
+      state.value.callCid,
+    );
   }
 
   /// Allows for the muting of a or group of users as indicated by [userIds].

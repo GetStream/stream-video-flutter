@@ -86,12 +86,22 @@ class AppUpdatedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "AppUpdatedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "AppUpdatedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'app'),
+            'Required key "AppUpdatedEvent[app]" is missing from JSON.');
+        assert(json[r'app'] != null,
+            'Required key "AppUpdatedEvent[app]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "AppUpdatedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "AppUpdatedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "AppUpdatedEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "AppUpdatedEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "AppUpdatedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "AppUpdatedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

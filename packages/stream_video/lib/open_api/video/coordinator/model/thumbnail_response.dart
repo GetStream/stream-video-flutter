@@ -48,12 +48,10 @@ class ThumbnailResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ThumbnailResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ThumbnailResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'image_url'),
+            'Required key "ThumbnailResponse[image_url]" is missing from JSON.');
+        assert(json[r'image_url'] != null,
+            'Required key "ThumbnailResponse[image_url]" has a null value in JSON.');
         return true;
       }());
 

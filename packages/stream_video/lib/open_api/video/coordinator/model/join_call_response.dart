@@ -102,12 +102,34 @@ class JoinCallResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "JoinCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "JoinCallResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "JoinCallResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "JoinCallResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'created'),
+            'Required key "JoinCallResponse[created]" is missing from JSON.');
+        assert(json[r'created'] != null,
+            'Required key "JoinCallResponse[created]" has a null value in JSON.');
+        assert(json.containsKey(r'credentials'),
+            'Required key "JoinCallResponse[credentials]" is missing from JSON.');
+        assert(json[r'credentials'] != null,
+            'Required key "JoinCallResponse[credentials]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "JoinCallResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "JoinCallResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "JoinCallResponse[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "JoinCallResponse[members]" has a null value in JSON.');
+        assert(json.containsKey(r'own_capabilities'),
+            'Required key "JoinCallResponse[own_capabilities]" is missing from JSON.');
+        assert(json[r'own_capabilities'] != null,
+            'Required key "JoinCallResponse[own_capabilities]" has a null value in JSON.');
+        assert(json.containsKey(r'stats_options'),
+            'Required key "JoinCallResponse[stats_options]" is missing from JSON.');
+        assert(json[r'stats_options'] != null,
+            'Required key "JoinCallResponse[stats_options]" has a null value in JSON.');
         return true;
       }());
 

@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 import '../../open_api/video/coordinator/api.dart';
+import '../coordinator/open_api/open_api_extensions.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_encoding.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
+import 'call_egress.dart';
 
 class CallSettings with EquatableMixin {
   const CallSettings({
@@ -381,16 +383,19 @@ class StreamRecordingSettings extends AbstractSettings {
 class StreamIndividualRecordingSettings extends AbstractSettings {
   const StreamIndividualRecordingSettings({
     this.mode = IndividualRecordingSettingsMode.disabled,
+    this.outputTypes = const [],
   });
 
   final IndividualRecordingSettingsMode mode;
+  final List<IndividualRecordingOutputType> outputTypes;
 
   @override
-  List<Object?> get props => [mode];
+  List<Object?> get props => [mode, outputTypes];
 
   IndividualRecordingSettingsRequest toOpenDto() {
     return IndividualRecordingSettingsRequest(
       mode: mode.toOpenDto(),
+      outputTypes: outputTypes.map((e) => e.toOpenDto()).toList(),
     );
   }
 }
@@ -398,16 +403,19 @@ class StreamIndividualRecordingSettings extends AbstractSettings {
 class StreamRawRecordingSettings extends AbstractSettings {
   const StreamRawRecordingSettings({
     this.mode = RawRecordingSettingsMode.disabled,
+    this.audioOnly,
   });
 
   final RawRecordingSettingsMode mode;
+  final bool? audioOnly;
 
   @override
-  List<Object?> get props => [mode];
+  List<Object?> get props => [mode, audioOnly];
 
   RawRecordingSettingsRequest toOpenDto() {
     return RawRecordingSettingsRequest(
       mode: mode.toOpenDto(),
+      audioOnly: audioOnly,
     );
   }
 }
@@ -482,24 +490,49 @@ class StreamNoiceCancellingSettings extends AbstractSettings {
 }
 
 class StreamHlsSettings extends AbstractSettings {
+  /// Creates HLS settings.
+  ///
+  /// [qualityTracks] accepts raw string aliases (e.g. `'720p'`, `'1080p'`)
+  /// for backward compatibility but is deprecated. Use [qualities] with
+  /// [StreamVideoQuality] values instead. If both are provided, [qualities]
+  /// takes precedence.
   const StreamHlsSettings({
     this.autoOn,
     this.enabled,
+    @Deprecated('Use qualities with StreamVideoQuality values instead.')
     this.qualityTracks = const [],
+    this.qualities = const [],
   });
 
   final bool? enabled;
   final bool? autoOn;
+
+  @Deprecated('Use qualities with StreamVideoQuality values instead.')
   final List<String> qualityTracks;
 
+  final List<StreamVideoQuality> qualities;
+
+  List<StreamVideoQuality> get _resolvedQualities {
+    if (qualities.isNotEmpty) return qualities;
+    // ignore: deprecated_member_use_from_same_package
+    if (qualityTracks.isNotEmpty) {
+      // ignore: deprecated_member_use_from_same_package
+      return qualityTracks.map(StreamVideoQuality.fromAlias).nonNulls.toList();
+    }
+    return const [];
+  }
+
   @override
-  List<Object?> get props => [enabled, autoOn, qualityTracks];
+  // ignore: deprecated_member_use_from_same_package
+  List<Object?> get props => [enabled, autoOn, qualityTracks, qualities];
 
   HLSSettingsRequest toOpenDto() {
     return HLSSettingsRequest(
       enabled: enabled,
       autoOn: autoOn,
-      qualityTracks: qualityTracks,
+      qualityTracks: _resolvedQualities
+          .map((q) => q.toHlsQualityTrackDomain())
+          .toList(),
     );
   }
 }
@@ -617,18 +650,76 @@ class StreamIngressAudioEncodingOptions extends AbstractSettings {
 
 class StreamIngressVideoEncodingOptions extends AbstractSettings {
   const StreamIngressVideoEncodingOptions({
+    required this.source,
     this.layers = const [],
   });
 
   final List<StreamIngressVideoLayer> layers;
+  final StreamIngressSource source;
 
   @override
-  List<Object?> get props => [layers];
+  List<Object?> get props => [layers, source];
 
   IngressVideoEncodingOptionsRequest toOpenDto() {
     return IngressVideoEncodingOptionsRequest(
       layers: layers.map((e) => e.toOpenDto()).toList(),
+      source_: source.toOpenDto(),
     );
+  }
+}
+
+class StreamIngressSource extends AbstractSettings {
+  const StreamIngressSource({
+    required this.fps,
+    required this.height,
+    required this.width,
+  });
+
+  final StreamIngressSourceFps fps;
+
+  /// Minimum value: 2.
+  final int height;
+
+  /// Minimum value: 2.
+  final int width;
+
+  @override
+  List<Object?> get props => [fps, height, width];
+
+  IngressSourceRequest toOpenDto() {
+    return IngressSourceRequest(
+      fps: fps.toOpenDto(),
+      height: height,
+      width: width,
+    );
+  }
+}
+
+enum StreamIngressSourceFps {
+  fps30(30),
+  fps60(60);
+
+  const StreamIngressSourceFps(this.value);
+
+  final int value;
+
+  static StreamIngressSourceFps fromValue(int value) {
+    switch (value) {
+      case 60:
+        return StreamIngressSourceFps.fps60;
+      case 30:
+      default:
+        return StreamIngressSourceFps.fps30;
+    }
+  }
+
+  IngressSourceRequestFpsEnum toOpenDto() {
+    switch (this) {
+      case StreamIngressSourceFps.fps30:
+        return IngressSourceRequestFpsEnum.number30;
+      case StreamIngressSourceFps.fps60:
+        return IngressSourceRequestFpsEnum.number60;
+    }
   }
 }
 
@@ -790,6 +881,57 @@ enum IndividualRecordingSettingsMode {
         return IndividualRecordingSettingsMode.autoOn;
       default:
         return IndividualRecordingSettingsMode.disabled;
+    }
+  }
+}
+
+enum IndividualRecordingOutputType {
+  audioOnly,
+  videoOnly,
+  audioVideo,
+  screenshareAudioOnly,
+  screenshareVideoOnly,
+  screenshareAudioVideo;
+
+  @override
+  String toString() => name;
+
+  IndividualRecordingSettingsRequestOutputTypesEnum toOpenDto() {
+    switch (this) {
+      case IndividualRecordingOutputType.audioOnly:
+        return IndividualRecordingSettingsRequestOutputTypesEnum.audioOnly;
+      case IndividualRecordingOutputType.videoOnly:
+        return IndividualRecordingSettingsRequestOutputTypesEnum.videoOnly;
+      case IndividualRecordingOutputType.audioVideo:
+        return IndividualRecordingSettingsRequestOutputTypesEnum.audioVideo;
+      case IndividualRecordingOutputType.screenshareAudioOnly:
+        return IndividualRecordingSettingsRequestOutputTypesEnum
+            .screenshareAudioOnly;
+      case IndividualRecordingOutputType.screenshareVideoOnly:
+        return IndividualRecordingSettingsRequestOutputTypesEnum
+            .screenshareVideoOnly;
+      case IndividualRecordingOutputType.screenshareAudioVideo:
+        return IndividualRecordingSettingsRequestOutputTypesEnum
+            .screenshareAudioVideo;
+    }
+  }
+
+  static IndividualRecordingOutputType? fromString(String value) {
+    switch (value) {
+      case 'audio_only':
+        return IndividualRecordingOutputType.audioOnly;
+      case 'video_only':
+        return IndividualRecordingOutputType.videoOnly;
+      case 'audio_video':
+        return IndividualRecordingOutputType.audioVideo;
+      case 'screenshare_audio_only':
+        return IndividualRecordingOutputType.screenshareAudioOnly;
+      case 'screenshare_video_only':
+        return IndividualRecordingOutputType.screenshareVideoOnly;
+      case 'screenshare_audio_video':
+        return IndividualRecordingOutputType.screenshareAudioVideo;
+      default:
+        return null;
     }
   }
 }

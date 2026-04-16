@@ -102,12 +102,18 @@ class CollectUserFeedbackRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CollectUserFeedbackRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CollectUserFeedbackRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'rating'),
+            'Required key "CollectUserFeedbackRequest[rating]" is missing from JSON.');
+        assert(json[r'rating'] != null,
+            'Required key "CollectUserFeedbackRequest[rating]" has a null value in JSON.');
+        assert(json.containsKey(r'sdk'),
+            'Required key "CollectUserFeedbackRequest[sdk]" is missing from JSON.');
+        assert(json[r'sdk'] != null,
+            'Required key "CollectUserFeedbackRequest[sdk]" has a null value in JSON.');
+        assert(json.containsKey(r'sdk_version'),
+            'Required key "CollectUserFeedbackRequest[sdk_version]" is missing from JSON.');
+        assert(json[r'sdk_version'] != null,
+            'Required key "CollectUserFeedbackRequest[sdk_version]" has a null value in JSON.');
         return true;
       }());
 

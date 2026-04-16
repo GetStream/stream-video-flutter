@@ -56,12 +56,14 @@ class ListDevicesResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ListDevicesResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ListDevicesResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'devices'),
+            'Required key "ListDevicesResponse[devices]" is missing from JSON.');
+        assert(json[r'devices'] != null,
+            'Required key "ListDevicesResponse[devices]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "ListDevicesResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "ListDevicesResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

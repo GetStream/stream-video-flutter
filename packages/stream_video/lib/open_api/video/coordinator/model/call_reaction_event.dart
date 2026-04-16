@@ -23,7 +23,7 @@ class CallReactionEvent {
 
   DateTime createdAt;
 
-  ReactionResponse reaction;
+  VideoReactionResponse reaction;
 
   /// The type of event: \"call.reaction_new\" in this case
   String type;
@@ -69,19 +69,29 @@ class CallReactionEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallReactionEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallReactionEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallReactionEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallReactionEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallReactionEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallReactionEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'reaction'),
+            'Required key "CallReactionEvent[reaction]" is missing from JSON.');
+        assert(json[r'reaction'] != null,
+            'Required key "CallReactionEvent[reaction]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallReactionEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallReactionEvent[type]" has a null value in JSON.');
         return true;
       }());
 
       return CallReactionEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+        reaction: VideoReactionResponse.fromJson(json[r'reaction'])!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }

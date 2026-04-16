@@ -78,12 +78,26 @@ class FileUploadConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "FileUploadConfig[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "FileUploadConfig[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'allowed_file_extensions'),
+            'Required key "FileUploadConfig[allowed_file_extensions]" is missing from JSON.');
+        assert(json[r'allowed_file_extensions'] != null,
+            'Required key "FileUploadConfig[allowed_file_extensions]" has a null value in JSON.');
+        assert(json.containsKey(r'allowed_mime_types'),
+            'Required key "FileUploadConfig[allowed_mime_types]" is missing from JSON.');
+        assert(json[r'allowed_mime_types'] != null,
+            'Required key "FileUploadConfig[allowed_mime_types]" has a null value in JSON.');
+        assert(json.containsKey(r'blocked_file_extensions'),
+            'Required key "FileUploadConfig[blocked_file_extensions]" is missing from JSON.');
+        assert(json[r'blocked_file_extensions'] != null,
+            'Required key "FileUploadConfig[blocked_file_extensions]" has a null value in JSON.');
+        assert(json.containsKey(r'blocked_mime_types'),
+            'Required key "FileUploadConfig[blocked_mime_types]" is missing from JSON.');
+        assert(json[r'blocked_mime_types'] != null,
+            'Required key "FileUploadConfig[blocked_mime_types]" has a null value in JSON.');
+        assert(json.containsKey(r'size_limit'),
+            'Required key "FileUploadConfig[size_limit]" is missing from JSON.');
+        assert(json[r'size_limit'] != null,
+            'Required key "FileUploadConfig[size_limit]" has a null value in JSON.');
         return true;
       }());
 

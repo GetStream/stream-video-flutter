@@ -14,26 +14,33 @@ class IndividualRecordingSettingsResponse {
   /// Returns a new [IndividualRecordingSettingsResponse] instance.
   IndividualRecordingSettingsResponse({
     required this.mode,
+    this.outputTypes = const [],
   });
 
   IndividualRecordingSettingsResponseModeEnum mode;
 
+  List<String> outputTypes;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IndividualRecordingSettingsResponse && other.mode == mode;
+      other is IndividualRecordingSettingsResponse &&
+          other.mode == mode &&
+          _deepEquality.equals(other.outputTypes, outputTypes);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (mode.hashCode);
+      (mode.hashCode) + (outputTypes.hashCode);
 
   @override
-  String toString() => 'IndividualRecordingSettingsResponse[mode=$mode]';
+  String toString() =>
+      'IndividualRecordingSettingsResponse[mode=$mode, outputTypes=$outputTypes]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'mode'] = this.mode;
+    json[r'output_types'] = this.outputTypes;
     return json;
   }
 
@@ -48,18 +55,21 @@ class IndividualRecordingSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "IndividualRecordingSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "IndividualRecordingSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'mode'),
+            'Required key "IndividualRecordingSettingsResponse[mode]" is missing from JSON.');
+        assert(json[r'mode'] != null,
+            'Required key "IndividualRecordingSettingsResponse[mode]" has a null value in JSON.');
         return true;
       }());
 
       return IndividualRecordingSettingsResponse(
         mode: IndividualRecordingSettingsResponseModeEnum.fromJson(
             json[r'mode'])!,
+        outputTypes: json[r'output_types'] is Iterable
+            ? (json[r'output_types'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
+            : const [],
       );
     }
     return null;

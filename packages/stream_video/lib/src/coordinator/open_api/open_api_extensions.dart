@@ -139,7 +139,13 @@ extension EnvelopeExt on open.CallResponse {
 extension EgressExt on open.EgressResponse {
   CallEgress toCallEgress() {
     return CallEgress(
+      broadcasting: broadcasting,
       hlsPlaylistUrl: hls?.playlistUrl,
+      hlsStatus: hls?.status,
+      compositeRecordingStatus: compositeRecording?.status,
+      frameRecordingStatus: frameRecording?.status,
+      individualRecordingStatus: individualRecording?.status,
+      rawRecordingStatus: rawRecording?.status,
       rtmps: rtmps.map((it) => it.toCallRtmp()).toList(),
     );
   }
@@ -151,6 +157,69 @@ extension EgressRtmpExt on open.EgressRTMPResponse {
       name: name,
       streamKey: streamKey,
       url: streamUrl,
+    );
+  }
+}
+
+extension VideoQualityRtmpExt on StreamVideoQuality {
+  open.RTMPBroadcastRequestQualityEnum toRtmpQualityDomain() {
+    switch (this) {
+      case StreamVideoQuality.p360:
+        return open.RTMPBroadcastRequestQualityEnum.n360p;
+      case StreamVideoQuality.p480:
+        return open.RTMPBroadcastRequestQualityEnum.n480p;
+      case StreamVideoQuality.p720:
+        return open.RTMPBroadcastRequestQualityEnum.n720p;
+      case StreamVideoQuality.p1080:
+        return open.RTMPBroadcastRequestQualityEnum.n1080p;
+      case StreamVideoQuality.p1440:
+        return open.RTMPBroadcastRequestQualityEnum.n1440p;
+      case StreamVideoQuality.portrait360x640:
+        return open.RTMPBroadcastRequestQualityEnum.portrait360x640;
+      case StreamVideoQuality.portrait480x854:
+        return open.RTMPBroadcastRequestQualityEnum.portrait480x854;
+      case StreamVideoQuality.portrait720x1280:
+        return open.RTMPBroadcastRequestQualityEnum.portrait720x1280;
+      case StreamVideoQuality.portrait1080x1920:
+        return open.RTMPBroadcastRequestQualityEnum.portrait1080x1920;
+      case StreamVideoQuality.portrait1440x2560:
+        return open.RTMPBroadcastRequestQualityEnum.portrait1440x2560;
+    }
+  }
+
+  open.HLSSettingsRequestQualityTracksEnum toHlsQualityTrackDomain() {
+    switch (this) {
+      case StreamVideoQuality.p360:
+        return open.HLSSettingsRequestQualityTracksEnum.n360p;
+      case StreamVideoQuality.p480:
+        return open.HLSSettingsRequestQualityTracksEnum.n480p;
+      case StreamVideoQuality.p720:
+        return open.HLSSettingsRequestQualityTracksEnum.n720p;
+      case StreamVideoQuality.p1080:
+        return open.HLSSettingsRequestQualityTracksEnum.n1080p;
+      case StreamVideoQuality.p1440:
+        return open.HLSSettingsRequestQualityTracksEnum.n1440p;
+      case StreamVideoQuality.portrait360x640:
+        return open.HLSSettingsRequestQualityTracksEnum.portrait360x640;
+      case StreamVideoQuality.portrait480x854:
+        return open.HLSSettingsRequestQualityTracksEnum.portrait480x854;
+      case StreamVideoQuality.portrait720x1280:
+        return open.HLSSettingsRequestQualityTracksEnum.portrait720x1280;
+      case StreamVideoQuality.portrait1080x1920:
+        return open.HLSSettingsRequestQualityTracksEnum.portrait1080x1920;
+      case StreamVideoQuality.portrait1440x2560:
+        return open.HLSSettingsRequestQualityTracksEnum.portrait1440x2560;
+    }
+  }
+}
+
+extension RtmpBroadcastRequestExt on StreamRtmpBroadcastRequest {
+  open.RTMPBroadcastRequest toRequestDomain() {
+    return open.RTMPBroadcastRequest(
+      name: name,
+      streamUrl: streamUrl,
+      streamKey: streamKey,
+      quality: quality?.toRtmpQualityDomain(),
     );
   }
 }
@@ -217,14 +286,66 @@ extension CallSettingsExt on open.CallSettingsResponse {
         mode: IndividualRecordingSettingsMode.fromString(
           individualRecording.mode.value,
         ),
+        outputTypes: individualRecording.outputTypes
+            .map(IndividualRecordingOutputType.fromString)
+            .nonNulls
+            .toList(),
       ),
       rawRecording: StreamRawRecordingSettings(
         mode: RawRecordingSettingsMode.fromString(
           rawRecording.mode.value,
         ),
+        audioOnly: rawRecording.audioOnly,
       ),
       ingress: ingress?.toSettingsDomain(),
     );
+  }
+}
+
+extension CallPermissionRequestPermissionsExt on CallPermission {
+  open.RequestPermissionRequestPermissionsEnum? toRequestPermissionDomain() {
+    switch (this) {
+      case CallPermission.screenshare:
+        return open.RequestPermissionRequestPermissionsEnum.screenshare;
+      case CallPermission.sendAudio:
+        return open.RequestPermissionRequestPermissionsEnum.sendAudio;
+      case CallPermission.sendVideo:
+        return open.RequestPermissionRequestPermissionsEnum.sendVideo;
+      default:
+        return null;
+    }
+  }
+
+  open.UpdateUserPermissionsRequestGrantPermissionsEnum?
+  toGrantPermissionDomain() {
+    switch (this) {
+      case CallPermission.screenshare:
+        return open
+            .UpdateUserPermissionsRequestGrantPermissionsEnum
+            .screenshare;
+      case CallPermission.sendAudio:
+        return open.UpdateUserPermissionsRequestGrantPermissionsEnum.sendAudio;
+      case CallPermission.sendVideo:
+        return open.UpdateUserPermissionsRequestGrantPermissionsEnum.sendVideo;
+      default:
+        return null;
+    }
+  }
+
+  open.UpdateUserPermissionsRequestRevokePermissionsEnum?
+  toRevokePermissionDomain() {
+    switch (this) {
+      case CallPermission.screenshare:
+        return open
+            .UpdateUserPermissionsRequestRevokePermissionsEnum
+            .screenshare;
+      case CallPermission.sendAudio:
+        return open.UpdateUserPermissionsRequestRevokePermissionsEnum.sendAudio;
+      case CallPermission.sendVideo:
+        return open.UpdateUserPermissionsRequestRevokePermissionsEnum.sendVideo;
+      default:
+        return null;
+    }
   }
 }
 
@@ -310,7 +431,14 @@ extension on open.HLSSettingsResponse {
     return StreamHlsSettings(
       autoOn: autoOn,
       enabled: enabled,
+      // ignore: deprecated_member_use_from_same_package
       qualityTracks: List.unmodifiable(qualityTracks),
+      qualities: List.unmodifiable(
+        qualityTracks
+            .map(StreamVideoQuality.fromAlias)
+            .whereType<StreamVideoQuality>()
+            .toList(),
+      ),
     );
   }
 }
@@ -360,6 +488,17 @@ extension on open.IngressVideoEncodingResponse {
   StreamIngressVideoEncodingOptions toSettingsDomain() {
     return StreamIngressVideoEncodingOptions(
       layers: layers.map((e) => e.toSettingsDomain()).toList(),
+      source: source_.toSettingsDomain(),
+    );
+  }
+}
+
+extension on open.IngressSourceResponse {
+  StreamIngressSource toSettingsDomain() {
+    return StreamIngressSource(
+      fps: StreamIngressSourceFps.fromValue(fps),
+      height: height,
+      width: width,
     );
   }
 }
@@ -400,7 +539,7 @@ extension CredentialsExt on open.Credentials {
   }
 }
 
-extension ReactionExt on open.ReactionResponse {
+extension ReactionExt on open.VideoReactionResponse {
   CallReaction toCallReaction() {
     return CallReaction(
       type: type,

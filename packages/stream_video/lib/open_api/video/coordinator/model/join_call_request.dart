@@ -173,12 +173,10 @@ class JoinCallRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "JoinCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "JoinCallRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'location'),
+            'Required key "JoinCallRequest[location]" is missing from JSON.');
+        assert(json[r'location'] != null,
+            'Required key "JoinCallRequest[location]" has a null value in JSON.');
         return true;
       }());
 
