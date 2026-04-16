@@ -54,12 +54,14 @@ class GroupedStatsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GroupedStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GroupedStatsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'name'),
+            'Required key "GroupedStatsResponse[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "GroupedStatsResponse[name]" has a null value in JSON.');
+        assert(json.containsKey(r'unique'),
+            'Required key "GroupedStatsResponse[unique]" is missing from JSON.');
+        assert(json[r'unique'] != null,
+            'Required key "GroupedStatsResponse[unique]" has a null value in JSON.');
         return true;
       }());
 

@@ -48,12 +48,10 @@ class RTMPIngress {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RTMPIngress[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RTMPIngress[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'address'),
+            'Required key "RTMPIngress[address]" is missing from JSON.');
+        assert(json[r'address'] != null,
+            'Required key "RTMPIngress[address]" has a null value in JSON.');
         return true;
       }());
 

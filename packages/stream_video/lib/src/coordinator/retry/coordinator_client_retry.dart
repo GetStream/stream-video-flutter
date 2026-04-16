@@ -2,6 +2,7 @@ import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
+import '../../models/call_egress.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
@@ -598,6 +599,42 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.stopBroadcasting(callCid),
       (error, nextAttemptDelay) async {
         _logRetry('stopBroadcasting', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> startRtmpBroadcasts(
+    StreamCallCid callCid, {
+    required List<StreamRtmpBroadcastRequest> broadcasts,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.startRtmpBroadcasts(callCid, broadcasts: broadcasts),
+      (error, nextAttemptDelay) async {
+        _logRetry('startRtmpBroadcasts', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> stopRtmpBroadcast(
+    StreamCallCid callCid, {
+    required String name,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.stopRtmpBroadcast(callCid, name: name),
+      (error, nextAttemptDelay) async {
+        _logRetry('stopRtmpBroadcast', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> stopAllRtmpBroadcasts(StreamCallCid callCid) {
+    return _retryManager.execute(
+      () => _delegate.stopAllRtmpBroadcasts(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('stopAllRtmpBroadcasts', error, nextAttemptDelay);
       },
     );
   }

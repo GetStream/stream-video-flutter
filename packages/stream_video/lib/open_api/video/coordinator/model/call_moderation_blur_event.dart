@@ -77,12 +77,26 @@ class CallModerationBlurEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallModerationBlurEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallModerationBlurEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallModerationBlurEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallModerationBlurEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallModerationBlurEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallModerationBlurEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "CallModerationBlurEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "CallModerationBlurEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallModerationBlurEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallModerationBlurEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user_id'),
+            'Required key "CallModerationBlurEvent[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "CallModerationBlurEvent[user_id]" has a null value in JSON.');
         return true;
       }());
 

@@ -104,12 +104,46 @@ class EdgeResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "EdgeResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "EdgeResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'continent_code'),
+            'Required key "EdgeResponse[continent_code]" is missing from JSON.');
+        assert(json[r'continent_code'] != null,
+            'Required key "EdgeResponse[continent_code]" has a null value in JSON.');
+        assert(json.containsKey(r'country_iso_code'),
+            'Required key "EdgeResponse[country_iso_code]" is missing from JSON.');
+        assert(json[r'country_iso_code'] != null,
+            'Required key "EdgeResponse[country_iso_code]" has a null value in JSON.');
+        assert(json.containsKey(r'green'),
+            'Required key "EdgeResponse[green]" is missing from JSON.');
+        assert(json[r'green'] != null,
+            'Required key "EdgeResponse[green]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "EdgeResponse[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "EdgeResponse[id]" has a null value in JSON.');
+        assert(json.containsKey(r'latency_test_url'),
+            'Required key "EdgeResponse[latency_test_url]" is missing from JSON.');
+        assert(json[r'latency_test_url'] != null,
+            'Required key "EdgeResponse[latency_test_url]" has a null value in JSON.');
+        assert(json.containsKey(r'latitude'),
+            'Required key "EdgeResponse[latitude]" is missing from JSON.');
+        assert(json[r'latitude'] != null,
+            'Required key "EdgeResponse[latitude]" has a null value in JSON.');
+        assert(json.containsKey(r'longitude'),
+            'Required key "EdgeResponse[longitude]" is missing from JSON.');
+        assert(json[r'longitude'] != null,
+            'Required key "EdgeResponse[longitude]" has a null value in JSON.');
+        assert(json.containsKey(r'red'),
+            'Required key "EdgeResponse[red]" is missing from JSON.');
+        assert(json[r'red'] != null,
+            'Required key "EdgeResponse[red]" has a null value in JSON.');
+        assert(json.containsKey(r'subdivision_iso_code'),
+            'Required key "EdgeResponse[subdivision_iso_code]" is missing from JSON.');
+        assert(json[r'subdivision_iso_code'] != null,
+            'Required key "EdgeResponse[subdivision_iso_code]" has a null value in JSON.');
+        assert(json.containsKey(r'yellow'),
+            'Required key "EdgeResponse[yellow]" is missing from JSON.');
+        assert(json[r'yellow'] != null,
+            'Required key "EdgeResponse[yellow]" has a null value in JSON.');
         return true;
       }());
 

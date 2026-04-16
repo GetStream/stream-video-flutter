@@ -148,7 +148,6 @@ void main() {
               () => localCoordinator.joinCall(
                 callCid: any(named: 'callCid'),
                 create: any(named: 'create'),
-                migratingFrom: null,
                 migratingFromList: any(named: 'migratingFromList'),
                 video: any(named: 'video'),
                 membersLimit: any(named: 'membersLimit'),
@@ -245,7 +244,6 @@ void main() {
             () => coordinatorClient.joinCall(
               callCid: any(named: 'callCid'),
               create: any(named: 'create'),
-              migratingFrom: null,
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),

@@ -69,12 +69,22 @@ class ConnectionErrorEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ConnectionErrorEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ConnectionErrorEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'connection_id'),
+            'Required key "ConnectionErrorEvent[connection_id]" is missing from JSON.');
+        assert(json[r'connection_id'] != null,
+            'Required key "ConnectionErrorEvent[connection_id]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "ConnectionErrorEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "ConnectionErrorEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'error'),
+            'Required key "ConnectionErrorEvent[error]" is missing from JSON.');
+        assert(json[r'error'] != null,
+            'Required key "ConnectionErrorEvent[error]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "ConnectionErrorEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "ConnectionErrorEvent[type]" has a null value in JSON.');
         return true;
       }());
 

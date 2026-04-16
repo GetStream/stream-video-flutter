@@ -74,12 +74,26 @@ class VideoSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'access_request_enabled'),
+            'Required key "VideoSettingsResponse[access_request_enabled]" is missing from JSON.');
+        assert(json[r'access_request_enabled'] != null,
+            'Required key "VideoSettingsResponse[access_request_enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'camera_default_on'),
+            'Required key "VideoSettingsResponse[camera_default_on]" is missing from JSON.');
+        assert(json[r'camera_default_on'] != null,
+            'Required key "VideoSettingsResponse[camera_default_on]" has a null value in JSON.');
+        assert(json.containsKey(r'camera_facing'),
+            'Required key "VideoSettingsResponse[camera_facing]" is missing from JSON.');
+        assert(json[r'camera_facing'] != null,
+            'Required key "VideoSettingsResponse[camera_facing]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'),
+            'Required key "VideoSettingsResponse[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "VideoSettingsResponse[enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'target_resolution'),
+            'Required key "VideoSettingsResponse[target_resolution]" is missing from JSON.');
+        assert(json[r'target_resolution'] != null,
+            'Required key "VideoSettingsResponse[target_resolution]" has a null value in JSON.');
         return true;
       }());
 

@@ -165,12 +165,10 @@ class QueryAggregateCallStatsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryAggregateCallStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryAggregateCallStatsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "QueryAggregateCallStatsResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "QueryAggregateCallStatsResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

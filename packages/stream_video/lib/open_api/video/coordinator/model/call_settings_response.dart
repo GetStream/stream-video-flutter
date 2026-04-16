@@ -150,12 +150,66 @@ class CallSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'audio'),
+            'Required key "CallSettingsResponse[audio]" is missing from JSON.');
+        assert(json[r'audio'] != null,
+            'Required key "CallSettingsResponse[audio]" has a null value in JSON.');
+        assert(json.containsKey(r'backstage'),
+            'Required key "CallSettingsResponse[backstage]" is missing from JSON.');
+        assert(json[r'backstage'] != null,
+            'Required key "CallSettingsResponse[backstage]" has a null value in JSON.');
+        assert(json.containsKey(r'broadcasting'),
+            'Required key "CallSettingsResponse[broadcasting]" is missing from JSON.');
+        assert(json[r'broadcasting'] != null,
+            'Required key "CallSettingsResponse[broadcasting]" has a null value in JSON.');
+        assert(json.containsKey(r'frame_recording'),
+            'Required key "CallSettingsResponse[frame_recording]" is missing from JSON.');
+        assert(json[r'frame_recording'] != null,
+            'Required key "CallSettingsResponse[frame_recording]" has a null value in JSON.');
+        assert(json.containsKey(r'geofencing'),
+            'Required key "CallSettingsResponse[geofencing]" is missing from JSON.');
+        assert(json[r'geofencing'] != null,
+            'Required key "CallSettingsResponse[geofencing]" has a null value in JSON.');
+        assert(json.containsKey(r'individual_recording'),
+            'Required key "CallSettingsResponse[individual_recording]" is missing from JSON.');
+        assert(json[r'individual_recording'] != null,
+            'Required key "CallSettingsResponse[individual_recording]" has a null value in JSON.');
+        assert(json.containsKey(r'limits'),
+            'Required key "CallSettingsResponse[limits]" is missing from JSON.');
+        assert(json[r'limits'] != null,
+            'Required key "CallSettingsResponse[limits]" has a null value in JSON.');
+        assert(json.containsKey(r'raw_recording'),
+            'Required key "CallSettingsResponse[raw_recording]" is missing from JSON.');
+        assert(json[r'raw_recording'] != null,
+            'Required key "CallSettingsResponse[raw_recording]" has a null value in JSON.');
+        assert(json.containsKey(r'recording'),
+            'Required key "CallSettingsResponse[recording]" is missing from JSON.');
+        assert(json[r'recording'] != null,
+            'Required key "CallSettingsResponse[recording]" has a null value in JSON.');
+        assert(json.containsKey(r'ring'),
+            'Required key "CallSettingsResponse[ring]" is missing from JSON.');
+        assert(json[r'ring'] != null,
+            'Required key "CallSettingsResponse[ring]" has a null value in JSON.');
+        assert(json.containsKey(r'screensharing'),
+            'Required key "CallSettingsResponse[screensharing]" is missing from JSON.');
+        assert(json[r'screensharing'] != null,
+            'Required key "CallSettingsResponse[screensharing]" has a null value in JSON.');
+        assert(json.containsKey(r'session'),
+            'Required key "CallSettingsResponse[session]" is missing from JSON.');
+        assert(json[r'session'] != null,
+            'Required key "CallSettingsResponse[session]" has a null value in JSON.');
+        assert(json.containsKey(r'thumbnails'),
+            'Required key "CallSettingsResponse[thumbnails]" is missing from JSON.');
+        assert(json[r'thumbnails'] != null,
+            'Required key "CallSettingsResponse[thumbnails]" has a null value in JSON.');
+        assert(json.containsKey(r'transcription'),
+            'Required key "CallSettingsResponse[transcription]" is missing from JSON.');
+        assert(json[r'transcription'] != null,
+            'Required key "CallSettingsResponse[transcription]" has a null value in JSON.');
+        assert(json.containsKey(r'video'),
+            'Required key "CallSettingsResponse[video]" is missing from JSON.');
+        assert(json[r'video'] != null,
+            'Required key "CallSettingsResponse[video]" has a null value in JSON.');
         return true;
       }());
 

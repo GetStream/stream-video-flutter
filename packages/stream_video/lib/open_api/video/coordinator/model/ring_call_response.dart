@@ -56,12 +56,14 @@ class RingCallResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RingCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RingCallResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "RingCallResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "RingCallResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'members_ids'),
+            'Required key "RingCallResponse[members_ids]" is missing from JSON.');
+        assert(json[r'members_ids'] != null,
+            'Required key "RingCallResponse[members_ids]" has a null value in JSON.');
         return true;
       }());
 

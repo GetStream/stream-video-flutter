@@ -102,12 +102,34 @@ class AudioSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "AudioSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "AudioSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'access_request_enabled'),
+            'Required key "AudioSettingsResponse[access_request_enabled]" is missing from JSON.');
+        assert(json[r'access_request_enabled'] != null,
+            'Required key "AudioSettingsResponse[access_request_enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'default_device'),
+            'Required key "AudioSettingsResponse[default_device]" is missing from JSON.');
+        assert(json[r'default_device'] != null,
+            'Required key "AudioSettingsResponse[default_device]" has a null value in JSON.');
+        assert(json.containsKey(r'hifi_audio_enabled'),
+            'Required key "AudioSettingsResponse[hifi_audio_enabled]" is missing from JSON.');
+        assert(json[r'hifi_audio_enabled'] != null,
+            'Required key "AudioSettingsResponse[hifi_audio_enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'mic_default_on'),
+            'Required key "AudioSettingsResponse[mic_default_on]" is missing from JSON.');
+        assert(json[r'mic_default_on'] != null,
+            'Required key "AudioSettingsResponse[mic_default_on]" has a null value in JSON.');
+        assert(json.containsKey(r'opus_dtx_enabled'),
+            'Required key "AudioSettingsResponse[opus_dtx_enabled]" is missing from JSON.');
+        assert(json[r'opus_dtx_enabled'] != null,
+            'Required key "AudioSettingsResponse[opus_dtx_enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'redundant_coding_enabled'),
+            'Required key "AudioSettingsResponse[redundant_coding_enabled]" is missing from JSON.');
+        assert(json[r'redundant_coding_enabled'] != null,
+            'Required key "AudioSettingsResponse[redundant_coding_enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'speaker_default_on'),
+            'Required key "AudioSettingsResponse[speaker_default_on]" is missing from JSON.');
+        assert(json[r'speaker_default_on'] != null,
+            'Required key "AudioSettingsResponse[speaker_default_on]" has a null value in JSON.');
         return true;
       }());
 

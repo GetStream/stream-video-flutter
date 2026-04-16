@@ -16,6 +16,7 @@ class StartClosedCaptionsRequest {
     this.enableTranscription,
     this.externalStorage,
     this.language,
+    this.speechSegmentConfig,
   });
 
   /// Enable transcriptions along with closed captions
@@ -36,8 +37,16 @@ class StartClosedCaptionsRequest {
   ///
   String? externalStorage;
 
-  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+  /// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
   StartClosedCaptionsRequestLanguageEnum? language;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  SpeechSegmentConfig? speechSegmentConfig;
 
   @override
   bool operator ==(Object other) =>
@@ -45,18 +54,20 @@ class StartClosedCaptionsRequest {
       other is StartClosedCaptionsRequest &&
           other.enableTranscription == enableTranscription &&
           other.externalStorage == externalStorage &&
-          other.language == language;
+          other.language == language &&
+          other.speechSegmentConfig == speechSegmentConfig;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (enableTranscription == null ? 0 : enableTranscription!.hashCode) +
       (externalStorage == null ? 0 : externalStorage!.hashCode) +
-      (language == null ? 0 : language!.hashCode);
+      (language == null ? 0 : language!.hashCode) +
+      (speechSegmentConfig == null ? 0 : speechSegmentConfig!.hashCode);
 
   @override
   String toString() =>
-      'StartClosedCaptionsRequest[enableTranscription=$enableTranscription, externalStorage=$externalStorage, language=$language]';
+      'StartClosedCaptionsRequest[enableTranscription=$enableTranscription, externalStorage=$externalStorage, language=$language, speechSegmentConfig=$speechSegmentConfig]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -75,6 +86,11 @@ class StartClosedCaptionsRequest {
     } else {
       json[r'language'] = null;
     }
+    if (this.speechSegmentConfig != null) {
+      json[r'speech_segment_config'] = this.speechSegmentConfig;
+    } else {
+      json[r'speech_segment_config'] = null;
+    }
     return json;
   }
 
@@ -89,12 +105,6 @@ class StartClosedCaptionsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StartClosedCaptionsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StartClosedCaptionsRequest[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
@@ -104,6 +114,8 @@ class StartClosedCaptionsRequest {
         externalStorage: mapValueOfType<String>(json, r'external_storage'),
         language:
             StartClosedCaptionsRequestLanguageEnum.fromJson(json[r'language']),
+        speechSegmentConfig:
+            SpeechSegmentConfig.fromJson(json[r'speech_segment_config']),
       );
     }
     return null;
@@ -162,7 +174,7 @@ class StartClosedCaptionsRequest {
   static const requiredKeys = <String>{};
 }
 
-/// The spoken language in the call, if not provided the language defined in the transcription settings will be used
+/// The spoken language in the call, if not provided the language defined in the transcription settings will be used. One of: auto, ar, bg, ca, cs, da, de, el, en, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, ms, nl, no, pl, pt, ro, ru, sk, sl, sv, ta, th, tl, tr, uk, zh
 class StartClosedCaptionsRequestLanguageEnum {
   /// Instantiate a new enum with the provided [value].
   const StartClosedCaptionsRequestLanguageEnum._(this.value);

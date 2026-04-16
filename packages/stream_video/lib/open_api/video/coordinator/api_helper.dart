@@ -120,6 +120,24 @@ DateTime? mapDateTime(dynamic map, String key, [String? pattern]) {
 }
 
 // MANUAL_EDIT
+Map<String, List<List<double>>> _mapListListDoubleFromJson(dynamic json) {
+  final map = <String, List<List<double>>>{};
+  if (json is Map) {
+    for (final entry in json.entries) {
+      final key = entry.key as String;
+      final value = entry.value;
+      if (value is List) {
+        map[key] = value
+            .map<List<double>>((inner) =>
+                (inner as List).map<double>((e) => (e as num).toDouble()).toList())
+            .toList();
+      }
+    }
+  }
+  return map;
+}
+
+// MANUAL_EDIT
 extension on Map<String, String> {
   Map<String, DateTime> convertValueToDateTime() {
     final Map<String, DateTime> output = {};

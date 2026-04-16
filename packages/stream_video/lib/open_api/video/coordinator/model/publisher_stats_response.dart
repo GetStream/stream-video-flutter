@@ -60,12 +60,14 @@ class PublisherStatsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PublisherStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PublisherStatsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'total'),
+            'Required key "PublisherStatsResponse[total]" is missing from JSON.');
+        assert(json[r'total'] != null,
+            'Required key "PublisherStatsResponse[total]" has a null value in JSON.');
+        assert(json.containsKey(r'unique'),
+            'Required key "PublisherStatsResponse[unique]" is missing from JSON.');
+        assert(json[r'unique'] != null,
+            'Required key "PublisherStatsResponse[unique]" has a null value in JSON.');
         return true;
       }());
 

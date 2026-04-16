@@ -54,12 +54,14 @@ class PerSDKUsageReport {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PerSDKUsageReport[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PerSDKUsageReport[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'by_version'),
+            'Required key "PerSDKUsageReport[by_version]" is missing from JSON.');
+        assert(json[r'by_version'] != null,
+            'Required key "PerSDKUsageReport[by_version]" has a null value in JSON.');
+        assert(json.containsKey(r'total'),
+            'Required key "PerSDKUsageReport[total]" is missing from JSON.');
+        assert(json[r'total'] != null,
+            'Required key "PerSDKUsageReport[total]" has a null value in JSON.');
         return true;
       }());
 

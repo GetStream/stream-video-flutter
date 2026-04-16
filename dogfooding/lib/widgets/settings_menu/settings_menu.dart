@@ -596,21 +596,21 @@ class _SettingsMenuState extends State<SettingsMenu> {
     ];
   }
 
-  VideoDimension? getIncomingVideoResolution(IncomingVideoQuality quality) {
+  RtcVideoDimension? getIncomingVideoResolution(IncomingVideoQuality quality) {
     switch (quality) {
       case IncomingVideoQuality.auto:
       case IncomingVideoQuality.off:
         return null;
       case IncomingVideoQuality.p2160:
-        return VideoDimension(width: 3840, height: 2160);
+        return const RtcVideoDimension(width: 3840, height: 2160);
       case IncomingVideoQuality.p1080:
-        return VideoDimension(width: 1920, height: 1080);
+        return const RtcVideoDimension(width: 1920, height: 1080);
       case IncomingVideoQuality.p720:
-        return VideoDimension(width: 1280, height: 720);
+        return const RtcVideoDimension(width: 1280, height: 720);
       case IncomingVideoQuality.p480:
-        return VideoDimension(width: 640, height: 480);
+        return const RtcVideoDimension(width: 640, height: 480);
       case IncomingVideoQuality.p144:
-        return VideoDimension(width: 256, height: 144);
+        return const RtcVideoDimension(width: 256, height: 144);
     }
   }
 

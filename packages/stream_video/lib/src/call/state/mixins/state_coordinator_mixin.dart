@@ -3,6 +3,7 @@ import 'package:state_notifier/state_notifier.dart';
 
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_egress.dart';
 import '../../../models/call_member_state.dart';
 import '../../../models/call_metadata.dart';
 import '../../../models/call_reaction.dart';
@@ -390,6 +391,91 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       isBroadcasting: false,
+    );
+  }
+
+  void coordinatorCallRtmpBroadcastStarted(
+    StreamCallRtmpBroadcastStartedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallRtmpBroadcastStarted] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    final currentRtmps = state.egress.rtmps;
+    if (currentRtmps.any((it) => it.name == event.name)) {
+      // Already tracked — nothing to do.
+      return;
+    }
+
+    state = state.copyWith(
+      egress: state.egress.copyWith(
+        rtmps: [
+          ...currentRtmps,
+          CallEgressRtmp(name: event.name),
+        ],
+      ),
+    );
+  }
+
+  void coordinatorCallRtmpBroadcastStopped(
+    StreamCallRtmpBroadcastStoppedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallRtmpBroadcastStopped] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      egress: state.egress.copyWith(
+        rtmps: state.egress.rtmps.where((it) => it.name != event.name).toList(),
+      ),
+    );
+  }
+
+  void coordinatorCallRtmpBroadcastFailed(
+    StreamCallRtmpBroadcastFailedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallRtmpBroadcastFailed] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      egress: state.egress.copyWith(
+        rtmps: state.egress.rtmps.where((it) => it.name != event.name).toList(),
+      ),
+    );
+  }
+
+  void coordinatorCallDeleted(
+    StreamCallDeletedEvent event,
+  ) {
+    _logger.i(() => '[coordinatorCallDeleted] state: $state');
+    if (state.callCid != event.callCid) {
+      _logger.w(
+        () => '[coordinatorCallDeleted] rejected (invalid cid): $event',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      status: CallStatus.disconnected(
+        DisconnectReason.ended(),
+      ),
+      callParticipants: const [],
     );
   }
 

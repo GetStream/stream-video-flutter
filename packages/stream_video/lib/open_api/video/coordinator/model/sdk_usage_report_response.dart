@@ -49,12 +49,10 @@ class SDKUsageReportResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SDKUsageReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SDKUsageReportResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'daily'),
+            'Required key "SDKUsageReportResponse[daily]" is missing from JSON.');
+        assert(json[r'daily'] != null,
+            'Required key "SDKUsageReportResponse[daily]" has a null value in JSON.');
         return true;
       }());
 
