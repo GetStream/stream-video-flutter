@@ -1,3 +1,8 @@
+## Upcoming
+
+### 🐞 Fixed
+* Fixed iOS Picture-in-Picture window not dismissing when the call ends during PiP mode.
+
 ## 1.3.1
 
 ### 🐞 Fixed
