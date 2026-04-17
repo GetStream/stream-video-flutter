@@ -18,9 +18,9 @@ class UpdateUserPermissionsRequest {
     required this.userId,
   });
 
-  List<String> grantPermissions;
+  List<UpdateUserPermissionsRequestGrantPermissionsEnum> grantPermissions;
 
-  List<String> revokePermissions;
+  List<UpdateUserPermissionsRequestRevokePermissionsEnum> revokePermissions;
 
   String userId;
 
@@ -62,26 +62,20 @@ class UpdateUserPermissionsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UpdateUserPermissionsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UpdateUserPermissionsRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'user_id'),
+            'Required key "UpdateUserPermissionsRequest[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "UpdateUserPermissionsRequest[user_id]" has a null value in JSON.');
         return true;
       }());
 
       return UpdateUserPermissionsRequest(
-        grantPermissions: json[r'grant_permissions'] is Iterable
-            ? (json[r'grant_permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
-        revokePermissions: json[r'revoke_permissions'] is Iterable
-            ? (json[r'revoke_permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
+        grantPermissions:
+            UpdateUserPermissionsRequestGrantPermissionsEnum.listFromJson(
+                json[r'grant_permissions']),
+        revokePermissions:
+            UpdateUserPermissionsRequestRevokePermissionsEnum.listFromJson(
+                json[r'revoke_permissions']),
         userId: mapValueOfType<String>(json, r'user_id')!,
       );
     }
@@ -141,4 +135,192 @@ class UpdateUserPermissionsRequest {
   static const requiredKeys = <String>{
     'user_id',
   };
+}
+
+class UpdateUserPermissionsRequestGrantPermissionsEnum {
+  /// Instantiate a new enum with the provided [value].
+  const UpdateUserPermissionsRequestGrantPermissionsEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const screenshare =
+      UpdateUserPermissionsRequestGrantPermissionsEnum._(r'screenshare');
+  static const sendAudio =
+      UpdateUserPermissionsRequestGrantPermissionsEnum._(r'send-audio');
+  static const sendVideo =
+      UpdateUserPermissionsRequestGrantPermissionsEnum._(r'send-video');
+
+  /// List of all possible values in this [enum][UpdateUserPermissionsRequestGrantPermissionsEnum].
+  static const values = <UpdateUserPermissionsRequestGrantPermissionsEnum>[
+    screenshare,
+    sendAudio,
+    sendVideo,
+  ];
+
+  static UpdateUserPermissionsRequestGrantPermissionsEnum? fromJson(
+          dynamic value) =>
+      UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer()
+          .decode(value);
+
+  static List<UpdateUserPermissionsRequestGrantPermissionsEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <UpdateUserPermissionsRequestGrantPermissionsEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value =
+            UpdateUserPermissionsRequestGrantPermissionsEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [UpdateUserPermissionsRequestGrantPermissionsEnum] to String,
+/// and [decode] dynamic data back to [UpdateUserPermissionsRequestGrantPermissionsEnum].
+class UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer {
+  factory UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer() =>
+      _instance ??=
+          const UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer
+              ._();
+
+  const UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer._();
+
+  String encode(UpdateUserPermissionsRequestGrantPermissionsEnum data) =>
+      data.value;
+
+  /// Decodes a [dynamic value][data] to a UpdateUserPermissionsRequestGrantPermissionsEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  UpdateUserPermissionsRequestGrantPermissionsEnum? decode(dynamic data,
+      {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'screenshare':
+          return UpdateUserPermissionsRequestGrantPermissionsEnum.screenshare;
+        case r'send-audio':
+          return UpdateUserPermissionsRequestGrantPermissionsEnum.sendAudio;
+        case r'send-video':
+          return UpdateUserPermissionsRequestGrantPermissionsEnum.sendVideo;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer] instance.
+  static UpdateUserPermissionsRequestGrantPermissionsEnumTypeTransformer?
+      _instance;
+}
+
+class UpdateUserPermissionsRequestRevokePermissionsEnum {
+  /// Instantiate a new enum with the provided [value].
+  const UpdateUserPermissionsRequestRevokePermissionsEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const screenshare =
+      UpdateUserPermissionsRequestRevokePermissionsEnum._(r'screenshare');
+  static const sendAudio =
+      UpdateUserPermissionsRequestRevokePermissionsEnum._(r'send-audio');
+  static const sendVideo =
+      UpdateUserPermissionsRequestRevokePermissionsEnum._(r'send-video');
+
+  /// List of all possible values in this [enum][UpdateUserPermissionsRequestRevokePermissionsEnum].
+  static const values = <UpdateUserPermissionsRequestRevokePermissionsEnum>[
+    screenshare,
+    sendAudio,
+    sendVideo,
+  ];
+
+  static UpdateUserPermissionsRequestRevokePermissionsEnum? fromJson(
+          dynamic value) =>
+      UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer()
+          .decode(value);
+
+  static List<UpdateUserPermissionsRequestRevokePermissionsEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <UpdateUserPermissionsRequestRevokePermissionsEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value =
+            UpdateUserPermissionsRequestRevokePermissionsEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [UpdateUserPermissionsRequestRevokePermissionsEnum] to String,
+/// and [decode] dynamic data back to [UpdateUserPermissionsRequestRevokePermissionsEnum].
+class UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer {
+  factory UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer() =>
+      _instance ??=
+          const UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer
+              ._();
+
+  const UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer._();
+
+  String encode(UpdateUserPermissionsRequestRevokePermissionsEnum data) =>
+      data.value;
+
+  /// Decodes a [dynamic value][data] to a UpdateUserPermissionsRequestRevokePermissionsEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  UpdateUserPermissionsRequestRevokePermissionsEnum? decode(dynamic data,
+      {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'screenshare':
+          return UpdateUserPermissionsRequestRevokePermissionsEnum.screenshare;
+        case r'send-audio':
+          return UpdateUserPermissionsRequestRevokePermissionsEnum.sendAudio;
+        case r'send-video':
+          return UpdateUserPermissionsRequestRevokePermissionsEnum.sendVideo;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer] instance.
+  static UpdateUserPermissionsRequestRevokePermissionsEnumTypeTransformer?
+      _instance;
 }

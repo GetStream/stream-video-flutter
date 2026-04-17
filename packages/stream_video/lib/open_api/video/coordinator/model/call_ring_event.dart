@@ -95,12 +95,38 @@ class CallRingEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRingEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRingEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallRingEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallRingEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallRingEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallRingEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallRingEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallRingEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "CallRingEvent[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "CallRingEvent[members]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "CallRingEvent[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "CallRingEvent[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallRingEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallRingEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "CallRingEvent[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "CallRingEvent[user]" has a null value in JSON.');
+        assert(json.containsKey(r'video'),
+            'Required key "CallRingEvent[video]" is missing from JSON.');
+        assert(json[r'video'] != null,
+            'Required key "CallRingEvent[video]" has a null value in JSON.');
         return true;
       }());
 

@@ -369,6 +369,7 @@ class StreamCallEndedEvent extends StreamCallEvent {
     required this.metadata,
     required this.type,
     this.reason,
+    this.members = const [],
   });
 
   final CallUser? endedBy;
@@ -376,6 +377,7 @@ class StreamCallEndedEvent extends StreamCallEvent {
   final CallMetadata metadata;
   final String type;
   final String? reason;
+  final List<CallMember> members;
 
   String? get endedByUserId => endedBy?.id;
 
@@ -384,6 +386,7 @@ class StreamCallEndedEvent extends StreamCallEvent {
     ...super.props,
     endedBy,
     createdAt,
+    members,
   ];
 }
 
@@ -1068,6 +1071,248 @@ class StreamCallBroadcastingFailedEvent extends StreamCallEvent {
   ];
 }
 
+/// Event that is triggered when an RTMP broadcast is started for a call.
+class StreamCallRtmpBroadcastStartedEvent extends StreamCallEvent {
+  const StreamCallRtmpBroadcastStartedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.name,
+  });
+
+  final DateTime createdAt;
+
+  /// Name of the RTMP broadcast destination.
+  final String name;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    name,
+  ];
+}
+
+/// Event that is triggered when an RTMP broadcast is stopped for a call.
+class StreamCallRtmpBroadcastStoppedEvent extends StreamCallEvent {
+  const StreamCallRtmpBroadcastStoppedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.name,
+  });
+
+  final DateTime createdAt;
+
+  /// Name of the RTMP broadcast destination.
+  final String name;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    name,
+  ];
+}
+
+/// Event that is triggered when an RTMP broadcast fails for a call.
+class StreamCallRtmpBroadcastFailedEvent extends StreamCallEvent {
+  const StreamCallRtmpBroadcastFailedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.name,
+  });
+
+  final DateTime createdAt;
+
+  /// Name of the RTMP broadcast destination.
+  final String name;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    name,
+  ];
+}
+
+/// Event that is triggered when a call is deleted.
+class StreamCallDeletedEvent extends StreamCallEvent {
+  const StreamCallDeletedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.metadata,
+  });
+
+  final DateTime createdAt;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    metadata,
+  ];
+}
+
+/// Event that is triggered when a user submits feedback for a call.
+class StreamCallUserFeedbackSubmittedEvent extends StreamCallEvent {
+  const StreamCallUserFeedbackSubmittedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.sessionId,
+    required this.rating,
+    required this.user,
+    this.reason,
+    this.sdk,
+    this.sdkVersion,
+    this.custom = const {},
+  });
+
+  final DateTime createdAt;
+  final String sessionId;
+
+  /// The rating given by the user (1-5).
+  final int rating;
+  final String? reason;
+  final String? sdk;
+  final String? sdkVersion;
+  final CallUser user;
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    sessionId,
+    rating,
+    reason,
+    sdk,
+    sdkVersion,
+    user,
+    custom,
+  ];
+}
+
+/// Event that is triggered when a call transcription file is ready.
+class StreamCallTranscriptionReadyEvent extends StreamCallEvent {
+  const StreamCallTranscriptionReadyEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.egressId,
+    required this.url,
+    required this.filename,
+    required this.startTime,
+    required this.endTime,
+    required this.sessionId,
+  });
+
+  final DateTime createdAt;
+  final String egressId;
+  final String url;
+  final String filename;
+  final DateTime startTime;
+  final DateTime endTime;
+  final String sessionId;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    egressId,
+    url,
+    filename,
+    startTime,
+    endTime,
+    sessionId,
+  ];
+}
+
+/// Event triggered when a third-party ingress stream (RTMP/SRT/WHIP) has
+/// started for a call.
+class StreamCallIngressStartedEvent extends StreamCallEvent {
+  const StreamCallIngressStartedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.ingressStreamId,
+    required this.publisherType,
+    required this.userId,
+    this.clientIp,
+    this.clientName,
+    this.version,
+  });
+
+  final DateTime createdAt;
+  final String ingressStreamId;
+
+  /// Streaming protocol (e.g., 'rtmps', 'srt', 'rtmp', 'rtsp').
+  final String publisherType;
+  final String userId;
+  final String? clientIp;
+  final String? clientName;
+  final String? version;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    ingressStreamId,
+    publisherType,
+    userId,
+    clientIp,
+    clientName,
+    version,
+  ];
+}
+
+/// Event triggered when a third-party ingress stream has stopped for a call.
+class StreamCallIngressStoppedEvent extends StreamCallEvent {
+  const StreamCallIngressStoppedEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.ingressStreamId,
+    required this.userId,
+  });
+
+  final DateTime createdAt;
+  final String ingressStreamId;
+  final String userId;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    ingressStreamId,
+    userId,
+  ];
+}
+
+/// Event triggered when a third-party ingress stream errored for a call.
+class StreamCallIngressErrorEvent extends StreamCallEvent {
+  const StreamCallIngressErrorEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.ingressStreamId,
+    required this.userId,
+    required this.error,
+    this.code,
+  });
+
+  final DateTime createdAt;
+  final String ingressStreamId;
+  final String userId;
+  final String error;
+  final String? code;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    ingressStreamId,
+    userId,
+    error,
+    code,
+  ];
+}
+
 /// Event that is triggered when the user is blocked in a call.
 class StreamCallUserBlockedEvent extends StreamCallEvent {
   const StreamCallUserBlockedEvent(
@@ -1431,6 +1676,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
         metadata: event.metadata,
         type: event.type,
         reason: event.reason,
+        members: event.members,
       ),
       final CoordinatorCallAcceptedEvent event => StreamCallAcceptedEvent(
         event.callCid,
@@ -1541,6 +1787,78 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           event.callCid,
           createdAt: event.createdAt,
         ),
+      final CoordinatorCallRtmpBroadcastStartedEvent event =>
+        StreamCallRtmpBroadcastStartedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          name: event.name,
+        ),
+      final CoordinatorCallRtmpBroadcastStoppedEvent event =>
+        StreamCallRtmpBroadcastStoppedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          name: event.name,
+        ),
+      final CoordinatorCallRtmpBroadcastFailedEvent event =>
+        StreamCallRtmpBroadcastFailedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          name: event.name,
+        ),
+      final CoordinatorCallDeletedEvent event => StreamCallDeletedEvent(
+        event.callCid,
+        createdAt: event.createdAt,
+        metadata: event.metadata,
+      ),
+      final CoordinatorCallUserFeedbackSubmittedEvent event =>
+        StreamCallUserFeedbackSubmittedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          rating: event.rating,
+          reason: event.reason,
+          sdk: event.sdk,
+          sdkVersion: event.sdkVersion,
+          user: event.user,
+          custom: event.custom,
+        ),
+      final CoordinatorCallTranscriptionReadyEvent event =>
+        StreamCallTranscriptionReadyEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          egressId: event.egressId,
+          url: event.url,
+          filename: event.filename,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          sessionId: event.sessionId,
+        ),
+      final CoordinatorIngressStartedEvent event =>
+        StreamCallIngressStartedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          ingressStreamId: event.ingressStreamId,
+          publisherType: event.publisherType,
+          userId: event.userId,
+          clientIp: event.clientIp,
+          clientName: event.clientName,
+          version: event.version,
+        ),
+      final CoordinatorIngressStoppedEvent event =>
+        StreamCallIngressStoppedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          ingressStreamId: event.ingressStreamId,
+          userId: event.userId,
+        ),
+      final CoordinatorIngressErrorEvent event => StreamCallIngressErrorEvent(
+        event.callCid,
+        createdAt: event.createdAt,
+        ingressStreamId: event.ingressStreamId,
+        userId: event.userId,
+        error: event.error,
+        code: event.code,
+      ),
       final CoordinatorCallUserBlockedEvent event => StreamCallUserBlockedEvent(
         event.callCid,
         createdAt: event.createdAt,

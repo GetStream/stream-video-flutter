@@ -75,12 +75,26 @@ class CallHLSBroadcastingStartedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallHLSBroadcastingStartedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallHLSBroadcastingStartedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallHLSBroadcastingStartedEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallHLSBroadcastingStartedEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallHLSBroadcastingStartedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallHLSBroadcastingStartedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallHLSBroadcastingStartedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallHLSBroadcastingStartedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'hls_playlist_url'),
+            'Required key "CallHLSBroadcastingStartedEvent[hls_playlist_url]" is missing from JSON.');
+        assert(json[r'hls_playlist_url'] != null,
+            'Required key "CallHLSBroadcastingStartedEvent[hls_playlist_url]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallHLSBroadcastingStartedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallHLSBroadcastingStartedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

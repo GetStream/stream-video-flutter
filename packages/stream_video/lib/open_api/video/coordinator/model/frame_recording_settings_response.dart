@@ -74,12 +74,14 @@ class FrameRecordingSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "FrameRecordingSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "FrameRecordingSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'capture_interval_in_seconds'),
+            'Required key "FrameRecordingSettingsResponse[capture_interval_in_seconds]" is missing from JSON.');
+        assert(json[r'capture_interval_in_seconds'] != null,
+            'Required key "FrameRecordingSettingsResponse[capture_interval_in_seconds]" has a null value in JSON.');
+        assert(json.containsKey(r'mode'),
+            'Required key "FrameRecordingSettingsResponse[mode]" is missing from JSON.');
+        assert(json[r'mode'] != null,
+            'Required key "FrameRecordingSettingsResponse[mode]" has a null value in JSON.');
         return true;
       }());
 

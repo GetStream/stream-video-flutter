@@ -83,12 +83,30 @@ class CallSessionParticipantCountsUpdatedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSessionParticipantCountsUpdatedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSessionParticipantCountsUpdatedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'anonymous_participant_count'),
+            'Required key "CallSessionParticipantCountsUpdatedEvent[anonymous_participant_count]" is missing from JSON.');
+        assert(json[r'anonymous_participant_count'] != null,
+            'Required key "CallSessionParticipantCountsUpdatedEvent[anonymous_participant_count]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallSessionParticipantCountsUpdatedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallSessionParticipantCountsUpdatedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallSessionParticipantCountsUpdatedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallSessionParticipantCountsUpdatedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'participants_count_by_role'),
+            'Required key "CallSessionParticipantCountsUpdatedEvent[participants_count_by_role]" is missing from JSON.');
+        assert(json[r'participants_count_by_role'] != null,
+            'Required key "CallSessionParticipantCountsUpdatedEvent[participants_count_by_role]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "CallSessionParticipantCountsUpdatedEvent[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "CallSessionParticipantCountsUpdatedEvent[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallSessionParticipantCountsUpdatedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallSessionParticipantCountsUpdatedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

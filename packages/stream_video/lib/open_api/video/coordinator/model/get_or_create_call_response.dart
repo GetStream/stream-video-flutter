@@ -90,12 +90,26 @@ class GetOrCreateCallResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GetOrCreateCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GetOrCreateCallResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "GetOrCreateCallResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "GetOrCreateCallResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'created'),
+            'Required key "GetOrCreateCallResponse[created]" is missing from JSON.');
+        assert(json[r'created'] != null,
+            'Required key "GetOrCreateCallResponse[created]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "GetOrCreateCallResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "GetOrCreateCallResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "GetOrCreateCallResponse[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "GetOrCreateCallResponse[members]" has a null value in JSON.');
+        assert(json.containsKey(r'own_capabilities'),
+            'Required key "GetOrCreateCallResponse[own_capabilities]" is missing from JSON.');
+        assert(json[r'own_capabilities'] != null,
+            'Required key "GetOrCreateCallResponse[own_capabilities]" has a null value in JSON.');
         return true;
       }());
 

@@ -18,6 +18,7 @@ class JoinCallRequest {
     required this.location,
     this.membersLimit,
     this.migratingFrom,
+    this.migratingFromList = const [],
     this.notify,
     this.ring,
     this.video,
@@ -60,6 +61,9 @@ class JoinCallRequest {
   ///
   String? migratingFrom;
 
+  /// List of SFU IDs to exclude when picking a new SFU for the participant
+  List<String> migratingFromList;
+
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -94,6 +98,7 @@ class JoinCallRequest {
           other.location == location &&
           other.membersLimit == membersLimit &&
           other.migratingFrom == migratingFrom &&
+          _deepEquality.equals(other.migratingFromList, migratingFromList) &&
           other.notify == notify &&
           other.ring == ring &&
           other.video == video;
@@ -106,13 +111,14 @@ class JoinCallRequest {
       (location.hashCode) +
       (membersLimit == null ? 0 : membersLimit!.hashCode) +
       (migratingFrom == null ? 0 : migratingFrom!.hashCode) +
+      (migratingFromList.hashCode) +
       (notify == null ? 0 : notify!.hashCode) +
       (ring == null ? 0 : ring!.hashCode) +
       (video == null ? 0 : video!.hashCode);
 
   @override
   String toString() =>
-      'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, notify=$notify, ring=$ring, video=$video]';
+      'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, migratingFromList=$migratingFromList, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -137,6 +143,7 @@ class JoinCallRequest {
     } else {
       json[r'migrating_from'] = null;
     }
+    json[r'migrating_from_list'] = this.migratingFromList;
     if (this.notify != null) {
       json[r'notify'] = this.notify;
     } else {
@@ -166,12 +173,10 @@ class JoinCallRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "JoinCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "JoinCallRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'location'),
+            'Required key "JoinCallRequest[location]" is missing from JSON.');
+        assert(json[r'location'] != null,
+            'Required key "JoinCallRequest[location]" has a null value in JSON.');
         return true;
       }());
 
@@ -181,6 +186,11 @@ class JoinCallRequest {
         location: mapValueOfType<String>(json, r'location')!,
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
         migratingFrom: mapValueOfType<String>(json, r'migrating_from'),
+        migratingFromList: json[r'migrating_from_list'] is Iterable
+            ? (json[r'migrating_from_list'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
+            : const [],
         notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
         video: mapValueOfType<bool>(json, r'video'),

@@ -14,26 +14,37 @@ class CallIngressResponse {
   /// Returns a new [CallIngressResponse] instance.
   CallIngressResponse({
     required this.rtmp,
+    required this.srt,
+    required this.whip,
   });
 
   RTMPIngress rtmp;
 
+  SRTIngress srt;
+
+  WHIPIngress whip;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CallIngressResponse && other.rtmp == rtmp;
+      other is CallIngressResponse &&
+          other.rtmp == rtmp &&
+          other.srt == srt &&
+          other.whip == whip;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (rtmp.hashCode);
+      (rtmp.hashCode) + (srt.hashCode) + (whip.hashCode);
 
   @override
-  String toString() => 'CallIngressResponse[rtmp=$rtmp]';
+  String toString() => 'CallIngressResponse[rtmp=$rtmp, srt=$srt, whip=$whip]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'rtmp'] = this.rtmp;
+    json[r'srt'] = this.srt;
+    json[r'whip'] = this.whip;
     return json;
   }
 
@@ -48,17 +59,25 @@ class CallIngressResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallIngressResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallIngressResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'rtmp'),
+            'Required key "CallIngressResponse[rtmp]" is missing from JSON.');
+        assert(json[r'rtmp'] != null,
+            'Required key "CallIngressResponse[rtmp]" has a null value in JSON.');
+        assert(json.containsKey(r'srt'),
+            'Required key "CallIngressResponse[srt]" is missing from JSON.');
+        assert(json[r'srt'] != null,
+            'Required key "CallIngressResponse[srt]" has a null value in JSON.');
+        assert(json.containsKey(r'whip'),
+            'Required key "CallIngressResponse[whip]" is missing from JSON.');
+        assert(json[r'whip'] != null,
+            'Required key "CallIngressResponse[whip]" has a null value in JSON.');
         return true;
       }());
 
       return CallIngressResponse(
         rtmp: RTMPIngress.fromJson(json[r'rtmp'])!,
+        srt: SRTIngress.fromJson(json[r'srt'])!,
+        whip: WHIPIngress.fromJson(json[r'whip'])!,
       );
     }
     return null;
@@ -116,5 +135,7 @@ class CallIngressResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'rtmp',
+    'srt',
+    'whip',
   };
 }

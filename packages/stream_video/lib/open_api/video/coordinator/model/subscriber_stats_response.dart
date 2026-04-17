@@ -64,12 +64,18 @@ class SubscriberStatsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SubscriberStatsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SubscriberStatsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'total'),
+            'Required key "SubscriberStatsResponse[total]" is missing from JSON.');
+        assert(json[r'total'] != null,
+            'Required key "SubscriberStatsResponse[total]" has a null value in JSON.');
+        assert(json.containsKey(r'total_subscribed_duration_seconds'),
+            'Required key "SubscriberStatsResponse[total_subscribed_duration_seconds]" is missing from JSON.');
+        assert(json[r'total_subscribed_duration_seconds'] != null,
+            'Required key "SubscriberStatsResponse[total_subscribed_duration_seconds]" has a null value in JSON.');
+        assert(json.containsKey(r'unique'),
+            'Required key "SubscriberStatsResponse[unique]" is missing from JSON.');
+        assert(json[r'unique'] != null,
+            'Required key "SubscriberStatsResponse[unique]" has a null value in JSON.');
         return true;
       }());
 

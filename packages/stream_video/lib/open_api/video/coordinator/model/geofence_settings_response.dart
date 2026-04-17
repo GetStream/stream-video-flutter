@@ -49,12 +49,10 @@ class GeofenceSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GeofenceSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GeofenceSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'names'),
+            'Required key "GeofenceSettingsResponse[names]" is missing from JSON.');
+        assert(json[r'names'] != null,
+            'Required key "GeofenceSettingsResponse[names]" has a null value in JSON.');
         return true;
       }());
 

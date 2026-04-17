@@ -55,12 +55,14 @@ class DailyAggregateUserFeedbackReportResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "DailyAggregateUserFeedbackReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "DailyAggregateUserFeedbackReportResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'date'),
+            'Required key "DailyAggregateUserFeedbackReportResponse[date]" is missing from JSON.');
+        assert(json[r'date'] != null,
+            'Required key "DailyAggregateUserFeedbackReportResponse[date]" has a null value in JSON.');
+        assert(json.containsKey(r'report'),
+            'Required key "DailyAggregateUserFeedbackReportResponse[report]" is missing from JSON.');
+        assert(json[r'report'] != null,
+            'Required key "DailyAggregateUserFeedbackReportResponse[report]" has a null value in JSON.');
         return true;
       }());
 

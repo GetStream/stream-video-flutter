@@ -94,12 +94,18 @@ class ReportByHistogramBucket {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ReportByHistogramBucket[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ReportByHistogramBucket[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'category'),
+            'Required key "ReportByHistogramBucket[category]" is missing from JSON.');
+        assert(json[r'category'] != null,
+            'Required key "ReportByHistogramBucket[category]" has a null value in JSON.');
+        assert(json.containsKey(r'count'),
+            'Required key "ReportByHistogramBucket[count]" is missing from JSON.');
+        assert(json[r'count'] != null,
+            'Required key "ReportByHistogramBucket[count]" has a null value in JSON.');
+        assert(json.containsKey(r'sum'),
+            'Required key "ReportByHistogramBucket[sum]" is missing from JSON.');
+        assert(json[r'sum'] != null,
+            'Required key "ReportByHistogramBucket[sum]" has a null value in JSON.');
         return true;
       }());
 

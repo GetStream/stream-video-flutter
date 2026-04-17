@@ -74,12 +74,26 @@ class IngressVideoLayerResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "IngressVideoLayerResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "IngressVideoLayerResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'bitrate'),
+            'Required key "IngressVideoLayerResponse[bitrate]" is missing from JSON.');
+        assert(json[r'bitrate'] != null,
+            'Required key "IngressVideoLayerResponse[bitrate]" has a null value in JSON.');
+        assert(json.containsKey(r'codec'),
+            'Required key "IngressVideoLayerResponse[codec]" is missing from JSON.');
+        assert(json[r'codec'] != null,
+            'Required key "IngressVideoLayerResponse[codec]" has a null value in JSON.');
+        assert(json.containsKey(r'frame_rate_limit'),
+            'Required key "IngressVideoLayerResponse[frame_rate_limit]" is missing from JSON.');
+        assert(json[r'frame_rate_limit'] != null,
+            'Required key "IngressVideoLayerResponse[frame_rate_limit]" has a null value in JSON.');
+        assert(json.containsKey(r'max_dimension'),
+            'Required key "IngressVideoLayerResponse[max_dimension]" is missing from JSON.');
+        assert(json[r'max_dimension'] != null,
+            'Required key "IngressVideoLayerResponse[max_dimension]" has a null value in JSON.');
+        assert(json.containsKey(r'min_dimension'),
+            'Required key "IngressVideoLayerResponse[min_dimension]" is missing from JSON.');
+        assert(json[r'min_dimension'] != null,
+            'Required key "IngressVideoLayerResponse[min_dimension]" has a null value in JSON.');
         return true;
       }());
 

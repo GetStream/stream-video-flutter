@@ -101,12 +101,18 @@ class GetCallReportResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "GetCallReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "GetCallReportResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "GetCallReportResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "GetCallReportResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'report'),
+            'Required key "GetCallReportResponse[report]" is missing from JSON.');
+        assert(json[r'report'] != null,
+            'Required key "GetCallReportResponse[report]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "GetCallReportResponse[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "GetCallReportResponse[session_id]" has a null value in JSON.');
         return true;
       }());
 

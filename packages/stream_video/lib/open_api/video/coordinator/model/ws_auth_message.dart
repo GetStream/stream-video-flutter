@@ -18,8 +18,10 @@ class WSAuthMessage {
     required this.userDetails,
   });
 
-  List<String> products;
+  /// List of products to subscribe to. One of: chat, video, feeds
+  List<WSAuthMessageProductsEnum> products;
 
+  /// JWT token for authentication
   String token;
 
   ConnectUserDetailsRequest userDetails;
@@ -60,21 +62,19 @@ class WSAuthMessage {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "WSAuthMessage[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "WSAuthMessage[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'token'),
+            'Required key "WSAuthMessage[token]" is missing from JSON.');
+        assert(json[r'token'] != null,
+            'Required key "WSAuthMessage[token]" has a null value in JSON.');
+        assert(json.containsKey(r'user_details'),
+            'Required key "WSAuthMessage[user_details]" is missing from JSON.');
+        assert(json[r'user_details'] != null,
+            'Required key "WSAuthMessage[user_details]" has a null value in JSON.');
         return true;
       }());
 
       return WSAuthMessage(
-        products: json[r'products'] is Iterable
-            ? (json[r'products'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
+        products: WSAuthMessageProductsEnum.listFromJson(json[r'products']),
         token: mapValueOfType<String>(json, r'token')!,
         userDetails: ConnectUserDetailsRequest.fromJson(json[r'user_details'])!,
       );
@@ -136,4 +136,87 @@ class WSAuthMessage {
     'token',
     'user_details',
   };
+}
+
+class WSAuthMessageProductsEnum {
+  /// Instantiate a new enum with the provided [value].
+  const WSAuthMessageProductsEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const chat = WSAuthMessageProductsEnum._(r'chat');
+  static const video = WSAuthMessageProductsEnum._(r'video');
+  static const feeds = WSAuthMessageProductsEnum._(r'feeds');
+
+  /// List of all possible values in this [enum][WSAuthMessageProductsEnum].
+  static const values = <WSAuthMessageProductsEnum>[
+    chat,
+    video,
+    feeds,
+  ];
+
+  static WSAuthMessageProductsEnum? fromJson(dynamic value) =>
+      WSAuthMessageProductsEnumTypeTransformer().decode(value);
+
+  static List<WSAuthMessageProductsEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <WSAuthMessageProductsEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = WSAuthMessageProductsEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [WSAuthMessageProductsEnum] to String,
+/// and [decode] dynamic data back to [WSAuthMessageProductsEnum].
+class WSAuthMessageProductsEnumTypeTransformer {
+  factory WSAuthMessageProductsEnumTypeTransformer() =>
+      _instance ??= const WSAuthMessageProductsEnumTypeTransformer._();
+
+  const WSAuthMessageProductsEnumTypeTransformer._();
+
+  String encode(WSAuthMessageProductsEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a WSAuthMessageProductsEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  WSAuthMessageProductsEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'chat':
+          return WSAuthMessageProductsEnum.chat;
+        case r'video':
+          return WSAuthMessageProductsEnum.video;
+        case r'feeds':
+          return WSAuthMessageProductsEnum.feeds;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [WSAuthMessageProductsEnumTypeTransformer] instance.
+  static WSAuthMessageProductsEnumTypeTransformer? _instance;
 }

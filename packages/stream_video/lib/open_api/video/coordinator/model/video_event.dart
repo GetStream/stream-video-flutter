@@ -48,6 +48,8 @@ class VideoEvent {
     this.participantsCountByRole = const {},
     required this.participant,
     required this.durationSeconds,
+    this.isTrimmed,
+    this.participantsOverview = const [],
     required this.error,
     required this.callTranscription,
     required this.rating,
@@ -58,7 +60,7 @@ class VideoEvent {
     required this.closedCaption,
     required this.connectionId,
     required this.me,
-    required this.cid,
+    this.cid,
     this.code,
     required this.ingressStreamId,
     this.clientIp,
@@ -68,14 +70,22 @@ class VideoEvent {
     this.kickedByUser,
     this.permissions = const [],
     this.ownCapabilities = const [],
-    required this.channelId,
-    required this.channelType,
-    required this.createdBy,
+    this.channelCustom = const {},
+    this.channelId,
+    this.channelMemberCount,
+    this.channelMessageCount,
+    this.channelType,
+    this.createdBy,
     this.expiration,
-    required this.shadow,
+    this.shadow,
     this.team,
-    this.targetUser,
-    this.targetUsers = const [],
+    this.totalBans,
+    required this.deleteConversation,
+    required this.deleteConversationChannels,
+    required this.deleteMessages,
+    required this.deleteUser,
+    required this.hardDelete,
+    required this.markMessagesDeleted,
   });
 
   AppEventResponse app;
@@ -125,6 +135,7 @@ class VideoEvent {
   /// When the digit press ended and was detected
   DateTime timestamp;
 
+  /// The reason for the ban
   String reason;
 
   String egressId;
@@ -157,7 +168,7 @@ class VideoEvent {
   /// The warning message
   String message;
 
-  ReactionResponse reaction;
+  VideoReactionResponse reaction;
 
   /// The type of recording
   VideoEventRecordingTypeEnum recordingType;
@@ -177,6 +188,18 @@ class VideoEvent {
 
   /// The duration participant was in the session in seconds
   int durationSeconds;
+
+  /// Whether participants_overview is truncated by the server-side limit
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? isTrimmed;
+
+  /// Top participant sessions overview
+  List<CallStatsParticipant> participantsOverview;
 
   /// Human-readable error message
   String error;
@@ -212,7 +235,14 @@ class VideoEvent {
 
   OwnUserResponse me;
 
-  String cid;
+  /// The CID of the channel where the target user was unbanned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? cid;
 
   /// Error code
   ///
@@ -270,12 +300,51 @@ class VideoEvent {
   /// The capabilities of the current user
   List<OwnCapability> ownCapabilities;
 
-  String channelId;
+  Map<String, Object> channelCustom;
 
-  String channelType;
+  /// The ID of the channel where the target user was unbanned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? channelId;
 
-  User createdBy;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? channelMemberCount;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? channelMessageCount;
+
+  /// The type of the channel where the target user was unbanned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? channelType;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  UserResponseCommonFields? createdBy;
+
+  /// The expiration date of the ban
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -284,8 +353,16 @@ class VideoEvent {
   ///
   DateTime? expiration;
 
-  bool shadow;
+  /// Whether the target user was shadow unbanned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? shadow;
 
+  /// The team of the channel where the target user was unbanned
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -300,9 +377,25 @@ class VideoEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? targetUser;
+  int? totalBans;
 
-  List<String> targetUsers;
+  /// The type of deletion that was used for the user's conversations. One of: hard, soft, pruning, (empty string)
+  String deleteConversation;
+
+  /// Whether the user's conversation channels were deleted
+  bool deleteConversationChannels;
+
+  /// The type of deletion that was used for the user's messages. One of: hard, soft, pruning, (empty string)
+  String deleteMessages;
+
+  /// The type of deletion that was used for the user. One of: hard, soft, pruning, (empty string)
+  String deleteUser;
+
+  /// Whether the user was hard deleted
+  bool hardDelete;
+
+  /// Whether the user's messages were marked as deleted
+  bool markMessagesDeleted;
 
   @override
   bool operator ==(Object other) =>
@@ -344,6 +437,9 @@ class VideoEvent {
               other.participantsCountByRole, participantsCountByRole) &&
           other.participant == participant &&
           other.durationSeconds == durationSeconds &&
+          other.isTrimmed == isTrimmed &&
+          _deepEquality.equals(
+              other.participantsOverview, participantsOverview) &&
           other.error == error &&
           other.callTranscription == callTranscription &&
           other.rating == rating &&
@@ -364,14 +460,22 @@ class VideoEvent {
           other.kickedByUser == kickedByUser &&
           _deepEquality.equals(other.permissions, permissions) &&
           _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
+          _deepEquality.equals(other.channelCustom, channelCustom) &&
           other.channelId == channelId &&
+          other.channelMemberCount == channelMemberCount &&
+          other.channelMessageCount == channelMessageCount &&
           other.channelType == channelType &&
           other.createdBy == createdBy &&
           other.expiration == expiration &&
           other.shadow == shadow &&
           other.team == team &&
-          other.targetUser == targetUser &&
-          _deepEquality.equals(other.targetUsers, targetUsers);
+          other.totalBans == totalBans &&
+          other.deleteConversation == deleteConversation &&
+          other.deleteConversationChannels == deleteConversationChannels &&
+          other.deleteMessages == deleteMessages &&
+          other.deleteUser == deleteUser &&
+          other.hardDelete == hardDelete &&
+          other.markMessagesDeleted == markMessagesDeleted;
 
   @override
   int get hashCode =>
@@ -411,6 +515,8 @@ class VideoEvent {
       (participantsCountByRole.hashCode) +
       (participant.hashCode) +
       (durationSeconds.hashCode) +
+      (isTrimmed == null ? 0 : isTrimmed!.hashCode) +
+      (participantsOverview.hashCode) +
       (error.hashCode) +
       (callTranscription.hashCode) +
       (rating.hashCode) +
@@ -421,7 +527,7 @@ class VideoEvent {
       (closedCaption.hashCode) +
       (connectionId.hashCode) +
       (me.hashCode) +
-      (cid.hashCode) +
+      (cid == null ? 0 : cid!.hashCode) +
       (code == null ? 0 : code!.hashCode) +
       (ingressStreamId.hashCode) +
       (clientIp == null ? 0 : clientIp!.hashCode) +
@@ -431,18 +537,26 @@ class VideoEvent {
       (kickedByUser == null ? 0 : kickedByUser!.hashCode) +
       (permissions.hashCode) +
       (ownCapabilities.hashCode) +
-      (channelId.hashCode) +
-      (channelType.hashCode) +
-      (createdBy.hashCode) +
+      (channelCustom.hashCode) +
+      (channelId == null ? 0 : channelId!.hashCode) +
+      (channelMemberCount == null ? 0 : channelMemberCount!.hashCode) +
+      (channelMessageCount == null ? 0 : channelMessageCount!.hashCode) +
+      (channelType == null ? 0 : channelType!.hashCode) +
+      (createdBy == null ? 0 : createdBy!.hashCode) +
       (expiration == null ? 0 : expiration!.hashCode) +
-      (shadow.hashCode) +
+      (shadow == null ? 0 : shadow!.hashCode) +
       (team == null ? 0 : team!.hashCode) +
-      (targetUser == null ? 0 : targetUser!.hashCode) +
-      (targetUsers.hashCode);
+      (totalBans == null ? 0 : totalBans!.hashCode) +
+      (deleteConversation.hashCode) +
+      (deleteConversationChannels.hashCode) +
+      (deleteMessages.hashCode) +
+      (deleteUser.hashCode) +
+      (hardDelete.hashCode) +
+      (markMessagesDeleted.hashCode);
 
   @override
   String toString() =>
-      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, digit=$digit, durationMs=$durationMs, seqNumber=$seqNumber, timestamp=$timestamp, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, recordingType=$recordingType, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, error=$error, callTranscription=$callTranscription, rating=$rating, sdk=$sdk, sdkVersion=$sdkVersion, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, code=$code, ingressStreamId=$ingressStreamId, clientIp=$clientIp, clientName=$clientName, publisherType=$publisherType, version=$version, kickedByUser=$kickedByUser, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, targetUser=$targetUser, targetUsers=$targetUsers]';
+      'VideoEvent[app=$app, createdAt=$createdAt, custom=$custom, receivedAt=$receivedAt, type=$type, blockedByUser=$blockedByUser, callCid=$callCid, user=$user, call=$call, members=$members, digit=$digit, durationMs=$durationMs, seqNumber=$seqNumber, timestamp=$timestamp, reason=$reason, egressId=$egressId, capturedAt=$capturedAt, sessionId=$sessionId, trackType=$trackType, url=$url, users=$users, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, userId=$userId, message=$message, reaction=$reaction, recordingType=$recordingType, callRecording=$callRecording, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, durationSeconds=$durationSeconds, isTrimmed=$isTrimmed, participantsOverview=$participantsOverview, error=$error, callTranscription=$callTranscription, rating=$rating, sdk=$sdk, sdkVersion=$sdkVersion, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, cid=$cid, code=$code, ingressStreamId=$ingressStreamId, clientIp=$clientIp, clientName=$clientName, publisherType=$publisherType, version=$version, kickedByUser=$kickedByUser, permissions=$permissions, ownCapabilities=$ownCapabilities, channelCustom=$channelCustom, channelId=$channelId, channelMemberCount=$channelMemberCount, channelMessageCount=$channelMessageCount, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, totalBans=$totalBans, deleteConversation=$deleteConversation, deleteConversationChannels=$deleteConversationChannels, deleteMessages=$deleteMessages, deleteUser=$deleteUser, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -489,6 +603,12 @@ class VideoEvent {
     json[r'participants_count_by_role'] = this.participantsCountByRole;
     json[r'participant'] = this.participant;
     json[r'duration_seconds'] = this.durationSeconds;
+    if (this.isTrimmed != null) {
+      json[r'is_trimmed'] = this.isTrimmed;
+    } else {
+      json[r'is_trimmed'] = null;
+    }
+    json[r'participants_overview'] = this.participantsOverview;
     json[r'error'] = this.error;
     json[r'call_transcription'] = this.callTranscription;
     json[r'rating'] = this.rating;
@@ -507,7 +627,11 @@ class VideoEvent {
     json[r'closed_caption'] = this.closedCaption;
     json[r'connection_id'] = this.connectionId;
     json[r'me'] = this.me;
-    json[r'cid'] = this.cid;
+    if (this.cid != null) {
+      json[r'cid'] = this.cid;
+    } else {
+      json[r'cid'] = null;
+    }
     if (this.code != null) {
       json[r'code'] = this.code;
     } else {
@@ -537,26 +661,58 @@ class VideoEvent {
     }
     json[r'permissions'] = this.permissions;
     json[r'own_capabilities'] = this.ownCapabilities;
-    json[r'channel_id'] = this.channelId;
-    json[r'channel_type'] = this.channelType;
-    json[r'created_by'] = this.createdBy;
+    json[r'channel_custom'] = this.channelCustom;
+    if (this.channelId != null) {
+      json[r'channel_id'] = this.channelId;
+    } else {
+      json[r'channel_id'] = null;
+    }
+    if (this.channelMemberCount != null) {
+      json[r'channel_member_count'] = this.channelMemberCount;
+    } else {
+      json[r'channel_member_count'] = null;
+    }
+    if (this.channelMessageCount != null) {
+      json[r'channel_message_count'] = this.channelMessageCount;
+    } else {
+      json[r'channel_message_count'] = null;
+    }
+    if (this.channelType != null) {
+      json[r'channel_type'] = this.channelType;
+    } else {
+      json[r'channel_type'] = null;
+    }
+    if (this.createdBy != null) {
+      json[r'created_by'] = this.createdBy;
+    } else {
+      json[r'created_by'] = null;
+    }
     if (this.expiration != null) {
       json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
     } else {
       json[r'expiration'] = null;
     }
-    json[r'shadow'] = this.shadow;
+    if (this.shadow != null) {
+      json[r'shadow'] = this.shadow;
+    } else {
+      json[r'shadow'] = null;
+    }
     if (this.team != null) {
       json[r'team'] = this.team;
     } else {
       json[r'team'] = null;
     }
-    if (this.targetUser != null) {
-      json[r'target_user'] = this.targetUser;
+    if (this.totalBans != null) {
+      json[r'total_bans'] = this.totalBans;
     } else {
-      json[r'target_user'] = null;
+      json[r'total_bans'] = null;
     }
-    json[r'target_users'] = this.targetUsers;
+    json[r'delete_conversation'] = this.deleteConversation;
+    json[r'delete_conversation_channels'] = this.deleteConversationChannels;
+    json[r'delete_messages'] = this.deleteMessages;
+    json[r'delete_user'] = this.deleteUser;
+    json[r'hard_delete'] = this.hardDelete;
+    json[r'mark_messages_deleted'] = this.markMessagesDeleted;
     return json;
   }
 
@@ -571,12 +727,210 @@ class VideoEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "VideoEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "VideoEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'app'),
+            'Required key "VideoEvent[app]" is missing from JSON.');
+        assert(json[r'app'] != null,
+            'Required key "VideoEvent[app]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "VideoEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "VideoEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "VideoEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "VideoEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "VideoEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "VideoEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "VideoEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "VideoEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "VideoEvent[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "VideoEvent[user]" has a null value in JSON.');
+        assert(json.containsKey(r'call'),
+            'Required key "VideoEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "VideoEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "VideoEvent[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "VideoEvent[members]" has a null value in JSON.');
+        assert(json.containsKey(r'digit'),
+            'Required key "VideoEvent[digit]" is missing from JSON.');
+        assert(json[r'digit'] != null,
+            'Required key "VideoEvent[digit]" has a null value in JSON.');
+        assert(json.containsKey(r'duration_ms'),
+            'Required key "VideoEvent[duration_ms]" is missing from JSON.');
+        assert(json[r'duration_ms'] != null,
+            'Required key "VideoEvent[duration_ms]" has a null value in JSON.');
+        assert(json.containsKey(r'seq_number'),
+            'Required key "VideoEvent[seq_number]" is missing from JSON.');
+        assert(json[r'seq_number'] != null,
+            'Required key "VideoEvent[seq_number]" has a null value in JSON.');
+        assert(json.containsKey(r'timestamp'),
+            'Required key "VideoEvent[timestamp]" is missing from JSON.');
+        assert(json[r'timestamp'] != null,
+            'Required key "VideoEvent[timestamp]" has a null value in JSON.');
+        assert(json.containsKey(r'reason'),
+            'Required key "VideoEvent[reason]" is missing from JSON.');
+        assert(json[r'reason'] != null,
+            'Required key "VideoEvent[reason]" has a null value in JSON.');
+        assert(json.containsKey(r'egress_id'),
+            'Required key "VideoEvent[egress_id]" is missing from JSON.');
+        assert(json[r'egress_id'] != null,
+            'Required key "VideoEvent[egress_id]" has a null value in JSON.');
+        assert(json.containsKey(r'captured_at'),
+            'Required key "VideoEvent[captured_at]" is missing from JSON.');
+        assert(json[r'captured_at'] != null,
+            'Required key "VideoEvent[captured_at]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "VideoEvent[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "VideoEvent[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'track_type'),
+            'Required key "VideoEvent[track_type]" is missing from JSON.');
+        assert(json[r'track_type'] != null,
+            'Required key "VideoEvent[track_type]" has a null value in JSON.');
+        assert(json.containsKey(r'url'),
+            'Required key "VideoEvent[url]" is missing from JSON.');
+        assert(json[r'url'] != null,
+            'Required key "VideoEvent[url]" has a null value in JSON.');
+        assert(json.containsKey(r'users'),
+            'Required key "VideoEvent[users]" is missing from JSON.');
+        assert(json[r'users'] != null,
+            'Required key "VideoEvent[users]" has a null value in JSON.');
+        assert(json.containsKey(r'hls_playlist_url'),
+            'Required key "VideoEvent[hls_playlist_url]" is missing from JSON.');
+        assert(json[r'hls_playlist_url'] != null,
+            'Required key "VideoEvent[hls_playlist_url]" has a null value in JSON.');
+        assert(json.containsKey(r'capabilities_by_role'),
+            'Required key "VideoEvent[capabilities_by_role]" is missing from JSON.');
+        assert(json[r'capabilities_by_role'] != null,
+            'Required key "VideoEvent[capabilities_by_role]" has a null value in JSON.');
+        assert(json.containsKey(r'notify_user'),
+            'Required key "VideoEvent[notify_user]" is missing from JSON.');
+        assert(json[r'notify_user'] != null,
+            'Required key "VideoEvent[notify_user]" has a null value in JSON.');
+        assert(json.containsKey(r'user_id'),
+            'Required key "VideoEvent[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "VideoEvent[user_id]" has a null value in JSON.');
+        assert(json.containsKey(r'message'),
+            'Required key "VideoEvent[message]" is missing from JSON.');
+        assert(json[r'message'] != null,
+            'Required key "VideoEvent[message]" has a null value in JSON.');
+        assert(json.containsKey(r'reaction'),
+            'Required key "VideoEvent[reaction]" is missing from JSON.');
+        assert(json[r'reaction'] != null,
+            'Required key "VideoEvent[reaction]" has a null value in JSON.');
+        assert(json.containsKey(r'recording_type'),
+            'Required key "VideoEvent[recording_type]" is missing from JSON.');
+        assert(json[r'recording_type'] != null,
+            'Required key "VideoEvent[recording_type]" has a null value in JSON.');
+        assert(json.containsKey(r'call_recording'),
+            'Required key "VideoEvent[call_recording]" is missing from JSON.');
+        assert(json[r'call_recording'] != null,
+            'Required key "VideoEvent[call_recording]" has a null value in JSON.');
+        assert(json.containsKey(r'video'),
+            'Required key "VideoEvent[video]" is missing from JSON.');
+        assert(json[r'video'] != null,
+            'Required key "VideoEvent[video]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "VideoEvent[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "VideoEvent[name]" has a null value in JSON.');
+        assert(json.containsKey(r'anonymous_participant_count'),
+            'Required key "VideoEvent[anonymous_participant_count]" is missing from JSON.');
+        assert(json[r'anonymous_participant_count'] != null,
+            'Required key "VideoEvent[anonymous_participant_count]" has a null value in JSON.');
+        assert(json.containsKey(r'participants_count_by_role'),
+            'Required key "VideoEvent[participants_count_by_role]" is missing from JSON.');
+        assert(json[r'participants_count_by_role'] != null,
+            'Required key "VideoEvent[participants_count_by_role]" has a null value in JSON.');
+        assert(json.containsKey(r'participant'),
+            'Required key "VideoEvent[participant]" is missing from JSON.');
+        assert(json[r'participant'] != null,
+            'Required key "VideoEvent[participant]" has a null value in JSON.');
+        assert(json.containsKey(r'duration_seconds'),
+            'Required key "VideoEvent[duration_seconds]" is missing from JSON.');
+        assert(json[r'duration_seconds'] != null,
+            'Required key "VideoEvent[duration_seconds]" has a null value in JSON.');
+        assert(json.containsKey(r'error'),
+            'Required key "VideoEvent[error]" is missing from JSON.');
+        assert(json[r'error'] != null,
+            'Required key "VideoEvent[error]" has a null value in JSON.');
+        assert(json.containsKey(r'call_transcription'),
+            'Required key "VideoEvent[call_transcription]" is missing from JSON.');
+        assert(json[r'call_transcription'] != null,
+            'Required key "VideoEvent[call_transcription]" has a null value in JSON.');
+        assert(json.containsKey(r'rating'),
+            'Required key "VideoEvent[rating]" is missing from JSON.');
+        assert(json[r'rating'] != null,
+            'Required key "VideoEvent[rating]" has a null value in JSON.');
+        assert(json.containsKey(r'from_user_id'),
+            'Required key "VideoEvent[from_user_id]" is missing from JSON.');
+        assert(json[r'from_user_id'] != null,
+            'Required key "VideoEvent[from_user_id]" has a null value in JSON.');
+        assert(json.containsKey(r'muted_user_ids'),
+            'Required key "VideoEvent[muted_user_ids]" is missing from JSON.');
+        assert(json[r'muted_user_ids'] != null,
+            'Required key "VideoEvent[muted_user_ids]" has a null value in JSON.');
+        assert(json.containsKey(r'closed_caption'),
+            'Required key "VideoEvent[closed_caption]" is missing from JSON.');
+        assert(json[r'closed_caption'] != null,
+            'Required key "VideoEvent[closed_caption]" has a null value in JSON.');
+        assert(json.containsKey(r'connection_id'),
+            'Required key "VideoEvent[connection_id]" is missing from JSON.');
+        assert(json[r'connection_id'] != null,
+            'Required key "VideoEvent[connection_id]" has a null value in JSON.');
+        assert(json.containsKey(r'me'),
+            'Required key "VideoEvent[me]" is missing from JSON.');
+        assert(json[r'me'] != null,
+            'Required key "VideoEvent[me]" has a null value in JSON.');
+        assert(json.containsKey(r'ingress_stream_id'),
+            'Required key "VideoEvent[ingress_stream_id]" is missing from JSON.');
+        assert(json[r'ingress_stream_id'] != null,
+            'Required key "VideoEvent[ingress_stream_id]" has a null value in JSON.');
+        assert(json.containsKey(r'publisher_type'),
+            'Required key "VideoEvent[publisher_type]" is missing from JSON.');
+        assert(json[r'publisher_type'] != null,
+            'Required key "VideoEvent[publisher_type]" has a null value in JSON.');
+        assert(json.containsKey(r'permissions'),
+            'Required key "VideoEvent[permissions]" is missing from JSON.');
+        assert(json[r'permissions'] != null,
+            'Required key "VideoEvent[permissions]" has a null value in JSON.');
+        assert(json.containsKey(r'own_capabilities'),
+            'Required key "VideoEvent[own_capabilities]" is missing from JSON.');
+        assert(json[r'own_capabilities'] != null,
+            'Required key "VideoEvent[own_capabilities]" has a null value in JSON.');
+        assert(json.containsKey(r'delete_conversation'),
+            'Required key "VideoEvent[delete_conversation]" is missing from JSON.');
+        assert(json[r'delete_conversation'] != null,
+            'Required key "VideoEvent[delete_conversation]" has a null value in JSON.');
+        assert(json.containsKey(r'delete_conversation_channels'),
+            'Required key "VideoEvent[delete_conversation_channels]" is missing from JSON.');
+        assert(json[r'delete_conversation_channels'] != null,
+            'Required key "VideoEvent[delete_conversation_channels]" has a null value in JSON.');
+        assert(json.containsKey(r'delete_messages'),
+            'Required key "VideoEvent[delete_messages]" is missing from JSON.');
+        assert(json[r'delete_messages'] != null,
+            'Required key "VideoEvent[delete_messages]" has a null value in JSON.');
+        assert(json.containsKey(r'delete_user'),
+            'Required key "VideoEvent[delete_user]" is missing from JSON.');
+        assert(json[r'delete_user'] != null,
+            'Required key "VideoEvent[delete_user]" has a null value in JSON.');
+        assert(json.containsKey(r'hard_delete'),
+            'Required key "VideoEvent[hard_delete]" is missing from JSON.');
+        assert(json[r'hard_delete'] != null,
+            'Required key "VideoEvent[hard_delete]" has a null value in JSON.');
+        assert(json.containsKey(r'mark_messages_deleted'),
+            'Required key "VideoEvent[mark_messages_deleted]" is missing from JSON.');
+        assert(json[r'mark_messages_deleted'] != null,
+            'Required key "VideoEvent[mark_messages_deleted]" has a null value in JSON.');
         return true;
       }());
 
@@ -603,14 +957,15 @@ class VideoEvent {
         url: mapValueOfType<String>(json, r'url')!,
         users: UserResponse.mapFromJson(json[r'users']),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        //MANUAL_EDIT mapCast
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
-            : capabilitiesFromJson(json['capabilities_by_role']),
+            : (json[r'capabilities_by_role'] as Map<String, dynamic>).map(
+                (k, v) => MapEntry(k,
+                    v == null ? const <String>[] : (v as List).cast<String>())),
         notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
         userId: mapValueOfType<String>(json, r'user_id')!,
         message: mapValueOfType<String>(json, r'message')!,
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+        reaction: VideoReactionResponse.fromJson(json[r'reaction'])!,
         recordingType:
             VideoEventRecordingTypeEnum.fromJson(json[r'recording_type'])!,
         callRecording: CallRecording.fromJson(json[r'call_recording'])!,
@@ -622,6 +977,9 @@ class VideoEvent {
             mapCastOfType<String, int>(json, r'participants_count_by_role')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         durationSeconds: mapValueOfType<int>(json, r'duration_seconds')!,
+        isTrimmed: mapValueOfType<bool>(json, r'is_trimmed'),
+        participantsOverview:
+            CallStatsParticipant.listFromJson(json[r'participants_overview']),
         error: mapValueOfType<String>(json, r'error')!,
         callTranscription:
             CallTranscription.fromJson(json[r'call_transcription'])!,
@@ -637,7 +995,7 @@ class VideoEvent {
         closedCaption: CallClosedCaption.fromJson(json[r'closed_caption'])!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
-        cid: mapValueOfType<String>(json, r'cid')!,
+        cid: mapValueOfType<String>(json, r'cid'),
         code: mapValueOfType<String>(json, r'code'),
         ingressStreamId: mapValueOfType<String>(json, r'ingress_stream_id')!,
         clientIp: mapValueOfType<String>(json, r'client_ip'),
@@ -651,39 +1009,30 @@ class VideoEvent {
                 .toList(growable: false)
             : const [],
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
-        channelId: mapValueOfType<String>(json, r'channel_id')!,
-        channelType: mapValueOfType<String>(json, r'channel_type')!,
-        createdBy: User.fromJson(json[r'created_by'])!,
+        channelCustom:
+            mapCastOfType<String, Object>(json, r'channel_custom') ?? const {},
+        channelId: mapValueOfType<String>(json, r'channel_id'),
+        channelMemberCount: mapValueOfType<int>(json, r'channel_member_count'),
+        channelMessageCount:
+            mapValueOfType<int>(json, r'channel_message_count'),
+        channelType: mapValueOfType<String>(json, r'channel_type'),
+        createdBy: UserResponseCommonFields.fromJson(json[r'created_by']),
         expiration: mapDateTime(json, r'expiration', r''),
-        shadow: mapValueOfType<bool>(json, r'shadow')!,
+        shadow: mapValueOfType<bool>(json, r'shadow'),
         team: mapValueOfType<String>(json, r'team'),
-        targetUser: mapValueOfType<String>(json, r'target_user'),
-        targetUsers: json[r'target_users'] is Iterable
-            ? (json[r'target_users'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
-            : const [],
+        totalBans: mapValueOfType<int>(json, r'total_bans'),
+        deleteConversation:
+            mapValueOfType<String>(json, r'delete_conversation')!,
+        deleteConversationChannels:
+            mapValueOfType<bool>(json, r'delete_conversation_channels')!,
+        deleteMessages: mapValueOfType<String>(json, r'delete_messages')!,
+        deleteUser: mapValueOfType<String>(json, r'delete_user')!,
+        hardDelete: mapValueOfType<bool>(json, r'hard_delete')!,
+        markMessagesDeleted:
+            mapValueOfType<bool>(json, r'mark_messages_deleted')!,
       );
     }
     return null;
-  }
-
-  // MANUAL_EDIT: capabilitiesFromJson
-  static Map<String, List<String>> capabilitiesFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
-    final map = <String, List<String>>{};
-    if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
-      for (final entry in json.entries) {
-        if (entry.value is List) {
-          map[entry.key] = (entry.value as List).cast<String>();
-        }
-      }
-    }
-    return growable ? map : Map.unmodifiable(map);
   }
 
   static List<VideoEvent> listFromJson(
@@ -778,15 +1127,16 @@ class VideoEvent {
     'closed_caption',
     'connection_id',
     'me',
-    'cid',
     'ingress_stream_id',
     'publisher_type',
     'permissions',
     'own_capabilities',
-    'channel_id',
-    'channel_type',
-    'created_by',
-    'shadow',
+    'delete_conversation',
+    'delete_conversation_channels',
+    'delete_messages',
+    'delete_user',
+    'hard_delete',
+    'mark_messages_deleted',
   };
 }
 

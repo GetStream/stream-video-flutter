@@ -1,3 +1,24 @@
+## Upcoming
+
+### 🐞 Fixed
+* Fixed `consumeAndAcceptActiveCall` auto-accepting incoming calls on Android when the user opens the app without pressing the Accept button on the notification. The method now only consumes calls that the user explicitly accepted.
+* Fixed coordinator REST API calls failing permanently when the JWT token expires.
+
+### 🔄 Changed
+* Regenerated OpenAPI models to match the latest backend schema.
+* Fixed broadcasting status updates not being wired through to call state.
+
+### ⚠️ Deprecated
+* `StreamHlsSettings.qualityTracks` (`List<String>`) is deprecated — use `StreamHlsSettings.qualities` (`List<StreamVideoQuality>`) instead.
+
+## 1.3.1
+
+### 🐞 Fixed
+* Reverted iOS audio session release on call leave ([#1155](https://github.com/GetStream/stream-video-flutter/pull/1155)) due to reports of broken audio playout on some iOS sessions.
+* Improved SFU join, recovery and migration logic to reduce failed joins with reconnect loops when joining full or shutting-down SFU 
+* Fixed race condition in `Call.join` when another connect is already in progress, with proper timeout handling.
+* Fixed `consumeAndAcceptActiveCall` to ensure the coordinator WS is connected before consuming incoming calls during cold start.
+
 ## 1.3.0
 
 ### 🐞 Fixed

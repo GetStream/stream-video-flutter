@@ -18,7 +18,7 @@ class Credentials {
     required this.token,
   });
 
-  List<ICEServer> iceServers;
+  List<ICEServerResponse> iceServers;
 
   SFUResponse server;
 
@@ -60,17 +60,23 @@ class Credentials {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "Credentials[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "Credentials[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'ice_servers'),
+            'Required key "Credentials[ice_servers]" is missing from JSON.');
+        assert(json[r'ice_servers'] != null,
+            'Required key "Credentials[ice_servers]" has a null value in JSON.');
+        assert(json.containsKey(r'server'),
+            'Required key "Credentials[server]" is missing from JSON.');
+        assert(json[r'server'] != null,
+            'Required key "Credentials[server]" has a null value in JSON.');
+        assert(json.containsKey(r'token'),
+            'Required key "Credentials[token]" is missing from JSON.');
+        assert(json[r'token'] != null,
+            'Required key "Credentials[token]" has a null value in JSON.');
         return true;
       }());
 
       return Credentials(
-        iceServers: ICEServer.listFromJson(json[r'ice_servers']),
+        iceServers: ICEServerResponse.listFromJson(json[r'ice_servers']),
         server: SFUResponse.fromJson(json[r'server'])!,
         token: mapValueOfType<String>(json, r'token')!,
       );

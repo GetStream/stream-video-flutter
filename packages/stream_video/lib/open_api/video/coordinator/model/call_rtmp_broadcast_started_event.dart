@@ -72,12 +72,22 @@ class CallRtmpBroadcastStartedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallRtmpBroadcastStartedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallRtmpBroadcastStartedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallRtmpBroadcastStartedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallRtmpBroadcastStartedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallRtmpBroadcastStartedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallRtmpBroadcastStartedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "CallRtmpBroadcastStartedEvent[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "CallRtmpBroadcastStartedEvent[name]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallRtmpBroadcastStartedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallRtmpBroadcastStartedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

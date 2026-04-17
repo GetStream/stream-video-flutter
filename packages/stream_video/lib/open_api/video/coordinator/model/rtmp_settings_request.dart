@@ -17,6 +17,7 @@ class RTMPSettingsRequest {
     this.quality,
   });
 
+  /// Whether RTMP broadcasting is enabled
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -25,7 +26,7 @@ class RTMPSettingsRequest {
   ///
   bool? enabled;
 
-  /// Resolution to set for the RTMP stream
+  /// Resolution to set for the RTMP stream. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
   RTMPSettingsRequestQualityEnum? quality;
 
   @override
@@ -71,12 +72,6 @@ class RTMPSettingsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RTMPSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RTMPSettingsRequest[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
@@ -141,7 +136,7 @@ class RTMPSettingsRequest {
   static const requiredKeys = <String>{};
 }
 
-/// Resolution to set for the RTMP stream
+/// Resolution to set for the RTMP stream. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
 class RTMPSettingsRequestQualityEnum {
   /// Instantiate a new enum with the provided [value].
   const RTMPSettingsRequestQualityEnum._(this.value);

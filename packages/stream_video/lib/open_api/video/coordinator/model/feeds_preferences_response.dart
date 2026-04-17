@@ -14,7 +14,9 @@ class FeedsPreferencesResponse {
   /// Returns a new [FeedsPreferencesResponse] instance.
   FeedsPreferencesResponse({
     this.comment,
+    this.commentMention,
     this.commentReaction,
+    this.commentReply,
     this.customActivityTypes = const {},
     this.follow,
     this.mention,
@@ -35,7 +37,23 @@ class FeedsPreferencesResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  String? commentMention;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   String? commentReaction;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? commentReply;
 
   Map<String, String> customActivityTypes;
 
@@ -68,7 +86,9 @@ class FeedsPreferencesResponse {
       identical(this, other) ||
       other is FeedsPreferencesResponse &&
           other.comment == comment &&
+          other.commentMention == commentMention &&
           other.commentReaction == commentReaction &&
+          other.commentReply == commentReply &&
           _deepEquality.equals(
               other.customActivityTypes, customActivityTypes) &&
           other.follow == follow &&
@@ -79,7 +99,9 @@ class FeedsPreferencesResponse {
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (comment == null ? 0 : comment!.hashCode) +
+      (commentMention == null ? 0 : commentMention!.hashCode) +
       (commentReaction == null ? 0 : commentReaction!.hashCode) +
+      (commentReply == null ? 0 : commentReply!.hashCode) +
       (customActivityTypes.hashCode) +
       (follow == null ? 0 : follow!.hashCode) +
       (mention == null ? 0 : mention!.hashCode) +
@@ -87,7 +109,7 @@ class FeedsPreferencesResponse {
 
   @override
   String toString() =>
-      'FeedsPreferencesResponse[comment=$comment, commentReaction=$commentReaction, customActivityTypes=$customActivityTypes, follow=$follow, mention=$mention, reaction=$reaction]';
+      'FeedsPreferencesResponse[comment=$comment, commentMention=$commentMention, commentReaction=$commentReaction, commentReply=$commentReply, customActivityTypes=$customActivityTypes, follow=$follow, mention=$mention, reaction=$reaction]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -96,10 +118,20 @@ class FeedsPreferencesResponse {
     } else {
       json[r'comment'] = null;
     }
+    if (this.commentMention != null) {
+      json[r'comment_mention'] = this.commentMention;
+    } else {
+      json[r'comment_mention'] = null;
+    }
     if (this.commentReaction != null) {
       json[r'comment_reaction'] = this.commentReaction;
     } else {
       json[r'comment_reaction'] = null;
+    }
+    if (this.commentReply != null) {
+      json[r'comment_reply'] = this.commentReply;
+    } else {
+      json[r'comment_reply'] = null;
     }
     json[r'custom_activity_types'] = this.customActivityTypes;
     if (this.follow != null) {
@@ -131,18 +163,14 @@ class FeedsPreferencesResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "FeedsPreferencesResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "FeedsPreferencesResponse[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
       return FeedsPreferencesResponse(
         comment: mapValueOfType<String>(json, r'comment'),
+        commentMention: mapValueOfType<String>(json, r'comment_mention'),
         commentReaction: mapValueOfType<String>(json, r'comment_reaction'),
+        commentReply: mapValueOfType<String>(json, r'comment_reply'),
         customActivityTypes:
             mapCastOfType<String, String>(json, r'custom_activity_types') ??
                 const {},

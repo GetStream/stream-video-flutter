@@ -48,12 +48,10 @@ class IndividualRecordingResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "IndividualRecordingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "IndividualRecordingResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'status'),
+            'Required key "IndividualRecordingResponse[status]" is missing from JSON.');
+        assert(json[r'status'] != null,
+            'Required key "IndividualRecordingResponse[status]" has a null value in JSON.');
         return true;
       }());
 

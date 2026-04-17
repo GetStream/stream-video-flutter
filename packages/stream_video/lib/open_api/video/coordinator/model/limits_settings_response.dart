@@ -102,12 +102,10 @@ class LimitsSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "LimitsSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "LimitsSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'max_participants_exclude_roles'),
+            'Required key "LimitsSettingsResponse[max_participants_exclude_roles]" is missing from JSON.');
+        assert(json[r'max_participants_exclude_roles'] != null,
+            'Required key "LimitsSettingsResponse[max_participants_exclude_roles]" has a null value in JSON.');
         return true;
       }());
 

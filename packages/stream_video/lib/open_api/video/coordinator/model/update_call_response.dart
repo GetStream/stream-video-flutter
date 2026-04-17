@@ -84,12 +84,22 @@ class UpdateCallResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UpdateCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UpdateCallResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "UpdateCallResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "UpdateCallResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "UpdateCallResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "UpdateCallResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "UpdateCallResponse[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "UpdateCallResponse[members]" has a null value in JSON.');
+        assert(json.containsKey(r'own_capabilities'),
+            'Required key "UpdateCallResponse[own_capabilities]" is missing from JSON.');
+        assert(json[r'own_capabilities'] != null,
+            'Required key "UpdateCallResponse[own_capabilities]" has a null value in JSON.');
         return true;
       }());
 

@@ -49,12 +49,10 @@ class CallParticipantCountReportResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallParticipantCountReportResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallParticipantCountReportResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'daily'),
+            'Required key "CallParticipantCountReportResponse[daily]" is missing from JSON.');
+        assert(json[r'daily'] != null,
+            'Required key "CallParticipantCountReportResponse[daily]" has a null value in JSON.');
         return true;
       }());
 

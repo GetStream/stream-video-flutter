@@ -10,16 +10,15 @@
 
 part of openapi.api;
 
-class ReactionResponse {
-  /// Returns a new [ReactionResponse] instance.
-  ReactionResponse({
-    this.custom = const {},
-    this.emojiCode,
-    required this.type,
-    required this.user,
+class SessionWarningResponse {
+  /// Returns a new [SessionWarningResponse] instance.
+  SessionWarningResponse({
+    required this.code,
+    this.time,
+    required this.warning,
   });
 
-  Map<String, Object> custom;
+  String code;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -27,50 +26,45 @@ class ReactionResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? emojiCode;
+  DateTime? time;
 
-  String type;
-
-  UserResponse user;
+  String warning;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ReactionResponse &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.emojiCode == emojiCode &&
-          other.type == type &&
-          other.user == user;
+      other is SessionWarningResponse &&
+          other.code == code &&
+          other.time == time &&
+          other.warning == warning;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (custom.hashCode) +
-      (emojiCode == null ? 0 : emojiCode!.hashCode) +
-      (type.hashCode) +
-      (user.hashCode);
+      (code.hashCode) +
+      (time == null ? 0 : time!.hashCode) +
+      (warning.hashCode);
 
   @override
   String toString() =>
-      'ReactionResponse[custom=$custom, emojiCode=$emojiCode, type=$type, user=$user]';
+      'SessionWarningResponse[code=$code, time=$time, warning=$warning]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'custom'] = this.custom;
-    if (this.emojiCode != null) {
-      json[r'emoji_code'] = this.emojiCode;
+    json[r'code'] = this.code;
+    if (this.time != null) {
+      json[r'time'] = this.time!.toUtc().toIso8601String();
     } else {
-      json[r'emoji_code'] = null;
+      json[r'time'] = null;
     }
-    json[r'type'] = this.type;
-    json[r'user'] = this.user;
+    json[r'warning'] = this.warning;
     return json;
   }
 
-  /// Returns a new [ReactionResponse] instance and imports its values from
+  /// Returns a new [SessionWarningResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static ReactionResponse? fromJson(dynamic value) {
+  static SessionWarningResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -78,33 +72,34 @@ class ReactionResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ReactionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ReactionResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'code'),
+            'Required key "SessionWarningResponse[code]" is missing from JSON.');
+        assert(json[r'code'] != null,
+            'Required key "SessionWarningResponse[code]" has a null value in JSON.');
+        assert(json.containsKey(r'warning'),
+            'Required key "SessionWarningResponse[warning]" is missing from JSON.');
+        assert(json[r'warning'] != null,
+            'Required key "SessionWarningResponse[warning]" has a null value in JSON.');
         return true;
       }());
 
-      return ReactionResponse(
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        emojiCode: mapValueOfType<String>(json, r'emoji_code'),
-        type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
+      return SessionWarningResponse(
+        code: mapValueOfType<String>(json, r'code')!,
+        time: mapDateTime(json, r'time', r''),
+        warning: mapValueOfType<String>(json, r'warning')!,
       );
     }
     return null;
   }
 
-  static List<ReactionResponse> listFromJson(
+  static List<SessionWarningResponse> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <ReactionResponse>[];
+    final result = <SessionWarningResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = ReactionResponse.fromJson(row);
+        final value = SessionWarningResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -113,12 +108,12 @@ class ReactionResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, ReactionResponse> mapFromJson(dynamic json) {
-    final map = <String, ReactionResponse>{};
+  static Map<String, SessionWarningResponse> mapFromJson(dynamic json) {
+    final map = <String, SessionWarningResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = ReactionResponse.fromJson(entry.value);
+        final value = SessionWarningResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -127,17 +122,17 @@ class ReactionResponse {
     return map;
   }
 
-  // maps a json object with a list of ReactionResponse-objects as value to a dart map
-  static Map<String, List<ReactionResponse>> mapListFromJson(
+  // maps a json object with a list of SessionWarningResponse-objects as value to a dart map
+  static Map<String, List<SessionWarningResponse>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<ReactionResponse>>{};
+    final map = <String, List<SessionWarningResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ReactionResponse.listFromJson(
+        map[entry.key] = SessionWarningResponse.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -148,7 +143,7 @@ class ReactionResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'type',
-    'user',
+    'code',
+    'warning',
   };
 }

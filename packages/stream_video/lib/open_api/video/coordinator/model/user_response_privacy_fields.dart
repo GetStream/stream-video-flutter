@@ -245,12 +245,38 @@ class UserResponsePrivacyFields {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserResponsePrivacyFields[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserResponsePrivacyFields[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'blocked_user_ids'),
+            'Required key "UserResponsePrivacyFields[blocked_user_ids]" is missing from JSON.');
+        assert(json[r'blocked_user_ids'] != null,
+            'Required key "UserResponsePrivacyFields[blocked_user_ids]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "UserResponsePrivacyFields[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "UserResponsePrivacyFields[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "UserResponsePrivacyFields[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "UserResponsePrivacyFields[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "UserResponsePrivacyFields[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "UserResponsePrivacyFields[id]" has a null value in JSON.');
+        assert(json.containsKey(r'language'),
+            'Required key "UserResponsePrivacyFields[language]" is missing from JSON.');
+        assert(json[r'language'] != null,
+            'Required key "UserResponsePrivacyFields[language]" has a null value in JSON.');
+        assert(json.containsKey(r'role'),
+            'Required key "UserResponsePrivacyFields[role]" is missing from JSON.');
+        assert(json[r'role'] != null,
+            'Required key "UserResponsePrivacyFields[role]" has a null value in JSON.');
+        assert(json.containsKey(r'teams'),
+            'Required key "UserResponsePrivacyFields[teams]" is missing from JSON.');
+        assert(json[r'teams'] != null,
+            'Required key "UserResponsePrivacyFields[teams]" has a null value in JSON.');
+        assert(json.containsKey(r'updated_at'),
+            'Required key "UserResponsePrivacyFields[updated_at]" is missing from JSON.');
+        assert(json[r'updated_at'] != null,
+            'Required key "UserResponsePrivacyFields[updated_at]" has a null value in JSON.');
         return true;
       }());
 

@@ -283,12 +283,74 @@ class CallResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'backstage'),
+            'Required key "CallResponse[backstage]" is missing from JSON.');
+        assert(json[r'backstage'] != null,
+            'Required key "CallResponse[backstage]" has a null value in JSON.');
+        assert(json.containsKey(r'blocked_user_ids'),
+            'Required key "CallResponse[blocked_user_ids]" is missing from JSON.');
+        assert(json[r'blocked_user_ids'] != null,
+            'Required key "CallResponse[blocked_user_ids]" has a null value in JSON.');
+        assert(json.containsKey(r'captioning'),
+            'Required key "CallResponse[captioning]" is missing from JSON.');
+        assert(json[r'captioning'] != null,
+            'Required key "CallResponse[captioning]" has a null value in JSON.');
+        assert(json.containsKey(r'cid'),
+            'Required key "CallResponse[cid]" is missing from JSON.');
+        assert(json[r'cid'] != null,
+            'Required key "CallResponse[cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallResponse[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallResponse[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'created_by'),
+            'Required key "CallResponse[created_by]" is missing from JSON.');
+        assert(json[r'created_by'] != null,
+            'Required key "CallResponse[created_by]" has a null value in JSON.');
+        assert(json.containsKey(r'current_session_id'),
+            'Required key "CallResponse[current_session_id]" is missing from JSON.');
+        assert(json[r'current_session_id'] != null,
+            'Required key "CallResponse[current_session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "CallResponse[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "CallResponse[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'egress'),
+            'Required key "CallResponse[egress]" is missing from JSON.');
+        assert(json[r'egress'] != null,
+            'Required key "CallResponse[egress]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "CallResponse[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "CallResponse[id]" has a null value in JSON.');
+        assert(json.containsKey(r'ingress'),
+            'Required key "CallResponse[ingress]" is missing from JSON.');
+        assert(json[r'ingress'] != null,
+            'Required key "CallResponse[ingress]" has a null value in JSON.');
+        assert(json.containsKey(r'recording'),
+            'Required key "CallResponse[recording]" is missing from JSON.');
+        assert(json[r'recording'] != null,
+            'Required key "CallResponse[recording]" has a null value in JSON.');
+        assert(json.containsKey(r'settings'),
+            'Required key "CallResponse[settings]" is missing from JSON.');
+        assert(json[r'settings'] != null,
+            'Required key "CallResponse[settings]" has a null value in JSON.');
+        assert(json.containsKey(r'transcribing'),
+            'Required key "CallResponse[transcribing]" is missing from JSON.');
+        assert(json[r'transcribing'] != null,
+            'Required key "CallResponse[transcribing]" has a null value in JSON.');
+        assert(json.containsKey(r'translating'),
+            'Required key "CallResponse[translating]" is missing from JSON.');
+        assert(json[r'translating'] != null,
+            'Required key "CallResponse[translating]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallResponse[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallResponse[type]" has a null value in JSON.');
+        assert(json.containsKey(r'updated_at'),
+            'Required key "CallResponse[updated_at]" is missing from JSON.');
+        assert(json[r'updated_at'] != null,
+            'Required key "CallResponse[updated_at]" has a null value in JSON.');
         return true;
       }());
 

@@ -14,26 +14,35 @@ class IndividualRecordingSettingsRequest {
   /// Returns a new [IndividualRecordingSettingsRequest] instance.
   IndividualRecordingSettingsRequest({
     required this.mode,
+    this.outputTypes = const [],
   });
 
+  /// Recording mode. One of: available, disabled, auto-on
   IndividualRecordingSettingsRequestModeEnum mode;
+
+  /// Output types to include: audio_only, video_only, audio_video, screenshare_audio_only, screenshare_video_only, screenshare_audio_video
+  List<IndividualRecordingSettingsRequestOutputTypesEnum> outputTypes;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IndividualRecordingSettingsRequest && other.mode == mode;
+      other is IndividualRecordingSettingsRequest &&
+          other.mode == mode &&
+          _deepEquality.equals(other.outputTypes, outputTypes);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (mode.hashCode);
+      (mode.hashCode) + (outputTypes.hashCode);
 
   @override
-  String toString() => 'IndividualRecordingSettingsRequest[mode=$mode]';
+  String toString() =>
+      'IndividualRecordingSettingsRequest[mode=$mode, outputTypes=$outputTypes]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'mode'] = this.mode;
+    json[r'output_types'] = this.outputTypes;
     return json;
   }
 
@@ -48,18 +57,19 @@ class IndividualRecordingSettingsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "IndividualRecordingSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "IndividualRecordingSettingsRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'mode'),
+            'Required key "IndividualRecordingSettingsRequest[mode]" is missing from JSON.');
+        assert(json[r'mode'] != null,
+            'Required key "IndividualRecordingSettingsRequest[mode]" has a null value in JSON.');
         return true;
       }());
 
       return IndividualRecordingSettingsRequest(
         mode:
             IndividualRecordingSettingsRequestModeEnum.fromJson(json[r'mode'])!,
+        outputTypes:
+            IndividualRecordingSettingsRequestOutputTypesEnum.listFromJson(
+                json[r'output_types']),
       );
     }
     return null;
@@ -121,6 +131,7 @@ class IndividualRecordingSettingsRequest {
   };
 }
 
+/// Recording mode. One of: available, disabled, auto-on
 class IndividualRecordingSettingsRequestModeEnum {
   /// Instantiate a new enum with the provided [value].
   const IndividualRecordingSettingsRequestModeEnum._(this.value);
@@ -207,4 +218,119 @@ class IndividualRecordingSettingsRequestModeEnumTypeTransformer {
 
   /// Singleton [IndividualRecordingSettingsRequestModeEnumTypeTransformer] instance.
   static IndividualRecordingSettingsRequestModeEnumTypeTransformer? _instance;
+}
+
+class IndividualRecordingSettingsRequestOutputTypesEnum {
+  /// Instantiate a new enum with the provided [value].
+  const IndividualRecordingSettingsRequestOutputTypesEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const audioOnly =
+      IndividualRecordingSettingsRequestOutputTypesEnum._(r'audio_only');
+  static const videoOnly =
+      IndividualRecordingSettingsRequestOutputTypesEnum._(r'video_only');
+  static const audioVideo =
+      IndividualRecordingSettingsRequestOutputTypesEnum._(r'audio_video');
+  static const screenshareAudioOnly =
+      IndividualRecordingSettingsRequestOutputTypesEnum._(
+          r'screenshare_audio_only');
+  static const screenshareVideoOnly =
+      IndividualRecordingSettingsRequestOutputTypesEnum._(
+          r'screenshare_video_only');
+  static const screenshareAudioVideo =
+      IndividualRecordingSettingsRequestOutputTypesEnum._(
+          r'screenshare_audio_video');
+
+  /// List of all possible values in this [enum][IndividualRecordingSettingsRequestOutputTypesEnum].
+  static const values = <IndividualRecordingSettingsRequestOutputTypesEnum>[
+    audioOnly,
+    videoOnly,
+    audioVideo,
+    screenshareAudioOnly,
+    screenshareVideoOnly,
+    screenshareAudioVideo,
+  ];
+
+  static IndividualRecordingSettingsRequestOutputTypesEnum? fromJson(
+          dynamic value) =>
+      IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer()
+          .decode(value);
+
+  static List<IndividualRecordingSettingsRequestOutputTypesEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final result = <IndividualRecordingSettingsRequestOutputTypesEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value =
+            IndividualRecordingSettingsRequestOutputTypesEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [IndividualRecordingSettingsRequestOutputTypesEnum] to String,
+/// and [decode] dynamic data back to [IndividualRecordingSettingsRequestOutputTypesEnum].
+class IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer {
+  factory IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer() =>
+      _instance ??=
+          const IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer
+              ._();
+
+  const IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer._();
+
+  String encode(IndividualRecordingSettingsRequestOutputTypesEnum data) =>
+      data.value;
+
+  /// Decodes a [dynamic value][data] to a IndividualRecordingSettingsRequestOutputTypesEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  IndividualRecordingSettingsRequestOutputTypesEnum? decode(dynamic data,
+      {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'audio_only':
+          return IndividualRecordingSettingsRequestOutputTypesEnum.audioOnly;
+        case r'video_only':
+          return IndividualRecordingSettingsRequestOutputTypesEnum.videoOnly;
+        case r'audio_video':
+          return IndividualRecordingSettingsRequestOutputTypesEnum.audioVideo;
+        case r'screenshare_audio_only':
+          return IndividualRecordingSettingsRequestOutputTypesEnum
+              .screenshareAudioOnly;
+        case r'screenshare_video_only':
+          return IndividualRecordingSettingsRequestOutputTypesEnum
+              .screenshareVideoOnly;
+        case r'screenshare_audio_video':
+          return IndividualRecordingSettingsRequestOutputTypesEnum
+              .screenshareAudioVideo;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer] instance.
+  static IndividualRecordingSettingsRequestOutputTypesEnumTypeTransformer?
+      _instance;
 }

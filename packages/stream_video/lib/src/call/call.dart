@@ -13,7 +13,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart' hide User;
+import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
@@ -79,6 +79,7 @@ typedef SetOutgoingCall = Future<void> Function(Call?);
 typedef GetActiveCall = Call? Function();
 typedef GetOutgoingCall = Call? Function();
 typedef CallStateSelector<T> = T Function(CallState state);
+typedef VideoDimension = RtcVideoDimension;
 
 const _idState = 1;
 const _idUserId = 2;
@@ -566,6 +567,14 @@ class Call {
         return _stateManager.coordinatorCallBroadcastingStopped(event);
       case StreamCallBroadcastingFailedEvent _:
         return _stateManager.coordinatorCallBroadcastingFailed(event);
+      case StreamCallRtmpBroadcastStartedEvent _:
+        return _stateManager.coordinatorCallRtmpBroadcastStarted(event);
+      case StreamCallRtmpBroadcastStoppedEvent _:
+        return _stateManager.coordinatorCallRtmpBroadcastStopped(event);
+      case StreamCallRtmpBroadcastFailedEvent _:
+        return _stateManager.coordinatorCallRtmpBroadcastFailed(event);
+      case StreamCallDeletedEvent _:
+        return _stateManager.coordinatorCallDeleted(event);
       case StreamCallClosedCaptionsEvent _:
         return _handleClosedCaptionEvent(event);
       case StreamCallReactionEvent _:
@@ -836,19 +845,33 @@ class Call {
       return Result.error('a call with the same cid is in progress');
     }
 
-    if (state.value.status is CallStatusConnecting) {
-      _logger.v(() => '[join] await "connecting" change');
+    if (state.value.status is CallStatusConnecting ||
+        state.value.status is CallStatusJoining) {
+      _logger.v(() => '[join] await ongoing connect to resolve');
 
-      final status = await state.firstWhere(
-        (it) => it.status is CallStatusConnected,
-        timeLimit: _stateManager.callState.preferences.connectTimeout,
-      );
+      try {
+        final currentState = await state.firstWhere(
+          (it) =>
+              it.status is! CallStatusConnecting &&
+              it.status is! CallStatusJoining,
+          timeLimit: _stateManager.callState.preferences.connectTimeout,
+        );
 
-      if (status is! CallStatusConnected) {
-        return const Result.success(none);
-      } else {
-        _logger.e(() => '[join] original "connect" failed');
-        return Result.error('original "connect" failed');
+        if (currentState.status is CallStatusConnected ||
+            currentState.status is CallStatusJoined) {
+          _logger.v(() => '[join] ongoing connect succeeded');
+          return const Result.success(none);
+        } else {
+          _logger.e(
+            () => '[join] ongoing connect failed: ${currentState.status}',
+          );
+          return Result.error(
+            'ongoing connect failed: ${currentState.status}',
+          );
+        }
+      } on TimeoutException {
+        _logger.e(() => '[join] timed out waiting for ongoing connect');
+        return Result.error('timed out waiting for ongoing connect');
       }
     }
 
@@ -892,6 +915,7 @@ class Call {
     return _callJoinLock.synchronized(() async {
       final sfuJoinFailures = <String, int>{};
       String? sfuToForceExclude;
+      final sfusToExclude = <String>[];
 
       for (var attempt = 0; attempt < max(maxJoinRetries, 1); attempt++) {
         final result = await runCatchingResult(
@@ -899,6 +923,7 @@ class Call {
             connectOptions: connectOptions,
             membersLimit: membersLimit,
             sfuToForceExclude: sfuToForceExclude,
+            sfusToExclude: List.unmodifiable(sfusToExclude),
             reconnectReason: reconnectReason,
           ),
         );
@@ -915,6 +940,19 @@ class Call {
           final error = result.getErrorOrNull();
           if (error is VideoErrorWithCause &&
               error.cause is SessionConnectionFailure) {
+            final connectionFailure = error.cause as SessionConnectionFailure;
+
+            if (_isUnrecoverableSfuError(connectionFailure)) {
+              _logger.e(
+                () => '[join] unrecoverable SFU error, not retrying',
+              );
+              await leave(
+                reason: DisconnectReason.failure(error),
+              );
+              return result;
+            }
+
+            final switchSfu = _isJoinErrorCode(connectionFailure);
             final sfuName = _credentials?.sfuServer.name ?? '';
 
             sfuJoinFailures.update(
@@ -923,17 +961,25 @@ class Call {
               ifAbsent: () => 1,
             );
 
-            if (sfuJoinFailures[sfuName]! >= 2) {
+            if (switchSfu || sfuJoinFailures[sfuName]! >= 2) {
+              final sfuMigrateReason = switchSfu
+                  ? 'join error code'
+                  : 'too many failures';
+
               _logger.e(
                 () =>
-                    '[join] too many failures for SFU: $sfuName, migrating...',
+                    '[join] $sfuMigrateReason for SFU: $sfuName, migrating...',
               );
 
               _session?.trace('call_join_migrate', {
                 'migrateFrom': sfuName,
+                'reason': sfuMigrateReason,
               });
 
               sfuToForceExclude = sfuName;
+              sfusToExclude
+                ..clear()
+                ..addAll(sfuJoinFailures.keys);
             }
           }
         }
@@ -957,10 +1003,28 @@ class Call {
     });
   }
 
+  SfuError? _extractSfuError(SessionConnectionFailure failure) {
+    final innerError = failure.error;
+    if (innerError is VideoErrorWithCause && innerError.cause is SfuError) {
+      return innerError.cause as SfuError;
+    }
+    return null;
+  }
+
+  bool _isJoinErrorCode(SessionConnectionFailure failure) {
+    return _extractSfuError(failure)?.code.isJoinErrorCode ?? false;
+  }
+
+  bool _isUnrecoverableSfuError(SessionConnectionFailure failure) {
+    return _extractSfuError(failure)?.reconnectStrategy ==
+        SfuReconnectionStrategy.disconnect;
+  }
+
   Future<Result<None>> _doJoin({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     String? sfuToForceExclude,
+    List<String> sfusToExclude = const [],
     String? reconnectReason,
   }) async {
     _logger.d(() => '[join] options: $_connectOptions');
@@ -1007,6 +1071,7 @@ class Call {
       connectOptions: connectOptions,
       membersLimit: membersLimit,
       forceMigratingFrom: sfuToForceExclude,
+      migratingFromList: sfusToExclude,
     );
 
     if (joinedResult is! Success<CallCredentials>) {
@@ -1166,6 +1231,7 @@ class Call {
     CallConnectOptions? connectOptions,
     int? membersLimit,
     String? forceMigratingFrom,
+    List<String> migratingFromList = const [],
   }) async {
     _logger.d(
       () =>
@@ -1183,14 +1249,25 @@ class Call {
         _reconnectStrategy == SfuReconnectionStrategy.migrate) {
       _logger.d(() => '[joinIfNeeded] joining');
 
+      final migratingFrom =
+          forceMigratingFrom ??
+          (_reconnectStrategy == SfuReconnectionStrategy.migrate
+              ? _session?.config.sfuName
+              : null);
+
+      // When migrating, include the current SFU in the exclusion list
+      // so the coordinator picks a different SFU.
+      final effectiveMigratingFromList = [
+        ...migratingFromList,
+        if (migratingFrom != null && !migratingFromList.contains(migratingFrom))
+          migratingFrom,
+      ];
+
       final joinedResult = await _performJoinCallRequest(
         create: true,
         connectOptions: connectOptions,
-        migratingFrom:
-            forceMigratingFrom ??
-            (_reconnectStrategy == SfuReconnectionStrategy.migrate
-                ? _session?.config.sfuName
-                : null),
+        migratingFrom: migratingFrom,
+        migratingFromList: effectiveMigratingFromList,
         membersLimit: membersLimit,
       );
 
@@ -1225,10 +1302,14 @@ class Call {
     bool create = false,
     bool video = false,
     String? migratingFrom,
+    List<String> migratingFromList = const [],
     int? membersLimit,
     CallConnectOptions? connectOptions,
   }) async {
-    _logger.d(() => '[joinCall] cid: $callCid, migratingFrom: $migratingFrom');
+    _logger.d(
+      () =>
+          '[joinCall] cid: $callCid, migratingFrom: $migratingFrom, migratingFromList: $migratingFromList',
+    );
 
     if (_callLifecycleCompleter.isCompleted) {
       _logger.w(() => '[joinCall] rejected (call was left)');
@@ -1239,6 +1320,7 @@ class Call {
       callCid: callCid,
       create: create,
       migratingFrom: migratingFrom,
+      migratingFromList: migratingFromList,
       video: video,
       membersLimit: membersLimit,
     );
@@ -1543,6 +1625,22 @@ class Call {
     }
     // error event
     else if (sfuEvent is SfuErrorEvent) {
+      _session?.trace('sfu_error', {
+        'code': sfuEvent.error.code.name,
+        'error': sfuEvent.error.message,
+        'strategy': sfuEvent.error.reconnectStrategy.name,
+      });
+
+      // SFU_FULL, SFU_SHUTTING_DOWN, CALL_PARTICIPANT_LIMIT_REACHED are join
+      // errors. Although they may specify a `migrate` strategy, they should be
+      // handled by the join retry logic in the join flow with a REJOIN to a new SFU instead.
+      if (sfuEvent.error.code.isJoinErrorCode) {
+        _logger.w(
+          () => '[onSfuEvent] skipping join error code: ${sfuEvent.error.code}',
+        );
+        return;
+      }
+
       switch (sfuEvent.error.reconnectStrategy) {
         case SfuReconnectionStrategy.rejoin:
         case SfuReconnectionStrategy.fast:
@@ -1551,9 +1649,7 @@ class Call {
             () =>
                 '[onSfuEvent] SFU error: ${sfuEvent.error}, reconnect strategy: ${sfuEvent.error.reconnectStrategy}',
           );
-          _session?.trace('sfu_error', {
-            'error': sfuEvent.error.message,
-          });
+
           await _reconnect(
             sfuEvent.error.reconnectStrategy,
             reconnectReason: 'sfu error: ${sfuEvent.error.message}',
@@ -2814,6 +2910,32 @@ class Call {
     }
 
     return result;
+  }
+
+  /// Starts RTMP broadcasts for the call to the provided [broadcasts]
+  /// destinations.
+  Future<Result<None>> startRtmpBroadcasts({
+    required List<StreamRtmpBroadcastRequest> broadcasts,
+  }) {
+    return _coordinatorClient.startRtmpBroadcasts(
+      state.value.callCid,
+      broadcasts: broadcasts,
+    );
+  }
+
+  /// Stops a single RTMP broadcast identified by [name].
+  Future<Result<None>> stopRtmpBroadcast({required String name}) {
+    return _coordinatorClient.stopRtmpBroadcast(
+      state.value.callCid,
+      name: name,
+    );
+  }
+
+  /// Stops all RTMP broadcasts for this call.
+  Future<Result<None>> stopAllRtmpBroadcasts() {
+    return _coordinatorClient.stopAllRtmpBroadcasts(
+      state.value.callCid,
+    );
   }
 
   /// Allows for the muting of a or group of users as indicated by [userIds].

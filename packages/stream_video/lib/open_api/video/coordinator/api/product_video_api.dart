@@ -10,8 +10,8 @@
 
 part of openapi.api;
 
-class ProductvideoApi {
-  ProductvideoApi([ApiClient? apiClient])
+class ProductVideoApi {
+  ProductVideoApi([ApiClient? apiClient])
       : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
@@ -906,6 +906,126 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Get call participant session metrics
+  ///
+  ///
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [String] user (required):
+  ///
+  /// * [String] userSession (required):
+  ///
+  /// * [DateTime] since:
+  ///
+  /// * [DateTime] until:
+  Future<Response> getCallParticipantSessionMetricsWithHttpInfo(
+    String type,
+    String id,
+    String session,
+    String user,
+    String userSession, {
+    DateTime? since,
+    DateTime? until,
+  }) async {
+    // ignore: prefer_const_declarations
+    final path =
+        r'/video/call/{type}/{id}/session/{session}/participant/{user}/{user_session}/details/track'
+            .replaceAll('{type}', type)
+            .replaceAll('{id}', id)
+            .replaceAll('{session}', session)
+            .replaceAll('{user}', user)
+            .replaceAll('{user_session}', userSession);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (since != null) {
+      queryParams.addAll(_queryParams('', 'since', since));
+    }
+    if (until != null) {
+      queryParams.addAll(_queryParams('', 'until', until));
+    }
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get call participant session metrics
+  ///
+  ///
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [String] user (required):
+  ///
+  /// * [String] userSession (required):
+  ///
+  /// * [DateTime] since:
+  ///
+  /// * [DateTime] until:
+  Future<GetCallParticipantSessionMetricsResponse?>
+      getCallParticipantSessionMetrics(
+    String type,
+    String id,
+    String session,
+    String user,
+    String userSession, {
+    DateTime? since,
+    DateTime? until,
+  }) async {
+    final response = await getCallParticipantSessionMetricsWithHttpInfo(
+      type,
+      id,
+      session,
+      user,
+      userSession,
+      since: since,
+      until: until,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GetCallParticipantSessionMetricsResponse',
+      ) as GetCallParticipantSessionMetricsResponse;
+    }
+    return null;
+  }
+
   /// Get call report
   ///
   ///
@@ -986,6 +1106,400 @@ class ProductvideoApi {
         await _decodeBodyBytes(response),
         'GetCallReportResponse',
       ) as GetCallReportResponse;
+    }
+    return null;
+  }
+
+  /// Get call session participant stats details
+  ///
+  ///
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [String] user (required):
+  ///
+  /// * [String] userSession (required):
+  ///
+  /// * [String] since:
+  ///
+  /// * [String] until:
+  ///
+  /// * [int] maxPoints:
+  Future<Response> getCallSessionParticipantStatsDetailsWithHttpInfo(
+    String callType,
+    String callId,
+    String session,
+    String user,
+    String userSession, {
+    String? since,
+    String? until,
+    int? maxPoints,
+  }) async {
+    // ignore: prefer_const_declarations
+    final path =
+        r'/video/call_stats/{call_type}/{call_id}/{session}/participant/{user}/{user_session}/details'
+            .replaceAll('{call_type}', callType)
+            .replaceAll('{call_id}', callId)
+            .replaceAll('{session}', session)
+            .replaceAll('{user}', user)
+            .replaceAll('{user_session}', userSession);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (since != null) {
+      queryParams.addAll(_queryParams('', 'since', since));
+    }
+    if (until != null) {
+      queryParams.addAll(_queryParams('', 'until', until));
+    }
+    if (maxPoints != null) {
+      queryParams.addAll(_queryParams('', 'max_points', maxPoints));
+    }
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get call session participant stats details
+  ///
+  ///
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [String] user (required):
+  ///
+  /// * [String] userSession (required):
+  ///
+  /// * [String] since:
+  ///
+  /// * [String] until:
+  ///
+  /// * [int] maxPoints:
+  Future<GetCallSessionParticipantStatsDetailsResponse?>
+      getCallSessionParticipantStatsDetails(
+    String callType,
+    String callId,
+    String session,
+    String user,
+    String userSession, {
+    String? since,
+    String? until,
+    int? maxPoints,
+  }) async {
+    final response = await getCallSessionParticipantStatsDetailsWithHttpInfo(
+      callType,
+      callId,
+      session,
+      user,
+      userSession,
+      since: since,
+      until: until,
+      maxPoints: maxPoints,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'GetCallSessionParticipantStatsDetailsResponse',
+      ) as GetCallSessionParticipantStatsDetailsResponse;
+    }
+    return null;
+  }
+
+  /// Get participant timeline events
+  ///
+  ///
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [String] user (required):
+  ///
+  /// * [String] userSession (required):
+  ///
+  /// * [String] startTime:
+  ///
+  /// * [String] endTime:
+  ///
+  /// * [List<String>] severity:
+  Future<Response> getCallSessionParticipantStatsTimelineWithHttpInfo(
+    String callType,
+    String callId,
+    String session,
+    String user,
+    String userSession, {
+    String? startTime,
+    String? endTime,
+    List<String>? severity,
+  }) async {
+    // ignore: prefer_const_declarations
+    final path =
+        r'/video/call_stats/{call_type}/{call_id}/{session}/participants/{user}/{user_session}/timeline'
+            .replaceAll('{call_type}', callType)
+            .replaceAll('{call_id}', callId)
+            .replaceAll('{session}', session)
+            .replaceAll('{user}', user)
+            .replaceAll('{user_session}', userSession);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (startTime != null) {
+      queryParams.addAll(_queryParams('', 'start_time', startTime));
+    }
+    if (endTime != null) {
+      queryParams.addAll(_queryParams('', 'end_time', endTime));
+    }
+    if (severity != null) {
+      queryParams.addAll(_queryParams('multi', 'severity', severity));
+    }
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get participant timeline events
+  ///
+  ///
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [String] user (required):
+  ///
+  /// * [String] userSession (required):
+  ///
+  /// * [String] startTime:
+  ///
+  /// * [String] endTime:
+  ///
+  /// * [List<String>] severity:
+  Future<QueryCallSessionParticipantStatsTimelineResponse?>
+      getCallSessionParticipantStatsTimeline(
+    String callType,
+    String callId,
+    String session,
+    String user,
+    String userSession, {
+    String? startTime,
+    String? endTime,
+    List<String>? severity,
+  }) async {
+    final response = await getCallSessionParticipantStatsTimelineWithHttpInfo(
+      callType,
+      callId,
+      session,
+      user,
+      userSession,
+      startTime: startTime,
+      endTime: endTime,
+      severity: severity,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallSessionParticipantStatsTimelineResponse',
+      ) as QueryCallSessionParticipantStatsTimelineResponse;
+    }
+    return null;
+  }
+
+  /// Map call participants by location
+  ///
+  ///
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [DateTime] startTime:
+  ///
+  /// * [DateTime] endTime:
+  ///
+  /// * [bool] excludePublishers:
+  ///
+  /// * [bool] excludeSubscribers:
+  ///
+  /// * [bool] excludeSfus:
+  Future<Response> getCallStatsMapWithHttpInfo(
+    String callType,
+    String callId,
+    String session, {
+    DateTime? startTime,
+    DateTime? endTime,
+    bool? excludePublishers,
+    bool? excludeSubscribers,
+    bool? excludeSfus,
+  }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call_stats/{call_type}/{call_id}/{session}/map'
+        .replaceAll('{call_type}', callType)
+        .replaceAll('{call_id}', callId)
+        .replaceAll('{session}', session);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (startTime != null) {
+      queryParams.addAll(_queryParams('', 'start_time', startTime));
+    }
+    if (endTime != null) {
+      queryParams.addAll(_queryParams('', 'end_time', endTime));
+    }
+    if (excludePublishers != null) {
+      queryParams
+          .addAll(_queryParams('', 'exclude_publishers', excludePublishers));
+    }
+    if (excludeSubscribers != null) {
+      queryParams
+          .addAll(_queryParams('', 'exclude_subscribers', excludeSubscribers));
+    }
+    if (excludeSfus != null) {
+      queryParams.addAll(_queryParams('', 'exclude_sfus', excludeSfus));
+    }
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Map call participants by location
+  ///
+  ///
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [DateTime] startTime:
+  ///
+  /// * [DateTime] endTime:
+  ///
+  /// * [bool] excludePublishers:
+  ///
+  /// * [bool] excludeSubscribers:
+  ///
+  /// * [bool] excludeSfus:
+  Future<QueryCallStatsMapResponse?> getCallStatsMap(
+    String callType,
+    String callId,
+    String session, {
+    DateTime? startTime,
+    DateTime? endTime,
+    bool? excludePublishers,
+    bool? excludeSubscribers,
+    bool? excludeSfus,
+  }) async {
+    final response = await getCallStatsMapWithHttpInfo(
+      callType,
+      callId,
+      session,
+      startTime: startTime,
+      endTime: endTime,
+      excludePublishers: excludePublishers,
+      excludeSubscribers: excludeSubscribers,
+      excludeSfus: excludeSfus,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallStatsMapResponse',
+      ) as QueryCallStatsMapResponse;
     }
     return null;
   }
@@ -1796,6 +2310,130 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Query call participant sessions
+  ///
+  ///
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [int] limit:
+  ///
+  /// * [String] prev:
+  ///
+  /// * [String] next:
+  ///
+  /// * [Map<String, Object>] filterConditions:
+  Future<Response> queryCallParticipantSessionsWithHttpInfo(
+    String type,
+    String id,
+    String session, {
+    int? limit,
+    String? prev,
+    String? next,
+    Map<String, Object>? filterConditions,
+  }) async {
+    // ignore: prefer_const_declarations
+    final path =
+        r'/video/call/{type}/{id}/session/{session}/participant_sessions'
+            .replaceAll('{type}', type)
+            .replaceAll('{id}', id)
+            .replaceAll('{session}', session);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (limit != null) {
+      queryParams.addAll(_queryParams('', 'limit', limit));
+    }
+    if (prev != null) {
+      queryParams.addAll(_queryParams('', 'prev', prev));
+    }
+    if (next != null) {
+      queryParams.addAll(_queryParams('', 'next', next));
+    }
+    if (filterConditions != null) {
+      queryParams
+          .addAll(_queryParams('', 'filter_conditions', filterConditions));
+    }
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Query call participant sessions
+  ///
+  ///
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [int] limit:
+  ///
+  /// * [String] prev:
+  ///
+  /// * [String] next:
+  ///
+  /// * [Map<String, Object>] filterConditions:
+  Future<QueryCallParticipantSessionsResponse?> queryCallParticipantSessions(
+    String type,
+    String id,
+    String session, {
+    int? limit,
+    String? prev,
+    String? next,
+    Map<String, Object>? filterConditions,
+  }) async {
+    final response = await queryCallParticipantSessionsWithHttpInfo(
+      type,
+      id,
+      session,
+      limit: limit,
+      prev: prev,
+      next: next,
+      filterConditions: filterConditions,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallParticipantSessionsResponse',
+      ) as QueryCallParticipantSessionsResponse;
+    }
+    return null;
+  }
+
   /// Query call participants
   ///
   /// Returns a list of participants connected to the call
@@ -1883,6 +2521,141 @@ class ProductvideoApi {
         await _decodeBodyBytes(response),
         'QueryCallParticipantsResponse',
       ) as QueryCallParticipantsResponse;
+    }
+    return null;
+  }
+
+  /// Query call participant statistics
+  ///
+  ///
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [List<SortParamRequest>] sort:
+  ///
+  /// * [Map<String, Object>] filterConditions:
+  ///
+  /// * [int] limit:
+  ///
+  /// * [String] prev:
+  ///
+  /// * [String] next:
+  Future<Response> queryCallSessionParticipantStatsWithHttpInfo(
+    String callType,
+    String callId,
+    String session, {
+    List<SortParamRequest>? sort,
+    Map<String, Object>? filterConditions,
+    int? limit,
+    String? prev,
+    String? next,
+  }) async {
+    // ignore: prefer_const_declarations
+    final path =
+        r'/video/call_stats/{call_type}/{call_id}/{session}/participants'
+            .replaceAll('{call_type}', callType)
+            .replaceAll('{call_id}', callId)
+            .replaceAll('{session}', session);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (sort != null) {
+      queryParams.addAll(_queryParams('multi', 'sort', sort));
+    }
+    if (filterConditions != null) {
+      queryParams
+          .addAll(_queryParams('', 'filter_conditions', filterConditions));
+    }
+    if (limit != null) {
+      queryParams.addAll(_queryParams('', 'limit', limit));
+    }
+    if (prev != null) {
+      queryParams.addAll(_queryParams('', 'prev', prev));
+    }
+    if (next != null) {
+      queryParams.addAll(_queryParams('', 'next', next));
+    }
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Query call participant statistics
+  ///
+  ///
+  ///
+  /// Parameters:
+  ///
+  /// * [String] callType (required):
+  ///
+  /// * [String] callId (required):
+  ///
+  /// * [String] session (required):
+  ///
+  /// * [List<SortParamRequest>] sort:
+  ///
+  /// * [Map<String, Object>] filterConditions:
+  ///
+  /// * [int] limit:
+  ///
+  /// * [String] prev:
+  ///
+  /// * [String] next:
+  Future<QueryCallSessionParticipantStatsResponse?>
+      queryCallSessionParticipantStats(
+    String callType,
+    String callId,
+    String session, {
+    List<SortParamRequest>? sort,
+    Map<String, Object>? filterConditions,
+    int? limit,
+    String? prev,
+    String? next,
+  }) async {
+    final response = await queryCallSessionParticipantStatsWithHttpInfo(
+      callType,
+      callId,
+      session,
+      sort: sort,
+      filterConditions: filterConditions,
+      limit: limit,
+      prev: prev,
+      next: next,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'QueryCallSessionParticipantStatsResponse',
+      ) as QueryCallSessionParticipantStatsResponse;
     }
     return null;
   }
@@ -2192,6 +2965,138 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Resolve SIP Auth
+  ///
+  /// Determine authentication requirements for an inbound SIP call before sending a digest challenge
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ResolveSipAuthRequest] resolveSipAuthRequest (required):
+  ///   ResolveSipAuthRequest
+  Future<Response> resolveSipAuthWithHttpInfo(
+    ResolveSipAuthRequest resolveSipAuthRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/sip/auth';
+
+    // ignore: prefer_final_locals
+    Object? postBody = resolveSipAuthRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Resolve SIP Auth
+  ///
+  /// Determine authentication requirements for an inbound SIP call before sending a digest challenge
+  ///
+  /// Parameters:
+  ///
+  /// * [ResolveSipAuthRequest] resolveSipAuthRequest (required):
+  ///   ResolveSipAuthRequest
+  Future<ResolveSipAuthResponse?> resolveSipAuth(
+    ResolveSipAuthRequest resolveSipAuthRequest,
+  ) async {
+    final response = await resolveSipAuthWithHttpInfo(
+      resolveSipAuthRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ResolveSipAuthResponse',
+      ) as ResolveSipAuthResponse;
+    }
+    return null;
+  }
+
+  /// Resolve SIP Inbound Routing
+  ///
+  /// Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ResolveSipInboundRequest] resolveSipInboundRequest (required):
+  ///   ResolveSipInboundRequest
+  Future<Response> resolveSipInboundWithHttpInfo(
+    ResolveSipInboundRequest resolveSipInboundRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/sip/resolve';
+
+    // ignore: prefer_final_locals
+    Object? postBody = resolveSipInboundRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Resolve SIP Inbound Routing
+  ///
+  /// Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
+  ///
+  /// Parameters:
+  ///
+  /// * [ResolveSipInboundRequest] resolveSipInboundRequest (required):
+  ///   ResolveSipInboundRequest
+  Future<ResolveSipInboundResponse?> resolveSipInbound(
+    ResolveSipInboundRequest resolveSipInboundRequest,
+  ) async {
+    final response = await resolveSipInboundWithHttpInfo(
+      resolveSipInboundRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ResolveSipInboundResponse',
+      ) as ResolveSipInboundResponse;
+    }
+    return null;
+  }
+
   /// Ring Call Users
   ///
   /// Sends a ring notification to the provided users who are not already in the call. All users should be members of the call  Sends events: - call.ring
@@ -2368,11 +3273,11 @@ class ProductvideoApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [SendReactionRequest] sendReactionRequest (required):
+  /// * [SendVideoReactionRequest] sendVideoReactionRequest (required):
   Future<Response> sendVideoReactionWithHttpInfo(
     String type,
     String id,
-    SendReactionRequest sendReactionRequest,
+    SendVideoReactionRequest sendVideoReactionRequest,
   ) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/reaction'
@@ -2380,7 +3285,7 @@ class ProductvideoApi {
         .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody = sendReactionRequest;
+    Object? postBody = sendVideoReactionRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -2409,16 +3314,16 @@ class ProductvideoApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<SendReactionResponse?> sendVideoReaction(
+  /// * [SendVideoReactionRequest] sendVideoReactionRequest (required):
+  Future<SendVideoReactionResponse?> sendVideoReaction(
     String type,
     String id,
-    SendReactionRequest sendReactionRequest,
+    SendVideoReactionRequest sendVideoReactionRequest,
   ) async {
     final response = await sendVideoReactionWithHttpInfo(
       type,
       id,
-      sendReactionRequest,
+      sendVideoReactionRequest,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -2430,8 +3335,8 @@ class ProductvideoApi {
         response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
-        'SendReactionResponse',
-      ) as SendReactionResponse;
+        'SendVideoReactionResponse',
+      ) as SendVideoReactionResponse;
     }
     return null;
   }
@@ -3890,7 +4795,7 @@ class ProductvideoApi {
 
   /// Video Connect (WebSocket)
   ///
-  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok
+  /// Establishes WebSocket connection for user to video  Sends events: - connection.ok - health.check
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> videoConnectWithHttpInfo() async {
@@ -3919,7 +4824,7 @@ class ProductvideoApi {
 
   /// Video Connect (WebSocket)
   ///
-  /// Establishes WebSocket connection for user to video  Sends events: - health.check - connection.ok
+  /// Establishes WebSocket connection for user to video  Sends events: - connection.ok - health.check
   Future<void> videoConnect() async {
     final response = await videoConnectWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {

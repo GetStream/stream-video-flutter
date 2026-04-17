@@ -76,12 +76,26 @@ class CallSessionStartedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSessionStartedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSessionStartedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallSessionStartedEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallSessionStartedEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallSessionStartedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallSessionStartedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallSessionStartedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallSessionStartedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "CallSessionStartedEvent[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "CallSessionStartedEvent[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallSessionStartedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallSessionStartedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

@@ -251,12 +251,38 @@ class OwnUserResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "OwnUserResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "OwnUserResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'created_at'),
+            'Required key "OwnUserResponse[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "OwnUserResponse[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "OwnUserResponse[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "OwnUserResponse[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'devices'),
+            'Required key "OwnUserResponse[devices]" is missing from JSON.');
+        assert(json[r'devices'] != null,
+            'Required key "OwnUserResponse[devices]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "OwnUserResponse[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "OwnUserResponse[id]" has a null value in JSON.');
+        assert(json.containsKey(r'language'),
+            'Required key "OwnUserResponse[language]" is missing from JSON.');
+        assert(json[r'language'] != null,
+            'Required key "OwnUserResponse[language]" has a null value in JSON.');
+        assert(json.containsKey(r'role'),
+            'Required key "OwnUserResponse[role]" is missing from JSON.');
+        assert(json[r'role'] != null,
+            'Required key "OwnUserResponse[role]" has a null value in JSON.');
+        assert(json.containsKey(r'teams'),
+            'Required key "OwnUserResponse[teams]" is missing from JSON.');
+        assert(json[r'teams'] != null,
+            'Required key "OwnUserResponse[teams]" has a null value in JSON.');
+        assert(json.containsKey(r'updated_at'),
+            'Required key "OwnUserResponse[updated_at]" is missing from JSON.');
+        assert(json[r'updated_at'] != null,
+            'Required key "OwnUserResponse[updated_at]" has a null value in JSON.');
         return true;
       }());
 

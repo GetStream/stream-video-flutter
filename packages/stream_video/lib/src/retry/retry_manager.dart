@@ -1,5 +1,6 @@
 import '../../open_api/video/coordinator/api.dart';
 import '../errors/video_error.dart';
+import '../token/token_manager.dart';
 import '../utils/result.dart';
 import 'retry_policy.dart';
 
@@ -11,9 +12,13 @@ typedef OnFailure<T> =
     );
 
 class RpcRetryManager {
-  const RpcRetryManager(this.policy);
+  const RpcRetryManager(
+    this.policy, {
+    this.tokenManager,
+  });
 
   final RetryPolicy policy;
+  final TokenManager? tokenManager;
 
   Future<Result<T>> execute<T>(
     Delegate<T> delegate, [
@@ -21,6 +26,8 @@ class RpcRetryManager {
   ]) async {
     late Result<T> result;
     var retryAttempt = 0;
+    var authRefreshed = false;
+
     do {
       final delay = policy.backoff(retryAttempt);
       if (retryAttempt > 0 && result is Failure) {
@@ -30,6 +37,19 @@ class RpcRetryManager {
         delay,
         delegate,
       );
+
+      // On 401, refresh the token once and retry immediately.
+      if (result.isFailure && !authRefreshed && _isAuthError(result)) {
+        if (tokenManager != null) {
+          authRefreshed = true;
+          final refreshResult = await tokenManager!.refreshToken();
+          if (refreshResult.isSuccess) {
+            // Prevent infinite loop of retries if the token refresh provides invalid token.
+            continue;
+          }
+        }
+      }
+
       retryAttempt++;
     } while (result.isFailure &&
         retryAttempt < policy.config.rpcMaxRetries &&
@@ -38,8 +58,22 @@ class RpcRetryManager {
     return result;
   }
 
-  /// Returns false for permanent client errors (4xx except 408/429)
+  bool _isAuthError(Result<dynamic> result) {
+    if (result is! Failure) return false;
+
+    final error = result.error;
+    if (error is! VideoErrorWithCause) return false;
+
+    final cause = error.cause;
+    if (cause is! ApiException) return false;
+
+    return cause.code == 401;
+  }
+
+  /// Returns false for permanent client errors (4xx except 401/408/429)
   /// that should not be retried.
+  /// 401 (Unauthorized) is retryable because the auth-retry logic above handles it with a token refresh.
+  /// 408 (Request Timeout) and 429 (Too Many Requests) are retryable because they are temporary errors.
   bool _isRetryable(Result<dynamic> result) {
     if (result is! Failure) return true;
 
@@ -51,8 +85,7 @@ class RpcRetryManager {
 
     final statusCode = cause.code;
     if (statusCode >= 400 && statusCode < 500) {
-      // 408 Request Timeout and 429 Too Many Requests are retryable
-      return statusCode == 408 || statusCode == 429;
+      return statusCode == 401 || statusCode == 408 || statusCode == 429;
     }
 
     return true;

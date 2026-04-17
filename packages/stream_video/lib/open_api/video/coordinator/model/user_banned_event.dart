@@ -13,29 +13,84 @@ part of openapi.api;
 class UserBannedEvent {
   /// Returns a new [UserBannedEvent] instance.
   UserBannedEvent({
-    required this.channelId,
-    required this.channelType,
-    required this.cid,
+    this.channelCustom = const {},
+    this.channelId,
+    this.channelMemberCount,
+    this.channelMessageCount,
+    this.channelType,
+    this.cid,
     required this.createdAt,
-    required this.createdBy,
+    this.createdBy,
+    this.custom = const {},
     this.expiration,
     this.reason,
-    required this.shadow,
+    this.receivedAt,
+    this.shadow,
     this.team,
+    this.totalBans,
     this.type = 'user.banned',
-    this.user,
+    required this.user,
   });
 
-  String channelId;
+  Map<String, Object> channelCustom;
 
-  String channelType;
+  /// The ID of the channel where the target user was banned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? channelId;
 
-  String cid;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? channelMemberCount;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? channelMessageCount;
+
+  /// The type of the channel where the target user was banned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? channelType;
+
+  /// The CID of the channel where the target user was banned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? cid;
+
+  /// Date/time of creation
   DateTime createdAt;
 
-  User createdBy;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  UserResponseCommonFields? createdBy;
 
+  Map<String, Object> custom;
+
+  /// The expiration date of the ban
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -44,6 +99,7 @@ class UserBannedEvent {
   ///
   DateTime? expiration;
 
+  /// The reason for the ban
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -52,8 +108,24 @@ class UserBannedEvent {
   ///
   String? reason;
 
-  bool shadow;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? receivedAt;
 
+  /// Whether the user was shadow banned
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? shadow;
+
+  /// The team of the channel where the target user was banned
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -62,58 +134,101 @@ class UserBannedEvent {
   ///
   String? team;
 
-  String type;
-
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  User? user;
+  int? totalBans;
+
+  /// The type of event: \"user.banned\" in this case
+  String type;
+
+  UserResponseCommonFields user;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UserBannedEvent &&
+          _deepEquality.equals(other.channelCustom, channelCustom) &&
           other.channelId == channelId &&
+          other.channelMemberCount == channelMemberCount &&
+          other.channelMessageCount == channelMessageCount &&
           other.channelType == channelType &&
           other.cid == cid &&
           other.createdAt == createdAt &&
           other.createdBy == createdBy &&
+          _deepEquality.equals(other.custom, custom) &&
           other.expiration == expiration &&
           other.reason == reason &&
+          other.receivedAt == receivedAt &&
           other.shadow == shadow &&
           other.team == team &&
+          other.totalBans == totalBans &&
           other.type == type &&
           other.user == user;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (channelId.hashCode) +
-      (channelType.hashCode) +
-      (cid.hashCode) +
+      (channelCustom.hashCode) +
+      (channelId == null ? 0 : channelId!.hashCode) +
+      (channelMemberCount == null ? 0 : channelMemberCount!.hashCode) +
+      (channelMessageCount == null ? 0 : channelMessageCount!.hashCode) +
+      (channelType == null ? 0 : channelType!.hashCode) +
+      (cid == null ? 0 : cid!.hashCode) +
       (createdAt.hashCode) +
-      (createdBy.hashCode) +
+      (createdBy == null ? 0 : createdBy!.hashCode) +
+      (custom.hashCode) +
       (expiration == null ? 0 : expiration!.hashCode) +
       (reason == null ? 0 : reason!.hashCode) +
-      (shadow.hashCode) +
+      (receivedAt == null ? 0 : receivedAt!.hashCode) +
+      (shadow == null ? 0 : shadow!.hashCode) +
       (team == null ? 0 : team!.hashCode) +
+      (totalBans == null ? 0 : totalBans!.hashCode) +
       (type.hashCode) +
-      (user == null ? 0 : user!.hashCode);
+      (user.hashCode);
 
   @override
   String toString() =>
-      'UserBannedEvent[channelId=$channelId, channelType=$channelType, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, expiration=$expiration, reason=$reason, shadow=$shadow, team=$team, type=$type, user=$user]';
+      'UserBannedEvent[channelCustom=$channelCustom, channelId=$channelId, channelMemberCount=$channelMemberCount, channelMessageCount=$channelMessageCount, channelType=$channelType, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, expiration=$expiration, reason=$reason, receivedAt=$receivedAt, shadow=$shadow, team=$team, totalBans=$totalBans, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'channel_id'] = this.channelId;
-    json[r'channel_type'] = this.channelType;
-    json[r'cid'] = this.cid;
+    json[r'channel_custom'] = this.channelCustom;
+    if (this.channelId != null) {
+      json[r'channel_id'] = this.channelId;
+    } else {
+      json[r'channel_id'] = null;
+    }
+    if (this.channelMemberCount != null) {
+      json[r'channel_member_count'] = this.channelMemberCount;
+    } else {
+      json[r'channel_member_count'] = null;
+    }
+    if (this.channelMessageCount != null) {
+      json[r'channel_message_count'] = this.channelMessageCount;
+    } else {
+      json[r'channel_message_count'] = null;
+    }
+    if (this.channelType != null) {
+      json[r'channel_type'] = this.channelType;
+    } else {
+      json[r'channel_type'] = null;
+    }
+    if (this.cid != null) {
+      json[r'cid'] = this.cid;
+    } else {
+      json[r'cid'] = null;
+    }
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'created_by'] = this.createdBy;
+    if (this.createdBy != null) {
+      json[r'created_by'] = this.createdBy;
+    } else {
+      json[r'created_by'] = null;
+    }
+    json[r'custom'] = this.custom;
     if (this.expiration != null) {
       json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
     } else {
@@ -124,18 +239,28 @@ class UserBannedEvent {
     } else {
       json[r'reason'] = null;
     }
-    json[r'shadow'] = this.shadow;
+    if (this.receivedAt != null) {
+      json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'received_at'] = null;
+    }
+    if (this.shadow != null) {
+      json[r'shadow'] = this.shadow;
+    } else {
+      json[r'shadow'] = null;
+    }
     if (this.team != null) {
       json[r'team'] = this.team;
     } else {
       json[r'team'] = null;
     }
-    json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
+    if (this.totalBans != null) {
+      json[r'total_bans'] = this.totalBans;
     } else {
-      json[r'user'] = null;
+      json[r'total_bans'] = null;
     }
+    json[r'type'] = this.type;
+    json[r'user'] = this.user;
     return json;
   }
 
@@ -150,27 +275,45 @@ class UserBannedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserBannedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserBannedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'created_at'),
+            'Required key "UserBannedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "UserBannedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "UserBannedEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "UserBannedEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "UserBannedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "UserBannedEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "UserBannedEvent[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "UserBannedEvent[user]" has a null value in JSON.');
         return true;
       }());
 
       return UserBannedEvent(
-        channelId: mapValueOfType<String>(json, r'channel_id')!,
-        channelType: mapValueOfType<String>(json, r'channel_type')!,
-        cid: mapValueOfType<String>(json, r'cid')!,
+        channelCustom:
+            mapCastOfType<String, Object>(json, r'channel_custom') ?? const {},
+        channelId: mapValueOfType<String>(json, r'channel_id'),
+        channelMemberCount: mapValueOfType<int>(json, r'channel_member_count'),
+        channelMessageCount:
+            mapValueOfType<int>(json, r'channel_message_count'),
+        channelType: mapValueOfType<String>(json, r'channel_type'),
+        cid: mapValueOfType<String>(json, r'cid'),
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        createdBy: User.fromJson(json[r'created_by'])!,
+        createdBy: UserResponseCommonFields.fromJson(json[r'created_by']),
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         expiration: mapDateTime(json, r'expiration', r''),
         reason: mapValueOfType<String>(json, r'reason'),
-        shadow: mapValueOfType<bool>(json, r'shadow')!,
+        receivedAt: mapDateTime(json, r'received_at', r''),
+        shadow: mapValueOfType<bool>(json, r'shadow'),
         team: mapValueOfType<String>(json, r'team'),
+        totalBans: mapValueOfType<int>(json, r'total_bans'),
         type: mapValueOfType<String>(json, r'type')!,
-        user: User.fromJson(json[r'user']),
+        user: UserResponseCommonFields.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -227,12 +370,9 @@ class UserBannedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'channel_id',
-    'channel_type',
-    'cid',
     'created_at',
-    'created_by',
-    'shadow',
+    'custom',
     'type',
+    'user',
   };
 }

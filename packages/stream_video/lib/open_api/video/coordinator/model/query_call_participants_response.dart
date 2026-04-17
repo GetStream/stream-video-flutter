@@ -97,12 +97,30 @@ class QueryCallParticipantsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryCallParticipantsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryCallParticipantsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "QueryCallParticipantsResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "QueryCallParticipantsResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "QueryCallParticipantsResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "QueryCallParticipantsResponse[duration]" has a null value in JSON.');
+        assert(json.containsKey(r'members'),
+            'Required key "QueryCallParticipantsResponse[members]" is missing from JSON.');
+        assert(json[r'members'] != null,
+            'Required key "QueryCallParticipantsResponse[members]" has a null value in JSON.');
+        assert(json.containsKey(r'own_capabilities'),
+            'Required key "QueryCallParticipantsResponse[own_capabilities]" is missing from JSON.');
+        assert(json[r'own_capabilities'] != null,
+            'Required key "QueryCallParticipantsResponse[own_capabilities]" has a null value in JSON.');
+        assert(json.containsKey(r'participants'),
+            'Required key "QueryCallParticipantsResponse[participants]" is missing from JSON.');
+        assert(json[r'participants'] != null,
+            'Required key "QueryCallParticipantsResponse[participants]" has a null value in JSON.');
+        assert(json.containsKey(r'total_participants'),
+            'Required key "QueryCallParticipantsResponse[total_participants]" is missing from JSON.');
+        assert(json[r'total_participants'] != null,
+            'Required key "QueryCallParticipantsResponse[total_participants]" has a null value in JSON.');
         return true;
       }());
 

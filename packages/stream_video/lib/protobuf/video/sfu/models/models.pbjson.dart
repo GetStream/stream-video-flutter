@@ -180,6 +180,8 @@ const SdkType$json = {
     {'1': 'SDK_TYPE_UNITY', '2': 7},
     {'1': 'SDK_TYPE_GO', '2': 8},
     {'1': 'SDK_TYPE_PLAIN_JAVASCRIPT', '2': 9},
+    {'1': 'SDK_TYPE_PYTHON', '2': 10},
+    {'1': 'SDK_TYPE_VISION_AGENTS', '2': 11},
   ],
 };
 
@@ -189,7 +191,8 @@ final $typed_data.Uint8List sdkTypeDescriptor = $convert.base64Decode(
     'IUChBTREtfVFlQRV9BTkdVTEFSEAISFAoQU0RLX1RZUEVfQU5EUk9JRBADEhAKDFNES19UWVBF'
     'X0lPUxAEEhQKEFNES19UWVBFX0ZMVVRURVIQBRIZChVTREtfVFlQRV9SRUFDVF9OQVRJVkUQBh'
     'ISCg5TREtfVFlQRV9VTklUWRAHEg8KC1NES19UWVBFX0dPEAgSHQoZU0RLX1RZUEVfUExBSU5f'
-    'SkFWQVNDUklQVBAJ');
+    'SkFWQVNDUklQVBAJEhMKD1NES19UWVBFX1BZVEhPThAKEhoKFlNES19UWVBFX1ZJU0lPTl9BR0'
+    'VOVFMQCw==');
 
 @$core.Deprecated('Use trackUnpublishReasonDescriptor instead')
 const TrackUnpublishReason$json = {
@@ -831,6 +834,7 @@ const ClientDetails$json = {
       '6': '.stream.video.sfu.models.Device',
       '10': 'device'
     },
+    {'1': 'webrtc_version', '3': 5, '4': 1, '5': 9, '10': 'webrtcVersion'},
   ],
 };
 
@@ -840,7 +844,7 @@ final $typed_data.Uint8List clientDetailsDescriptor = $convert.base64Decode(
     'Nka1IDc2RrEisKAm9zGAIgASgLMhsuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuT1NSAm9zEjoK'
     'B2Jyb3dzZXIYAyABKAsyIC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Ccm93c2VyUgdicm93c2'
     'VyEjcKBmRldmljZRgEIAEoCzIfLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkRldmljZVIGZGV2'
-    'aWNl');
+    'aWNlEiUKDndlYnJ0Y192ZXJzaW9uGAUgASgJUg13ZWJydGNWZXJzaW9u');
 
 @$core.Deprecated('Use sdkDescriptor instead')
 const Sdk$json = {

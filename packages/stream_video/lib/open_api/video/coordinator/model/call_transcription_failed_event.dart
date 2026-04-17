@@ -86,12 +86,22 @@ class CallTranscriptionFailedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallTranscriptionFailedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallTranscriptionFailedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallTranscriptionFailedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallTranscriptionFailedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallTranscriptionFailedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallTranscriptionFailedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'egress_id'),
+            'Required key "CallTranscriptionFailedEvent[egress_id]" is missing from JSON.');
+        assert(json[r'egress_id'] != null,
+            'Required key "CallTranscriptionFailedEvent[egress_id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallTranscriptionFailedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallTranscriptionFailedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

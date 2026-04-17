@@ -100,12 +100,30 @@ class CallSessionParticipantLeftEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallSessionParticipantLeftEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallSessionParticipantLeftEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallSessionParticipantLeftEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallSessionParticipantLeftEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallSessionParticipantLeftEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallSessionParticipantLeftEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'duration_seconds'),
+            'Required key "CallSessionParticipantLeftEvent[duration_seconds]" is missing from JSON.');
+        assert(json[r'duration_seconds'] != null,
+            'Required key "CallSessionParticipantLeftEvent[duration_seconds]" has a null value in JSON.');
+        assert(json.containsKey(r'participant'),
+            'Required key "CallSessionParticipantLeftEvent[participant]" is missing from JSON.');
+        assert(json[r'participant'] != null,
+            'Required key "CallSessionParticipantLeftEvent[participant]" has a null value in JSON.');
+        assert(json.containsKey(r'session_id'),
+            'Required key "CallSessionParticipantLeftEvent[session_id]" is missing from JSON.');
+        assert(json[r'session_id'] != null,
+            'Required key "CallSessionParticipantLeftEvent[session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallSessionParticipantLeftEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallSessionParticipantLeftEvent[type]" has a null value in JSON.');
         return true;
       }());
 

@@ -76,12 +76,26 @@ class CustomVideoEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CustomVideoEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CustomVideoEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CustomVideoEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CustomVideoEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CustomVideoEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CustomVideoEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'custom'),
+            'Required key "CustomVideoEvent[custom]" is missing from JSON.');
+        assert(json[r'custom'] != null,
+            'Required key "CustomVideoEvent[custom]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CustomVideoEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CustomVideoEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "CustomVideoEvent[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "CustomVideoEvent[user]" has a null value in JSON.');
         return true;
       }());
 
