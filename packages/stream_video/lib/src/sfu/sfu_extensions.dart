@@ -48,6 +48,7 @@ extension SfuParticipantX on SfuParticipant {
       roles: roles.isNotEmpty ? roles : existingRoles,
       name: userName.ifEmpty(() => existingName),
       custom: custom,
+      customData: customData,
       image: userImage.ifEmpty(() => existingImage),
       sessionId: sessionId,
       trackIdPrefix: trackLookupPrefix,

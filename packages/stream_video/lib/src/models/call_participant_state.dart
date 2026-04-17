@@ -21,6 +21,7 @@ class CallParticipantState
     required this.roles,
     required this.name,
     required this.custom,
+    this.customData = const {},
     this.image,
     required this.sessionId,
     required this.trackIdPrefix,
@@ -46,6 +47,7 @@ class CallParticipantState
     required this.roles,
     required this.name,
     required this.custom,
+    required this.customData,
     required this.image,
     required this.sessionId,
     required this.trackIdPrefix,
@@ -68,7 +70,9 @@ class CallParticipantState
   final String userId;
   final List<String> roles;
   final String name;
+  @Deprecated('Use customData instead')
   final Map<String, Object?> custom;
+  final Map<String, Object?> customData;
   final String? image;
   final String sessionId;
   final String trackIdPrefix;
@@ -111,6 +115,7 @@ class CallParticipantState
     List<String>? roles,
     String? name,
     Map<String, Object?>? custom,
+    Map<String, Object?>? customData,
     String? image,
     String? sessionId,
     String? trackIdPrefix,
@@ -134,6 +139,7 @@ class CallParticipantState
       roles: roles ?? this.roles,
       name: name ?? this.name,
       custom: custom ?? this.custom,
+      customData: customData ?? this.customData,
       image: image ?? this.image,
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -181,6 +187,7 @@ class CallParticipantState
       roles: roles,
       name: name,
       custom: custom,
+      customData: customData,
       image: image,
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
@@ -213,6 +220,7 @@ class CallParticipantState
       roles: roles,
       name: name,
       custom: custom,
+      customData: customData,
       image: image,
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
@@ -272,6 +280,7 @@ class CallParticipantState
     roles,
     name,
     custom,
+    customData,
     image,
     sessionId,
     trackIdPrefix,
