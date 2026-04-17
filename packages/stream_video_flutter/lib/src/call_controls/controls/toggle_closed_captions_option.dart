@@ -40,25 +40,27 @@ class ToggleClosedCaptionsOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = call.state.value.isCaptioning;
-
-    return CallControlOption(
-      icon: enabled
-          ? Icon(enabledClosedCaptionIcon)
-          : Icon(disabledClosedCaptionIcon),
-      iconColor: enabled
-          ? enabledClosedCaptionIconColor
-          : disabledClosedCaptionIconColor,
-      backgroundColor: enabled
-          ? enabledClosedCaptionBackgroundColor
-          : disabledClosedCaptionBackgroundColor,
-      onPressed: () {
-        if (!enabled) {
-          call.startClosedCaptions();
-        } else {
-          call.stopClosedCaptions();
-        }
-      },
+    return PartialCallStateBuilder<bool>(
+      call: call,
+      selector: (state) => state.isCaptioning,
+      builder: (_, enabled) => CallControlOption(
+        icon: enabled
+            ? Icon(enabledClosedCaptionIcon)
+            : Icon(disabledClosedCaptionIcon),
+        iconColor: enabled
+            ? enabledClosedCaptionIconColor
+            : disabledClosedCaptionIconColor,
+        backgroundColor: enabled
+            ? enabledClosedCaptionBackgroundColor
+            : disabledClosedCaptionBackgroundColor,
+        onPressed: () {
+          if (!enabled) {
+            call.startClosedCaptions();
+          } else {
+            call.stopClosedCaptions();
+          }
+        },
+      ),
     );
   }
 }

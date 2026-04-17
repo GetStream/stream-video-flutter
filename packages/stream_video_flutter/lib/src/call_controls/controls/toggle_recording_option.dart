@@ -40,23 +40,27 @@ class ToggleRecordingOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = call.state.value.isRecording;
-
-    return CallControlOption(
-      icon: enabled ? Icon(enabledRecordingIcon) : Icon(disabledRecordingIcon),
-      iconColor: enabled
-          ? enabledRecordingIconColor
-          : disabledRecordingIconColor,
-      backgroundColor: enabled
-          ? enabledRecordingBackgroundColor
-          : disabledRecordingBackgroundColor,
-      onPressed: () {
-        if (!enabled) {
-          call.startRecording();
-        } else {
-          call.stopRecording();
-        }
-      },
+    return PartialCallStateBuilder<bool>(
+      call: call,
+      selector: (state) => state.isRecording,
+      builder: (_, enabled) => CallControlOption(
+        icon: enabled
+            ? Icon(enabledRecordingIcon)
+            : Icon(disabledRecordingIcon),
+        iconColor: enabled
+            ? enabledRecordingIconColor
+            : disabledRecordingIconColor,
+        backgroundColor: enabled
+            ? enabledRecordingBackgroundColor
+            : disabledRecordingBackgroundColor,
+        onPressed: () {
+          if (!enabled) {
+            call.startRecording();
+          } else {
+            call.stopRecording();
+          }
+        },
+      ),
     );
   }
 }

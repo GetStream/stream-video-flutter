@@ -93,24 +93,25 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
 
   @override
   Widget build(BuildContext context) {
-    var enabled = false;
-
-    final callState = widget.call.state.valueOrNull;
-    final audioOutputDevice = callState?.audioOutputDevice;
-    if (audioOutputDevice != null) {
-      enabled = audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
-    }
-
-    return CallControlOption(
-      icon: enabled
-          ? Icon(widget.enabledSpeakerphoneIcon)
-          : Icon(widget.disabledSpeakerphoneIcon),
-      onPressed: () async {
-        try {
-          // Enable/disable the speaker.
-          await _setSpeakerphoneEnabled(enabled: !enabled);
-        } catch (_) {}
+    return PartialCallStateBuilder<bool>(
+      call: widget.call,
+      selector: (state) {
+        final audioOutputDevice = state.audioOutputDevice;
+        if (audioOutputDevice != null) {
+          return audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
+        }
+        return false;
       },
+      builder: (_, enabled) => CallControlOption(
+        icon: enabled
+            ? Icon(widget.enabledSpeakerphoneIcon)
+            : Icon(widget.disabledSpeakerphoneIcon),
+        onPressed: () async {
+          try {
+            await _setSpeakerphoneEnabled(enabled: !enabled);
+          } catch (_) {}
+        },
+      ),
     );
   }
 }

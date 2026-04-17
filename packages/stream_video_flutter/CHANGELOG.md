@@ -1,5 +1,8 @@
 ## Upcoming
 
+### ✨ Refactor
+* Refactored call control options to use `PartialCallStateBuilder` for reactive state updates instead of one-shot `call.state.value` reads.
+
 ### 🐞 Fixed
 * Fixed iOS Picture-in-Picture window not dismissing when the call ends during PiP mode.
 * Fixed `CallDiagnosticsContent` throwing `failed to call super.dispose` when the widget was disposed while awaiting stats subscription cancellation.
