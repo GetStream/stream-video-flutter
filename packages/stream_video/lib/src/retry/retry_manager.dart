@@ -70,7 +70,7 @@ class RpcRetryManager {
     return cause.code == 401;
   }
 
-  /// Returns false for permanent client errors (4xx except 401 and 429)
+  /// Returns false for permanent client errors (4xx except 401/408/429)
   /// that should not be retried. 401 is retryable because the auth-retry
   /// logic above handles it with a token refresh.
   bool _isRetryable(Result<dynamic> result) {
@@ -84,7 +84,7 @@ class RpcRetryManager {
 
     final statusCode = cause.code;
     if (statusCode >= 400 && statusCode < 500) {
-      return statusCode == 401 || statusCode == 429;
+      return statusCode == 401 || statusCode == 408 || statusCode == 429;
     }
 
     return true;
