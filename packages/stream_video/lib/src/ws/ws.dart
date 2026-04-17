@@ -7,7 +7,7 @@ import '../logger/impl/tagged_logger.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'connect/connect.dart'
-    if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
+    if (dart.library.js_interop) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
     as platform;
 import 'health/connection_state.dart';
