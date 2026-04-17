@@ -753,7 +753,7 @@ class StreamVideo extends Disposable {
     CallPreferences? callPreferences,
   }) async {
     final allCalls = await pushNotificationManager?.activeCalls();
-    
+
     // Only consume calls that the user explicitly accepted via the native notification UI.
     final calls = allCalls?.where((c) => c.isAccepted).toList();
     if (calls == null || calls.isEmpty) return false;
