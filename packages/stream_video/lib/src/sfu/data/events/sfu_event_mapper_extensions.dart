@@ -255,6 +255,7 @@ extension SfuParticipantExtension on sfu_models.Participant {
       userImage: image,
       sessionId: sessionId,
       custom: custom.fields,
+      customData: (custom.toProto3Json() as Map<String, Object?>?) ?? {},
       publishedTracks: publishedTracks
           .map(
             (track) => track.toDomain(),
