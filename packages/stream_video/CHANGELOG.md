@@ -1,4 +1,4 @@
-## Upcoming
+## 1.4.0
 
 ### 🐞 Fixed
 * Fixed `consumeAndAcceptActiveCall` auto-accepting incoming calls on Android when the user opens the app without pressing the Accept button on the notification. The method now only consumes calls that the user explicitly accepted.
@@ -7,6 +7,7 @@
 ### 🔄 Changed
 * Regenerated OpenAPI models to match the latest backend schema.
 * Fixed broadcasting status updates not being wired through to call state.
+* Updated conditional imports to support WASM
 
 ### ⚠️ Deprecated
 * `StreamHlsSettings.qualityTracks` (`List<String>`) is deprecated — use `StreamHlsSettings.qualities` (`List<StreamVideoQuality>`) instead.
