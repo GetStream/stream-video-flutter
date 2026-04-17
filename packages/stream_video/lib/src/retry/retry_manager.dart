@@ -84,6 +84,7 @@ class RpcRetryManager {
 
     final statusCode = cause.code;
     if (statusCode >= 400 && statusCode < 500) {
+      // 401 Unauthorized, 408 Request Timeout, 429 Too Many Requests
       return statusCode == 401 || statusCode == 408 || statusCode == 429;
     }
 
