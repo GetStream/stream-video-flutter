@@ -71,8 +71,9 @@ class RpcRetryManager {
   }
 
   /// Returns false for permanent client errors (4xx except 401/408/429)
-  /// that should not be retried. 401 is retryable because the auth-retry
-  /// logic above handles it with a token refresh.
+  /// that should not be retried.
+  /// 401 (Unauthorized) is retryable because the auth-retry logic above handles it with a token refresh.
+  /// 408 (Request Timeout) and 429 (Too Many Requests) are retryable because they are temporary errors.
   bool _isRetryable(Result<dynamic> result) {
     if (result is! Failure) return true;
 
@@ -84,7 +85,6 @@ class RpcRetryManager {
 
     final statusCode = cause.code;
     if (statusCode >= 400 && statusCode < 500) {
-      // 401 Unauthorized, 408 Request Timeout, 429 Too Many Requests
       return statusCode == 401 || statusCode == 408 || statusCode == 429;
     }
 
