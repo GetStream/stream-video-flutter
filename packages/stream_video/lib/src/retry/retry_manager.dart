@@ -41,10 +41,10 @@ class RpcRetryManager {
       // On 401, refresh the token once and retry immediately.
       if (result.isFailure && !authRefreshed && _isAuthError(result)) {
         if (tokenManager != null) {
+          authRefreshed = true;
           final refreshResult = await tokenManager!.refreshToken();
           if (refreshResult.isSuccess) {
             // Prevent infinite loop of retries if the token refresh provides invalid token.
-            authRefreshed = true;
             continue;
           }
         }
