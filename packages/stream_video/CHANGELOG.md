@@ -1,6 +1,7 @@
 ## Upcoming
 
-### Fixed
+### 🐞 Fixed
+* Fixed `consumeAndAcceptActiveCall` auto-accepting incoming calls on Android when the user opens the app without pressing the Accept button on the notification. The method now only consumes calls that the user explicitly accepted.
 * Fixed coordinator REST API calls failing permanently when the JWT token expires.
 
 ### 🔄 Changed
