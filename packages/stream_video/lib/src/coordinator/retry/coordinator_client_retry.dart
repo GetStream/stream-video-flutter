@@ -18,6 +18,7 @@ import '../../models/user_info.dart';
 import '../../retry/retry_manager.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
+import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../coordinator_client.dart';
@@ -28,8 +29,12 @@ class CoordinatorClientRetry extends CoordinatorClient {
   CoordinatorClientRetry({
     required CoordinatorClient delegate,
     required RetryPolicy retryPolicy,
+    TokenManager? tokenManager,
   }) : _delegate = delegate,
-       _retryManager = RpcRetryManager(retryPolicy);
+       _retryManager = RpcRetryManager(
+         retryPolicy,
+         tokenManager: tokenManager,
+       );
 
   final CoordinatorClient _delegate;
   final RpcRetryManager _retryManager;

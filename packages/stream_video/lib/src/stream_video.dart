@@ -1268,6 +1268,7 @@ CoordinatorClient buildCoordinatorClient({
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
   return CoordinatorClientRetry(
     retryPolicy: retryPolicy,
+    tokenManager: tokenManager,
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,
       tokenManager: tokenManager,
