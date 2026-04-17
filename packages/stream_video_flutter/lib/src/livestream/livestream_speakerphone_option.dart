@@ -92,35 +92,36 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
 
   @override
   Widget build(BuildContext context) {
-    var enabled = false;
-
-    final callState = widget.call.state.valueOrNull;
-    final audioOutputDevice = callState?.audioOutputDevice;
-    if (audioOutputDevice != null) {
-      enabled = audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
-    }
-
-    return IconButton(
-      icon: enabled
-          ? IconTheme(
-              data: widget.enabledSpeakerphoneIconTheme,
-              child: const Icon(
-                Icons.volume_up_rounded,
-              ),
-            )
-          : IconTheme(
-              data: widget.disabledSpeakerphoneIconTheme,
-              child: const Icon(
-                Icons.volume_off_rounded,
-              ),
-            ),
-      onPressed: () async {
-        try {
-          // Enable/disable the speaker.
-          await _setSpeakerphoneEnabled(enabled: !enabled);
-        } catch (_) {}
+    return PartialCallStateBuilder<bool>(
+      call: widget.call,
+      selector: (state) {
+        final audioOutputDevice = state.audioOutputDevice;
+        if (audioOutputDevice != null) {
+          return audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
+        }
+        return false;
       },
-      padding: const EdgeInsets.all(16),
+      builder: (_, enabled) => IconButton(
+        icon: enabled
+            ? IconTheme(
+                data: widget.enabledSpeakerphoneIconTheme,
+                child: const Icon(
+                  Icons.volume_up_rounded,
+                ),
+              )
+            : IconTheme(
+                data: widget.disabledSpeakerphoneIconTheme,
+                child: const Icon(
+                  Icons.volume_off_rounded,
+                ),
+              ),
+        onPressed: () async {
+          try {
+            await _setSpeakerphoneEnabled(enabled: !enabled);
+          } catch (_) {}
+        },
+        padding: const EdgeInsets.all(16),
+      ),
     );
   }
 }
