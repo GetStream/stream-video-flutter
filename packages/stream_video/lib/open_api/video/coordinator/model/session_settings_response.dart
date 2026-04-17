@@ -52,12 +52,10 @@ class SessionSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SessionSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SessionSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'inactivity_timeout_seconds'),
+            'Required key "SessionSettingsResponse[inactivity_timeout_seconds]" is missing from JSON.');
+        assert(json[r'inactivity_timeout_seconds'] != null,
+            'Required key "SessionSettingsResponse[inactivity_timeout_seconds]" has a null value in JSON.');
         return true;
       }());
 

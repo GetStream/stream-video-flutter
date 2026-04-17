@@ -14,12 +14,23 @@ class EgressResponse {
   /// Returns a new [EgressResponse] instance.
   EgressResponse({
     required this.broadcasting,
+    this.compositeRecording,
     this.frameRecording,
     this.hls,
+    this.individualRecording,
+    this.rawRecording,
     this.rtmps = const [],
   });
 
   bool broadcasting;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  CompositeRecordingResponse? compositeRecording;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -37,6 +48,22 @@ class EgressResponse {
   ///
   EgressHLSResponse? hls;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  IndividualRecordingResponse? individualRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  RawRecordingResponse? rawRecording;
+
   List<EgressRTMPResponse> rtmps;
 
   @override
@@ -44,25 +71,36 @@ class EgressResponse {
       identical(this, other) ||
       other is EgressResponse &&
           other.broadcasting == broadcasting &&
+          other.compositeRecording == compositeRecording &&
           other.frameRecording == frameRecording &&
           other.hls == hls &&
+          other.individualRecording == individualRecording &&
+          other.rawRecording == rawRecording &&
           _deepEquality.equals(other.rtmps, rtmps);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (broadcasting.hashCode) +
+      (compositeRecording == null ? 0 : compositeRecording!.hashCode) +
       (frameRecording == null ? 0 : frameRecording!.hashCode) +
       (hls == null ? 0 : hls!.hashCode) +
+      (individualRecording == null ? 0 : individualRecording!.hashCode) +
+      (rawRecording == null ? 0 : rawRecording!.hashCode) +
       (rtmps.hashCode);
 
   @override
   String toString() =>
-      'EgressResponse[broadcasting=$broadcasting, frameRecording=$frameRecording, hls=$hls, rtmps=$rtmps]';
+      'EgressResponse[broadcasting=$broadcasting, compositeRecording=$compositeRecording, frameRecording=$frameRecording, hls=$hls, individualRecording=$individualRecording, rawRecording=$rawRecording, rtmps=$rtmps]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'broadcasting'] = this.broadcasting;
+    if (this.compositeRecording != null) {
+      json[r'composite_recording'] = this.compositeRecording;
+    } else {
+      json[r'composite_recording'] = null;
+    }
     if (this.frameRecording != null) {
       json[r'frame_recording'] = this.frameRecording;
     } else {
@@ -72,6 +110,16 @@ class EgressResponse {
       json[r'hls'] = this.hls;
     } else {
       json[r'hls'] = null;
+    }
+    if (this.individualRecording != null) {
+      json[r'individual_recording'] = this.individualRecording;
+    } else {
+      json[r'individual_recording'] = null;
+    }
+    if (this.rawRecording != null) {
+      json[r'raw_recording'] = this.rawRecording;
+    } else {
+      json[r'raw_recording'] = null;
     }
     json[r'rtmps'] = this.rtmps;
     return json;
@@ -88,20 +136,27 @@ class EgressResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "EgressResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "EgressResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'broadcasting'),
+            'Required key "EgressResponse[broadcasting]" is missing from JSON.');
+        assert(json[r'broadcasting'] != null,
+            'Required key "EgressResponse[broadcasting]" has a null value in JSON.');
+        assert(json.containsKey(r'rtmps'),
+            'Required key "EgressResponse[rtmps]" is missing from JSON.');
+        assert(json[r'rtmps'] != null,
+            'Required key "EgressResponse[rtmps]" has a null value in JSON.');
         return true;
       }());
 
       return EgressResponse(
         broadcasting: mapValueOfType<bool>(json, r'broadcasting')!,
+        compositeRecording:
+            CompositeRecordingResponse.fromJson(json[r'composite_recording']),
         frameRecording:
             FrameRecordingResponse.fromJson(json[r'frame_recording']),
         hls: EgressHLSResponse.fromJson(json[r'hls']),
+        individualRecording:
+            IndividualRecordingResponse.fromJson(json[r'individual_recording']),
+        rawRecording: RawRecordingResponse.fromJson(json[r'raw_recording']),
         rtmps: EgressRTMPResponse.listFromJson(json[r'rtmps']),
       );
     }

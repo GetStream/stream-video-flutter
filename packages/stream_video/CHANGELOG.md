@@ -1,3 +1,16 @@
+## Upcoming
+
+### 🐞 Fixed
+* Fixed `consumeAndAcceptActiveCall` auto-accepting incoming calls on Android when the user opens the app without pressing the Accept button on the notification. The method now only consumes calls that the user explicitly accepted.
+* Fixed coordinator REST API calls failing permanently when the JWT token expires.
+
+### 🔄 Changed
+* Regenerated OpenAPI models to match the latest backend schema.
+* Fixed broadcasting status updates not being wired through to call state.
+
+### ⚠️ Deprecated
+* `StreamHlsSettings.qualityTracks` (`List<String>`) is deprecated — use `StreamHlsSettings.qualities` (`List<StreamVideoQuality>`) instead.
+
 ## 1.3.1
 
 ### 🐞 Fixed

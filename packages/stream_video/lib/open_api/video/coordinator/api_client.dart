@@ -269,6 +269,8 @@ class ApiClient {
           return CallClosedCaptionsStoppedEvent.fromJson(value);
         case 'CallCreatedEvent':
           return CallCreatedEvent.fromJson(value);
+        case 'CallDTMFEvent':
+          return CallDTMFEvent.fromJson(value);
         case 'CallDeletedEvent':
           return CallDeletedEvent.fromJson(value);
         case 'CallDurationReport':
@@ -293,6 +295,8 @@ class ApiClient {
           return CallHLSBroadcastingStoppedEvent.fromJson(value);
         case 'CallIngressResponse':
           return CallIngressResponse.fromJson(value);
+        case 'CallLevelEventPayload':
+          return CallLevelEventPayload.fromJson(value);
         case 'CallLiveStartedEvent':
           return CallLiveStartedEvent.fromJson(value);
         case 'CallMemberAddedEvent':
@@ -317,6 +321,8 @@ class ApiClient {
           return CallParticipantCountReportResponse.fromJson(value);
         case 'CallParticipantResponse':
           return CallParticipantResponse.fromJson(value);
+        case 'CallParticipantTimeline':
+          return CallParticipantTimeline.fromJson(value);
         case 'CallReactionEvent':
           return CallReactionEvent.fromJson(value);
         case 'CallRecording':
@@ -363,6 +369,26 @@ class ApiClient {
           return CallSettingsResponse.fromJson(value);
         case 'CallStateResponseFields':
           return CallStateResponseFields.fromJson(value);
+        case 'CallStatsLocation':
+          return CallStatsLocation.fromJson(value);
+        case 'CallStatsMapLocation':
+          return CallStatsMapLocation.fromJson(value);
+        case 'CallStatsMapPublisher':
+          return CallStatsMapPublisher.fromJson(value);
+        case 'CallStatsMapPublishers':
+          return CallStatsMapPublishers.fromJson(value);
+        case 'CallStatsMapSFUs':
+          return CallStatsMapSFUs.fromJson(value);
+        case 'CallStatsMapSubscriber':
+          return CallStatsMapSubscriber.fromJson(value);
+        case 'CallStatsMapSubscribers':
+          return CallStatsMapSubscribers.fromJson(value);
+        case 'CallStatsParticipant':
+          return CallStatsParticipant.fromJson(value);
+        case 'CallStatsParticipantCounts':
+          return CallStatsParticipantCounts.fromJson(value);
+        case 'CallStatsParticipantSession':
+          return CallStatsParticipantSession.fromJson(value);
         case 'CallStatsReportReadyEvent':
           return CallStatsReportReadyEvent.fromJson(value);
         case 'CallStatsReportSummaryResponse':
@@ -379,6 +405,8 @@ class ApiClient {
           return CallTranscriptionStoppedEvent.fromJson(value);
         case 'CallUpdatedEvent':
           return CallUpdatedEvent.fromJson(value);
+        case 'CallUserFeedbackSubmittedEvent':
+          return CallUserFeedbackSubmittedEvent.fromJson(value);
         case 'CallUserMutedEvent':
           return CallUserMutedEvent.fromJson(value);
         case 'CallsPerDayReport':
@@ -387,18 +415,24 @@ class ApiClient {
           return CallsPerDayReportResponse.fromJson(value);
         case 'ChatActivityStatsResponse':
           return ChatActivityStatsResponse.fromJson(value);
+        case 'ChatPreferencesResponse':
+          return ChatPreferencesResponse.fromJson(value);
         case 'ClosedCaptionEvent':
           return ClosedCaptionEvent.fromJson(value);
         case 'CollectUserFeedbackRequest':
           return CollectUserFeedbackRequest.fromJson(value);
         case 'CollectUserFeedbackResponse':
           return CollectUserFeedbackResponse.fromJson(value);
+        case 'CompositeRecordingResponse':
+          return CompositeRecordingResponse.fromJson(value);
         case 'ConnectUserDetailsRequest':
           return ConnectUserDetailsRequest.fromJson(value);
         case 'ConnectedEvent':
           return ConnectedEvent.fromJson(value);
         case 'ConnectionErrorEvent':
           return ConnectionErrorEvent.fromJson(value);
+        case 'CoordinatesResponse':
+          return CoordinatesResponse.fromJson(value);
         case 'CountByMinuteResponse':
           return CountByMinuteResponse.fromJson(value);
         case 'CreateDeviceRequest':
@@ -444,6 +478,8 @@ class ApiClient {
           return EgressResponse.fromJson(value);
         case 'EndCallResponse':
           return EndCallResponse.fromJson(value);
+        case 'FeedsPreferencesResponse':
+          return FeedsPreferencesResponse.fromJson(value);
         case 'FileUploadConfig':
           return FileUploadConfig.fromJson(value);
         case 'FrameRecordingResponse':
@@ -456,10 +492,14 @@ class ApiClient {
           return GeofenceSettingsRequest.fromJson(value);
         case 'GeofenceSettingsResponse':
           return GeofenceSettingsResponse.fromJson(value);
+        case 'GetCallParticipantSessionMetricsResponse':
+          return GetCallParticipantSessionMetricsResponse.fromJson(value);
         case 'GetCallReportResponse':
           return GetCallReportResponse.fromJson(value);
         case 'GetCallResponse':
           return GetCallResponse.fromJson(value);
+        case 'GetCallSessionParticipantStatsDetailsResponse':
+          return GetCallSessionParticipantStatsDetailsResponse.fromJson(value);
         case 'GetEdgesResponse':
           return GetEdgesResponse.fromJson(value);
         case 'GetOrCreateCallRequest':
@@ -478,8 +518,8 @@ class ApiClient {
           return HLSSettingsResponse.fromJson(value);
         case 'HealthCheckEvent':
           return HealthCheckEvent.fromJson(value);
-        case 'ICEServer':
-          return ICEServer.fromJson(value);
+        case 'ICEServerResponse':
+          return ICEServerResponse.fromJson(value);
         case 'IndividualRecordingResponse':
           return IndividualRecordingResponse.fromJson(value);
         case 'IndividualRecordingSettingsRequest':
@@ -490,10 +530,20 @@ class ApiClient {
           return IngressAudioEncodingOptionsRequest.fromJson(value);
         case 'IngressAudioEncodingResponse':
           return IngressAudioEncodingResponse.fromJson(value);
+        case 'IngressErrorEvent':
+          return IngressErrorEvent.fromJson(value);
         case 'IngressSettingsRequest':
           return IngressSettingsRequest.fromJson(value);
         case 'IngressSettingsResponse':
           return IngressSettingsResponse.fromJson(value);
+        case 'IngressSourceRequest':
+          return IngressSourceRequest.fromJson(value);
+        case 'IngressSourceResponse':
+          return IngressSourceResponse.fromJson(value);
+        case 'IngressStartedEvent':
+          return IngressStartedEvent.fromJson(value);
+        case 'IngressStoppedEvent':
+          return IngressStoppedEvent.fromJson(value);
         case 'IngressVideoEncodingOptionsRequest':
           return IngressVideoEncodingOptionsRequest.fromJson(value);
         case 'IngressVideoEncodingResponse':
@@ -524,12 +574,20 @@ class ApiClient {
           return ListRecordingsResponse.fromJson(value);
         case 'ListTranscriptionsResponse':
           return ListTranscriptionsResponse.fromJson(value);
+        case 'LocationResponse':
+          return LocationResponse.fromJson(value);
         case 'MemberRequest':
           return MemberRequest.fromJson(value);
         case 'MemberResponse':
           return MemberResponse.fromJson(value);
         case 'MessageStatsResponse':
           return MessageStatsResponse.fromJson(value);
+        case 'MetricDescriptor':
+          return MetricDescriptor.fromJson(value);
+        case 'MetricThreshold':
+          return MetricThreshold.fromJson(value);
+        case 'MetricTimeSeries':
+          return MetricTimeSeries.fromJson(value);
         case 'MuteUsersRequest':
           return MuteUsersRequest.fromJson(value);
         case 'MuteUsersResponse':
@@ -548,6 +606,20 @@ class ApiClient {
           return ParticipantCountOverTimeResponse.fromJson(value);
         case 'ParticipantReportResponse':
           return ParticipantReportResponse.fromJson(value);
+        case 'ParticipantSeriesPublisherStats':
+          return ParticipantSeriesPublisherStats.fromJson(value);
+        case 'ParticipantSeriesSubscriberStats':
+          return ParticipantSeriesSubscriberStats.fromJson(value);
+        case 'ParticipantSeriesSubscriptionTrackMetrics':
+          return ParticipantSeriesSubscriptionTrackMetrics.fromJson(value);
+        case 'ParticipantSeriesTimeframe':
+          return ParticipantSeriesTimeframe.fromJson(value);
+        case 'ParticipantSeriesTrackMetrics':
+          return ParticipantSeriesTrackMetrics.fromJson(value);
+        case 'ParticipantSeriesUserStats':
+          return ParticipantSeriesUserStats.fromJson(value);
+        case 'ParticipantSessionDetails':
+          return ParticipantSessionDetails.fromJson(value);
         case 'PerSDKUsageReport':
           return PerSDKUsageReport.fromJson(value);
         case 'PermissionRequestEvent':
@@ -556,10 +628,10 @@ class ApiClient {
           return PinRequest.fromJson(value);
         case 'PinResponse':
           return PinResponse.fromJson(value);
-        case 'PrivacySettings':
-          return PrivacySettings.fromJson(value);
         case 'PublishedTrackFlags':
           return PublishedTrackFlags.fromJson(value);
+        case 'PublishedTrackMetrics':
+          return PublishedTrackMetrics.fromJson(value);
         case 'PublisherStatsResponse':
           return PublisherStatsResponse.fromJson(value);
         case 'PushPreferencesResponse':
@@ -576,10 +648,19 @@ class ApiClient {
           return QueryCallMembersRequest.fromJson(value);
         case 'QueryCallMembersResponse':
           return QueryCallMembersResponse.fromJson(value);
+        case 'QueryCallParticipantSessionsResponse':
+          return QueryCallParticipantSessionsResponse.fromJson(value);
         case 'QueryCallParticipantsRequest':
           return QueryCallParticipantsRequest.fromJson(value);
         case 'QueryCallParticipantsResponse':
           return QueryCallParticipantsResponse.fromJson(value);
+        case 'QueryCallSessionParticipantStatsResponse':
+          return QueryCallSessionParticipantStatsResponse.fromJson(value);
+        case 'QueryCallSessionParticipantStatsTimelineResponse':
+          return QueryCallSessionParticipantStatsTimelineResponse.fromJson(
+              value);
+        case 'QueryCallStatsMapResponse':
+          return QueryCallStatsMapResponse.fromJson(value);
         case 'QueryCallStatsRequest':
           return QueryCallStatsRequest.fromJson(value);
         case 'QueryCallStatsResponse':
@@ -596,14 +677,12 @@ class ApiClient {
           return RTMPSettingsRequest.fromJson(value);
         case 'RTMPSettingsResponse':
           return RTMPSettingsResponse.fromJson(value);
+        case 'RawRecordingResponse':
+          return RawRecordingResponse.fromJson(value);
         case 'RawRecordingSettingsRequest':
           return RawRecordingSettingsRequest.fromJson(value);
         case 'RawRecordingSettingsResponse':
           return RawRecordingSettingsResponse.fromJson(value);
-        case 'ReactionResponse':
-          return ReactionResponse.fromJson(value);
-        case 'ReadReceipts':
-          return ReadReceipts.fromJson(value);
         case 'RecordSettingsRequest':
           return RecordSettingsRequest.fromJson(value);
         case 'RecordSettingsResponse':
@@ -623,6 +702,16 @@ class ApiClient {
         //MANUAL_EDIT
         case 'DurationResponse':
           return DurationResponse.fromJson(value);
+        case 'ResolutionMetricsTimeSeries':
+          return ResolutionMetricsTimeSeries.fromJson(value);
+        case 'ResolveSipAuthRequest':
+          return ResolveSipAuthRequest.fromJson(value);
+        case 'ResolveSipAuthResponse':
+          return ResolveSipAuthResponse.fromJson(value);
+        case 'ResolveSipInboundRequest':
+          return ResolveSipInboundRequest.fromJson(value);
+        case 'ResolveSipInboundResponse':
+          return ResolveSipInboundResponse.fromJson(value);
         case 'RingCallRequest':
           return RingCallRequest.fromJson(value);
         case 'RingCallResponse':
@@ -635,8 +724,28 @@ class ApiClient {
           return SDKUsageReport.fromJson(value);
         case 'SDKUsageReportResponse':
           return SDKUsageReportResponse.fromJson(value);
+        case 'SFULocationResponse':
+          return SFULocationResponse.fromJson(value);
         case 'SFUResponse':
           return SFUResponse.fromJson(value);
+        case 'SIPCallConfigsResponse':
+          return SIPCallConfigsResponse.fromJson(value);
+        case 'SIPCallerConfigsResponse':
+          return SIPCallerConfigsResponse.fromJson(value);
+        case 'SIPChallengeRequest':
+          return SIPChallengeRequest.fromJson(value);
+        case 'SIPDirectRoutingRuleCallConfigsResponse':
+          return SIPDirectRoutingRuleCallConfigsResponse.fromJson(value);
+        case 'SIPInboundRoutingRulePinConfigsResponse':
+          return SIPInboundRoutingRulePinConfigsResponse.fromJson(value);
+        case 'SIPInboundRoutingRuleResponse':
+          return SIPInboundRoutingRuleResponse.fromJson(value);
+        case 'SIPPinProtectionConfigsResponse':
+          return SIPPinProtectionConfigsResponse.fromJson(value);
+        case 'SIPTrunkResponse':
+          return SIPTrunkResponse.fromJson(value);
+        case 'SRTIngress':
+          return SRTIngress.fromJson(value);
         case 'ScreensharingSettingsRequest':
           return ScreensharingSettingsRequest.fromJson(value);
         case 'ScreensharingSettingsResponse':
@@ -645,16 +754,24 @@ class ApiClient {
           return SendCallEventRequest.fromJson(value);
         case 'SendCallEventResponse':
           return SendCallEventResponse.fromJson(value);
-        case 'SendReactionRequest':
-          return SendReactionRequest.fromJson(value);
-        case 'SendReactionResponse':
-          return SendReactionResponse.fromJson(value);
+        case 'SendVideoReactionRequest':
+          return SendVideoReactionRequest.fromJson(value);
+        case 'SendVideoReactionResponse':
+          return SendVideoReactionResponse.fromJson(value);
+        case 'SessionClient':
+          return SessionClient.fromJson(value);
         case 'SessionSettingsRequest':
           return SessionSettingsRequest.fromJson(value);
         case 'SessionSettingsResponse':
           return SessionSettingsResponse.fromJson(value);
+        case 'SessionWarningResponse':
+          return SessionWarningResponse.fromJson(value);
+        case 'SipInboundCredentials':
+          return SipInboundCredentials.fromJson(value);
         case 'SortParamRequest':
           return SortParamRequest.fromJson(value);
+        case 'SpeechSegmentConfig':
+          return SpeechSegmentConfig.fromJson(value);
         case 'StartClosedCaptionsRequest':
           return StartClosedCaptionsRequest.fromJson(value);
         case 'StartClosedCaptionsResponse':
@@ -717,8 +834,8 @@ class ApiClient {
           return TranscriptionSettingsRequest.fromJson(value);
         case 'TranscriptionSettingsResponse':
           return TranscriptionSettingsResponse.fromJson(value);
-        case 'TypingIndicators':
-          return TypingIndicators.fromJson(value);
+        case 'TranslationSettings':
+          return TranslationSettings.fromJson(value);
         case 'UnblockUserRequest':
           return UnblockUserRequest.fromJson(value);
         case 'UnblockUserResponse':
@@ -743,18 +860,18 @@ class ApiClient {
           return UpdateUserPermissionsResponse.fromJson(value);
         case 'UpdatedCallPermissionsEvent':
           return UpdatedCallPermissionsEvent.fromJson(value);
-        case 'User':
-          return User.fromJson(value);
         case 'UserBannedEvent':
           return UserBannedEvent.fromJson(value);
         case 'UserDeactivatedEvent':
           return UserDeactivatedEvent.fromJson(value);
+        case 'UserDeletedEvent':
+          return UserDeletedEvent.fromJson(value);
         case 'UserFeedbackReport':
           return UserFeedbackReport.fromJson(value);
         case 'UserFeedbackReportResponse':
           return UserFeedbackReportResponse.fromJson(value);
-        case 'UserMutedEvent':
-          return UserMutedEvent.fromJson(value);
+        case 'UserPresenceChangedEvent':
+          return UserPresenceChangedEvent.fromJson(value);
         case 'UserRatingReportResponse':
           return UserRatingReportResponse.fromJson(value);
         case 'UserReactivatedEvent':
@@ -763,22 +880,32 @@ class ApiClient {
           return UserRequest.fromJson(value);
         case 'UserResponse':
           return UserResponse.fromJson(value);
+        case 'UserResponseCommonFields':
+          return UserResponseCommonFields.fromJson(value);
         case 'UserResponsePrivacyFields':
           return UserResponsePrivacyFields.fromJson(value);
+        case 'UserUnbannedEvent':
+          return UserUnbannedEvent.fromJson(value);
         case 'UserUpdatedEvent':
           return UserUpdatedEvent.fromJson(value);
         case 'VideoEvent':
           return VideoEvent.fromJson(value);
         case 'VideoReactionOverTimeResponse':
           return VideoReactionOverTimeResponse.fromJson(value);
+        case 'VideoReactionResponse':
+          return VideoReactionResponse.fromJson(value);
         case 'VideoReactionsResponse':
           return VideoReactionsResponse.fromJson(value);
         case 'VideoSettingsRequest':
           return VideoSettingsRequest.fromJson(value);
         case 'VideoSettingsResponse':
           return VideoSettingsResponse.fromJson(value);
+        case 'WHIPIngress':
+          return WHIPIngress.fromJson(value);
         case 'WSAuthMessage':
           return WSAuthMessage.fromJson(value);
+        case 'WSCallEvent':
+          return WSCallEvent.fromJson(value);
         default:
           dynamic match;
           if (value is List &&

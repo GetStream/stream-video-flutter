@@ -21,6 +21,7 @@ class QueryCallsRequest {
     this.watch,
   });
 
+  /// Filter conditions to apply to the query
   Map<String, Object> filterConditions;
 
   /// Minimum value: 0
@@ -123,12 +124,6 @@ class QueryCallsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryCallsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryCallsRequest[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 

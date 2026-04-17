@@ -60,12 +60,18 @@ class RecordSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RecordSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RecordSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'audio_only'),
+            'Required key "RecordSettingsResponse[audio_only]" is missing from JSON.');
+        assert(json[r'audio_only'] != null,
+            'Required key "RecordSettingsResponse[audio_only]" has a null value in JSON.');
+        assert(json.containsKey(r'mode'),
+            'Required key "RecordSettingsResponse[mode]" is missing from JSON.');
+        assert(json[r'mode'] != null,
+            'Required key "RecordSettingsResponse[mode]" has a null value in JSON.');
+        assert(json.containsKey(r'quality'),
+            'Required key "RecordSettingsResponse[quality]" is missing from JSON.');
+        assert(json[r'quality'] != null,
+            'Required key "RecordSettingsResponse[quality]" has a null value in JSON.');
         return true;
       }());
 

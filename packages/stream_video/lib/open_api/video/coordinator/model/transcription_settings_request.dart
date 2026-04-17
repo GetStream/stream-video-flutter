@@ -15,14 +15,32 @@ class TranscriptionSettingsRequest {
   TranscriptionSettingsRequest({
     this.closedCaptionMode,
     this.language,
-    required this.mode,
+    this.mode,
+    this.speechSegmentConfig,
+    this.translation,
   });
 
   TranscriptionSettingsRequestClosedCaptionModeEnum? closedCaptionMode;
 
   TranscriptionSettingsRequestLanguageEnum? language;
 
-  TranscriptionSettingsRequestModeEnum mode;
+  TranscriptionSettingsRequestModeEnum? mode;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  SpeechSegmentConfig? speechSegmentConfig;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  TranslationSettings? translation;
 
   @override
   bool operator ==(Object other) =>
@@ -30,18 +48,22 @@ class TranscriptionSettingsRequest {
       other is TranscriptionSettingsRequest &&
           other.closedCaptionMode == closedCaptionMode &&
           other.language == language &&
-          other.mode == mode;
+          other.mode == mode &&
+          other.speechSegmentConfig == speechSegmentConfig &&
+          other.translation == translation;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (closedCaptionMode == null ? 0 : closedCaptionMode!.hashCode) +
       (language == null ? 0 : language!.hashCode) +
-      (mode.hashCode);
+      (mode == null ? 0 : mode!.hashCode) +
+      (speechSegmentConfig == null ? 0 : speechSegmentConfig!.hashCode) +
+      (translation == null ? 0 : translation!.hashCode);
 
   @override
   String toString() =>
-      'TranscriptionSettingsRequest[closedCaptionMode=$closedCaptionMode, language=$language, mode=$mode]';
+      'TranscriptionSettingsRequest[closedCaptionMode=$closedCaptionMode, language=$language, mode=$mode, speechSegmentConfig=$speechSegmentConfig, translation=$translation]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -55,7 +77,21 @@ class TranscriptionSettingsRequest {
     } else {
       json[r'language'] = null;
     }
-    json[r'mode'] = this.mode;
+    if (this.mode != null) {
+      json[r'mode'] = this.mode;
+    } else {
+      json[r'mode'] = null;
+    }
+    if (this.speechSegmentConfig != null) {
+      json[r'speech_segment_config'] = this.speechSegmentConfig;
+    } else {
+      json[r'speech_segment_config'] = null;
+    }
+    if (this.translation != null) {
+      json[r'translation'] = this.translation;
+    } else {
+      json[r'translation'] = null;
+    }
     return json;
   }
 
@@ -70,12 +106,6 @@ class TranscriptionSettingsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "TranscriptionSettingsRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "TranscriptionSettingsRequest[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
@@ -85,7 +115,10 @@ class TranscriptionSettingsRequest {
                 json[r'closed_caption_mode']),
         language: TranscriptionSettingsRequestLanguageEnum.fromJson(
             json[r'language']),
-        mode: TranscriptionSettingsRequestModeEnum.fromJson(json[r'mode'])!,
+        mode: TranscriptionSettingsRequestModeEnum.fromJson(json[r'mode']),
+        speechSegmentConfig:
+            SpeechSegmentConfig.fromJson(json[r'speech_segment_config']),
+        translation: TranslationSettings.fromJson(json[r'translation']),
       );
     }
     return null;
@@ -141,9 +174,7 @@ class TranscriptionSettingsRequest {
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-    'mode',
-  };
+  static const requiredKeys = <String>{};
 }
 
 class TranscriptionSettingsRequestClosedCaptionModeEnum {

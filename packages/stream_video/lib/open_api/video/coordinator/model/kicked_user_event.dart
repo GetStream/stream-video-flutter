@@ -85,12 +85,22 @@ class KickedUserEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "KickedUserEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "KickedUserEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "KickedUserEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "KickedUserEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "KickedUserEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "KickedUserEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "KickedUserEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "KickedUserEvent[type]" has a null value in JSON.');
+        assert(json.containsKey(r'user'),
+            'Required key "KickedUserEvent[user]" is missing from JSON.');
+        assert(json[r'user'] != null,
+            'Required key "KickedUserEvent[user]" has a null value in JSON.');
         return true;
       }());
 

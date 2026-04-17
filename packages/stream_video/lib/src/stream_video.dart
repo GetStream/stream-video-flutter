@@ -13,7 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../globals.dart';
-import '../open_api/video/coordinator/api.dart' hide User;
+import '../open_api/video/coordinator/api.dart';
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';
@@ -752,7 +752,10 @@ class StreamVideo extends Disposable {
     void Function(Call)? onCallAccepted,
     CallPreferences? callPreferences,
   }) async {
-    final calls = await pushNotificationManager?.activeCalls();
+    final allCalls = await pushNotificationManager?.activeCalls();
+
+    // Only consume calls that the user explicitly accepted via the native notification UI.
+    final calls = allCalls?.where((c) => c.isAccepted).toList();
     if (calls == null || calls.isEmpty) return false;
 
     // Ensure the coordinator WS is connected before proceeding.
@@ -1268,6 +1271,7 @@ CoordinatorClient buildCoordinatorClient({
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
   return CoordinatorClientRetry(
     retryPolicy: retryPolicy,
+    tokenManager: tokenManager,
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,
       tokenManager: tokenManager,

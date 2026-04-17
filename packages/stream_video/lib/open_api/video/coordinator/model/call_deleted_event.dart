@@ -69,12 +69,22 @@ class CallDeletedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallDeletedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallDeletedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallDeletedEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallDeletedEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallDeletedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallDeletedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallDeletedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallDeletedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallDeletedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallDeletedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

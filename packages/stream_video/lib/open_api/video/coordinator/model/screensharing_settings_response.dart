@@ -72,12 +72,14 @@ class ScreensharingSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "ScreensharingSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "ScreensharingSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'access_request_enabled'),
+            'Required key "ScreensharingSettingsResponse[access_request_enabled]" is missing from JSON.');
+        assert(json[r'access_request_enabled'] != null,
+            'Required key "ScreensharingSettingsResponse[access_request_enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'),
+            'Required key "ScreensharingSettingsResponse[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "ScreensharingSettingsResponse[enabled]" has a null value in JSON.');
         return true;
       }());
 

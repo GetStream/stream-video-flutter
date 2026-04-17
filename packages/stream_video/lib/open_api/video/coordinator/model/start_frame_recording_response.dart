@@ -49,12 +49,10 @@ class StartFrameRecordingResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StartFrameRecordingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StartFrameRecordingResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "StartFrameRecordingResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "StartFrameRecordingResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

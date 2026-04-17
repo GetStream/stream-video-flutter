@@ -49,12 +49,10 @@ class BlockUserRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "BlockUserRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "BlockUserRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'user_id'),
+            'Required key "BlockUserRequest[user_id]" is missing from JSON.');
+        assert(json[r'user_id'] != null,
+            'Required key "BlockUserRequest[user_id]" has a null value in JSON.');
         return true;
       }());
 

@@ -10,45 +10,38 @@
 
 part of openapi.api;
 
-class SendReactionResponse {
-  /// Returns a new [SendReactionResponse] instance.
-  SendReactionResponse({
-    required this.duration,
-    required this.reaction,
+class CallStatsMapSFUs {
+  /// Returns a new [CallStatsMapSFUs] instance.
+  CallStatsMapSFUs({
+    this.locations = const [],
   });
 
-  /// Duration of the request in milliseconds
-  String duration;
-
-  ReactionResponse reaction;
+  List<SFULocationResponse> locations;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SendReactionResponse &&
-          other.duration == duration &&
-          other.reaction == reaction;
+      other is CallStatsMapSFUs &&
+          _deepEquality.equals(other.locations, locations);
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
-      (duration.hashCode) + (reaction.hashCode);
+      (locations.hashCode);
 
   @override
-  String toString() =>
-      'SendReactionResponse[duration=$duration, reaction=$reaction]';
+  String toString() => 'CallStatsMapSFUs[locations=$locations]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'duration'] = this.duration;
-    json[r'reaction'] = this.reaction;
+    json[r'locations'] = this.locations;
     return json;
   }
 
-  /// Returns a new [SendReactionResponse] instance and imports its values from
+  /// Returns a new [CallStatsMapSFUs] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static SendReactionResponse? fromJson(dynamic value) {
+  static CallStatsMapSFUs? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -56,31 +49,28 @@ class SendReactionResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "SendReactionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "SendReactionResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'locations'),
+            'Required key "CallStatsMapSFUs[locations]" is missing from JSON.');
+        assert(json[r'locations'] != null,
+            'Required key "CallStatsMapSFUs[locations]" has a null value in JSON.');
         return true;
       }());
 
-      return SendReactionResponse(
-        duration: mapValueOfType<String>(json, r'duration')!,
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+      return CallStatsMapSFUs(
+        locations: SFULocationResponse.listFromJson(json[r'locations']),
       );
     }
     return null;
   }
 
-  static List<SendReactionResponse> listFromJson(
+  static List<CallStatsMapSFUs> listFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final result = <SendReactionResponse>[];
+    final result = <CallStatsMapSFUs>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = SendReactionResponse.fromJson(row);
+        final value = CallStatsMapSFUs.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -89,12 +79,12 @@ class SendReactionResponse {
     return result.toList(growable: growable);
   }
 
-  static Map<String, SendReactionResponse> mapFromJson(dynamic json) {
-    final map = <String, SendReactionResponse>{};
+  static Map<String, CallStatsMapSFUs> mapFromJson(dynamic json) {
+    final map = <String, CallStatsMapSFUs>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = SendReactionResponse.fromJson(entry.value);
+        final value = CallStatsMapSFUs.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -103,17 +93,17 @@ class SendReactionResponse {
     return map;
   }
 
-  // maps a json object with a list of SendReactionResponse-objects as value to a dart map
-  static Map<String, List<SendReactionResponse>> mapListFromJson(
+  // maps a json object with a list of CallStatsMapSFUs-objects as value to a dart map
+  static Map<String, List<CallStatsMapSFUs>> mapListFromJson(
     dynamic json, {
     bool growable = false,
   }) {
-    final map = <String, List<SendReactionResponse>>{};
+    final map = <String, List<CallStatsMapSFUs>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SendReactionResponse.listFromJson(
+        map[entry.key] = CallStatsMapSFUs.listFromJson(
           entry.value,
           growable: growable,
         );
@@ -124,7 +114,6 @@ class SendReactionResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'duration',
-    'reaction',
+    'locations',
   };
 }

@@ -81,12 +81,30 @@ class CallUserMutedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallUserMutedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallUserMutedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallUserMutedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallUserMutedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallUserMutedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallUserMutedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'from_user_id'),
+            'Required key "CallUserMutedEvent[from_user_id]" is missing from JSON.');
+        assert(json[r'from_user_id'] != null,
+            'Required key "CallUserMutedEvent[from_user_id]" has a null value in JSON.');
+        assert(json.containsKey(r'muted_user_ids'),
+            'Required key "CallUserMutedEvent[muted_user_ids]" is missing from JSON.');
+        assert(json[r'muted_user_ids'] != null,
+            'Required key "CallUserMutedEvent[muted_user_ids]" has a null value in JSON.');
+        assert(json.containsKey(r'reason'),
+            'Required key "CallUserMutedEvent[reason]" is missing from JSON.');
+        assert(json[r'reason'] != null,
+            'Required key "CallUserMutedEvent[reason]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallUserMutedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallUserMutedEvent[type]" has a null value in JSON.');
         return true;
       }());
 

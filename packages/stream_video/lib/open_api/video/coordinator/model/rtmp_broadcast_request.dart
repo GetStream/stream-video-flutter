@@ -31,7 +31,7 @@ class RTMPBroadcastRequest {
   /// Name identifier for RTMP broadcast, must be unique in call
   String name;
 
-  /// If provided, will override the call's RTMP settings quality
+  /// If provided, will override the call's RTMP settings quality. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
   RTMPBroadcastRequestQualityEnum? quality;
 
   /// If provided, will be appended at the end of stream_url
@@ -102,12 +102,14 @@ class RTMPBroadcastRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "RTMPBroadcastRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "RTMPBroadcastRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'name'),
+            'Required key "RTMPBroadcastRequest[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "RTMPBroadcastRequest[name]" has a null value in JSON.');
+        assert(json.containsKey(r'stream_url'),
+            'Required key "RTMPBroadcastRequest[stream_url]" is missing from JSON.');
+        assert(json[r'stream_url'] != null,
+            'Required key "RTMPBroadcastRequest[stream_url]" has a null value in JSON.');
         return true;
       }());
 
@@ -178,7 +180,7 @@ class RTMPBroadcastRequest {
   };
 }
 
-/// If provided, will override the call's RTMP settings quality
+/// If provided, will override the call's RTMP settings quality. One of: 360p, 480p, 720p, 1080p, 1440p, portrait-360x640, portrait-480x854, portrait-720x1280, portrait-1080x1920, portrait-1440x2560
 class RTMPBroadcastRequestQualityEnum {
   /// Instantiate a new enum with the provided [value].
   const RTMPBroadcastRequestQualityEnum._(this.value);

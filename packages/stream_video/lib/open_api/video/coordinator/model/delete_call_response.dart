@@ -72,12 +72,14 @@ class DeleteCallResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "DeleteCallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "DeleteCallResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "DeleteCallResponse[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "DeleteCallResponse[call]" has a null value in JSON.');
+        assert(json.containsKey(r'duration'),
+            'Required key "DeleteCallResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "DeleteCallResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

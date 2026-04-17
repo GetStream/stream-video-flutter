@@ -22,6 +22,7 @@ class QueryCallMembersRequest {
     required this.type,
   });
 
+  /// Filter conditions to apply to the query
   Map<String, Object> filterConditions;
 
   String id;
@@ -52,6 +53,7 @@ class QueryCallMembersRequest {
   ///
   String? prev;
 
+  /// Array of sort parameters
   List<SortParamRequest> sort;
 
   String type;
@@ -118,12 +120,14 @@ class QueryCallMembersRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "QueryCallMembersRequest[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "QueryCallMembersRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'),
+            'Required key "QueryCallMembersRequest[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "QueryCallMembersRequest[id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "QueryCallMembersRequest[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "QueryCallMembersRequest[type]" has a null value in JSON.');
         return true;
       }());
 

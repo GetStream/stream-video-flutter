@@ -60,12 +60,18 @@ class HLSSettingsResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "HLSSettingsResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "HLSSettingsResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'auto_on'),
+            'Required key "HLSSettingsResponse[auto_on]" is missing from JSON.');
+        assert(json[r'auto_on'] != null,
+            'Required key "HLSSettingsResponse[auto_on]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'),
+            'Required key "HLSSettingsResponse[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "HLSSettingsResponse[enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'quality_tracks'),
+            'Required key "HLSSettingsResponse[quality_tracks]" is missing from JSON.');
+        assert(json[r'quality_tracks'] != null,
+            'Required key "HLSSettingsResponse[quality_tracks]" has a null value in JSON.');
         return true;
       }());
 

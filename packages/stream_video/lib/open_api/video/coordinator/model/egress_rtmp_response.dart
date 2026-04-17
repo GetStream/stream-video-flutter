@@ -88,12 +88,14 @@ class EgressRTMPResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "EgressRTMPResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "EgressRTMPResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'name'),
+            'Required key "EgressRTMPResponse[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "EgressRTMPResponse[name]" has a null value in JSON.');
+        assert(json.containsKey(r'started_at'),
+            'Required key "EgressRTMPResponse[started_at]" is missing from JSON.');
+        assert(json[r'started_at'] != null,
+            'Required key "EgressRTMPResponse[started_at]" has a null value in JSON.');
         return true;
       }());
 

@@ -95,6 +95,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           metadata: event.call.toCallMetadata(),
           type: event.type,
           reason: event.reason,
+          members: event.members.map((it) => it.toCallMember()).toList(),
         );
       case EventType.callSessionStarted:
         final event = callSessionStarted!;
@@ -207,6 +208,27 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallBroadcastingFailedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
+        );
+      case EventType.callRtmpBroadcastStarted:
+        final event = callRtmpBroadcastStarted!;
+        return CoordinatorCallRtmpBroadcastStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          name: event.name,
+        );
+      case EventType.callRtmpBroadcastStopped:
+        final event = callRtmpBroadcastStopped!;
+        return CoordinatorCallRtmpBroadcastStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          name: event.name,
+        );
+      case EventType.callRtmpBroadcastFailed:
+        final event = callRtmpBroadcastFailed!;
+        return CoordinatorCallRtmpBroadcastFailedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          name: event.name,
         );
       case EventType.callLiveStarted:
         final event = callLiveStarted!;
@@ -421,6 +443,68 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           userId: event.userId,
           message: event.message,
           custom: event.custom,
+        );
+      case EventType.callDeleted:
+        final event = callDeleted!;
+        return CoordinatorCallDeletedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          metadata: event.call.toCallMetadata(),
+        );
+      case EventType.callUserFeedbackSubmitted:
+        final event = callUserFeedbackSubmitted!;
+        return CoordinatorCallUserFeedbackSubmittedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          rating: event.rating,
+          reason: event.reason,
+          sdk: event.sdk,
+          sdkVersion: event.sdkVersion,
+          user: event.user.toCallUser(),
+          custom: event.custom,
+        );
+      case EventType.callTranscriptionReady:
+        final event = callTranscriptionReady!;
+        return CoordinatorCallTranscriptionReadyEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          egressId: event.egressId,
+          url: event.callTranscription.url,
+          filename: event.callTranscription.filename,
+          startTime: event.callTranscription.startTime,
+          endTime: event.callTranscription.endTime,
+          sessionId: event.callTranscription.sessionId,
+        );
+      case EventType.ingressStarted:
+        final event = ingressStarted!;
+        return CoordinatorIngressStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          ingressStreamId: event.ingressStreamId,
+          publisherType: event.publisherType,
+          userId: event.userId,
+          clientIp: event.clientIp,
+          clientName: event.clientName,
+          version: event.version,
+        );
+      case EventType.ingressStopped:
+        final event = ingressStopped!;
+        return CoordinatorIngressStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          ingressStreamId: event.ingressStreamId,
+          userId: event.userId,
+        );
+      case EventType.ingressError:
+        final event = ingressError!;
+        return CoordinatorIngressErrorEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          ingressStreamId: event.ingressStreamId,
+          userId: event.userId,
+          error: event.error,
+          code: event.code,
         );
       case EventType.custom:
         final event = custom!;

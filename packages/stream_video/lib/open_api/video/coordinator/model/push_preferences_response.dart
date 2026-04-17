@@ -15,6 +15,7 @@ class PushPreferencesResponse {
   PushPreferencesResponse({
     this.callLevel,
     this.chatLevel,
+    this.chatPreferences,
     this.disabledUntil,
     this.feedsLevel,
     this.feedsPreferences,
@@ -35,6 +36,14 @@ class PushPreferencesResponse {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? chatLevel;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  ChatPreferencesResponse? chatPreferences;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -66,6 +75,7 @@ class PushPreferencesResponse {
       other is PushPreferencesResponse &&
           other.callLevel == callLevel &&
           other.chatLevel == chatLevel &&
+          other.chatPreferences == chatPreferences &&
           other.disabledUntil == disabledUntil &&
           other.feedsLevel == feedsLevel &&
           other.feedsPreferences == feedsPreferences;
@@ -75,13 +85,14 @@ class PushPreferencesResponse {
       // ignore: unnecessary_parenthesis
       (callLevel == null ? 0 : callLevel!.hashCode) +
       (chatLevel == null ? 0 : chatLevel!.hashCode) +
+      (chatPreferences == null ? 0 : chatPreferences!.hashCode) +
       (disabledUntil == null ? 0 : disabledUntil!.hashCode) +
       (feedsLevel == null ? 0 : feedsLevel!.hashCode) +
       (feedsPreferences == null ? 0 : feedsPreferences!.hashCode);
 
   @override
   String toString() =>
-      'PushPreferencesResponse[callLevel=$callLevel, chatLevel=$chatLevel, disabledUntil=$disabledUntil, feedsLevel=$feedsLevel, feedsPreferences=$feedsPreferences]';
+      'PushPreferencesResponse[callLevel=$callLevel, chatLevel=$chatLevel, chatPreferences=$chatPreferences, disabledUntil=$disabledUntil, feedsLevel=$feedsLevel, feedsPreferences=$feedsPreferences]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -94,6 +105,11 @@ class PushPreferencesResponse {
       json[r'chat_level'] = this.chatLevel;
     } else {
       json[r'chat_level'] = null;
+    }
+    if (this.chatPreferences != null) {
+      json[r'chat_preferences'] = this.chatPreferences;
+    } else {
+      json[r'chat_preferences'] = null;
     }
     if (this.disabledUntil != null) {
       json[r'disabled_until'] = this.disabledUntil!.toUtc().toIso8601String();
@@ -124,18 +140,14 @@ class PushPreferencesResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "PushPreferencesResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "PushPreferencesResponse[$key]" has a null value in JSON.');
-        });
         return true;
       }());
 
       return PushPreferencesResponse(
         callLevel: mapValueOfType<String>(json, r'call_level'),
         chatLevel: mapValueOfType<String>(json, r'chat_level'),
+        chatPreferences:
+            ChatPreferencesResponse.fromJson(json[r'chat_preferences']),
         disabledUntil: mapDateTime(json, r'disabled_until', r''),
         feedsLevel: mapValueOfType<String>(json, r'feeds_level'),
         feedsPreferences:

@@ -49,12 +49,10 @@ class StartTranscriptionResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "StartTranscriptionResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "StartTranscriptionResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'duration'),
+            'Required key "StartTranscriptionResponse[duration]" is missing from JSON.');
+        assert(json[r'duration'] != null,
+            'Required key "StartTranscriptionResponse[duration]" has a null value in JSON.');
         return true;
       }());
 

@@ -16,6 +16,7 @@ class CallEndedEvent {
     required this.call,
     required this.callCid,
     required this.createdAt,
+    this.members = const [],
     this.reason,
     this.type = 'call.ended',
     this.user,
@@ -26,6 +27,9 @@ class CallEndedEvent {
   String callCid;
 
   DateTime createdAt;
+
+  /// The list of members in the call
+  List<MemberResponse> members;
 
   /// The reason why the call ended, if available
   ///
@@ -54,6 +58,7 @@ class CallEndedEvent {
           other.call == call &&
           other.callCid == callCid &&
           other.createdAt == createdAt &&
+          _deepEquality.equals(other.members, members) &&
           other.reason == reason &&
           other.type == type &&
           other.user == user;
@@ -64,19 +69,21 @@ class CallEndedEvent {
       (call.hashCode) +
       (callCid.hashCode) +
       (createdAt.hashCode) +
+      (members.hashCode) +
       (reason == null ? 0 : reason!.hashCode) +
       (type.hashCode) +
       (user == null ? 0 : user!.hashCode);
 
   @override
   String toString() =>
-      'CallEndedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, reason=$reason, type=$type, user=$user]';
+      'CallEndedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, reason=$reason, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'call'] = this.call;
     json[r'call_cid'] = this.callCid;
     json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'members'] = this.members;
     if (this.reason != null) {
       json[r'reason'] = this.reason;
     } else {
@@ -102,12 +109,22 @@ class CallEndedEvent {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "CallEndedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "CallEndedEvent[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'call'),
+            'Required key "CallEndedEvent[call]" is missing from JSON.');
+        assert(json[r'call'] != null,
+            'Required key "CallEndedEvent[call]" has a null value in JSON.');
+        assert(json.containsKey(r'call_cid'),
+            'Required key "CallEndedEvent[call_cid]" is missing from JSON.');
+        assert(json[r'call_cid'] != null,
+            'Required key "CallEndedEvent[call_cid]" has a null value in JSON.');
+        assert(json.containsKey(r'created_at'),
+            'Required key "CallEndedEvent[created_at]" is missing from JSON.');
+        assert(json[r'created_at'] != null,
+            'Required key "CallEndedEvent[created_at]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "CallEndedEvent[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "CallEndedEvent[type]" has a null value in JSON.');
         return true;
       }());
 
@@ -115,6 +132,7 @@ class CallEndedEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        members: MemberResponse.listFromJson(json[r'members']),
         reason: mapValueOfType<String>(json, r'reason'),
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user']),

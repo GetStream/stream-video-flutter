@@ -60,12 +60,18 @@ class IngressAudioEncodingResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "IngressAudioEncodingResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "IngressAudioEncodingResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'bitrate'),
+            'Required key "IngressAudioEncodingResponse[bitrate]" is missing from JSON.');
+        assert(json[r'bitrate'] != null,
+            'Required key "IngressAudioEncodingResponse[bitrate]" has a null value in JSON.');
+        assert(json.containsKey(r'channels'),
+            'Required key "IngressAudioEncodingResponse[channels]" is missing from JSON.');
+        assert(json[r'channels'] != null,
+            'Required key "IngressAudioEncodingResponse[channels]" has a null value in JSON.');
+        assert(json.containsKey(r'enable_dtx'),
+            'Required key "IngressAudioEncodingResponse[enable_dtx]" is missing from JSON.');
+        assert(json[r'enable_dtx'] != null,
+            'Required key "IngressAudioEncodingResponse[enable_dtx]" has a null value in JSON.');
         return true;
       }());
 
