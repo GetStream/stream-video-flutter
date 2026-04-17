@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'stream_video_filters'
-  s.version          = '1.3.1'
+  s.version          = '1.3.2'
   s.summary          = 'Official Video Filters Plugin for Stream Video.'
   s.description      = <<-DESC
 Official Video Filters Plugin for Stream Video.
