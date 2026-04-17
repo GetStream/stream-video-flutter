@@ -89,6 +89,11 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
             name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
+    deinit {
+        pictureInPictureController?.stopPictureInPicture()
+        NotificationCenter.default.removeObserver(self)
+    }
+
     // MARK: - AVPictureInPictureControllerDelegate
 
     func pictureInPictureController(

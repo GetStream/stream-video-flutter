@@ -307,6 +307,11 @@ class _StreamPictureInPictureUiKitViewState
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _subscriptions.cancelAll();
+    unawaited(
+      _channel.invokeMethod('callEnded').catchError((_) {
+        // Best-effort cleanup; intentionally ignored.
+      }),
+    );
     super.dispose();
   }
 
