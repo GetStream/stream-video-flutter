@@ -231,6 +231,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       roles: event.participant.roles,
       name: event.participant.userName,
       custom: event.participant.custom,
+      customData: event.participant.customData,
       image: event.participant.userImage,
       sessionId: event.participant.sessionId,
       trackIdPrefix: event.participant.trackLookupPrefix,
@@ -274,6 +275,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
             .copyWith(
               name: participant.userName,
               custom: participant.custom,
+              customData: participant.customData,
               image: participant.userImage,
               trackIdPrefix: participant.trackLookupPrefix,
               isSpeaking: participant.isSpeaking,
