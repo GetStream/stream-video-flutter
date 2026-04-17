@@ -47,7 +47,8 @@ class RtcRemoteInboundRtpVideoStream extends RtcRemoteInboundRtp {
         codecId: value['codecId'],
         ssrc: (value['ssrc'] as num?)?.toInt(),
         jitter: value['jitter'],
-        roundTripTimeMeasurements: (value['roundTripTimeMeasurements'] as num?)?.toInt(),
+        roundTripTimeMeasurements: (value['roundTripTimeMeasurements'] as num?)
+            ?.toInt(),
         roundTripTime: value['roundTripTime'],
         totalRoundTripTime: value['totalRoundTripTime'],
         fractionLost: value['fractionLost'],

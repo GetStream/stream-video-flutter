@@ -91,7 +91,8 @@ class RtcMediaStreamTrackRemoteAudio extends RtcStats
         timestamp: value['timestamp'],
         totalAudioEnergy: value['totalAudioEnergy'],
         totalInterruptionDuration: value['totalInterruptionDuration'],
-        removedSamplesForAcceleration: (value['removedSamplesForAcceleration'] as num?)?.toInt(),
+        removedSamplesForAcceleration:
+            (value['removedSamplesForAcceleration'] as num?)?.toInt(),
         kind: value['kind'],
         audioLevel: value['audioLevel'],
         jitterBufferDelay: value['jitterBufferDelay'],
@@ -103,14 +104,18 @@ class RtcMediaStreamTrackRemoteAudio extends RtcStats
         trackIdentifier: value['trackIdentifier'],
         totalSamplesDuration: value['totalSamplesDuration'],
         detached: value['detached'],
-        insertedSamplesForDeceleration: (value['insertedSamplesForDeceleration'] as num?)?.toInt(),
-        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)?.toInt(),
-        delayedPacketOutageSamples: (value['delayedPacketOutageSamples'] as num?)?.toInt(),
+        insertedSamplesForDeceleration:
+            (value['insertedSamplesForDeceleration'] as num?)?.toInt(),
+        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)
+            ?.toInt(),
+        delayedPacketOutageSamples:
+            (value['delayedPacketOutageSamples'] as num?)?.toInt(),
         ended: value['ended'],
         totalSamplesReceived: (value['totalSamplesReceived'] as num?)?.toInt(),
         concealmentEvents: (value['concealmentEvents'] as num?)?.toInt(),
         remoteSource: value['remoteSource'],
-        silentConcealedSamples: (value['silentConcealedSamples'] as num?)?.toInt(),
+        silentConcealedSamples: (value['silentConcealedSamples'] as num?)
+            ?.toInt(),
       );
     }
     return null;

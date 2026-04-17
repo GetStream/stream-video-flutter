@@ -138,20 +138,24 @@ class RtcOutboundRtpVideoStream extends RtcStats
         framesSent: (value['framesSent'] as num?)?.toInt(),
         framesPerSecond: value['framesPerSecond'],
         keyFramesEncoded: (value['keyFramesEncoded'] as num?)?.toInt(),
-        retransmittedPacketsSent: (value['retransmittedPacketsSent'] as num?)?.toInt(),
+        retransmittedPacketsSent: (value['retransmittedPacketsSent'] as num?)
+            ?.toInt(),
         kind: value['kind'],
         trackId: value['trackId'],
         ssrc: (value['ssrc'] as num?)?.toInt(),
         mediaType: value['mediaType'],
         qualityLimitationReason: value['qualityLimitationReason'],
-        qualityLimitationResolutionChanges: (value['qualityLimitationResolutionChanges'] as num?)?.toInt(),
+        qualityLimitationResolutionChanges:
+            (value['qualityLimitationResolutionChanges'] as num?)?.toInt(),
         bytesSent: (value['bytesSent'] as num?)?.toInt(),
         mediaSourceId: value['mediaSourceId'],
         encoderImplementation: value['encoderImplementation'],
         remoteId: value['remoteId'],
         codecId: value['codecId'],
-        totalEncodedBytesTarget: (value['totalEncodedBytesTarget'] as num?)?.toInt(),
-        retransmittedBytesSent: (value['retransmittedBytesSent'] as num?)?.toInt(),
+        totalEncodedBytesTarget: (value['totalEncodedBytesTarget'] as num?)
+            ?.toInt(),
+        retransmittedBytesSent: (value['retransmittedBytesSent'] as num?)
+            ?.toInt(),
         jitter: value['jitter'],
         targetBitrate: value['targetBitrate'],
       );

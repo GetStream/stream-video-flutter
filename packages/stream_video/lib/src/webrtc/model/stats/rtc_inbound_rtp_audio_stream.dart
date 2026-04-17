@@ -109,7 +109,8 @@ class RtcInboundRtpAudioStream extends RtcStats
         packetsLost: (value['packetsLost'] as num?)?.toInt(),
         totalSamplesReceived: (value['totalSamplesReceived'] as num?)?.toInt(),
         concealmentEvents: (value['concealmentEvents'] as num?)?.toInt(),
-        removedSamplesForAcceleration: (value['removedSamplesForAcceleration'] as num?)?.toInt(),
+        removedSamplesForAcceleration:
+            (value['removedSamplesForAcceleration'] as num?)?.toInt(),
         kind: value['kind'],
         trackId: value['trackId'],
         jitterBufferDelay: value['jitterBufferDelay'],
@@ -118,15 +119,18 @@ class RtcInboundRtpAudioStream extends RtcStats
         mediaType: value['mediaType'],
         totalSamplesDuration: value['totalSamplesDuration'],
         headerBytesReceived: (value['headerBytesReceived'] as num?)?.toInt(),
-        insertedSamplesForDeceleration: (value['insertedSamplesForDeceleration'] as num?)?.toInt(),
+        insertedSamplesForDeceleration:
+            (value['insertedSamplesForDeceleration'] as num?)?.toInt(),
         packetsDiscarded: (value['packetsDiscarded'] as num?)?.toInt(),
         fecPacketsReceived: (value['fecPacketsReceived'] as num?)?.toInt(),
-        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)?.toInt(),
+        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)
+            ?.toInt(),
         codecId: value['codecId'],
         bytesReceived: (value['bytesReceived'] as num?)?.toInt(),
         jitter: value['jitter'],
         packetsReceived: (value['packetsReceived'] as num?)?.toInt(),
-        silentConcealedSamples: (value['silentConcealedSamples'] as num?)?.toInt(),
+        silentConcealedSamples: (value['silentConcealedSamples'] as num?)
+            ?.toInt(),
         fecPacketsDiscarded: (value['fecPacketsDiscarded'] as num?)?.toInt(),
       );
     }

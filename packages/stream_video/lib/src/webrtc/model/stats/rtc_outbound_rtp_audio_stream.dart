@@ -74,7 +74,8 @@ class RtcOutboundRtpAudioStream extends RtcStats
         transportId: value['transportId'],
         headerBytesSent: (value['headerBytesSent'] as num?)?.toInt(),
         nackCount: (value['nackCount'] as num?)?.toInt(),
-        retransmittedPacketsSent: (value['retransmittedPacketsSent'] as num?)?.toInt(),
+        retransmittedPacketsSent: (value['retransmittedPacketsSent'] as num?)
+            ?.toInt(),
         kind: value['kind'],
         trackId: value['trackId'],
         targetBitrate: value['targetBitrate'],
@@ -85,7 +86,8 @@ class RtcOutboundRtpAudioStream extends RtcStats
         remoteId: value['remoteId'],
         codecId: value['codecId'],
         packetsSent: (value['packetsSent'] as num?)?.toInt(),
-        retransmittedBytesSent: (value['retransmittedBytesSent'] as num?)?.toInt(),
+        retransmittedBytesSent: (value['retransmittedBytesSent'] as num?)
+            ?.toInt(),
         jitter: value['jitter'],
       );
     }

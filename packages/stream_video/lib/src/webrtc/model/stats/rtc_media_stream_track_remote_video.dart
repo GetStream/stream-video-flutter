@@ -93,7 +93,8 @@ class RtcMediaStreamTrackRemoteVideo extends RtcStats
         jitterBufferDelay: value['jitterBufferDelay'],
         trackIdentifier: value['trackIdentifier'],
         totalPausesDuration: value['totalPausesDuration'],
-        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)?.toInt(),
+        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)
+            ?.toInt(),
         sumOfSquaredFramesDuration: value['sumOfSquaredFramesDuration'],
       );
     }

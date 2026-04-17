@@ -146,7 +146,8 @@ class RtcInboundRtpVideoStream extends RtcStats
         mediaType: value['mediaType'],
         minPlayoutDelay: value['minPlayoutDelay'],
         headerBytesReceived: (value['headerBytesReceived'] as num?)?.toInt(),
-        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)?.toInt(),
+        jitterBufferEmittedCount: (value['jitterBufferEmittedCount'] as num?)
+            ?.toInt(),
         codecId: value['codecId'],
         bytesReceived: (value['bytesReceived'] as num?)?.toInt(),
         totalProcessingDelay: value['totalProcessingDelay'],

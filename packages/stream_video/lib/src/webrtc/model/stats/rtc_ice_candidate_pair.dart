@@ -95,7 +95,8 @@ class RtcIceCandidatePair extends RtcStats {
         bytesReceived: (value['bytesReceived'] as num?)?.toInt(),
         packetsReceived: (value['packetsReceived'] as num?)?.toInt(),
         responsesSent: (value['responsesSent'] as num?)?.toInt(),
-        packetsDiscardedOnSend: (value['packetsDiscardedOnSend'] as num?)?.toInt(),
+        packetsDiscardedOnSend: (value['packetsDiscardedOnSend'] as num?)
+            ?.toInt(),
         nominated: value['nominated'],
         packetsSent: (value['packetsSent'] as num?)?.toInt(),
         totalRoundTripTime: value['totalRoundTripTime'],
