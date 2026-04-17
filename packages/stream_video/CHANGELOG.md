@@ -1,5 +1,8 @@
 ## Upcoming
 
+### Fixed
+* Fixed coordinator REST API calls failing permanently when the JWT token expires.
+
 ### 🔄 Changed
 * Regenerated OpenAPI models to match the latest backend schema.
 * Fixed broadcasting status updates not being wired through to call state.
