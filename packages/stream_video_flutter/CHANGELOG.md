@@ -1,6 +1,7 @@
-## Unreleased
+## Upcoming
 
 ### 🐞 Fixed
+* Fixed iOS Picture-in-Picture window not dismissing when the call ends during PiP mode.
 * Fixed `CallDiagnosticsContent` throwing `failed to call super.dispose` when the widget was disposed while awaiting stats subscription cancellation.
 
 ## 1.3.1
