@@ -271,6 +271,7 @@ class CallData with EquatableMixin {
     this.callerName,
     this.hasVideo,
     this.extraData,
+    this.isAccepted = false,
   });
 
   /// Unique identifier for the call.
@@ -294,6 +295,9 @@ class CallData with EquatableMixin {
   /// Extra data associated with the call.
   final Map<String, Object?>? extraData;
 
+  /// Whether the user has accepted this call via the native notification UI.
+  final bool isAccepted;
+
   @override
   bool? get stringify => true;
 
@@ -306,5 +310,6 @@ class CallData with EquatableMixin {
     callerName,
     hasVideo,
     extraData,
+    isAccepted,
   ];
 }
