@@ -1,3 +1,8 @@
+## Unreleased
+
+### 🐞 Fixed
+* Fixed `CallDiagnosticsContent` throwing `failed to call super.dispose` when the widget was disposed while awaiting stats subscription cancellation.
+
 ## 1.3.1
 
 ### 🐞 Fixed
