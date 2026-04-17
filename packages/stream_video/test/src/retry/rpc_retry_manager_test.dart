@@ -54,7 +54,7 @@ void main() {
       final result = await manager.execute(() async {
         callCount++;
         if (callCount == 1) {
-          return _httpError(401, 'Unauthorized');
+          return _httpError<String>(401, 'Unauthorized');
         }
         return const Result.success('ok');
       });
@@ -65,8 +65,6 @@ void main() {
     });
 
     test('retries only once on repeated 401', () async {
-      var callCount = 0;
-
       when(() => tokenManager.refreshToken()).thenAnswer(
         (_) async => Result.success(_token),
       );
@@ -77,8 +75,7 @@ void main() {
       );
 
       final result = await manager.execute(() async {
-        callCount++;
-        return _httpError(401, 'Unauthorized');
+        return _httpError<String>(401, 'Unauthorized');
       });
 
       expect(result.isFailure, isTrue);
@@ -97,7 +94,7 @@ void main() {
 
       final result = await manager.execute(() async {
         callCount++;
-        return _httpError(403, 'Forbidden');
+        return _httpError<String>(403, 'Forbidden');
       });
 
       expect(result.isFailure, isTrue);
@@ -108,11 +105,11 @@ void main() {
     test('does not attempt refresh without tokenManager', () async {
       var callCount = 0;
 
-      final manager = RpcRetryManager(_noDelayPolicy);
+      const manager = RpcRetryManager(_noDelayPolicy);
 
       final result = await manager.execute(() async {
         callCount++;
-        return _httpError(401, 'Unauthorized');
+        return _httpError<String>(401, 'Unauthorized');
       });
 
       expect(result.isFailure, isTrue);
@@ -128,7 +125,7 @@ void main() {
         (_) async => Result.success(_token),
       );
 
-      final policy = const RetryPolicy(
+      const policy = RetryPolicy(
         config: RetryConfig(rpcMaxRetries: 2),
         backoff: _zeroBackoff,
       );
@@ -143,8 +140,8 @@ void main() {
       // 3rd → success (retry slot 2)
       final result = await manager.execute(() async {
         callCount++;
-        if (callCount == 1) return _httpError(401);
-        if (callCount == 2) return _httpError(500);
+        if (callCount == 1) return _httpError<String>(401);
+        if (callCount == 2) return _httpError<String>(500);
         return const Result.success('ok');
       });
 
@@ -163,7 +160,10 @@ void main() {
 
       final result = await manager.execute(() async {
         callCount++;
-        if (callCount < 3) return _httpError(503, 'Service Unavailable');
+        if (callCount < 3) {
+          return _httpError<String>(503, 'Service Unavailable');
+        }
+
         return const Result.success('ok');
       });
 
