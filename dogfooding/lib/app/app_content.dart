@@ -104,6 +104,8 @@ class _StreamDogFoodingAppContentState
     if (_router.routerDelegate.navigatorKey.currentContext == null) {
       // App is not running yet. Postpone consuming after app is in the foreground
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        if (!locator.isRegistered<StreamVideo>()) return;
+
         final streamVideo = locator.get<StreamVideo>();
         streamVideo.consumeAndAcceptActiveCall(
           onCallAccepted: (call) {

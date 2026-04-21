@@ -15,6 +15,7 @@ class JoinCallRequest {
   JoinCallRequest({
     this.create,
     this.data,
+    this.hintHighScaleLivestreamPublisher,
     required this.location,
     this.membersLimit,
     this.migratingFrom,
@@ -40,6 +41,15 @@ class JoinCallRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   CallRequest? data;
+
+  /// if true, the participant will be marked as publsihing to large audience
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? hintHighScaleLivestreamPublisher;
 
   String location;
 
@@ -95,6 +105,8 @@ class JoinCallRequest {
       other is JoinCallRequest &&
           other.create == create &&
           other.data == data &&
+          other.hintHighScaleLivestreamPublisher ==
+              hintHighScaleLivestreamPublisher &&
           other.location == location &&
           other.membersLimit == membersLimit &&
           other.migratingFrom == migratingFrom &&
@@ -108,6 +120,9 @@ class JoinCallRequest {
       // ignore: unnecessary_parenthesis
       (create == null ? 0 : create!.hashCode) +
       (data == null ? 0 : data!.hashCode) +
+      (hintHighScaleLivestreamPublisher == null
+          ? 0
+          : hintHighScaleLivestreamPublisher!.hashCode) +
       (location.hashCode) +
       (membersLimit == null ? 0 : membersLimit!.hashCode) +
       (migratingFrom == null ? 0 : migratingFrom!.hashCode) +
@@ -118,7 +133,7 @@ class JoinCallRequest {
 
   @override
   String toString() =>
-      'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, migratingFromList=$migratingFromList, notify=$notify, ring=$ring, video=$video]';
+      'JoinCallRequest[create=$create, data=$data, hintHighScaleLivestreamPublisher=$hintHighScaleLivestreamPublisher, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, migratingFromList=$migratingFromList, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -131,6 +146,12 @@ class JoinCallRequest {
       json[r'data'] = this.data;
     } else {
       json[r'data'] = null;
+    }
+    if (this.hintHighScaleLivestreamPublisher != null) {
+      json[r'hint_high_scale_livestream_publisher'] =
+          this.hintHighScaleLivestreamPublisher;
+    } else {
+      json[r'hint_high_scale_livestream_publisher'] = null;
     }
     json[r'location'] = this.location;
     if (this.membersLimit != null) {
@@ -183,6 +204,8 @@ class JoinCallRequest {
       return JoinCallRequest(
         create: mapValueOfType<bool>(json, r'create'),
         data: CallRequest.fromJson(json[r'data']),
+        hintHighScaleLivestreamPublisher:
+            mapValueOfType<bool>(json, r'hint_high_scale_livestream_publisher'),
         location: mapValueOfType<String>(json, r'location')!,
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
         migratingFrom: mapValueOfType<String>(json, r'migrating_from'),
