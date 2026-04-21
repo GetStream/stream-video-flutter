@@ -34,6 +34,12 @@ abstract class DisconnectReason extends Equatable {
     return DisconnectReasonEnded();
   }
 
+  /// The call was ended externally (e.g. a backend `call.ended` event or
+  /// CallKit reporting the call ended) while the user was still connected.
+  factory DisconnectReason.callEnded() {
+    return DisconnectReasonCallEnded();
+  }
+
   factory DisconnectReason.replaced() {
     return DisconnectReasonReplaced();
   }
@@ -191,6 +197,22 @@ class DisconnectReasonReconnectionFailed extends DisconnectReason {
   @override
   String toString() {
     return 'ReconnectionFailed';
+  }
+}
+
+class DisconnectReasonCallEnded extends DisconnectReason {
+  factory DisconnectReasonCallEnded() {
+    return _instance;
+  }
+
+  const DisconnectReasonCallEnded._internal();
+
+  static const DisconnectReasonCallEnded _instance =
+      DisconnectReasonCallEnded._internal();
+
+  @override
+  String toString() {
+    return 'CallEnded';
   }
 }
 

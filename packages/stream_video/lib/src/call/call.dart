@@ -536,9 +536,11 @@ class Call {
         // Notify the client about the permission request.
         return onPermissionRequest?.call(event);
       case StreamCallRejectedEvent _:
-        return _stateManager.coordinatorCallRejected(event);
+        await _handleCoordinatorCallRejected(event);
+        return;
       case StreamCallAcceptedEvent _:
-        return _stateManager.coordinatorCallAccepted(event);
+        await _handleCoordinatorCallAccepted(event);
+        return;
       case StreamCallEndedEvent _:
         return _stateManager.coordinatorCallEnded(event);
       case StreamCallPermissionsUpdatedEvent _:
@@ -643,6 +645,46 @@ class Call {
       default:
         break;
     }
+  }
+
+  Future<void> _handleCoordinatorCallAccepted(
+    StreamCallAcceptedEvent event,
+  ) async {
+    final currentUserId = _stateManager.callState.currentUserId;
+    final status = state.value.status;
+
+    if (event.acceptedByUserId == currentUserId &&
+        status is CallStatusIncoming &&
+        !status.acceptedByMe) {
+      _logger.i(
+        () => '[onCoordinatorEvent] call accepted on another device, '
+            'rejecting locally with userRespondedElsewhere',
+      );
+      await reject(reason: CallRejectReason.userRespondedElsewhere());
+      return;
+    }
+
+    _stateManager.coordinatorCallAccepted(event);
+  }
+
+  Future<void> _handleCoordinatorCallRejected(
+    StreamCallRejectedEvent event,
+  ) async {
+    final currentUserId = _stateManager.callState.currentUserId;
+    final status = state.value.status;
+
+    if (event.rejectedByUserId == currentUserId &&
+        status is CallStatusIncoming &&
+        !status.acceptedByMe) {
+      _logger.i(
+        () => '[onCoordinatorEvent] call rejected on another device, '
+            'rejecting locally with userRespondedElsewhere',
+      );
+      await reject(reason: CallRejectReason.userRespondedElsewhere());
+      return;
+    }
+
+    _stateManager.coordinatorCallRejected(event);
   }
 
   void _handleModerationWarningEvent(
@@ -779,7 +821,7 @@ class Call {
   /// Rejects the incoming call.
   Future<Result<None>> reject({CallRejectReason? reason}) async {
     final state = this.state.value;
-    _logger.i(() => '[reject] state: $state');
+    _logger.i(() => '[reject] reason: $reason');
 
     final result = await _coordinatorClient.rejectCall(
       cid: state.callCid,
@@ -2005,7 +2047,7 @@ class Call {
       }
 
       try {
-        _session?.leave(reason: 'user is leaving the call');
+        _session?.leave(reason: _sfuLeaveReason(reason));
       } finally {
         await _clear('leave');
       }
@@ -2018,6 +2060,30 @@ class Call {
     } finally {
       _leaveCallTriggered = false;
     }
+  }
+
+  String _sfuLeaveReason(DisconnectReason? reason) {
+    if (reason == null) return 'user is leaving the call';
+    if (reason is DisconnectReasonRejected) {
+      return 'rejected: ${reason.reason?.value ?? 'unspecified'}';
+    } else if (reason is DisconnectReasonReplaced) {
+      return 'replaced by another call';
+    } else if (reason is DisconnectReasonReconnectionFailed) {
+      return 'reconnection failed';
+    } else if (reason is DisconnectReasonLastParticipantLeft) {
+      return 'last participant left';
+    } else if (reason is DisconnectReasonFailure) {
+      return 'failure: ${reason.error}';
+    } else if (reason is DisconnectReasonSfuError) {
+      return 'sfu error: ${reason.error}';
+    } else if (reason is DisconnectReasonCallEnded) {
+      return 'call ended externally';
+    } else if (reason is DisconnectReasonEnded) {
+      return 'call ended';
+    } else if (reason is DisconnectReasonTimeout) {
+      return 'timeout';
+    }
+    return 'user is leaving the call';
   }
 
   Future<void> _clear(String src) async {

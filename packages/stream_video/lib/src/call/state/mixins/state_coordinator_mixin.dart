@@ -108,7 +108,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           status: CallStatus.disconnected(
             DisconnectReason.rejected(
               byUserId: event.rejectedByUserId,
-              reason: CallRejectReason.custom('ring: everyone rejected'),
+              reason: CallRejectReason.allOtherParticipantsRejected(),
             ),
           ),
           sessionId: '',
@@ -126,7 +126,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           status: CallStatus.disconnected(
             DisconnectReason.rejected(
               byUserId: event.rejectedByUserId,
-              reason: CallRejectReason.custom('ring: creator rejected'),
+              reason: CallRejectReason.creatorRejected(),
             ),
           ),
           sessionId: '',

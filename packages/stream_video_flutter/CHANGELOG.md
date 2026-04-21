@@ -1,3 +1,8 @@
+## Upcoming
+
+### 🐞 Fixed
+* Improved disconnect/reject reason propagation.
+
 ## 1.3.2
 
 ### 🐞 Fixed
