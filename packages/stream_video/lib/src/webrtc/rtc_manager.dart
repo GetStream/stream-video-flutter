@@ -1639,12 +1639,12 @@ extension on RtcLocalTrack<VideoConstraints> {
         // try to use getSettings for more accurate resolution
         final settings = mediaTrack.getSettings();
         streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
-        if (settings['width'] is int) {
+        if (settings['width'] is num) {
           dimension = dimension.copyWith(
             width: (settings['width'] as num).toInt(),
           );
         }
-        if (settings['height'] is int) {
+        if (settings['height'] is num) {
           dimension = dimension.copyWith(
             height: (settings['height'] as num).toInt(),
           );
