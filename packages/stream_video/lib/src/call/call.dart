@@ -823,10 +823,12 @@ class Call {
   ///
   /// - [connectOptions]: optional initial call configuration
   /// - [membersLimit]: Sets the maximum number of members to return as part of the response.
+  /// - [hintHighScaleLivestreamPublisher]: Whether the local user is a high-scale livestream publisher.
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     await _init();
 
@@ -881,6 +883,8 @@ class Call {
               connectOptions: connectOptions,
               membersLimit: membersLimit,
               maxJoinRetries: maxJoinRetries,
+              hintHighScaleLivestreamPublisher:
+                  hintHighScaleLivestreamPublisher,
             )
             .asCancelable()
             .storeIn(_idConnect, _cancelables)
@@ -906,6 +910,7 @@ class Call {
     int? membersLimit,
     int maxJoinRetries = 3,
     String? reconnectReason,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     if (_callJoinLock.locked) {
       _logger.w(() => '[join] rejected (already joining)');
@@ -925,6 +930,7 @@ class Call {
             sfuToForceExclude: sfuToForceExclude,
             sfusToExclude: List.unmodifiable(sfusToExclude),
             reconnectReason: reconnectReason,
+            hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
           ),
         );
 
@@ -1026,6 +1032,7 @@ class Call {
     String? sfuToForceExclude,
     List<String> sfusToExclude = const [],
     String? reconnectReason,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     _logger.d(() => '[join] options: $_connectOptions');
     final connectionTimeStopwatch = Stopwatch()..start();
@@ -1072,6 +1079,7 @@ class Call {
       membersLimit: membersLimit,
       forceMigratingFrom: sfuToForceExclude,
       migratingFromList: sfusToExclude,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
     );
 
     if (joinedResult is! Success<CallCredentials>) {
@@ -1232,6 +1240,7 @@ class Call {
     int? membersLimit,
     String? forceMigratingFrom,
     List<String> migratingFromList = const [],
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     _logger.d(
       () =>
@@ -1269,6 +1278,7 @@ class Call {
         migratingFrom: migratingFrom,
         migratingFromList: effectiveMigratingFromList,
         membersLimit: membersLimit,
+        hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
       );
 
       return joinedResult.fold(
@@ -1305,6 +1315,7 @@ class Call {
     List<String> migratingFromList = const [],
     int? membersLimit,
     CallConnectOptions? connectOptions,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     _logger.d(
       () =>
@@ -1323,6 +1334,7 @@ class Call {
       migratingFromList: migratingFromList,
       video: video,
       membersLimit: membersLimit,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
     );
 
     if (joinResult is! Success<CoordinatorJoined>) {
