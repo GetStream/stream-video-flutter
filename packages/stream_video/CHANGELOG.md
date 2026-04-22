@@ -1,3 +1,8 @@
+## Upcoming
+
+### ✅ Added
+* Support server-side pinning on participant join. When the SFU sends `isPinned: true` on a `ParticipantJoined` event, the participant is now automatically pinned.
+
 ## 1.3.2
 
 ### 🐞 Fixed

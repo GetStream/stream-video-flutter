@@ -808,6 +808,7 @@ const ParticipantJoined$json = {
       '6': '.stream.video.sfu.models.Participant',
       '10': 'participant'
     },
+    {'1': 'is_pinned', '3': 3, '4': 1, '5': 8, '10': 'isPinned'},
   ],
 };
 
@@ -815,7 +816,7 @@ const ParticipantJoined$json = {
 final $typed_data.Uint8List participantJoinedDescriptor = $convert.base64Decode(
     'ChFQYXJ0aWNpcGFudEpvaW5lZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZBJGCgtwYXJ0aW'
     'NpcGFudBgCIAEoCzIkLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBhcnRpY2lwYW50UgtwYXJ0'
-    'aWNpcGFudA==');
+    'aWNpcGFudBIbCglpc19waW5uZWQYAyABKAhSCGlzUGlubmVk');
 
 @$core.Deprecated('Use participantLeftDescriptor instead')
 const ParticipantLeft$json = {
@@ -867,13 +868,14 @@ const SubscriberOffer$json = {
   '2': [
     {'1': 'ice_restart', '3': 1, '4': 1, '5': 8, '10': 'iceRestart'},
     {'1': 'sdp', '3': 2, '4': 1, '5': 9, '10': 'sdp'},
+    {'1': 'negotiation_id', '3': 3, '4': 1, '5': 13, '10': 'negotiationId'},
   ],
 };
 
 /// Descriptor for `SubscriberOffer`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List subscriberOfferDescriptor = $convert.base64Decode(
     'Cg9TdWJzY3JpYmVyT2ZmZXISHwoLaWNlX3Jlc3RhcnQYASABKAhSCmljZVJlc3RhcnQSEAoDc2'
-    'RwGAIgASgJUgNzZHA=');
+    'RwGAIgASgJUgNzZHASJQoObmVnb3RpYXRpb25faWQYAyABKA1SDW5lZ290aWF0aW9uSWQ=');
 
 @$core.Deprecated('Use publisherAnswerDescriptor instead')
 const PublisherAnswer$json = {
