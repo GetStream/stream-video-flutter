@@ -13,16 +13,36 @@ part of openapi.api;
 class CallStatsParticipantCounts {
   /// Returns a new [CallStatsParticipantCounts] instance.
   CallStatsParticipantCounts({
+    this.averageJitterMs,
+    this.averageLatencyMs,
     this.callEventCount,
     this.cqScore,
     required this.liveSessions,
+    this.maxFreezesDurationMs,
     required this.participants,
     required this.peakConcurrentSessions,
     required this.peakConcurrentUsers,
     required this.publishers,
     required this.sessions,
+    required this.sfusUsed,
     this.totalParticipantDuration,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? averageJitterMs;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? averageLatencyMs;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -42,6 +62,14 @@ class CallStatsParticipantCounts {
 
   int liveSessions;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? maxFreezesDurationMs;
+
   int participants;
 
   int peakConcurrentSessions;
@@ -51,6 +79,8 @@ class CallStatsParticipantCounts {
   int publishers;
 
   int sessions;
+
+  int sfusUsed;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -64,37 +94,55 @@ class CallStatsParticipantCounts {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CallStatsParticipantCounts &&
+          other.averageJitterMs == averageJitterMs &&
+          other.averageLatencyMs == averageLatencyMs &&
           other.callEventCount == callEventCount &&
           other.cqScore == cqScore &&
           other.liveSessions == liveSessions &&
+          other.maxFreezesDurationMs == maxFreezesDurationMs &&
           other.participants == participants &&
           other.peakConcurrentSessions == peakConcurrentSessions &&
           other.peakConcurrentUsers == peakConcurrentUsers &&
           other.publishers == publishers &&
           other.sessions == sessions &&
+          other.sfusUsed == sfusUsed &&
           other.totalParticipantDuration == totalParticipantDuration;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
+      (averageJitterMs == null ? 0 : averageJitterMs!.hashCode) +
+      (averageLatencyMs == null ? 0 : averageLatencyMs!.hashCode) +
       (callEventCount == null ? 0 : callEventCount!.hashCode) +
       (cqScore == null ? 0 : cqScore!.hashCode) +
       (liveSessions.hashCode) +
+      (maxFreezesDurationMs == null ? 0 : maxFreezesDurationMs!.hashCode) +
       (participants.hashCode) +
       (peakConcurrentSessions.hashCode) +
       (peakConcurrentUsers.hashCode) +
       (publishers.hashCode) +
       (sessions.hashCode) +
+      (sfusUsed.hashCode) +
       (totalParticipantDuration == null
           ? 0
           : totalParticipantDuration!.hashCode);
 
   @override
   String toString() =>
-      'CallStatsParticipantCounts[callEventCount=$callEventCount, cqScore=$cqScore, liveSessions=$liveSessions, participants=$participants, peakConcurrentSessions=$peakConcurrentSessions, peakConcurrentUsers=$peakConcurrentUsers, publishers=$publishers, sessions=$sessions, totalParticipantDuration=$totalParticipantDuration]';
+      'CallStatsParticipantCounts[averageJitterMs=$averageJitterMs, averageLatencyMs=$averageLatencyMs, callEventCount=$callEventCount, cqScore=$cqScore, liveSessions=$liveSessions, maxFreezesDurationMs=$maxFreezesDurationMs, participants=$participants, peakConcurrentSessions=$peakConcurrentSessions, peakConcurrentUsers=$peakConcurrentUsers, publishers=$publishers, sessions=$sessions, sfusUsed=$sfusUsed, totalParticipantDuration=$totalParticipantDuration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.averageJitterMs != null) {
+      json[r'average_jitter_ms'] = this.averageJitterMs;
+    } else {
+      json[r'average_jitter_ms'] = null;
+    }
+    if (this.averageLatencyMs != null) {
+      json[r'average_latency_ms'] = this.averageLatencyMs;
+    } else {
+      json[r'average_latency_ms'] = null;
+    }
     if (this.callEventCount != null) {
       json[r'call_event_count'] = this.callEventCount;
     } else {
@@ -106,11 +154,17 @@ class CallStatsParticipantCounts {
       json[r'cq_score'] = null;
     }
     json[r'live_sessions'] = this.liveSessions;
+    if (this.maxFreezesDurationMs != null) {
+      json[r'max_freezes_duration_ms'] = this.maxFreezesDurationMs;
+    } else {
+      json[r'max_freezes_duration_ms'] = null;
+    }
     json[r'participants'] = this.participants;
     json[r'peak_concurrent_sessions'] = this.peakConcurrentSessions;
     json[r'peak_concurrent_users'] = this.peakConcurrentUsers;
     json[r'publishers'] = this.publishers;
     json[r'sessions'] = this.sessions;
+    json[r'sfus_used'] = this.sfusUsed;
     if (this.totalParticipantDuration != null) {
       json[r'total_participant_duration'] = this.totalParticipantDuration;
     } else {
@@ -154,13 +208,21 @@ class CallStatsParticipantCounts {
             'Required key "CallStatsParticipantCounts[sessions]" is missing from JSON.');
         assert(json[r'sessions'] != null,
             'Required key "CallStatsParticipantCounts[sessions]" has a null value in JSON.');
+        assert(json.containsKey(r'sfus_used'),
+            'Required key "CallStatsParticipantCounts[sfus_used]" is missing from JSON.');
+        assert(json[r'sfus_used'] != null,
+            'Required key "CallStatsParticipantCounts[sfus_used]" has a null value in JSON.');
         return true;
       }());
 
       return CallStatsParticipantCounts(
+        averageJitterMs: mapValueOfType<int>(json, r'average_jitter_ms'),
+        averageLatencyMs: mapValueOfType<int>(json, r'average_latency_ms'),
         callEventCount: mapValueOfType<int>(json, r'call_event_count'),
         cqScore: mapValueOfType<int>(json, r'cq_score'),
         liveSessions: mapValueOfType<int>(json, r'live_sessions')!,
+        maxFreezesDurationMs:
+            mapValueOfType<int>(json, r'max_freezes_duration_ms'),
         participants: mapValueOfType<int>(json, r'participants')!,
         peakConcurrentSessions:
             mapValueOfType<int>(json, r'peak_concurrent_sessions')!,
@@ -168,6 +230,7 @@ class CallStatsParticipantCounts {
             mapValueOfType<int>(json, r'peak_concurrent_users')!,
         publishers: mapValueOfType<int>(json, r'publishers')!,
         sessions: mapValueOfType<int>(json, r'sessions')!,
+        sfusUsed: mapValueOfType<int>(json, r'sfus_used')!,
         totalParticipantDuration:
             mapValueOfType<int>(json, r'total_participant_duration'),
       );
@@ -232,5 +295,6 @@ class CallStatsParticipantCounts {
     'peak_concurrent_users',
     'publishers',
     'sessions',
+    'sfus_used',
   };
 }

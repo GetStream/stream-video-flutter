@@ -1,3 +1,8 @@
+## Upcoming
+
+### ✅ Added
+* Added `hintHighScaleLivestreamPublisher` parameter to `Call.join()` to allow marking the participant as publishing to a large audience.
+
 ## 1.3.2
 
 ### 🐞 Fixed
