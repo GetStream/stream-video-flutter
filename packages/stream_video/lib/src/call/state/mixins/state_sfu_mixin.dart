@@ -239,6 +239,9 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
           consumePendingTracks(event.participant.trackLookupPrefix) ?? {},
       isLocal: isLocal,
       isOnline: !isLocal,
+      pin: event.isPinned
+          ? CallParticipantPin(isLocalPin: false, pinnedAt: DateTime.now())
+          : null,
     );
 
     var isExisting = false;

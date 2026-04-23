@@ -119,6 +119,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuParticipantJoinedEvent(
           callCid: participantJoined.callCid,
           participant: participantJoined.participant.toDomain(),
+          isPinned: participantJoined.isPinned,
         );
       case sfu_events.SfuEvent_EventPayload.participantLeft:
         return SfuParticipantLeftEvent(
