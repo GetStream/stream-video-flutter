@@ -1588,12 +1588,14 @@ extension SfuEventX on SfuEvent {
       final SfuParticipantJoinedEvent event => StreamCallParticipantJoinedEvent(
         state.callCid,
         participant: event.isPinned
-            ? event.participant.toParticipantState(state).copyWithPin(
-                participantPin: CallParticipantPin(
-                  isLocalPin: false,
-                  pinnedAt: DateTime.now(),
-                ),
-              )
+            ? event.participant
+                  .toParticipantState(state)
+                  .copyWithPin(
+                    participantPin: CallParticipantPin(
+                      isLocalPin: false,
+                      pinnedAt: DateTime.now(),
+                    ),
+                  )
             : event.participant.toParticipantState(state),
       ),
       final SfuParticipantLeftEvent event => StreamCallParticipantLeftEvent(
