@@ -30,6 +30,9 @@ class SfuStatsReporter {
     required this.statsOptions,
     this.unifiedSessionId,
   }) {
+    _deviceTracer = Tracer('sfu-stats-device')
+      ..setEnabled(statsOptions.enableRtcStats);
+
     final thermalStatusAvailable =
         CurrentPlatform.isAndroid || CurrentPlatform.isIos;
     if (thermalStatusAvailable) {
@@ -38,6 +41,7 @@ class SfuStatsReporter {
           ThermalStatus status,
         ) {
           _thermalStatus = status;
+          _deviceTracer.trace('device.thermalState', status.name);
         });
       } catch (e) {
         _logger.d(() => 'Failed to subscribe to thermal status changes');
@@ -60,6 +64,14 @@ class SfuStatsReporter {
         );
   }
 
+  // In the initial stage send stats more often in case of early-call issues.
+  static const _initialReportingDelays = <Duration>[
+    Duration(milliseconds: 1500),
+    Duration(seconds: 3),
+    Duration(seconds: 3),
+    Duration(seconds: 5),
+  ];
+
   final CallSession callSession;
   final CallStateNotifier stateManager;
   final StatsOptions statsOptions;
@@ -75,18 +87,37 @@ class SfuStatsReporter {
   List<String>? _availableAudioInputs;
   List<String>? _availableVideoInputs;
   ThermalStatus? _thermalStatus;
+  bool? _lastLowPowerMode;
+
+  late final Tracer _deviceTracer;
 
   Timer? _timer;
+  int _reportCount = 0;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
-    _timer = Timer.periodic(interval, (_) {
-      try {
-        sendSfuStats();
-      } catch (e) {
-        _logger.v(() => 'Failed to send SFU stats');
-      }
-    });
+    _reportCount = 0;
+    _scheduleNextReport(interval);
+  }
+
+  void _scheduleNextReport(Duration regularInterval) {
+    if (_reportCount < _initialReportingDelays.length) {
+      _timer = Timer(_initialReportingDelays[_reportCount], () {
+        _reportCount++;
+        _invokeSendStats();
+        _scheduleNextReport(regularInterval);
+      });
+    } else {
+      _timer = Timer.periodic(regularInterval, (_) => _invokeSendStats());
+    }
+  }
+
+  void _invokeSendStats() {
+    try {
+      sendSfuStats();
+    } catch (e) {
+      _logger.v(() => 'Failed to send SFU stats');
+    }
   }
 
   Future<void> sendSfuStats({
@@ -114,6 +145,10 @@ class SfuStatsReporter {
         if (batterySaveModeAvailable) {
           try {
             lowPowerMode = await Battery().isInBatterySaveMode;
+            if (lowPowerMode != _lastLowPowerMode) {
+              _deviceTracer.trace('device.lowPowerMode', lowPowerMode);
+              _lastLowPowerMode = lowPowerMode;
+            }
           } on PlatformException {
             _logger.d(() => 'Failed to get battery save mode from the device');
           }
@@ -196,6 +231,7 @@ class SfuStatsReporter {
             if (publisherTrace != null) publisherTrace,
             ...sessionTrace,
             mediaDeviceNotifierTrace,
+            _deviceTracer.take(),
           ]);
         }
 
@@ -281,5 +317,6 @@ class SfuStatsReporter {
     _timer?.cancel();
     _mediaDeviceSubscription?.cancel();
     _thermalStatusSubscription?.cancel();
+    _deviceTracer.dispose();
   }
 }
