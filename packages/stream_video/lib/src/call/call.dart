@@ -768,6 +768,7 @@ class Call {
       }
     }
 
+    _session?.trace('call.accept', null);
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Success<None>) {
       _stateManager.lifecycleCallAccepted();
@@ -781,6 +782,7 @@ class Call {
     final state = this.state.value;
     _logger.i(() => '[reject] state: $state');
 
+    _session?.trace('call.reject', reason?.value);
     final result = await _coordinatorClient.rejectCall(
       cid: state.callCid,
       reason: reason?.value,
