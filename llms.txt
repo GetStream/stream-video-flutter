@@ -1,0 +1,30 @@
+# Stream Video Flutter SDK
+
+> Official Flutter / Dart client for [Stream Video](https://getstream.io/video/sdk/flutter/) — 1:1 and group video & audio calling, livestreaming, audio rooms, ringing with CallKit / VoIP push, and AI voice agents. This file follows the [llms.txt](https://llmstxt.org) convention so LLMs can find the canonical entry points without crawling the whole repo.
+
+## Agent entry points
+
+- [AGENTS.md](AGENTS.md): Cross-tool agent guide — routing table for integration skills and contributor conventions.
+- [.claude/skills/stream-video-flutter/SKILL.md](.claude/skills/stream-video-flutter/SKILL.md): Core SDK setup, 1:1 / group video & audio calling, call lifecycle, pre-built UI widgets.
+- [.claude/skills/stream-video-flutter-livestream/SKILL.md](.claude/skills/stream-video-flutter-livestream/SKILL.md): Livestreaming, audio rooms, HLS, TikTok-style live feeds.
+- [.claude/skills/stream-video-flutter-ringing/SKILL.md](.claude/skills/stream-video-flutter-ringing/SKILL.md): Ringing, push notifications, CallKit, VoIP push, missed-call handling.
+
+## Documentation
+
+- [Flutter Video docs](https://getstream.io/video/docs/flutter/): Authoritative documentation — UI cookbook, advanced APIs, dashboard, server-side tokens.
+- [development.md](development.md): Contributor setup for this monorepo.
+- [README.md](README.md): Repository overview and Melos workspace structure.
+
+## Packages on pub.dev
+
+- [stream_video_flutter](https://pub.dev/packages/stream_video_flutter): Primary package — pre-built UI widgets and re-exports `stream_video`.
+- [stream_video](https://pub.dev/packages/stream_video): Low-level client. Use directly only when building custom UI from scratch.
+- [stream_video_push_notification](https://pub.dev/packages/stream_video_push_notification): Push notifications and CallKit integration for ringing.
+- [stream_video_noise_cancellation](https://pub.dev/packages/stream_video_noise_cancellation): Optional AI noise cancellation add-on.
+
+## Related repositories
+
+- [flutter-video-agent-skills](https://github.com/GetStream/flutter-video-agent-skills): Standalone, installable copy of the agent skills used in this repo.
+- [flutter-video-samples](https://github.com/GetStream/flutter-video-samples): Full sample apps (calling, livestream, audio room, ringing).
+- [flutter-video-tutorials](https://github.com/GetStream/flutter-video-tutorials): Step-by-step tutorial repos.
+- [agent-skills](https://github.com/GetStream/agent-skills): Broader Stream agent pack (Chat, Feeds, Moderation, CLI).
