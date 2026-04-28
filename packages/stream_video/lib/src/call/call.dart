@@ -657,7 +657,8 @@ class Call {
         status is CallStatusIncoming &&
         !status.acceptedByMe) {
       _logger.i(
-        () => '[onCoordinatorEvent] call accepted on another device, '
+        () =>
+            '[onCoordinatorEvent] call accepted on another device, '
             'rejecting locally with userRespondedElsewhere',
       );
       await reject(reason: CallRejectReason.userRespondedElsewhere());
@@ -677,7 +678,8 @@ class Call {
         status is CallStatusIncoming &&
         !status.acceptedByMe) {
       _logger.i(
-        () => '[onCoordinatorEvent] call rejected on another device, '
+        () =>
+            '[onCoordinatorEvent] call rejected on another device, '
             'rejecting locally with userRespondedElsewhere',
       );
       await reject(reason: CallRejectReason.userRespondedElsewhere());
