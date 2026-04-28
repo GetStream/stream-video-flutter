@@ -3,6 +3,10 @@
 ### 🐞 Fixed
 * Improved disconnect/reject reason propagation.
 
+### ✅ Added
+* Support server-side pinning on participant join. When the SFU sends `isPinned: true` on a `ParticipantJoined` event, the participant is now automatically pinned.
+* Added `hintHighScaleLivestreamPublisher` parameter to `Call.join()` to allow marking the participant as publishing to a large audience.
+
 ## 1.3.2
 
 ### 🐞 Fixed

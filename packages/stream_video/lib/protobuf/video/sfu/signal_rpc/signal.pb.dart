@@ -1555,11 +1555,13 @@ class SendAnswerRequest extends $pb.GeneratedMessage {
     $0.PeerType? peerType,
     $core.String? sdp,
     $core.String? sessionId,
+    $core.int? negotiationId,
   }) {
     final result = create();
     if (peerType != null) result.peerType = peerType;
     if (sdp != null) result.sdp = sdp;
     if (sessionId != null) result.sessionId = sessionId;
+    if (negotiationId != null) result.negotiationId = negotiationId;
     return result;
   }
 
@@ -1581,6 +1583,8 @@ class SendAnswerRequest extends $pb.GeneratedMessage {
         enumValues: $0.PeerType.values)
     ..aOS(2, _omitFieldNames ? '' : 'sdp')
     ..aOS(3, _omitFieldNames ? '' : 'sessionId')
+    ..aI(4, _omitFieldNames ? '' : 'negotiationId',
+        fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1628,6 +1632,15 @@ class SendAnswerRequest extends $pb.GeneratedMessage {
   $core.bool hasSessionId() => $_has(2);
   @$pb.TagNumber(3)
   void clearSessionId() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get negotiationId => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set negotiationId($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasNegotiationId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearNegotiationId() => $_clearField(4);
 }
 
 class SendAnswerResponse extends $pb.GeneratedMessage {

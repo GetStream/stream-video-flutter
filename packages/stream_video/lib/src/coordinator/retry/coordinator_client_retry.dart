@@ -283,6 +283,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     List<String> migratingFromList = const [],
     bool? video,
     int? membersLimit,
+    bool? hintHighScaleLivestreamPublisher,
   }) {
     return _retryManager.execute(
       () => _delegate.joinCall(
@@ -292,6 +293,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         migratingFrom: migratingFrom,
         migratingFromList: migratingFromList,
         video: video,
+        hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('joinCall', error, nextAttemptDelay);
