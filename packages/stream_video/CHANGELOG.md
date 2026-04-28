@@ -1,6 +1,7 @@
 ## Upcoming
 
 ### 🐞 Fixed
+* Improved disconnect/reject reason propagation.
 * Fixed `TranscriptionSettingsResponse.fromJson` crashing with a null check error when the backend returns an empty string for the `language` field.
 
 ### ✅ Added

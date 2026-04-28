@@ -510,7 +510,7 @@ class CallSession extends Disposable {
   }
 
   void leave({String? reason}) {
-    _logger.d(() => '[leave] no args');
+    _logger.d(() => '[leave] reason: $reason');
     _isLeavingOrClosed = true;
     _tracer.trace('call.leave', reason);
     sfuWS.leave(sessionId: sessionId, reason: reason);
