@@ -30,7 +30,7 @@ void main() {
       final result = CallSessionResponse.fromJson(json)!;
 
       expect(result.acceptedBy, isA<Map<String, DateTime>>());
-      expect(result.acceptedBy['user-1'], DateTime.utc(2024, 5, 1, 10, 0));
+      expect(result.acceptedBy['user-1'], DateTime.utc(2024, 5, 1, 10));
       expect(result.acceptedBy['user-2'], DateTime.utc(2024, 5, 1, 10, 1));
     });
 
@@ -85,7 +85,7 @@ void main() {
   // Tests iterate .values/.entries to trigger the lazy CastMap type check;
   // plain [] returns V? regardless of V and would not catch the regression.
   group('UserResponse – custom field allows null values', () {
-    Map<String, dynamic> _minimalUserJson({
+    Map<String, dynamic> minimalUserJson({
       required Map<String, dynamic> custom,
     }) => {
       'blocked_user_ids': <dynamic>[],
@@ -99,7 +99,7 @@ void main() {
     };
 
     test('fromJson: iterating custom values with nulls does not throw', () {
-      final json = _minimalUserJson(
+      final json = minimalUserJson(
         custom: {
           'nickname': 'Bob',
           'avatar': null,
@@ -114,7 +114,7 @@ void main() {
     });
 
     test('fromJson: iterating custom entries with nulls does not throw', () {
-      final json = _minimalUserJson(
+      final json = minimalUserJson(
         custom: {
           'field_a': null,
           'field_b': null,
