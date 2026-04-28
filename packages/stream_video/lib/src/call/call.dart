@@ -2080,26 +2080,24 @@ class Call {
 
   String _sfuLeaveReason(DisconnectReason? reason) {
     if (reason == null) return 'user is leaving the call';
-    if (reason is DisconnectReasonRejected) {
-      return 'rejected: ${reason.reason?.value ?? 'unspecified'}';
-    } else if (reason is DisconnectReasonReplaced) {
-      return 'replaced by another call';
-    } else if (reason is DisconnectReasonReconnectionFailed) {
-      return 'reconnection failed';
-    } else if (reason is DisconnectReasonLastParticipantLeft) {
-      return 'last participant left';
-    } else if (reason is DisconnectReasonFailure) {
-      return 'failure: ${reason.error}';
-    } else if (reason is DisconnectReasonSfuError) {
-      return 'sfu error: ${reason.error}';
-    } else if (reason is DisconnectReasonCallEnded) {
-      return 'call ended externally';
-    } else if (reason is DisconnectReasonEnded) {
-      return 'call ended';
-    } else if (reason is DisconnectReasonTimeout) {
-      return 'timeout';
-    }
-    return 'user is leaving the call';
+
+    return switch (reason) {
+      final DisconnectReasonRejected rejected =>
+        'rejected: ${rejected.reason?.value ?? 'unspecified'}',
+      final DisconnectReasonFailure failure => 'failure: ${failure.error}',
+      final DisconnectReasonSfuError sfuError => 'sfu error: ${sfuError.error}',
+      final DisconnectReasonCancelled cancelled =>
+        'cancelled: ${cancelled.byUserId}',
+      DisconnectReasonReplaced _ => 'replaced by another call',
+      DisconnectReasonReconnectionFailed _ => 'reconnection failed',
+      DisconnectReasonLastParticipantLeft _ => 'last participant left',
+      DisconnectReasonCallEnded _ => 'call ended externally',
+      DisconnectReasonEnded _ => 'call ended',
+      DisconnectReasonTimeout _ => 'timeout',
+      DisconnectReasonManuallyClosed _ => 'manually closed',
+      DisconnectReasonBlocked _ => 'blocked',
+      _ => 'user is leaving the call',
+    };
   }
 
   Future<void> _clear(String src) async {
