@@ -38,10 +38,10 @@ class RtcCodec extends RtcStats {
         type: value['type'],
         timestamp: value['timestamp'],
         sdpFmtpLine: value['sdpFmtpLine'],
-        payloadType: value['payloadType'],
+        payloadType: (value['payloadType'] as num?)?.toInt(),
         transportId: value['transportId'],
         mimeType: value['mimeType'],
-        clockRate: value['clockRate'],
+        clockRate: (value['clockRate'] as num?)?.toInt(),
       );
     }
     return null;
