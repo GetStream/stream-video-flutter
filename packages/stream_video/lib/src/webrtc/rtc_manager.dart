@@ -41,10 +41,7 @@ typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
 /// Called when a subscriber track is received.
 /// {@endtemplate}
 typedef OnRemoteTrackReceived =
-    void Function(
-      StreamPeerConnection pc,
-      RtcRemoteTrack track,
-    );
+    void Function(StreamPeerConnection pc, RtcRemoteTrack track);
 
 const _tag = 'SV:RtcManager';
 
@@ -215,6 +212,18 @@ class RtcManager extends Disposable {
     _defaultAudioConstraints = constraints;
 
     final localAudioTracks = tracks.values.whereType<RtcLocalAudioTrack>();
+
+    // Capture each track's current stopTrackOnMute before forcing a
+    // stop-and-recreate cycle. The cycle must use stopTrackOnMute: true so
+    // that unmuteTrack enters the recreate branch and picks up the new
+    // constraints via getUserMedia. After recreation the original value is
+    // restored so that subsequent mute/unmute calls honour the integrator's
+    // chosen TrackDisableMode.
+    final originalModes = {
+      for (final track in localAudioTracks)
+        track.trackId: track.stopTrackOnMute,
+    };
+
     for (final track in localAudioTracks) {
       await muteTrack(trackId: track.trackId, stopTrackOnMute: true);
     }
@@ -222,9 +231,34 @@ class RtcManager extends Disposable {
     for (final track in localAudioTracks) {
       await unmuteTrack(trackId: track.trackId);
     }
+
+    // Restore the original stopTrackOnMute value on each recreated track.
+    for (final entry in originalModes.entries) {
+      final track = tracks[entry.key];
+      if (track is RtcLocalAudioTrack) {
+        tracks[entry.key] = track.copyWith(stopTrackOnMute: entry.value);
+      }
+    }
   }
 
-  Future<void> unpublishTrack({required String trackId}) async {
+  /// Stops the local track / clones / media stream for [trackId] and (by
+  /// default) calls `pc.removeTrack` on every sender that referenced it.
+  ///
+  /// When [removeFromPc] is `false`, only the local track-stop side-effects
+  /// run; the publisher PC's senders are left attached. This is what
+  /// [dispose] needs: libwebrtc's per-`Call.AudioState` issues
+  /// `ADM.StopRecording()` on the shared `AudioDeviceModule` whenever a
+  /// sender is explicitly removed, with no shared refcount across PCs. The
+  /// wholesale `pc.close()`/`pc.dispose()` that runs right after this in
+  /// [dispose] does NOT take the same path — it tears the PC down without
+  /// going through per-stream removal lifecycles, so a sibling call's audio
+  /// capture is not collateral damage. See
+  /// `stream-video-flutter/docs/audio-lifecycle-analysis.md` for the full
+  /// trail.
+  Future<void> unpublishTrack({
+    required String trackId,
+    bool removeFromPc = true,
+  }) async {
     final publishedTrack = tracks.remove(trackId);
 
     if (publishedTrack == null) {
@@ -233,6 +267,10 @@ class RtcManager extends Disposable {
     }
 
     await publishedTrack.stop();
+
+    if (!removeFromPc) {
+      return;
+    }
 
     if (publishedTrack is RtcRemoteTrack) {
       final sender = publishedTrack.transceiver?.sender;
@@ -337,10 +375,7 @@ class RtcManager extends Disposable {
         final localTrack = tracks[item.track.trackId] as RtcLocalTrack?;
         if (localTrack != null) {
           tracks[item.track.trackId] = localTrack.copyWith(
-            clonedTracks: [
-              ...localTrack.clonedTracks,
-              mediaTrackClone,
-            ],
+            clonedTracks: [...localTrack.clonedTracks, mediaTrackClone],
           );
         }
       } else {
@@ -381,10 +416,7 @@ class RtcManager extends Disposable {
     );
 
     final sender = transceiversManager
-        .getWith(
-          videoSender.trackType,
-          videoSender.publishOptionId,
-        )
+        .getWith(videoSender.trackType, videoSender.publishOptionId)
         ?.sender;
 
     if (sender == null) {
@@ -472,8 +504,12 @@ class RtcManager extends Disposable {
   }
 
   @override
-  Future<void> dispose() async {
-    _logger.d(() => '[dispose] no args');
+  Future<void> dispose({bool disposePC = true}) async {
+    _logger.d(
+      () =>
+          '[dispose] disposePC: '
+          '$disposePC',
+    );
 
     await _screenSharingStartedSubscription?.cancel();
     _screenSharingStartedSubscription = null;
@@ -481,14 +517,12 @@ class RtcManager extends Disposable {
     final trackIds = [...tracks.keys];
     await Future.wait(
       trackIds.map(
-        (trackId) => unpublishTrack(trackId: trackId).catchError((
-          Object e,
-          StackTrace stk,
-        ) {
-          _logger.e(
-            () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
-          );
-        }),
+        (trackId) => unpublishTrack(trackId: trackId, removeFromPc: disposePC)
+            .catchError((Object e, StackTrace stk) {
+              _logger.e(
+                () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
+              );
+            }),
       ),
     );
 
@@ -500,15 +534,17 @@ class RtcManager extends Disposable {
 
     await Future.wait([
       if (publisher != null)
-        publisher!.dispose().catchError((Object e, StackTrace stk) {
-          _logger.e(
-            () => '[dispose] publisher.dispose failed: $e\n$stk',
-          );
+        publisher!.dispose(disposePC: disposePC).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
+          _logger.e(() => '[dispose] publisher.dispose failed: $e\n$stk');
         }),
-      subscriber.dispose().catchError((Object e, StackTrace stk) {
-        _logger.e(
-          () => '[dispose] subscriber.dispose failed: $e\n$stk',
-        );
+      subscriber.dispose(disposePC: disposePC).catchError((
+        Object e,
+        StackTrace stk,
+      ) {
+        _logger.e(() => '[dispose] subscriber.dispose failed: $e\n$stk');
       }),
     ]);
 
@@ -579,9 +615,7 @@ extension PublisherRtcManager on RtcManager {
     return transceiverInitIndex.toString();
   }
 
-  Future<List<RtcTrackInfo>> getAnnouncedTracks({
-    String? sdp,
-  }) async {
+  Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
     final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
     final infos = <RtcTrackInfo>[];
 
@@ -1186,9 +1220,7 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setTrackFacingMode({
     required FacingMode facingMode,
   }) async {
-    _logger.d(
-      () => '[setTrackFacingMode] facingMode: $facingMode',
-    );
+    _logger.d(() => '[setTrackFacingMode] facingMode: $facingMode');
 
     final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) return Result.error('Track not found');
@@ -1204,9 +1236,7 @@ extension PublisherRtcManager on RtcManager {
 
     final updatedTrack = await track.recreate(
       transceivers,
-      mediaConstraints: track.mediaConstraints.copyWith(
-        facingMode: facingMode,
-      ),
+      mediaConstraints: track.mediaConstraints.copyWith(facingMode: facingMode),
     );
 
     tracks[updatedTrack.trackId] = updatedTrack;
@@ -1216,9 +1246,7 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setCameraVideoParameters({
     required RtcVideoParameters params,
   }) async {
-    _logger.d(
-      () => '[setCameraVideoParameters] params: $params',
-    );
+    _logger.d(() => '[setCameraVideoParameters] params: $params');
 
     final track = getPublisherTrackByType(SfuTrackType.video);
 
@@ -1413,11 +1441,13 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalTrack>> setMicrophoneEnabled({
     bool enabled = true,
     AudioConstraints? constraints,
+    TrackDisableMode? disableMode,
   }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.audio,
       enabled: enabled,
       constraints: constraints,
+      disableMode: disableMode,
     );
   }
 
@@ -1462,6 +1492,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     required bool enabled,
     MediaConstraints? constraints,
+    TrackDisableMode? disableMode,
   }) async {
     final track = getPublisherTrackByType(trackType);
 
@@ -1479,6 +1510,7 @@ extension RtcManagerTrackHelper on RtcManager {
       final toggledTrack = await _toggleTrackMuteState(
         track: track,
         muted: !enabled,
+        disableMode: disableMode,
       );
 
       return Result.success(toggledTrack);
@@ -1499,9 +1531,14 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<RtcLocalTrack> _toggleTrackMuteState({
     required RtcLocalTrack track,
     required bool muted,
+    TrackDisableMode? disableMode,
   }) async {
     if (muted) {
-      await muteTrack(trackId: track.trackId);
+      final stopTrackOnMute = disableMode == null
+          ? null
+          : disableMode == TrackDisableMode.stopTracks;
+
+      await muteTrack(trackId: track.trackId, stopTrackOnMute: stopTrackOnMute);
 
       // If the track is a screen share track, mute the audio track as well.
       if (track.trackType == SfuTrackType.screenShare) {
@@ -1509,7 +1546,10 @@ extension RtcManagerTrackHelper on RtcManager {
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
-          await muteTrack(trackId: screenShareAudioTrack.trackId);
+          await muteTrack(
+            trackId: screenShareAudioTrack.trackId,
+            stopTrackOnMute: stopTrackOnMute,
+          );
         }
       }
     } else {
@@ -1607,9 +1647,7 @@ extension RtcManagerTrackHelper on RtcManager {
         .listen((event) async {
           _logger.i(() => '[ScreenSharingStartedEvent] received: $event');
 
-          await publishVideoTrack(
-            track: track,
-          );
+          await publishVideoTrack(track: track);
         });
   }
 

@@ -171,6 +171,7 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
     () => streamVideo.currentUser,
   ).thenReturn(SampleCallData.defaultUserInfo);
   when(streamVideo.isAudioProcessorConfigured).thenReturn(false);
+  when(() => streamVideo.activeCalls).thenReturn(const <Call>[]);
 
   return streamVideo;
 }

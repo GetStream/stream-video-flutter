@@ -1,3 +1,16 @@
+## Unreleased
+
+### ✅ Added
+* Added `TrackDisableMode` enum and optional `disableMode` parameter to `Call.setMicrophoneEnabled()`. Allows integrators to choose between releasing the microphone hardware on mute (`TrackDisableMode.stopTracks`, the default) or keeping the capture session alive (`TrackDisableMode.disableTracks`). The latter avoids the brief iOS `AVAudioSession` teardown that can duck playback of other participants for ~1–2 seconds — recommended for audio rooms and other playback-sensitive use cases. Note: `disableTracks` keeps the system microphone indicator visible while muted because the capture hardware remains active.
+
+### 🐞 Fixed
+* Fixed sibling-call audio capture being silently broken when another concurrently-active call ended (e.g. a 1:1 ringing call ending alongside a running livestream, or a previous ringing call ending before a new one was accepted). `RtcManager.dispose()` now skips the `pc.removeTrack(sender)` step on the publisher PC when it's about to dispose the PC entirely. The explicit `removeTrack` triggers libwebrtc's per-`Call.AudioState` to issue `ADM.StopRecording()` on the **process-wide shared** `AudioDeviceModule` — with no refcount across PCs — which left every still-active call wired against a stopped capture pipeline. Wholesale `pc.dispose()` doesn't take the same lifecycle path and tears down the PC cleanly. Implemented via a new `removeFromPc` parameter on `unpublishTrack` (default `true`; `false` when called from `dispose`). See `docs/audio-lifecycle-analysis.md` for the full investigation trail.
+* Fixed a sibling call's audio breaking when a ringing 1:1 call ended via `dropIfAloneInRingingFlow` (the remote party hung up first). `Call.end()` and `Call.leave()` now share a single `_disconnect` cleanup path, so both honor `_leaveCallTriggered`, complete `_callLifecycleCompleter`, and short-circuit consistently when the call is already disconnected — previously `Call.end()` skipped these guards, which caused races with concurrent reconnect handlers and with re-enabling the mic on a sibling active call.
+* Made the audio processor teardown in `Call._clear` multi-call aware. The audio processor is owned by `StreamVideo`, not by an individual `Call`, so disabling it on one call's teardown silently dropped noise cancellation on any other still-active call. `_clear` now only stops the global processor when no other active call is configured to use `NoiceCancellationSettingsMode.autoOn`.
+
+### 🔄 Changed
+* `Call.leave()` and `Call.end()` now actually wait for the underlying native teardown before returning. Previously `Call._clear` fire-and-forgot `_session.dispose()`, and `CallSession.close` itself fire-and-forgot the WebRTC manager dispose and the SFU WebSocket disconnect, so callers could observe `leave()`/`end()` "complete" while peer connections, local audio tracks, and audio sources were still being torn down on the native side. With this change, awaiting `Call.leave()` / `Call.end()` is enough to guarantee the native cleanup has finished — important when the next thing the integrator does is touch a sibling active call's audio (e.g. resuming a livestream's mic after a 1:1 ringing call ends). Leave/end will take slightly longer to return; if you need fire-and-forget semantics, wrap the call in `unawaited(...)` yourself.
+
 ## 1.3.3
 
 ### 🐞 Fixed

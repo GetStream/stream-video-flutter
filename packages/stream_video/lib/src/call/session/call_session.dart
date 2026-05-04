@@ -519,8 +519,13 @@ class CallSession extends Disposable {
   Future<void> close(
     StreamWebSocketCloseCode code, {
     String? closeReason,
+    bool multipleActiveCalls = false,
   }) async {
-    _logger.d(() => '[close] code: $code, closeReason: $closeReason');
+    _logger.d(
+      () =>
+          '[close] code: $code, closeReason: $closeReason, '
+          'multipleActiveCalls: $multipleActiveCalls',
+    );
     _isLeavingOrClosed = true;
 
     await _eventsSubscription?.cancel();
@@ -546,7 +551,10 @@ class CallSession extends Disposable {
 
     if (rtcManager != null) {
       unawaited(
-        rtcManager!.dispose().catchError((Object e, StackTrace stk) {
+        rtcManager!.dispose(disposePC: !multipleActiveCalls).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
           _logger.w(() => '[close] rtcManager.dispose failed: $e');
         }),
       );
@@ -556,11 +564,14 @@ class CallSession extends Disposable {
   }
 
   @override
-  Future<void> dispose() async {
-    _logger.d(() => '[dispose] no args');
+  Future<void> dispose({bool multipleActiveCalls = false}) async {
+    _logger.d(() => '[dispose] multipleActiveCalls: $multipleActiveCalls');
     _isLeavingOrClosed = true;
 
-    await close(StreamWebSocketCloseCode.normalClosure);
+    await close(
+      StreamWebSocketCloseCode.normalClosure,
+      multipleActiveCalls: multipleActiveCalls,
+    );
     return await super.dispose();
   }
 
@@ -1042,22 +1053,20 @@ class CallSession extends Disposable {
   Future<Result<RtcLocalTrack>> setMicrophoneEnabled(
     bool enabled, {
     AudioConstraints? constraints,
+    TrackDisableMode? disableMode,
   }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set microphone, Call not connected');
     }
 
-    final result = TracerZone.run(
-      _zonedTracer,
-      ++zonedTracerSeq,
-      () async {
-        return rtcManager.setMicrophoneEnabled(
-          enabled: enabled,
-          constraints: constraints,
-        );
-      },
-    );
+    final result = TracerZone.run(_zonedTracer, ++zonedTracerSeq, () async {
+      return rtcManager.setMicrophoneEnabled(
+        enabled: enabled,
+        constraints: constraints,
+        disableMode: disableMode,
+      );
+    });
 
     return result;
   }

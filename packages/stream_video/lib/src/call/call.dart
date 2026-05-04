@@ -47,6 +47,7 @@ import '../utils/subscriptions.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
+import '../webrtc/model/track_disable_mode.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
@@ -278,6 +279,7 @@ class Call {
 
   CallCredentials? _credentials;
   CallSession? _session;
+  CallSession? get callSession => _session;
   CallSession? _previousSession;
 
   StatsOptions? _sfuStatsOptions;
@@ -847,22 +849,34 @@ class Call {
 
   /// Ends the call for all participants.
   Future<Result<None>> end({String? reason}) async {
-    final state = this.state.value;
-    _logger.d(() => '[end] status: ${state.status}');
+    _logger.d(() => '[end] status: ${state.value.status}');
 
-    if (state.status is! CallStatusActive) {
-      _logger.w(() => '[end] rejected (invalid status): ${state.status}');
-      return Result.error('invalid status: ${state.status}');
+    if (state.value.status is! CallStatusActive) {
+      _logger.w(() => '[end] rejected (invalid status): ${state.value.status}');
+      return Result.error('invalid status: ${state.value.status}');
     }
 
-    _session?.leave(reason: reason ?? 'user is ending the call');
-    await _clear('end');
+    try {
+      final didDisconnect = await _disconnect(
+        sfuLeaveReason: reason ?? 'user is ending the call',
+      );
 
-    final result = await _permissionsManager.endCall();
-    _stateManager.lifecycleCallEnded();
+      // If another disconnect already ran (or is running), don't fire the
+      // server-side endCall a second time and don't re-emit the lifecycle
+      // event.
+      if (!didDisconnect) {
+        _logger.v(() => '[end] disconnect short-circuited');
+        return const Result.success(none);
+      }
 
-    _logger.v(() => '[end] completed: $result');
-    return result;
+      final result = await _permissionsManager.endCall();
+      _stateManager.lifecycleCallEnded();
+
+      _logger.v(() => '[end] completed: $result');
+      return result;
+    } finally {
+      _leaveCallTriggered = false;
+    }
   }
 
   /// Joins the call.
@@ -2041,41 +2055,58 @@ class Call {
   ///
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) async {
+    _logger.i(() => '[leave] reason: $reason');
+
     try {
-      if (_leaveCallTriggered) {
-        _logger.i(() => '[leave] rejected (already leaving call)');
-        return const Result.success(none);
+      final didDisconnect = await _disconnect(
+        sfuLeaveReason: _sfuLeaveReason(reason),
+      );
+
+      if (didDisconnect) {
+        _stateManager.lifecycleCallDisconnected(reason: reason);
       }
-
-      _leaveCallTriggered = true;
-
-      // Complete the leave completer to cancel ongoing operations
-      if (!_callLifecycleCompleter.isCompleted) {
-        _callLifecycleCompleter.complete();
-      }
-
-      final state = this.state.value;
-      _logger.i(() => '[leave] state: $state');
-
-      if (state.status.isDisconnected) {
-        _logger.d(() => '[leave] rejected (state.status is disconnected)');
-        return const Result.success(none);
-      }
-
-      try {
-        _session?.leave(reason: _sfuLeaveReason(reason));
-      } finally {
-        await _clear('leave');
-      }
-
-      _stateManager.lifecycleCallDisconnected(reason: reason);
 
       _logger.v(() => '[leave] finished');
-
       return const Result.success(none);
     } finally {
       _leaveCallTriggered = false;
     }
+  }
+
+  /// Shared cleanup sequence for [leave] and [end].
+  ///
+  /// Sets [_leaveCallTriggered], completes [_callLifecycleCompleter], sends
+  /// the SFU leave message, and runs [_clear]. Returns `true` when the
+  /// cleanup actually ran; `false` if it was short-circuited because a
+  /// concurrent disconnect was already in flight or the call was already
+  /// disconnected.
+  Future<bool> _disconnect({required String sfuLeaveReason}) async {
+    if (_leaveCallTriggered) {
+      _logger.i(() => '[disconnect] rejected (already disconnecting)');
+      return false;
+    }
+
+    _leaveCallTriggered = true;
+
+    // Complete the lifecycle completer to cancel ongoing operations awaiting
+    // it (e.g. _startSession). This must run regardless of whether the
+    // disconnect proceeds further so that nothing gets stuck waiting.
+    if (!_callLifecycleCompleter.isCompleted) {
+      _callLifecycleCompleter.complete();
+    }
+
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[disconnect] rejected (status is disconnected)');
+      return false;
+    }
+
+    try {
+      _session?.leave(reason: sfuLeaveReason);
+    } finally {
+      await _clear('disconnect');
+    }
+
+    return true;
   }
 
   String _sfuLeaveReason(DisconnectReason? reason) {
@@ -2109,6 +2140,7 @@ class Call {
     ]) {
       timer.cancel();
     }
+
     _videoModerationTimer?.cancel();
     _videoModerationTimer = null;
 
@@ -2130,9 +2162,16 @@ class Call {
       );
     }
 
+    final multipleActiveCalls = _streamVideo.activeCalls.any((other) {
+      if (other.callCid == callCid) return false;
+      return !other.state.value.status.isDisconnected;
+    });
+
     if (_session != null) {
       unawaited(
-        _session!.dispose().catchError((Object e) {
+        _session!.dispose(multipleActiveCalls: multipleActiveCalls).catchError((
+          Object e,
+        ) {
           _logger.w(() => '[clear] session dispose failed: $e');
         }),
       );
@@ -3295,9 +3334,23 @@ class Call {
     }
   }
 
+  /// Enables or disables the microphone for this call.
+  ///
+  /// When [enabled] is `false`, [disableMode] controls how the local audio
+  /// track is muted. Defaults to [TrackDisableMode.stopTracks], which
+  /// releases the microphone hardware on mute so the system privacy
+  /// indicator turns off. Pass [TrackDisableMode.disableTracks] to keep
+  /// the capture session alive — this avoids the brief iOS
+  /// `AVAudioSession` teardown that otherwise ducks playback of other
+  /// participants for ~1–2 s during mute/unmute, at the cost of the
+  /// system microphone indicator remaining visible while muted.
+  /// Recommended for audio rooms and other playback-sensitive use cases.
+  ///
+  /// See [TrackDisableMode] for the full tradeoff.
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
+    TrackDisableMode? disableMode,
   }) async {
     if (enabled &&
         state.value.isVideoModerated &&
@@ -3313,6 +3366,7 @@ class Call {
         await _session?.setMicrophoneEnabled(
           enabled,
           constraints: constraints,
+          disableMode: disableMode,
         ) ??
         Result.error('Session is null');
 
