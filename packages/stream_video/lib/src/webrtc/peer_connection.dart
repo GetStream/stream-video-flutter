@@ -543,7 +543,7 @@ class StreamPeerConnection extends Disposable {
   }
 
   @override
-  Future<void> dispose({bool disposePC = true}) async {
+  Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     _dropRtcCallbacks();
     iceRestartTimeout?.cancel();
@@ -554,9 +554,7 @@ class StreamPeerConnection extends Disposable {
     onIceCandidate = null;
     onTrack = null;
     _pendingCandidates.clear();
-    if (disposePC) {
-      await pc.dispose();
-    }
+    await pc.dispose();
     return await super.dispose();
   }
 }

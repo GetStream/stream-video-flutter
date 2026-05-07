@@ -246,18 +246,17 @@ class RtcMediaDeviceNotifier {
     return rtc.Helper.regainAndroidAudioFocus();
   }
 
-  /// Reinitializes the audio configuration for the WebRTC instance.
+  /// Refreshes the snapshot the implicit native peer-connection factory will
+  /// use the next time it is built.
   ///
-  /// This is used to reinitialize the audio configuration when the audio configuration policy changes.
-  /// When called after initial setup, it will automatically
-  /// dispose all existing peer connections, tracks, and streams, then recreate
-  /// the audio device module and peer connection factory with the new parameters.
+  /// Already-built factories keep their original configuration: the new
+  /// snapshot only takes effect on subsequent factory builds.
   Future<void> reinitializeAudioConfiguration(
     AudioConfigurationPolicy policy,
   ) async {
     await rtc.WebRTC.initialize(
+      refresh: true,
       options: {
-        'reinitialize': true,
         'bypassVoiceProcessing': policy.bypassVoiceProcessing,
         if (CurrentPlatform.isAndroid)
           'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),

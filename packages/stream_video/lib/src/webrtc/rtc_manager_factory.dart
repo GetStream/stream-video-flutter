@@ -15,10 +15,12 @@ class RtcManagerFactory {
     required this.configuration,
     required SdpEditor sdpEditor,
     this.mediaConstraints = const {},
+    AudioConfigurationPolicy? audioConfigurationPolicy,
   }) : pcFactory = StreamPeerConnectionFactory(
          sessionId: sessionId,
          callCid: callCid,
          sdpEditor: sdpEditor,
+         audioConfigurationPolicy: audioConfigurationPolicy,
        );
 
   final _logger = taggedLogger(tag: 'SV:RtcManagerFactory');
@@ -73,6 +75,7 @@ class RtcManagerFactory {
       publishOptions: publishOptions,
       stateManager: stateManager,
       streamVideo: streamVideo,
+      pcFactory: pcFactory,
     );
   }
 }

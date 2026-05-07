@@ -1184,6 +1184,9 @@ class Call {
         networkMonitor: networkMonitor,
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
+        audioConfigurationPolicy:
+            _stateManager.callState.preferences.audioConfigurationPolicy ??
+            _streamVideo.options.audioConfigurationPolicy,
         leftoverTraceRecords:
             _previousSession
                 ?.getTrace()
@@ -2162,14 +2165,9 @@ class Call {
       );
     }
 
-    final multipleActiveCalls = _streamVideo.activeCalls.any((other) {
-      if (other.callCid == callCid) return false;
-      return !other.state.value.status.isDisconnected;
-    });
-
     if (_session != null) {
       unawaited(
-        _session!.dispose(multipleActiveCalls: multipleActiveCalls).catchError((
+        _session!.dispose().catchError((
           Object e,
         ) {
           _logger.w(() => '[clear] session dispose failed: $e');
@@ -2327,7 +2325,9 @@ class Call {
       if (CurrentPlatform.isIos) {
         await _session?.rtcManager?.setAppleAudioConfiguration(
           speakerOn: _connectOptions.speakerDefaultOn,
-          policy: _streamVideo.options.audioConfigurationPolicy,
+          policy:
+              _stateManager.callState.preferences.audioConfigurationPolicy ??
+              _streamVideo.options.audioConfigurationPolicy,
         );
       }
     }
@@ -3403,7 +3403,15 @@ class Call {
     return result.map((_) => none);
   }
 
-  Future<bool> requestScreenSharePermission() {
+  Future<bool> requestScreenSharePermission() async {
+    // Request screen share permission from the native factory if available
+    final nativeFactory = await _session?.rtcManager?.pcFactory
+        .ensureNativeFactory();
+
+    if (nativeFactory != null) {
+      return nativeFactory.requestCapturePermission();
+    }
+
     return Helper.requestCapturePermission();
   }
 

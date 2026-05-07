@@ -473,8 +473,8 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   }
 
   @override
-  Future<void> dispose({bool disposePC = true}) {
+  Future<void> dispose() {
     tracer.dispose();
-    return super.dispose(disposePC: disposePC);
+    return super.dispose();
   }
 }

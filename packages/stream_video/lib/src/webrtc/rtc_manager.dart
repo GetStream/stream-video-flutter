@@ -20,6 +20,7 @@ import 'codecs_helper.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
 import 'peer_connection.dart';
+import 'peer_connection_factory.dart';
 import 'rtc_audio_api/rtc_audio_api.dart'
     show checkIfAudioOutputChangeSupported;
 import 'rtc_parser.dart';
@@ -55,6 +56,7 @@ class RtcManager extends Disposable {
     required this.publishOptions,
     required this.stateManager,
     required StreamVideo streamVideo,
+    required this.pcFactory,
   }) : _streamVideo = streamVideo {
     subscriber.onTrack = _onRemoteTrack;
   }
@@ -68,6 +70,8 @@ class RtcManager extends Disposable {
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
   final StreamVideo _streamVideo;
+
+  final StreamPeerConnectionFactory pcFactory;
 
   final transceiversManager = TransceiverManager();
 
@@ -241,23 +245,10 @@ class RtcManager extends Disposable {
     }
   }
 
-  /// Stops the local track / clones / media stream for [trackId] and (by
-  /// default) calls `pc.removeTrack` on every sender that referenced it.
-  ///
-  /// When [removeFromPc] is `false`, only the local track-stop side-effects
-  /// run; the publisher PC's senders are left attached. This is what
-  /// [dispose] needs: libwebrtc's per-`Call.AudioState` issues
-  /// `ADM.StopRecording()` on the shared `AudioDeviceModule` whenever a
-  /// sender is explicitly removed, with no shared refcount across PCs. The
-  /// wholesale `pc.close()`/`pc.dispose()` that runs right after this in
-  /// [dispose] does NOT take the same path — it tears the PC down without
-  /// going through per-stream removal lifecycles, so a sibling call's audio
-  /// capture is not collateral damage. See
-  /// `stream-video-flutter/docs/audio-lifecycle-analysis.md` for the full
-  /// trail.
+  /// Stops the local track / clones / media stream for [trackId] and calls
+  /// `pc.removeTrack` on every sender that referenced it.
   Future<void> unpublishTrack({
     required String trackId,
-    bool removeFromPc = true,
   }) async {
     final publishedTrack = tracks.remove(trackId);
 
@@ -267,10 +258,6 @@ class RtcManager extends Disposable {
     }
 
     await publishedTrack.stop();
-
-    if (!removeFromPc) {
-      return;
-    }
 
     if (publishedTrack is RtcRemoteTrack) {
       final sender = publishedTrack.transceiver?.sender;
@@ -504,12 +491,8 @@ class RtcManager extends Disposable {
   }
 
   @override
-  Future<void> dispose({bool disposePC = true}) async {
-    _logger.d(
-      () =>
-          '[dispose] disposePC: '
-          '$disposePC',
-    );
+  Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
 
     await _screenSharingStartedSubscription?.cancel();
     _screenSharingStartedSubscription = null;
@@ -517,12 +500,13 @@ class RtcManager extends Disposable {
     final trackIds = [...tracks.keys];
     await Future.wait(
       trackIds.map(
-        (trackId) => unpublishTrack(trackId: trackId, removeFromPc: disposePC)
-            .catchError((Object e, StackTrace stk) {
-              _logger.e(
-                () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
-              );
-            }),
+        (trackId) => unpublishTrack(trackId: trackId).catchError(
+          (Object e, StackTrace stk) {
+            _logger.e(
+              () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
+            );
+          },
+        ),
       ),
     );
 
@@ -534,19 +518,23 @@ class RtcManager extends Disposable {
 
     await Future.wait([
       if (publisher != null)
-        publisher!.dispose(disposePC: disposePC).catchError((
+        publisher!.dispose().catchError((
           Object e,
           StackTrace stk,
         ) {
           _logger.e(() => '[dispose] publisher.dispose failed: $e\n$stk');
         }),
-      subscriber.dispose(disposePC: disposePC).catchError((
+      subscriber.dispose().catchError((
         Object e,
         StackTrace stk,
       ) {
         _logger.e(() => '[dispose] subscriber.dispose failed: $e\n$stk');
       }),
     ]);
+
+    await pcFactory.dispose().catchError((Object e, StackTrace stk) {
+      _logger.w(() => '[dispose] pcFactory.dispose failed: $e\n$stk');
+    });
 
     return super.dispose();
   }
@@ -1155,9 +1143,11 @@ extension PublisherRtcManager on RtcManager {
     }
 
     try {
+      final nativeFactory = await pcFactory.ensureNativeFactory();
       final audioTrack = await RtcLocalTrack.audio(
         trackIdPrefix: publisherId!,
         constraints: constraints ?? _defaultAudioConstraints,
+        nativeFactory: nativeFactory,
       );
 
       return Result.success(audioTrack);
@@ -1179,9 +1169,11 @@ extension PublisherRtcManager on RtcManager {
     }
 
     try {
+      final nativeFactory = await pcFactory.ensureNativeFactory();
       final videoTrack = await RtcLocalTrack.camera(
         trackIdPrefix: publisherId!,
         constraints: constraints,
+        nativeFactory: nativeFactory,
       );
 
       return Result.success(videoTrack);
@@ -1205,9 +1197,11 @@ extension PublisherRtcManager on RtcManager {
     }
 
     try {
+      final nativeFactory = await pcFactory.ensureNativeFactory();
       final screenShareTrack = await RtcLocalTrack.screenShare(
         trackIdPrefix: publisherId!,
         constraints: constraints,
+        nativeFactory: nativeFactory,
       );
 
       return Result.success(screenShareTrack);

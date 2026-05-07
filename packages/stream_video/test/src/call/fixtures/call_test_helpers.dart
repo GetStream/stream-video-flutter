@@ -360,6 +360,8 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
       onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
       clientPublishOptions: any(named: 'clientPublishOptions'),
       streamVideo: any(named: 'streamVideo'),
+      leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
+      audioConfigurationPolicy: any(named: 'audioConfigurationPolicy'),
     ),
   ).thenAnswer(
     (_) => Future.value(callSession ?? setupMockCallSession()),

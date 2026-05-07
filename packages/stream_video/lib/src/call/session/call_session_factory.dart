@@ -51,6 +51,7 @@ class CallSessionFactory {
     required StreamVideo streamVideo,
     ClientPublishOptions? clientPublishOptions,
     List<TraceRecord> leftoverTraceRecords = const [],
+    AudioConfigurationPolicy? audioConfigurationPolicy,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
@@ -98,6 +99,7 @@ class CallSessionFactory {
       statsOptions: statsOptions,
       streamVideo: streamVideo,
       tracer: tracer,
+      audioConfigurationPolicy: audioConfigurationPolicy,
     );
   }
 

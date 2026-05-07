@@ -58,6 +58,7 @@ class CallSession extends Disposable {
     required Tracer tracer,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
+    AudioConfigurationPolicy? audioConfigurationPolicy,
   }) : _tracer = tracer,
        _streamVideo = streamVideo,
        sfuClient = SfuClient(
@@ -81,6 +82,7 @@ class CallSession extends Disposable {
          callCid: callCid,
          configuration: config.rtcConfig,
          sdpEditor: sdpEditor,
+         audioConfigurationPolicy: audioConfigurationPolicy,
        ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
     _observeNetworkStatus();
@@ -519,12 +521,9 @@ class CallSession extends Disposable {
   Future<void> close(
     StreamWebSocketCloseCode code, {
     String? closeReason,
-    bool multipleActiveCalls = false,
   }) async {
     _logger.d(
-      () =>
-          '[close] code: $code, closeReason: $closeReason, '
-          'multipleActiveCalls: $multipleActiveCalls',
+      () => '[close] code: $code, closeReason: $closeReason',
     );
     _isLeavingOrClosed = true;
 
@@ -551,7 +550,7 @@ class CallSession extends Disposable {
 
     if (rtcManager != null) {
       unawaited(
-        rtcManager!.dispose(disposePC: !multipleActiveCalls).catchError((
+        rtcManager!.dispose().catchError((
           Object e,
           StackTrace stk,
         ) {
@@ -564,14 +563,11 @@ class CallSession extends Disposable {
   }
 
   @override
-  Future<void> dispose({bool multipleActiveCalls = false}) async {
-    _logger.d(() => '[dispose] multipleActiveCalls: $multipleActiveCalls');
+  Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
     _isLeavingOrClosed = true;
 
-    await close(
-      StreamWebSocketCloseCode.normalClosure,
-      multipleActiveCalls: multipleActiveCalls,
-    );
+    await close(StreamWebSocketCloseCode.normalClosure);
     return await super.dispose();
   }
 
