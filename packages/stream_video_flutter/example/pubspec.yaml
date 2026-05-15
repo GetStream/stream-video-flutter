@@ -31,10 +31,7 @@ dependencies:
   stream_video: ^1.3.3
   stream_video_flutter: ^1.3.3
   stream_video_push_notification: ^1.3.3
-  stream_webrtc_flutter:
-    git:
-      url: https://github.com/GetStream/webrtc-flutter.git
-      ref: chore/per-call-pc-factory
+  stream_webrtc_flutter: ^2.2.6
 
 dependency_overrides:
   stream_video:
