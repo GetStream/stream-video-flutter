@@ -21,23 +21,20 @@ import 'traced_peer_connection.dart';
 /// it created has been disposed.
 class StreamPeerConnectionFactory {
   StreamPeerConnectionFactory({
-    required this.sessionId,
     required this.callCid,
-    required this.sdpEditor,
     this.audioConfigurationPolicy,
   });
 
   final _logger = taggedLogger(tag: 'SV:PeerConnectionFactory');
 
-  final String sessionId;
   final StreamCallCid callCid;
-  final SdpEditor sdpEditor;
 
   /// Audio policy applied to the per-call factory build. Falls back to
   /// [BroadcasterAudioPolicy] when null.
   final AudioConfigurationPolicy? audioConfigurationPolicy;
 
   rtc.NativePeerConnectionFactory? _nativeFactory;
+  Future<rtc.NativePeerConnectionFactory?>? _nativeFactoryFuture;
 
   /// Whether the platform exposes the per-call native factory APIs.
   /// Web / desktop fall through to the global webrtc entrypoints because
@@ -50,42 +47,50 @@ class StreamPeerConnectionFactory {
   /// The per-call native factory, lazily built on first use. Returns null on
   /// web (no per-call factory concept) so callers can fall back to the
   /// global webrtc entrypoints.
-  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() async {
+  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
     if (!_isPerCallFactorySupported) {
-      return null;
+      return Future.value();
     }
-
     if (_nativeFactory != null) {
+      return Future.value(_nativeFactory);
+    }
+    return _nativeFactoryFuture ??= _buildNativeFactory();
+  }
+
+  Future<rtc.NativePeerConnectionFactory?> _buildNativeFactory() async {
+    try {
+      final policy = audioConfigurationPolicy ?? const BroadcasterAudioPolicy();
+      final options = <String, dynamic>{
+        'bypassVoiceProcessing': policy.bypassVoiceProcessing,
+      };
+
+      if (CurrentPlatform.isAndroid) {
+        options['androidAudioConfiguration'] = policy
+            .getAndroidConfiguration()
+            .toMap();
+      }
+
+      if (CurrentPlatform.isIos || CurrentPlatform.isMacOS) {
+        options['appleAudioConfiguration'] = policy
+            .getAppleConfiguration()
+            .toMap();
+      }
+
+      _nativeFactory = await rtc.NativePeerConnectionFactory.create(
+        options: options,
+      );
+
+      _logger.i(
+        () =>
+            '[ensureNativeFactory] built per-call factory '
+            'id: ${_nativeFactory!.factoryId}, policy: ${policy.runtimeType}',
+      );
       return _nativeFactory;
+    } finally {
+      // Drop the in-flight reference once the build resolves so a future
+      // rebuild after dispose works as expected.
+      _nativeFactoryFuture = null;
     }
-
-    final policy = audioConfigurationPolicy ?? const BroadcasterAudioPolicy();
-    final options = <String, dynamic>{
-      'bypassVoiceProcessing': policy.bypassVoiceProcessing,
-    };
-
-    if (CurrentPlatform.isAndroid) {
-      options['androidAudioConfiguration'] = policy
-          .getAndroidConfiguration()
-          .toMap();
-    }
-
-    if (CurrentPlatform.isIos || CurrentPlatform.isMacOS) {
-      options['appleAudioConfiguration'] = policy
-          .getAppleConfiguration()
-          .toMap();
-    }
-
-    _nativeFactory = await rtc.NativePeerConnectionFactory.create(
-      options: options,
-    );
-
-    _logger.i(
-      () =>
-          '[ensureNativeFactory] built per-call factory '
-          'id: ${_nativeFactory!.factoryId}, policy: ${policy.runtimeType}',
-    );
-    return _nativeFactory;
   }
 
   /// Synchronous accessor returning the cached factory if already built.
@@ -93,16 +98,44 @@ class StreamPeerConnectionFactory {
   /// platforms without per-call factory support.
   rtc.NativePeerConnectionFactory? get nativeFactory => _nativeFactory;
 
-  Future<TracedStreamPeerConnection> makeSubscriber(
-    SfuClient sfuClient,
-    RTCConfiguration configuration,
-    ClientDetails? clientDetails, [
+  /// Suspends this factory's audio capture + playback so another factory
+  /// can take exclusive ownership of mic/speaker resources. Used when this
+  /// call coexists with a second active call (multiple calls).
+  Future<void> suspendAudio() async {
+    final native = _nativeFactory;
+    if (native == null) {
+      _logger.w(() => '[suspendAudio] no native factory to suspend');
+      return;
+    }
+    _logger.i(() => '[suspendAudio] factoryId: ${native.factoryId}');
+    await native.suspendAudio();
+  }
+
+  /// Resumes a previously [suspendAudio]'d factory.
+  Future<void> resumeAudio() async {
+    final native = _nativeFactory;
+    if (native == null) {
+      _logger.w(() => '[resumeAudio] no native factory to resume');
+      return;
+    }
+    _logger.i(() => '[resumeAudio] factoryId: ${native.factoryId}');
+    await native.resumeAudio();
+  }
+
+  Future<TracedStreamPeerConnection> makeSubscriber({
+    required String sessionId,
+    required SdpEditor sdpEditor,
+    required SfuClient sfuClient,
+    required RTCConfiguration configuration,
+    required ClientDetails? clientDetails,
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
-  ]) async {
+  }) async {
     return makePeerConnection(
+      sessionId: sessionId,
+      sdpEditor: sdpEditor,
       sfuClient: sfuClient,
       type: StreamPeerType.subscriber,
       configuration: configuration,
@@ -114,16 +147,20 @@ class StreamPeerConnectionFactory {
     );
   }
 
-  Future<TracedStreamPeerConnection> makePublisher(
-    SfuClient sfuClient,
-    RTCConfiguration configuration,
-    ClientDetails? clientDetails, [
+  Future<TracedStreamPeerConnection> makePublisher({
+    required String sessionId,
+    required SdpEditor sdpEditor,
+    required SfuClient sfuClient,
+    required RTCConfiguration configuration,
+    required ClientDetails? clientDetails,
     String? tracerIdPrefix,
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
-  ]) async {
+  }) async {
     return makePeerConnection(
+      sessionId: sessionId,
+      sdpEditor: sdpEditor,
       sfuClient: sfuClient,
       type: StreamPeerType.publisher,
       configuration: configuration,
@@ -136,6 +173,8 @@ class StreamPeerConnectionFactory {
   }
 
   Future<TracedStreamPeerConnection> makePeerConnection({
+    required String sessionId,
+    required SdpEditor sdpEditor,
     required SfuClient sfuClient,
     required StreamPeerType type,
     required RTCConfiguration configuration,
@@ -191,6 +230,11 @@ class StreamPeerConnectionFactory {
   /// Tears down the per-call factory. Must be called only after every PC the
   /// factory created has been disposed.
   Future<void> dispose() async {
+    if (_nativeFactoryFuture != null) {
+      try {
+        await _nativeFactoryFuture;
+      } catch (_) {}
+    }
     if (_nativeFactory == null) {
       return;
     }

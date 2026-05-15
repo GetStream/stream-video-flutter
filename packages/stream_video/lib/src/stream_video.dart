@@ -65,7 +65,6 @@ import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
-import 'webrtc/rtc_manager.dart';
 import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
@@ -131,7 +130,6 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
-    bool precacheGenericSdps = true,
   }) {
     final instance = StreamVideo._(
       apiKey,
@@ -141,7 +139,6 @@ class StreamVideo extends Disposable {
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
       pushNotificationManagerProvider: pushNotificationManagerProvider,
-      precacheGenericSdps: precacheGenericSdps,
     );
     return instance;
   }
@@ -154,7 +151,6 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
-    bool precacheGenericSdps = true,
   }) : _options = options,
        _state = MutableClientState(user, options) {
     _networkMonitor =
@@ -194,10 +190,6 @@ class StreamVideo extends Disposable {
       RtcMediaDeviceNotifier.instance
           .reinitializeAudioConfiguration(options.audioConfigurationPolicy)
           .then((_) {
-            if (precacheGenericSdps) {
-              unawaited(RtcManager.cacheGenericSdp());
-            }
-
             webrtcInitializationCompleter.complete();
           })
           .onError((_, _) {

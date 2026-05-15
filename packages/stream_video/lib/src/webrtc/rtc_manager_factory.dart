@@ -13,22 +13,20 @@ class RtcManagerFactory {
     required this.sessionId,
     required this.callCid,
     required this.configuration,
-    required SdpEditor sdpEditor,
+    required this.sdpEditor,
+    required this.pcFactory,
     this.mediaConstraints = const {},
-    AudioConfigurationPolicy? audioConfigurationPolicy,
-  }) : pcFactory = StreamPeerConnectionFactory(
-         sessionId: sessionId,
-         callCid: callCid,
-         sdpEditor: sdpEditor,
-         audioConfigurationPolicy: audioConfigurationPolicy,
-       );
+  });
 
   final _logger = taggedLogger(tag: 'SV:RtcManagerFactory');
 
   final String sessionId;
   final StreamCallCid callCid;
   final RTCConfiguration configuration;
+  final SdpEditor sdpEditor;
+
   final StreamPeerConnectionFactory pcFactory;
+
   final Map<String, dynamic> mediaConstraints;
 
   Future<RtcManager> makeRtcManager({
@@ -46,24 +44,28 @@ class RtcManagerFactory {
 
     final publisher = publisherId != null
         ? await pcFactory.makePublisher(
-            sfuClient,
-            configuration,
-            clientDetails,
-            sessionSequence?.toString(),
-            mediaConstraints,
-            statsOptions,
-            callSessionConfig,
+            sessionId: sessionId,
+            sdpEditor: sdpEditor,
+            sfuClient: sfuClient,
+            configuration: configuration,
+            clientDetails: clientDetails,
+            tracerIdPrefix: sessionSequence?.toString(),
+            mediaConstraints: mediaConstraints,
+            statsOptions: statsOptions,
+            callSessionConfig: callSessionConfig,
           )
         : null;
 
     final subscriber = await pcFactory.makeSubscriber(
-      sfuClient,
-      configuration,
-      clientDetails,
-      sessionSequence?.toString(),
-      mediaConstraints,
-      statsOptions,
-      callSessionConfig,
+      sessionId: sessionId,
+      sdpEditor: sdpEditor,
+      sfuClient: sfuClient,
+      configuration: configuration,
+      clientDetails: clientDetails,
+      tracerIdPrefix: sessionSequence?.toString(),
+      mediaConstraints: mediaConstraints,
+      statsOptions: statsOptions,
+      callSessionConfig: callSessionConfig,
     );
 
     return RtcManager(

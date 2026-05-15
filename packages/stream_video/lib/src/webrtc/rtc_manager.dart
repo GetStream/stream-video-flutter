@@ -106,24 +106,20 @@ class RtcManager extends Disposable {
 
   static final Map<rtc.TransceiverDirection, String> _cachedGenericSdp = {};
 
-  static Future<void> cacheGenericSdp() async {
-    await Future.wait([
-      getGenericSdp(rtc.TransceiverDirection.RecvOnly),
-      getGenericSdp(rtc.TransceiverDirection.SendOnly),
-    ]);
-  }
-
   /// Returns a generic sdp. Results are cached since device capabilities
   /// don't change between calls.
   static Future<String> getGenericSdp(
-    rtc.TransceiverDirection direction,
-  ) async {
+    rtc.TransceiverDirection direction, {
+    required rtc.NativePeerConnectionFactory? pcFactory,
+  }) async {
     // Check cache first
     if (_cachedGenericSdp.containsKey(direction)) {
       return _cachedGenericSdp[direction]!;
     }
 
-    final tempPC = await rtc.createPeerConnection({});
+    final tempPC = pcFactory != null
+        ? await pcFactory.createPeerConnection({}, {})
+        : await rtc.createPeerConnection({});
 
     await tempPC.addTransceiver(
       kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
@@ -217,31 +213,12 @@ class RtcManager extends Disposable {
 
     final localAudioTracks = tracks.values.whereType<RtcLocalAudioTrack>();
 
-    // Capture each track's current stopTrackOnMute before forcing a
-    // stop-and-recreate cycle. The cycle must use stopTrackOnMute: true so
-    // that unmuteTrack enters the recreate branch and picks up the new
-    // constraints via getUserMedia. After recreation the original value is
-    // restored so that subsequent mute/unmute calls honour the integrator's
-    // chosen TrackDisableMode.
-    final originalModes = {
-      for (final track in localAudioTracks)
-        track.trackId: track.stopTrackOnMute,
-    };
-
     for (final track in localAudioTracks) {
       await muteTrack(trackId: track.trackId, stopTrackOnMute: true);
     }
 
     for (final track in localAudioTracks) {
       await unmuteTrack(trackId: track.trackId);
-    }
-
-    // Restore the original stopTrackOnMute value on each recreated track.
-    for (final entry in originalModes.entries) {
-      final track = tracks[entry.key];
-      if (track is RtcLocalAudioTrack) {
-        tracks[entry.key] = track.copyWith(stopTrackOnMute: entry.value);
-      }
     }
   }
 
@@ -531,10 +508,6 @@ class RtcManager extends Disposable {
         _logger.e(() => '[dispose] subscriber.dispose failed: $e\n$stk');
       }),
     ]);
-
-    await pcFactory.dispose().catchError((Object e, StackTrace stk) {
-      _logger.w(() => '[dispose] pcFactory.dispose failed: $e\n$stk');
-    });
 
     return super.dispose();
   }
@@ -1435,13 +1408,11 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalTrack>> setMicrophoneEnabled({
     bool enabled = true,
     AudioConstraints? constraints,
-    TrackDisableMode? disableMode,
   }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.audio,
       enabled: enabled,
       constraints: constraints,
-      disableMode: disableMode,
     );
   }
 
@@ -1486,7 +1457,6 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     required bool enabled,
     MediaConstraints? constraints,
-    TrackDisableMode? disableMode,
   }) async {
     final track = getPublisherTrackByType(trackType);
 
@@ -1504,7 +1474,6 @@ extension RtcManagerTrackHelper on RtcManager {
       final toggledTrack = await _toggleTrackMuteState(
         track: track,
         muted: !enabled,
-        disableMode: disableMode,
       );
 
       return Result.success(toggledTrack);
@@ -1525,14 +1494,9 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<RtcLocalTrack> _toggleTrackMuteState({
     required RtcLocalTrack track,
     required bool muted,
-    TrackDisableMode? disableMode,
   }) async {
     if (muted) {
-      final stopTrackOnMute = disableMode == null
-          ? null
-          : disableMode == TrackDisableMode.stopTracks;
-
-      await muteTrack(trackId: track.trackId, stopTrackOnMute: stopTrackOnMute);
+      await muteTrack(trackId: track.trackId);
 
       // If the track is a screen share track, mute the audio track as well.
       if (track.trackType == SfuTrackType.screenShare) {
@@ -1540,10 +1504,7 @@ extension RtcManagerTrackHelper on RtcManager {
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
-          await muteTrack(
-            trackId: screenShareAudioTrack.trackId,
-            stopTrackOnMute: stopTrackOnMute,
-          );
+          await muteTrack(trackId: screenShareAudioTrack.trackId);
         }
       }
     } else {

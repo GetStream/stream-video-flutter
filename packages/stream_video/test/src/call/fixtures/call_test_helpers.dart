@@ -17,6 +17,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/state_emitter.dart';
+import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -39,6 +40,9 @@ void registerMockFallbackValues() {
   registerFallbackValue(SampleCallData.defaultMediaDevice);
   registerFallbackValue(MockStreamVideo());
   registerFallbackValue(sfu_events.ReconnectDetails());
+  registerFallbackValue(
+    StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
+  );
 }
 
 Call createStubCall({
@@ -361,7 +365,7 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
       clientPublishOptions: any(named: 'clientPublishOptions'),
       streamVideo: any(named: 'streamVideo'),
       leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
-      audioConfigurationPolicy: any(named: 'audioConfigurationPolicy'),
+      pcFactory: any(named: 'pcFactory'),
     ),
   ).thenAnswer(
     (_) => Future.value(callSession ?? setupMockCallSession()),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -27,6 +29,18 @@ class ScreenSharingStartedEvent extends NativeWebRtcEvent {
   final Map<dynamic, dynamic>? data;
 }
 
+sealed class SpeechActivityEvent {
+  const SpeechActivityEvent();
+}
+
+class SpeechActivityStarted extends SpeechActivityEvent {
+  const SpeechActivityStarted();
+}
+
+class SpeechActivityEnded extends SpeechActivityEvent {
+  const SpeechActivityEnded();
+}
+
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
@@ -35,12 +49,18 @@ class RtcMediaDeviceNotifier {
     _onDeviceChange(null);
 
     _listenForAudioProcessingStateChanges();
+    _listenForSpeechActivityChanges();
   }
 
   static final instance = RtcMediaDeviceNotifier._internal();
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
+
+  Stream<SpeechActivityEvent> get speechActivityStream =>
+      _speechActivityController.stream;
+  final _speechActivityController =
+      StreamController<SpeechActivityEvent>.broadcast();
 
   final _tracer = Tracer(null);
 
@@ -145,6 +165,25 @@ class RtcMediaDeviceNotifier {
           'voiceProcessingAGCEnabled': voiceProcessingAGCEnabled,
         },
       );
+    });
+  }
+
+  void _listenForSpeechActivityChanges() {
+    rtc.eventStream.listen((data) {
+      if (data.isEmpty) return;
+
+      final event = data.keys.first;
+      if (event != 'onSpeechActivityChanged') return;
+
+      final values = data.values.first;
+      if (values is! Map<dynamic, dynamic>) return;
+
+      switch (values['type']) {
+        case 'started':
+          _speechActivityController.add(const SpeechActivityStarted());
+        case 'ended':
+          _speechActivityController.add(const SpeechActivityEnded());
+      }
     });
   }
 

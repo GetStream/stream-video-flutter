@@ -28,6 +28,7 @@ import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
+import '../../webrtc/peer_connection_factory.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
@@ -56,9 +57,9 @@ class CallSession extends Disposable {
     required this.statsOptions,
     required StreamVideo streamVideo,
     required Tracer tracer,
+    required StreamPeerConnectionFactory pcFactory,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
-    AudioConfigurationPolicy? audioConfigurationPolicy,
   }) : _tracer = tracer,
        _streamVideo = streamVideo,
        sfuClient = SfuClient(
@@ -82,7 +83,7 @@ class CallSession extends Disposable {
          callCid: callCid,
          configuration: config.rtcConfig,
          sdpEditor: sdpEditor,
-         audioConfigurationPolicy: audioConfigurationPolicy,
+         pcFactory: pcFactory,
        ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
     _observeNetworkStatus();
@@ -227,11 +228,15 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[start] sfu connected');
 
+      final genericSdpFactory = await rtcManagerFactory.pcFactory
+          .ensureNativeFactory();
       final subscriberSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
+        pcFactory: genericSdpFactory,
       );
       final publisherSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
+        pcFactory: genericSdpFactory,
       );
 
       _logger.v(
@@ -416,11 +421,15 @@ class CallSession extends Disposable {
 
       _tracer.trace('fastReconnect', reconnectDetails.toJson());
 
+      final genericSdpFactory = await rtcManagerFactory.pcFactory
+          .ensureNativeFactory();
       final subscriberSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
+        pcFactory: genericSdpFactory,
       );
       final publisherSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
+        pcFactory: genericSdpFactory,
       );
 
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
@@ -1049,7 +1058,6 @@ class CallSession extends Disposable {
   Future<Result<RtcLocalTrack>> setMicrophoneEnabled(
     bool enabled, {
     AudioConstraints? constraints,
-    TrackDisableMode? disableMode,
   }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
@@ -1060,7 +1068,6 @@ class CallSession extends Disposable {
       return rtcManager.setMicrophoneEnabled(
         enabled: enabled,
         constraints: constraints,
-        disableMode: disableMode,
       );
     });
 

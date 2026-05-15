@@ -47,7 +47,7 @@ import '../utils/subscriptions.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
-import '../webrtc/model/track_disable_mode.dart';
+import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
@@ -281,6 +281,42 @@ class Call {
   CallSession? _session;
   CallSession? get callSession => _session;
   CallSession? _previousSession;
+  StreamPeerConnectionFactory? _pcFactory;
+
+  StreamPeerConnectionFactory _ensurePcFactory() {
+    return _pcFactory ??= StreamPeerConnectionFactory(
+      callCid: callCid,
+      audioConfigurationPolicy:
+          _stateManager.callState.preferences.audioConfigurationPolicy ??
+          _streamVideo.options.audioConfigurationPolicy,
+    );
+  }
+
+  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
+    return _ensurePcFactory().ensureNativeFactory();
+  }
+
+  @internal
+  Future<void> suspendAudio() async {
+    //TODO also disable all audio tracks (watch for new tracks to also be disabled)
+
+    final factory = _pcFactory;
+    if (factory == null) {
+      _logger.w(() => '[suspendAudio] no factory yet');
+      return;
+    }
+    await factory.suspendAudio();
+  }
+
+  @internal
+  Future<void> resumeAudio() async {
+    final factory = _pcFactory;
+    if (factory == null) {
+      _logger.w(() => '[resumeAudio] no factory yet');
+      return;
+    }
+    await factory.resumeAudio();
+  }
 
   StatsOptions? _sfuStatsOptions;
   SfuStatsReporter? _sfuStatsReporter;
@@ -1184,9 +1220,7 @@ class Call {
         networkMonitor: networkMonitor,
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
-        audioConfigurationPolicy:
-            _stateManager.callState.preferences.audioConfigurationPolicy ??
-            _streamVideo.options.audioConfigurationPolicy,
+        pcFactory: _ensurePcFactory(),
         leftoverTraceRecords:
             _previousSession
                 ?.getTrace()
@@ -2155,14 +2189,34 @@ class Call {
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
 
+    // The audio processor is owned by StreamVideo, not by an individual
+    // Call, so stopping it on this call's teardown would silently drop noise
+    // cancellation on any other still-active call that also wants it. Only
+    // stop the global processor when no other active call is configured for
+    // NoiceCancellationSettingsMode.autoOn.
     if (state.value.settings.audio.noiseCancellation?.mode ==
         NoiceCancellationSettingsMode.autoOn) {
-      unawaited(
-        stopAudioProcessing().catchError((Object e) {
-          _logger.w(() => '[clear] stopAudioProcessing failed: $e');
-          return const Result.success(none);
-        }),
+      final anotherCallWantsAutoOn = _streamVideo.state.activeCalls.value.any(
+        (other) =>
+            other.callCid != callCid &&
+            other.state.value.status is! CallStatusDisconnected &&
+            other.state.value.settings.audio.noiseCancellation?.mode ==
+                NoiceCancellationSettingsMode.autoOn,
       );
+      if (!anotherCallWantsAutoOn) {
+        unawaited(
+          stopAudioProcessing().catchError((Object e) {
+            _logger.w(() => '[clear] stopAudioProcessing failed: $e');
+            return const Result.success(none);
+          }),
+        );
+      } else {
+        _logger.d(
+          () =>
+              '[clear] keeping audio processor running '
+              '(another active call has autoOn)',
+        );
+      }
     }
 
     if (_session != null) {
@@ -2171,6 +2225,16 @@ class Call {
           Object e,
         ) {
           _logger.w(() => '[clear] session dispose failed: $e');
+        }),
+      );
+    }
+
+    final pcFactory = _pcFactory;
+    _pcFactory = null;
+    if (pcFactory != null) {
+      unawaited(
+        pcFactory.dispose().catchError((Object e) {
+          _logger.w(() => '[clear] pcFactory dispose failed: $e');
         }),
       );
     }
@@ -3335,22 +3399,9 @@ class Call {
   }
 
   /// Enables or disables the microphone for this call.
-  ///
-  /// When [enabled] is `false`, [disableMode] controls how the local audio
-  /// track is muted. Defaults to [TrackDisableMode.stopTracks], which
-  /// releases the microphone hardware on mute so the system privacy
-  /// indicator turns off. Pass [TrackDisableMode.disableTracks] to keep
-  /// the capture session alive — this avoids the brief iOS
-  /// `AVAudioSession` teardown that otherwise ducks playback of other
-  /// participants for ~1–2 s during mute/unmute, at the cost of the
-  /// system microphone indicator remaining visible while muted.
-  /// Recommended for audio rooms and other playback-sensitive use cases.
-  ///
-  /// See [TrackDisableMode] for the full tradeoff.
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
-    TrackDisableMode? disableMode,
   }) async {
     if (enabled &&
         state.value.isVideoModerated &&
@@ -3366,7 +3417,6 @@ class Call {
         await _session?.setMicrophoneEnabled(
           enabled,
           constraints: constraints,
-          disableMode: disableMode,
         ) ??
         Result.error('Session is null');
 
@@ -3677,6 +3727,11 @@ class Call {
     required ViewportVisibility visibility,
     required SfuTrackTypeVideo trackType,
   }) async {
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[updateViewportVisibility] rejected (disconnected)');
+      return const Result.success(none);
+    }
+
     final change = VisibilityChange(
       sessionId: sessionId,
       userId: userId,
