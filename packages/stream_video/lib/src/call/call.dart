@@ -296,7 +296,6 @@ class Call {
     return _ensurePcFactory().ensureNativeFactory();
   }
 
-  @internal
   Future<void> suspendAudio() async {
     //TODO also disable all audio tracks (watch for new tracks to also be disabled)
 
@@ -308,7 +307,6 @@ class Call {
     await factory.suspendAudio();
   }
 
-  @internal
   Future<void> resumeAudio() async {
     final factory = _pcFactory;
     if (factory == null) {
