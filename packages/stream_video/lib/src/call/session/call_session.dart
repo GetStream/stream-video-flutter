@@ -558,14 +558,12 @@ class CallSession extends Disposable {
     );
 
     if (rtcManager != null) {
-      unawaited(
-        rtcManager!.dispose().catchError((
-          Object e,
-          StackTrace stk,
-        ) {
-          _logger.w(() => '[close] rtcManager.dispose failed: $e');
-        }),
-      );
+      await rtcManager!.dispose().catchError((
+        Object e,
+        StackTrace stk,
+      ) {
+        _logger.w(() => '[close] rtcManager.dispose failed: $e');
+      });
 
       rtcManager = null;
     }

@@ -30,7 +30,7 @@ dependency_overrides:
   stream_webrtc_flutter:
     git:
       url: https://github.com/GetStream/webrtc-flutter.git
-      ref: chore/per-call-pc-factory
+      ref: e8678886871fb08aa6646aef870a2560d49199ea
 
 dev_dependencies:
   build_runner: ^2.9.0

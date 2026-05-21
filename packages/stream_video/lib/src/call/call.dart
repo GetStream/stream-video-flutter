@@ -2218,13 +2218,9 @@ class Call {
     }
 
     if (_session != null) {
-      unawaited(
-        _session!.dispose().catchError((
-          Object e,
-        ) {
-          _logger.w(() => '[clear] session dispose failed: $e');
-        }),
-      );
+      await _session!.dispose().catchError((Object e) {
+        _logger.w(() => '[clear] session dispose failed: $e');
+      });
     }
 
     final pcFactory = _pcFactory;

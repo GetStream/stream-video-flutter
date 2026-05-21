@@ -33,19 +33,13 @@ class SfuStatsReporter {
     _deviceTracer = Tracer('sfu-stats-device')
       ..setEnabled(statsOptions.enableRtcStats);
 
-    final thermalStatusAvailable =
-        CurrentPlatform.isAndroid || CurrentPlatform.isIos;
-    if (thermalStatusAvailable) {
-      try {
-        _thermalStatusSubscription = Thermal().onThermalStatusChanged.listen((
-          ThermalStatus status,
-        ) {
-          _thermalStatus = status;
-          _deviceTracer.trace('device.thermalState', status.name);
-        });
-      } catch (e) {
-        _logger.d(() => 'Failed to subscribe to thermal status changes');
-      }
+    final sharedStream = _ThermalMonitor.stream;
+    if (sharedStream != null) {
+      _thermalStatus = _ThermalMonitor.lastStatus;
+      _thermalStatusSubscription = sharedStream.listen((ThermalStatus status) {
+        _thermalStatus = status;
+        _deviceTracer.trace('device.thermalState', status.name);
+      });
     }
 
     _mediaDeviceSubscription = RtcMediaDeviceNotifier.instance.onDeviceChange
@@ -93,10 +87,12 @@ class SfuStatsReporter {
 
   Timer? _timer;
   int _reportCount = 0;
+  bool _stopped = false;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
     _reportCount = 0;
+    _stopped = false;
     _scheduleNextReport(interval);
   }
 
@@ -124,14 +120,19 @@ class SfuStatsReporter {
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
+    if (_stopped) return;
     try {
       await _sfuStatsLock.synchronized(() async {
+        if (_stopped) return;
         final publisherStatsBundle = await callSession.rtcManager?.publisher
             ?.getStats();
+
+        if (_stopped) return;
         final subscriberStatsBundle = await callSession.rtcManager?.subscriber
             .getStats();
 
-        if (publisherStatsBundle == null && subscriberStatsBundle == null) {
+        if (_stopped ||
+            (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
 
@@ -314,9 +315,42 @@ class SfuStatsReporter {
   }
 
   void stop() {
+    _stopped = true;
     _timer?.cancel();
     _mediaDeviceSubscription?.cancel();
     _thermalStatusSubscription?.cancel();
     _deviceTracer.dispose();
+  }
+}
+
+/// Shared, never-cancelled bridge to `Thermal().onThermalStatusChanged`.
+class _ThermalMonitor {
+  _ThermalMonitor._();
+
+  static StreamController<ThermalStatus>? _controller;
+  static ThermalStatus? _lastStatus;
+  static bool _initialized = false;
+
+  static ThermalStatus? get lastStatus => _lastStatus;
+
+  static Stream<ThermalStatus>? get stream {
+    final available = CurrentPlatform.isAndroid || CurrentPlatform.isIos;
+    if (!available) return null;
+    _ensureSubscribed();
+    return _controller?.stream;
+  }
+
+  static void _ensureSubscribed() {
+    if (_initialized) return;
+    _initialized = true;
+    _controller = StreamController<ThermalStatus>.broadcast();
+    try {
+      Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
+        _lastStatus = status;
+        _controller?.add(status);
+      });
+    } catch (_) {
+      // Thermal plugin not available
+    }
   }
 }
