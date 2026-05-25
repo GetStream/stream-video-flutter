@@ -9,7 +9,7 @@ packages:
   - packages/**
 
 ignore:
-  - '**/build/**'
+  - "**/build/**"
 
 command:
   bootstrap:
