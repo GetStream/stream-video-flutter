@@ -354,6 +354,9 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
   when(() => sessionFactory.sdpEditor).thenReturn(MockSdpEditor());
   when(
     () => sessionFactory.makeCallSession(
+      onSuspendedAudioTrackRecorded: any(
+        named: 'onSuspendedAudioTrackRecorded',
+      ),
       sessionId: any(named: 'sessionId'),
       sessionSeq: any(named: 'sessionSeq'),
       credentials: any(named: 'credentials'),
