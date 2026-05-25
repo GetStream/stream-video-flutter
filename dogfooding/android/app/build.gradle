@@ -1,9 +1,17 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "com.google.gms.google-services"
     id 'com.google.firebase.crashlytics'
     id "dev.flutter.flutter-gradle-plugin"
+}
+
+// Apply legacy KGP only when built-in Kotlin is opted out (the Flutter
+// migrator currently auto-injects android.builtInKotlin=false). When all
+// plugins have migrated to built-in Kotlin, remove that flag from
+// gradle.properties and this conditional becomes a no-op.
+def builtInKotlin = (project.findProperty("android.builtInKotlin") ?: "true").toBoolean()
+if (!builtInKotlin) {
+    apply plugin: "kotlin-android"
 }
 
 def keystoreProperties = new Properties()
@@ -43,23 +51,13 @@ android {
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-
-    afterEvaluate { project ->
-         if (project.hasProperty("kotlin")) {
-             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-                 kotlinOptions {
-                     jvmTarget = "17"
-                 }
-             }
-         }
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
     }
 
     sourceSets {
@@ -103,7 +101,7 @@ android {
         release {
             signingConfig signingConfigs.release
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -128,4 +126,10 @@ flutter {
 
 dependencies {
     implementation 'com.android.support:multidex:1.0.3'
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
 }

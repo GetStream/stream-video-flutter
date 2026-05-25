@@ -8,6 +8,9 @@ packages:
   - dogfooding
   - packages/**
 
+ignore:
+  - '**/build/**'
+
 command:
   bootstrap:
     # Dart and Flutter environment used in the project.

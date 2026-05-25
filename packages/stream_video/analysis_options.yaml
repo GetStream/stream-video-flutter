@@ -9,3 +9,5 @@ analyzer:
     # exclude all the generated files
     - lib/open_api/**
     - lib/protobuf/**
+    - "**/build/**"
+    - "**/example/**"
