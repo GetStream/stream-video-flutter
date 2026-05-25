@@ -719,7 +719,21 @@ class CallSession extends Disposable {
 
     // Only start remote tracks. Local tracks are started by the user.
     if (track is! RtcRemoteTrack) return;
-    await track.start();
+
+    if (track.isAudioTrack && stateManager.callState.isAudioSuspended) {
+      _logger.d(
+        () =>
+            '[onTrackPublished] audio suspended, '
+            'skipping start for audio track ${track.trackId}',
+      );
+      onSuspendedAudioTrackRecorded(track.trackId);
+    } else {
+      await track.start();
+
+      if (track.isAudioTrack) {
+        await _applyCurrentAudioOutputDevice();
+      }
+    }
   }
 
   Future<void> _onTrackUnpublished(
