@@ -306,6 +306,11 @@ class Call {
       return;
     }
 
+    if (_stateManager.callState.isAudioSuspended) {
+      _logger.d(() => '[suspendAudio] already suspended');
+      return;
+    }
+
     _suspendedTrackStates.clear();
     _stateManager.state = _stateManager.callState.copyWith(
       isAudioSuspended: true,
