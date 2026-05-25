@@ -52,6 +52,7 @@ class CallSession extends Disposable {
     required this.stateManager,
     required this.dynascaleManager,
     required this.onReconnectionNeeded,
+    required this.onSuspendedAudioTrackRecorded,
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
@@ -121,6 +122,11 @@ class CallSession extends Disposable {
   StreamSubscription<InternetStatus>? _networkStatusSubscription;
 
   StatsReporter? statsReporter;
+
+  /// Called by [_onLocalTrackPublished] and [_onRemoteTrackReceived] when an
+  /// audio track arrives while audio is suspended. The owning [Call] uses this
+  /// to record the track in its tracking map.
+  final void Function(String trackId) onSuspendedAudioTrackRecorded;
 
   Timer? _peerConnectionCheckTimer;
   bool _isLeavingOrClosed = false;
@@ -859,12 +865,19 @@ class CallSession extends Disposable {
   Future<void> _onLocalTrackPublished(RtcLocalTrack track) async {
     _logger.d(() => '[onPublisherTrackPublished] track: $track');
 
-    // Start the track.
-    await track.start();
+    if (track.isAudioTrack && stateManager.callState.isAudioSuspended) {
+      _logger.d(
+        () =>
+            '[onPublisherTrackPublished] audio suspended, '
+            'skipping start for audio track ${track.trackId}',
+      );
+      onSuspendedAudioTrackRecorded(track.trackId);
+    } else {
+      await track.start();
 
-    // If the track is an audioTrack, apply the current audio output device.
-    if (track.isAudioTrack) {
-      await _applyCurrentAudioOutputDevice();
+      if (track.isAudioTrack) {
+        await _applyCurrentAudioOutputDevice();
+      }
     }
 
     if (track.isVideoTrack) {
@@ -973,12 +986,19 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
 
-    // Start the track.
-    await remoteTrack.start();
+    if (remoteTrack.isAudioTrack && stateManager.callState.isAudioSuspended) {
+      _logger.d(
+        () =>
+            '[onRemoteTrackReceived] audio suspended, '
+            'skipping start for audio track ${remoteTrack.trackId}',
+      );
+      onSuspendedAudioTrackRecorded(remoteTrack.trackId);
+    } else {
+      await remoteTrack.start();
 
-    // If the track is an audioTrack, apply the current audio output device.
-    if (remoteTrack.isAudioTrack) {
-      await _applyCurrentAudioOutputDevice();
+      if (remoteTrack.isAudioTrack) {
+        await _applyCurrentAudioOutputDevice();
+      }
     }
 
     return stateManager.rtcUpdateSubscriberTrack(
@@ -992,6 +1012,41 @@ class CallSession extends Disposable {
     final audioOutputDevice = state?.audioOutputDevice;
     if (audioOutputDevice != null) {
       await setAudioOutputDevice(audioOutputDevice);
+    }
+  }
+
+  /// Resumes audio tracks that were suspended or arrived during suspension.
+  Future<void> resumeSuspendedAudioTracks(
+    Map<String, SuspendedTrackState> priorStates,
+  ) async {
+    final tracks = rtcManager?.tracks;
+    if (tracks == null) return;
+
+    for (final entry in tracks.entries) {
+      final track = entry.value;
+      if (!track.isAudioTrack) continue;
+
+      final prior = priorStates[entry.key];
+      if (prior == null) continue;
+      switch (prior) {
+        case SuspendedTrackState.wasEnabled:
+          track.enable();
+          _logger.d(
+            () => '[resumeSuspendedAudioTracks] re-enabled track ${entry.key}',
+          );
+        case SuspendedTrackState.neverStarted:
+          await track.start();
+          await _applyCurrentAudioOutputDevice();
+          _logger.d(
+            () => '[resumeSuspendedAudioTracks] started track ${entry.key}',
+          );
+        case SuspendedTrackState.wasDisabled:
+          _logger.v(
+            () =>
+                '[resumeSuspendedAudioTracks] track ${entry.key} was '
+                'disabled before suspension, leaving disabled',
+          );
+      }
     }
   }
 

@@ -283,6 +283,9 @@ class Call {
   CallSession? _previousSession;
   StreamPeerConnectionFactory? _pcFactory;
 
+  /// Audio track states captured at suspension time.
+  final _suspendedTrackStates = <String, SuspendedTrackState>{};
+
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
@@ -297,14 +300,38 @@ class Call {
   }
 
   Future<void> suspendAudio() async {
-    //TODO also disable all audio tracks (watch for new tracks to also be disabled)
-
     final factory = _pcFactory;
     if (factory == null) {
       _logger.w(() => '[suspendAudio] no factory yet');
       return;
     }
     await factory.suspendAudio();
+
+    _suspendedTrackStates.clear();
+    final tracks = _session?.rtcManager?.tracks;
+    if (tracks != null) {
+      for (final entry in tracks.entries) {
+        final track = entry.value;
+        if (track.isAudioTrack) {
+          final wasEnabled = track.mediaTrack.enabled;
+          _suspendedTrackStates[entry.key] = wasEnabled
+              ? SuspendedTrackState.wasEnabled
+              : SuspendedTrackState.wasDisabled;
+
+          track.disable();
+
+          _logger.d(
+            () =>
+                '[suspendAudio] disabled track ${entry.key} '
+                '(was enabled: $wasEnabled)',
+          );
+        }
+      }
+    }
+
+    _stateManager.state = _stateManager.callState.copyWith(
+      isAudioSuspended: true,
+    );
   }
 
   Future<void> resumeAudio() async {
@@ -314,6 +341,13 @@ class Call {
       return;
     }
     await factory.resumeAudio();
+
+    await _session?.resumeSuspendedAudioTracks(_suspendedTrackStates);
+    _suspendedTrackStates.clear();
+
+    _stateManager.state = _stateManager.callState.copyWith(
+      isAudioSuspended: false,
+    );
   }
 
   StatsOptions? _sfuStatsOptions;
@@ -1225,6 +1259,9 @@ class Call {
                 .expand((slice) => slice.snapshot)
                 .toList() ??
             const [],
+        onSuspendedAudioTrackRecorded: (trackId) {
+          _suspendedTrackStates[trackId] = SuspendedTrackState.neverStarted;
+        },
         onReconnectionNeeded: (pc, strategy) {
           _session?.trace('pc_reconnection_needed', {
             'peerConnectionId': pc.type.name,
@@ -4042,10 +4079,10 @@ extension FutureStartWithEx<T> on Stream<T> {
   }
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Call factory to create a [Call] instance.
 /// Only meant for testing purposes.
 @visibleForTesting
+// ignore: avoid_classes_with_only_static_members
 class BaseCallFactory {
   static Call makeCall({
     required CoordinatorClient coordinatorClient,
