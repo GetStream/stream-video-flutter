@@ -305,9 +305,23 @@ class Call {
       _logger.w(() => '[suspendAudio] no factory yet');
       return;
     }
-    await factory.suspendAudio();
 
     _suspendedTrackStates.clear();
+    _stateManager.state = _stateManager.callState.copyWith(
+      isAudioSuspended: true,
+    );
+
+    try {
+      await factory.suspendAudio();
+    } catch (e, stk) {
+      _logger.e(() => '[suspendAudio] native suspend failed: $e\n$stk');
+      _suspendedTrackStates.clear();
+      _stateManager.state = _stateManager.callState.copyWith(
+        isAudioSuspended: false,
+      );
+      return;
+    }
+
     final tracks = _session?.rtcManager?.tracks;
     if (tracks != null) {
       for (final entry in tracks.entries) {
@@ -328,10 +342,6 @@ class Call {
         }
       }
     }
-
-    _stateManager.state = _stateManager.callState.copyWith(
-      isAudioSuspended: true,
-    );
   }
 
   Future<void> resumeAudio() async {
