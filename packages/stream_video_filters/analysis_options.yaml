@@ -7,4 +7,3 @@ formatter:
 analyzer:
   exclude:
     - "**/build/**"
-    - "**/example/**"

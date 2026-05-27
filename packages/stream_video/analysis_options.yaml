@@ -10,4 +10,3 @@ analyzer:
     - lib/open_api/**
     - lib/protobuf/**
     - "**/build/**"
-    - "**/example/**"
