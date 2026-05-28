@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:async/async.dart' as async;
 import 'package:collection/collection.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
@@ -157,6 +158,7 @@ class StreamVideo extends Disposable {
         _options.networkMonitorSettings.internetConnectionInstance ??
         InternetConnection.createInstance(
           checkInterval: _options.networkMonitorSettings.checkInterval,
+          triggerStream: Connectivity().onConnectivityChanged,
           useDefaultOptions:
               _options.networkMonitorSettings.customEndpoints.isEmpty,
           customCheckOptions:
