@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -27,6 +29,18 @@ class ScreenSharingStartedEvent extends NativeWebRtcEvent {
   final Map<dynamic, dynamic>? data;
 }
 
+sealed class SpeechActivityEvent {
+  const SpeechActivityEvent();
+}
+
+class SpeechActivityStarted extends SpeechActivityEvent {
+  const SpeechActivityStarted();
+}
+
+class SpeechActivityEnded extends SpeechActivityEvent {
+  const SpeechActivityEnded();
+}
+
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
@@ -35,12 +49,18 @@ class RtcMediaDeviceNotifier {
     _onDeviceChange(null);
 
     _listenForAudioProcessingStateChanges();
+    _listenForSpeechActivityChanges();
   }
 
   static final instance = RtcMediaDeviceNotifier._internal();
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
+
+  Stream<SpeechActivityEvent> get speechActivityStream =>
+      _speechActivityController.stream;
+  final _speechActivityController =
+      StreamController<SpeechActivityEvent>.broadcast();
 
   final _tracer = Tracer(null);
 
@@ -148,6 +168,25 @@ class RtcMediaDeviceNotifier {
     });
   }
 
+  void _listenForSpeechActivityChanges() {
+    rtc.eventStream.listen((data) {
+      if (data.isEmpty) return;
+
+      final event = data.keys.first;
+      if (event != 'onSpeechActivityChanged') return;
+
+      final values = data.values.first;
+      if (values is! Map<dynamic, dynamic>) return;
+
+      switch (values['type']) {
+        case 'started':
+          _speechActivityController.add(const SpeechActivityStarted());
+        case 'ended':
+          _speechActivityController.add(const SpeechActivityEnded());
+      }
+    });
+  }
+
   Future<void> _onDeviceChange(_) async {
     await enumerateDevices();
   }
@@ -246,18 +285,17 @@ class RtcMediaDeviceNotifier {
     return rtc.Helper.regainAndroidAudioFocus();
   }
 
-  /// Reinitializes the audio configuration for the WebRTC instance.
+  /// Refreshes the snapshot the implicit native peer-connection factory will
+  /// use the next time it is built.
   ///
-  /// This is used to reinitialize the audio configuration when the audio configuration policy changes.
-  /// When called after initial setup, it will automatically
-  /// dispose all existing peer connections, tracks, and streams, then recreate
-  /// the audio device module and peer connection factory with the new parameters.
+  /// Already-built factories keep their original configuration: the new
+  /// snapshot only takes effect on subsequent factory builds.
   Future<void> reinitializeAudioConfiguration(
     AudioConfigurationPolicy policy,
   ) async {
     await rtc.WebRTC.initialize(
+      refresh: true,
       options: {
-        'reinitialize': true,
         'bypassVoiceProcessing': policy.bypassVoiceProcessing,
         if (CurrentPlatform.isAndroid)
           'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),

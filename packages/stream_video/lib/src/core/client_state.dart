@@ -127,6 +127,16 @@ class MutableClientState implements ClientState {
       activeCall.value = call;
       activeCalls.value = call == null ? [] : [call];
     } else if (call != null) {
+      // Auto-suspend every other currently-active call's audio before this
+      // one claims mic/speaker/audio-session resources.
+      for (final existing in activeCalls.value) {
+        if (existing.callCid == call.callCid) continue;
+        try {
+          await existing.suspendAudio();
+        } catch (_) {
+          // Best-effort — never block a new call on suspend failure.
+        }
+      }
       activeCalls.value = [...activeCalls.value, call];
     }
 
@@ -143,13 +153,26 @@ class MutableClientState implements ClientState {
       activeCall.value = null;
     }
 
-    activeCalls.value = [
-      ...activeCalls.value.where((it) => it.callCid != call.callCid),
-    ];
+    final remaining = activeCalls.value
+        .where((it) => it.callCid != call.callCid)
+        .toList(growable: false);
+    activeCalls.value = remaining;
 
     watchedCalls.value = [
       ...watchedCalls.value.where((it) => it.callCid != call.callCid),
     ];
+
+    // After removing this call, restore the next call in line — the most
+    // recently-added remaining one is the one that was suspended when this
+    // call took focus, so it should now resume.
+    if (options.allowMultipleActiveCalls && remaining.isNotEmpty) {
+      final next = remaining.last;
+      try {
+        await next.resumeAudio();
+      } catch (_) {
+        // Best-effort — never block leave on resume failure.
+      }
+    }
   }
 
   @override

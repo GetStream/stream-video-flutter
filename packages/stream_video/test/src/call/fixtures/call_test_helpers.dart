@@ -17,6 +17,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/state_emitter.dart';
+import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -39,6 +40,9 @@ void registerMockFallbackValues() {
   registerFallbackValue(SampleCallData.defaultMediaDevice);
   registerFallbackValue(MockStreamVideo());
   registerFallbackValue(sfu_events.ReconnectDetails());
+  registerFallbackValue(
+    StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
+  );
 }
 
 Call createStubCall({
@@ -171,6 +175,7 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
     () => streamVideo.currentUser,
   ).thenReturn(SampleCallData.defaultUserInfo);
   when(streamVideo.isAudioProcessorConfigured).thenReturn(false);
+  when(() => streamVideo.activeCalls).thenReturn(const <Call>[]);
 
   return streamVideo;
 }
@@ -349,6 +354,9 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
   when(() => sessionFactory.sdpEditor).thenReturn(MockSdpEditor());
   when(
     () => sessionFactory.makeCallSession(
+      onSuspendedAudioTrackRecorded: any(
+        named: 'onSuspendedAudioTrackRecorded',
+      ),
       sessionId: any(named: 'sessionId'),
       sessionSeq: any(named: 'sessionSeq'),
       credentials: any(named: 'credentials'),
@@ -359,6 +367,8 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
       onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
       clientPublishOptions: any(named: 'clientPublishOptions'),
       streamVideo: any(named: 'streamVideo'),
+      leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
+      pcFactory: any(named: 'pcFactory'),
     ),
   ).thenAnswer(
     (_) => Future.value(callSession ?? setupMockCallSession()),

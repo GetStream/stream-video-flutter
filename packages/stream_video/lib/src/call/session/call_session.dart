@@ -28,6 +28,7 @@ import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
+import '../../webrtc/peer_connection_factory.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
@@ -51,11 +52,13 @@ class CallSession extends Disposable {
     required this.stateManager,
     required this.dynascaleManager,
     required this.onReconnectionNeeded,
+    required this.onSuspendedAudioTrackRecorded,
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
     required StreamVideo streamVideo,
     required Tracer tracer,
+    required StreamPeerConnectionFactory pcFactory,
     this.clientPublishOptions,
     this.joinResponseTimeout = const Duration(seconds: 5),
   }) : _tracer = tracer,
@@ -81,6 +84,7 @@ class CallSession extends Disposable {
          callCid: callCid,
          configuration: config.rtcConfig,
          sdpEditor: sdpEditor,
+         pcFactory: pcFactory,
        ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
     _observeNetworkStatus();
@@ -118,6 +122,11 @@ class CallSession extends Disposable {
   StreamSubscription<InternetStatus>? _networkStatusSubscription;
 
   StatsReporter? statsReporter;
+
+  /// Called by [_onLocalTrackPublished] and [_onRemoteTrackReceived] when an
+  /// audio track arrives while audio is suspended. The owning [Call] uses this
+  /// to record the track in its tracking map.
+  final void Function(String trackId) onSuspendedAudioTrackRecorded;
 
   Timer? _peerConnectionCheckTimer;
   bool _isLeavingOrClosed = false;
@@ -225,11 +234,15 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[start] sfu connected');
 
+      final genericSdpFactory = await rtcManagerFactory.pcFactory
+          .ensureNativeFactory();
       final subscriberSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
+        pcFactory: genericSdpFactory,
       );
       final publisherSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
+        pcFactory: genericSdpFactory,
       );
 
       _logger.v(
@@ -414,11 +427,15 @@ class CallSession extends Disposable {
 
       _tracer.trace('fastReconnect', reconnectDetails.toJson());
 
+      final genericSdpFactory = await rtcManagerFactory.pcFactory
+          .ensureNativeFactory();
       final subscriberSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
+        pcFactory: genericSdpFactory,
       );
       final publisherSdp = await RtcManager.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
+        pcFactory: genericSdpFactory,
       );
 
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
@@ -520,7 +537,9 @@ class CallSession extends Disposable {
     StreamWebSocketCloseCode code, {
     String? closeReason,
   }) async {
-    _logger.d(() => '[close] code: $code, closeReason: $closeReason');
+    _logger.d(
+      () => '[close] code: $code, closeReason: $closeReason',
+    );
     _isLeavingOrClosed = true;
 
     await _eventsSubscription?.cancel();
@@ -545,11 +564,12 @@ class CallSession extends Disposable {
     );
 
     if (rtcManager != null) {
-      unawaited(
-        rtcManager!.dispose().catchError((Object e, StackTrace stk) {
-          _logger.w(() => '[close] rtcManager.dispose failed: $e');
-        }),
-      );
+      await rtcManager!.dispose().catchError((
+        Object e,
+        StackTrace stk,
+      ) {
+        _logger.w(() => '[close] rtcManager.dispose failed: $e');
+      });
 
       rtcManager = null;
     }
@@ -699,7 +719,21 @@ class CallSession extends Disposable {
 
     // Only start remote tracks. Local tracks are started by the user.
     if (track is! RtcRemoteTrack) return;
-    await track.start();
+
+    if (track.isAudioTrack && stateManager.callState.isAudioSuspended) {
+      _logger.d(
+        () =>
+            '[onTrackPublished] audio suspended, '
+            'skipping start for audio track ${track.trackId}',
+      );
+      onSuspendedAudioTrackRecorded(track.trackId);
+    } else {
+      await track.start();
+
+      if (track.isAudioTrack) {
+        await _applyCurrentAudioOutputDevice();
+      }
+    }
   }
 
   Future<void> _onTrackUnpublished(
@@ -845,12 +879,19 @@ class CallSession extends Disposable {
   Future<void> _onLocalTrackPublished(RtcLocalTrack track) async {
     _logger.d(() => '[onPublisherTrackPublished] track: $track');
 
-    // Start the track.
-    await track.start();
+    if (track.isAudioTrack && stateManager.callState.isAudioSuspended) {
+      _logger.d(
+        () =>
+            '[onPublisherTrackPublished] audio suspended, '
+            'skipping start for audio track ${track.trackId}',
+      );
+      onSuspendedAudioTrackRecorded(track.trackId);
+    } else {
+      await track.start();
 
-    // If the track is an audioTrack, apply the current audio output device.
-    if (track.isAudioTrack) {
-      await _applyCurrentAudioOutputDevice();
+      if (track.isAudioTrack) {
+        await _applyCurrentAudioOutputDevice();
+      }
     }
 
     if (track.isVideoTrack) {
@@ -959,12 +1000,19 @@ class CallSession extends Disposable {
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
 
-    // Start the track.
-    await remoteTrack.start();
+    if (remoteTrack.isAudioTrack && stateManager.callState.isAudioSuspended) {
+      _logger.d(
+        () =>
+            '[onRemoteTrackReceived] audio suspended, '
+            'skipping start for audio track ${remoteTrack.trackId}',
+      );
+      onSuspendedAudioTrackRecorded(remoteTrack.trackId);
+    } else {
+      await remoteTrack.start();
 
-    // If the track is an audioTrack, apply the current audio output device.
-    if (remoteTrack.isAudioTrack) {
-      await _applyCurrentAudioOutputDevice();
+      if (remoteTrack.isAudioTrack) {
+        await _applyCurrentAudioOutputDevice();
+      }
     }
 
     return stateManager.rtcUpdateSubscriberTrack(
@@ -978,6 +1026,41 @@ class CallSession extends Disposable {
     final audioOutputDevice = state?.audioOutputDevice;
     if (audioOutputDevice != null) {
       await setAudioOutputDevice(audioOutputDevice);
+    }
+  }
+
+  /// Resumes audio tracks that were suspended or arrived during suspension.
+  Future<void> resumeSuspendedAudioTracks(
+    Map<String, SuspendedTrackState> priorStates,
+  ) async {
+    final tracks = rtcManager?.tracks;
+    if (tracks == null) return;
+
+    for (final entry in tracks.entries) {
+      final track = entry.value;
+      if (!track.isAudioTrack) continue;
+
+      final prior = priorStates[entry.key];
+      if (prior == null) continue;
+      switch (prior) {
+        case SuspendedTrackState.wasEnabled:
+          track.enable();
+          _logger.d(
+            () => '[resumeSuspendedAudioTracks] re-enabled track ${entry.key}',
+          );
+        case SuspendedTrackState.neverStarted:
+          await track.start();
+          await _applyCurrentAudioOutputDevice();
+          _logger.d(
+            () => '[resumeSuspendedAudioTracks] started track ${entry.key}',
+          );
+        case SuspendedTrackState.wasDisabled:
+          _logger.v(
+            () =>
+                '[resumeSuspendedAudioTracks] track ${entry.key} was '
+                'disabled before suspension, leaving disabled',
+          );
+      }
     }
   }
 
@@ -1048,16 +1131,12 @@ class CallSession extends Disposable {
       return Result.error('Unable to set microphone, Call not connected');
     }
 
-    final result = TracerZone.run(
-      _zonedTracer,
-      ++zonedTracerSeq,
-      () async {
-        return rtcManager.setMicrophoneEnabled(
-          enabled: enabled,
-          constraints: constraints,
-        );
-      },
-    );
+    final result = TracerZone.run(_zonedTracer, ++zonedTracerSeq, () async {
+      return rtcManager.setMicrophoneEnabled(
+        enabled: enabled,
+        constraints: constraints,
+      );
+    });
 
     return result;
   }

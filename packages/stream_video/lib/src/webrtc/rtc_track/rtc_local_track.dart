@@ -30,16 +30,26 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     required this.mediaConstraints,
     this.stopTrackOnMute = true,
     this.clonedTracks = const [],
+    this.nativeFactory,
     super.videoDimension,
   });
+
+  /// Per-call native factory the track is pinned to. Carried on the track so
+  /// [recreate] can target the same factory. Null on web, which has no
+  /// per-call factory concept.
+  final rtc.NativePeerConnectionFactory? nativeFactory;
 
   static Future<RtcLocalAudioTrack> audio({
     String trackIdPrefix = kLocalTrackIdPrefix,
     AudioConstraints constraints = const AudioConstraints(),
+    rtc.NativePeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating audio track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
+    final stream = await rtc.navigator.mediaDevices.getMedia(
+      constraints,
+      nativeFactory: nativeFactory,
+    );
     final audioTrack = stream.getAudioTracks().firstOrNull;
 
     if (audioTrack == null) {
@@ -53,6 +63,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaStream: stream,
       mediaTrack: audioTrack,
       mediaConstraints: constraints,
+      nativeFactory: nativeFactory,
     );
 
     return track;
@@ -61,9 +72,13 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalCameraTrack> camera({
     String trackIdPrefix = kLocalTrackIdPrefix,
     CameraConstraints constraints = const CameraConstraints(),
+    rtc.NativePeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating camera track');
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
+    final stream = await rtc.navigator.mediaDevices.getMedia(
+      constraints,
+      nativeFactory: nativeFactory,
+    );
     final videoTrack = stream.getVideoTracks().firstOrNull;
 
     if (videoTrack == null) {
@@ -86,6 +101,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaStream: stream,
       mediaTrack: videoTrack,
       mediaConstraints: updatedConstraints,
+      nativeFactory: nativeFactory,
     );
 
     return track;
@@ -94,10 +110,14 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalScreenShareTrack> screenShare({
     String trackIdPrefix = kLocalTrackIdPrefix,
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
+    rtc.NativePeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating screen share track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
+    final stream = await rtc.navigator.mediaDevices.getMedia(
+      constraints,
+      nativeFactory: nativeFactory,
+    );
     final videoTrack = stream.getVideoTracks().firstOrNull;
 
     if (videoTrack == null) {
@@ -111,6 +131,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaStream: stream,
       mediaTrack: videoTrack,
       mediaConstraints: constraints,
+      nativeFactory: nativeFactory,
     );
 
     return track;
@@ -202,6 +223,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
     List<rtc.MediaStreamTrack>? clonedTracks,
+    rtc.NativePeerConnectionFactory? nativeFactory,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -212,6 +234,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       stopTrackOnMute: stopTrackOnMute ?? this.stopTrackOnMute,
       videoDimension: videoDimension ?? this.videoDimension,
       clonedTracks: clonedTracks ?? this.clonedTracks,
+      nativeFactory: nativeFactory ?? this.nativeFactory,
     );
   }
 
@@ -228,8 +251,12 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     // Use the current constraints if none are provided.
     final constraints = mediaConstraints ?? this.mediaConstraints;
 
-    // Create a new track with the new constraints.
-    final newStream = await rtc.navigator.mediaDevices.getMedia(constraints);
+    // Create a new track with the new constraints, pinned to the same
+    // per-call factory the original was attached to.
+    final newStream = await rtc.navigator.mediaDevices.getMedia(
+      constraints,
+      nativeFactory: nativeFactory,
+    );
     final newTrack = newStream.getTracks().first;
     final clonedTracks = <rtc.MediaStreamTrack>[];
 

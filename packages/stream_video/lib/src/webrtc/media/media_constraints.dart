@@ -33,12 +33,21 @@ abstract class MediaConstraints {
 }
 
 extension MediaDevices on rtc_interface.MediaDevices {
-  Future<rtc.MediaStream> getMedia(MediaConstraints constraints) async {
+  /// Captures media. When [nativeFactory] is non-null, the resulting tracks
+  /// are pinned to that per-call native factory. When null, falls through to
+  /// the global browser/webrtc entrypoints (used on web, which has no
+  /// per-call factory concept).
+  Future<rtc.MediaStream> getMedia(
+    MediaConstraints constraints, {
+    rtc.NativePeerConnectionFactory? nativeFactory,
+  }) async {
     final constraintsMap = constraints.toMap();
     streamLog.i(
       'SV:MediaDevices',
       () =>
-          '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap',
+          '[getMedia] #${constraints.runtimeType}; '
+          'nativeFactory: ${nativeFactory?.factoryId}, '
+          'constraintsMap: $constraintsMap',
     );
 
     final (tracer, sequence) = TracerZone.currentTracer;
@@ -51,16 +60,16 @@ extension MediaDevices on rtc_interface.MediaDevices {
         tag = 'navigator.mediaDevices.getDisplayMedia';
         tracer?.trace('$tag.$sequence', constraintsMap);
 
-        stream = await rtc.navigator.mediaDevices.getDisplayMedia(
-          constraintsMap,
-        );
+        stream = nativeFactory != null
+            ? await nativeFactory.getDisplayMedia(constraintsMap)
+            : await rtc.navigator.mediaDevices.getDisplayMedia(constraintsMap);
       } else {
         tag = 'navigator.mediaDevices.getUserMedia';
         tracer?.trace('$tag.$sequence', constraintsMap);
 
-        stream = await rtc.navigator.mediaDevices.getUserMedia(
-          constraintsMap,
-        );
+        stream = nativeFactory != null
+            ? await nativeFactory.getUserMedia(constraintsMap)
+            : await rtc.navigator.mediaDevices.getUserMedia(constraintsMap);
       }
     } catch (e) {
       tracer?.trace('$tag.failure.$sequence', e.toString());

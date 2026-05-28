@@ -63,7 +63,6 @@ void main() {
             allowMultipleActiveCalls: false,
             autoConnect: false,
           ),
-          precacheGenericSdps: false,
         );
       });
 
@@ -184,7 +183,6 @@ void main() {
             allowMultipleActiveCalls: true,
             autoConnect: false,
           ),
-          precacheGenericSdps: false,
         );
       });
 
