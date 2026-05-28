@@ -247,24 +247,26 @@ void main() {
   });
 
   group('CallSession.getReconnectDetails', () {
-    test('rejoin includes the current sessionId as previousSessionId',
-        () async {
-      final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+    test(
+      'rejoin includes the current sessionId as previousSessionId',
+      () async {
+        final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
 
-      final details = await session.getReconnectDetails(
-        SfuReconnectionStrategy.rejoin,
-        reconnectAttempts: 3,
-        reason: 'sfu_socket_failed',
-      );
+        final details = await session.getReconnectDetails(
+          SfuReconnectionStrategy.rejoin,
+          reconnectAttempts: 3,
+          reason: 'sfu_socket_failed',
+        );
 
-      expect(
-        details.strategy,
-        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-      );
-      expect(details.previousSessionId, 'test-session');
-      expect(details.reconnectAttempt, 3);
-      expect(details.reason, 'sfu_socket_failed');
-    });
+        expect(
+          details.strategy,
+          WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+        );
+        expect(details.previousSessionId, 'test-session');
+        expect(details.reconnectAttempt, 3);
+        expect(details.reason, 'sfu_socket_failed');
+      },
+    );
 
     test('fast leaves previousSessionId unset', () async {
       final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
@@ -285,22 +287,24 @@ void main() {
       );
     });
 
-    test('migrate carries fromSfuId and leaves previousSessionId unset',
-        () async {
-      final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+    test(
+      'migrate carries fromSfuId and leaves previousSessionId unset',
+      () async {
+        final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
 
-      final details = await session.getReconnectDetails(
-        SfuReconnectionStrategy.migrate,
-        migratingFromSfuId: 'sfu-eu-west-1',
-      );
+        final details = await session.getReconnectDetails(
+          SfuReconnectionStrategy.migrate,
+          migratingFromSfuId: 'sfu-eu-west-1',
+        );
 
-      expect(
-        details.strategy,
-        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-      );
-      expect(details.previousSessionId, isEmpty);
-      expect(details.fromSfuId, 'sfu-eu-west-1');
-    });
+        expect(
+          details.strategy,
+          WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+        );
+        expect(details.previousSessionId, isEmpty);
+        expect(details.fromSfuId, 'sfu-eu-west-1');
+      },
+    );
 
     test('omits announcedTracks when rtcManager is null', () async {
       final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
@@ -352,8 +356,7 @@ void main() {
   });
 
   group('CallSession.close', () {
-    test('clears rtcManager so subsequent track lookups return null',
-        () async {
+    test('clears rtcManager so subsequent track lookups return null', () async {
       final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
       _wirePublisher(
         session,
