@@ -8,7 +8,6 @@ import 'lifecycle_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:LifecycleUtilsM');
 
-@override
 Stream<LifecycleState> get appState {
   final controller = StreamController<LifecycleState>();
   final callback = LifecycleStateCallback((state) {
