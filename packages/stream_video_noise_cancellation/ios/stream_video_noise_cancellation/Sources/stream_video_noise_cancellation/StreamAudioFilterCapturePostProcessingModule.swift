@@ -37,11 +37,13 @@ open class StreamAudioFilterCapturePostProcessingModule: NSObject,
     /// - Parameter audioFilter: The audio filter to set for processing.
     open func setAudioFilter(_ audioFilter: AudioFilter?) {
         let oldValue = self.audioFilter
-        oldValue?.release()
 
         guard oldValue?.id != audioFilter?.id else {
             return
         }
+
+        // Only release the old filter when we're actually replacing it with a different one.
+        oldValue?.release()
 
         if let newValue = audioFilter, sampleRate > 0, channels > 0 {
             /// If new filter is set and sample rate & channels are valid, initialize the filter.
@@ -82,7 +84,11 @@ open class StreamAudioFilterCapturePostProcessingModule: NSObject,
     }
 
     /// Handles release of audio processing resources.
-    open func audioProcessingRelease() {
-        audioFilter = nil
-    }
+    ///
+    /// Intentionally does NOT clear `audioFilter`: the WebRTC ADM calls
+    /// release/initialize whenever its capture pipeline restarts (which the
+    /// per-call factory + `RTCAudioDeviceModuleTypeAudioEngine` triggers on
+    /// rejoin). Keeping the reference lets the matching `audioProcessingInitialize`
+    /// re-arm the filter so noise cancellation survives the cycle.
+    open func audioProcessingRelease() {}
 }
