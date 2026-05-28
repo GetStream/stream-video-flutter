@@ -512,8 +512,16 @@ class StreamPeerConnection extends Disposable {
   }
 
   void _onRenegotiationNeeded() {
-    _logger.v(() => '[onRenegotiationNeeded] no args');
+    if (_isReconnecting) {
+      _logger.i(
+        () =>
+            '[onRenegotiationNeeded] suppressed — reconnect in progress for '
+            '$type, will renegotiate explicitly after reconnect',
+      );
+      return;
+    }
 
+    _logger.v(() => '[onRenegotiationNeeded] no args');
     onRenegotiationNeeded?.call(this);
   }
 
