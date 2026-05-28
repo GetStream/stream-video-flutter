@@ -6,5 +6,5 @@ formatter:
 
 analyzer:
   exclude:
-    # exclude all the generated files
     - lib/**/*.*.dart
+    - "**/build/**"

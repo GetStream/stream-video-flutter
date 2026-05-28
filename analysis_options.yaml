@@ -21,6 +21,7 @@ analyzer:
     - packages/*/lib/**/*.*.dart
     - packages/stream_video/lib/open_api/**
     - packages/stream_video/lib/protobuf/**
+    - "**/build/**"
 
 linter:
   rules:

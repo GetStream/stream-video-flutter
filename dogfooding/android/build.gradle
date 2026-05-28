@@ -18,8 +18,11 @@ subprojects {
                     sourceCompatibility = JavaVersion.VERSION_17
                     targetCompatibility = JavaVersion.VERSION_17
                 }
-                project.android.kotlinOptions {
-                    jvmTarget = JavaVersion.VERSION_17
+                def kotlinExt = project.extensions.findByName("kotlin")
+                if (kotlinExt != null) {
+                    kotlinExt.compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+                    }
                 }
                 project.android {
                     // add namespace if it is missing
