@@ -3931,10 +3931,10 @@ extension FutureStartWithEx<T> on Stream<T> {
   }
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Call factory to create a [Call] instance.
 /// Only meant for testing purposes.
 @visibleForTesting
+// ignore: avoid_classes_with_only_static_members
 class BaseCallFactory {
   static Call makeCall({
     required CoordinatorClient coordinatorClient,
