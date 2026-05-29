@@ -1380,6 +1380,21 @@ class Call {
       _stateManager.lifecycleCallConnected();
     }
 
+    // Re-bind audio filter after rejoin/migrate, as iOS may drop it.
+    if ((performingRejoin || performingMigration) &&
+        _streamVideo.isAudioProcessorConfigured() &&
+        state.value.isAudioProcessing) {
+      unawaited(
+        _streamVideo.setAudioProcessingEnabled(true).then((result) {
+          if (result.isFailure) {
+            _logger.w(
+              () =>
+                  '[join] re-binding audio processing after reconnect failed: $result',
+            );
+          }
+        }),
+      );
+    }
     _logger.v(() => '[join] completed');
     return const Result.success(none);
   }

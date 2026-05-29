@@ -13,6 +13,7 @@ Each call now owns an isolated native PeerConnectionFactory — fixes cross-call
 - Fixed sibling-call audio capture being silently broken when another concurrently-active call ended (e.g. a 1:1 ringing call ending alongside a running livestream, or a previous ringing call ending before a new one was accepted).
 - Fixed a sibling call's audio breaking when a ringing 1:1 call ended via `dropIfAloneInRingingFlow` (the remote party hung up first). `Call.end()` and `Call.leave()` now share a single `_disconnect` cleanup path.
 - Made the audio processor teardown in `Call._clear` multi-call aware. The audio processor is owned by `StreamVideo`, not by an individual `Call`, so disabling it on one call's teardown silently dropped noise cancellation on any other still-active call. `_clear` now only stops the global processor when no other active call is configured to use `NoiceCancellationSettingsMode.autoOn`.
+- Fixed noise cancellation breaking on iOS after the rejoin reconnection flow.
 
 ### 🔄 Changed
 
