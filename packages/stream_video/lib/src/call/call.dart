@@ -1351,6 +1351,8 @@ class Call {
           _fastReconnectDeadline;
     }
 
+    _session?.startPublisherConnectionCheck();
+
     // make sure we only track connection timing if we are not calling this method as part of a migration flow
     connectionTimeStopwatch.stop();
     if (!performingMigration) {
