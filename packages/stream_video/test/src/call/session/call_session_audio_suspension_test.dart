@@ -1,17 +1,16 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_video/src/call/session/call_session.dart';
 import 'package:stream_video/src/call/session/call_session_config.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
-import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
-import 'package:stream_video/src/webrtc/rtc_track/rtc_track.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../test_helpers.dart';
 import '../fixtures/call_test_helpers.dart';
@@ -137,12 +136,12 @@ CallSession _buildTestSession({
     callCid: callCid,
     sessionSeq: 0,
     sessionId: 'test-session',
-    config: CallSessionConfig(
+    config: const CallSessionConfig(
       sfuName: 'test-sfu',
       sfuToken: 'test-token',
       sfuUrl: 'https://test.example.com',
       sfuWsEndpoint: 'wss://test.example.com/ws',
-      rtcConfig: const RTCConfiguration(),
+      rtcConfig: RTCConfiguration(),
     ),
     stateManager: stateManager,
     dynascaleManager: DynascaleManager(stateManager: stateManager),

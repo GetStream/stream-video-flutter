@@ -7,7 +7,6 @@ import 'package:stream_video/protobuf/video/sfu/models/models.pbenum.dart'
     as sfu_enums;
 import 'package:stream_video/src/sfu/data/events/sfu_event_mapper_extensions.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_model_mapper_extensions.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_video_sender.dart';
