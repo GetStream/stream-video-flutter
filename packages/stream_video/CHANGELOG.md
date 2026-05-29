@@ -6,6 +6,7 @@ Each call now owns an isolated native PeerConnectionFactory — fixes cross-call
 
 - Added `Call.ensureNativeFactory()` - returns the per-call native `NativePeerConnectionFactory`. Use it to pin pre-join media (e.g. lobby-preview tracks via `RtcLocalTrack.camera(nativeFactory: …)`) to the same factory the call will use post-join.
 - Added per-call `audioConfigurationPolicy` override on `DefaultCallPreferences`. Falls back to `StreamVideoOptions.audioConfigurationPolicy` when null.
+- Publisher now respects SFU `degradationPreference` for video quality, falling back to `maintain-framerate` if unspecified.
 
 ### 🐞 Fixed
 

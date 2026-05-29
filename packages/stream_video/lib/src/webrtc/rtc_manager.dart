@@ -450,6 +450,13 @@ class RtcManager extends Disposable {
       }
     }
 
+    final degradationPreference = videoSender.degradationPreference;
+    if (degradationPreference != null &&
+        params.degradationPreference != degradationPreference) {
+      params.degradationPreference = degradationPreference;
+      changed = true;
+    }
+
     final activeLayers = params.encodings!.where((e) => e.active).toList();
 
     if (!changed) {
@@ -958,6 +965,7 @@ extension PublisherRtcManager on RtcManager {
       transceiverResult = await publisher!.addVideoTransceiver(
         track: track.mediaTrack,
         encodings: sendEncodings,
+        degradationPreference: publishOptions.degradationPreference,
       );
     } else {
       return Result.error('Unsupported track type: ${track.runtimeType}');

@@ -361,6 +361,7 @@ class StreamPeerConnection extends Disposable {
   Future<Result<rtc.RTCRtpTransceiver>> addVideoTransceiver({
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
+    rtc.RTCDegradationPreference? degradationPreference,
   }) async {
     try {
       final transceiver = await pc.addTransceiver(
@@ -374,6 +375,7 @@ class StreamPeerConnection extends Disposable {
 
       final params = transceiver.sender.parameters;
       params.degradationPreference =
+          degradationPreference ??
           rtc.RTCDegradationPreference.MAINTAIN_FRAMERATE;
       await transceiver.sender.setParameters(params);
 

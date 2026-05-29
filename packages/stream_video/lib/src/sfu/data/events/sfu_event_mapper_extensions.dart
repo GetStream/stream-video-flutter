@@ -491,6 +491,7 @@ extension SfuVideoSenderExtension on sfu_events.VideoSender {
       layers: layers.map((it) => it.toDomain()).toList(),
       trackType: trackType.toDomain(),
       publishOptionId: publishOptionId,
+      degradationPreference: degradationPreference.toRtc(),
     );
   }
 }
@@ -539,6 +540,7 @@ extension on sfu_models.PublishOption {
       audioBitrateProfiles: audioBitrateProfiles
           .map((it) => it.toDomain())
           .toList(),
+      degradationPreference: degradationPreference.toRtc(),
     );
   }
 }

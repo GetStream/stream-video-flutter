@@ -1082,6 +1082,14 @@ const VideoSender$json = {
       '10': 'trackType'
     },
     {'1': 'publish_option_id', '3': 5, '4': 1, '5': 5, '10': 'publishOptionId'},
+    {
+      '1': 'degradation_preference',
+      '3': 6,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.DegradationPreference',
+      '10': 'degradationPreference'
+    },
   ],
 };
 
@@ -1091,7 +1099,9 @@ final $typed_data.Uint8List videoSenderDescriptor = $convert.base64Decode(
     'NvZGVjUgVjb2RlYxJBCgZsYXllcnMYAyADKAsyKS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LlZp'
     'ZGVvTGF5ZXJTZXR0aW5nUgZsYXllcnMSQQoKdHJhY2tfdHlwZRgEIAEoDjIiLnN0cmVhbS52aW'
     'Rlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEioKEXB1Ymxpc2hfb3B0aW9uX2lk'
-    'GAUgASgFUg9wdWJsaXNoT3B0aW9uSWQ=');
+    'GAUgASgFUg9wdWJsaXNoT3B0aW9uSWQSZQoWZGVncmFkYXRpb25fcHJlZmVyZW5jZRgGIAEoDj'
+    'IuLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkRlZ3JhZGF0aW9uUHJlZmVyZW5jZVIVZGVncmFk'
+    'YXRpb25QcmVmZXJlbmNl');
 
 @$core.Deprecated('Use changePublishQualityDescriptor instead')
 const ChangePublishQuality$json = {

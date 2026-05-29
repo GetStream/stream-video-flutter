@@ -1,3 +1,5 @@
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+
 import '../../../webrtc/model/rtc_video_dimension.dart';
 import 'sfu_audio_bitrate.dart';
 import 'sfu_codec.dart';
@@ -15,6 +17,7 @@ class SfuPublishOptions {
     this.fps,
     this.useSingleLayer = false,
     this.audioBitrateProfiles,
+    this.degradationPreference,
   });
 
   /// The unique identifier for the publish request.
@@ -71,8 +74,12 @@ class SfuPublishOptions {
 
   final List<SfuAudioBitrate>? audioBitrateProfiles;
 
+  /// The degradation preference for video encoding, as instructed by the SFU.
+  /// When null, the default (MAINTAIN_FRAMERATE) is used.
+  final RTCDegradationPreference? degradationPreference;
+
   @override
   String toString() {
-    return 'SfuPublishOptions{id: $id, codec: $codec, trackType: $trackType, videoDimension: $videoDimension, maxSpatialLayers: $maxSpatialLayers, maxTemporalLayers: $maxTemporalLayers, bitrate: $bitrate, fps: $fps, useSingleLayer: $useSingleLayer, audioBitrateProfiles: $audioBitrateProfiles}';
+    return 'SfuPublishOptions{id: $id, codec: $codec, trackType: $trackType, videoDimension: $videoDimension, maxSpatialLayers: $maxSpatialLayers, maxTemporalLayers: $maxTemporalLayers, bitrate: $bitrate, fps: $fps, useSingleLayer: $useSingleLayer, audioBitrateProfiles: $audioBitrateProfiles, degradationPreference: $degradationPreference}';
   }
 }
