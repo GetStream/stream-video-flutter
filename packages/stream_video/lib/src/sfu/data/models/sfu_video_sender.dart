@@ -27,6 +27,11 @@ class SfuVideoSender with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props =>
-      [codec, layers, trackType, publishOptionId, degradationPreference];
+  List<Object?> get props => [
+    codec,
+    layers,
+    trackType,
+    publishOptionId,
+    degradationPreference,
+  ];
 }
