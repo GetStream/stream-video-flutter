@@ -9,6 +9,7 @@ Each call now owns an isolated native PeerConnectionFactory — fixes cross-call
 
 ### 🐞 Fixed
 
+- Fixed connection flickering causing rejoin flow to fail in some cases.
 - Added safety nets and recovery for cases when the publisher connection doesn't establish after a reconnection (e.g. the SFU answer is lost or ICE stays in `new` state).
 - Fixed sibling-call audio capture being silently broken when another concurrently-active call ended (e.g. a 1:1 ringing call ending alongside a running livestream, or a previous ringing call ending before a new one was accepted).
 - Fixed a sibling call's audio breaking when a ringing 1:1 call ended via `dropIfAloneInRingingFlow` (the remote party hung up first). `Call.end()` and `Call.leave()` now share a single `_disconnect` cleanup path.

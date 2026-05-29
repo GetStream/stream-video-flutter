@@ -1873,7 +1873,17 @@ class Call {
       final reconnectStartTime = DateTime.now();
       var fastReconnectAttemptsCount = 0;
       do {
-        _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
+        // Wait for a stable network before reconnecting with rejoin/migrate
+        // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
+        final stabilityWindow =
+            (_reconnectStrategy == SfuReconnectionStrategy.rejoin ||
+                _reconnectStrategy == SfuReconnectionStrategy.migrate)
+            ? const Duration(seconds: 3)
+            : Duration.zero;
+
+        _awaitNetworkAvailableFuture = _awaitNetworkAvailable(
+          stabilityWindow: stabilityWindow,
+        );
 
         if (state.value.preferences.reconnectTimeout > Duration.zero) {
           final elapsed = DateTime.now().difference(reconnectStartTime);
@@ -2075,40 +2085,96 @@ class Call {
     }
   }
 
-  Future<InternetStatus> _awaitNetworkAvailable() async {
+  /// Waits until the network becomes available **and** stays connected for
+  /// [stabilityWindow]. When [stabilityWindow] is [Duration.zero] (the
+  /// default), the method returns as soon as connectivity is detected.
+  ///
+  /// The total time spent in this method is bounded by
+  /// [CallPreferences.networkAvailabilityTimeout]. If the network keeps
+  /// flickering (connecting then dropping within the stability window),
+  /// the remaining budget shrinks on each iteration until it is exhausted.
+  Future<InternetStatus> _awaitNetworkAvailable({
+    Duration stabilityWindow = Duration.zero,
+  }) async {
     final previousCheckInterval = networkMonitor.checkInterval;
+    final budget = state.value.preferences.networkAvailabilityTimeout;
+    final deadline = Stopwatch()..start();
+
     try {
       networkMonitor.setIntervalAndResetTimer(
         _streamVideo.options.networkMonitorSettings.offlineCheckInterval,
       );
 
-      final networkFuture = networkMonitor.onStatusChange
-          .startWithFuture(networkMonitor.internetStatus)
-          .firstWhere((status) => status == InternetStatus.connected)
-          .timeout(
-            state.value.preferences.networkAvailabilityTimeout,
-            onTimeout: () {
-              _logger.w(() => '[_awaitNetworkAvailable] timeout');
-              return InternetStatus.disconnected;
-            },
+      while (true) {
+        final remaining = budget - deadline.elapsed;
+        if (remaining <= Duration.zero) {
+          _logger.w(
+            () => '[_awaitNetworkAvailable] total budget exhausted',
           );
+          return InternetStatus.disconnected;
+        }
 
-      final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
-        _logger.w(() => '[_awaitNetworkAvailable] call was left');
-        return InternetStatus.disconnected;
-      });
+        final networkFuture = networkMonitor.onStatusChange
+            .startWithFuture(networkMonitor.internetStatus)
+            .firstWhere((status) => status == InternetStatus.connected)
+            .timeout(
+              remaining,
+              onTimeout: () {
+                _logger.w(() => '[_awaitNetworkAvailable] timeout');
+                return InternetStatus.disconnected;
+              },
+            );
 
-      // Race the network future against the call lifecycle cancellable
-      // to ensure we don't wait for the network if the call was left
-      final connectionStatus =
-          await Future.any([
-                networkFuture,
-                lifecycleFuture,
-              ])
-              .asCancelable()
-              .storeIn(_idFastReconnectTimeout, _cancelables)
-              .valueOrDefault(InternetStatus.disconnected);
-      return connectionStatus;
+        final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
+          _logger.w(() => '[_awaitNetworkAvailable] call was left');
+          return InternetStatus.disconnected;
+        });
+
+        // Race the network future against the call lifecycle cancellable
+        // to ensure we don't wait for the network if the call was left
+        final connectionStatus =
+            await Future.any([
+                  networkFuture,
+                  lifecycleFuture,
+                ])
+                .asCancelable()
+                .storeIn(_idFastReconnectTimeout, _cancelables)
+                .valueOrDefault(InternetStatus.disconnected);
+
+        if (connectionStatus == InternetStatus.disconnected) {
+          return connectionStatus;
+        }
+
+        if (stabilityWindow <= Duration.zero) {
+          return connectionStatus;
+        }
+
+        // Verify the connection holds for the full stability window.
+        try {
+          await networkMonitor.onStatusChange
+              .where((s) => s == InternetStatus.disconnected)
+              .first
+              .timeout(stabilityWindow);
+
+          // Stream emitted before timeout → network dropped during window.
+          _logger.w(
+            () =>
+                '[_awaitNetworkAvailable] network dropped during '
+                '${stabilityWindow.inSeconds}s stability window, retrying',
+          );
+          _session?.trace('awaitNetwork.unstable', {
+            'stabilityWindowSeconds': stabilityWindow.inSeconds,
+          });
+        } on TimeoutException {
+          // No drop detected within the window — network is stable.
+          _logger.v(
+            () =>
+                '[_awaitNetworkAvailable] network stable for '
+                '${stabilityWindow.inSeconds}s',
+          );
+          return InternetStatus.connected;
+        }
+      }
     } finally {
       networkMonitor.setIntervalAndResetTimer(previousCheckInterval);
     }
