@@ -43,6 +43,27 @@ CoordinatorJoined _joinedWithSettings(
   );
 }
 
+/// Polls until [mockCall] has been invoked at least once, or fails after
+/// [timeout]. This avoids fragile fixed-duration sleeps by yielding the
+/// event loop in a tight retry loop until the async reconnect chain completes.
+Future<void> _waitForMockCall(
+  dynamic Function() mockCall, {
+  Duration timeout = const Duration(seconds: 2),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    try {
+      verify(mockCall).called(greaterThanOrEqualTo(1));
+      return;
+    } on TestFailure {
+      // Not yet — yield and retry.
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+  }
+  // Final attempt — let it throw if still not called.
+  verify(mockCall).called(greaterThanOrEqualTo(1));
+}
+
 void main() {
   setUpAll(() {
     registerMockFallbackValues();
@@ -660,12 +681,12 @@ void main() {
           internetStatusController.add(InternetStatus.disconnected);
           await Future<void>.delayed(Duration.zero);
           internetStatusController.add(InternetStatus.connected);
-          await Future<void>.delayed(const Duration(milliseconds: 200));
 
-          // The rejoin path should re-bind audio processing
-          verify(
+          // Poll until the rejoin path calls setAudioProcessingEnabled(true)
+          // again, rather than relying on a fixed sleep duration.
+          await _waitForMockCall(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
-          ).called(greaterThanOrEqualTo(1));
+          );
         },
       );
 
