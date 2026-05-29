@@ -42,6 +42,7 @@ dependencies:
   webrtc_interface: ^1.1.1
 
 dev_dependencies:
+  fake_async: ^1.3.1
   flutter_test:
     sdk: flutter
   mockito: ^5.4.2

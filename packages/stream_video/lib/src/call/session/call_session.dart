@@ -42,6 +42,7 @@ const _tag = 'SV:CallSession';
 
 const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
+const _publisherConnectionCheckDelay = Duration(seconds: 15);
 
 class CallSession extends Disposable {
   CallSession({
@@ -128,7 +129,8 @@ class CallSession extends Disposable {
   /// to record the track in its tracking map.
   final void Function(String trackId) onSuspendedAudioTrackRecorded;
 
-  Timer? _peerConnectionCheckTimer;
+  Timer? _publisherConnectionCheckTimer;
+
   bool _isLeavingOrClosed = false;
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
@@ -442,7 +444,13 @@ class CallSession extends Disposable {
       result;
 
       _logger.d(() => '[fastReconnect] sfu not connected, recreating');
-      await sfuWS.recreate();
+      final wsResult = await sfuWS.recreate();
+      if (wsResult.isFailure) {
+        _logger.w(() => '[fastReconnect] sfu recreate failed: $wsResult');
+        return const Result.failure(
+          VideoError(message: 'SFU WS reconnect failed'),
+        );
+      }
 
       _logger.d(() => '[fastReconnect] sfu connected, sending join request');
       sfuWS.send(
@@ -526,6 +534,47 @@ class CallSession extends Disposable {
     }
   }
 
+  /// Starts a one-shot timer that verifies the publisher's ICE transport
+  /// transitions out of the `new` state within [_publisherConnectionCheckDelay].
+  ///
+  /// If the transport is still `new` after the deadline, the SDP answer was
+  /// likely never received (e.g. network dropped before the SFU could reply)
+  /// and we trigger a reconnection.
+  void startPublisherConnectionCheck() {
+    _publisherConnectionCheckTimer?.cancel();
+
+    _publisherConnectionCheckTimer = Timer(
+      _publisherConnectionCheckDelay,
+      () {
+        if (_isLeavingOrClosed) return;
+
+        final publisher = rtcManager?.publisher;
+        if (publisher == null) return;
+
+        final iceState = publisher.pc.iceConnectionState;
+        if (iceState == rtc.RTCIceConnectionState.RTCIceConnectionStateNew) {
+          _logger.w(
+            () =>
+                '[publisherConnectionCheck] publisher ICE still in "new" '
+                'state after ${_publisherConnectionCheckDelay.inSeconds}s '
+                '— triggering reconnection',
+          );
+          _tracer.trace('publisherConnectionCheck.stalled', {
+            'iceState': iceState.toString(),
+            'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
+          });
+          onReconnectionNeeded(publisher, SfuReconnectionStrategy.rejoin);
+        } else {
+          _logger.v(
+            () =>
+                '[publisherConnectionCheck] publisher ICE state: '
+                '$iceState — OK',
+          );
+        }
+      },
+    );
+  }
+
   void leave({String? reason}) {
     _logger.d(() => '[leave] reason: $reason');
     _isLeavingOrClosed = true;
@@ -542,6 +591,8 @@ class CallSession extends Disposable {
     );
     _isLeavingOrClosed = true;
 
+    _publisherConnectionCheckTimer?.cancel();
+
     await _eventsSubscription?.cancel();
     await _networkStatusSubscription?.cancel();
 
@@ -549,7 +600,6 @@ class CallSession extends Disposable {
     statsReporter = null;
 
     _tracer.dispose();
-    _peerConnectionCheckTimer?.cancel();
 
     unawaited(
       sfuWS
@@ -939,6 +989,11 @@ class CallSession extends Disposable {
     if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(() => '[negotiate] call is disconnected');
       return Result.error('Call is disconnected');
+    }
+
+    if (!sfuWS.isConnected) {
+      _logger.w(() => '[negotiate] skipped — SFU WS not connected');
+      return Result.error('SFU WS is not connected');
     }
 
     await _negotiationLock.synchronized(() async {
