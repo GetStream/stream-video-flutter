@@ -2921,12 +2921,15 @@ class VideoSender extends $pb.GeneratedMessage {
     $core.Iterable<VideoLayerSetting>? layers,
     $0.TrackType? trackType,
     $core.int? publishOptionId,
+    $0.DegradationPreference? degradationPreference,
   }) {
     final result = create();
     if (codec != null) result.codec = codec;
     if (layers != null) result.layers.addAll(layers);
     if (trackType != null) result.trackType = trackType;
     if (publishOptionId != null) result.publishOptionId = publishOptionId;
+    if (degradationPreference != null)
+      result.degradationPreference = degradationPreference;
     return result;
   }
 
@@ -2951,6 +2954,9 @@ class VideoSender extends $pb.GeneratedMessage {
     ..aE<$0.TrackType>(4, _omitFieldNames ? '' : 'trackType',
         enumValues: $0.TrackType.values)
     ..aI(5, _omitFieldNames ? '' : 'publishOptionId')
+    ..aE<$0.DegradationPreference>(
+        6, _omitFieldNames ? '' : 'degradationPreference',
+        enumValues: $0.DegradationPreference.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -3003,6 +3009,16 @@ class VideoSender extends $pb.GeneratedMessage {
   $core.bool hasPublishOptionId() => $_has(3);
   @$pb.TagNumber(5)
   void clearPublishOptionId() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $0.DegradationPreference get degradationPreference => $_getN(4);
+  @$pb.TagNumber(6)
+  set degradationPreference($0.DegradationPreference value) =>
+      $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasDegradationPreference() => $_has(4);
+  @$pb.TagNumber(6)
+  void clearDegradationPreference() => $_clearField(6);
 }
 
 /// sent to users when they need to change the quality of their video

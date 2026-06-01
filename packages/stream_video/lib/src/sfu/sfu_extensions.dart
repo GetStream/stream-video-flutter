@@ -303,6 +303,7 @@ extension SfuVideoSenderJsonX on SfuVideoSender {
       'layers': layers.map((layer) => layer.toJson()).toList(),
       'trackType': trackType.toDTO().value,
       'publishOptionId': publishOptionId,
+      'degradationPreference': degradationPreference?.name,
     };
   }
 }
@@ -323,6 +324,7 @@ extension SfuPublishOptionsJsonX on SfuPublishOptions {
       'audio_bitrate_profiles': audioBitrateProfiles
           ?.map((it) => it.toJson())
           .toList(),
+      'degradationPreference': degradationPreference?.name,
     };
   }
 }

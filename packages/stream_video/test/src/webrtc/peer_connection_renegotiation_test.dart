@@ -183,7 +183,7 @@ void main() {
       _build(pc: pc, type: StreamPeerType.publisher);
 
       // onRenegotiationNeeded is null by default — must not throw.
-      expect(pc.capturedOnRenegotiationNeeded!, isA<void Function()>());
+      expect(pc.capturedOnRenegotiationNeeded, isA<void Function()>());
       expect(() => pc.capturedOnRenegotiationNeeded!(), returnsNormally);
     });
   });

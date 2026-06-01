@@ -792,6 +792,7 @@ class PublishOption extends $pb.GeneratedMessage {
     $core.int? id,
     $core.bool? useSingleLayer,
     $core.Iterable<AudioBitrate>? audioBitrateProfiles,
+    DegradationPreference? degradationPreference,
   }) {
     final result = create();
     if (trackType != null) result.trackType = trackType;
@@ -805,6 +806,8 @@ class PublishOption extends $pb.GeneratedMessage {
     if (useSingleLayer != null) result.useSingleLayer = useSingleLayer;
     if (audioBitrateProfiles != null)
       result.audioBitrateProfiles.addAll(audioBitrateProfiles);
+    if (degradationPreference != null)
+      result.degradationPreference = degradationPreference;
     return result;
   }
 
@@ -835,6 +838,9 @@ class PublishOption extends $pb.GeneratedMessage {
     ..aOB(9, _omitFieldNames ? '' : 'useSingleLayer')
     ..pPM<AudioBitrate>(10, _omitFieldNames ? '' : 'audioBitrateProfiles',
         subBuilder: AudioBitrate.create)
+    ..aE<DegradationPreference>(
+        11, _omitFieldNames ? '' : 'degradationPreference',
+        enumValues: DegradationPreference.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -978,6 +984,17 @@ class PublishOption extends $pb.GeneratedMessage {
   /// Audio bitrate profiles for different audio quality profiles.
   @$pb.TagNumber(10)
   $pb.PbList<AudioBitrate> get audioBitrateProfiles => $_getList(9);
+
+  /// The degradation preference for video encoding.
+  @$pb.TagNumber(11)
+  DegradationPreference get degradationPreference => $_getN(10);
+  @$pb.TagNumber(11)
+  set degradationPreference(DegradationPreference value) =>
+      $_setField(11, value);
+  @$pb.TagNumber(11)
+  $core.bool hasDegradationPreference() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearDegradationPreference() => $_clearField(11);
 }
 
 class Codec extends $pb.GeneratedMessage {
@@ -1243,6 +1260,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     $core.bool? muted,
     Codec? codec,
     $core.int? publishOptionId,
+    $core.bool? selfSubAudioVideo,
   }) {
     final result = create();
     if (trackId != null) result.trackId = trackId;
@@ -1255,6 +1273,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     if (muted != null) result.muted = muted;
     if (codec != null) result.codec = codec;
     if (publishOptionId != null) result.publishOptionId = publishOptionId;
+    if (selfSubAudioVideo != null) result.selfSubAudioVideo = selfSubAudioVideo;
     return result;
   }
 
@@ -1284,6 +1303,7 @@ class TrackInfo extends $pb.GeneratedMessage {
     ..aOB(10, _omitFieldNames ? '' : 'muted')
     ..aOM<Codec>(11, _omitFieldNames ? '' : 'codec', subBuilder: Codec.create)
     ..aI(12, _omitFieldNames ? '' : 'publishOptionId')
+    ..aOB(13, _omitFieldNames ? '' : 'selfSubAudioVideo')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1390,6 +1410,15 @@ class TrackInfo extends $pb.GeneratedMessage {
   $core.bool hasPublishOptionId() => $_has(9);
   @$pb.TagNumber(12)
   void clearPublishOptionId() => $_clearField(12);
+
+  @$pb.TagNumber(13)
+  $core.bool get selfSubAudioVideo => $_getBF(10);
+  @$pb.TagNumber(13)
+  set selfSubAudioVideo($core.bool value) => $_setBool(10, value);
+  @$pb.TagNumber(13)
+  $core.bool hasSelfSubAudioVideo() => $_has(10);
+  @$pb.TagNumber(13)
+  void clearSelfSubAudioVideo() => $_clearField(13);
 }
 
 class Error extends $pb.GeneratedMessage {

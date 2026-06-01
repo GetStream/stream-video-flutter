@@ -11,7 +11,6 @@ import 'fixtures/call_test_helpers.dart';
 // Helpers
 // ---------------------------------------------------------------------------
 
-/// Returns a [MockPermissionsManager] with [endCall] stubbed to succeed.
 MockPermissionsManager _mockPermissionsWithEndCall() {
   final pm = MockPermissionsManager();
   when(pm.endCall).thenAnswer(
