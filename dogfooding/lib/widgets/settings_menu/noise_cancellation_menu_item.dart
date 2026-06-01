@@ -25,7 +25,7 @@ class _NoiseCancellationMenuItemState extends State<NoiseCancellationMenuItem> {
 
           if (callState == null ||
               callState.settings.audio.noiseCancellation?.mode ==
-                  NoiceCancellationSettingsMode.disabled) {
+                  NoiseCancellationSettingsMode.disabled) {
             return const SizedBox.shrink();
           }
 
