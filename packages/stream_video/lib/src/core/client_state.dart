@@ -142,7 +142,10 @@ class MutableClientState implements ClientState {
           }
         case MultiCallAudioPolicy.suspendIncoming:
           // Suspend new call's audio if another call is already active.
-          if (activeCalls.value.isNotEmpty) {
+          // Skip when this same call is already active (a no-op
+          // reactivation), otherwise we would mute the call itself.
+          if (activeCalls.value.isNotEmpty &&
+              !activeCalls.value.any((c) => c.callCid == call.callCid)) {
             try {
               await call.ensureNativeFactory();
               await call.suspendAudio();
