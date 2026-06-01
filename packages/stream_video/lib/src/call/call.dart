@@ -1547,7 +1547,7 @@ class Call {
 
     if (_streamVideo.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
-            NoiceCancellationSettingsMode.autoOn) {
+            NoiseCancellationSettingsMode.autoOn) {
       // AutoOn will enable noise cancellation if the device has sufficient processing power
       unawaited(
         startAudioProcessing(
@@ -2326,15 +2326,15 @@ class Call {
     // Call, so stopping it on this call's teardown would silently drop noise
     // cancellation on any other still-active call that also wants it. Only
     // stop the global processor when no other active call is configured for
-    // NoiceCancellationSettingsMode.autoOn.
+    // NoiseCancellationSettingsMode.autoOn.
     if (state.value.settings.audio.noiseCancellation?.mode ==
-        NoiceCancellationSettingsMode.autoOn) {
+        NoiseCancellationSettingsMode.autoOn) {
       final anotherCallWantsAutoOn = _streamVideo.state.activeCalls.value.any(
         (other) =>
             other.callCid != callCid &&
             other.state.value.status is! CallStatusDisconnected &&
             other.state.value.settings.audio.noiseCancellation?.mode ==
-                NoiceCancellationSettingsMode.autoOn,
+                NoiseCancellationSettingsMode.autoOn,
       );
       if (!anotherCallWantsAutoOn) {
         unawaited(

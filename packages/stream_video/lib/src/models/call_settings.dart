@@ -474,10 +474,10 @@ class StreamTranscriptionSettings extends AbstractSettings {
 
 class StreamNoiceCancellingSettings extends AbstractSettings {
   const StreamNoiceCancellingSettings({
-    this.mode = NoiceCancellationSettingsMode.disabled,
+    this.mode = NoiseCancellationSettingsMode.disabled,
   });
 
-  final NoiceCancellationSettingsMode mode;
+  final NoiseCancellationSettingsMode mode;
 
   @override
   List<Object?> get props => [mode];
@@ -1296,7 +1296,10 @@ enum RecordingType {
   }
 }
 
-enum NoiceCancellationSettingsMode {
+@Deprecated('Use NoiseCancellationSettingsMode instead.')
+typedef NoiceCancellationSettingsMode = NoiseCancellationSettingsMode;
+
+enum NoiseCancellationSettingsMode {
   available,
   disabled,
   autoOn;
@@ -1306,11 +1309,11 @@ enum NoiceCancellationSettingsMode {
 
   NoiseCancellationSettingsModeEnum toOpenDto() {
     switch (this) {
-      case NoiceCancellationSettingsMode.available:
+      case NoiseCancellationSettingsMode.available:
         return NoiseCancellationSettingsModeEnum.available;
-      case NoiceCancellationSettingsMode.disabled:
+      case NoiseCancellationSettingsMode.disabled:
         return NoiseCancellationSettingsModeEnum.disabled;
-      case NoiceCancellationSettingsMode.autoOn:
+      case NoiseCancellationSettingsMode.autoOn:
         return NoiseCancellationSettingsModeEnum.autoOn;
     }
   }
