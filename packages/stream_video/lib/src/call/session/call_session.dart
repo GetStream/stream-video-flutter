@@ -777,7 +777,7 @@ class CallSession extends Disposable {
             '[onTrackPublished] audio suspended, '
             'disabling and skipping start for audio track ${track.trackId}',
       );
-      disableAndRecordSuspendedAudioTrack(track);
+      _suspendAudioTrack(track);
     } else {
       await track.start();
 
@@ -936,7 +936,7 @@ class CallSession extends Disposable {
             '[onPublisherTrackPublished] audio suspended, '
             'disabling and skipping start for audio track ${track.trackId}',
       );
-      disableAndRecordSuspendedAudioTrack(track);
+      _suspendAudioTrack(track);
     } else {
       await track.start();
 
@@ -1062,7 +1062,7 @@ class CallSession extends Disposable {
             '[onRemoteTrackReceived] audio suspended, '
             'disabling and skipping start for audio track ${remoteTrack.trackId}',
       );
-      disableAndRecordSuspendedAudioTrack(remoteTrack);
+      _suspendAudioTrack(remoteTrack);
     } else {
       await remoteTrack.start();
 
@@ -1087,8 +1087,7 @@ class CallSession extends Disposable {
 
   /// Disables a freshly-received audio track and records it so
   /// [resumeSuspendedAudioTracks] can re-enable it on resume.
-  @visibleForTesting
-  void disableAndRecordSuspendedAudioTrack(RtcTrack track) {
+  void _suspendAudioTrack(RtcTrack track) {
     track.disable();
     onSuspendedAudioTrackRecorded(track.trackId);
   }
