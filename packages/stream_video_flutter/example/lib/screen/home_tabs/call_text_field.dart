@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallIdTextField extends StatelessWidget {
-  const CallIdTextField({
-    super.key,
-    required this.controller,
-    this.onChanged,
-  });
+  const CallIdTextField({super.key, required this.controller, this.onChanged});
 
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;

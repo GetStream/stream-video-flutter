@@ -39,9 +39,7 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
 
   final subscription = client.observeCoreRingingEventsForBackground();
 
-  client.disposeAfterResolvingRinging(
-    disposingCallback: subscription.cancel,
-  );
+  client.disposeAfterResolvingRinging(disposingCallback: subscription.cancel);
 
   await client.handleRingingFlowNotifications(message.data);
 }
@@ -100,10 +98,7 @@ Future<void> showNotification(
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({
-    super.key,
-    required this.connectUser,
-  });
+  const MyApp({super.key, required this.connectUser});
 
   final ConnectUser connectUser;
 
@@ -158,9 +153,7 @@ class _MyAppState extends State<MyApp> {
   void _navigateToCall(Call call) {
     navigatorKey.currentState?.push(
       MaterialPageRoute<dynamic>(
-        builder: (context) => StreamCallContainer(
-          call: call,
-        ),
+        builder: (context) => StreamCallContainer(call: call),
       ),
     );
   }

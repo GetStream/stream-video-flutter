@@ -7,4 +7,4 @@ formatter:
 analyzer:
   exclude:
     - lib/**/*.*.dart
-    - "**/build/**"
+    - build/**

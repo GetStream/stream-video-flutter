@@ -6,4 +6,4 @@ formatter:
 
 analyzer:
   exclude:
-    - "**/build/**"
+    - build/**

@@ -20,17 +20,11 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await _setupLogger();
 
-  runApp(
-    const MyApp(
-      connectUser: _connectUser,
-    ),
-  );
+  runApp(const MyApp(connectUser: _connectUser));
 }
 
 Future<Result<None>> _connectUser(UserInfo user) async {
@@ -54,11 +48,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
 
   final authRepository = await AuthRepository.getInstance();
   await authRepository.setCredentials(
-    AuthCredentials(
-      apiKey: apiKey,
-      token: token,
-      userInfo: user,
-    ),
+    AuthCredentials(apiKey: apiKey, token: token, userInfo: user),
   );
 
   await client.connect();

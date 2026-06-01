@@ -774,9 +774,9 @@ class CallSession extends Disposable {
       _logger.d(
         () =>
             '[onTrackPublished] audio suspended, '
-            'skipping start for audio track ${track.trackId}',
+            'disabling and skipping start for audio track ${track.trackId}',
       );
-      onSuspendedAudioTrackRecorded(track.trackId);
+      _suspendAudioTrack(track);
     } else {
       await track.start();
 
@@ -933,9 +933,9 @@ class CallSession extends Disposable {
       _logger.d(
         () =>
             '[onPublisherTrackPublished] audio suspended, '
-            'skipping start for audio track ${track.trackId}',
+            'disabling and skipping start for audio track ${track.trackId}',
       );
-      onSuspendedAudioTrackRecorded(track.trackId);
+      _suspendAudioTrack(track);
     } else {
       await track.start();
 
@@ -1059,9 +1059,9 @@ class CallSession extends Disposable {
       _logger.d(
         () =>
             '[onRemoteTrackReceived] audio suspended, '
-            'skipping start for audio track ${remoteTrack.trackId}',
+            'disabling and skipping start for audio track ${remoteTrack.trackId}',
       );
-      onSuspendedAudioTrackRecorded(remoteTrack.trackId);
+      _suspendAudioTrack(remoteTrack);
     } else {
       await remoteTrack.start();
 
@@ -1082,6 +1082,13 @@ class CallSession extends Disposable {
     if (audioOutputDevice != null) {
       await setAudioOutputDevice(audioOutputDevice);
     }
+  }
+
+  /// Disables a freshly-received audio track and records it so
+  /// [resumeSuspendedAudioTracks] can re-enable it on resume.
+  void _suspendAudioTrack(RtcTrack track) {
+    track.disable();
+    onSuspendedAudioTrackRecorded(track.trackId);
   }
 
   /// Resumes audio tracks that were suspended or arrived during suspension.

@@ -69,14 +69,15 @@ scripts:
        Flags all compiler `errors` in the project.
 
   format:
-    run: dart format .
+    # Only format git-tracked Dart files so `dart format` never descends into
+    # build artifacts (e.g. /build/ios/SourcePackages).
     description: |
-      Run `dart format .` in all packages.
+      Run `dart format` on all git-tracked Dart files.
 
   format:verify:
-    run: dart format --set-exit-if-changed .
+    run: git ls-files '*.dart' | xargs dart format --set-exit-if-changed
     description: |
-      Run `dart format --set-exit-if-changed .` in all packages.
+      Run `dart format --set-exit-if-changed` on all git-tracked Dart files.
 
   metrics:
     run: |

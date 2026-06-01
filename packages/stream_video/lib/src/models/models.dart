@@ -20,6 +20,7 @@ export 'call_track_state.dart';
 export 'disconnect_reason.dart';
 export 'guest_created_data.dart';
 export 'moderation_blur_config.dart';
+export 'multi_call_audio_policy.dart';
 export 'push_device.dart';
 export 'push_provider.dart';
 export 'queried_calls.dart';
