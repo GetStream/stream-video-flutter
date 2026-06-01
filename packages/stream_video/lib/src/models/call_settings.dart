@@ -1296,9 +1296,9 @@ enum RecordingType {
   }
 }
 
-typedef NoiseCancellationSettingsMode = NoiceCancellationSettingsMode;
+typedef NoiceCancellationSettingsMode = NoiseCancellationSettingsMode;
 
-enum NoiceCancellationSettingsMode {
+enum NoiseCancellationSettingsMode {
   available,
   disabled,
   autoOn;
@@ -1308,11 +1308,11 @@ enum NoiceCancellationSettingsMode {
 
   NoiseCancellationSettingsModeEnum toOpenDto() {
     switch (this) {
-      case NoiceCancellationSettingsMode.available:
+      case NoiseCancellationSettingsMode.available:
         return NoiseCancellationSettingsModeEnum.available;
-      case NoiceCancellationSettingsMode.disabled:
+      case NoiseCancellationSettingsMode.disabled:
         return NoiseCancellationSettingsModeEnum.disabled;
-      case NoiceCancellationSettingsMode.autoOn:
+      case NoiseCancellationSettingsMode.autoOn:
         return NoiseCancellationSettingsModeEnum.autoOn;
     }
   }
