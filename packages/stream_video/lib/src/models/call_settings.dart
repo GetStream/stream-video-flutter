@@ -1296,6 +1296,7 @@ enum RecordingType {
   }
 }
 
+@Deprecated('Use NoiseCancellationSettingsMode instead.')
 typedef NoiceCancellationSettingsMode = NoiseCancellationSettingsMode;
 
 enum NoiseCancellationSettingsMode {
