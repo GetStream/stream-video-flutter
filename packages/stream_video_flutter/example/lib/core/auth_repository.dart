@@ -6,9 +6,7 @@ import '../model/credentials.dart';
 
 class AuthRepository {
   // Private constructor
-  const AuthRepository._({
-    required SharedPreferences prefs,
-  }) : _prefs = prefs;
+  const AuthRepository._({required SharedPreferences prefs}) : _prefs = prefs;
 
   static const String _kAuthCredentialsPref = 'auth_credentials';
   final SharedPreferences _prefs;

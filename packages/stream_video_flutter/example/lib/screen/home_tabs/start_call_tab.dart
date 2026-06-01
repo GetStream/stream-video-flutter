@@ -6,10 +6,7 @@ import '../../utils.dart';
 import 'call_text_field.dart';
 
 class StartCallTab extends StatefulWidget {
-  const StartCallTab({
-    super.key,
-    required this.onNavigateToCall,
-  });
+  const StartCallTab({super.key, required this.onNavigateToCall});
 
   final void Function(Call call, {CallConnectOptions options}) onNavigateToCall;
 
@@ -43,10 +40,7 @@ class _StartCallTabState extends State<StartCallTab>
           const SizedBox(height: 24),
           const Text(
             'Select participants',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Flexible(
@@ -62,9 +56,7 @@ class _StartCallTabState extends State<StartCallTab>
           ),
           const SizedBox(height: 16),
           if (_callInProgress)
-            const CircularProgressIndicator(
-              strokeWidth: 2,
-            )
+            const CircularProgressIndicator(strokeWidth: 2)
           else
             Column(
               children: [
@@ -108,9 +100,7 @@ class _StartCallTabState extends State<StartCallTab>
     );
     final result = await call.getOrCreate(
       ringing: _ringingCall,
-      memberIds: [
-        for (final user in _selectedUsers) user.id,
-      ],
+      memberIds: [for (final user in _selectedUsers) user.id],
     );
 
     result.when(
@@ -168,9 +158,7 @@ class _ParticipantsListState extends State<ParticipantsList> {
     final users = sampleUsers;
 
     final remainingUsers = [
-      ...users.where(
-        (user) => user.id != widget.currentUserId,
-      ),
+      ...users.where((user) => user.id != widget.currentUserId),
     ];
 
     return ListView.separated(

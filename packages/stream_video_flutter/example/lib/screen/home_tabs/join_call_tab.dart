@@ -5,10 +5,7 @@ import '../../utils.dart';
 import 'call_text_field.dart';
 
 class JoinCallTab extends StatefulWidget {
-  const JoinCallTab({
-    super.key,
-    required this.onNavigateToCall,
-  });
+  const JoinCallTab({super.key, required this.onNavigateToCall});
 
   final void Function(Call call, {CallConnectOptions options}) onNavigateToCall;
 
@@ -34,9 +31,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Column(
         children: [
-          CallIdTextField(
-            controller: _callIdController,
-          ),
+          CallIdTextField(controller: _callIdController),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -53,9 +48,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
           ),
           const SizedBox(height: 24),
           if (_callInProgress)
-            const CircularProgressIndicator(
-              strokeWidth: 2,
-            )
+            const CircularProgressIndicator(strokeWidth: 2)
           else
             ElevatedButton(
               onPressed: _joinCall,
