@@ -304,6 +304,76 @@ void main() {
     });
   });
 
+  group('CallSession.disableAndRecordSuspendedAudioTrack', () {
+    test('disables the track and records its id via the callback', () {
+      final recorded = <String>[];
+      final session = _buildTestSession(
+        onSuspendedAudioTrackRecorded: recorded.add,
+      );
+      final track = _FakeAudioTrack();
+      expect(track.enabled, isTrue, reason: 'tracks default to enabled');
+
+      session.disableAndRecordSuspendedAudioTrack(track);
+
+      expect(track.enabled, isFalse);
+      expect(recorded, equals([track.trackId]));
+      expect(
+        track.startCalled,
+        isFalse,
+        reason: 'must not start() — that would enable + apply audio output',
+      );
+    });
+
+    test('is idempotent on an already-disabled track', () {
+      final recorded = <String>[];
+      final session = _buildTestSession(
+        onSuspendedAudioTrackRecorded: recorded.add,
+      );
+      final track = _FakeAudioTrack()..enabled = false;
+
+      session.disableAndRecordSuspendedAudioTrack(track);
+
+      expect(track.enabled, isFalse);
+      expect(recorded, equals([track.trackId]));
+    });
+
+    test(
+      'paired with resumeSuspendedAudioTracks: disabled-on-arrival track is '
+      're-enabled on resume',
+      () async {
+        final recorded = <String>[];
+        final session = _buildTestSession(
+          onSuspendedAudioTrackRecorded: recorded.add,
+        );
+        final track = _FakeAudioTrack();
+        const trackKey = 'fake:audio';
+
+        // Simulate the track arriving while audio is suspended.
+        session.disableAndRecordSuspendedAudioTrack(track);
+        expect(track.enabled, isFalse);
+        expect(recorded, equals([trackKey]));
+
+        // Now the integrator calls Call.resumeAudio, which ends up invoking
+        // resumeSuspendedAudioTracks with the recorded states. Tracks
+        // recorded by this helper must map to neverStarted so start() runs
+        // on resume and the track becomes audible again.
+        final mockRtcManager = MockRtcManager();
+        when(() => mockRtcManager.tracks).thenReturn({trackKey: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          trackKey: SuspendedTrackState.neverStarted,
+        });
+
+        // resumeSuspendedAudioTracks routes neverStarted → track.start().
+        // The real RtcRemoteTrack.start() calls enable() internally, so the
+        // track ends up enabled on resume. The fake here only flips
+        // startCalled, so we assert on the routing decision.
+        expect(track.startCalled, isTrue);
+      },
+    );
+  });
+
   group('CallSession onSuspendedAudioTrackRecorded callback', () {
     // This callback is invoked by the session when a track arrives while audio
     // is suspended. We verify that the session was constructed with the

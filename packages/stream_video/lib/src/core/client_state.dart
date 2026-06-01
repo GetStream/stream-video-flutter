@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 
-import '../../stream_video.dart' show DisconnectReason, StreamVideoOptions;
+import '../../stream_video.dart'
+    show DisconnectReason, MultiCallAudioPolicy, StreamVideoOptions;
 import '../call/call.dart';
 import '../lifecycle/lifecycle_state.dart';
 import '../models/user.dart';
@@ -127,15 +128,31 @@ class MutableClientState implements ClientState {
       activeCall.value = call;
       activeCalls.value = call == null ? [] : [call];
     } else if (call != null) {
-      // Auto-suspend every other currently-active call's audio before this
-      // one claims mic/speaker/audio-session resources.
-      for (final existing in activeCalls.value) {
-        if (existing.callCid == call.callCid) continue;
-        try {
-          await existing.suspendAudio();
-        } catch (_) {
-          // Best-effort — never block a new call on suspend failure.
-        }
+      switch (options.multiCallAudioPolicy) {
+        case MultiCallAudioPolicy.suspendExisting:
+          // Auto-suspend every other currently-active call's audio before
+          // this one claims mic/speaker/audio-session resources.
+          for (final existing in activeCalls.value) {
+            if (existing.callCid == call.callCid) continue;
+            try {
+              await existing.suspendAudio();
+            } catch (_) {
+              // Best-effort — never block a new call on suspend failure.
+            }
+          }
+        case MultiCallAudioPolicy.suspendIncoming:
+          // Suspend new call's audio if another call is already active.
+          if (activeCalls.value.isNotEmpty) {
+            try {
+              await call.ensureNativeFactory();
+              await call.suspendAudio();
+            } catch (_) {
+              // Best-effort — never block a new call on suspend failure.
+            }
+          }
+        case MultiCallAudioPolicy.manual:
+          // Integrator owns suspend/resume; SDK does nothing here.
+          break;
       }
       activeCalls.value = [...activeCalls.value, call];
     }
@@ -162,10 +179,10 @@ class MutableClientState implements ClientState {
       ...watchedCalls.value.where((it) => it.callCid != call.callCid),
     ];
 
-    // After removing this call, restore the next call in line — the most
-    // recently-added remaining one is the one that was suspended when this
-    // call took focus, so it should now resume.
-    if (options.allowMultipleActiveCalls && remaining.isNotEmpty) {
+    // Resume next most recent call if using suspendExisting audio policy.
+    if (options.allowMultipleActiveCalls &&
+        remaining.isNotEmpty &&
+        options.multiCallAudioPolicy == MultiCallAudioPolicy.suspendExisting) {
       final next = remaining.last;
       try {
         await next.resumeAudio();

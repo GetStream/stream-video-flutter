@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
@@ -774,9 +775,9 @@ class CallSession extends Disposable {
       _logger.d(
         () =>
             '[onTrackPublished] audio suspended, '
-            'skipping start for audio track ${track.trackId}',
+            'disabling and skipping start for audio track ${track.trackId}',
       );
-      onSuspendedAudioTrackRecorded(track.trackId);
+      disableAndRecordSuspendedAudioTrack(track);
     } else {
       await track.start();
 
@@ -933,9 +934,9 @@ class CallSession extends Disposable {
       _logger.d(
         () =>
             '[onPublisherTrackPublished] audio suspended, '
-            'skipping start for audio track ${track.trackId}',
+            'disabling and skipping start for audio track ${track.trackId}',
       );
-      onSuspendedAudioTrackRecorded(track.trackId);
+      disableAndRecordSuspendedAudioTrack(track);
     } else {
       await track.start();
 
@@ -1059,9 +1060,9 @@ class CallSession extends Disposable {
       _logger.d(
         () =>
             '[onRemoteTrackReceived] audio suspended, '
-            'skipping start for audio track ${remoteTrack.trackId}',
+            'disabling and skipping start for audio track ${remoteTrack.trackId}',
       );
-      onSuspendedAudioTrackRecorded(remoteTrack.trackId);
+      disableAndRecordSuspendedAudioTrack(remoteTrack);
     } else {
       await remoteTrack.start();
 
@@ -1082,6 +1083,14 @@ class CallSession extends Disposable {
     if (audioOutputDevice != null) {
       await setAudioOutputDevice(audioOutputDevice);
     }
+  }
+
+  /// Disables a freshly-received audio track and records it so
+  /// [resumeSuspendedAudioTracks] can re-enable it on resume.
+  @visibleForTesting
+  void disableAndRecordSuspendedAudioTrack(RtcTrack track) {
+    track.disable();
+    onSuspendedAudioTrackRecorded(track.trackId);
   }
 
   /// Resumes audio tracks that were suspended or arrived during suspension.

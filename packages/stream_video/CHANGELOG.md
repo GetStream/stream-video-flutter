@@ -1,25 +1,26 @@
 ## Upcoming
 
-Each call now owns an isolated native PeerConnectionFactory — fixes cross-call audio interference, sibling-call mic capture loss, and noise cancellation engagement during lobby preview.
+Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
 
 ### ✅ Added
 
-- Added `Call.ensureNativeFactory()` - returns the per-call native `NativePeerConnectionFactory`. Use it to pin pre-join media (e.g. lobby-preview tracks via `RtcLocalTrack.camera(nativeFactory: …)`) to the same factory the call will use post-join.
-- Added per-call `audioConfigurationPolicy` override on `DefaultCallPreferences`. Falls back to `StreamVideoOptions.audioConfigurationPolicy` when null.
-- Publisher now respects SFU `degradationPreference` for video quality, falling back to `maintain-framerate` if unspecified.
+- Added `Call.ensureNativeFactory()`, which returns the per-call native `NativePeerConnectionFactory`. Use it to pin pre-join media (e.g. lobby-preview tracks created via `RtcLocalTrack.camera(nativeFactory: …)`) to the same factory the call uses after joining.
+- Added a per-call `audioConfigurationPolicy` override on `DefaultCallPreferences`. It falls back to `StreamVideoOptions.audioConfigurationPolicy` when null.
+- The publisher now respects the SFU `degradationPreference` for video quality, falling back to `maintain-framerate` when it is unspecified.
 
 ### 🐞 Fixed
 
-- Fixed connection flickering causing rejoin flow to fail in some cases.
-- Added safety nets and recovery for cases when the publisher connection doesn't establish after a reconnection (e.g. the SFU answer is lost or ICE stays in `new` state).
-- Fixed sibling-call audio capture being silently broken when another concurrently-active call ended (e.g. a 1:1 ringing call ending alongside a running livestream, or a previous ringing call ending before a new one was accepted).
+- Fixed connection flickering that caused the rejoin flow to fail in some cases.
+- Added safety nets and recovery for cases where the publisher connection fails to establish after a reconnection (e.g. the SFU answer is lost or ICE stays in the `new` state).
+- Fixed sibling-call audio capture being silently broken when another concurrently active call ended (e.g. a 1:1 ringing call ending alongside a running livestream, or a previous ringing call ending before a new one was accepted).
 - Fixed a sibling call's audio breaking when a ringing 1:1 call ended via `dropIfAloneInRingingFlow` (the remote party hung up first). `Call.end()` and `Call.leave()` now share a single `_disconnect` cleanup path.
-- Made the audio processor teardown in `Call._clear` multi-call aware. The audio processor is owned by `StreamVideo`, not by an individual `Call`, so disabling it on one call's teardown silently dropped noise cancellation on any other still-active call. `_clear` now only stops the global processor when no other active call is configured to use `NoiceCancellationSettingsMode.autoOn`.
+- Made the audio processor teardown in `Call._clear` multi-call aware. The audio processor is owned by `StreamVideo` rather than by an individual `Call`, so disabling it during one call's teardown silently dropped noise cancellation on any other still-active call. `_clear` now stops the global processor only when no other active call is configured to use `NoiceCancellationSettingsMode.autoOn`.
 - Fixed noise cancellation breaking on iOS after the rejoin reconnection flow.
+- Fixed a potential iOS crash on call end when noise cancellation was active.
 
 ### 🔄 Changed
 
-- [iOS/Android] Each call now owns an isolated native `PeerConnectionFactory` + `AudioDeviceModule`. Previously all calls shared the global ambient factory. The per-call isolation is what enables clean multi-call audio. Integrators building tracks directly should pass `nativeFactory: await call.ensureNativeFactory()` to `RtcLocalTrack.*` constructors.
+- [iOS/Android] Each call now owns an isolated native `PeerConnectionFactory` and `AudioDeviceModule`. Previously, all calls shared the global ambient factory. This per-call isolation is what enables clean multi-call audio. Integrators building tracks directly should pass `nativeFactory: await call.ensureNativeFactory()` to the `RtcLocalTrack.*` constructors.
 
 ## 1.3.3
 

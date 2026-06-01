@@ -14,11 +14,14 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     public typealias ReleaseClosure = () -> Void
 
     private var isActive: Bool = false
+    private let serialQueue = DispatchQueue(
+        label: "io.getstream.video.NoiseCancellationFilter"
+    )
 
     private let name: String
-    private let initializeClosure: (Int, Int) -> Void
-    private let processClosure: (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void
-    private let releaseClosure: () -> Void
+    private let initializeClosure: InitializeClosure
+    private let processClosure: ProcessClosure
+    private let releaseClosure: ReleaseClosure
 
     /// Initializes a new instance of `NoiseCancellationFilter`.
     /// - Parameters:
@@ -48,8 +51,11 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        self.initializeClosure(sampleRate, channels)
-        self.isActive = true
+        serialQueue.async { [weak self] in
+            guard let self, !isActive else { return }
+            initializeClosure(sampleRate, channels)
+            isActive = true
+        }
     }
 
     /// Applies noise cancellation processing to the audio buffer.
@@ -65,7 +71,13 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     }
 
     /// Releases the filter by stopping noise cancellation for the active call.
+    ///
+    /// Set `isActive = false` before `releaseClosure()` to prevent further processing on a torn-down filter.
     public func release() {
-        releaseClosure()  // Invoke the release closure.
+        serialQueue.async { [weak self] in
+            guard let self else { return }
+            isActive = false
+            releaseClosure()
+        }
     }
 }

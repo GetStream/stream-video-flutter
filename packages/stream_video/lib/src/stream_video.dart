@@ -49,6 +49,7 @@ import 'models/call_ringing_data.dart';
 import 'models/call_status.dart';
 import 'models/disconnect_reason.dart';
 import 'models/guest_created_data.dart';
+import 'models/multi_call_audio_policy.dart';
 import 'models/push_device.dart';
 import 'models/push_provider.dart';
 import 'models/queried_calls.dart';
@@ -1413,6 +1414,7 @@ class StreamVideoOptions {
     this.keepConnectionsAliveWhenInBackground = false,
     this.networkMonitorSettings = const NetworkMonitorSettings(),
     this.allowMultipleActiveCalls = false,
+    this.multiCallAudioPolicy = MultiCallAudioPolicy.suspendExisting,
     @Deprecated(
       'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
     )
@@ -1444,6 +1446,12 @@ class StreamVideoOptions {
   final bool includeUserDetailsForAutoConnect;
   final bool keepConnectionsAliveWhenInBackground;
   final bool allowMultipleActiveCalls;
+
+  /// Controls automatic audio suspension between calls when
+  /// [allowMultipleActiveCalls] is `true`. Defaults to [MultiCallAudioPolicy.suspendExisting].
+  ///
+  /// Ignored when [allowMultipleActiveCalls] is `false`.
+  final MultiCallAudioPolicy multiCallAudioPolicy;
 
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;
