@@ -41,10 +41,10 @@ class RtcVideoSource extends RtcMediaSource {
         timestamp: value['timestamp'],
         kind: value['kind'],
         trackIdentifier: value['trackIdentifier'],
-        width: value['width'],
-        height: value['height'],
+        width: (value['width'] as num?)?.toInt(),
+        height: (value['height'] as num?)?.toInt(),
         framesPerSecond: value['framesPerSecond'],
-        frames: value['frames'],
+        frames: (value['frames'] as num?)?.toInt(),
       );
     }
     return null;

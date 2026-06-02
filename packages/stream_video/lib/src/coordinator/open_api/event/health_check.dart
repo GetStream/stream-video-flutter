@@ -101,9 +101,9 @@ class Me {
     channelMutes: json['channel_mutes'] == null
         ? []
         : List<dynamic>.from(json['channel_mutes']!.map((x) => x)),
-    unreadCount: json['unread_count'],
-    totalUnreadCount: json['total_unread_count'],
-    unreadChannels: json['unread_channels'],
+    unreadCount: (json['unread_count'] as num?)?.toInt(),
+    totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
+    unreadChannels: (json['unread_channels'] as num?)?.toInt(),
     language: json['language'],
     image: json['image'],
     imageUrl: json['imageURL'],
