@@ -131,9 +131,9 @@ void main() {
       expect(stream.ssrc, isA<int>());
       expect(stream.bytesReceived, isA<int>());
 
-      // Double fields are untouched.
       expect(stream.jitter, 0.007);
       expect(stream.framesPerSecond, 29.0);
+      expect(stream.framesPerSecond, isA<double>());
       expect(stream.jitterBufferDelay, 4.69);
     });
   });
