@@ -24,34 +24,25 @@ runs:
     - name: Temporary Override Local Dependencies
       shell: bash
       run: |
-        # Add dependency_overrides to use local paths instead of pub.dev versions
-        # This preserves the original YAML formatting by appending to files
-
-        # --- stream_video_flutter ---
-        cat >> packages/stream_video_flutter/pubspec.yaml << 'PUBSPEC_EOF'
-
+        cat > packages/stream_video_flutter/pubspec_overrides.yaml << 'EOF'
         dependency_overrides:
           stream_video:
             path: ../stream_video
-        PUBSPEC_EOF
+        EOF
 
-        # --- stream_video_push_notification ---
-        cat >> packages/stream_video_push_notification/pubspec.yaml << 'PUBSPEC_EOF'
-
+        cat > packages/stream_video_push_notification/pubspec_overrides.yaml << 'EOF'
         dependency_overrides:
           stream_video:
             path: ../stream_video
           stream_video_flutter:
             path: ../stream_video_flutter
-        PUBSPEC_EOF
+        EOF
 
-        # --- stream_video_noise_cancellation ---
-        cat >> packages/stream_video_noise_cancellation/pubspec.yaml << 'PUBSPEC_EOF'
-
+        cat > packages/stream_video_noise_cancellation/pubspec_overrides.yaml << 'EOF'
         dependency_overrides:
           stream_video:
             path: ../stream_video
-        PUBSPEC_EOF
+        EOF
 
     - name: Install Flutter
       uses: subosito/flutter-action@v2
