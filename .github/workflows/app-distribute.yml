@@ -23,6 +23,10 @@ on:
         type: boolean
         description: Android
         default: true
+      upload_android_to_play_store:
+        type: boolean
+        description: Upload Android AAB to Play Store (uncheck to only build the artifact)
+        default: true
       build_web:
         type: boolean
         description: Web
@@ -162,7 +166,20 @@ jobs:
       - name: Build and Distribute
         run: |
           cd dogfooding/android
-          bundle exec fastlane android build_and_deploy flavor:${{ env.FLAVOR }}
+          if [[ "${{ inputs.upload_android_to_play_store }}" == "false" ]]; then
+            bundle exec fastlane android build_release flavor:${{ env.FLAVOR }}
+          else
+            bundle exec fastlane android build_and_deploy flavor:${{ env.FLAVOR }}
+          fi
+
+      - name: Upload AAB artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ env.FLAVOR }}-release-aab
+          path: dogfooding/build/app/outputs/bundle/${{ env.FLAVOR }}Release/app-${{ env.FLAVOR }}-release.aab
+          if-no-files-found: warn
+          retention-days: 14
 
   build_and_deploy_web:
     name: Build and Deploy Dogfooding Web
