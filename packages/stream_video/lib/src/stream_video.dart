@@ -132,6 +132,10 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
+    @Deprecated(
+      'No longer used, SDPs are now generated lazily per call. This parameter is a no-op and will be removed in a future major release.',
+    )
+    bool precacheGenericSdps = true,
   }) {
     final instance = StreamVideo._(
       apiKey,
