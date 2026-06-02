@@ -415,13 +415,13 @@ extension on open.NoiseCancellationSettings {
 }
 
 extension on open.NoiseCancellationSettingsModeEnum {
-  NoiceCancellationSettingsMode toSettingsDomain() {
+  NoiseCancellationSettingsMode toSettingsDomain() {
     if (this == open.NoiseCancellationSettingsModeEnum.autoOn) {
-      return NoiceCancellationSettingsMode.autoOn;
+      return NoiseCancellationSettingsMode.autoOn;
     } else if (this == open.NoiseCancellationSettingsModeEnum.available) {
-      return NoiceCancellationSettingsMode.available;
+      return NoiseCancellationSettingsMode.available;
     } else {
-      return NoiceCancellationSettingsMode.disabled;
+      return NoiseCancellationSettingsMode.disabled;
     }
   }
 }
