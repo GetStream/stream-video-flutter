@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
+import '../models/call_participant_pin.dart';
 import '../models/models.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_level.dart';
@@ -1586,7 +1587,16 @@ extension SfuEventX on SfuEvent {
       ),
       final SfuParticipantJoinedEvent event => StreamCallParticipantJoinedEvent(
         state.callCid,
-        participant: event.participant.toParticipantState(state),
+        participant: event.isPinned
+            ? event.participant
+                  .toParticipantState(state)
+                  .copyWithPin(
+                    participantPin: CallParticipantPin(
+                      isLocalPin: false,
+                      pinnedAt: DateTime.now(),
+                    ),
+                  )
+            : event.participant.toParticipantState(state),
       ),
       final SfuParticipantLeftEvent event => StreamCallParticipantLeftEvent(
         state.callCid,

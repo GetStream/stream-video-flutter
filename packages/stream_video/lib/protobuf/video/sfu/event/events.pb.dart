@@ -1992,10 +1992,12 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   factory ParticipantJoined({
     $core.String? callCid,
     $0.Participant? participant,
+    $core.bool? isPinned,
   }) {
     final result = create();
     if (callCid != null) result.callCid = callCid;
     if (participant != null) result.participant = participant;
+    if (isPinned != null) result.isPinned = isPinned;
     return result;
   }
 
@@ -2016,6 +2018,7 @@ class ParticipantJoined extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'callCid')
     ..aOM<$0.Participant>(2, _omitFieldNames ? '' : 'participant',
         subBuilder: $0.Participant.create)
+    ..aOB(3, _omitFieldNames ? '' : 'isPinned')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2056,6 +2059,15 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   void clearParticipant() => $_clearField(2);
   @$pb.TagNumber(2)
   $0.Participant ensureParticipant() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $core.bool get isPinned => $_getBF(2);
+  @$pb.TagNumber(3)
+  set isPinned($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasIsPinned() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearIsPinned() => $_clearField(3);
 }
 
 /// ParticipantJoined is fired when a user leaves a call
@@ -2205,10 +2217,12 @@ class SubscriberOffer extends $pb.GeneratedMessage {
   factory SubscriberOffer({
     $core.bool? iceRestart,
     $core.String? sdp,
+    $core.int? negotiationId,
   }) {
     final result = create();
     if (iceRestart != null) result.iceRestart = iceRestart;
     if (sdp != null) result.sdp = sdp;
+    if (negotiationId != null) result.negotiationId = negotiationId;
     return result;
   }
 
@@ -2228,6 +2242,8 @@ class SubscriberOffer extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'iceRestart')
     ..aOS(2, _omitFieldNames ? '' : 'sdp')
+    ..aI(3, _omitFieldNames ? '' : 'negotiationId',
+        fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2266,6 +2282,15 @@ class SubscriberOffer extends $pb.GeneratedMessage {
   $core.bool hasSdp() => $_has(1);
   @$pb.TagNumber(2)
   void clearSdp() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get negotiationId => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set negotiationId($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasNegotiationId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNegotiationId() => $_clearField(3);
 }
 
 class PublisherAnswer extends $pb.GeneratedMessage {
@@ -2896,12 +2921,15 @@ class VideoSender extends $pb.GeneratedMessage {
     $core.Iterable<VideoLayerSetting>? layers,
     $0.TrackType? trackType,
     $core.int? publishOptionId,
+    $0.DegradationPreference? degradationPreference,
   }) {
     final result = create();
     if (codec != null) result.codec = codec;
     if (layers != null) result.layers.addAll(layers);
     if (trackType != null) result.trackType = trackType;
     if (publishOptionId != null) result.publishOptionId = publishOptionId;
+    if (degradationPreference != null)
+      result.degradationPreference = degradationPreference;
     return result;
   }
 
@@ -2926,6 +2954,9 @@ class VideoSender extends $pb.GeneratedMessage {
     ..aE<$0.TrackType>(4, _omitFieldNames ? '' : 'trackType',
         enumValues: $0.TrackType.values)
     ..aI(5, _omitFieldNames ? '' : 'publishOptionId')
+    ..aE<$0.DegradationPreference>(
+        6, _omitFieldNames ? '' : 'degradationPreference',
+        enumValues: $0.DegradationPreference.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2978,6 +3009,16 @@ class VideoSender extends $pb.GeneratedMessage {
   $core.bool hasPublishOptionId() => $_has(3);
   @$pb.TagNumber(5)
   void clearPublishOptionId() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $0.DegradationPreference get degradationPreference => $_getN(4);
+  @$pb.TagNumber(6)
+  set degradationPreference($0.DegradationPreference value) =>
+      $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasDegradationPreference() => $_has(4);
+  @$pb.TagNumber(6)
+  void clearDegradationPreference() => $_clearField(6);
 }
 
 /// sent to users when they need to change the quality of their video

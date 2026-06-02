@@ -1,4 +1,7 @@
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../../../protobuf/video/sfu/models/models.pbenum.dart' as sfu_enums;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
@@ -137,5 +140,28 @@ extension SfuPublishOptionsMapper on SfuPublishOptions {
           ?.map((it) => it.toDTO())
           .toList(),
     );
+  }
+}
+
+extension SfuDegradationPreferenceMapper on sfu_enums.DegradationPreference {
+  RTCDegradationPreference? toRtc() {
+    switch (this) {
+      case sfu_enums.DegradationPreference.DEGRADATION_PREFERENCE_BALANCED:
+        return RTCDegradationPreference.BALANCED;
+      case sfu_enums
+          .DegradationPreference
+          .DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE:
+        return RTCDegradationPreference.MAINTAIN_FRAMERATE;
+      case sfu_enums
+          .DegradationPreference
+          .DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION:
+        return RTCDegradationPreference.MAINTAIN_RESOLUTION;
+      case sfu_enums
+          .DegradationPreference
+          .DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION:
+        return RTCDegradationPreference.MAINTAIN_FRAMERATE_AND_RESOLUTION;
+      default:
+        return null;
+    }
   }
 }

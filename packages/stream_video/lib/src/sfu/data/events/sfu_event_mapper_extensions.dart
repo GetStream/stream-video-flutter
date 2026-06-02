@@ -119,6 +119,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuParticipantJoinedEvent(
           callCid: participantJoined.callCid,
           participant: participantJoined.participant.toDomain(),
+          isPinned: participantJoined.isPinned,
         );
       case sfu_events.SfuEvent_EventPayload.participantLeft:
         return SfuParticipantLeftEvent(
@@ -490,6 +491,7 @@ extension SfuVideoSenderExtension on sfu_events.VideoSender {
       layers: layers.map((it) => it.toDomain()).toList(),
       trackType: trackType.toDomain(),
       publishOptionId: publishOptionId,
+      degradationPreference: degradationPreference.toRtc(),
     );
   }
 }
@@ -538,6 +540,7 @@ extension on sfu_models.PublishOption {
       audioBitrateProfiles: audioBitrateProfiles
           .map((it) => it.toDomain())
           .toList(),
+      degradationPreference: degradationPreference.toRtc(),
     );
   }
 }

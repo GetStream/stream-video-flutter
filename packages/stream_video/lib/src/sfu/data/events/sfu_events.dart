@@ -148,13 +148,15 @@ class SfuParticipantJoinedEvent extends SfuEvent {
   const SfuParticipantJoinedEvent({
     required this.callCid,
     required this.participant,
+    this.isPinned = false,
   });
 
   final String callCid;
   final SfuParticipant participant;
+  final bool isPinned;
 
   @override
-  List<Object> get props => [callCid, participant];
+  List<Object> get props => [callCid, participant, isPinned];
 }
 
 @internal

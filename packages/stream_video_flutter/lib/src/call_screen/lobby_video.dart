@@ -78,10 +78,12 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
     }
 
     try {
+      final nativeFactory = await widget.call.ensureNativeFactory();
       final cameraTrack = await RtcLocalTrack.camera(
         constraints: CameraConstraints(
           deviceId: widget.initialCameraDevice?.id,
         ),
+        nativeFactory: nativeFactory,
       );
       await widget.onCameraTrackSet?.call(cameraTrack);
 
@@ -100,7 +102,10 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
     }
 
     try {
-      final microphoneTrack = await RtcLocalTrack.audio();
+      final nativeFactory = await widget.call.ensureNativeFactory();
+      final microphoneTrack = await RtcLocalTrack.audio(
+        nativeFactory: nativeFactory,
+      );
       await widget.onMicrophoneTrackSet?.call(microphoneTrack);
 
       return setState(() => _microphoneTrack = microphoneTrack);

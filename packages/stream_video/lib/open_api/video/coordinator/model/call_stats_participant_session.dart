@@ -20,7 +20,10 @@ class CallStatsParticipantSession {
     this.currentSfu,
     this.distanceToSfuKilometers,
     this.endedAt,
+    this.freezesDurationMs,
     required this.isLive,
+    this.jitterMs,
+    this.latencyMs,
     this.location,
     this.os,
     required this.publishedTracks,
@@ -89,7 +92,31 @@ class CallStatsParticipantSession {
   ///
   DateTime? endedAt;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? freezesDurationMs;
+
   bool isLive;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? jitterMs;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? latencyMs;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -170,7 +197,10 @@ class CallStatsParticipantSession {
           other.currentSfu == currentSfu &&
           other.distanceToSfuKilometers == distanceToSfuKilometers &&
           other.endedAt == endedAt &&
+          other.freezesDurationMs == freezesDurationMs &&
           other.isLive == isLive &&
+          other.jitterMs == jitterMs &&
+          other.latencyMs == latencyMs &&
           other.location == location &&
           other.os == os &&
           other.publishedTracks == publishedTracks &&
@@ -194,7 +224,10 @@ class CallStatsParticipantSession {
           ? 0
           : distanceToSfuKilometers!.hashCode) +
       (endedAt == null ? 0 : endedAt!.hashCode) +
+      (freezesDurationMs == null ? 0 : freezesDurationMs!.hashCode) +
       (isLive.hashCode) +
+      (jitterMs == null ? 0 : jitterMs!.hashCode) +
+      (latencyMs == null ? 0 : latencyMs!.hashCode) +
       (location == null ? 0 : location!.hashCode) +
       (os == null ? 0 : os!.hashCode) +
       (publishedTracks.hashCode) +
@@ -208,7 +241,7 @@ class CallStatsParticipantSession {
 
   @override
   String toString() =>
-      'CallStatsParticipantSession[browser=$browser, browserVersion=$browserVersion, cqScore=$cqScore, currentIp=$currentIp, currentSfu=$currentSfu, distanceToSfuKilometers=$distanceToSfuKilometers, endedAt=$endedAt, isLive=$isLive, location=$location, os=$os, publishedTracks=$publishedTracks, publisherType=$publisherType, sdk=$sdk, sdkVersion=$sdkVersion, startedAt=$startedAt, unifiedSessionId=$unifiedSessionId, userSessionId=$userSessionId, webrtcVersion=$webrtcVersion]';
+      'CallStatsParticipantSession[browser=$browser, browserVersion=$browserVersion, cqScore=$cqScore, currentIp=$currentIp, currentSfu=$currentSfu, distanceToSfuKilometers=$distanceToSfuKilometers, endedAt=$endedAt, freezesDurationMs=$freezesDurationMs, isLive=$isLive, jitterMs=$jitterMs, latencyMs=$latencyMs, location=$location, os=$os, publishedTracks=$publishedTracks, publisherType=$publisherType, sdk=$sdk, sdkVersion=$sdkVersion, startedAt=$startedAt, unifiedSessionId=$unifiedSessionId, userSessionId=$userSessionId, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -247,7 +280,22 @@ class CallStatsParticipantSession {
     } else {
       json[r'ended_at'] = null;
     }
+    if (this.freezesDurationMs != null) {
+      json[r'freezes_duration_ms'] = this.freezesDurationMs;
+    } else {
+      json[r'freezes_duration_ms'] = null;
+    }
     json[r'is_live'] = this.isLive;
+    if (this.jitterMs != null) {
+      json[r'jitter_ms'] = this.jitterMs;
+    } else {
+      json[r'jitter_ms'] = null;
+    }
+    if (this.latencyMs != null) {
+      json[r'latency_ms'] = this.latencyMs;
+    } else {
+      json[r'latency_ms'] = null;
+    }
     if (this.location != null) {
       json[r'location'] = this.location;
     } else {
@@ -328,7 +376,10 @@ class CallStatsParticipantSession {
         distanceToSfuKilometers:
             mapValueOfType<double>(json, r'distance_to_sfu_kilometers'),
         endedAt: mapDateTime(json, r'ended_at', r''),
+        freezesDurationMs: mapValueOfType<int>(json, r'freezes_duration_ms'),
         isLive: mapValueOfType<bool>(json, r'is_live')!,
+        jitterMs: mapValueOfType<int>(json, r'jitter_ms'),
+        latencyMs: mapValueOfType<int>(json, r'latency_ms'),
         location: CallStatsLocation.fromJson(json[r'location']),
         os: mapValueOfType<String>(json, r'os'),
         publishedTracks:

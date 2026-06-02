@@ -91,6 +91,7 @@ abstract class CoordinatorClient {
     List<String> migratingFromList = const [],
     bool? video,
     int? membersLimit,
+    bool? hintHighScaleLivestreamPublisher,
   });
 
   Future<Result<List<String>>> ringCall({

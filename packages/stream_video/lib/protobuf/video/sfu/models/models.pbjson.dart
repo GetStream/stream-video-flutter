@@ -325,6 +325,26 @@ final $typed_data.Uint8List clientCapabilityDescriptor = $convert.base64Decode(
     'ooQ0xJRU5UX0NBUEFCSUxJVFlfU1VCU0NSSUJFUl9WSURFT19QQVVTRRABEicKI0NMSUVOVF9D'
     'QVBBQklMSVRZX0NPT1JESU5BVE9SX1NUQVRTEAI=');
 
+@$core.Deprecated('Use degradationPreferenceDescriptor instead')
+const DegradationPreference$json = {
+  '1': 'DegradationPreference',
+  '2': [
+    {'1': 'DEGRADATION_PREFERENCE_UNSPECIFIED', '2': 0},
+    {'1': 'DEGRADATION_PREFERENCE_BALANCED', '2': 1},
+    {'1': 'DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE', '2': 2},
+    {'1': 'DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION', '2': 3},
+    {'1': 'DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION', '2': 4},
+  ],
+};
+
+/// Descriptor for `DegradationPreference`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List degradationPreferenceDescriptor = $convert.base64Decode(
+    'ChVEZWdyYWRhdGlvblByZWZlcmVuY2USJgoiREVHUkFEQVRJT05fUFJFRkVSRU5DRV9VTlNQRU'
+    'NJRklFRBAAEiMKH0RFR1JBREFUSU9OX1BSRUZFUkVOQ0VfQkFMQU5DRUQQARItCilERUdSQURB'
+    'VElPTl9QUkVGRVJFTkNFX01BSU5UQUlOX0ZSQU1FUkFURRACEi4KKkRFR1JBREFUSU9OX1BSRU'
+    'ZFUkVOQ0VfTUFJTlRBSU5fUkVTT0xVVElPThADEjwKOERFR1JBREFUSU9OX1BSRUZFUkVOQ0Vf'
+    'TUFJTlRBSU5fRlJBTUVSQVRFX0FORF9SRVNPTFVUSU9OEAQ=');
+
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = {
   '1': 'CallState',
@@ -636,6 +656,14 @@ const PublishOption$json = {
       '6': '.stream.video.sfu.models.AudioBitrate',
       '10': 'audioBitrateProfiles'
     },
+    {
+      '1': 'degradation_preference',
+      '3': 11,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.DegradationPreference',
+      '10': 'degradationPreference'
+    },
   ],
 };
 
@@ -650,7 +678,9 @@ final $typed_data.Uint8List publishOptionDescriptor = $convert.base64Decode(
     'bWVuc2lvblIOdmlkZW9EaW1lbnNpb24SDgoCaWQYCCABKAVSAmlkEigKEHVzZV9zaW5nbGVfbG'
     'F5ZXIYCSABKAhSDnVzZVNpbmdsZUxheWVyElsKFmF1ZGlvX2JpdHJhdGVfcHJvZmlsZXMYCiAD'
     'KAsyJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BdWRpb0JpdHJhdGVSFGF1ZGlvQml0cmF0ZV'
-    'Byb2ZpbGVz');
+    'Byb2ZpbGVzEmUKFmRlZ3JhZGF0aW9uX3ByZWZlcmVuY2UYCyABKA4yLi5zdHJlYW0udmlkZW8u'
+    'c2Z1Lm1vZGVscy5EZWdyYWRhdGlvblByZWZlcmVuY2VSFWRlZ3JhZGF0aW9uUHJlZmVyZW5jZQ'
+    '==');
 
 @$core.Deprecated('Use codecDescriptor instead')
 const Codec$json = {
@@ -762,6 +792,13 @@ const TrackInfo$json = {
       '5': 5,
       '10': 'publishOptionId'
     },
+    {
+      '1': 'self_sub_audio_video',
+      '3': 13,
+      '4': 1,
+      '5': 8,
+      '10': 'selfSubAudioVideo'
+    },
   ],
 };
 
@@ -773,7 +810,8 @@ final $typed_data.Uint8List trackInfoDescriptor = $convert.base64Decode(
     'IQCgNtaWQYBiABKAlSA21pZBIQCgNkdHgYByABKAhSA2R0eBIWCgZzdGVyZW8YCCABKAhSBnN0'
     'ZXJlbxIQCgNyZWQYCSABKAhSA3JlZBIUCgVtdXRlZBgKIAEoCFIFbXV0ZWQSNAoFY29kZWMYCy'
     'ABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IFY29kZWMSKgoRcHVibGlzaF9v'
-    'cHRpb25faWQYDCABKAVSD3B1Ymxpc2hPcHRpb25JZA==');
+    'cHRpb25faWQYDCABKAVSD3B1Ymxpc2hPcHRpb25JZBIvChRzZWxmX3N1Yl9hdWRpb192aWRlbx'
+    'gNIAEoCFIRc2VsZlN1YkF1ZGlvVmlkZW8=');
 
 @$core.Deprecated('Use errorDescriptor instead')
 const Error$json = {

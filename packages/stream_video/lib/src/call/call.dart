@@ -47,6 +47,7 @@ import '../utils/subscriptions.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
+import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
@@ -278,7 +279,91 @@ class Call {
 
   CallCredentials? _credentials;
   CallSession? _session;
+  CallSession? get callSession => _session;
   CallSession? _previousSession;
+  StreamPeerConnectionFactory? _pcFactory;
+
+  /// Audio track states captured at suspension time.
+  final _suspendedTrackStates = <String, SuspendedTrackState>{};
+
+  StreamPeerConnectionFactory _ensurePcFactory() {
+    return _pcFactory ??= StreamPeerConnectionFactory(
+      callCid: callCid,
+      audioConfigurationPolicy:
+          _stateManager.callState.preferences.audioConfigurationPolicy ??
+          _streamVideo.options.audioConfigurationPolicy,
+    );
+  }
+
+  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
+    return _ensurePcFactory().ensureNativeFactory();
+  }
+
+  Future<void> suspendAudio() async {
+    final factory = _pcFactory;
+    if (factory == null) {
+      _logger.w(() => '[suspendAudio] no factory yet');
+      return;
+    }
+
+    if (_stateManager.callState.isAudioSuspended) {
+      _logger.d(() => '[suspendAudio] already suspended');
+      return;
+    }
+
+    _suspendedTrackStates.clear();
+    _stateManager.state = _stateManager.callState.copyWith(
+      isAudioSuspended: true,
+    );
+
+    try {
+      await factory.suspendAudio();
+    } catch (e, stk) {
+      _logger.e(() => '[suspendAudio] native suspend failed: $e\n$stk');
+      _suspendedTrackStates.clear();
+      _stateManager.state = _stateManager.callState.copyWith(
+        isAudioSuspended: false,
+      );
+      return;
+    }
+
+    final tracks = _session?.rtcManager?.tracks;
+    if (tracks != null) {
+      for (final entry in tracks.entries) {
+        final track = entry.value;
+        if (track.isAudioTrack) {
+          final wasEnabled = track.mediaTrack.enabled;
+          _suspendedTrackStates[entry.key] = wasEnabled
+              ? SuspendedTrackState.wasEnabled
+              : SuspendedTrackState.wasDisabled;
+
+          track.disable();
+
+          _logger.d(
+            () =>
+                '[suspendAudio] disabled track ${entry.key} '
+                '(was enabled: $wasEnabled)',
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> resumeAudio() async {
+    final factory = _pcFactory;
+    if (factory == null) {
+      _logger.w(() => '[resumeAudio] no factory yet');
+      return;
+    }
+    await factory.resumeAudio();
+
+    await _session?.resumeSuspendedAudioTracks(_suspendedTrackStates);
+    _suspendedTrackStates.clear();
+
+    _stateManager.state = _stateManager.callState.copyWith(
+      isAudioSuspended: false,
+    );
+  }
 
   StatsOptions? _sfuStatsOptions;
   SfuStatsReporter? _sfuStatsReporter;
@@ -536,9 +621,11 @@ class Call {
         // Notify the client about the permission request.
         return onPermissionRequest?.call(event);
       case StreamCallRejectedEvent _:
-        return _stateManager.coordinatorCallRejected(event);
+        await _handleCoordinatorCallRejected(event);
+        return;
       case StreamCallAcceptedEvent _:
-        return _stateManager.coordinatorCallAccepted(event);
+        await _handleCoordinatorCallAccepted(event);
+        return;
       case StreamCallEndedEvent _:
         return _stateManager.coordinatorCallEnded(event);
       case StreamCallPermissionsUpdatedEvent _:
@@ -643,6 +730,48 @@ class Call {
       default:
         break;
     }
+  }
+
+  Future<void> _handleCoordinatorCallAccepted(
+    StreamCallAcceptedEvent event,
+  ) async {
+    final currentUserId = _stateManager.callState.currentUserId;
+    final status = state.value.status;
+
+    if (event.acceptedByUserId == currentUserId &&
+        status is CallStatusIncoming &&
+        !status.acceptedByMe) {
+      _logger.i(
+        () =>
+            '[onCoordinatorEvent] call accepted on another device, '
+            'rejecting locally with userRespondedElsewhere',
+      );
+      await reject(reason: CallRejectReason.userRespondedElsewhere());
+      return;
+    }
+
+    _stateManager.coordinatorCallAccepted(event);
+  }
+
+  Future<void> _handleCoordinatorCallRejected(
+    StreamCallRejectedEvent event,
+  ) async {
+    final currentUserId = _stateManager.callState.currentUserId;
+    final status = state.value.status;
+
+    if (event.rejectedByUserId == currentUserId &&
+        status is CallStatusIncoming &&
+        !status.acceptedByMe) {
+      _logger.i(
+        () =>
+            '[onCoordinatorEvent] call rejected on another device, '
+            'rejecting locally with userRespondedElsewhere',
+      );
+      await reject(reason: CallRejectReason.userRespondedElsewhere());
+      return;
+    }
+
+    _stateManager.coordinatorCallRejected(event);
   }
 
   void _handleModerationWarningEvent(
@@ -768,6 +897,7 @@ class Call {
       }
     }
 
+    _session?.trace('call.accept', null);
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Success<None>) {
       _stateManager.lifecycleCallAccepted();
@@ -779,8 +909,9 @@ class Call {
   /// Rejects the incoming call.
   Future<Result<None>> reject({CallRejectReason? reason}) async {
     final state = this.state.value;
-    _logger.i(() => '[reject] state: $state');
+    _logger.i(() => '[reject] reason: $reason');
 
+    _session?.trace('call.reject', reason?.value);
     final result = await _coordinatorClient.rejectCall(
       cid: state.callCid,
       reason: reason?.value,
@@ -801,32 +932,46 @@ class Call {
 
   /// Ends the call for all participants.
   Future<Result<None>> end({String? reason}) async {
-    final state = this.state.value;
-    _logger.d(() => '[end] status: ${state.status}');
+    _logger.d(() => '[end] status: ${state.value.status}');
 
-    if (state.status is! CallStatusActive) {
-      _logger.w(() => '[end] rejected (invalid status): ${state.status}');
-      return Result.error('invalid status: ${state.status}');
+    if (state.value.status is! CallStatusActive) {
+      _logger.w(() => '[end] rejected (invalid status): ${state.value.status}');
+      return Result.error('invalid status: ${state.value.status}');
     }
 
-    _session?.leave(reason: reason ?? 'user is ending the call');
-    await _clear('end');
+    try {
+      final didDisconnect = await _disconnect(
+        sfuLeaveReason: reason ?? 'user is ending the call',
+      );
 
-    final result = await _permissionsManager.endCall();
-    _stateManager.lifecycleCallEnded();
+      // If another disconnect already ran (or is running), don't fire the
+      // server-side endCall a second time and don't re-emit the lifecycle
+      // event.
+      if (!didDisconnect) {
+        _logger.v(() => '[end] disconnect short-circuited');
+        return const Result.success(none);
+      }
 
-    _logger.v(() => '[end] completed: $result');
-    return result;
+      final result = await _permissionsManager.endCall();
+      _stateManager.lifecycleCallEnded();
+
+      _logger.v(() => '[end] completed: $result');
+      return result;
+    } finally {
+      _leaveCallTriggered = false;
+    }
   }
 
   /// Joins the call.
   ///
   /// - [connectOptions]: optional initial call configuration
   /// - [membersLimit]: Sets the maximum number of members to return as part of the response.
+  /// - [hintHighScaleLivestreamPublisher]: Whether the local user is a high-scale livestream publisher.
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     await _init();
 
@@ -881,6 +1026,8 @@ class Call {
               connectOptions: connectOptions,
               membersLimit: membersLimit,
               maxJoinRetries: maxJoinRetries,
+              hintHighScaleLivestreamPublisher:
+                  hintHighScaleLivestreamPublisher,
             )
             .asCancelable()
             .storeIn(_idConnect, _cancelables)
@@ -906,6 +1053,7 @@ class Call {
     int? membersLimit,
     int maxJoinRetries = 3,
     String? reconnectReason,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     if (_callJoinLock.locked) {
       _logger.w(() => '[join] rejected (already joining)');
@@ -925,6 +1073,7 @@ class Call {
             sfuToForceExclude: sfuToForceExclude,
             sfusToExclude: List.unmodifiable(sfusToExclude),
             reconnectReason: reconnectReason,
+            hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
           ),
         );
 
@@ -1026,6 +1175,7 @@ class Call {
     String? sfuToForceExclude,
     List<String> sfusToExclude = const [],
     String? reconnectReason,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     _logger.d(() => '[join] options: $_connectOptions');
     final connectionTimeStopwatch = Stopwatch()..start();
@@ -1072,6 +1222,7 @@ class Call {
       membersLimit: membersLimit,
       forceMigratingFrom: sfuToForceExclude,
       migratingFromList: sfusToExclude,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
     );
 
     if (joinedResult is! Success<CallCredentials>) {
@@ -1116,12 +1267,16 @@ class Call {
         networkMonitor: networkMonitor,
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
+        pcFactory: _ensurePcFactory(),
         leftoverTraceRecords:
             _previousSession
                 ?.getTrace()
                 .expand((slice) => slice.snapshot)
                 .toList() ??
             const [],
+        onSuspendedAudioTrackRecorded: (trackId) {
+          _suspendedTrackStates[trackId] = SuspendedTrackState.neverStarted;
+        },
         onReconnectionNeeded: (pc, strategy) {
           _session?.trace('pc_reconnection_needed', {
             'peerConnectionId': pc.type.name,
@@ -1196,6 +1351,8 @@ class Call {
           _fastReconnectDeadline;
     }
 
+    _session?.startPublisherConnectionCheck();
+
     // make sure we only track connection timing if we are not calling this method as part of a migration flow
     connectionTimeStopwatch.stop();
     if (!performingMigration) {
@@ -1223,6 +1380,21 @@ class Call {
       _stateManager.lifecycleCallConnected();
     }
 
+    // Re-bind audio filter after rejoin/migrate, as iOS may drop it.
+    if ((performingRejoin || performingMigration) &&
+        _streamVideo.isAudioProcessorConfigured() &&
+        state.value.isAudioProcessing) {
+      unawaited(
+        _streamVideo.setAudioProcessingEnabled(true).then((result) {
+          if (result.isFailure) {
+            _logger.w(
+              () =>
+                  '[join] re-binding audio processing after reconnect failed: $result',
+            );
+          }
+        }),
+      );
+    }
     _logger.v(() => '[join] completed');
     return const Result.success(none);
   }
@@ -1232,6 +1404,7 @@ class Call {
     int? membersLimit,
     String? forceMigratingFrom,
     List<String> migratingFromList = const [],
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     _logger.d(
       () =>
@@ -1269,6 +1442,7 @@ class Call {
         migratingFrom: migratingFrom,
         migratingFromList: effectiveMigratingFromList,
         membersLimit: membersLimit,
+        hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
       );
 
       return joinedResult.fold(
@@ -1305,6 +1479,7 @@ class Call {
     List<String> migratingFromList = const [],
     int? membersLimit,
     CallConnectOptions? connectOptions,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     _logger.d(
       () =>
@@ -1323,6 +1498,7 @@ class Call {
       migratingFromList: migratingFromList,
       video: video,
       membersLimit: membersLimit,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
     );
 
     if (joinResult is! Success<CoordinatorJoined>) {
@@ -1371,7 +1547,7 @@ class Call {
 
     if (_streamVideo.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
-            NoiceCancellationSettingsMode.autoOn) {
+            NoiseCancellationSettingsMode.autoOn) {
       // AutoOn will enable noise cancellation if the device has sufficient processing power
       unawaited(
         startAudioProcessing(
@@ -1697,7 +1873,17 @@ class Call {
       final reconnectStartTime = DateTime.now();
       var fastReconnectAttemptsCount = 0;
       do {
-        _awaitNetworkAvailableFuture = _awaitNetworkAvailable();
+        // Wait for a stable network before reconnecting with rejoin/migrate
+        // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
+        final stabilityWindow =
+            (_reconnectStrategy == SfuReconnectionStrategy.rejoin ||
+                _reconnectStrategy == SfuReconnectionStrategy.migrate)
+            ? const Duration(seconds: 3)
+            : Duration.zero;
+
+        _awaitNetworkAvailableFuture = _awaitNetworkAvailable(
+          stabilityWindow: stabilityWindow,
+        );
 
         if (state.value.preferences.reconnectTimeout > Duration.zero) {
           final elapsed = DateTime.now().difference(reconnectStartTime);
@@ -1899,40 +2085,96 @@ class Call {
     }
   }
 
-  Future<InternetStatus> _awaitNetworkAvailable() async {
+  /// Waits until the network becomes available **and** stays connected for
+  /// [stabilityWindow]. When [stabilityWindow] is [Duration.zero] (the
+  /// default), the method returns as soon as connectivity is detected.
+  ///
+  /// The total time spent in this method is bounded by
+  /// [CallPreferences.networkAvailabilityTimeout]. If the network keeps
+  /// flickering (connecting then dropping within the stability window),
+  /// the remaining budget shrinks on each iteration until it is exhausted.
+  Future<InternetStatus> _awaitNetworkAvailable({
+    Duration stabilityWindow = Duration.zero,
+  }) async {
     final previousCheckInterval = networkMonitor.checkInterval;
+    final budget = state.value.preferences.networkAvailabilityTimeout;
+    final deadline = Stopwatch()..start();
+
     try {
       networkMonitor.setIntervalAndResetTimer(
         _streamVideo.options.networkMonitorSettings.offlineCheckInterval,
       );
 
-      final networkFuture = networkMonitor.onStatusChange
-          .startWithFuture(networkMonitor.internetStatus)
-          .firstWhere((status) => status == InternetStatus.connected)
-          .timeout(
-            state.value.preferences.networkAvailabilityTimeout,
-            onTimeout: () {
-              _logger.w(() => '[_awaitNetworkAvailable] timeout');
-              return InternetStatus.disconnected;
-            },
+      while (true) {
+        final remaining = budget - deadline.elapsed;
+        if (remaining <= Duration.zero) {
+          _logger.w(
+            () => '[_awaitNetworkAvailable] total budget exhausted',
           );
+          return InternetStatus.disconnected;
+        }
 
-      final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
-        _logger.w(() => '[_awaitNetworkAvailable] call was left');
-        return InternetStatus.disconnected;
-      });
+        final networkFuture = networkMonitor.onStatusChange
+            .startWithFuture(networkMonitor.internetStatus)
+            .firstWhere((status) => status == InternetStatus.connected)
+            .timeout(
+              remaining,
+              onTimeout: () {
+                _logger.w(() => '[_awaitNetworkAvailable] timeout');
+                return InternetStatus.disconnected;
+              },
+            );
 
-      // Race the network future against the call lifecycle cancellable
-      // to ensure we don't wait for the network if the call was left
-      final connectionStatus =
-          await Future.any([
-                networkFuture,
-                lifecycleFuture,
-              ])
-              .asCancelable()
-              .storeIn(_idFastReconnectTimeout, _cancelables)
-              .valueOrDefault(InternetStatus.disconnected);
-      return connectionStatus;
+        final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
+          _logger.w(() => '[_awaitNetworkAvailable] call was left');
+          return InternetStatus.disconnected;
+        });
+
+        // Race the network future against the call lifecycle cancellable
+        // to ensure we don't wait for the network if the call was left
+        final connectionStatus =
+            await Future.any([
+                  networkFuture,
+                  lifecycleFuture,
+                ])
+                .asCancelable()
+                .storeIn(_idFastReconnectTimeout, _cancelables)
+                .valueOrDefault(InternetStatus.disconnected);
+
+        if (connectionStatus == InternetStatus.disconnected) {
+          return connectionStatus;
+        }
+
+        if (stabilityWindow <= Duration.zero) {
+          return connectionStatus;
+        }
+
+        // Verify the connection holds for the full stability window.
+        try {
+          await networkMonitor.onStatusChange
+              .where((s) => s == InternetStatus.disconnected)
+              .first
+              .timeout(stabilityWindow);
+
+          // Stream emitted before timeout → network dropped during window.
+          _logger.w(
+            () =>
+                '[_awaitNetworkAvailable] network dropped during '
+                '${stabilityWindow.inSeconds}s stability window, retrying',
+          );
+          _session?.trace('awaitNetwork.unstable', {
+            'stabilityWindowSeconds': stabilityWindow.inSeconds,
+          });
+        } on TimeoutException {
+          // No drop detected within the window — network is stable.
+          _logger.v(
+            () =>
+                '[_awaitNetworkAvailable] network stable for '
+                '${stabilityWindow.inSeconds}s',
+          );
+          return InternetStatus.connected;
+        }
+      }
     } finally {
       networkMonitor.setIntervalAndResetTimer(previousCheckInterval);
     }
@@ -1983,41 +2225,80 @@ class Call {
   ///
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) async {
+    _logger.i(() => '[leave] reason: $reason');
+
     try {
-      if (_leaveCallTriggered) {
-        _logger.i(() => '[leave] rejected (already leaving call)');
-        return const Result.success(none);
+      final didDisconnect = await _disconnect(
+        sfuLeaveReason: _sfuLeaveReason(reason),
+      );
+
+      if (didDisconnect) {
+        _stateManager.lifecycleCallDisconnected(reason: reason);
       }
-
-      _leaveCallTriggered = true;
-
-      // Complete the leave completer to cancel ongoing operations
-      if (!_callLifecycleCompleter.isCompleted) {
-        _callLifecycleCompleter.complete();
-      }
-
-      final state = this.state.value;
-      _logger.i(() => '[leave] state: $state');
-
-      if (state.status.isDisconnected) {
-        _logger.d(() => '[leave] rejected (state.status is disconnected)');
-        return const Result.success(none);
-      }
-
-      try {
-        _session?.leave(reason: 'user is leaving the call');
-      } finally {
-        await _clear('leave');
-      }
-
-      _stateManager.lifecycleCallDisconnected(reason: reason);
 
       _logger.v(() => '[leave] finished');
-
       return const Result.success(none);
     } finally {
       _leaveCallTriggered = false;
     }
+  }
+
+  /// Shared cleanup sequence for [leave] and [end].
+  ///
+  /// Sets [_leaveCallTriggered], completes [_callLifecycleCompleter], sends
+  /// the SFU leave message, and runs [_clear]. Returns `true` when the
+  /// cleanup actually ran; `false` if it was short-circuited because a
+  /// concurrent disconnect was already in flight or the call was already
+  /// disconnected.
+  Future<bool> _disconnect({required String sfuLeaveReason}) async {
+    if (_leaveCallTriggered) {
+      _logger.i(() => '[disconnect] rejected (already disconnecting)');
+      return false;
+    }
+
+    _leaveCallTriggered = true;
+
+    // Complete the lifecycle completer to cancel ongoing operations awaiting
+    // it (e.g. _startSession). This must run regardless of whether the
+    // disconnect proceeds further so that nothing gets stuck waiting.
+    if (!_callLifecycleCompleter.isCompleted) {
+      _callLifecycleCompleter.complete();
+    }
+
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[disconnect] rejected (status is disconnected)');
+      return false;
+    }
+
+    try {
+      _session?.leave(reason: sfuLeaveReason);
+    } finally {
+      await _clear('disconnect');
+    }
+
+    return true;
+  }
+
+  String _sfuLeaveReason(DisconnectReason? reason) {
+    if (reason == null) return 'user is leaving the call';
+
+    return switch (reason) {
+      final DisconnectReasonRejected rejected =>
+        'rejected: ${rejected.reason?.value ?? 'unspecified'}',
+      final DisconnectReasonFailure failure => 'failure: ${failure.error}',
+      final DisconnectReasonSfuError sfuError => 'sfu error: ${sfuError.error}',
+      final DisconnectReasonCancelled cancelled =>
+        'cancelled: ${cancelled.byUserId}',
+      DisconnectReasonReplaced _ => 'replaced by another call',
+      DisconnectReasonReconnectionFailed _ => 'reconnection failed',
+      DisconnectReasonLastParticipantLeft _ => 'last participant left',
+      DisconnectReasonCallEnded _ => 'call ended externally',
+      DisconnectReasonEnded _ => 'call ended',
+      DisconnectReasonTimeout _ => 'timeout',
+      DisconnectReasonManuallyClosed _ => 'manually closed',
+      DisconnectReasonBlocked _ => 'blocked',
+      _ => 'user is leaving the call',
+    };
   }
 
   Future<void> _clear(String src) async {
@@ -2029,6 +2310,7 @@ class Call {
     ]) {
       timer.cancel();
     }
+
     _videoModerationTimer?.cancel();
     _videoModerationTimer = null;
 
@@ -2040,20 +2322,48 @@ class Call {
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
 
+    // The audio processor is owned by StreamVideo, not by an individual
+    // Call, so stopping it on this call's teardown would silently drop noise
+    // cancellation on any other still-active call that also wants it. Only
+    // stop the global processor when no other active call is configured for
+    // NoiseCancellationSettingsMode.autoOn.
     if (state.value.settings.audio.noiseCancellation?.mode ==
-        NoiceCancellationSettingsMode.autoOn) {
-      unawaited(
-        stopAudioProcessing().catchError((Object e) {
-          _logger.w(() => '[clear] stopAudioProcessing failed: $e');
-          return const Result.success(none);
-        }),
+        NoiseCancellationSettingsMode.autoOn) {
+      final anotherCallWantsAutoOn = _streamVideo.state.activeCalls.value.any(
+        (other) =>
+            other.callCid != callCid &&
+            other.state.value.status is! CallStatusDisconnected &&
+            other.state.value.settings.audio.noiseCancellation?.mode ==
+                NoiseCancellationSettingsMode.autoOn,
       );
+      if (!anotherCallWantsAutoOn) {
+        unawaited(
+          stopAudioProcessing().catchError((Object e) {
+            _logger.w(() => '[clear] stopAudioProcessing failed: $e');
+            return const Result.success(none);
+          }),
+        );
+      } else {
+        _logger.d(
+          () =>
+              '[clear] keeping audio processor running '
+              '(another active call has autoOn)',
+        );
+      }
     }
 
     if (_session != null) {
+      await _session!.dispose().catchError((Object e) {
+        _logger.w(() => '[clear] session dispose failed: $e');
+      });
+    }
+
+    final pcFactory = _pcFactory;
+    _pcFactory = null;
+    if (pcFactory != null) {
       unawaited(
-        _session!.dispose().catchError((Object e) {
-          _logger.w(() => '[clear] session dispose failed: $e');
+        pcFactory.dispose().catchError((Object e) {
+          _logger.w(() => '[clear] pcFactory dispose failed: $e');
         }),
       );
     }
@@ -2208,7 +2518,9 @@ class Call {
       if (CurrentPlatform.isIos) {
         await _session?.rtcManager?.setAppleAudioConfiguration(
           speakerOn: _connectOptions.speakerDefaultOn,
-          policy: _streamVideo.options.audioConfigurationPolicy,
+          policy:
+              _stateManager.callState.preferences.audioConfigurationPolicy ??
+              _streamVideo.options.audioConfigurationPolicy,
         );
       }
     }
@@ -3215,6 +3527,7 @@ class Call {
     }
   }
 
+  /// Enables or disables the microphone for this call.
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
@@ -3269,7 +3582,15 @@ class Call {
     return result.map((_) => none);
   }
 
-  Future<bool> requestScreenSharePermission() {
+  Future<bool> requestScreenSharePermission() async {
+    // Request screen share permission from the native factory if available
+    final nativeFactory = await _session?.rtcManager?.pcFactory
+        .ensureNativeFactory();
+
+    if (nativeFactory != null) {
+      return nativeFactory.requestCapturePermission();
+    }
+
     return Helper.requestCapturePermission();
   }
 
@@ -3535,6 +3856,11 @@ class Call {
     required ViewportVisibility visibility,
     required SfuTrackTypeVideo trackType,
   }) async {
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[updateViewportVisibility] rejected (disconnected)');
+      return const Result.success(none);
+    }
+
     final change = VisibilityChange(
       sessionId: sessionId,
       userId: userId,
@@ -3851,10 +4177,10 @@ extension FutureStartWithEx<T> on Stream<T> {
   }
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// Call factory to create a [Call] instance.
 /// Only meant for testing purposes.
 @visibleForTesting
+// ignore: avoid_classes_with_only_static_members
 class BaseCallFactory {
   static Call makeCall({
     required CoordinatorClient coordinatorClient,

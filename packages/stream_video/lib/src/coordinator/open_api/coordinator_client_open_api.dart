@@ -517,6 +517,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     List<String> migratingFromList = const [],
     bool? video,
     int? membersLimit,
+    bool? hintHighScaleLivestreamPublisher,
   }) async {
     try {
       _logger.d(
@@ -543,6 +544,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           migratingFrom: migratingFrom,
           migratingFromList: migratingFromList,
           video: video,
+          hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
         ),
       );
       _logger.v(() => '[joinCall] completed: $result');

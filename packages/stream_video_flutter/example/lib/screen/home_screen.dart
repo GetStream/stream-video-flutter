@@ -53,10 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: true,
           title: const Text('Call Details'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: _logout,
-            ),
+            IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
           ],
           bottom: const TabBar(
             tabs: [

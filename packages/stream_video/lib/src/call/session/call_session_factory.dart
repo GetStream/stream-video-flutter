@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../stream_video.dart';
 import '../../core/utils.dart';
 import '../../webrtc/peer_connection.dart';
+import '../../webrtc/peer_connection_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/trace_record.dart';
@@ -46,9 +47,11 @@ class CallSessionFactory {
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
     required OnReconnectionNeeded onReconnectionNeeded,
+    required void Function(String trackId) onSuspendedAudioTrackRecorded,
     required InternetConnection networkMonitor,
     required StatsOptions statsOptions,
     required StreamVideo streamVideo,
+    required StreamPeerConnectionFactory pcFactory,
     ClientPublishOptions? clientPublishOptions,
     List<TraceRecord> leftoverTraceRecords = const [],
   }) async {
@@ -93,11 +96,13 @@ class CallSessionFactory {
       dynascaleManager: dynascaleManager,
       sdpEditor: sdpEditor,
       onReconnectionNeeded: onReconnectionNeeded,
+      onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded,
       clientPublishOptions: clientPublishOptions,
       networkMonitor: networkMonitor,
       statsOptions: statsOptions,
       streamVideo: streamVideo,
       tracer: tracer,
+      pcFactory: pcFactory,
     );
   }
 

@@ -564,5 +564,45 @@ class ClientCapability extends $pb.ProtobufEnum {
   const ClientCapability._(super.value, super.name);
 }
 
+/// DegradationPreference represents the RTCDegradationPreference from WebRTC.
+/// See https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSender/setParameters#degradationpreference
+class DegradationPreference extends $pb.ProtobufEnum {
+  static const DegradationPreference DEGRADATION_PREFERENCE_UNSPECIFIED =
+      DegradationPreference._(
+          0, _omitEnumNames ? '' : 'DEGRADATION_PREFERENCE_UNSPECIFIED');
+  static const DegradationPreference DEGRADATION_PREFERENCE_BALANCED =
+      DegradationPreference._(
+          1, _omitEnumNames ? '' : 'DEGRADATION_PREFERENCE_BALANCED');
+  static const DegradationPreference DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE =
+      DegradationPreference._(
+          2, _omitEnumNames ? '' : 'DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE');
+  static const DegradationPreference
+      DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION = DegradationPreference._(3,
+          _omitEnumNames ? '' : 'DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION');
+  static const DegradationPreference
+      DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION =
+      DegradationPreference._(
+          4,
+          _omitEnumNames
+              ? ''
+              : 'DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION');
+
+  static const $core.List<DegradationPreference> values =
+      <DegradationPreference>[
+    DEGRADATION_PREFERENCE_UNSPECIFIED,
+    DEGRADATION_PREFERENCE_BALANCED,
+    DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE,
+    DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION,
+    DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION,
+  ];
+
+  static final $core.List<DegradationPreference?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static DegradationPreference? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const DegradationPreference._(super.value, super.name);
+}
+
 const $core.bool _omitEnumNames =
     $core.bool.fromEnvironment('protobuf.omit_enum_names');

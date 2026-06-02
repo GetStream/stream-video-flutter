@@ -808,6 +808,7 @@ const ParticipantJoined$json = {
       '6': '.stream.video.sfu.models.Participant',
       '10': 'participant'
     },
+    {'1': 'is_pinned', '3': 3, '4': 1, '5': 8, '10': 'isPinned'},
   ],
 };
 
@@ -815,7 +816,7 @@ const ParticipantJoined$json = {
 final $typed_data.Uint8List participantJoinedDescriptor = $convert.base64Decode(
     'ChFQYXJ0aWNpcGFudEpvaW5lZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZBJGCgtwYXJ0aW'
     'NpcGFudBgCIAEoCzIkLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBhcnRpY2lwYW50UgtwYXJ0'
-    'aWNpcGFudA==');
+    'aWNpcGFudBIbCglpc19waW5uZWQYAyABKAhSCGlzUGlubmVk');
 
 @$core.Deprecated('Use participantLeftDescriptor instead')
 const ParticipantLeft$json = {
@@ -867,13 +868,14 @@ const SubscriberOffer$json = {
   '2': [
     {'1': 'ice_restart', '3': 1, '4': 1, '5': 8, '10': 'iceRestart'},
     {'1': 'sdp', '3': 2, '4': 1, '5': 9, '10': 'sdp'},
+    {'1': 'negotiation_id', '3': 3, '4': 1, '5': 13, '10': 'negotiationId'},
   ],
 };
 
 /// Descriptor for `SubscriberOffer`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List subscriberOfferDescriptor = $convert.base64Decode(
     'Cg9TdWJzY3JpYmVyT2ZmZXISHwoLaWNlX3Jlc3RhcnQYASABKAhSCmljZVJlc3RhcnQSEAoDc2'
-    'RwGAIgASgJUgNzZHA=');
+    'RwGAIgASgJUgNzZHASJQoObmVnb3RpYXRpb25faWQYAyABKA1SDW5lZ290aWF0aW9uSWQ=');
 
 @$core.Deprecated('Use publisherAnswerDescriptor instead')
 const PublisherAnswer$json = {
@@ -1080,6 +1082,14 @@ const VideoSender$json = {
       '10': 'trackType'
     },
     {'1': 'publish_option_id', '3': 5, '4': 1, '5': 5, '10': 'publishOptionId'},
+    {
+      '1': 'degradation_preference',
+      '3': 6,
+      '4': 1,
+      '5': 14,
+      '6': '.stream.video.sfu.models.DegradationPreference',
+      '10': 'degradationPreference'
+    },
   ],
 };
 
@@ -1089,7 +1099,9 @@ final $typed_data.Uint8List videoSenderDescriptor = $convert.base64Decode(
     'NvZGVjUgVjb2RlYxJBCgZsYXllcnMYAyADKAsyKS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LlZp'
     'ZGVvTGF5ZXJTZXR0aW5nUgZsYXllcnMSQQoKdHJhY2tfdHlwZRgEIAEoDjIiLnN0cmVhbS52aW'
     'Rlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEioKEXB1Ymxpc2hfb3B0aW9uX2lk'
-    'GAUgASgFUg9wdWJsaXNoT3B0aW9uSWQ=');
+    'GAUgASgFUg9wdWJsaXNoT3B0aW9uSWQSZQoWZGVncmFkYXRpb25fcHJlZmVyZW5jZRgGIAEoDj'
+    'IuLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkRlZ3JhZGF0aW9uUHJlZmVyZW5jZVIVZGVncmFk'
+    'YXRpb25QcmVmZXJlbmNl');
 
 @$core.Deprecated('Use changePublishQualityDescriptor instead')
 const ChangePublishQuality$json = {

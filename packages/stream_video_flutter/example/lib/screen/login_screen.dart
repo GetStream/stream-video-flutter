@@ -5,16 +5,10 @@ import '../app_config.dart';
 import '../core/auth_repository.dart';
 import 'home_screen.dart';
 
-typedef ConnectUser =
-    Future<Result<None>> Function(
-      UserInfo user,
-    );
+typedef ConnectUser = Future<Result<None>> Function(UserInfo user);
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({
-    super.key,
-    required this.connectUser,
-  });
+  const LoginScreen({super.key, required this.connectUser});
 
   final ConnectUser connectUser;
 
@@ -44,9 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final users = sampleUsers;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select a user'),
-      ),
+      appBar: AppBar(title: const Text('Select a user')),
       body: SafeArea(
         child: Stack(
           children: [
@@ -95,9 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (mounted) {
       await Navigator.of(context).push(
-        MaterialPageRoute<dynamic>(
-          builder: (context) => const HomeScreen(),
-        ),
+        MaterialPageRoute<dynamic>(builder: (context) => const HomeScreen()),
       );
     }
   }

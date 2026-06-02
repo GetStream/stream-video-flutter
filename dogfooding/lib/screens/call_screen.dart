@@ -47,6 +47,17 @@ class _CallScreenState extends State<CallScreen> {
   late final _videoEffectsManager =
       widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
+  late final _speakingWhileMuted = SpeakingWhileMutedRecognition(
+    call: widget.call,
+  );
+  late final StreamSubscription<SpeakingWhileMutedState>
+  _speakingWhileMutedSubscription;
+  Timer? _speakingWhileMutedDebounce;
+  DateTime? _lastSnackbarShownAt;
+
+  static const _snackbarDebounce = Duration(seconds: 1);
+  static const _snackbarCooldown = Duration(seconds: 5);
+
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
   bool _moreMenuVisible = false;
@@ -55,10 +66,44 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     _connectChatChannel();
+    _speakingWhileMutedSubscription = _speakingWhileMuted.stream.listen(
+      _onSpeakingWhileMutedChanged,
+    );
+  }
+
+  void _onSpeakingWhileMutedChanged(SpeakingWhileMutedState state) {
+    if (!state.isSpeakingWhileMuted) {
+      _speakingWhileMutedDebounce?.cancel();
+      _speakingWhileMutedDebounce = null;
+      return;
+    }
+
+    if (_speakingWhileMutedDebounce?.isActive ?? false) return;
+
+    _speakingWhileMutedDebounce = Timer(_snackbarDebounce, () {
+      if (!mounted) return;
+
+      final now = DateTime.now();
+      if (_lastSnackbarShownAt != null &&
+          now.difference(_lastSnackbarShownAt!) < _snackbarCooldown) {
+        return;
+      }
+
+      _lastSnackbarShownAt = now;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(
+          content: Text('You are muted. Unmute to speak.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    });
   }
 
   @override
   void dispose() {
+    _speakingWhileMutedDebounce?.cancel();
+    _speakingWhileMutedSubscription.cancel();
+    _speakingWhileMuted.dispose();
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();

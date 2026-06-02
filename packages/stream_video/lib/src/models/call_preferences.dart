@@ -1,3 +1,4 @@
+import 'audio_configuration_policy.dart';
 import 'call_client_publish_options.dart';
 import 'moderation_blur_config.dart';
 
@@ -54,6 +55,11 @@ abstract class CallPreferences {
   /// Configuration for how the SDK handles call moderation events.
   /// Defaults to [VideoModerationConfig.disabled].
   VideoModerationConfig get videoModerationConfig;
+
+  /// Per-call audio configuration override. When non-null, the per-call
+  /// native peer-connection factory is built with this policy instead of
+  /// the client-level default `StreamVideoOptions.audioConfigurationPolicy`.
+  AudioConfigurationPolicy? get audioConfigurationPolicy;
 }
 
 class DefaultCallPreferences implements CallPreferences {
@@ -68,6 +74,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.closedCaptionsVisibilityDurationMs = 2700,
     this.closedCaptionsVisibleCaptions = 2,
     this.videoModerationConfig = const VideoModerationConfig.disabled(),
+    this.audioConfigurationPolicy,
   });
 
   /// The maximum duration to wait when establishing a connection to the call.
@@ -149,4 +156,12 @@ class DefaultCallPreferences implements CallPreferences {
   /// Defaults to [VideoModerationConfig.disabled].
   @override
   final VideoModerationConfig videoModerationConfig;
+
+  /// Per-call audio configuration override. When non-null, the per-call
+  /// native peer-connection factory is built with this policy instead of
+  /// the client-level default `StreamVideoOptions.audioConfigurationPolicy`.
+  ///
+  /// Defaults to null (falls back to `StreamVideoOptions.audioConfigurationPolicy`).
+  @override
+  final AudioConfigurationPolicy? audioConfigurationPolicy;
 }

@@ -576,6 +576,7 @@ const SendAnswerRequest$json = {
     },
     {'1': 'sdp', '3': 2, '4': 1, '5': 9, '10': 'sdp'},
     {'1': 'session_id', '3': 3, '4': 1, '5': 9, '10': 'sessionId'},
+    {'1': 'negotiation_id', '3': 4, '4': 1, '5': 13, '10': 'negotiationId'},
   ],
 };
 
@@ -583,7 +584,8 @@ const SendAnswerRequest$json = {
 final $typed_data.Uint8List sendAnswerRequestDescriptor = $convert.base64Decode(
     'ChFTZW5kQW5zd2VyUmVxdWVzdBI+CglwZWVyX3R5cGUYASABKA4yIS5zdHJlYW0udmlkZW8uc2'
     'Z1Lm1vZGVscy5QZWVyVHlwZVIIcGVlclR5cGUSEAoDc2RwGAIgASgJUgNzZHASHQoKc2Vzc2lv'
-    'bl9pZBgDIAEoCVIJc2Vzc2lvbklk');
+    'bl9pZBgDIAEoCVIJc2Vzc2lvbklkEiUKDm5lZ290aWF0aW9uX2lkGAQgASgNUg1uZWdvdGlhdG'
+    'lvbklk');
 
 @$core.Deprecated('Use sendAnswerResponseDescriptor instead')
 const SendAnswerResponse$json = {

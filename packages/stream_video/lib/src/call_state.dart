@@ -8,6 +8,17 @@ import 'models/models.dart';
 import 'sfu/data/models/sfu_audio_bitrate.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
+enum SuspendedTrackState {
+  /// Track existed and was enabled before suspension.
+  wasEnabled,
+
+  /// Track existed but was already disabled before suspension.
+  wasDisabled,
+
+  /// Track arrived while audio was suspended and was never started.
+  neverStarted,
+}
+
 /// Represents the call's state.
 @immutable
 class CallState extends Equatable {
@@ -55,6 +66,7 @@ class CallState extends Equatable {
       iOSMultitaskingCameraAccessEnabled: false,
       custom: const {},
       isVideoModerated: false,
+      isAudioSuspended: false,
     );
   }
 
@@ -97,6 +109,7 @@ class CallState extends Equatable {
     required this.iOSMultitaskingCameraAccessEnabled,
     required this.custom,
     required this.isVideoModerated,
+    required this.isAudioSuspended,
   });
 
   final CallPreferences preferences;
@@ -139,6 +152,9 @@ class CallState extends Equatable {
 
   /// Whether the local user's video is currently blurred by moderation.
   final bool isVideoModerated;
+
+  /// Whether audio tracks have been suspended for this call.
+  final bool isAudioSuspended;
 
   String get callId => callCid.id;
 
@@ -212,6 +228,7 @@ class CallState extends Equatable {
     bool? iOSMultitaskingCameraAccessEnabled,
     Map<String, Object>? custom,
     bool? isVideoModerated,
+    bool? isAudioSuspended,
   }) {
     return CallState._(
       preferences: preferences ?? this.preferences,
@@ -255,6 +272,7 @@ class CallState extends Equatable {
           this.iOSMultitaskingCameraAccessEnabled,
       custom: custom ?? this.custom,
       isVideoModerated: isVideoModerated ?? this.isVideoModerated,
+      isAudioSuspended: isAudioSuspended ?? this.isAudioSuspended,
     );
   }
 
@@ -329,6 +347,7 @@ class CallState extends Equatable {
     iOSMultitaskingCameraAccessEnabled,
     custom,
     isVideoModerated,
+    isAudioSuspended,
   ];
 
   @override
@@ -337,6 +356,7 @@ class CallState extends Equatable {
         ' callCid: $callCid, createdByUser: $createdByUser,'
         ' sessionId: $sessionId, isRecording: $isRecording,'
         ' isVideoModerated: $isVideoModerated,'
+        ' isAudioSuspended: $isAudioSuspended,'
         ' settings: $settings, egress: $egress, '
         ' videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'

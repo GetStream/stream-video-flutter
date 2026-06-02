@@ -361,6 +361,7 @@ class StreamPeerConnection extends Disposable {
   Future<Result<rtc.RTCRtpTransceiver>> addVideoTransceiver({
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
+    rtc.RTCDegradationPreference? degradationPreference,
   }) async {
     try {
       final transceiver = await pc.addTransceiver(
@@ -374,6 +375,7 @@ class StreamPeerConnection extends Disposable {
 
       final params = transceiver.sender.parameters;
       params.degradationPreference =
+          degradationPreference ??
           rtc.RTCDegradationPreference.MAINTAIN_FRAMERATE;
       await transceiver.sender.setParameters(params);
 
@@ -512,8 +514,16 @@ class StreamPeerConnection extends Disposable {
   }
 
   void _onRenegotiationNeeded() {
-    _logger.v(() => '[onRenegotiationNeeded] no args');
+    if (_isReconnecting) {
+      _logger.i(
+        () =>
+            '[onRenegotiationNeeded] suppressed — reconnect in progress for '
+            '$type, will renegotiate explicitly after reconnect',
+      );
+      return;
+    }
 
+    _logger.v(() => '[onRenegotiationNeeded] no args');
     onRenegotiationNeeded?.call(this);
   }
 
