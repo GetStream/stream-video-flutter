@@ -12,7 +12,7 @@ dependencies:
   collection: ^1.19.1
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
-  device_info_plus: ^12.1.0
+  device_info_plus: ">=12.1.0 <14.0.0"
   envied: ^1.2.1
   firebase_auth: ^6.0.2
   firebase_core: ^4.1.0
