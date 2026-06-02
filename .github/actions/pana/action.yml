@@ -22,7 +22,7 @@ runs:
   using: "composite"
   steps:
     - name: Temporary Override Local Dependencies
-      uses: mikefarah/yq@master
+      uses: mikefarah/yq@v4.53.2
       with:
         cmd: |
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_flutter/pubspec.yaml
