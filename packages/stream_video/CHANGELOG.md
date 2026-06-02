@@ -1,4 +1,4 @@
-## Upcoming
+## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
 
@@ -21,7 +21,7 @@ Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-
 
 ### 🔄 Changed
 
-- [iOS/Android] Each call now owns an isolated native `PeerConnectionFactory` and `AudioDeviceModule`. Previously, all calls shared the global ambient factory. This per-call isolation is what enables clean multi-call audio. Integrators building tracks directly should pass `nativeFactory: await call.ensureNativeFactory()` to the `RtcLocalTrack.*` constructors.
+- [iOS/Android] Each call now also owns an isolated native `AudioDeviceModule`. Previously, all calls shared the global ambient factory. This per-call isolation is what enables clean multi-call audio. Integrators building tracks directly should pass `nativeFactory: await call.ensureNativeFactory()` to the `RtcLocalTrack.*` constructors.
 
 ## 1.3.3
 
