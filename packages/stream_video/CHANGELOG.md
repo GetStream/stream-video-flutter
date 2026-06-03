@@ -16,7 +16,7 @@ Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-
 - Fixed a sibling call's audio breaking when a ringing 1:1 call ended via `dropIfAloneInRingingFlow` (the remote party hung up first). `Call.end()` and `Call.leave()` now share a single `_disconnect` cleanup path.
 - Made the audio processor teardown in `Call._clear` multi-call aware. The audio processor is owned by `StreamVideo` rather than by an individual `Call`, so disabling it during one call's teardown silently dropped noise cancellation on any other still-active call. `_clear` now stops the global processor only when no other active call is configured to use `NoiseCancellationSettingsMode.autoOn`.
 - Fixed noise cancellation breaking on iOS after the rejoin reconnection flow.
-- Fixed a potential iOS crash on call end when noise cancellation was active.
+- Fixed a potential iOS crash on call end when disabling noise cancellation.
 - [WASM] Fixed integer stats fields failing to parse, where JS numbers arrive as `double`.
 
 ### 🔄 Changed

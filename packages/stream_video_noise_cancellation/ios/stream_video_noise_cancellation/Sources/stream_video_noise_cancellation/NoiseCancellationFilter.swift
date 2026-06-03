@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import os
 import stream_webrtc_flutter
 
 /// A concrete implementation of `AudioFilter` that applies noise cancellation effects.
@@ -14,9 +15,14 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     public typealias ReleaseClosure = () -> Void
 
     private var isActive: Bool = false
-    private let serialQueue = DispatchQueue(
-        label: "io.getstream.video.NoiseCancellationFilter"
-    )
+
+    /// Guards `isActive` and, crucially, the underlying noise-cancellation processor so that
+    /// `process` can never run concurrently with `initialize` / `release`.
+    private let unfairLock: os_unfair_lock_t = {
+        let lock = os_unfair_lock_t.allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
+        return lock
+    }()
 
     private let name: String
     private let initializeClosure: InitializeClosure
@@ -41,6 +47,11 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
         releaseClosure = release
     }
 
+    deinit {
+        unfairLock.deinitialize(count: 1)
+        unfairLock.deallocate()
+    }
+
     // MARK: - AudioFilter
 
     /// The identifier of the filter.
@@ -51,16 +62,18 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        serialQueue.async { [weak self] in
-            guard let self, !isActive else { return }
-            initializeClosure(sampleRate, channels)
-            isActive = true
-        }
+        os_unfair_lock_lock(unfairLock)
+        defer { os_unfair_lock_unlock(unfairLock) }
+        guard !isActive else { return }
+        initializeClosure(sampleRate, channels)
+        isActive = true
     }
 
     /// Applies noise cancellation processing to the audio buffer.
     /// - Parameter buffer: The audio buffer to which the effect is applied.
     public func applyEffect(to buffer: inout RTCAudioBuffer) {
+        os_unfair_lock_lock(unfairLock)
+        defer { os_unfair_lock_unlock(unfairLock) }
         guard isActive else { return }
         processClosure(
             buffer.channels,
@@ -72,12 +85,13 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
 
     /// Releases the filter by stopping noise cancellation for the active call.
     ///
-    /// Set `isActive = false` before `releaseClosure()` to prevent further processing on a torn-down filter.
+    /// Holding `unfairLock` here ensures the Krisp model is never freed while
+    /// `applyEffect(to:)` is mid-flight on the audio thread.
     public func release() {
-        serialQueue.async { [weak self] in
-            guard let self else { return }
-            isActive = false
-            releaseClosure()
-        }
+        os_unfair_lock_lock(unfairLock)
+        defer { os_unfair_lock_unlock(unfairLock) }
+        guard isActive else { return }
+        isActive = false
+        releaseClosure()
     }
 }
