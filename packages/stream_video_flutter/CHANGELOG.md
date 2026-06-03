@@ -1,14 +1,42 @@
+## 1.4.0
+
+Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
+
+### ✅ Added
+
+- Added `Call.ensureNativeFactory()`, which returns the per-call native `NativePeerConnectionFactory`. Use it to pin pre-join media (e.g. lobby-preview tracks created via `RtcLocalTrack.camera(nativeFactory: …)`) to the same factory the call uses after joining.
+- Added a per-call `audioConfigurationPolicy` override on `DefaultCallPreferences`. It falls back to `StreamVideoOptions.audioConfigurationPolicy` when null.
+- The publisher now respects the SFU `degradationPreference` for video quality, falling back to `maintain-framerate` when it is unspecified.
+
+### 🐞 Fixed
+
+- Fixed connection flickering that caused the rejoin flow to fail in some cases.
+- Added safety nets and recovery for cases where the publisher connection fails to establish after a reconnection (e.g. the SFU answer is lost or ICE stays in the `new` state).
+- Fixed sibling-call audio capture being silently broken when another concurrently active call ended (e.g. a 1:1 ringing call ending alongside a running livestream, or a previous ringing call ending before a new one was accepted).
+- Fixed a sibling call's audio breaking when a ringing 1:1 call ended via `dropIfAloneInRingingFlow` (the remote party hung up first). `Call.end()` and `Call.leave()` now share a single `_disconnect` cleanup path.
+- Made the audio processor teardown in `Call._clear` multi-call aware. The audio processor is owned by `StreamVideo` rather than by an individual `Call`, so disabling it during one call's teardown silently dropped noise cancellation on any other still-active call. `_clear` now stops the global processor only when no other active call is configured to use `NoiseCancellationSettingsMode.autoOn`.
+- Fixed noise cancellation breaking on iOS after the rejoin reconnection flow.
+- Fixed a potential iOS crash on call end when noise cancellation was active.
+- [WASM] Fixed integer stats fields failing to parse, where JS numbers arrive as `double`.
+
+### 🔄 Changed
+
+- [iOS/Android] Each call now also owns an isolated native `AudioDeviceModule`. Previously, all calls shared the global ambient factory. This per-call isolation is what enables clean multi-call audio. Integrators building tracks directly should pass `nativeFactory: await call.ensureNativeFactory()` to the `RtcLocalTrack.*` constructors.
+
 ## 1.3.3
 
 ### 🐞 Fixed
-* Fixed `TranscriptionSettingsResponse.fromJson` crashing with a null check error when the backend returns an empty string for the `language` field.
+
+- Fixed `TranscriptionSettingsResponse.fromJson` crashing with a null check error when the backend returns an empty string for the `language` field.
 
 ### 🔄 Changed
-* Improved disconnect/reject reason propagation.
+
+- Improved disconnect/reject reason propagation.
 
 ### ✅ Added
-* Support server-side pinning on participant join. When the SFU sends `isPinned: true` on a `ParticipantJoined` event, the participant is now automatically pinned.
-* Added `hintHighScaleLivestreamPublisher` parameter to `Call.join()` to allow marking the participant as publishing to a large audience.
+
+- Support server-side pinning on participant join. When the SFU sends `isPinned: true` on a `ParticipantJoined` event, the participant is now automatically pinned.
+- Added `hintHighScaleLivestreamPublisher` parameter to `Call.join()` to allow marking the participant as publishing to a large audience.
 
 ## 1.3.2
 
