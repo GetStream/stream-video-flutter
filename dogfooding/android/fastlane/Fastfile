@@ -34,7 +34,7 @@ platform :android do
     is_prod = options[:flavor] == 'prod'
 
     upload_to_play_store(
-      track: is_prod ? 'internal' : 'internal',
+      track: is_prod ? 'production' : 'internal',
       aab: "../build/app/outputs/bundle/#{options[:flavor]}Release/app-#{options[:flavor]}-release.aab",
       skip_upload_screenshots: true,
       skip_upload_images: true,
