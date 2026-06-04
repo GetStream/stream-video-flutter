@@ -1,3 +1,10 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- Fixed an issue where ringing a member during an ongoing call could prematurely end the call if they declined.
+- Fixed an issue where a failed call accept attempt left the CallKit call active on iOS.
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
