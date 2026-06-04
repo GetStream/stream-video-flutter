@@ -93,47 +93,52 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       }
     }).toList();
 
-    if (state.createdByMe) {
-      final everyoneElseRejected =
-          state.otherParticipants.isEmpty &&
-          state.callMembers
-              .where((m) => m.userId != state.currentUserId)
-              .every((m) => rejectedBy.keys.contains(m.userId));
+    // Auto-disconnect on rejection only applies to the ringing flow (call
+    // created with `ringing: true`). Ringing users mid-call via `Call.ring()`
+    // must not tear down the already established call when everyone declines.
+    if (state.isRingingFlow) {
+      if (state.createdByMe) {
+        final everyoneElseRejected =
+            state.otherParticipants.isEmpty &&
+            state.callMembers
+                .where((m) => m.userId != state.currentUserId)
+                .every((m) => rejectedBy.keys.contains(m.userId));
 
-      if (everyoneElseRejected) {
-        _logger.d(
-          () => '[coordinatorCallRejected] everyone rejected, disconnecting',
-        );
-        state = state.copyWith(
-          status: CallStatus.disconnected(
-            DisconnectReason.rejected(
-              byUserId: event.rejectedByUserId,
-              reason: CallRejectReason.allOtherParticipantsRejected(),
+        if (everyoneElseRejected) {
+          _logger.d(
+            () => '[coordinatorCallRejected] everyone rejected, disconnecting',
+          );
+          state = state.copyWith(
+            status: CallStatus.disconnected(
+              DisconnectReason.rejected(
+                byUserId: event.rejectedByUserId,
+                reason: CallRejectReason.allOtherParticipantsRejected(),
+              ),
             ),
-          ),
-          sessionId: '',
-          callParticipants: const [],
-          callMembers: members,
-        );
-        return;
-      }
-    } else {
-      if (rejectedBy.keys.contains(state.createdByUserId)) {
-        _logger.d(
-          () => '[coordinatorCallRejected] creator rejected, disconnecting',
-        );
-        state = state.copyWith(
-          status: CallStatus.disconnected(
-            DisconnectReason.rejected(
-              byUserId: event.rejectedByUserId,
-              reason: CallRejectReason.creatorRejected(),
+            sessionId: '',
+            callParticipants: const [],
+            callMembers: members,
+          );
+          return;
+        }
+      } else {
+        if (rejectedBy.keys.contains(state.createdByUserId)) {
+          _logger.d(
+            () => '[coordinatorCallRejected] creator rejected, disconnecting',
+          );
+          state = state.copyWith(
+            status: CallStatus.disconnected(
+              DisconnectReason.rejected(
+                byUserId: event.rejectedByUserId,
+                reason: CallRejectReason.creatorRejected(),
+              ),
             ),
-          ),
-          sessionId: '',
-          callParticipants: const [],
-          callMembers: members,
-        );
-        return;
+            sessionId: '',
+            callParticipants: const [],
+            callMembers: members,
+          );
+          return;
+        }
       }
     }
 
