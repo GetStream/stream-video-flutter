@@ -161,6 +161,9 @@ MockClientState setupMockClientState() {
     () => clientState.removeActiveCall(any()),
   ).thenAnswer((_) => Future.value());
   when(() => clientState.outgoingCall).thenAnswer((_) => outgoingCallEmitter);
+  when(
+    () => clientState.setOutgoingCall(any()),
+  ).thenAnswer((_) => Future.value());
 
   return clientState;
 }
