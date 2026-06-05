@@ -87,13 +87,17 @@ class CallParticipantsList extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: StreamButton.tertiary(
-                          icon: const Icon(
-                            Icons.link,
-                            color: Colors.white,
+                        // Builder provides the button's own context so the
+                        // share sheet can be anchored to the button.
+                        child: Builder(
+                          builder: (buttonContext) => StreamButton.tertiary(
+                            icon: const Icon(
+                              Icons.link,
+                              color: Colors.white,
+                            ),
+                            label: 'Share link',
+                            onPressed: () => _shareLink(buttonContext),
                           ),
-                          label: 'Share link',
-                          onPressed: () => _shareLink(context),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -271,7 +275,7 @@ class _ParticipantTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    participant.name,
+                    participant.name.ifEmpty(() => participant.userId),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(

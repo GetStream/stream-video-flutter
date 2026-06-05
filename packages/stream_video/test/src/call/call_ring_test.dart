@@ -23,11 +23,13 @@ void main() {
 
   /// Sets up an ongoing (connected) call started by the current user, with the
   /// current user already a member of the call.
-  Future<({
-    Call call,
-    MutableSharedEmitterImpl<CoordinatorEvent> events,
-    MockCoordinatorClient coordinatorClient,
-  })>
+  Future<
+    ({
+      Call call,
+      MutableSharedEmitterImpl<CoordinatorEvent> events,
+      MockCoordinatorClient coordinatorClient,
+    })
+  >
   setupOngoingCall({
     Map<String, CallMember>? members,
   }) async {
@@ -121,24 +123,27 @@ void main() {
       ).called(1);
     });
 
-    test('rings all members not in the call when no ids are provided', () async {
-      final setup = await setupOngoingCall();
-      stubRingCall(
-        setup.coordinatorClient,
-        result: const Result.success(['user1', 'user2']),
-      );
+    test(
+      'rings all members not in the call when no ids are provided',
+      () async {
+        final setup = await setupOngoingCall();
+        stubRingCall(
+          setup.coordinatorClient,
+          result: const Result.success(['user1', 'user2']),
+        );
 
-      final result = await setup.call.ring();
+        final result = await setup.call.ring();
 
-      expect(result.isSuccess, isTrue);
-      verify(
-        () => setup.coordinatorClient.ringCall(
-          callCid: setup.call.callCid,
-          membersIds: const [],
-          video: false,
-        ),
-      ).called(1);
-    });
+        expect(result.isSuccess, isTrue);
+        verify(
+          () => setup.coordinatorClient.ringCall(
+            callCid: setup.call.callCid,
+            membersIds: const [],
+            video: false,
+          ),
+        ).called(1);
+      },
+    );
 
     test('forwards the video flag when ringing', () async {
       final setup = await setupOngoingCall();
@@ -155,18 +160,21 @@ void main() {
       ).called(1);
     });
 
-    test('propagates failure from the coordinator when ringing fails', () async {
-      final setup = await setupOngoingCall();
-      stubRingCall(
-        setup.coordinatorClient,
-        result: const Result.failure(VideoError(message: 'ring failed')),
-      );
+    test(
+      'propagates failure from the coordinator when ringing fails',
+      () async {
+        final setup = await setupOngoingCall();
+        stubRingCall(
+          setup.coordinatorClient,
+          result: const Result.failure(VideoError(message: 'ring failed')),
+        );
 
-      final result = await setup.call.ring(userIds: ['user1']);
+        final result = await setup.call.ring(userIds: ['user1']);
 
-      expect(result.isFailure, isTrue);
-      expect((result as Failure).error.message, equals('ring failed'));
-    });
+        expect(result.isFailure, isTrue);
+        expect((result as Failure).error.message, equals('ring failed'));
+      },
+    );
 
     test('adds a member to the ongoing call via the coordinator', () async {
       final setup = await setupOngoingCall();
@@ -185,8 +193,8 @@ void main() {
         ),
       ).captured;
 
-      final members =
-          (captured.single as Iterable<open.MemberRequest>).toList();
+      final members = (captured.single as Iterable<open.MemberRequest>)
+          .toList();
       expect(members, hasLength(1));
       expect(members.first.userId, equals('user2'));
       expect(members.first.role, equals('user'));
@@ -234,12 +242,14 @@ void main() {
 
         // The newly added member is now part of the call members and is not yet
         // a participant (not in the call).
-        final addedMember = setup.call.state.value.callMembers
-            .firstWhereOrNull((m) => m.userId == newUser.id);
+        final addedMember = setup.call.state.value.callMembers.firstWhereOrNull(
+          (m) => m.userId == newUser.id,
+        );
         expect(addedMember, isNotNull);
         expect(
-          setup.call.state.value.callParticipants
-              .any((p) => p.userId == newUser.id),
+          setup.call.state.value.callParticipants.any(
+            (p) => p.userId == newUser.id,
+          ),
           isFalse,
         );
 
