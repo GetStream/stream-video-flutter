@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload AAB artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-${{ env.FLAVOR }}-release-aab
           path: dogfooding/build/app/outputs/bundle/${{ env.FLAVOR }}Release/app-${{ env.FLAVOR }}-release.aab
