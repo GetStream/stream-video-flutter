@@ -4,8 +4,8 @@ publish_to: none
 description: Flutter Dogfooding App to showcase Video SDK.
 
 environment:
-  sdk: ^3.8.0
-  flutter: ">=3.32.0"
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
 
 dependencies:
   app_links: ^6.4.1

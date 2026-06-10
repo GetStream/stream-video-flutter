@@ -29,7 +29,7 @@ on:
         default: true
 
 env:
-  FLUTTER_VERSION: "3.35.3"
+  FLUTTER_VERSION: "3.44.1"
   FLUTTER_CHANNEL: stable
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
   CREDENTIAL_FILE_CONTENT: ${{ secrets.CREDENTIAL_FILE_CONTENT }}

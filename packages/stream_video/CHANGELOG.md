@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🔄 Changed
+
+- Increased minimum Flutter version to 3.38.0.
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
