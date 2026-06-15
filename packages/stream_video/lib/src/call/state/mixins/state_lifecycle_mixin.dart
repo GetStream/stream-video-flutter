@@ -43,16 +43,16 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallAccepted() {
+  void lifecycleCallAccepted({bool accepted = true}) {
     final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
+    if (status is! CallStatusIncoming || status.acceptedByMe == accepted) {
       _logger.w(
         () => '[lifecycleCallAccepted] rejected (invalid status): $status',
       );
       return;
     }
     state = state.copyWith(
-      status: CallStatus.incoming(acceptedByMe: true),
+      status: CallStatus.incoming(acceptedByMe: accepted),
     );
   }
 
