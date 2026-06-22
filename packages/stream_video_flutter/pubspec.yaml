@@ -28,6 +28,10 @@ dependencies:
   stream_webrtc_flutter: ^3.0.0
   visibility_detector: ^0.4.0+2
 
+dependency_overrides:
+  stream_core:
+    path: ../../../stream-core-flutter/packages/stream_core
+
 dev_dependencies:
   alchemist: ^0.12.1
   build_runner: ^2.8.0
