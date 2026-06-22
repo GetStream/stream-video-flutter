@@ -1,4 +1,4 @@
-import '../../platform_detector/platform_detector.dart';
+import 'package:stream_core/stream_core.dart';
 import '../model/rtc_video_parameters.dart';
 import 'video_constraints.dart';
 

@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -163,7 +162,7 @@ void main() {
 
     test('should clean up outgoing call if it matches', () async {
       // Arrange - create custom client state with exposed emitters
-      final outgoingCallEmitter = MutableStateEmitterImpl<Call?>(null);
+      final outgoingCallEmitter = MutableStateEmitter<Call?>(null);
       final mockClientState = setupMockClientState();
       when(() => mockClientState.outgoingCall).thenReturn(outgoingCallEmitter);
       when(

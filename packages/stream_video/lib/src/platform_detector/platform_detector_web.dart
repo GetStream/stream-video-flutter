@@ -1,4 +1,4 @@
-import 'platform_detector.dart';
+import '../../stream_video.dart';
 
 /// Version running on web
 PlatformType get currentPlatform => PlatformType.web;

@@ -13,7 +13,7 @@ class ClosedCaptionsMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: widget.call.state.asStream(),
+      stream: widget.call.state,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final callState = snapshot.data;

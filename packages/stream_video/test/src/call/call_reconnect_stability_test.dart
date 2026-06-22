@@ -12,7 +12,12 @@ import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/data.dart';
 
-class _MockPeerConnection extends Mock implements StreamPeerConnection {}
+class _MockPeerConnection extends Mock implements StreamPeerConnection {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
 
 void main() {
   setUpAll(() {

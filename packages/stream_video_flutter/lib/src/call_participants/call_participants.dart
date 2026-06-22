@@ -34,10 +34,10 @@ typedef ScreenShareParticipantBuilder =
     );
 
 /// A function used to sort the participants.
-typedef Filter<T> = bool Function(T element);
+typedef CallParticipantFilter<T> = bool Function(T element);
 
 /// Comparator used to sort the participants.
-typedef Sort<T> = Comparator<T>;
+typedef CallParticipantSort<T> = Comparator<T>;
 
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
@@ -48,7 +48,7 @@ class StreamCallParticipants extends StatefulWidget {
     required this.call,
     this.participants,
     this.filter = _defaultFilter,
-    Sort<CallParticipantState>? sort,
+    CallParticipantSort<CallParticipantState>? sort,
     this.enableLocalVideo,
     this.callParticipantBuilder = _defaultParticipantBuilder,
     this.localVideoParticipantBuilder,
@@ -65,10 +65,10 @@ class StreamCallParticipants extends StatefulWidget {
   final List<CallParticipantState>? participants;
 
   /// Used for filtering the call participants.
-  final Filter<CallParticipantState> filter;
+  final CallParticipantFilter<CallParticipantState> filter;
 
   /// Used for sorting the call participants.
-  final Sort<CallParticipantState> sort;
+  final CallParticipantSort<CallParticipantState> sort;
 
   /// Enable local video view for the local participant.
   final bool? enableLocalVideo;
@@ -114,10 +114,11 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   StreamSubscription<List<CallParticipantState>?>? _participantsSubscription;
 
   @override
-  Filter<CallParticipantState> get participantFilter => widget.filter;
+  CallParticipantFilter<CallParticipantState> get participantFilter =>
+      widget.filter;
 
   @override
-  Sort<CallParticipantState> get participantSort => widget.sort;
+  CallParticipantSort<CallParticipantState> get participantSort => widget.sort;
 
   @override
   void initState() {

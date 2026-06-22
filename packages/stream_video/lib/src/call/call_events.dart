@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:stream_core/stream_core.dart';
 
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -11,7 +12,6 @@ import '../sfu/data/models/sfu_connection_info.dart';
 import '../sfu/data/models/sfu_pin.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/sfu_extensions.dart';
-import '../shared_emitter.dart';
 
 abstract class StreamCallEvent extends Equatable {
   const StreamCallEvent(this.callCid);

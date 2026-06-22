@@ -5,7 +5,19 @@
 ///
 library stream_video;
 
-export 'open_api/video/coordinator/api.dart';
+export 'package:stream_core/stream_core.dart'
+    hide
+        AuthType,
+        LifecycleState,
+        PatternMatching,
+        TokenManager,
+        TokenProvider,
+        User,
+        UserToken,
+        UserType;
+
+export 'open_api/video/coordinator/api.dart' hide Role, User;
+export 'open_api/video/coordinator_legacy_enums.dart';
 export 'src/audio_processing/audio_processor.dart';
 export 'src/audio_processing/audio_recognition.dart';
 export 'src/audio_processing/speaking_while_muted_recognition.dart';
@@ -23,7 +35,6 @@ export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';
 export 'src/logger/stream_log.dart';
-export 'src/logger/stream_logger.dart';
 export 'src/models/audio_configuration_policy.dart';
 export 'src/models/models.dart';
 export 'src/network_monitor_settings.dart';
@@ -39,7 +50,6 @@ export 'src/sfu/data/models/sfu_participant_source.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/sorting/call_participant_sorting_presets.dart';
 export 'src/sorting/call_participant_state_sorting.dart';
-export 'src/state_emitter.dart' show MutableStateEmitter, StateEmitter;
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/types/other.dart';

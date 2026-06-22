@@ -28,7 +28,7 @@ class PermissionsManager {
 
   Future<Result<None>> endCall() async {
     if (!hasPermission(CallPermission.endCall)) {
-      return Result.error('has no "end-call" permission');
+      return failureWithError('has no "end-call" permission');
     }
     _logger.d(() => '[endCall] callCid: $callCid');
     final result = await coordinatorClient.endCall(callCid);
@@ -42,7 +42,7 @@ class PermissionsManager {
     final canRequest = permissions.every(canRequestPermission);
     if (!canRequest) {
       _logger.w(() => '[request] rejected (no permission)');
-      return Result.error(
+      return failureWithError(
         'Some permissions cannot be requested (see canRequestPermission method)',
       );
     }
@@ -63,7 +63,7 @@ class PermissionsManager {
     final canUpdate = hasPermission(CallPermission.updateCallPermissions);
     if (!canUpdate) {
       _logger.w(() => '[grant] rejected (no permission)');
-      return Result.error(
+      return failureWithError(
         'Cannot grant permissions (see canUpdatePermission method)',
       );
     }
@@ -86,7 +86,7 @@ class PermissionsManager {
     final canUpdate = hasPermission(CallPermission.updateCallPermissions);
     if (!canUpdate) {
       _logger.w(() => '[revoke] rejected (no permission)');
-      return Result.error(
+      return failureWithError(
         'Cannot revoke permissions (see canUpdatePermission method)',
       );
     }
@@ -104,7 +104,7 @@ class PermissionsManager {
   Future<Result<None>> blockUser(String userId) async {
     if (!hasPermission(CallPermission.blockUsers)) {
       _logger.w(() => '[blockUser] rejected (no permission)');
-      return Result.error('Cannot block user (no permission)');
+      return failureWithError('Cannot block user (no permission)');
     }
     _logger.d(() => '[blockUser] userId: $userId');
     final result = await coordinatorClient.blockUser(
@@ -118,7 +118,7 @@ class PermissionsManager {
   Future<Result<None>> unblockUser(String userId) async {
     if (!hasPermission(CallPermission.blockUsers)) {
       _logger.w(() => '[unblockUser] rejected (no permission)');
-      return Result.error('Cannot unblock user (no permission)');
+      return failureWithError('Cannot unblock user (no permission)');
     }
     _logger.d(() => '[unblockUser] userId: $userId');
     final result = coordinatorClient.unblockUser(
@@ -135,7 +135,7 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.kickUser)) {
       _logger.w(() => '[kickUser] rejected (no permission)');
-      return Result.error('Cannot kick user (no permission)');
+      return failureWithError('Cannot kick user (no permission)');
     }
     _logger.d(() => '[kickUser] userId: $userId');
     final result = await coordinatorClient.kickUser(
@@ -154,7 +154,7 @@ class PermissionsManager {
     final permission = _startRecordPermission(recordingType);
     if (!hasPermission(permission)) {
       _logger.w(() => '[startRecording] rejected (no permission)');
-      return Result.error('Cannot start recording (no permission)');
+      return failureWithError('Cannot start recording (no permission)');
     }
     _logger.d(() => '[startRecording] recordingType: $recordingType');
     final result = await coordinatorClient.startRecording(
@@ -179,7 +179,7 @@ class PermissionsManager {
     final permission = _stopRecordPermission(recordingType);
     if (!hasPermission(permission)) {
       _logger.w(() => '[stopRecording] rejected (no permission)');
-      return Result.error('Cannot stop recording (no permission)');
+      return failureWithError('Cannot stop recording (no permission)');
     }
     _logger.d(() => '[stopRecording] recordingType: $recordingType');
     final result = await coordinatorClient.stopRecording(
@@ -197,7 +197,7 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.startTranscriptionCall)) {
       _logger.w(() => '[startTranscription] rejected (no permission)');
-      return Result.error('Cannot start transcription (no permission)');
+      return failureWithError('Cannot start transcription (no permission)');
     }
     _logger.d(() => '[startTranscription] no args');
     final result = await coordinatorClient.startTranscription(
@@ -220,7 +220,7 @@ class PermissionsManager {
   Future<Result<None>> stopTranscription() async {
     if (!hasPermission(CallPermission.startTranscriptionCall)) {
       _logger.w(() => '[stopTranscription] rejected (no permission)');
-      return Result.error('Cannot stop transcription (no permission)');
+      return failureWithError('Cannot stop transcription (no permission)');
     }
     _logger.d(() => '[stopTranscription] no args');
     final result = await coordinatorClient.stopTranscription(callCid);
@@ -235,7 +235,9 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.startClosedCaptionsCall)) {
       _logger.w(() => '[startClosedCaptions] rejected (no permission)');
-      return Result.error('Cannot start closed captions (no permission)');
+      return failureWithError(
+        'Cannot start closed captions (no permission)',
+      );
     }
     _logger.d(() => '[startClosedCaptions] no args');
     final result = await coordinatorClient.startClosedCaptions(
@@ -251,7 +253,9 @@ class PermissionsManager {
   Future<Result<None>> stopClosedCaptions() async {
     if (!hasPermission(CallPermission.stopClosedCaptionsCall)) {
       _logger.w(() => '[stopClosedCaptions] rejected (no permission)');
-      return Result.error('Cannot stop closed captions (no permission)');
+      return failureWithError(
+        'Cannot stop closed captions (no permission)',
+      );
     }
     _logger.d(() => '[stopClosedCaptions] no args');
     final result = await coordinatorClient.stopClosedCaptions(callCid);
@@ -262,7 +266,7 @@ class PermissionsManager {
   Future<Result<String?>> startBroadcasting() async {
     if (!hasPermission(CallPermission.startBroadcastCall)) {
       _logger.w(() => '[startBroadcasting] rejected (no permission)');
-      return Result.error('Cannot start broadcasting (no permission)');
+      return failureWithError('Cannot start broadcasting (no permission)');
     }
     _logger.d(() => '[startBroadcasting] no args');
     final result = await coordinatorClient.startBroadcasting(callCid);
@@ -273,7 +277,7 @@ class PermissionsManager {
   Future<Result<None>> stopBroadcasting() async {
     if (!hasPermission(CallPermission.stopBroadcastCall)) {
       _logger.w(() => '[stopBroadcasting] rejected (no permission)');
-      return Result.error('Cannot stop broadcasting (no permission)');
+      return failureWithError('Cannot stop broadcasting (no permission)');
     }
     _logger.d(() => '[stopBroadcasting] no args');
     final result = await coordinatorClient.stopBroadcasting(callCid);
@@ -287,7 +291,7 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteUsers] rejected (no permission)');
-      return Result.error('Cannot mute users (no permission)');
+      return failureWithError('Cannot mute users (no permission)');
     }
     _logger.d(() => '[muteUsers] userIds: $userIds');
 
@@ -317,7 +321,7 @@ class PermissionsManager {
   Future<Result<None>> muteSelf({TrackType track = TrackType.audio}) async {
     if (!hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteSelf] rejected (no permission)');
-      return Result.error('Cannot mute self (no permission)');
+      return failureWithError('Cannot mute self (no permission)');
     }
     _logger.d(() => '[muteSelf] muting current user');
 
@@ -328,7 +332,7 @@ class PermissionsManager {
   Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) async {
     if (!hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteOthers] rejected (no permission)');
-      return Result.error('Cannot mute other users (no permission)');
+      return failureWithError('Cannot mute other users (no permission)');
     }
     _logger.d(() => '[muteOthers] muting other users');
 
@@ -345,7 +349,7 @@ class PermissionsManager {
   Future<Result<None>> muteAllUsers({TrackType track = TrackType.all}) async {
     if (!hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteAllUsers] rejected (no permission)');
-      return Result.error('Cannot mute users (no permission)');
+      return failureWithError('Cannot mute users (no permission)');
     }
     _logger.d(() => '[muteAllUsers] muting all users');
 
@@ -365,7 +369,9 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.pinForEveryone)) {
       _logger.w(() => '[pinForEveryone] rejected (no permission)');
-      return Result.error('Cannot pin session for everyone (no permission)');
+      return failureWithError(
+        'Cannot pin session for everyone (no permission)',
+      );
     }
 
     _logger.d(() => '[pinForEveryone] pinning $userId for everyone');
@@ -383,7 +389,9 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.pinForEveryone)) {
       _logger.w(() => '[unpinForEveryone] rejected (no permission)');
-      return Result.error('Cannot unpin session for everyone (no permission)');
+      return failureWithError(
+        'Cannot unpin session for everyone (no permission)',
+      );
     }
 
     _logger.d(() => '[unpinForEveryone] unpinning $userId for everyone');
@@ -402,7 +410,7 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.createReaction)) {
       _logger.w(() => '[sendReaction] rejected (no permission)');
-      return Result.error('Cannot send reaction (no permission)');
+      return failureWithError('Cannot send reaction (no permission)');
     }
     final result = await coordinatorClient.sendReaction(
       callCid: callCid,
@@ -423,7 +431,7 @@ class PermissionsManager {
   }) async {
     if (!hasPermission(CallPermission.readCall)) {
       _logger.w(() => '[queryMembers] rejected (no permission)');
-      return Result.error('Cannot query members (no permission)');
+      return failureWithError('Cannot query members (no permission)');
     }
     final result = coordinatorClient.queryMembers(
       callCid: callCid,
@@ -438,11 +446,7 @@ class PermissionsManager {
   }
 
   bool canRequestPermission(CallPermission permission) {
-    final settings = stateManager.callStateStream.valueOrNull?.settings;
-    if (settings == null) {
-      _logger.w(() => 'canRequestPermission: no settings');
-      return false;
-    }
+    final settings = stateManager.callStateStream.value.settings;
 
     if (permission == CallPermission.sendAudio) {
       return settings.audio.accessRequestEnabled;
@@ -457,9 +461,8 @@ class PermissionsManager {
   }
 
   bool hasPermission(CallPermission permission) {
-    final capabilities =
-        stateManager.callStateStream.valueOrNull?.ownCapabilities;
-    if (capabilities == null || capabilities.isEmpty) {
+    final capabilities = stateManager.callStateStream.value.ownCapabilities;
+    if (capabilities.isEmpty) {
       _logger.w(() => '[hasPermission] rejected (no capabilities)');
       return false;
     }

@@ -1,22 +1,18 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../../../stream_video.dart';
 import '../../../errors/video_error.dart';
-import '../../../logger/stream_logger.dart';
-import '../../../webrtc/peer_type.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
 import '../models/sfu_call_ended_reason.dart';
 import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
 import '../models/sfu_connection_info.dart';
-import '../models/sfu_error.dart';
-import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_inbound_video_state.dart';
 import '../models/sfu_participant.dart';
 import '../models/sfu_pin.dart';
 import '../models/sfu_publish_options.dart';
-import '../models/sfu_track_type.dart';
 import '../models/sfu_video_sender.dart';
 
 abstract class SfuEvent extends Equatable {

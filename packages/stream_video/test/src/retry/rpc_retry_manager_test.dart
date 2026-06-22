@@ -18,13 +18,20 @@ const _noDelayPolicy = RetryPolicy(
 
 Duration _zeroBackoff(RetryConfig config, int retryAttempt) => Duration.zero;
 
-/// Helper to create a [Result.failure] wrapping an [ApiException] with the
+/// Helper to create a [Result.failure] wrapping an [StreamApiError] with the
 /// given [statusCode].
 Result<T> _httpError<T>(int statusCode, [String message = '']) {
   return Result.failure(
     VideoErrorWithCause(
       message: message,
-      cause: ApiException(statusCode, message),
+      cause: StreamApiError(
+        code: statusCode,
+        details: const [],
+        duration: '',
+        message: message,
+        moreInfo: '',
+        statusCode: statusCode,
+      ),
     ),
   );
 }

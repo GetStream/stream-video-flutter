@@ -18,12 +18,12 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
   /// The filter function to apply to participants.
   ///
   /// Override this getter to provide the filter from your widget.
-  Filter<CallParticipantState>? get participantFilter;
+  CallParticipantFilter<CallParticipantState>? get participantFilter;
 
   /// The sort comparator to apply to participants.
   ///
   /// Override this getter to provide the sort from your widget.
-  Sort<CallParticipantState>? get participantSort;
+  CallParticipantSort<CallParticipantState>? get participantSort;
 
   /// Call this method whenever the participant list changes, typically from
   /// a stream subscription or in [didUpdateWidget].

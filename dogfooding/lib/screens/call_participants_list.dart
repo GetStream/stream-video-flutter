@@ -14,7 +14,8 @@ class CallParticipantsList extends StatelessWidget {
     final textTheme = streamVideoTheme.textTheme;
 
     return StreamBuilder<CallState>(
-      stream: call.state.asStream(),
+      initialData: call.state.value,
+      stream: call.state,
       builder: (context, snapshot) {
         final callState = snapshot.requireData;
         final participants = callState.callParticipants;

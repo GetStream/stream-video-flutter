@@ -1,4 +1,4 @@
-import 'platform_detector.dart';
+import '../../stream_video.dart';
 
 /// Stub implementation
 PlatformType get currentPlatform => throw UnimplementedError();

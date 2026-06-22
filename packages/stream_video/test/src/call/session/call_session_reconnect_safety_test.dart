@@ -19,10 +19,20 @@ import '../../../test_helpers.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
-class MockRtcManager extends Mock implements RtcManager {}
+class MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
 
 class MockTracedStreamPeerConnection extends Mock
-    implements TracedStreamPeerConnection {}
+    implements TracedStreamPeerConnection {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
 
 class MockRTCPeerConnection extends Mock implements rtc.RTCPeerConnection {}
 
@@ -56,7 +66,7 @@ CallSession _buildTestSession({
     onSuspendedAudioTrackRecorded: (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),
-    statsOptions: StatsOptions(
+    statsOptions: const StatsOptions(
       enableRtcStats: false,
       reportingIntervalMs: 500,
     ),

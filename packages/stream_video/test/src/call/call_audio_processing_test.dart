@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/errors/video_error.dart';
-import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -33,7 +32,7 @@ CoordinatorJoined _joinedWithSettings(
     members: const {},
     users: const {},
     duration: '0',
-    statsOptions: StatsOptions(
+    statsOptions: const StatsOptions(
       enableRtcStats: true,
       reportingIntervalMs: 5000,
     ),
@@ -763,7 +762,7 @@ void main() {
             ),
           );
 
-          final activeCallsEmitter = MutableStateEmitterImpl<List<Call>>(
+          final activeCallsEmitter = MutableStateEmitter<List<Call>>(
             [],
             sync: true,
           );

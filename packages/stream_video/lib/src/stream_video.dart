@@ -8,13 +8,15 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_core/stream_core.dart'
+    hide LifecycleState, TokenManager, TokenProvider, User, UserToken, UserType;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:system_info2/system_info2.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../globals.dart';
-import '../open_api/video/coordinator/api.dart';
+import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';
@@ -26,7 +28,6 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'core/client_state.dart';
 import 'core/connection_state.dart';
-import 'disposable.dart';
 import 'errors/video_error.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
@@ -40,7 +41,6 @@ import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
-import 'logger/stream_logger.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
 import 'models/call_preferences.dart';
@@ -56,7 +56,6 @@ import 'models/queried_calls.dart';
 import 'models/user.dart';
 import 'models/user_info.dart';
 import 'network_monitor_settings.dart';
-import 'platform_detector/platform_detector.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
 import 'token/token.dart';
@@ -65,7 +64,6 @@ import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
-import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
@@ -219,7 +217,7 @@ class StreamVideo extends Disposable {
       UserType.guest => TokenProvider.dynamic((userId) async {
         final result = await _client.loadGuest(id: userId);
         if (result is! Success<GuestCreatedData>) {
-          throw (result as Failure).error;
+          throw (result as Failure).videoError;
         }
         final updatedUser = result.data.user;
         _state.user.value = User(
@@ -255,7 +253,7 @@ class StreamVideo extends Disposable {
                 '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
           );
 
-          return Result.error('Failed to auto connect: $error');
+          return failureWithError('Failed to auto connect: $error');
         }),
       );
     }
@@ -332,7 +330,7 @@ class StreamVideo extends Disposable {
   /// Please note that subscribing to WebSocket events is an advanced use-case,
   /// for most use-cases it should be enough to watch for changes
   /// in the reactive [Call.state].
-  Stream<CoordinatorEvent> get events => _client.events.asStream();
+  Stream<CoordinatorEvent> get events => _client.events;
 
   async.CancelableOperation<Result<UserToken>>? _connectOperation;
   async.CancelableOperation<Result<None>>? _disconnectOperation;
@@ -354,7 +352,7 @@ class StreamVideo extends Disposable {
   }) async {
     if (currentUserType == UserType.anonymous) {
       _logger.w(() => '[connect] rejected (anonymous user)');
-      return Result.error(
+      return failureWithError(
         'Cannot connect anonymous user to the WS due to Missing Permissions',
       );
     }
@@ -365,7 +363,7 @@ class StreamVideo extends Disposable {
     ).asCancelable();
 
     return _connectOperation!
-        .valueOrDefault(Result.error('connect was cancelled'))
+        .valueOrDefault(failureWithError('connect was cancelled'))
         .whenComplete(() {
           _logger.i(() => '[connect] clear shared operation');
           _connectOperation = null;
@@ -376,7 +374,7 @@ class StreamVideo extends Disposable {
   Future<Result<None>> disconnect() async {
     _disconnectOperation ??= _disconnect().asCancelable();
     return _disconnectOperation!
-        .valueOrDefault(Result.error('disconnect was cancelled'))
+        .valueOrDefault(failureWithError('disconnect was cancelled'))
         .whenComplete(() {
           _logger.i(() => '[disconnect] clear shared operation');
           _disconnectOperation = null;
@@ -393,7 +391,9 @@ class StreamVideo extends Disposable {
       _logger.w(() => '[connect] rejected (already connected)');
       final token = _tokenManager.getCachedToken();
       if (token == null) {
-        return Result.error('[connect] userToken is null in Connected state');
+        return failureWithError(
+          '[connect] userToken is null in Connected state',
+        );
       }
       return Result.success(token);
     }
@@ -406,7 +406,7 @@ class StreamVideo extends Disposable {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
       _connectionState = ConnectionState.failed(
         _state.currentUser.id,
-        error: (tokenResult as Failure).error,
+        error: (tokenResult as Failure).videoError,
       );
       return tokenResult;
     }
@@ -423,7 +423,7 @@ class StreamVideo extends Disposable {
       if (result is Failure) {
         _connectionState = ConnectionState.failed(
           _state.currentUser.id,
-          error: result.error,
+          error: result.videoError,
         );
         return result;
       }
@@ -499,9 +499,8 @@ class StreamVideo extends Disposable {
 
       // In a edge case where call with the same CID as the incoming call is also an outgoing call
       // we want to use the same Call instance.
-      if (state.outgoingCall.valueOrNull?.callCid.value ==
-          event.data.callCid.value) {
-        _state.incomingCall.value = state.outgoingCall.valueOrNull;
+      if (state.outgoingCall.value?.callCid.value == event.data.callCid.value) {
+        _state.incomingCall.value = state.outgoingCall.value;
         return;
       }
 
@@ -994,7 +993,7 @@ class StreamVideo extends Disposable {
     final activeCall = activeCalls.firstWhereOrNull(
       (call) => call.callCid.value == cid,
     );
-    final incomingCall = _state.incomingCall.valueOrNull;
+    final incomingCall = _state.incomingCall.value;
 
     if (activeCall?.callCid.value == cid) {
       final result = await activeCall?.leave(
@@ -1149,7 +1148,7 @@ class StreamVideo extends Disposable {
     final call = makeCall(callType: callType, id: id);
     final callResult = await call.get(watch: false);
 
-    return callResult.fold(
+    return callResult.foldResult(
       failure: (failure) {
         _logger.e(() => '[getCallRingingState] failed: $failure');
         return CallRingingState.ended;
@@ -1203,7 +1202,7 @@ class StreamVideo extends Disposable {
     }
 
     // If call was already created by consuming ringing event, use the same instance.
-    if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
+    if (_state.incomingCall.value?.callCid.value == cid) {
       final call = _state.incomingCall.value!;
       if (preferences != null) {
         call.updateCallPreferences(preferences);
@@ -1308,12 +1307,12 @@ Future<String?> _setClientDetails() async {
     sfu_models.Browser? browser;
     String? webrtcVersion;
 
-    var os = sfu_models.OS(name: CurrentPlatform.name);
+    var os = sfu_models.OS(name: CurrentPlatform.operatingSystem);
 
     if (CurrentPlatform.isAndroid) {
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
       os = sfu_models.OS(
-        name: CurrentPlatform.name,
+        name: CurrentPlatform.operatingSystem,
         version: deviceInfo.version.release,
         architecture: SysInfo.rawKernelArchitecture,
       );
@@ -1324,7 +1323,7 @@ Future<String?> _setClientDetails() async {
     } else if (CurrentPlatform.isIos) {
       final deviceInfo = await DeviceInfoPlugin().iosInfo;
       os = sfu_models.OS(
-        name: CurrentPlatform.name,
+        name: CurrentPlatform.operatingSystem,
         version: deviceInfo.systemVersion,
       );
       device = sfu_models.Device(name: deviceInfo.utsname.machine);
@@ -1332,7 +1331,7 @@ Future<String?> _setClientDetails() async {
     } else if (CurrentPlatform.isMacOS) {
       final deviceInfo = await DeviceInfoPlugin().macOsInfo;
       os = sfu_models.OS(
-        name: CurrentPlatform.name,
+        name: CurrentPlatform.operatingSystem,
         version:
             '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}',
         architecture: deviceInfo.arch,
@@ -1344,7 +1343,7 @@ Future<String?> _setClientDetails() async {
     } else if (CurrentPlatform.isWindows) {
       final deviceInfo = await DeviceInfoPlugin().windowsInfo;
       os = sfu_models.OS(
-        name: CurrentPlatform.name,
+        name: CurrentPlatform.operatingSystem,
         version:
             '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}',
         architecture: deviceInfo.buildLabEx,
@@ -1352,7 +1351,7 @@ Future<String?> _setClientDetails() async {
     } else if (CurrentPlatform.isLinux) {
       final deviceInfo = await DeviceInfoPlugin().linuxInfo;
       os = sfu_models.OS(
-        name: CurrentPlatform.name,
+        name: CurrentPlatform.operatingSystem,
         version: '${deviceInfo.name} ${deviceInfo.version}',
       );
     } else if (CurrentPlatform.isWeb) {
@@ -1382,7 +1381,7 @@ Future<String?> _setClientDetails() async {
         : null;
 
     return clientVersionDetails ??=
-        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.name} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
+        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.operatingSystem} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
   } catch (e) {
     streamLog.e(_tag, () => '[_setClientDetails] failed: $e');
     return null;

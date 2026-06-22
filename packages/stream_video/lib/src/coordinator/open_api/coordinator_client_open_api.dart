@@ -1,29 +1,17 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:stream_core/stream_core.dart' as core;
 import 'package:uuid/uuid.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../globals.dart';
-import '../../../open_api/video/coordinator/api.dart';
+import '../../../stream_video.dart';
 import '../../errors/video_error_composer.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
-import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_received_data.dart';
-import '../../models/models.dart';
-import '../../retry/retry_policy.dart';
-import '../../shared_emitter.dart';
-import '../../state_emitter.dart';
-import '../../token/token.dart';
 import '../../token/token_manager.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../coordinator_client.dart';
 import '../models/coordinator_connection_state.dart';
-import '../models/coordinator_events.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws.dart';
 import 'open_api_extensions.dart';
@@ -68,7 +56,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         getToken: () async {
           final tokenResult = await _tokenManager.getToken();
           if (tokenResult is! Success<UserToken>) {
-            throw (tokenResult as Failure).error;
+            throw (tokenResult as Failure).videoError;
           }
           return tokenResult.data;
         },
@@ -84,9 +72,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   bool get isConnected => _ws?.isConnected ?? false;
 
-  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
+  final _events = MutableSharedEmitter<CoordinatorEvent>();
 
-  final _connectionState = MutableStateEmitterImpl<CoordinatorConnectionState>(
+  final _connectionState = MutableStateEmitter<CoordinatorConnectionState>(
     const CoordinatorDisconnected(),
   );
 
@@ -163,10 +151,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     return _connectionState
         .firstWhere(
           (it) => it.isConnected,
-          // TODO
-          // replace timeout with config value,
-          timeLimit: const Duration(milliseconds: _waitForConnectionTimeout),
         )
+        // TODO
+        // replace timeout with config value,
+        .timeout(const Duration(milliseconds: _waitForConnectionTimeout))
         .then((it) {
           _logger.v(() => '[waitUntilConnected] completed: $it');
           return const Result.success(none);
@@ -183,11 +171,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final ws = _ws;
       if (ws == null) {
         _logger.w(() => '[openConnection] rejected (no WS)');
-        return Result.error('WS is not initialized, call "connectUser" first');
+        return failureWithError(
+          'WS is not initialized, call "connectUser" first',
+        );
       }
       if (!ws.isDisconnected) {
         _logger.w(() => '[openConnection] rejected (not closed)');
-        return Result.error('WS is not closed');
+        return failureWithError('WS is not closed');
       }
 
       _logger.i(() => '[openConnection] no args');
@@ -206,11 +196,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final ws = _ws;
       if (ws == null) {
         _logger.w(() => '[closeConnection] rejected (no WS)');
-        return Result.error('WS is not initialized');
+        return failureWithError('WS is not initialized');
       }
       if (ws.isDisconnected) {
         _logger.w(() => '[closeConnection] rejected (already closed)');
-        return Result.error('WS is already closed');
+        return failureWithError('WS is already closed');
       }
       _logger.i(() => '[closeConnection] no args');
 

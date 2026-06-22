@@ -4,13 +4,9 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import '../../../stream_video.dart';
 import '../../core/network_monitor_flutter.dart';
 import '../../errors/video_error_composer.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../logger/stream_log.dart';
-import '../../shared_emitter.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
 import '../../ws/health/health_monitor.dart';
 import '../../ws/ws.dart';
 import '../data/events/sfu_event_mapper_extensions.dart';
@@ -93,7 +89,7 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
   bool _recreating = false;
 
   SharedEmitter<SfuEvent> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEvent>();
+  final _events = MutableSharedEmitter<SfuEvent>();
   StreamSubscription<InternetStatus>? _networkChangeSubscription;
 
   @override

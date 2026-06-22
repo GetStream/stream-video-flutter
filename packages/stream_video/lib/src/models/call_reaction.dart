@@ -13,7 +13,7 @@ class CallReaction with EquatableMixin {
   final String type;
   final String? emojiCode;
   final CallUser user;
-  final Map<String, Object>? custom;
+  final Map<String, Object?>? custom;
 
   @override
   bool? get stringify => true;

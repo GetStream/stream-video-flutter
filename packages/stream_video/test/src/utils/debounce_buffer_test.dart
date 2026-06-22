@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video/src/logger/impl/tagged_logger.dart';
-import 'package:stream_video/src/logger/stream_log.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
 import 'package:stream_video/src/utils/debounce_buffer.dart';
+import 'package:stream_video/stream_video.dart';
 
 import '../logger/impl/test_logger.dart';
 

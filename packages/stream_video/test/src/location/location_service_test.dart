@@ -2,8 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/location/location_service.dart';
-import 'package:stream_video/src/logger/stream_log.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
+import 'package:stream_video/stream_video.dart';
 
 import '../logger/impl/test_logger.dart';
 

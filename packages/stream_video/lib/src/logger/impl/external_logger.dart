@@ -1,4 +1,4 @@
-import '../stream_logger.dart';
+import '../../../stream_video.dart';
 
 typedef ExternalFunction =
     void Function(

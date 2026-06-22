@@ -65,7 +65,7 @@ class DynascaleManager {
   late final _saBuffer = DebounceBuffer<SubscriptionChange, Result<None>>(
     duration: _debounceDuration,
     onBuffered: updateSubscriptions,
-    onCancel: () => Result.error('SubscriptionChange cancelled'),
+    onCancel: () => failureWithError('SubscriptionChange cancelled'),
   );
 
   void init({
@@ -271,12 +271,12 @@ extension on SfuClient {
       ),
     );
 
-    return result.fold(
+    return result.foldResult(
       failure: (it) => it,
       success: (it) {
         if (it.data.hasError()) {
           final error = it.data.error;
-          return Result.error('${error.code} - ${error.message}');
+          return Result.failure('${error.code} - ${error.message}');
         }
         return const Result.success(none);
       },

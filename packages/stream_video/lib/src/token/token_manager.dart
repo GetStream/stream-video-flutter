@@ -62,7 +62,7 @@ class TokenManager {
     }
     return _tokenOperation!
         .valueOrDefault(
-          Result.error('provideToken was cancelled'),
+          failureWithError('provideToken was cancelled'),
         )
         .whenComplete(() {
           _logger.v(() => '[provideToken] drop cached future');
@@ -101,7 +101,9 @@ class _StubTokenProvider implements TokenProvider {
 
   @override
   Future<Result<UserToken>> getToken(String userId) async {
-    return Result.error('StubTokenProvider is unable to provide a real token');
+    return failureWithError(
+      'StubTokenProvider is unable to provide a real token',
+    );
   }
 
   @override

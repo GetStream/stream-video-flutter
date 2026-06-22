@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'fixtures/call_test_helpers.dart';
@@ -13,11 +12,11 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
-  Future<({Call call, MutableSharedEmitterImpl<CoordinatorEvent> events})>
+  Future<({Call call, MutableSharedEmitter<CoordinatorEvent> events})>
   setupCallForEventTesting({
     CallStatus? status,
   }) async {
-    final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+    final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
     final coordinatorClient = setupMockCoordinatorClient(
       events: coordinatorEvents,
@@ -41,7 +40,7 @@ void main() {
     test(
       'permission request event - onPermissionRequest is called when permission request event is emitted',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final coordinatorClient = setupMockCoordinatorClient(
           events: coordinatorEvents,
@@ -341,7 +340,7 @@ void main() {
     test(
       'member removed event - should remove members from call',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final user1 = SampleCallData.testCallUser1;
         final user2 = SampleCallData.testCallUser2;
@@ -402,7 +401,7 @@ void main() {
     test(
       'member updated event - should update member roles and custom data',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final user1 = SampleCallData.testCallUser1;
 
@@ -467,7 +466,7 @@ void main() {
     test(
       'member updated permission event - should update capabilities by role',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final user1 = SampleCallData.testCallUser1;
 
@@ -525,7 +524,7 @@ void main() {
     test(
       'call reaction event - should set reaction on participant',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final reactingUser = SampleCallData.testCallUser1;
@@ -596,7 +595,7 @@ void main() {
     test(
       'call reaction event - should dismiss reaction after timeout',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final reactingUser = SampleCallData.testCallUser1;
@@ -1111,7 +1110,7 @@ void main() {
     test(
       'call session ended event - should update metadata but not members',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final user1 = SampleCallData.testCallUser1;
         final user2 = SampleCallData.testCallUser2;
@@ -1180,7 +1179,7 @@ void main() {
     test(
       'call session started event - should update metadata but not members',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final user1 = SampleCallData.testCallUser1;
         final user2 = SampleCallData.testCallUser2;
@@ -1389,7 +1388,7 @@ void main() {
     test(
       'call rejected event - should update rejected member with callRejectedAt timestamp',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final members = [
           SampleCallData.createCallMember(
@@ -1459,7 +1458,7 @@ void main() {
     test(
       'call rejected event - should disconnect when user is creator and all other members rejected',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1527,7 +1526,7 @@ void main() {
     test(
       'call rejected event - should not disconnect when user is creator and some members have not rejected',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1590,7 +1589,7 @@ void main() {
     test(
       'call rejected event - should disconnect when user is not creator and creator rejected',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         const creator = CallUser(
@@ -1659,7 +1658,7 @@ void main() {
     test(
       'call rejected event - should preserve other members state when updating rejected member',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1732,7 +1731,7 @@ void main() {
     test(
       'call accepted event - should update accepted member with callAcceptedAt timestamp and status',
       () async {
-        final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final acceptingUser = SampleCallData.testCallUser1;
