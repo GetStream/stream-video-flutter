@@ -41,7 +41,7 @@ void main() {
       // Mock coordinator client methods that might be called
       when(
         () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitter<CoordinatorEvent>());
+      ).thenAnswer((_) => MutableSharedEmitter<CoordinatorEvent>());
 
       // Default device enumeration mocking - returns built-in devices only
       when(mockDeviceNotifier.enumerateDevices).thenAnswer(

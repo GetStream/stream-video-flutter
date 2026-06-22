@@ -768,7 +768,9 @@ void main() {
           );
 
           final clientState = setupMockClientState();
-          when(() => clientState.activeCalls).thenReturn(activeCallsEmitter);
+          when(
+            () => clientState.activeCalls,
+          ).thenAnswer((_) => activeCallsEmitter);
 
           final streamVideo = setupMockStreamVideo(clientState: clientState);
           when(streamVideo.isAudioProcessorConfigured).thenReturn(true);

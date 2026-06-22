@@ -164,7 +164,9 @@ void main() {
       // Arrange - create custom client state with exposed emitters
       final outgoingCallEmitter = MutableStateEmitter<Call?>(null);
       final mockClientState = setupMockClientState();
-      when(() => mockClientState.outgoingCall).thenReturn(outgoingCallEmitter);
+      when(
+        () => mockClientState.outgoingCall,
+      ).thenAnswer((_) => outgoingCallEmitter);
       when(
         () => mockClientState.setOutgoingCall(any()),
       ).thenAnswer((_) async {});

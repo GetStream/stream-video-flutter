@@ -41,12 +41,8 @@ class MockSdpEditor extends Mock implements SdpEditor {}
 
 class MockTracer extends Mock implements Tracer {}
 
-class MockCallSession extends Mock implements CallSession {
-  @override
-  Future<void> dispose() {
-    return Future.value();
-  }
-}
+// ignore: missing_override_of_must_be_overridden
+class MockCallSession extends Mock implements CallSession {}
 
 class MockSfuClient extends Mock implements SfuClient {}
 

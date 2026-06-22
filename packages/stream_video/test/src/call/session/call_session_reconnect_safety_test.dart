@@ -1,3 +1,5 @@
+// ignore_for_file: missing_override_of_must_be_overridden
+
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -19,20 +21,10 @@ import '../../../test_helpers.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
-class MockRtcManager extends Mock implements RtcManager {
-  @override
-  Future<void> dispose() {
-    return Future.value();
-  }
-}
+class MockRtcManager extends Mock implements RtcManager {}
 
 class MockTracedStreamPeerConnection extends Mock
-    implements TracedStreamPeerConnection {
-  @override
-  Future<void> dispose() {
-    return Future.value();
-  }
-}
+    implements TracedStreamPeerConnection {}
 
 class MockRTCPeerConnection extends Mock implements rtc.RTCPeerConnection {}
 

@@ -88,11 +88,13 @@ void main() {
     Map<String, dynamic> minimalUserJson({
       required Map<String, dynamic> custom,
     }) => {
+      'banned': false,
       'blocked_user_ids': <dynamic>[],
       'created_at': '2024-01-01T00:00:00.000Z',
       'custom': custom,
       'id': 'user-1',
       'language': 'en',
+      'online': false,
       'role': 'admin',
       'teams': <dynamic>[],
       'updated_at': '2024-01-01T00:00:00.000Z',
@@ -295,7 +297,7 @@ void main() {
       expect(result.metrics!['fps']![0], [30.0, 60.0, 24.0]);
     });
 
-    test('null metrics produces empty map', () {
+    test('null metrics produces null map', () {
       final json = {
         'track_id': 'track-3',
         'metrics': null,
@@ -303,7 +305,7 @@ void main() {
 
       final result = ParticipantSeriesTrackMetrics.fromJson(json);
 
-      expect(result.metrics, isEmpty);
+      expect(result.metrics, isNull);
     });
   });
 
@@ -457,11 +459,13 @@ Map<String, dynamic> _minimalCallResponseJson() => {
 };
 
 Map<String, dynamic> _minimalUserResponseJson() => {
+  'banned': false,
   'blocked_user_ids': <dynamic>[],
   'created_at': '2024-01-01T00:00:00.000Z',
   'custom': <String, dynamic>{},
   'id': 'user-fixture',
   'language': 'en',
+  'online': false,
   'role': 'user',
   'teams': <dynamic>[],
   'updated_at': '2024-01-01T00:00:00.000Z',
