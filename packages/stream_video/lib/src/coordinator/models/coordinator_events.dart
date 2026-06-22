@@ -673,7 +673,7 @@ class CoordinatorCallReactionEvent extends CoordinatorCallEvent {
     required this.reactionType,
     required this.user,
     this.emojiCode,
-    this.custom = const {},
+    this.custom = const <String, Object?>{},
   });
 
   @override
@@ -682,7 +682,7 @@ class CoordinatorCallReactionEvent extends CoordinatorCallEvent {
   final String reactionType;
   final String? emojiCode;
   final CallUser user;
-  final Map<String, Object>? custom;
+  final Map<String, Object?>? custom;
 
   @override
   List<Object?> get props => [...super.props, createdAt, emojiCode, custom];
@@ -695,7 +695,7 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
     required this.createdAt,
     required this.eventType,
     required this.users,
-    required this.custom,
+    this.custom = const <String, Object?>{},
   });
 
   @override
@@ -703,7 +703,7 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
   final String senderUserId;
   final DateTime createdAt;
   final String eventType;
-  final Map<String, Object>? custom;
+  final Map<String, Object?>? custom;
   final Map<String, CallUser> users;
 
   @override
@@ -1194,14 +1194,14 @@ class CoordinatorCallModerationBlurEvent extends CoordinatorCallEvent {
     required this.callCid,
     required this.createdAt,
     required this.userId,
-    this.custom = const {},
+    this.custom = const <String, Object?>{},
   });
 
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
   final String userId;
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
 
   @override
   List<Object?> get props => [
@@ -1218,7 +1218,7 @@ class CoordinatorCallModerationWarningEvent extends CoordinatorCallEvent {
     required this.createdAt,
     required this.userId,
     required this.message,
-    this.custom = const {},
+    this.custom = const <String, Object?>{},
   });
 
   @override
@@ -1226,7 +1226,7 @@ class CoordinatorCallModerationWarningEvent extends CoordinatorCallEvent {
   final DateTime createdAt;
   final String userId;
   final String message;
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
 
   @override
   List<Object?> get props => [
@@ -1268,7 +1268,7 @@ class CoordinatorCallUserFeedbackSubmittedEvent extends CoordinatorCallEvent {
     this.reason,
     this.sdk,
     this.sdkVersion,
-    this.custom = const {},
+    this.custom = const <String, Object?>{},
   });
 
   @override
@@ -1280,7 +1280,7 @@ class CoordinatorCallUserFeedbackSubmittedEvent extends CoordinatorCallEvent {
   final String? sdk;
   final String? sdkVersion;
   final CallUser user;
-  final Map<String, Object> custom;
+  final Map<String, Object?>? custom;
 
   @override
   List<Object?> get props => [

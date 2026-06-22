@@ -11,17 +11,17 @@ class OpenApiError {
 
   static OpenApiError? fromJson(Map<String, dynamic> jsonObj) {
     final errorObj = jsonObj['error'];
-    if (errorObj == null) {
+    if (errorObj is! Map<String, dynamic>) {
       return null;
     }
-    final parsed = APIError.fromJson(errorObj);
-    if (parsed == null) {
+    try {
+      return OpenApiError(StreamApiError.fromJson(errorObj));
+    } catch (_) {
       return null;
     }
-    return OpenApiError(parsed);
   }
 
-  final APIError apiError;
+  final StreamApiError apiError;
 }
 
 class NoErrorException implements Exception {

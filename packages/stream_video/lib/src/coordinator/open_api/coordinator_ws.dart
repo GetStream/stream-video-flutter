@@ -17,6 +17,7 @@ import '../../utils/result.dart';
 import '../../ws/health/health_monitor.dart';
 import '../../ws/ws.dart';
 import '../models/coordinator_events.dart';
+import '../models/healh_check_event.dart';
 import 'error/open_api_error.dart';
 import 'error/open_api_error_code.dart';
 import 'event/open_api_event.dart';
@@ -250,7 +251,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     }
   }
 
-  void _handleApiError(open.APIError apiError) {
+  void _handleApiError(open.StreamApiError apiError) {
     if (OpenApiErrorCode.tokenRelated.contains(apiError.code)) {
       _logger.i(() => '[handleApiError] token related error: ${apiError.code}');
       _refreshToken = true;
@@ -267,7 +268,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     connectionId ??= event.connectionId;
   }
 
-  void _handleHealthCheckEvent(open.HealthCheckEvent event) {
+  void _handleHealthCheckEvent(HealthCheckEvent event) {
     _logger.i(() => '[handleHealthCheckEvent] no args');
     healthMonitor.onPongReceived();
   }

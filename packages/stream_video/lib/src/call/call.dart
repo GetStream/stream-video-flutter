@@ -8,12 +8,13 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' as core;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart';
+import '../../open_api/video/coordinator/api.dart' hide User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
@@ -42,7 +43,6 @@ import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
-import '../utils/standard.dart';
 import '../utils/subscriptions.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
@@ -1964,7 +1964,7 @@ class Call {
         } catch (error) {
           switch (error) {
             case OpenApiError() when error.apiError.unrecoverable ?? false:
-            case APIError() when error.unrecoverable ?? false:
+            case StreamApiError() when error.unrecoverable ?? false:
               _logger.w(() => '[reconnect] unrecoverable error');
               _stateManager.lifecycleCallReconnectingFailed();
 
@@ -2432,7 +2432,7 @@ class Call {
         settings.video.cameraDefaultOn ||
         settings.audio.speakerDefaultOn ||
         settings.audio.defaultDevice ==
-            AudioSettingsRequestDefaultDeviceEnum.speaker;
+            AudioSettingsRequestDefaultDevice.speaker;
 
     // Determine default audio output with priority:
     // 1. External device (if available)
@@ -2445,14 +2445,14 @@ class Call {
       if (speakerOnWithSettingsPriority) {
         defaultAudioOutput = audioOutputs.firstWhereOrNull(
           (device) => device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+            AudioSettingsRequestDefaultDevice.speaker.name,
           ),
         );
       } else {
         // 3. First non-speaker device
         defaultAudioOutput = audioOutputs.firstWhereOrNull(
           (device) => !device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+            AudioSettingsRequestDefaultDevice.speaker.name,
           ),
         );
       }
@@ -2482,8 +2482,7 @@ class Call {
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
       cameraFacingMode:
-          settings.video.cameraFacing ==
-              VideoSettingsRequestCameraFacingEnum.front
+          settings.video.cameraFacing == VideoSettingsRequestCameraFacing.front
           ? FacingMode.user
           : FacingMode.environment,
       speakerDefaultOn:
