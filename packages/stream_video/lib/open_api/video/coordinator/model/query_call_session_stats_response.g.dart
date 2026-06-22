@@ -9,9 +9,13 @@ part of 'query_call_session_stats_response.dart';
 QueryCallSessionStatsResponse _$QueryCallSessionStatsResponseFromJson(
   Map<String, dynamic> json,
 ) => QueryCallSessionStatsResponse(
-  callStats: (json['call_stats'] as List<dynamic>)
-      .map((e) => CallStatsSessionResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  callStats:
+      (json['call_stats'] as List<dynamic>?)
+          ?.map(
+            (e) => CallStatsSessionResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   duration: json['duration'] as String,
   next: json['next'] as String?,
   prev: json['prev'] as String?,

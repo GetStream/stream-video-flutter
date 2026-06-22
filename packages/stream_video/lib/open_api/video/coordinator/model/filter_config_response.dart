@@ -34,6 +34,7 @@ class FilterConfigResponse with _$FilterConfigResponse {
   final List<String>? filterableCustomKeys;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> llmLabels;
 
   Map<String, dynamic> toJson() => _$FilterConfigResponseToJson(this);

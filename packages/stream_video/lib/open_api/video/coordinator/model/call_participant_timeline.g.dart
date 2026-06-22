@@ -9,7 +9,7 @@ part of 'call_participant_timeline.dart';
 CallParticipantTimeline _$CallParticipantTimelineFromJson(
   Map<String, dynamic> json,
 ) => CallParticipantTimeline(
-  data: json['data'] as Map<String, dynamic>,
+  data: json['data'] as Map<String, dynamic>? ?? {},
   severity: json['severity'] as String,
   timestamp: const EpochDateTimeConverter().fromJson(
     json['timestamp'] as Object,

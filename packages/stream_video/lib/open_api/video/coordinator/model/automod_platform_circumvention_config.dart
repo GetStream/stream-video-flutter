@@ -31,6 +31,7 @@ class AutomodPlatformCircumventionConfig
   final bool enabled;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<AutomodRule> rules;
 
   Map<String, dynamic> toJson() =>

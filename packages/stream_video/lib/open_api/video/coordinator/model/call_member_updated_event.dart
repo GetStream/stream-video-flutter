@@ -37,6 +37,7 @@ class CallMemberUpdatedEvent extends core.WsEvent
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

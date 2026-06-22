@@ -23,6 +23,7 @@ class GetBlockedUsersResponse with _$GetBlockedUsersResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BlockedUserResponse> blocks;
 
   @override

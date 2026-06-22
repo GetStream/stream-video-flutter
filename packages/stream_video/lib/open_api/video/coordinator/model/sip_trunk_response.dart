@@ -30,6 +30,7 @@ class SIPTrunkResponse with _$SIPTrunkResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> allowedIps;
 
   @override
@@ -43,6 +44,7 @@ class SIPTrunkResponse with _$SIPTrunkResponse {
   final String name;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> numbers;
 
   @override

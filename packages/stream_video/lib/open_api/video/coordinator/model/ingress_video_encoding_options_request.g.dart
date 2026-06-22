@@ -9,9 +9,13 @@ part of 'ingress_video_encoding_options_request.dart';
 IngressVideoEncodingOptionsRequest _$IngressVideoEncodingOptionsRequestFromJson(
   Map<String, dynamic> json,
 ) => IngressVideoEncodingOptionsRequest(
-  layers: (json['layers'] as List<dynamic>)
-      .map((e) => IngressVideoLayerRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  layers:
+      (json['layers'] as List<dynamic>?)
+          ?.map(
+            (e) => IngressVideoLayerRequest.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   source: IngressSourceRequest.fromJson(json['source'] as Map<String, dynamic>),
 );
 

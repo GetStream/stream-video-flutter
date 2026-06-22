@@ -49,6 +49,7 @@ class CallResponse with _$CallResponse {
   final bool backstage;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedUserIds;
 
   @override
@@ -71,6 +72,7 @@ class CallResponse with _$CallResponse {
   final String currentSessionId;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

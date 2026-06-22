@@ -25,6 +25,7 @@ class QueryCallSessionStatsResponse with _$QueryCallSessionStatsResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStatsSessionResponse> callStats;
 
   @override

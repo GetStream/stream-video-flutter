@@ -13,7 +13,7 @@ ModerationFlaggedEvent _$ModerationFlaggedEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   objectId: json['object_id'] as String,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],

@@ -36,6 +36,7 @@ class CallStatsParticipant with _$CallStatsParticipant {
   final List<String>? roles;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStatsParticipantSession> sessions;
 
   @override

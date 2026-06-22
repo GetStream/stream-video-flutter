@@ -7,35 +7,36 @@ part of 'query_call_session_participant_stats_response.dart';
 // **************************************************************************
 
 QueryCallSessionParticipantStatsResponse
-_$QueryCallSessionParticipantStatsResponseFromJson(Map<String, dynamic> json) =>
-    QueryCallSessionParticipantStatsResponse(
-      callEndedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['call_ended_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-      callEvents: (json['call_events'] as List<dynamic>?)
-          ?.map(
-            (e) => CallLevelEventPayload.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
-      callId: json['call_id'] as String,
-      callSessionId: json['call_session_id'] as String,
-      callStartedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['call_started_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-      callType: json['call_type'] as String,
-      counts: CallStatsParticipantCounts.fromJson(
-        json['counts'] as Map<String, dynamic>,
-      ),
-      duration: json['duration'] as String,
-      next: json['next'] as String?,
-      participants: (json['participants'] as List<dynamic>)
-          .map((e) => CallStatsParticipant.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      prev: json['prev'] as String?,
-      tmpDataSource: json['tmp_data_source'] as String?,
-    );
+_$QueryCallSessionParticipantStatsResponseFromJson(
+  Map<String, dynamic> json,
+) => QueryCallSessionParticipantStatsResponse(
+  callEndedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['call_ended_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+  callEvents: (json['call_events'] as List<dynamic>?)
+      ?.map((e) => CallLevelEventPayload.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  callId: json['call_id'] as String,
+  callSessionId: json['call_session_id'] as String,
+  callStartedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['call_started_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+  callType: json['call_type'] as String,
+  counts: CallStatsParticipantCounts.fromJson(
+    json['counts'] as Map<String, dynamic>,
+  ),
+  duration: json['duration'] as String,
+  next: json['next'] as String?,
+  participants:
+      (json['participants'] as List<dynamic>?)
+          ?.map((e) => CallStatsParticipant.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+  prev: json['prev'] as String?,
+  tmpDataSource: json['tmp_data_source'] as String?,
+);
 
 Map<String, dynamic> _$QueryCallSessionParticipantStatsResponseToJson(
   QueryCallSessionParticipantStatsResponse instance,

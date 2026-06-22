@@ -10,9 +10,11 @@ SearchUserGroupsResponse _$SearchUserGroupsResponseFromJson(
   Map<String, dynamic> json,
 ) => SearchUserGroupsResponse(
   duration: json['duration'] as String,
-  userGroups: (json['user_groups'] as List<dynamic>)
-      .map((e) => UserGroupResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  userGroups:
+      (json['user_groups'] as List<dynamic>?)
+          ?.map((e) => UserGroupResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$SearchUserGroupsResponseToJson(

@@ -60,6 +60,7 @@ class OwnUserResponse with _$OwnUserResponse {
   final List<String>? blockedUserIds;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ChannelMute> channelMutes;
 
   @override
@@ -67,6 +68,7 @@ class OwnUserResponse with _$OwnUserResponse {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -78,6 +80,7 @@ class OwnUserResponse with _$OwnUserResponse {
   final DateTime? deletedAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DeviceResponse> devices;
 
   @override
@@ -100,6 +103,7 @@ class OwnUserResponse with _$OwnUserResponse {
   final List<String>? latestHiddenChannels;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UserMuteResponse> mutes;
 
   @override
@@ -122,6 +126,7 @@ class OwnUserResponse with _$OwnUserResponse {
   final String role;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> teams;
 
   @override

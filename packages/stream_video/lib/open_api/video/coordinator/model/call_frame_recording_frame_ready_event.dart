@@ -57,6 +57,7 @@ class CallFrameRecordingFrameReadyEvent extends core.WsEvent
   final String url;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, UserResponse> users;
 
   Map<String, dynamic> toJson() =>

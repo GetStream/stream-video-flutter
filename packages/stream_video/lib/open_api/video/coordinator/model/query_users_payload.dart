@@ -27,6 +27,7 @@ class QueryUsersPayload with _$QueryUsersPayload {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> filterConditions;
 
   @override

@@ -55,6 +55,7 @@ class LLMRule with _$LLMRule {
   final String label;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BodyguardSeverityRule> severityRules;
 
   Map<String, dynamic> toJson() => _$LLMRuleToJson(this);

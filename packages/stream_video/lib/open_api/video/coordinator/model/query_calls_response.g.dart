@@ -8,11 +8,14 @@ part of 'query_calls_response.dart';
 
 QueryCallsResponse _$QueryCallsResponseFromJson(Map<String, dynamic> json) =>
     QueryCallsResponse(
-      calls: (json['calls'] as List<dynamic>)
-          .map(
-            (e) => CallStateResponseFields.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
+      calls:
+          (json['calls'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    CallStateResponseFields.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
       duration: json['duration'] as String,
       next: json['next'] as String?,
       prev: json['prev'] as String?,

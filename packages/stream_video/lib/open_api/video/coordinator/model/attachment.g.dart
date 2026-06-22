@@ -15,7 +15,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
   authorLink: json['author_link'] as String?,
   authorName: json['author_name'] as String?,
   color: json['color'] as String?,
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   fallback: json['fallback'] as String?,
   fields: (json['fields'] as List<dynamic>?)
       ?.map((e) => Field.fromJson(e as Map<String, dynamic>))

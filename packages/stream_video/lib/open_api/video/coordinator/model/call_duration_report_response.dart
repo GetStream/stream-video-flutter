@@ -22,6 +22,7 @@ class CallDurationReportResponse with _$CallDurationReportResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DailyAggregateCallDurationReportResponse> daily;
 
   Map<String, dynamic> toJson() => _$CallDurationReportResponseToJson(this);

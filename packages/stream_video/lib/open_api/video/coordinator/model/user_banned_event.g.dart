@@ -22,7 +22,7 @@ UserBannedEvent _$UserBannedEventFromJson(Map<String, dynamic> json) =>
           : UserResponseCommonFields.fromJson(
               json['created_by'] as Map<String, dynamic>,
             ),
-      custom: json['custom'] as Map<String, dynamic>,
+      custom: json['custom'] as Map<String, dynamic>? ?? {},
       expiration: _$JsonConverterFromJson<Object, DateTime>(
         json['expiration'],
         const EpochDateTimeConverter().fromJson,

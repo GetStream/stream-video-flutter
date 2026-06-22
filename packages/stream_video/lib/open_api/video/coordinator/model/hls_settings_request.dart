@@ -56,7 +56,10 @@ class HLSSettingsRequest with _$HLSSettingsRequest {
   final bool? enabled;
 
   @override
-  @JsonKey(unknownEnumValue: HLSSettingsRequestQualityTracks.unknown)
+  @JsonKey(
+    unknownEnumValue: HLSSettingsRequestQualityTracks.unknown,
+    defaultValue: [],
+  )
   final List<HLSSettingsRequestQualityTracks> qualityTracks;
 
   Map<String, dynamic> toJson() => _$HLSSettingsRequestToJson(this);

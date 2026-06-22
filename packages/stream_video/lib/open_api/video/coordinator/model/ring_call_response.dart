@@ -26,6 +26,7 @@ class RingCallResponse with _$RingCallResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> membersIds;
 
   Map<String, dynamic> toJson() => _$RingCallResponseToJson(this);

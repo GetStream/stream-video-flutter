@@ -12,7 +12,7 @@ FeedsEnrichedCollectionResponse _$FeedsEnrichedCollectionResponseFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   id: json['id'] as String,
   name: json['name'] as String,
   status: json['status'] as String,

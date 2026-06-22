@@ -46,6 +46,7 @@ class EgressResponse with _$EgressResponse {
   final RawRecordingResponse? rawRecording;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<EgressRTMPResponse> rtmps;
 
   Map<String, dynamic> toJson() => _$EgressResponseToJson(this);

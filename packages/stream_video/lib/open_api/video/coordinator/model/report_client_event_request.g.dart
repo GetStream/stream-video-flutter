@@ -9,9 +9,11 @@ part of 'report_client_event_request.dart';
 ReportClientEventRequest _$ReportClientEventRequestFromJson(
   Map<String, dynamic> json,
 ) => ReportClientEventRequest(
-  events: (json['events'] as List<dynamic>)
-      .map((e) => ClientEvent.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  events:
+      (json['events'] as List<dynamic>?)
+          ?.map((e) => ClientEvent.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$ReportClientEventRequestToJson(

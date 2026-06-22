@@ -23,6 +23,7 @@ class CallStatsMapSubscribers with _$CallStatsMapSubscribers {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStatsMapLocation> locations;
 
   @override

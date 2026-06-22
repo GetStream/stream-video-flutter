@@ -9,7 +9,7 @@ part of 'sip_call_configs_response.dart';
 SIPCallConfigsResponse _$SIPCallConfigsResponseFromJson(
   Map<String, dynamic> json,
 ) => SIPCallConfigsResponse(
-  customData: json['custom_data'] as Map<String, dynamic>,
+  customData: json['custom_data'] as Map<String, dynamic>? ?? {},
 );
 
 Map<String, dynamic> _$SIPCallConfigsResponseToJson(

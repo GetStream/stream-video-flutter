@@ -136,7 +136,7 @@ class TranscriptionSettingsResponse with _$TranscriptionSettingsResponse {
   final TranscriptionSettingsResponseClosedCaptionMode closedCaptionMode;
 
   @override
-  @JsonKey(unknownEnumValue: TranscriptionSettingsResponseLanguage.unknown)
+  @JsonKey(unknownEnumValue: TranscriptionSettingsResponseLanguage.auto)
   final TranscriptionSettingsResponseLanguage language;
 
   @override

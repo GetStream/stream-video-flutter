@@ -11,7 +11,7 @@ UserDeletedEvent _$UserDeletedEventFromJson(Map<String, dynamic> json) =>
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>,
+      custom: json['custom'] as Map<String, dynamic>? ?? {},
       deleteConversation: json['delete_conversation'] as String,
       deleteConversationChannels: json['delete_conversation_channels'] as bool,
       deleteMessages: json['delete_messages'] as String,

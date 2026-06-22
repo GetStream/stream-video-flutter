@@ -13,9 +13,10 @@ LimitsSettingsResponse _$LimitsSettingsResponseFromJson(
   maxParticipants: (json['max_participants'] as num?)?.toInt(),
   maxParticipantsExcludeOwner: json['max_participants_exclude_owner'] as bool?,
   maxParticipantsExcludeRoles:
-      (json['max_participants_exclude_roles'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      (json['max_participants_exclude_roles'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$LimitsSettingsResponseToJson(

@@ -25,6 +25,7 @@ class CallParticipantTimeline with _$CallParticipantTimeline {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> data;
 
   @override

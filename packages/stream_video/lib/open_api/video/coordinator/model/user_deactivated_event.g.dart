@@ -17,7 +17,7 @@ UserDeactivatedEvent _$UserDeactivatedEventFromJson(
       : UserResponseCommonFields.fromJson(
           json['created_by'] as Map<String, dynamic>,
         ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
     const EpochDateTimeConverter().fromJson,

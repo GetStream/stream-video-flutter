@@ -137,6 +137,7 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
   final ChatPreferences? chatPreferences;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<Command> commands;
 
   @override

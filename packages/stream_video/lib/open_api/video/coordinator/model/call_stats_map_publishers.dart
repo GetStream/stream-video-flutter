@@ -22,6 +22,7 @@ class CallStatsMapPublishers with _$CallStatsMapPublishers {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStatsMapPublisher> publishers;
 
   Map<String, dynamic> toJson() => _$CallStatsMapPublishersToJson(this);

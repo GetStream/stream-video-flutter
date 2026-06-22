@@ -22,6 +22,7 @@ class SDKUsageReportResponse with _$SDKUsageReportResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DailyAggregateSDKUsageReportResponse> daily;
 
   Map<String, dynamic> toJson() => _$SDKUsageReportResponseToJson(this);

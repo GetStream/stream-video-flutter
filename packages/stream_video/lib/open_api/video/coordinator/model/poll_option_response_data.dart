@@ -24,6 +24,7 @@ class PollOptionResponseData with _$PollOptionResponseData {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

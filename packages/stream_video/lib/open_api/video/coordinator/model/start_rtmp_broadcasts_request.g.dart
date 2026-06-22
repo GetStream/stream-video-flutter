@@ -9,9 +9,11 @@ part of 'start_rtmp_broadcasts_request.dart';
 StartRTMPBroadcastsRequest _$StartRTMPBroadcastsRequestFromJson(
   Map<String, dynamic> json,
 ) => StartRTMPBroadcastsRequest(
-  broadcasts: (json['broadcasts'] as List<dynamic>)
-      .map((e) => RTMPBroadcastRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  broadcasts:
+      (json['broadcasts'] as List<dynamic>?)
+          ?.map((e) => RTMPBroadcastRequest.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$StartRTMPBroadcastsRequestToJson(

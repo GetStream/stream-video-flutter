@@ -8,7 +8,8 @@ part of 'query_users_payload.dart';
 
 QueryUsersPayload _$QueryUsersPayloadFromJson(Map<String, dynamic> json) =>
     QueryUsersPayload(
-      filterConditions: json['filter_conditions'] as Map<String, dynamic>,
+      filterConditions:
+          json['filter_conditions'] as Map<String, dynamic>? ?? {},
       includeDeactivatedUsers: json['include_deactivated_users'] as bool?,
       limit: (json['limit'] as num?)?.toInt(),
       offset: (json['offset'] as num?)?.toInt(),

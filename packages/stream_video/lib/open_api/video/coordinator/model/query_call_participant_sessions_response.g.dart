@@ -15,9 +15,14 @@ _$QueryCallParticipantSessionsResponseFromJson(
   callType: json['call_type'] as String,
   duration: (json['duration'] as num).toInt(),
   next: json['next'] as String?,
-  participantsSessions: (json['participants_sessions'] as List<dynamic>)
-      .map((e) => ParticipantSessionDetails.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  participantsSessions:
+      (json['participants_sessions'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                ParticipantSessionDetails.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   prev: json['prev'] as String?,
   session: json['session'] == null
       ? null

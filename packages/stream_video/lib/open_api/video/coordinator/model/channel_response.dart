@@ -74,6 +74,7 @@ class ChannelResponse with _$ChannelResponse {
   final UserResponse? createdBy;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

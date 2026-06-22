@@ -36,6 +36,7 @@ class CallMemberAddedEvent extends core.WsEvent with _$CallMemberAddedEvent {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

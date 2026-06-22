@@ -8,11 +8,14 @@ part of 'quality_score_report.dart';
 
 QualityScoreReport _$QualityScoreReportFromJson(Map<String, dynamic> json) =>
     QualityScoreReport(
-      histogram: (json['histogram'] as List<dynamic>)
-          .map(
-            (e) => ReportByHistogramBucket.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
+      histogram:
+          (json['histogram'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    ReportByHistogramBucket.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$QualityScoreReportToJson(QualityScoreReport instance) =>

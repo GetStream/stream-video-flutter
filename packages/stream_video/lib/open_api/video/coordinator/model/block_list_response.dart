@@ -56,6 +56,7 @@ class BlockListResponse with _$BlockListResponse {
   final DateTime? updatedAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> words;
 
   Map<String, dynamic> toJson() => _$BlockListResponseToJson(this);

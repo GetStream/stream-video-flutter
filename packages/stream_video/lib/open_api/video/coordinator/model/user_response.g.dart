@@ -9,13 +9,15 @@ part of 'user_response.dart';
 UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
   avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
   banned: json['banned'] as bool,
-  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  blockedUserIds:
+      (json['blocked_user_ids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   deactivatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['deactivated_at'],
     const EpochDateTimeConverter().fromJson,
@@ -38,7 +40,8 @@ UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
     const EpochDateTimeConverter().fromJson,
   ),
   role: json['role'] as String,
-  teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
+  teams:
+      (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),

@@ -24,6 +24,7 @@ class Credentials with _$Credentials {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ICEServerResponse> iceServers;
 
   @override

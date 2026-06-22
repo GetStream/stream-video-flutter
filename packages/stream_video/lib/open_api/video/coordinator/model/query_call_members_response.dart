@@ -28,6 +28,7 @@ class QueryCallMembersResponse with _$QueryCallMembersResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

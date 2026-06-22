@@ -12,7 +12,7 @@ ModerationMarkReviewedEvent _$ModerationMarkReviewedEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   item: ReviewQueueItemResponse.fromJson(json['item'] as Map<String, dynamic>),
   message: json['message'] == null
       ? null

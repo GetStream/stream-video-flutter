@@ -22,6 +22,7 @@ class UserFeedbackReportResponse with _$UserFeedbackReportResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DailyAggregateUserFeedbackReportResponse> daily;
 
   Map<String, dynamic> toJson() => _$UserFeedbackReportResponseToJson(this);

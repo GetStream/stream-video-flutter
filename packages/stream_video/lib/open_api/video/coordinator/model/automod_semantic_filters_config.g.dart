@@ -11,11 +11,14 @@ AutomodSemanticFiltersConfig _$AutomodSemanticFiltersConfigFromJson(
 ) => AutomodSemanticFiltersConfig(
   async: json['async'] as bool?,
   enabled: json['enabled'] as bool,
-  rules: (json['rules'] as List<dynamic>)
-      .map(
-        (e) => AutomodSemanticFiltersRule.fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
+  rules:
+      (json['rules'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                AutomodSemanticFiltersRule.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$AutomodSemanticFiltersConfigToJson(

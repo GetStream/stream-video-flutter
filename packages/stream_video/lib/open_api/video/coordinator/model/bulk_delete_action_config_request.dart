@@ -22,6 +22,7 @@ class BulkDeleteActionConfigRequest with _$BulkDeleteActionConfigRequest {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> ids;
 
   Map<String, dynamic> toJson() => _$BulkDeleteActionConfigRequestToJson(this);

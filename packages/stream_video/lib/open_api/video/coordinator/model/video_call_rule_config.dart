@@ -27,9 +27,11 @@ class VideoCallRuleConfig with _$VideoCallRuleConfig {
   final bool flagAllLabels;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> flaggedLabels;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<HarmConfig> rules;
 
   Map<String, dynamic> toJson() => _$VideoCallRuleConfigToJson(this);

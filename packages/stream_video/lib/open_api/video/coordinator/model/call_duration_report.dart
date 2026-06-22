@@ -22,6 +22,7 @@ class CallDurationReport with _$CallDurationReport {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReportByHistogramBucket> histogram;
 
   Map<String, dynamic> toJson() => _$CallDurationReportToJson(this);

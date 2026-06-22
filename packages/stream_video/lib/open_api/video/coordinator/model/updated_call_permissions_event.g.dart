@@ -13,15 +13,17 @@ UpdatedCallPermissionsEvent _$UpdatedCallPermissionsEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  ownCapabilities: (json['own_capabilities'] as List<dynamic>)
-      .map(
-        (e) => $enumDecode(
-          _$OwnCapabilityEnumMap,
-          e,
-          unknownValue: OwnCapability.unknown,
-        ),
-      )
-      .toList(),
+  ownCapabilities:
+      (json['own_capabilities'] as List<dynamic>?)
+          ?.map(
+            (e) => $enumDecode(
+              _$OwnCapabilityEnumMap,
+              e,
+              unknownValue: OwnCapability.unknown,
+            ),
+          )
+          .toList() ??
+      [],
   type: json['type'] as String,
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
 );

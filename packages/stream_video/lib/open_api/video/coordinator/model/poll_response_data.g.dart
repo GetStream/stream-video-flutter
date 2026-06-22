@@ -19,16 +19,18 @@ PollResponseData _$PollResponseDataFromJson(
       ? null
       : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
   createdById: json['created_by_id'] as String,
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   description: json['description'] as String,
   enforceUniqueVote: json['enforce_unique_vote'] as bool,
   id: json['id'] as String,
   isClosed: json['is_closed'] as bool?,
-  latestAnswers: (json['latest_answers'] as List<dynamic>)
-      .map((e) => PollVoteResponseData.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  latestVotesByOption: (json['latest_votes_by_option'] as Map<String, dynamic>)
-      .map(
+  latestAnswers:
+      (json['latest_answers'] as List<dynamic>?)
+          ?.map((e) => PollVoteResponseData.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+  latestVotesByOption:
+      (json['latest_votes_by_option'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(
           k,
           (e as List<dynamic>)
@@ -37,22 +39,31 @@ PollResponseData _$PollResponseDataFromJson(
               )
               .toList(),
         ),
-      ),
+      ) ??
+      {},
   maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
   name: json['name'] as String,
-  options: (json['options'] as List<dynamic>)
-      .map((e) => PollOptionResponseData.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  ownVotes: (json['own_votes'] as List<dynamic>)
-      .map((e) => PollVoteResponseData.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  options:
+      (json['options'] as List<dynamic>?)
+          ?.map(
+            (e) => PollOptionResponseData.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
+  ownVotes:
+      (json['own_votes'] as List<dynamic>?)
+          ?.map((e) => PollVoteResponseData.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   updatedAt: const EpochDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   voteCount: (json['vote_count'] as num).toInt(),
-  voteCountsByOption: Map<String, int>.from(
-    json['vote_counts_by_option'] as Map,
-  ),
+  voteCountsByOption:
+      (json['vote_counts_by_option'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      {},
   votingVisibility: json['voting_visibility'] as String,
 );
 

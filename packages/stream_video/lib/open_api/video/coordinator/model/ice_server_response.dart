@@ -27,6 +27,7 @@ class ICEServerResponse with _$ICEServerResponse {
   final String password;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> urls;
 
   @override

@@ -37,6 +37,7 @@ class ChatDraftPayloadResponse with _$ChatDraftPayloadResponse {
   final List<Attachment>? attachments;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

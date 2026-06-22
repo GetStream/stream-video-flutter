@@ -11,7 +11,7 @@ ReactionResponse _$ReactionResponseFromJson(Map<String, dynamic> json) =>
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>,
+      custom: json['custom'] as Map<String, dynamic>? ?? {},
       messageId: json['message_id'] as String,
       score: (json['score'] as num).toInt(),
       type: json['type'] as String,

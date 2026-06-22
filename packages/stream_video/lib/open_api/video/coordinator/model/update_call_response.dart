@@ -32,13 +32,14 @@ class UpdateCallResponse with _$UpdateCallResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override
   final MemberResponse? membership;
 
   @override
-  @JsonKey(unknownEnumValue: OwnCapability.unknown)
+  @JsonKey(unknownEnumValue: OwnCapability.unknown, defaultValue: [])
   final List<OwnCapability> ownCapabilities;
 
   Map<String, dynamic> toJson() => _$UpdateCallResponseToJson(this);

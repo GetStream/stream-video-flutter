@@ -23,9 +23,11 @@ ModerationFlagResponse _$ModerationFlagResponseFromJson(
           json['moderation_payload'] as Map<String, dynamic>,
         ),
   reason: json['reason'] as String?,
-  result: (json['result'] as List<dynamic>)
-      .map((e) => e as Map<String, dynamic>)
-      .toList(),
+  result:
+      (json['result'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList() ??
+      [],
   reviewQueueItem: json['review_queue_item'] == null
       ? null
       : ReviewQueueItemResponse.fromJson(

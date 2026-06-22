@@ -13,9 +13,11 @@ CallUserMutedEvent _$CallUserMutedEventFromJson(Map<String, dynamic> json) =>
         json['created_at'] as Object,
       ),
       fromUserId: json['from_user_id'] as String,
-      mutedUserIds: (json['muted_user_ids'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      mutedUserIds:
+          (json['muted_user_ids'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       reason: json['reason'] as String,
       type: json['type'] as String,
     );

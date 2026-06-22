@@ -10,15 +10,17 @@ HLSSettingsRequest _$HLSSettingsRequestFromJson(Map<String, dynamic> json) =>
     HLSSettingsRequest(
       autoOn: json['auto_on'] as bool?,
       enabled: json['enabled'] as bool?,
-      qualityTracks: (json['quality_tracks'] as List<dynamic>)
-          .map(
-            (e) => $enumDecode(
-              _$HLSSettingsRequestQualityTracksEnumMap,
-              e,
-              unknownValue: HLSSettingsRequestQualityTracks.unknown,
-            ),
-          )
-          .toList(),
+      qualityTracks:
+          (json['quality_tracks'] as List<dynamic>?)
+              ?.map(
+                (e) => $enumDecode(
+                  _$HLSSettingsRequestQualityTracksEnumMap,
+                  e,
+                  unknownValue: HLSSettingsRequestQualityTracks.unknown,
+                ),
+              )
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$HLSSettingsRequestToJson(HLSSettingsRequest instance) =>

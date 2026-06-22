@@ -21,9 +21,11 @@ CallFrameRecordingFrameReadyEvent _$CallFrameRecordingFrameReadyEventFromJson(
   trackType: json['track_type'] as String,
   type: json['type'] as String,
   url: json['url'] as String,
-  users: (json['users'] as Map<String, dynamic>).map(
-    (k, e) => MapEntry(k, UserResponse.fromJson(e as Map<String, dynamic>)),
-  ),
+  users:
+      (json['users'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, UserResponse.fromJson(e as Map<String, dynamic>)),
+      ) ??
+      {},
 );
 
 Map<String, dynamic> _$CallFrameRecordingFrameReadyEventToJson(

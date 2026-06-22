@@ -9,15 +9,17 @@ part of 'request_permission_request.dart';
 RequestPermissionRequest _$RequestPermissionRequestFromJson(
   Map<String, dynamic> json,
 ) => RequestPermissionRequest(
-  permissions: (json['permissions'] as List<dynamic>)
-      .map(
-        (e) => $enumDecode(
-          _$RequestPermissionRequestPermissionsEnumMap,
-          e,
-          unknownValue: RequestPermissionRequestPermissions.unknown,
-        ),
-      )
-      .toList(),
+  permissions:
+      (json['permissions'] as List<dynamic>?)
+          ?.map(
+            (e) => $enumDecode(
+              _$RequestPermissionRequestPermissionsEnumMap,
+              e,
+              unknownValue: RequestPermissionRequestPermissions.unknown,
+            ),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$RequestPermissionRequestToJson(

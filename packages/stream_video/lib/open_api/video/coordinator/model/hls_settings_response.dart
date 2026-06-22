@@ -30,6 +30,7 @@ class HLSSettingsResponse with _$HLSSettingsResponse {
   final bool enabled;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> qualityTracks;
 
   Map<String, dynamic> toJson() => _$HLSSettingsResponseToJson(this);

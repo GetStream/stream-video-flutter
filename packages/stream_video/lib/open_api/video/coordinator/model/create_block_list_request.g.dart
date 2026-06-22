@@ -18,7 +18,8 @@ CreateBlockListRequest _$CreateBlockListRequestFromJson(
     json['type'],
     unknownValue: CreateBlockListRequestType.unknown,
   ),
-  words: (json['words'] as List<dynamic>).map((e) => e as String).toList(),
+  words:
+      (json['words'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
 );
 
 Map<String, dynamic> _$CreateBlockListRequestToJson(

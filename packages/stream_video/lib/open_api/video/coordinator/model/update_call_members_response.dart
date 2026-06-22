@@ -26,6 +26,7 @@ class UpdateCallMembersResponse with _$UpdateCallMembersResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   Map<String, dynamic> toJson() => _$UpdateCallMembersResponseToJson(this);

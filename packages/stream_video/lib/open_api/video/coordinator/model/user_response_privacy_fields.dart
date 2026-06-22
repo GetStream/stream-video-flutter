@@ -47,6 +47,7 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
   final bool banned;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedUserIds;
 
   @override
@@ -54,6 +55,7 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -97,6 +99,7 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
   final String role;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> teams;
 
   @override

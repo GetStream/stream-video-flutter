@@ -48,6 +48,7 @@ class BulkActionAppealsRequest with _$BulkActionAppealsRequest {
   final BulkActionAppealsRequestActionType actionType;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> appealIds;
 
   @override

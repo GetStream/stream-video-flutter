@@ -13,9 +13,11 @@ CallRingEvent _$CallRingEventFromJson(Map<String, dynamic> json) =>
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      members: (json['members'] as List<dynamic>)
-          .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      members:
+          (json['members'] as List<dynamic>?)
+              ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       sessionId: json['session_id'] as String,
       type: json['type'] as String,
       user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),

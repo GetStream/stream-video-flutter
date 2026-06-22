@@ -68,9 +68,10 @@ ConfigResponse _$ConfigResponseFromJson(
       ? null
       : LLMConfig.fromJson(json['llm_config'] as Map<String, dynamic>),
   supportedVideoCallHarmTypes:
-      (json['supported_video_call_harm_types'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      (json['supported_video_call_harm_types'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
   team: json['team'] as String,
   updatedAt: const EpochDateTimeConverter().fromJson(
     json['updated_at'] as Object,

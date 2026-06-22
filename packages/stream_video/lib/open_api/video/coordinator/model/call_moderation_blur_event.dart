@@ -34,6 +34,7 @@ class CallModerationBlurEvent extends core.WsEvent
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

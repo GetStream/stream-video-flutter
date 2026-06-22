@@ -23,6 +23,7 @@ class PerSDKUsageReport with _$PerSDKUsageReport {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, int> byVersion;
 
   @override

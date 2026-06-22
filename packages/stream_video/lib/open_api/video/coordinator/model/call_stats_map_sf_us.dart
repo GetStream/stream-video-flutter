@@ -22,6 +22,7 @@ class CallStatsMapSFUs with _$CallStatsMapSFUs {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<SFULocationResponse> locations;
 
   Map<String, dynamic> toJson() => _$CallStatsMapSFUsToJson(this);

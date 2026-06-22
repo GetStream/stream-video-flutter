@@ -9,13 +9,15 @@ part of 'quality_score_report_response.dart';
 QualityScoreReportResponse _$QualityScoreReportResponseFromJson(
   Map<String, dynamic> json,
 ) => QualityScoreReportResponse(
-  daily: (json['daily'] as List<dynamic>)
-      .map(
-        (e) => DailyAggregateQualityScoreReportResponse.fromJson(
-          e as Map<String, dynamic>,
-        ),
-      )
-      .toList(),
+  daily:
+      (json['daily'] as List<dynamic>?)
+          ?.map(
+            (e) => DailyAggregateQualityScoreReportResponse.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$QualityScoreReportResponseToJson(

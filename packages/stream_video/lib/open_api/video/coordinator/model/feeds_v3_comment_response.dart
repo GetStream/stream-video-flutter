@@ -83,6 +83,7 @@ class FeedsV3CommentResponse with _$FeedsV3CommentResponse {
   final List<FeedsReactionResponse>? latestReactions;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UserResponse> mentionedUsers;
 
   @override
@@ -95,6 +96,7 @@ class FeedsV3CommentResponse with _$FeedsV3CommentResponse {
   final String objectType;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<FeedsReactionResponse> ownReactions;
 
   @override

@@ -9,9 +9,14 @@ part of 'ingress_video_encoding_response.dart';
 IngressVideoEncodingResponse _$IngressVideoEncodingResponseFromJson(
   Map<String, dynamic> json,
 ) => IngressVideoEncodingResponse(
-  layers: (json['layers'] as List<dynamic>)
-      .map((e) => IngressVideoLayerResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  layers:
+      (json['layers'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                IngressVideoLayerResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   source: IngressSourceResponse.fromJson(
     json['source'] as Map<String, dynamic>,
   ),

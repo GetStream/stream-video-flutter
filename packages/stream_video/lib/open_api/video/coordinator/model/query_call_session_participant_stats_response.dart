@@ -63,6 +63,7 @@ class QueryCallSessionParticipantStatsResponse
   final String? next;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStatsParticipant> participants;
 
   @override

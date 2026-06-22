@@ -16,9 +16,14 @@ ReactionGroupResponse _$ReactionGroupResponseFromJson(
   lastReactionAt: const EpochDateTimeConverter().fromJson(
     json['last_reaction_at'] as Object,
   ),
-  latestReactionsBy: (json['latest_reactions_by'] as List<dynamic>)
-      .map((e) => ReactionGroupUserResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  latestReactionsBy:
+      (json['latest_reactions_by'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                ReactionGroupUserResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$ReactionGroupResponseToJson(

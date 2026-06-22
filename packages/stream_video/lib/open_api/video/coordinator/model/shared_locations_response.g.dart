@@ -9,11 +9,14 @@ part of 'shared_locations_response.dart';
 SharedLocationsResponse _$SharedLocationsResponseFromJson(
   Map<String, dynamic> json,
 ) => SharedLocationsResponse(
-  activeLiveLocations: (json['active_live_locations'] as List<dynamic>)
-      .map(
-        (e) => SharedLocationResponseData.fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
+  activeLiveLocations:
+      (json['active_live_locations'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                SharedLocationResponseData.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   duration: json['duration'] as String,
 );
 

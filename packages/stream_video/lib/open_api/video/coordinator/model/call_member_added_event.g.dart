@@ -14,9 +14,11 @@ CallMemberAddedEvent _$CallMemberAddedEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  members: (json['members'] as List<dynamic>)
-      .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  members:
+      (json['members'] as List<dynamic>?)
+          ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   type: json['type'] as String,
 );
 

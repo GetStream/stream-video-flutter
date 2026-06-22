@@ -11,24 +11,32 @@ QueryCallParticipantsResponse _$QueryCallParticipantsResponseFromJson(
 ) => QueryCallParticipantsResponse(
   call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
   duration: json['duration'] as String,
-  members: (json['members'] as List<dynamic>)
-      .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  members:
+      (json['members'] as List<dynamic>?)
+          ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   membership: json['membership'] == null
       ? null
       : MemberResponse.fromJson(json['membership'] as Map<String, dynamic>),
-  ownCapabilities: (json['own_capabilities'] as List<dynamic>)
-      .map(
-        (e) => $enumDecode(
-          _$OwnCapabilityEnumMap,
-          e,
-          unknownValue: OwnCapability.unknown,
-        ),
-      )
-      .toList(),
-  participants: (json['participants'] as List<dynamic>)
-      .map((e) => CallParticipantResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  ownCapabilities:
+      (json['own_capabilities'] as List<dynamic>?)
+          ?.map(
+            (e) => $enumDecode(
+              _$OwnCapabilityEnumMap,
+              e,
+              unknownValue: OwnCapability.unknown,
+            ),
+          )
+          .toList() ??
+      [],
+  participants:
+      (json['participants'] as List<dynamic>?)
+          ?.map(
+            (e) => CallParticipantResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   totalParticipants: (json['total_participants'] as num).toInt(),
 );
 

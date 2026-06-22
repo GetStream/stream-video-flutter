@@ -22,6 +22,7 @@ class QualityScoreReportResponse with _$QualityScoreReportResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DailyAggregateQualityScoreReportResponse> daily;
 
   Map<String, dynamic> toJson() => _$QualityScoreReportResponseToJson(this);

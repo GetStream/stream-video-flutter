@@ -22,6 +22,7 @@ class UpdateUsersRequest with _$UpdateUsersRequest {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, UserRequest> users;
 
   Map<String, dynamic> toJson() => _$UpdateUsersRequestToJson(this);

@@ -13,7 +13,7 @@ CallModerationWarningEvent _$CallModerationWarningEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   message: json['message'] as String,
   type: json['type'] as String,
   userId: json['user_id'] as String,

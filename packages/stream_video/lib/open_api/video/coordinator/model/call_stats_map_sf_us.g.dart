@@ -8,9 +8,13 @@ part of 'call_stats_map_sf_us.dart';
 
 CallStatsMapSFUs _$CallStatsMapSFUsFromJson(Map<String, dynamic> json) =>
     CallStatsMapSFUs(
-      locations: (json['locations'] as List<dynamic>)
-          .map((e) => SFULocationResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      locations:
+          (json['locations'] as List<dynamic>?)
+              ?.map(
+                (e) => SFULocationResponse.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$CallStatsMapSFUsToJson(CallStatsMapSFUs instance) =>

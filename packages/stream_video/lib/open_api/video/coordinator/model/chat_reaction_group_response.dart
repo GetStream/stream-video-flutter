@@ -37,6 +37,7 @@ class ChatReactionGroupResponse with _$ChatReactionGroupResponse {
   final DateTime lastReactionAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ChatReactionGroupUserResponse> latestReactionsBy;
 
   @override

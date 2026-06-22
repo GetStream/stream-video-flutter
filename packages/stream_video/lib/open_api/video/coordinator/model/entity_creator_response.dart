@@ -51,6 +51,7 @@ class EntityCreatorResponse with _$EntityCreatorResponse {
   final bool banned;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedUserIds;
 
   @override
@@ -58,6 +59,7 @@ class EntityCreatorResponse with _$EntityCreatorResponse {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -101,6 +103,7 @@ class EntityCreatorResponse with _$EntityCreatorResponse {
   final String role;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> teams;
 
   @override

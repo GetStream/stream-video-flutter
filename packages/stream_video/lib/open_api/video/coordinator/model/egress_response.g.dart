@@ -32,9 +32,13 @@ EgressResponse _$EgressResponseFromJson(Map<String, dynamic> json) =>
           : RawRecordingResponse.fromJson(
               json['raw_recording'] as Map<String, dynamic>,
             ),
-      rtmps: (json['rtmps'] as List<dynamic>)
-          .map((e) => EgressRTMPResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      rtmps:
+          (json['rtmps'] as List<dynamic>?)
+              ?.map(
+                (e) => EgressRTMPResponse.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$EgressResponseToJson(EgressResponse instance) =>

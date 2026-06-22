@@ -23,7 +23,7 @@ ChannelResponse _$ChannelResponseFromJson(
   createdBy: json['created_by'] == null
       ? null
       : UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   deletedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['deleted_at'],
     const EpochDateTimeConverter().fromJson,

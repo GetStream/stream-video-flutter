@@ -46,6 +46,7 @@ class VelocityFilterConfig with _$VelocityFilterConfig {
   final bool firstMessageOnly;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<VelocityFilterConfigRule> rules;
 
   Map<String, dynamic> toJson() => _$VelocityFilterConfigToJson(this);

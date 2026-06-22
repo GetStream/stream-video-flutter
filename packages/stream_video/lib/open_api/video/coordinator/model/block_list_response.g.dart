@@ -22,7 +22,9 @@ BlockListResponse _$BlockListResponseFromJson(Map<String, dynamic> json) =>
         json['updated_at'],
         const EpochDateTimeConverter().fromJson,
       ),
-      words: (json['words'] as List<dynamic>).map((e) => e as String).toList(),
+      words:
+          (json['words'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          [],
     );
 
 Map<String, dynamic> _$BlockListResponseToJson(BlockListResponse instance) =>

@@ -37,6 +37,7 @@ class SIPInboundRoutingRuleResponse with _$SIPInboundRoutingRuleResponse {
   final SIPCallConfigsResponse? callConfigs;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> calledNumbers;
 
   @override
@@ -68,6 +69,7 @@ class SIPInboundRoutingRuleResponse with _$SIPInboundRoutingRuleResponse {
   final SIPInboundRoutingRulePinConfigsResponse? pinRoutingConfigs;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> trunkIds;
 
   @override

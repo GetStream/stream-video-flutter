@@ -12,7 +12,7 @@ CustomVideoEvent _$CustomVideoEventFromJson(Map<String, dynamic> json) =>
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>,
+      custom: json['custom'] as Map<String, dynamic>? ?? {},
       type: json['type'] as String,
       user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
     );

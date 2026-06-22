@@ -25,6 +25,7 @@ class QueryCallsResponse with _$QueryCallsResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStateResponseFields> calls;
 
   @override

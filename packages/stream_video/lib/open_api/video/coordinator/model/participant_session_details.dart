@@ -42,6 +42,7 @@ class ParticipantSessionDetails with _$ParticipantSessionDetails {
   final String publisherType;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> roles;
 
   @override

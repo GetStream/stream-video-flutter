@@ -39,9 +39,11 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
       : ChatPreferences.fromJson(
           json['chat_preferences'] as Map<String, dynamic>,
         ),
-  commands: (json['commands'] as List<dynamic>)
-      .map((e) => Command.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  commands:
+      (json['commands'] as List<dynamic>?)
+          ?.map((e) => Command.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   connectEvents: json['connect_events'] as bool,
   countMessages: json['count_messages'] as bool,
   createdAt: const EpochDateTimeConverter().fromJson(
