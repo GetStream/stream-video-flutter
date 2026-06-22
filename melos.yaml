@@ -165,3 +165,7 @@ scripts:
       npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
       npx stream-chat-docusaurus -i -s
     description: Runs the docusaurus documentation locally.
+
+  gen:api:
+    run: $MELOS_ROOT_PATH/packages/stream_video/scripts/generate.sh
+    description: Generate API client from OpenAPI spec.
