@@ -36,6 +36,7 @@ class ReactionGroupResponse with _$ReactionGroupResponse {
   final DateTime lastReactionAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReactionGroupUserResponse> latestReactionsBy;
 
   Map<String, dynamic> toJson() => _$ReactionGroupResponseToJson(this);

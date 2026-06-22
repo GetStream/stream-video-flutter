@@ -34,7 +34,10 @@ class RequestPermissionRequest with _$RequestPermissionRequest {
   });
 
   @override
-  @JsonKey(unknownEnumValue: RequestPermissionRequestPermissions.unknown)
+  @JsonKey(
+    unknownEnumValue: RequestPermissionRequestPermissions.unknown,
+    defaultValue: [],
+  )
   final List<RequestPermissionRequestPermissions> permissions;
 
   Map<String, dynamic> toJson() => _$RequestPermissionRequestToJson(this);

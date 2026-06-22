@@ -23,6 +23,7 @@ class CallParticipantCountReportResponse
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DailyAggregateCallParticipantCountReportResponse> daily;
 
   Map<String, dynamic> toJson() =>

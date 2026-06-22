@@ -60,6 +60,7 @@ class UserUnbannedEvent extends core.WsEvent with _$UserUnbannedEvent {
   final UserResponseCommonFields? createdBy;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

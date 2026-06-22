@@ -10,9 +10,11 @@ QueryPollsResponse _$QueryPollsResponseFromJson(Map<String, dynamic> json) =>
     QueryPollsResponse(
       duration: json['duration'] as String,
       next: json['next'] as String?,
-      polls: (json['polls'] as List<dynamic>)
-          .map((e) => PollResponseData.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      polls:
+          (json['polls'] as List<dynamic>?)
+              ?.map((e) => PollResponseData.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       prev: json['prev'] as String?,
     );
 

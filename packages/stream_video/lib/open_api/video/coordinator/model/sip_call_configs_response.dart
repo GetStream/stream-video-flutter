@@ -22,6 +22,7 @@ class SIPCallConfigsResponse with _$SIPCallConfigsResponse {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> customData;
 
   Map<String, dynamic> toJson() => _$SIPCallConfigsResponseToJson(this);

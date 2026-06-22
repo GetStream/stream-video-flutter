@@ -8,17 +8,21 @@ part of 'sip_trunk_response.dart';
 
 SIPTrunkResponse _$SIPTrunkResponseFromJson(Map<String, dynamic> json) =>
     SIPTrunkResponse(
-      allowedIps: (json['allowed_ips'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      allowedIps:
+          (json['allowed_ips'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       id: json['id'] as String,
       name: json['name'] as String,
-      numbers: (json['numbers'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      numbers:
+          (json['numbers'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       password: json['password'] as String,
       updatedAt: const EpochDateTimeConverter().fromJson(
         json['updated_at'] as Object,

@@ -15,11 +15,14 @@ CallStatsParticipant _$CallStatsParticipantFromJson(
   ),
   name: json['name'] as String?,
   roles: (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  sessions: (json['sessions'] as List<dynamic>)
-      .map(
-        (e) => CallStatsParticipantSession.fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
+  sessions:
+      (json['sessions'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                CallStatsParticipantSession.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   userId: json['user_id'] as String,
 );
 

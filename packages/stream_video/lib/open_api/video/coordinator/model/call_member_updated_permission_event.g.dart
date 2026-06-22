@@ -11,17 +11,17 @@ CallMemberUpdatedPermissionEvent _$CallMemberUpdatedPermissionEventFromJson(
 ) => CallMemberUpdatedPermissionEvent(
   call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
   callCid: json['call_cid'] as String,
-  capabilitiesByRole: (json['capabilities_by_role'] as Map<String, dynamic>)
-      .map(
-        (k, e) =>
-            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
-      ),
+  capabilitiesByRole: _capabilitiesByRoleFromJson(
+    json['capabilities_by_role'] as Map<String, dynamic>,
+  ),
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  members: (json['members'] as List<dynamic>)
-      .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  members:
+      (json['members'] as List<dynamic>?)
+          ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   type: json['type'] as String,
 );
 

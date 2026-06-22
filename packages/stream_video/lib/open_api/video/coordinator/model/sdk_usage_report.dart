@@ -22,6 +22,7 @@ class SDKUsageReport with _$SDKUsageReport {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, PerSDKUsageReport> perSdkUsage;
 
   Map<String, dynamic> toJson() => _$SDKUsageReportToJson(this);

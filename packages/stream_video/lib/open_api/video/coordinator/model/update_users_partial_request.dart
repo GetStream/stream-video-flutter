@@ -22,6 +22,7 @@ class UpdateUsersPartialRequest with _$UpdateUsersPartialRequest {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UpdateUserPartialRequest> users;
 
   Map<String, dynamic> toJson() => _$UpdateUsersPartialRequestToJson(this);

@@ -26,6 +26,7 @@ class SearchRolesResponse with _$SearchRolesResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<Role> roles;
 
   Map<String, dynamic> toJson() => _$SearchRolesResponseToJson(this);

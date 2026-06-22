@@ -14,7 +14,9 @@ CallMemberRemovedEvent _$CallMemberRemovedEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  members: (json['members'] as List<dynamic>).map((e) => e as String).toList(),
+  members:
+      (json['members'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      [],
   type: json['type'] as String,
 );
 

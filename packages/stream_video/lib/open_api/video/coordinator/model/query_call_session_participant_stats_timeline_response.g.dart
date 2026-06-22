@@ -14,9 +14,13 @@ _$QueryCallSessionParticipantStatsTimelineResponseFromJson(
   callSessionId: json['call_session_id'] as String,
   callType: json['call_type'] as String,
   duration: json['duration'] as String,
-  events: (json['events'] as List<dynamic>)
-      .map((e) => CallParticipantTimeline.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  events:
+      (json['events'] as List<dynamic>?)
+          ?.map(
+            (e) => CallParticipantTimeline.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   userId: json['user_id'] as String,
   userSessionId: json['user_session_id'] as String,
 );

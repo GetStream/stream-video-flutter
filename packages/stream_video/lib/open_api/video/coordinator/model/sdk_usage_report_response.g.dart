@@ -9,13 +9,15 @@ part of 'sdk_usage_report_response.dart';
 SDKUsageReportResponse _$SDKUsageReportResponseFromJson(
   Map<String, dynamic> json,
 ) => SDKUsageReportResponse(
-  daily: (json['daily'] as List<dynamic>)
-      .map(
-        (e) => DailyAggregateSDKUsageReportResponse.fromJson(
-          e as Map<String, dynamic>,
-        ),
-      )
-      .toList(),
+  daily:
+      (json['daily'] as List<dynamic>?)
+          ?.map(
+            (e) => DailyAggregateSDKUsageReportResponse.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$SDKUsageReportResponseToJson(

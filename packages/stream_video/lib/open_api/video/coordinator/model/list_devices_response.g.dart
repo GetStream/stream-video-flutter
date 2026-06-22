@@ -8,9 +8,11 @@ part of 'list_devices_response.dart';
 
 ListDevicesResponse _$ListDevicesResponseFromJson(Map<String, dynamic> json) =>
     ListDevicesResponse(
-      devices: (json['devices'] as List<dynamic>)
-          .map((e) => DeviceResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      devices:
+          (json['devices'] as List<dynamic>?)
+              ?.map((e) => DeviceResponse.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       duration: json['duration'] as String,
     );
 

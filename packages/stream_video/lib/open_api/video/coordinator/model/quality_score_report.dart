@@ -22,6 +22,7 @@ class QualityScoreReport with _$QualityScoreReport {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReportByHistogramBucket> histogram;
 
   Map<String, dynamic> toJson() => _$QualityScoreReportToJson(this);

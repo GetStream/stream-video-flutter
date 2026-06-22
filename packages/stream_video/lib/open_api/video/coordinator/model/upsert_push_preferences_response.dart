@@ -27,10 +27,12 @@ class UpsertPushPreferencesResponse with _$UpsertPushPreferencesResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Map<String, ChannelPushPreferencesResponse>>
   userChannelPreferences;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, PushPreferencesResponse> userPreferences;
 
   Map<String, dynamic> toJson() => _$UpsertPushPreferencesResponseToJson(this);

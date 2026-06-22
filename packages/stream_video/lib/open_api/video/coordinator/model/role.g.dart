@@ -12,7 +12,9 @@ Role _$RoleFromJson(Map<String, dynamic> json) => Role(
   ),
   custom: json['custom'] as bool,
   name: json['name'] as String,
-  scopes: (json['scopes'] as List<dynamic>).map((e) => e as String).toList(),
+  scopes:
+      (json['scopes'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      [],
   updatedAt: const EpochDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),

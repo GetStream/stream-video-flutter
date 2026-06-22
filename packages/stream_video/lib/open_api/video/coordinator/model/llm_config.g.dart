@@ -10,9 +10,11 @@ LLMConfig _$LLMConfigFromJson(Map<String, dynamic> json) => LLMConfig(
   appContext: json['app_context'] as String?,
   async: json['async'] as bool?,
   enabled: json['enabled'] as bool,
-  rules: (json['rules'] as List<dynamic>)
-      .map((e) => LLMRule.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  rules:
+      (json['rules'] as List<dynamic>?)
+          ?.map((e) => LLMRule.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   severityDescriptions: (json['severity_descriptions'] as Map<String, dynamic>?)
       ?.map((k, e) => MapEntry(k, e as String)),
 );

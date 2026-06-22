@@ -9,9 +9,11 @@ part of 'get_blocked_users_response.dart';
 GetBlockedUsersResponse _$GetBlockedUsersResponseFromJson(
   Map<String, dynamic> json,
 ) => GetBlockedUsersResponse(
-  blocks: (json['blocks'] as List<dynamic>)
-      .map((e) => BlockedUserResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  blocks:
+      (json['blocks'] as List<dynamic>?)
+          ?.map((e) => BlockedUserResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   duration: json['duration'] as String,
 );
 

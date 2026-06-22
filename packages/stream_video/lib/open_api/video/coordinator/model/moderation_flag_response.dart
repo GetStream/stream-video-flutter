@@ -61,6 +61,7 @@ class ModerationFlagResponse with _$ModerationFlagResponse {
   final String? reason;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<Map<String, Object?>> result;
 
   @override

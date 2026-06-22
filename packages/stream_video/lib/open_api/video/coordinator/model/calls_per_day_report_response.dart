@@ -22,6 +22,7 @@ class CallsPerDayReportResponse with _$CallsPerDayReportResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DailyAggregateCallsPerDayReportResponse> daily;
 
   Map<String, dynamic> toJson() => _$CallsPerDayReportResponseToJson(this);

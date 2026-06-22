@@ -12,12 +12,15 @@ QueryCallStatsResponse _$QueryCallStatsResponseFromJson(
   duration: json['duration'] as String,
   next: json['next'] as String?,
   prev: json['prev'] as String?,
-  reports: (json['reports'] as List<dynamic>)
-      .map(
-        (e) =>
-            CallStatsReportSummaryResponse.fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
+  reports:
+      (json['reports'] as List<dynamic>?)
+          ?.map(
+            (e) => CallStatsReportSummaryResponse.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$QueryCallStatsResponseToJson(

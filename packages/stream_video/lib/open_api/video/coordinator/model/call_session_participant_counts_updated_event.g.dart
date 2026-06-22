@@ -15,9 +15,11 @@ _$CallSessionParticipantCountsUpdatedEventFromJson(Map<String, dynamic> json) =>
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      participantsCountByRole: Map<String, int>.from(
-        json['participants_count_by_role'] as Map,
-      ),
+      participantsCountByRole:
+          (json['participants_count_by_role'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ) ??
+          {},
       sessionId: json['session_id'] as String,
       type: json['type'] as String,
     );

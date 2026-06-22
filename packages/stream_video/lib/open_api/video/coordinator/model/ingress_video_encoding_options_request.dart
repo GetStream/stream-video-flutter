@@ -24,6 +24,7 @@ class IngressVideoEncodingOptionsRequest
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<IngressVideoLayerRequest> layers;
 
   @override

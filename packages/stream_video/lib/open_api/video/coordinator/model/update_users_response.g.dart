@@ -10,10 +10,14 @@ UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) =>
     UpdateUsersResponse(
       duration: json['duration'] as String,
       membershipDeletionTaskId: json['membership_deletion_task_id'] as String,
-      users: (json['users'] as Map<String, dynamic>).map(
-        (k, e) =>
-            MapEntry(k, FullUserResponse.fromJson(e as Map<String, dynamic>)),
-      ),
+      users:
+          (json['users'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              FullUserResponse.fromJson(e as Map<String, dynamic>),
+            ),
+          ) ??
+          {},
     );
 
 Map<String, dynamic> _$UpdateUsersResponseToJson(

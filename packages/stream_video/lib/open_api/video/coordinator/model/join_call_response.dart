@@ -41,13 +41,14 @@ class JoinCallResponse with _$JoinCallResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override
   final MemberResponse? membership;
 
   @override
-  @JsonKey(unknownEnumValue: OwnCapability.unknown)
+  @JsonKey(unknownEnumValue: OwnCapability.unknown, defaultValue: [])
   final List<OwnCapability> ownCapabilities;
 
   @override

@@ -9,13 +9,15 @@ part of 'calls_per_day_report_response.dart';
 CallsPerDayReportResponse _$CallsPerDayReportResponseFromJson(
   Map<String, dynamic> json,
 ) => CallsPerDayReportResponse(
-  daily: (json['daily'] as List<dynamic>)
-      .map(
-        (e) => DailyAggregateCallsPerDayReportResponse.fromJson(
-          e as Map<String, dynamic>,
-        ),
-      )
-      .toList(),
+  daily:
+      (json['daily'] as List<dynamic>?)
+          ?.map(
+            (e) => DailyAggregateCallsPerDayReportResponse.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$CallsPerDayReportResponseToJson(

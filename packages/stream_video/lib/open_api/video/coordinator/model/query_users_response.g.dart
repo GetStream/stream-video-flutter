@@ -9,9 +9,11 @@ part of 'query_users_response.dart';
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) =>
     QueryUsersResponse(
       duration: json['duration'] as String,
-      users: (json['users'] as List<dynamic>)
-          .map((e) => FullUserResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      users:
+          (json['users'] as List<dynamic>?)
+              ?.map((e) => FullUserResponse.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$QueryUsersResponseToJson(QueryUsersResponse instance) =>

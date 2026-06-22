@@ -22,6 +22,7 @@ class StartRTMPBroadcastsRequest with _$StartRTMPBroadcastsRequest {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<RTMPBroadcastRequest> broadcasts;
 
   Map<String, dynamic> toJson() => _$StartRTMPBroadcastsRequestToJson(this);

@@ -34,6 +34,7 @@ class PermissionRequestEvent extends core.WsEvent
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> permissions;
 
   @override

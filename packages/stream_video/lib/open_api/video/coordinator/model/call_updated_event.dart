@@ -13,6 +13,16 @@ import '../models.dart';
 part 'call_updated_event.g.dart';
 part 'call_updated_event.freezed.dart';
 
+Map<String, List<String>> _capabilitiesByRoleFromJson(
+  Map<String, dynamic> json,
+) {
+  return {
+    for (final entry in json.entries)
+      if (entry.value is List)
+        entry.key: (entry.value as List).map((i) => i as String).toList(),
+  };
+}
+
 @freezed
 @immutable
 @JsonSerializable()
@@ -32,6 +42,7 @@ class CallUpdatedEvent extends core.WsEvent with _$CallUpdatedEvent {
   final String callCid;
 
   @override
+  @JsonKey(fromJson: _capabilitiesByRoleFromJson)
   final Map<String, List<String>> capabilitiesByRole;
 
   @override

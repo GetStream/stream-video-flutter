@@ -32,9 +32,11 @@ FeedsV3CommentResponse _$FeedsV3CommentResponseFromJson(
   latestReactions: (json['latest_reactions'] as List<dynamic>?)
       ?.map((e) => FeedsReactionResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
-  mentionedUsers: (json['mentioned_users'] as List<dynamic>)
-      .map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  mentionedUsers:
+      (json['mentioned_users'] as List<dynamic>?)
+          ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   moderation: json['moderation'] == null
       ? null
       : ModerationV2Response.fromJson(
@@ -42,9 +44,13 @@ FeedsV3CommentResponse _$FeedsV3CommentResponseFromJson(
         ),
   objectId: json['object_id'] as String,
   objectType: json['object_type'] as String,
-  ownReactions: (json['own_reactions'] as List<dynamic>)
-      .map((e) => FeedsReactionResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  ownReactions:
+      (json['own_reactions'] as List<dynamic>?)
+          ?.map(
+            (e) => FeedsReactionResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   parentId: json['parent_id'] as String?,
   reactionCount: (json['reaction_count'] as num).toInt(),
   reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(

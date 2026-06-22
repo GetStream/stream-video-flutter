@@ -14,9 +14,11 @@ SIPInboundRoutingRuleResponse _$SIPInboundRoutingRuleResponseFromJson(
       : SIPCallConfigsResponse.fromJson(
           json['call_configs'] as Map<String, dynamic>,
         ),
-  calledNumbers: (json['called_numbers'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  calledNumbers:
+      (json['called_numbers'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
   callerConfigs: json['caller_configs'] == null
       ? null
       : SIPCallerConfigsResponse.fromJson(
@@ -46,9 +48,9 @@ SIPInboundRoutingRuleResponse _$SIPInboundRoutingRuleResponseFromJson(
       : SIPInboundRoutingRulePinConfigsResponse.fromJson(
           json['pin_routing_configs'] as Map<String, dynamic>,
         ),
-  trunkIds: (json['trunk_ids'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  trunkIds:
+      (json['trunk_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      [],
   updatedAt: const EpochDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),

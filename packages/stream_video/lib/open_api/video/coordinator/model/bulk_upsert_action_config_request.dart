@@ -22,6 +22,7 @@ class BulkUpsertActionConfigRequest with _$BulkUpsertActionConfigRequest {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UpsertActionConfigItem> actionConfigs;
 
   Map<String, dynamic> toJson() => _$BulkUpsertActionConfigRequestToJson(this);

@@ -13,6 +13,16 @@ import '../models.dart';
 part 'call_member_updated_permission_event.g.dart';
 part 'call_member_updated_permission_event.freezed.dart';
 
+Map<String, List<String>> _capabilitiesByRoleFromJson(
+  Map<String, dynamic> json,
+) {
+  return {
+    for (final entry in json.entries)
+      if (entry.value is List)
+        entry.key: (entry.value as List).map((i) => i as String).toList(),
+  };
+}
+
 @freezed
 @immutable
 @JsonSerializable()
@@ -34,6 +44,7 @@ class CallMemberUpdatedPermissionEvent extends core.WsEvent
   final String callCid;
 
   @override
+  @JsonKey(fromJson: _capabilitiesByRoleFromJson)
   final Map<String, List<String>> capabilitiesByRole;
 
   @override
@@ -41,6 +52,7 @@ class CallMemberUpdatedPermissionEvent extends core.WsEvent
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

@@ -26,15 +26,19 @@ class FileUploadConfig with _$FileUploadConfig {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> allowedFileExtensions;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> allowedMimeTypes;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedFileExtensions;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedMimeTypes;
 
   @override

@@ -9,9 +9,11 @@ part of 'review_queue_item_response.dart';
 ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
   Map<String, dynamic> json,
 ) => ReviewQueueItemResponse(
-  actions: (json['actions'] as List<dynamic>)
-      .map((e) => ActionLogResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  actions:
+      (json['actions'] as List<dynamic>?)
+          ?.map((e) => ActionLogResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   activity: json['activity'] == null
       ? null
       : EnrichedActivity.fromJson(json['activity'] as Map<String, dynamic>),
@@ -22,9 +24,11 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
   assignedTo: json['assigned_to'] == null
       ? null
       : UserResponse.fromJson(json['assigned_to'] as Map<String, dynamic>),
-  bans: (json['bans'] as List<dynamic>)
-      .map((e) => BanInfoResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  bans:
+      (json['bans'] as List<dynamic>?)
+          ?.map((e) => BanInfoResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   call: json['call'] == null
       ? null
       : CallResponse.fromJson(json['call'] as Map<String, dynamic>),
@@ -73,14 +77,18 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
       : FeedsV3CommentResponse.fromJson(
           json['feeds_v3_comment'] as Map<String, dynamic>,
         ),
-  flags: (json['flags'] as List<dynamic>)
-      .map((e) => ModerationFlagResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  flags:
+      (json['flags'] as List<dynamic>?)
+          ?.map(
+            (e) => ModerationFlagResponse.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
   flagsCount: (json['flags_count'] as num).toInt(),
   id: json['id'] as String,
-  languages: (json['languages'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  languages:
+      (json['languages'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      [],
   latestModeratorAction: json['latest_moderator_action'] as String,
   message: json['message'] == null
       ? null

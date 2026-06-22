@@ -11,7 +11,7 @@ UserUpdatedEvent _$UserUpdatedEventFromJson(Map<String, dynamic> json) =>
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>,
+      custom: json['custom'] as Map<String, dynamic>? ?? {},
       receivedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['received_at'],
         const EpochDateTimeConverter().fromJson,

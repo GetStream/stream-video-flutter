@@ -28,6 +28,7 @@ class QueryAppealsResponse with _$QueryAppealsResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<AppealItemResponse> items;
 
   @override

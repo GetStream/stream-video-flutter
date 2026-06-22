@@ -9,9 +9,11 @@ part of 'list_block_list_response.dart';
 ListBlockListResponse _$ListBlockListResponseFromJson(
   Map<String, dynamic> json,
 ) => ListBlockListResponse(
-  blocklists: (json['blocklists'] as List<dynamic>)
-      .map((e) => BlockListResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  blocklists:
+      (json['blocklists'] as List<dynamic>?)
+          ?.map((e) => BlockListResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   duration: json['duration'] as String,
 );
 

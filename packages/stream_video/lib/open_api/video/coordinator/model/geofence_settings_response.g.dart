@@ -9,7 +9,8 @@ part of 'geofence_settings_response.dart';
 GeofenceSettingsResponse _$GeofenceSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => GeofenceSettingsResponse(
-  names: (json['names'] as List<dynamic>).map((e) => e as String).toList(),
+  names:
+      (json['names'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
 );
 
 Map<String, dynamic> _$GeofenceSettingsResponseToJson(

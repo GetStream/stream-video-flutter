@@ -34,6 +34,7 @@ class UserReactivatedEvent extends core.WsEvent with _$UserReactivatedEvent {
   final UserResponseCommonFields? createdBy;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override

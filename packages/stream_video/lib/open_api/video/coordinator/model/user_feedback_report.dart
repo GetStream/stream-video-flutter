@@ -23,6 +23,7 @@ class UserFeedbackReport with _$UserFeedbackReport {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, int> countByRating;
 
   @override

@@ -30,6 +30,7 @@ class AutomodSemanticFiltersConfig with _$AutomodSemanticFiltersConfig {
   final bool enabled;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<AutomodSemanticFiltersRule> rules;
 
   Map<String, dynamic> toJson() => _$AutomodSemanticFiltersConfigToJson(this);

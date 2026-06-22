@@ -34,6 +34,7 @@ class QueryCallStatsResponse with _$QueryCallStatsResponse {
   final String? prev;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallStatsReportSummaryResponse> reports;
 
   Map<String, dynamic> toJson() => _$QueryCallStatsResponseToJson(this);

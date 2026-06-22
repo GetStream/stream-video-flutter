@@ -100,6 +100,41 @@ if [[ -f "$REACTION_GROUP_RESPONSE_FILE" ]]; then
   echo "• Fixed extra sumScores in ReactionGroupResponse"
 fi
 
+# capabilitiesByRole: Map<String, List<String>> — the generated cast crashes for
+# non-List values. Insert a tolerant helper and wire it via @JsonKey(fromJson:).
+for file in \
+  "$OUTPUT_DIR_VIDEO/model/call_updated_event.dart" \
+  "$OUTPUT_DIR_VIDEO/model/call_member_updated_permission_event.dart"; do
+  if [[ -f "$file" ]]; then
+    # Insert the helper function before the first @freezed annotation.
+    awk '/^@freezed$/ && !inserted {
+      print "Map<String, List<String>> _capabilitiesByRoleFromJson(Map<String, dynamic> json) {"
+      print "  return {"
+      print "    for (final entry in json.entries)"
+      print "      if (entry.value is List)"
+      print "        entry.key: (entry.value as List).map((i) => i as String).toList(),"
+      print "  };"
+      print "}"
+      print ""
+      inserted=1
+    }
+    { print }' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+    # Wire the helper: replace @JsonKey(defaultValue: {}) with @JsonKey(fromJson:).
+    # capabilitiesByRole is the only required Map field in these two event models,
+    # so the replacement is unambiguous.
+    sed_inplace 's/@JsonKey(defaultValue: {})/@JsonKey(fromJson: _capabilitiesByRoleFromJson)/' "$file"
+    echo "• Fixed capabilitiesByRole in $(basename "$file")"
+  fi
+done
+
+# TranscriptionSettingsResponseLanguage: use .auto (not .unknown) as the
+# unknown-value fallback so existing transcription sessions aren't lost.
+TRANSCRIPTION_FILE="$OUTPUT_DIR_VIDEO/model/transcription_settings_response.dart"
+if [[ -f "$TRANSCRIPTION_FILE" ]]; then
+  sed_inplace 's/unknownEnumValue: TranscriptionSettingsResponseLanguage\.unknown/unknownEnumValue: TranscriptionSettingsResponseLanguage.auto/g' "$TRANSCRIPTION_FILE"
+  echo "• Fixed TranscriptionSettingsResponseLanguage unknownEnumValue to .auto"
+fi
+
 section "✅ Post-generation fixes applied"
 
 # ---------- [3/4] build_runner (package only) ----------

@@ -39,6 +39,7 @@ class CallMissedEvent extends core.WsEvent with _$CallMissedEvent {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

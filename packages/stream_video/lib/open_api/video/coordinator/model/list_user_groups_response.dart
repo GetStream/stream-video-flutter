@@ -26,6 +26,7 @@ class ListUserGroupsResponse with _$ListUserGroupsResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UserGroupResponse> userGroups;
 
   Map<String, dynamic> toJson() => _$ListUserGroupsResponseToJson(this);

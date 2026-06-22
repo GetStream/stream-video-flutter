@@ -29,6 +29,7 @@ class QueryReviewQueueResponse with _$QueryReviewQueueResponse {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, List<ModerationActionConfigResponse>> actionConfig;
 
   @override
@@ -41,6 +42,7 @@ class QueryReviewQueueResponse with _$QueryReviewQueueResponse {
   final FilterConfigResponse? filterConfig;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReviewQueueItemResponse> items;
 
   @override
@@ -50,6 +52,7 @@ class QueryReviewQueueResponse with _$QueryReviewQueueResponse {
   final String? prev;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> stats;
 
   Map<String, dynamic> toJson() => _$QueryReviewQueueResponseToJson(this);

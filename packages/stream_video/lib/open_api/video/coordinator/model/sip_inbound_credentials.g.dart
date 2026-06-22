@@ -10,11 +10,11 @@ SipInboundCredentials _$SipInboundCredentialsFromJson(
   Map<String, dynamic> json,
 ) => SipInboundCredentials(
   apiKey: json['api_key'] as String,
-  callCustomData: json['call_custom_data'] as Map<String, dynamic>,
+  callCustomData: json['call_custom_data'] as Map<String, dynamic>? ?? {},
   callId: json['call_id'] as String,
   callType: json['call_type'] as String,
   token: json['token'] as String,
-  userCustomData: json['user_custom_data'] as Map<String, dynamic>,
+  userCustomData: json['user_custom_data'] as Map<String, dynamic>? ?? {},
   userId: json['user_id'] as String,
 );
 

@@ -13,9 +13,11 @@ PermissionRequestEvent _$PermissionRequestEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  permissions: (json['permissions'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  permissions:
+      (json['permissions'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
   type: json['type'] as String,
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
 );

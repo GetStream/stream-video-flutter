@@ -45,6 +45,7 @@ class UserResponse with _$UserResponse {
   final bool banned;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedUserIds;
 
   @override
@@ -52,6 +53,7 @@ class UserResponse with _$UserResponse {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -89,6 +91,7 @@ class UserResponse with _$UserResponse {
   final String role;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> teams;
 
   @override

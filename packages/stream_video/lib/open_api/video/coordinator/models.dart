@@ -593,7 +593,7 @@ export 'model/ws_event.dart';
 
 /// A [JsonConverter] for the API's [DateTime] fields.
 ///
-/// Depending on the product, the backend encodes timestamps either as
+/// Depending on the api version, the backend encodes timestamps either as
 /// ISO-8601 strings (e.g. the video coordinator) or as epoch nanoseconds
 /// (e.g. feeds, generated with `--encode-time-as-unix-timestamp`). The same
 /// generated client must read both, so this converter accepts either form:

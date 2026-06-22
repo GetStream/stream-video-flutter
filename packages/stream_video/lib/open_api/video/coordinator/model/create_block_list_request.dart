@@ -61,6 +61,7 @@ class CreateBlockListRequest with _$CreateBlockListRequest {
   final CreateBlockListRequestType? type;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> words;
 
   Map<String, dynamic> toJson() => _$CreateBlockListRequestToJson(this);

@@ -13,7 +13,7 @@ CallModerationBlurEvent _$CallModerationBlurEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   type: json['type'] as String,
   userId: json['user_id'] as String,
 );

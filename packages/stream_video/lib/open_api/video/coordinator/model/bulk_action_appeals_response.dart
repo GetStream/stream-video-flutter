@@ -27,9 +27,11 @@ class BulkActionAppealsResponse with _$BulkActionAppealsResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BulkAppealError> errors;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BulkAppealResult> results;
 
   Map<String, dynamic> toJson() => _$BulkActionAppealsResponseToJson(this);

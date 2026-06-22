@@ -9,7 +9,7 @@ part of 'poll_option_response_data.dart';
 PollOptionResponseData _$PollOptionResponseDataFromJson(
   Map<String, dynamic> json,
 ) => PollOptionResponseData(
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   id: json['id'] as String,
   text: json['text'] as String,
 );

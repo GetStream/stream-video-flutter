@@ -36,6 +36,7 @@ class Role with _$Role {
   final String name;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> scopes;
 
   @override

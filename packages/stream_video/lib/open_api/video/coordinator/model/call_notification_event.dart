@@ -38,6 +38,7 @@ class CallNotificationEvent extends core.WsEvent with _$CallNotificationEvent {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

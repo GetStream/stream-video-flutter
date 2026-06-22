@@ -23,6 +23,7 @@ class SIPCallerConfigsResponse with _$SIPCallerConfigsResponse {
   });
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> customData;
 
   @override

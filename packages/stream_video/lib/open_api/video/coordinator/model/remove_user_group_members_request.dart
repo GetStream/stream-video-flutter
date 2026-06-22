@@ -23,6 +23,7 @@ class RemoveUserGroupMembersRequest with _$RemoveUserGroupMembersRequest {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> memberIds;
 
   @override

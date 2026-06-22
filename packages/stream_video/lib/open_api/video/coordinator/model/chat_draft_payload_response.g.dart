@@ -12,7 +12,7 @@ ChatDraftPayloadResponse _$ChatDraftPayloadResponseFromJson(
   attachments: (json['attachments'] as List<dynamic>?)
       ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
       .toList(),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   html: json['html'] as String?,
   id: json['id'] as String,
   mentionedUsers: (json['mentioned_users'] as List<dynamic>?)

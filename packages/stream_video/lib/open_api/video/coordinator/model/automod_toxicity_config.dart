@@ -30,6 +30,7 @@ class AutomodToxicityConfig with _$AutomodToxicityConfig {
   final bool enabled;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<AutomodRule> rules;
 
   Map<String, dynamic> toJson() => _$AutomodToxicityConfigToJson(this);

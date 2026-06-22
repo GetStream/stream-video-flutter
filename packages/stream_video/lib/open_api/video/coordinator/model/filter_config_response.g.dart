@@ -18,9 +18,11 @@ FilterConfigResponse _$FilterConfigResponseFromJson(
   filterableCustomKeys: (json['filterable_custom_keys'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
-  llmLabels: (json['llm_labels'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  llmLabels:
+      (json['llm_labels'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$FilterConfigResponseToJson(

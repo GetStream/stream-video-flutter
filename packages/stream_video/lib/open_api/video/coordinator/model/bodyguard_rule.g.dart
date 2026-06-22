@@ -14,9 +14,14 @@ BodyguardRule _$BodyguardRuleFromJson(Map<String, dynamic> json) =>
         unknownValue: BodyguardRuleAction.unknown,
       ),
       label: json['label'] as String,
-      severityRules: (json['severity_rules'] as List<dynamic>)
-          .map((e) => BodyguardSeverityRule.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      severityRules:
+          (json['severity_rules'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    BodyguardSeverityRule.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$BodyguardRuleToJson(BodyguardRule instance) =>

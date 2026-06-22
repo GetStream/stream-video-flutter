@@ -22,6 +22,7 @@ class CallParticipantCountReport with _$CallParticipantCountReport {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReportByHistogramBucket> histogram;
 
   Map<String, dynamic> toJson() => _$CallParticipantCountReportToJson(this);

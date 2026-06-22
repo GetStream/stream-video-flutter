@@ -26,6 +26,7 @@ class GetEdgesResponse with _$GetEdgesResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<EdgeResponse> edges;
 
   Map<String, dynamic> toJson() => _$GetEdgesResponseToJson(this);

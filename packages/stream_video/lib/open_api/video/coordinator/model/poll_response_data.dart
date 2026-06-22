@@ -61,6 +61,7 @@ class PollResponseData with _$PollResponseData {
   final String createdById;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -76,9 +77,11 @@ class PollResponseData with _$PollResponseData {
   final bool? isClosed;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<PollVoteResponseData> latestAnswers;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, List<PollVoteResponseData>> latestVotesByOption;
 
   @override
@@ -88,9 +91,11 @@ class PollResponseData with _$PollResponseData {
   final String name;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<PollOptionResponseData> options;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<PollVoteResponseData> ownVotes;
 
   @override
@@ -101,6 +106,7 @@ class PollResponseData with _$PollResponseData {
   final int voteCount;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, int> voteCountsByOption;
 
   @override

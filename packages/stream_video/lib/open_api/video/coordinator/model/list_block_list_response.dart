@@ -23,6 +23,7 @@ class ListBlockListResponse with _$ListBlockListResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BlockListResponse> blocklists;
 
   @override

@@ -8,18 +8,26 @@ part of 'file_upload_config.dart';
 
 FileUploadConfig _$FileUploadConfigFromJson(Map<String, dynamic> json) =>
     FileUploadConfig(
-      allowedFileExtensions: (json['allowed_file_extensions'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      allowedMimeTypes: (json['allowed_mime_types'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      blockedFileExtensions: (json['blocked_file_extensions'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      blockedMimeTypes: (json['blocked_mime_types'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      allowedFileExtensions:
+          (json['allowed_file_extensions'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      allowedMimeTypes:
+          (json['allowed_mime_types'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      blockedFileExtensions:
+          (json['blocked_file_extensions'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      blockedMimeTypes:
+          (json['blocked_mime_types'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       sizeLimit: (json['size_limit'] as num).toInt(),
     );
 

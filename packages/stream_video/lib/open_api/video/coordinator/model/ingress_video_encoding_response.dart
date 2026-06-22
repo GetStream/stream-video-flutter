@@ -23,6 +23,7 @@ class IngressVideoEncodingResponse with _$IngressVideoEncodingResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<IngressVideoLayerResponse> layers;
 
   @override

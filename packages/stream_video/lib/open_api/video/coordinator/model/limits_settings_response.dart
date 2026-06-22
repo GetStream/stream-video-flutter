@@ -34,6 +34,7 @@ class LimitsSettingsResponse with _$LimitsSettingsResponse {
   final bool? maxParticipantsExcludeOwner;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> maxParticipantsExcludeRoles;
 
   Map<String, dynamic> toJson() => _$LimitsSettingsResponseToJson(this);

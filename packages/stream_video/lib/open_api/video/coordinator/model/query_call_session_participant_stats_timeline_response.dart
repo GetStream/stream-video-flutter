@@ -41,6 +41,7 @@ class QueryCallSessionParticipantStatsTimelineResponse
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallParticipantTimeline> events;
 
   @override

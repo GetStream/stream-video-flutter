@@ -36,6 +36,7 @@ class CallCreatedEvent extends core.WsEvent with _$CallCreatedEvent {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

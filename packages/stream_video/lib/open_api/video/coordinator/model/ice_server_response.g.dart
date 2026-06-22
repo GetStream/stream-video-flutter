@@ -9,7 +9,9 @@ part of 'ice_server_response.dart';
 ICEServerResponse _$ICEServerResponseFromJson(Map<String, dynamic> json) =>
     ICEServerResponse(
       password: json['password'] as String,
-      urls: (json['urls'] as List<dynamic>).map((e) => e as String).toList(),
+      urls:
+          (json['urls'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          [],
       username: json['username'] as String,
     );
 

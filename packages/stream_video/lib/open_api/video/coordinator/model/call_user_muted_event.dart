@@ -37,6 +37,7 @@ class CallUserMutedEvent extends core.WsEvent with _$CallUserMutedEvent {
   final String fromUserId;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> mutedUserIds;
 
   @override

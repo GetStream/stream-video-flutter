@@ -61,9 +61,11 @@ class FullUserResponse with _$FullUserResponse {
   final bool banned;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> blockedUserIds;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ChannelMute> channelMutes;
 
   @override
@@ -71,6 +73,7 @@ class FullUserResponse with _$FullUserResponse {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -82,6 +85,7 @@ class FullUserResponse with _$FullUserResponse {
   final DateTime? deletedAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DeviceResponse> devices;
 
   @override
@@ -104,6 +108,7 @@ class FullUserResponse with _$FullUserResponse {
   final List<String>? latestHiddenChannels;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UserMuteResponse> mutes;
 
   @override
@@ -126,6 +131,7 @@ class FullUserResponse with _$FullUserResponse {
   final bool shadowBanned;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> teams;
 
   @override

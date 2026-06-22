@@ -17,7 +17,7 @@ TranscriptionSettingsResponse _$TranscriptionSettingsResponseFromJson(
   language: $enumDecode(
     _$TranscriptionSettingsResponseLanguageEnumMap,
     json['language'],
-    unknownValue: TranscriptionSettingsResponseLanguage.unknown,
+    unknownValue: TranscriptionSettingsResponseLanguage.auto,
   ),
   mode: $enumDecode(
     _$TranscriptionSettingsResponseModeEnumMap,

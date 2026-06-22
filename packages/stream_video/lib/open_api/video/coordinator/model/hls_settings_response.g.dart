@@ -10,9 +10,11 @@ HLSSettingsResponse _$HLSSettingsResponseFromJson(Map<String, dynamic> json) =>
     HLSSettingsResponse(
       autoOn: json['auto_on'] as bool,
       enabled: json['enabled'] as bool,
-      qualityTracks: (json['quality_tracks'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      qualityTracks:
+          (json['quality_tracks'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$HLSSettingsResponseToJson(

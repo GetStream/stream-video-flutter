@@ -23,6 +23,7 @@ class ListDevicesResponse with _$ListDevicesResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<DeviceResponse> devices;
 
   @override

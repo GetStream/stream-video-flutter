@@ -39,6 +39,7 @@ class CallRingEvent extends core.WsEvent with _$CallRingEvent {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<MemberResponse> members;
 
   @override

@@ -26,6 +26,7 @@ class ListRecordingsResponse with _$ListRecordingsResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallRecording> recordings;
 
   Map<String, dynamic> toJson() => _$ListRecordingsResponseToJson(this);

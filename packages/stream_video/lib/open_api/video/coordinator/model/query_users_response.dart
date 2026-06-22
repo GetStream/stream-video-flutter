@@ -26,6 +26,7 @@ class QueryUsersResponse with _$QueryUsersResponse {
   final String duration;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<FullUserResponse> users;
 
   Map<String, dynamic> toJson() => _$QueryUsersResponseToJson(this);

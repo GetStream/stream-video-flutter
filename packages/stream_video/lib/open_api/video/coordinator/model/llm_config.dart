@@ -35,6 +35,7 @@ class LLMConfig with _$LLMConfig {
   final bool enabled;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<LLMRule> rules;
 
   @override

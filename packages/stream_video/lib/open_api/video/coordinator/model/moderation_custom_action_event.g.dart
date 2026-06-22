@@ -14,7 +14,7 @@ ModerationCustomActionEvent _$ModerationCustomActionEventFromJson(
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   message: json['message'] == null
       ? null
       : MessageResponse.fromJson(json['message'] as Map<String, dynamic>),

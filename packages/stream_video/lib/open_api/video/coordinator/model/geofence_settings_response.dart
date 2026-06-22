@@ -22,6 +22,7 @@ class GeofenceSettingsResponse with _$GeofenceSettingsResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> names;
 
   Map<String, dynamic> toJson() => _$GeofenceSettingsResponseToJson(this);

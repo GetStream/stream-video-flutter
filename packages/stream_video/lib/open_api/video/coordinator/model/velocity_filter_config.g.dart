@@ -15,9 +15,13 @@ VelocityFilterConfig _$VelocityFilterConfigFromJson(
   cidsPerUser: (json['cids_per_user'] as num).toInt(),
   enabled: json['enabled'] as bool,
   firstMessageOnly: json['first_message_only'] as bool,
-  rules: (json['rules'] as List<dynamic>)
-      .map((e) => VelocityFilterConfigRule.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  rules:
+      (json['rules'] as List<dynamic>?)
+          ?.map(
+            (e) => VelocityFilterConfigRule.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$VelocityFilterConfigToJson(

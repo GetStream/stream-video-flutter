@@ -19,7 +19,8 @@ ParticipantSessionDetails _$ParticipantSessionDetailsFromJson(
     const EpochDateTimeConverter().fromJson,
   ),
   publisherType: json['publisher_type'] as String,
-  roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
+  roles:
+      (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   userId: json['user_id'] as String,
   userSessionId: json['user_session_id'] as String,
 );

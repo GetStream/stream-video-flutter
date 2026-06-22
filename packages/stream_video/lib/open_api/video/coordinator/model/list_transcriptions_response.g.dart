@@ -10,9 +10,11 @@ ListTranscriptionsResponse _$ListTranscriptionsResponseFromJson(
   Map<String, dynamic> json,
 ) => ListTranscriptionsResponse(
   duration: json['duration'] as String,
-  transcriptions: (json['transcriptions'] as List<dynamic>)
-      .map((e) => CallTranscription.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  transcriptions:
+      (json['transcriptions'] as List<dynamic>?)
+          ?.map((e) => CallTranscription.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$ListTranscriptionsResponseToJson(

@@ -35,9 +35,11 @@ class AITextConfig with _$AITextConfig {
   final String profile;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BodyguardRule> rules;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BodyguardSeverityRule> severityRules;
 
   Map<String, dynamic> toJson() => _$AITextConfigToJson(this);

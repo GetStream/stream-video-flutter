@@ -70,6 +70,7 @@ class MessageResponse with _$MessageResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<Attachment> attachments;
 
   @override
@@ -83,6 +84,7 @@ class MessageResponse with _$MessageResponse {
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> custom;
 
   @override
@@ -111,6 +113,7 @@ class MessageResponse with _$MessageResponse {
   final Map<String, List<String>>? imageLabels;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReactionResponse> latestReactions;
 
   @override
@@ -132,6 +135,7 @@ class MessageResponse with _$MessageResponse {
   final List<String>? mentionedRoles;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<UserResponse> mentionedUsers;
 
   @override
@@ -145,6 +149,7 @@ class MessageResponse with _$MessageResponse {
   final ModerationV2Response? moderation;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ReactionResponse> ownReactions;
 
   @override
@@ -177,12 +182,14 @@ class MessageResponse with _$MessageResponse {
   final String? quotedMessageId;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, int> reactionCounts;
 
   @override
   final Map<String, ReactionGroupResponse>? reactionGroups;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, int> reactionScores;
 
   @override
@@ -192,6 +199,7 @@ class MessageResponse with _$MessageResponse {
   final int replyCount;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> restrictedVisibility;
 
   @override

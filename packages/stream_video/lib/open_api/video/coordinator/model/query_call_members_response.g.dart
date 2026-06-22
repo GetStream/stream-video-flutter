@@ -10,9 +10,11 @@ QueryCallMembersResponse _$QueryCallMembersResponseFromJson(
   Map<String, dynamic> json,
 ) => QueryCallMembersResponse(
   duration: json['duration'] as String,
-  members: (json['members'] as List<dynamic>)
-      .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  members:
+      (json['members'] as List<dynamic>?)
+          ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   next: json['next'] as String?,
   prev: json['prev'] as String?,
 );

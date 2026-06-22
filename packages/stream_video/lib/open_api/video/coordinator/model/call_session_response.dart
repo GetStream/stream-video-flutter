@@ -34,6 +34,7 @@ class CallSessionResponse with _$CallSessionResponse {
 
   @override
   @EpochDateTimeConverter()
+  @JsonKey(defaultValue: {})
   final Map<String, DateTime> acceptedBy;
 
   @override
@@ -56,16 +57,20 @@ class CallSessionResponse with _$CallSessionResponse {
 
   @override
   @EpochDateTimeConverter()
+  @JsonKey(defaultValue: {})
   final Map<String, DateTime> missedBy;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<CallParticipantResponse> participants;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, int> participantsCountByRole;
 
   @override
   @EpochDateTimeConverter()
+  @JsonKey(defaultValue: {})
   final Map<String, DateTime> rejectedBy;
 
   @override

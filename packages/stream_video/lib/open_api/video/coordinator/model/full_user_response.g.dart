@@ -14,16 +14,20 @@ FullUserResponse _$FullUserResponseFromJson(Map<String, dynamic> json) =>
         const EpochDateTimeConverter().fromJson,
       ),
       banned: json['banned'] as bool,
-      blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      channelMutes: (json['channel_mutes'] as List<dynamic>)
-          .map((e) => ChannelMute.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      blockedUserIds:
+          (json['blocked_user_ids'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      channelMutes:
+          (json['channel_mutes'] as List<dynamic>?)
+              ?.map((e) => ChannelMute.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>,
+      custom: json['custom'] as Map<String, dynamic>? ?? {},
       deactivatedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['deactivated_at'],
         const EpochDateTimeConverter().fromJson,
@@ -32,9 +36,11 @@ FullUserResponse _$FullUserResponseFromJson(Map<String, dynamic> json) =>
         json['deleted_at'],
         const EpochDateTimeConverter().fromJson,
       ),
-      devices: (json['devices'] as List<dynamic>)
-          .map((e) => DeviceResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      devices:
+          (json['devices'] as List<dynamic>?)
+              ?.map((e) => DeviceResponse.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       id: json['id'] as String,
       image: json['image'] as String?,
       invisible: json['invisible'] as bool,
@@ -46,9 +52,11 @@ FullUserResponse _$FullUserResponseFromJson(Map<String, dynamic> json) =>
       latestHiddenChannels: (json['latest_hidden_channels'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      mutes: (json['mutes'] as List<dynamic>)
-          .map((e) => UserMuteResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      mutes:
+          (json['mutes'] as List<dynamic>?)
+              ?.map((e) => UserMuteResponse.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       name: json['name'] as String?,
       online: json['online'] as bool,
       privacySettings: json['privacy_settings'] == null
@@ -62,7 +70,9 @@ FullUserResponse _$FullUserResponseFromJson(Map<String, dynamic> json) =>
       ),
       role: json['role'] as String,
       shadowBanned: json['shadow_banned'] as bool,
-      teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
+      teams:
+          (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          [],
       teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),

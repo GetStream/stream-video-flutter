@@ -10,9 +10,11 @@ ListRecordingsResponse _$ListRecordingsResponseFromJson(
   Map<String, dynamic> json,
 ) => ListRecordingsResponse(
   duration: json['duration'] as String,
-  recordings: (json['recordings'] as List<dynamic>)
-      .map((e) => CallRecording.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  recordings:
+      (json['recordings'] as List<dynamic>?)
+          ?.map((e) => CallRecording.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$ListRecordingsResponseToJson(

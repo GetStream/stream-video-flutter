@@ -6,52 +6,63 @@ part of 'call_session_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-CallSessionResponse _$CallSessionResponseFromJson(Map<String, dynamic> json) =>
-    CallSessionResponse(
-      acceptedBy: (json['accepted_by'] as Map<String, dynamic>).map(
+CallSessionResponse _$CallSessionResponseFromJson(
+  Map<String, dynamic> json,
+) => CallSessionResponse(
+  acceptedBy:
+      (json['accepted_by'] as Map<String, dynamic>?)?.map(
         (k, e) =>
             MapEntry(k, const EpochDateTimeConverter().fromJson(e as Object)),
-      ),
-      anonymousParticipantCount: (json['anonymous_participant_count'] as num)
-          .toInt(),
-      endedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['ended_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-      id: json['id'] as String,
-      liveEndedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['live_ended_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-      liveStartedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['live_started_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-      missedBy: (json['missed_by'] as Map<String, dynamic>).map(
+      ) ??
+      {},
+  anonymousParticipantCount: (json['anonymous_participant_count'] as num)
+      .toInt(),
+  endedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['ended_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+  id: json['id'] as String,
+  liveEndedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['live_ended_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+  liveStartedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['live_started_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+  missedBy:
+      (json['missed_by'] as Map<String, dynamic>?)?.map(
         (k, e) =>
             MapEntry(k, const EpochDateTimeConverter().fromJson(e as Object)),
-      ),
-      participants: (json['participants'] as List<dynamic>)
-          .map(
+      ) ??
+      {},
+  participants:
+      (json['participants'] as List<dynamic>?)
+          ?.map(
             (e) => CallParticipantResponse.fromJson(e as Map<String, dynamic>),
           )
-          .toList(),
-      participantsCountByRole: Map<String, int>.from(
-        json['participants_count_by_role'] as Map,
-      ),
-      rejectedBy: (json['rejected_by'] as Map<String, dynamic>).map(
+          .toList() ??
+      [],
+  participantsCountByRole:
+      (json['participants_count_by_role'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      {},
+  rejectedBy:
+      (json['rejected_by'] as Map<String, dynamic>?)?.map(
         (k, e) =>
             MapEntry(k, const EpochDateTimeConverter().fromJson(e as Object)),
-      ),
-      startedAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['started_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-      timerEndsAt: _$JsonConverterFromJson<Object, DateTime>(
-        json['timer_ends_at'],
-        const EpochDateTimeConverter().fromJson,
-      ),
-    );
+      ) ??
+      {},
+  startedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['started_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+  timerEndsAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['timer_ends_at'],
+    const EpochDateTimeConverter().fromJson,
+  ),
+);
 
 Map<String, dynamic> _$CallSessionResponseToJson(
   CallSessionResponse instance,

@@ -25,6 +25,7 @@ class QueryModerationConfigsResponse with _$QueryModerationConfigsResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ConfigResponse> configs;
 
   @override

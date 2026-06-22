@@ -10,9 +10,11 @@ UpdateCallMembersResponse _$UpdateCallMembersResponseFromJson(
   Map<String, dynamic> json,
 ) => UpdateCallMembersResponse(
   duration: json['duration'] as String,
-  members: (json['members'] as List<dynamic>)
-      .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  members:
+      (json['members'] as List<dynamic>?)
+          ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$UpdateCallMembersResponseToJson(

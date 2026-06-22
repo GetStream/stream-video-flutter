@@ -31,6 +31,7 @@ class SipInboundCredentials with _$SipInboundCredentials {
   final String apiKey;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> callCustomData;
 
   @override
@@ -43,6 +44,7 @@ class SipInboundCredentials with _$SipInboundCredentials {
   final String token;
 
   @override
+  @JsonKey(defaultValue: {})
   final Map<String, Object?> userCustomData;
 
   @override

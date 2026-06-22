@@ -31,9 +31,11 @@ class AIImageConfig with _$AIImageConfig {
   final bool enabled;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<OCRRule> ocrRules;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<AWSRekognitionRule> rules;
 
   Map<String, dynamic> toJson() => _$AIImageConfigToJson(this);

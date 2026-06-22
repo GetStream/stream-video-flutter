@@ -58,6 +58,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ActionLogResponse> actions;
 
   @override
@@ -73,6 +74,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   final UserResponse? assignedTo;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<BanInfoResponse> bans;
 
   @override
@@ -127,6 +129,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   final FeedsV3CommentResponse? feedsV3Comment;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ModerationFlagResponse> flags;
 
   @override
@@ -136,6 +139,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   final String id;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> languages;
 
   @override

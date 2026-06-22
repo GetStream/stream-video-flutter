@@ -37,6 +37,7 @@ class CallMemberRemovedEvent extends core.WsEvent
   final DateTime createdAt;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> members;
 
   @override

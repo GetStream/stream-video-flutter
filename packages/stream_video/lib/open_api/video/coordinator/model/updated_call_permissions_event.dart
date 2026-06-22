@@ -34,7 +34,7 @@ class UpdatedCallPermissionsEvent extends core.WsEvent
   final DateTime createdAt;
 
   @override
-  @JsonKey(unknownEnumValue: OwnCapability.unknown)
+  @JsonKey(unknownEnumValue: OwnCapability.unknown, defaultValue: [])
   final List<OwnCapability> ownCapabilities;
 
   @override

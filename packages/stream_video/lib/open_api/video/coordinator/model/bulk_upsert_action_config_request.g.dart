@@ -9,9 +9,13 @@ part of 'bulk_upsert_action_config_request.dart';
 BulkUpsertActionConfigRequest _$BulkUpsertActionConfigRequestFromJson(
   Map<String, dynamic> json,
 ) => BulkUpsertActionConfigRequest(
-  actionConfigs: (json['action_configs'] as List<dynamic>)
-      .map((e) => UpsertActionConfigItem.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  actionConfigs:
+      (json['action_configs'] as List<dynamic>?)
+          ?.map(
+            (e) => UpsertActionConfigItem.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$BulkUpsertActionConfigRequestToJson(

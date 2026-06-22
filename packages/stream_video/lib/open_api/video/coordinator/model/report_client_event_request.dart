@@ -22,6 +22,7 @@ class ReportClientEventRequest with _$ReportClientEventRequest {
   });
 
   @override
+  @JsonKey(defaultValue: [])
   final List<ClientEvent> events;
 
   Map<String, dynamic> toJson() => _$ReportClientEventRequestToJson(this);

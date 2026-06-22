@@ -87,6 +87,7 @@ class ConfigResponse with _$ConfigResponse {
   final LLMConfig? llmConfig;
 
   @override
+  @JsonKey(defaultValue: [])
   final List<String> supportedVideoCallHarmTypes;
 
   @override

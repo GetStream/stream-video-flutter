@@ -9,15 +9,17 @@ part of 'message_response.dart';
 MessageResponse _$MessageResponseFromJson(
   Map<String, dynamic> json,
 ) => MessageResponse(
-  attachments: (json['attachments'] as List<dynamic>)
-      .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  attachments:
+      (json['attachments'] as List<dynamic>?)
+          ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   cid: json['cid'] as String,
   command: json['command'] as String?,
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>,
+  custom: json['custom'] as Map<String, dynamic>? ?? {},
   deletedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['deleted_at'],
     const EpochDateTimeConverter().fromJson,
@@ -36,9 +38,11 @@ MessageResponse _$MessageResponseFromJson(
     (k, e) =>
         MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
-  latestReactions: (json['latest_reactions'] as List<dynamic>)
-      .map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  latestReactions:
+      (json['latest_reactions'] as List<dynamic>?)
+          ?.map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   member: json['member'] == null
       ? null
       : ChannelMemberResponse.fromJson(json['member'] as Map<String, dynamic>),
@@ -53,9 +57,11 @@ MessageResponse _$MessageResponseFromJson(
   mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
-  mentionedUsers: (json['mentioned_users'] as List<dynamic>)
-      .map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  mentionedUsers:
+      (json['mentioned_users'] as List<dynamic>?)
+          ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   messageTextUpdatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['message_text_updated_at'],
     const EpochDateTimeConverter().fromJson,
@@ -66,9 +72,11 @@ MessageResponse _$MessageResponseFromJson(
       : ModerationV2Response.fromJson(
           json['moderation'] as Map<String, dynamic>,
         ),
-  ownReactions: (json['own_reactions'] as List<dynamic>)
-      .map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  ownReactions:
+      (json['own_reactions'] as List<dynamic>?)
+          ?.map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   parentId: json['parent_id'] as String?,
   pinExpires: _$JsonConverterFromJson<Object, DateTime>(
     json['pin_expires'],
@@ -92,19 +100,29 @@ MessageResponse _$MessageResponseFromJson(
           json['quoted_message'] as Map<String, dynamic>,
         ),
   quotedMessageId: json['quoted_message_id'] as String?,
-  reactionCounts: Map<String, int>.from(json['reaction_counts'] as Map),
+  reactionCounts:
+      (json['reaction_counts'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      {},
   reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
     (k, e) =>
         MapEntry(k, ReactionGroupResponse.fromJson(e as Map<String, dynamic>)),
   ),
-  reactionScores: Map<String, int>.from(json['reaction_scores'] as Map),
+  reactionScores:
+      (json['reaction_scores'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      {},
   reminder: json['reminder'] == null
       ? null
       : ReminderResponseData.fromJson(json['reminder'] as Map<String, dynamic>),
   replyCount: (json['reply_count'] as num).toInt(),
-  restrictedVisibility: (json['restricted_visibility'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  restrictedVisibility:
+      (json['restricted_visibility'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
   shadowed: json['shadowed'] as bool,
   sharedLocation: json['shared_location'] == null
       ? null

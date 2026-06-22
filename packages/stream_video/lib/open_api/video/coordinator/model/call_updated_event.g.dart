@@ -10,13 +10,9 @@ CallUpdatedEvent _$CallUpdatedEventFromJson(Map<String, dynamic> json) =>
     CallUpdatedEvent(
       call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
       callCid: json['call_cid'] as String,
-      capabilitiesByRole: (json['capabilities_by_role'] as Map<String, dynamic>)
-          .map(
-            (k, e) => MapEntry(
-              k,
-              (e as List<dynamic>).map((e) => e as String).toList(),
-            ),
-          ),
+      capabilitiesByRole: _capabilitiesByRoleFromJson(
+        json['capabilities_by_role'] as Map<String, dynamic>,
+      ),
       createdAt: const EpochDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
