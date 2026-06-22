@@ -621,5 +621,5 @@ class EpochDateTimeConverter implements JsonConverter<DateTime, Object> {
   }
 
   @override
-  Object toJson(DateTime object) => object.toUtc().toIso8601String();
+  Object toJson(DateTime object) => object.microsecondsSinceEpoch * 1000;
 }
