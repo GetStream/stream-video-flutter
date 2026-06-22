@@ -13,16 +13,15 @@ void main() {
     late MockCall mockCall;
     late MockCallState mockCallState;
     late MockCallParticipantState mockLocalParticipant;
-    late MockStateEmitter<CallState> mockCallStateEmitter;
+    late MutableStateEmitter<CallState> callStateEmitter;
 
     setUp(() {
       mockCall = MockCall();
       mockCallState = MockCallState();
       mockLocalParticipant = MockCallParticipantState();
-      mockCallStateEmitter = MockStateEmitter<CallState>();
+      callStateEmitter = MutableStateEmitter<CallState>(mockCallState, sync: true);
 
-      when(() => mockCallStateEmitter.value).thenReturn(mockCallState);
-      when(() => mockCall.state).thenReturn(mockCallStateEmitter);
+      when(() => mockCall.state).thenAnswer((_) => callStateEmitter);
       when(
         () => mockCall.partialState<CallParticipantState?>(any()),
       ).thenAnswer((invocation) {
