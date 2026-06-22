@@ -1,3 +1,9 @@
+## Unreleased
+
+### ⚠️ Breaking
+
+- The `Sort` and `Filter` typedefs in `call_participants.dart` have been renamed to `CallParticipantSort` and `CallParticipantFilter` respectively.
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.

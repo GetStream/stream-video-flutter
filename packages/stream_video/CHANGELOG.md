@@ -1,3 +1,25 @@
+## Unreleased
+
+### ⚠️ Breaking
+
+- Generated enum types no longer use the `Enum` suffix (e.g. `AudioSettingsRequestDefaultDeviceEnum` → `AudioSettingsRequestDefaultDevice`). The old names remain available as deprecated aliases and will be removed in a future release — please migrate to the new names.
+- `custom` map fields now allow null values (`Map<String, Object?>`). Code that assumed non-null values may need null handling.
+- `Result`, `Success`, and `Failure` are now provided by `stream_core`. Several API changes follow:
+  - `Result.fold()` now takes `{onSuccess:, onFailure:}` parameters instead of `{success:, failure:}`. Use the new `foldResult()` extension method to keep the previous `{success: (Success<T>), failure: (Failure)}` style.
+  - `Result.error(String)` constructor has been removed. Use the top-level `failureWithError('...')` function instead.
+  - `Result.failureWithCause(String, Object, [StackTrace?])` is no longer a named constructor — use the top-level `failureWithError(..., cause: ...)` function instead.
+  - `Failure.error` is now typed as `Object` instead of `VideoError`. Use the `.videoError` getter to obtain a typed `VideoError`.
+- `StateEmitter`, `MutableStateEmitter`, `SharedEmitter`, and `MutableSharedEmitter` are now provided by `stream_core`. Several behavioural and API changes follow:
+  - `MutableStateEmitter` (previously `MutableStateEmitterImpl`) is **always seeded** — a `null` initial value is stored and immediately readable rather than leaving the emitter empty. Code that previously guarded against an unseeded state (e.g. `hasValue` checks) should be updated.
+  - Equal consecutive values are **conflated** — setting the same value twice emits only once. Previously every assignment produced an event regardless of equality.
+  - `StateEmitter.valueOrNull`, `StateEmitter.valueStream`, and `SharedEmitter.asStream()` are now provided as extension methods rather than interface members. They continue to work as before as long as `package:stream_video/stream_video.dart` is imported.
+  - `MutableStateEmitterImpl<T>` is now a typedef for `StateEmitterImpl<T>` from `stream_core`. Existing call sites continue to compile, but the concrete type has changed.
+  - `MutableSharedEmitterImpl<T>` is now a typedef for `MutableSharedEmitter<T>` from `stream_core`. Existing call sites continue to compile, but the concrete type has changed.
+  - `SharedEmitter.firstWhere` no longer accepts a `timeLimit` parameter — use the new `firstWhereWithTimeout` extension method instead.
+- `CurrentPlatform` and `PlatformType` are now provided by `stream_core`:
+  - `CurrentPlatform.name` has been removed — use `CurrentPlatform.operatingSystem` instead.
+- `StreamLogger`, `Priority`, and `MessageBuilder` are now provided by `stream_core`. Import them from `stream_video` as before — the re-export is in place.
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
