@@ -207,7 +207,6 @@ class CallSession extends Disposable {
 
       // Buffer sfu events until rtc manager is set
       final bufferedStream = sfuWS.events
-          .asStream()
           .takeWhile((_) => !_rtcManagerSubject!.hasValue)
           .buffer(_rtcManagerSubject!)
           .expand((event) => event);
@@ -215,7 +214,7 @@ class CallSession extends Disposable {
       // Delay rest of the sfu events until rtc manager is set
       final delayedStream = Rx.combineLatest2(
         _rtcManagerSubject!,
-        sfuWS.events.asStream(),
+        sfuWS.events,
         (_, event) => event,
       ).skip(1);
 
@@ -919,8 +918,8 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentVideoInputDevice() async {
-    final state = stateManager.callStateStream.valueOrNull;
-    final videoInputDevice = state?.videoInputDevice;
+    final state = stateManager.callStateStream.value;
+    final videoInputDevice = state.videoInputDevice;
     if (videoInputDevice != null) {
       await setVideoInputDevice(videoInputDevice);
     }
@@ -1077,8 +1076,8 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentAudioOutputDevice() async {
-    final state = stateManager.callStateStream.valueOrNull;
-    final audioOutputDevice = state?.audioOutputDevice;
+    final state = stateManager.callStateStream.value;
+    final audioOutputDevice = state.audioOutputDevice;
     if (audioOutputDevice != null) {
       await setAudioOutputDevice(audioOutputDevice);
     }

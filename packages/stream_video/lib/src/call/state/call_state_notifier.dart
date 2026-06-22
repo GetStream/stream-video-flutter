@@ -39,7 +39,7 @@ class CallStateNotifier extends StateNotifier<CallState>
   CallState get callState => callStateStream.value;
 
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
-    return callStateStream.valueStream
+    return callStateStream
         .map(selector)
         .distinct(
           (previous, current) =>

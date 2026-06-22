@@ -111,7 +111,7 @@ class MutableClientState implements ClientState {
   }
 
   List<Call> getActiveCalls() => activeCalls.value;
-  Call? getOutgoingCall() => outgoingCall.valueOrNull;
+  Call? getOutgoingCall() => outgoingCall.value;
 
   @override
   Future<void> setActiveCall(Call? call) async {

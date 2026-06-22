@@ -420,8 +420,7 @@ class Call {
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
   final _callEvents = MutableSharedEmitter<StreamCallEvent>();
 
-  Stream<List<StreamClosedCaption>> get closedCaptions =>
-      _closedCaptions.asStream();
+  Stream<List<StreamClosedCaption>> get closedCaptions => _closedCaptions;
   final _closedCaptions = MutableStateEmitter<List<StreamClosedCaption>>(
     [],
   );
@@ -525,7 +524,7 @@ class Call {
   void _observeUserId() {
     _subscriptions.add(
       _idUserId,
-      _streamVideo.state.user.asStream().map((u) => u.id).distinct().listen((
+      _streamVideo.state.user.map((u) => u.id).distinct().listen((
         userId,
       ) {
         final stateUserId = _stateManager.callState.currentUserId;
@@ -877,7 +876,7 @@ class Call {
       return failureWithError('invalid status: $status');
     }
 
-    final outgoingCall = _streamVideo.state.outgoingCall.valueOrNull;
+    final outgoingCall = _streamVideo.state.outgoingCall.value;
     if (outgoingCall != null && outgoingCall.callCid != callCid) {
       _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
       await outgoingCall.reject(reason: CallRejectReason.cancel());
@@ -2368,7 +2367,7 @@ class Call {
     await dynascaleManager.dispose();
 
     await _streamVideo.state.removeActiveCall(this);
-    if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
+    if (_streamVideo.state.outgoingCall.value?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
     }
 
@@ -4124,7 +4123,7 @@ CallStateNotifier _makeStateManager(
   StateEmitter<User?> currentUser,
   CallPreferences callPreferences,
 ) {
-  final currentUserId = currentUser.valueOrNull?.id ?? '';
+  final currentUserId = currentUser.value?.id ?? '';
 
   return CallStateNotifier(
     CallState(

@@ -10,12 +10,12 @@
   - `Result.failureWithCause(String, Object, [StackTrace?])` is no longer a named constructor — use the top-level `failureWithError(..., cause: ...)` function instead.
   - `Failure.error` is now typed as `Object` instead of `VideoError`. Use the `.videoError` getter to obtain a typed `VideoError`.
 - `StateEmitter`, `MutableStateEmitter`, `SharedEmitter`, and `MutableSharedEmitter` are now provided by `stream_core`. Several behavioural and API changes follow:
-  - `MutableStateEmitter` (previously `MutableStateEmitterImpl`) is **always seeded** — a `null` initial value is stored and immediately readable rather than leaving the emitter empty. Code that previously guarded against an unseeded state (e.g. `hasValue` checks) should be updated.
+  - `MutableStateEmitter` is **always seeded** — it requires an initial value and `.value` is always available. Use `.value` instead of `.valueOrNull` or `hasValue` checks.
   - Equal consecutive values are **conflated** — setting the same value twice emits only once. Previously every assignment produced an event regardless of equality.
-  - `StateEmitter.valueOrNull`, `StateEmitter.valueStream`, and `SharedEmitter.asStream()` are now provided as extension methods rather than interface members. They continue to work as before as long as `package:stream_video/stream_video.dart` is imported.
+  - `StateEmitter` and `SharedEmitter` now **implement `Stream` directly**. Use the emitter itself (e.g. `.listen()`, `.firstWhere()`) instead of `.asStream()` or `.valueStream`.
   - `MutableStateEmitterImpl<T>` is now a typedef for `StateEmitterImpl<T>` from `stream_core`. Existing call sites continue to compile, but the concrete type has changed.
   - `MutableSharedEmitterImpl<T>` is now a typedef for `MutableSharedEmitter<T>` from `stream_core`. Existing call sites continue to compile, but the concrete type has changed.
-  - `SharedEmitter.firstWhere` no longer accepts a `timeLimit` parameter — use the new `firstWhereWithTimeout` extension method instead.
+  - `SharedEmitter.firstWhere` no longer accepts a `timeLimit` parameter — use `waitFor` with an optional `timeLimit`, or call `.firstWhere(...).timeout(...)`.
 - `CurrentPlatform` and `PlatformType` are now provided by `stream_core`:
   - `CurrentPlatform.name` has been removed — use `CurrentPlatform.operatingSystem` instead.
 - `StreamLogger`, `Priority`, and `MessageBuilder` are now provided by `stream_core`. Import them from `stream_video` as before — the re-export is in place.
