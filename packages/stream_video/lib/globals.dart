@@ -12,7 +12,7 @@ const String iosWebRTCVersion = webrtc.iosWebRTCVersion;
 
 const String streamDefaultUserAgent =
     'stream-video-flutter-v$streamVideoVersion';
-final xStreamClientHeader = '$streamDefaultUserAgent|$clientVersionDetails';
+String get xStreamClientHeader => '$streamDefaultUserAgent|$clientVersionDetails';
 
 /// Details regarding app name, version, os and device. Is set during initialization of StreamVideo instance.
 @internal

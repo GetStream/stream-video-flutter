@@ -235,30 +235,26 @@ class StreamVideo extends Disposable {
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
     unawaited(
-      _setClientDetails().onError((dynamic error, StackTrace stackTrace) {
-        _logger.e(
-          () =>
-              '[StreamVideo] failed to set client details: $error with stackTrace: $stackTrace',
-        );
-
-        return null;
-      }),
+      _setClientDetails()
+          .catchError((dynamic error, StackTrace stackTrace) {
+            _logger.e(
+              () =>
+                  '[StreamVideo] failed to set client details: $error with stackTrace: $stackTrace',
+            );
+          })
+          .then((_) {
+            if (options.autoConnect) {
+              connect(
+                includeUserDetails: options.includeUserDetailsForAutoConnect,
+              ).catchError((dynamic error, StackTrace stackTrace) {
+                _logger.e(
+                  () =>
+                      '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
+                );
+              });
+            }
+          }),
     );
-
-    if (options.autoConnect) {
-      unawaited(
-        connect(
-          includeUserDetails: options.includeUserDetailsForAutoConnect,
-        ).onError((dynamic error, StackTrace stackTrace) {
-          _logger.e(
-            () =>
-                '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
-          );
-
-          return Result.error('Failed to auto connect: $error');
-        }),
-      );
-    }
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -1298,18 +1294,25 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
 }
 
 Future<String?> _setClientDetails() async {
+  String? appName;
+  String? appVersion;
   try {
     final packageInfo = await PackageInfo.fromPlatform();
+    appName = packageInfo.appName;
+    appVersion = packageInfo.version;
+  } catch (e, stk) {
+    streamLog.e(
+      _tag,
+      () => '[_setClientDetails] package info failed: $e\n$stk',
+    );
+  }
 
-    final appName = packageInfo.appName;
-    final appVersion = packageInfo.version;
+  sfu_models.Device? device;
+  sfu_models.Browser? browser;
+  String? webrtcVersion;
+  var os = sfu_models.OS(name: CurrentPlatform.name);
 
-    sfu_models.Device? device;
-    sfu_models.Browser? browser;
-    String? webrtcVersion;
-
-    var os = sfu_models.OS(name: CurrentPlatform.name);
-
+  try {
     if (CurrentPlatform.isAndroid) {
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
       os = sfu_models.OS(
@@ -1362,30 +1365,49 @@ Future<String?> _setClientDetails() async {
         version: browserInfo.appVersion,
       );
     }
+  } catch (e, stk) {
+    streamLog.e(
+      _tag,
+      () => '[_setClientDetails] platform info failed: $e\n$stk',
+    );
+  }
 
-    final versionSplit = streamVideoVersion.split('.');
+  try {
+    final versionParts = streamVideoVersion.split('.');
     clientDetails = sfu_models.ClientDetails(
       sdk: sfu_models.Sdk(
         type: sfu_models.SdkType.SDK_TYPE_FLUTTER,
-        major: versionSplit.first,
-        minor: versionSplit.skip(1).first,
-        patch: versionSplit.last,
+        major: versionParts.isNotEmpty ? versionParts[0] : '0',
+        minor: versionParts.length > 1 ? versionParts[1] : '0',
+        patch: versionParts.length > 2 ? versionParts[2] : '0',
       ),
       os: os,
       device: device,
       browser: browser,
       webrtcVersion: webrtcVersion,
     );
+  } catch (e, stk) {
+    streamLog.e(
+      _tag,
+      () => '[_setClientDetails] client details proto failed: $e\n$stk',
+    );
+  }
 
+  try {
+    final resolvedAppName = appName ?? 'unknown';
+    final resolvedAppVersion = appVersion ?? 'unknown';
     final deviceName = (device?.name != null && device!.name.isNotEmpty)
         ? device.name
         : null;
 
-    return clientVersionDetails ??=
-        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.name} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
-  } catch (e) {
-    streamLog.e(_tag, () => '[_setClientDetails] failed: $e');
-    return null;
+    return clientVersionDetails =
+        'app=$resolvedAppName|app_version=$resolvedAppVersion|os=${CurrentPlatform.name} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
+  } catch (e, stk) {
+    streamLog.e(
+      _tag,
+      () => '[_setClientDetails] client version string failed: $e\n$stk',
+    );
+    return clientVersionDetails;
   }
 }
 
