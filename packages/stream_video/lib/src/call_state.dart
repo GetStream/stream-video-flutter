@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'call/call_type.dart';
-import 'models/call_member_state.dart';
 import 'models/models.dart';
 import 'sfu/data/models/sfu_audio_bitrate.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
