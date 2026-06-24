@@ -786,11 +786,16 @@ class StreamVideo extends Disposable {
 
     final acceptResult = await call.accept();
     if (acceptResult.isFailure) {
-      _logger.d(
+      _logger.w(
         () =>
             '[consumeAndAcceptActiveCall] error accepting call: '
             '${acceptResult.getErrorOrNull()}',
       );
+
+      // The native UI (e.g. CallKit) has already answered the call at this
+      // point. End it there so the user isn't left on an answered call that
+      // never joins.
+      await pushNotificationManager?.endCallByCid(call.callCid.value);
       return false;
     }
 
@@ -926,7 +931,16 @@ class StreamVideo extends Disposable {
     final acceptResult = await callToJoin.accept();
 
     if (acceptResult.isFailure) {
-      _logger.d(() => '[onCallAccept] error accepting call: $callToJoin');
+      _logger.w(
+        () =>
+            '[onCallAccept] error accepting call ($callToJoin): '
+            '${acceptResult.getErrorOrNull()}',
+      );
+
+      // The native UI (e.g. CallKit) has already answered the call at this
+      // point. End it there so the user isn't left on an answered call that
+      // never joins.
+      await pushNotificationManager?.endCallByCid(cid);
       return;
     }
 

@@ -1,5 +1,9 @@
 ## Upcoming
 
+### 🐞 Fixed
+
+- Fixed an issue where ringing a member during an ongoing call could prematurely end the call if they declined.
+- Fixed an issue where a failed call accept attempt left the CallKit call active on iOS.
 - Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
 
 ## 1.4.0
