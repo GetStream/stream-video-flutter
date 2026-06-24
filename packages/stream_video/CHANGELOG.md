@@ -1,3 +1,9 @@
+## Unreleased
+
+### 🐞 Fixed
+
+- Fixed incoming calls being locally rejected after accept when the coordinator WebSocket event arrived before the HTTP response ([#1254](https://github.com/GetStream/stream-video-flutter/issues/1254)).
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
