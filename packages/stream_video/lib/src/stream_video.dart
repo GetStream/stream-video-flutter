@@ -12,8 +12,8 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:system_info2/system_info2.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../globals.dart';
+import 'video_environment.dart';
 import '../open_api/video/coordinator/api.dart';
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
@@ -235,26 +235,24 @@ class StreamVideo extends Disposable {
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
     unawaited(
-      _setClientDetails()
-          .catchError((dynamic error, StackTrace stackTrace) {
+      _collectEnvironment().then((env) {
+        _updateVideoEnvironment(env);
+        if (options.autoConnect) {
+          connect(
+            includeUserDetails: options.includeUserDetailsForAutoConnect,
+          ).catchError((dynamic error, StackTrace stackTrace) {
             _logger.e(
               () =>
-                  '[StreamVideo] failed to set client details: $error with stackTrace: $stackTrace',
+                  '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
             );
-          })
-          .then((_) {
-            if (options.autoConnect) {
-              connect(
-                includeUserDetails: options.includeUserDetailsForAutoConnect,
-              ).catchError((dynamic error, StackTrace stackTrace) {
-                _logger.e(
-                  () =>
-                      '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
-                );
-              });
-            }
-          }),
+          });
+        }
+      }),
     );
+  }
+
+  void _updateVideoEnvironment(VideoEnvironment environment) {
+    videoEnvironmentManager.environment = environment;
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -1293,7 +1291,9 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
   }
 }
 
-Future<String?> _setClientDetails() async {
+/// Collects platform and app info and returns a fully-populated
+/// [VideoEnvironment].
+Future<VideoEnvironment> _collectEnvironment() async {
   String? appName;
   String? appVersion;
   try {
@@ -1303,112 +1303,70 @@ Future<String?> _setClientDetails() async {
   } catch (e, stk) {
     streamLog.e(
       _tag,
-      () => '[_setClientDetails] package info failed: $e\n$stk',
+      () => '[_collectEnvironment] package info failed: $e\n$stk',
     );
   }
 
-  sfu_models.Device? device;
-  sfu_models.Browser? browser;
+  String? osVersion;
+  String? osArchitecture;
+  String? deviceModel;
+  String? deviceVersion;
+  String? browserName;
+  String? browserVersion;
   String? webrtcVersion;
-  var os = sfu_models.OS(name: CurrentPlatform.name);
 
   try {
     if (CurrentPlatform.isAndroid) {
-      final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version: deviceInfo.version.release,
-        architecture: SysInfo.rawKernelArchitecture,
-      );
-      device = sfu_models.Device(
-        name: '${deviceInfo.manufacturer} : ${deviceInfo.model}',
-      );
+      final info = await DeviceInfoPlugin().androidInfo;
+      osVersion = info.version.release;
+      osArchitecture = SysInfo.rawKernelArchitecture;
+      deviceModel = '${info.manufacturer} ${info.model}';
       webrtcVersion = androidWebRTCVersion;
     } else if (CurrentPlatform.isIos) {
-      final deviceInfo = await DeviceInfoPlugin().iosInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version: deviceInfo.systemVersion,
-      );
-      device = sfu_models.Device(name: deviceInfo.utsname.machine);
+      final info = await DeviceInfoPlugin().iosInfo;
+      osVersion = info.systemVersion;
+      deviceModel = info.utsname.machine;
       webrtcVersion = iosWebRTCVersion;
     } else if (CurrentPlatform.isMacOS) {
-      final deviceInfo = await DeviceInfoPlugin().macOsInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version:
-            '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}',
-        architecture: deviceInfo.arch,
-      );
-      device = sfu_models.Device(
-        name: deviceInfo.model,
-        version: deviceInfo.osRelease,
-      );
+      final info = await DeviceInfoPlugin().macOsInfo;
+      osVersion =
+          '${info.majorVersion}.${info.minorVersion}.${info.patchVersion}';
+      osArchitecture = info.arch;
+      deviceModel = info.model;
+      deviceVersion = info.osRelease;
     } else if (CurrentPlatform.isWindows) {
-      final deviceInfo = await DeviceInfoPlugin().windowsInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version:
-            '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}',
-        architecture: deviceInfo.buildLabEx,
-      );
+      final info = await DeviceInfoPlugin().windowsInfo;
+      osVersion =
+          '${info.majorVersion}.${info.minorVersion}.${info.buildNumber}';
+      osArchitecture = info.buildLabEx;
     } else if (CurrentPlatform.isLinux) {
-      final deviceInfo = await DeviceInfoPlugin().linuxInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version: '${deviceInfo.name} ${deviceInfo.version}',
-      );
+      final info = await DeviceInfoPlugin().linuxInfo;
+      osVersion = '${info.name} ${info.version}';
     } else if (CurrentPlatform.isWeb) {
-      final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
-      browser = sfu_models.Browser(
-        name: browserInfo.browserName.name,
-        version: browserInfo.appVersion,
-      );
+      final info = await DeviceInfoPlugin().webBrowserInfo;
+      browserName = info.browserName.name;
+      browserVersion = info.appVersion;
     }
   } catch (e, stk) {
     streamLog.e(
       _tag,
-      () => '[_setClientDetails] platform info failed: $e\n$stk',
+      () => '[_collectEnvironment] platform info failed: $e\n$stk',
     );
   }
 
-  try {
-    final versionParts = streamVideoVersion.split('.');
-    clientDetails = sfu_models.ClientDetails(
-      sdk: sfu_models.Sdk(
-        type: sfu_models.SdkType.SDK_TYPE_FLUTTER,
-        major: versionParts.isNotEmpty ? versionParts[0] : '0',
-        minor: versionParts.length > 1 ? versionParts[1] : '0',
-        patch: versionParts.length > 2 ? versionParts[2] : '0',
-      ),
-      os: os,
-      device: device,
-      browser: browser,
-      webrtcVersion: webrtcVersion,
-    );
-  } catch (e, stk) {
-    streamLog.e(
-      _tag,
-      () => '[_setClientDetails] client details proto failed: $e\n$stk',
-    );
-  }
-
-  try {
-    final resolvedAppName = appName ?? 'unknown';
-    final resolvedAppVersion = appVersion ?? 'unknown';
-    final deviceName = (device?.name != null && device!.name.isNotEmpty)
-        ? device.name
-        : null;
-
-    return clientVersionDetails =
-        'app=$resolvedAppName|app_version=$resolvedAppVersion|os=${CurrentPlatform.name} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
-  } catch (e, stk) {
-    streamLog.e(
-      _tag,
-      () => '[_setClientDetails] client version string failed: $e\n$stk',
-    );
-    return clientVersionDetails;
-  }
+  return VideoEnvironment(
+    sdkVersion: streamVideoVersion,
+    osName: CurrentPlatform.name,
+    appName: appName,
+    appVersion: appVersion,
+    osVersion: osVersion,
+    osArchitecture: osArchitecture,
+    deviceModel: deviceModel,
+    deviceVersion: deviceVersion,
+    browserName: browserName,
+    browserVersion: browserVersion,
+    webrtcVersion: webrtcVersion,
+  );
 }
 
 /// Default log handler function for the [StreamVideo] logger.
