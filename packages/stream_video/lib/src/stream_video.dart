@@ -13,7 +13,6 @@ import 'package:system_info2/system_info2.dart';
 import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
-import 'video_environment.dart';
 import '../open_api/video/coordinator/api.dart';
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
@@ -67,6 +66,7 @@ import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
+import 'video_environment.dart';
 import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
@@ -245,6 +245,8 @@ class StreamVideo extends Disposable {
               () =>
                   '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
             );
+
+            return Result<UserToken>.error('Failed to auto connect: $error');
           });
         }
       }),
@@ -252,7 +254,7 @@ class StreamVideo extends Disposable {
   }
 
   void _updateVideoEnvironment(VideoEnvironment environment) {
-    videoEnvironmentManager.environment = environment;
+    videoEnvironmentManager.updateEnvironment(environment);
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
