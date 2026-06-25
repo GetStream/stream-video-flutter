@@ -899,9 +899,14 @@ class Call {
     }
 
     _session?.trace('call.accept', null);
+
+    // Optimistically mark the call as accepted
+    _stateManager.lifecycleCallAccepted();
+
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
-    if (result is Success<None>) {
-      _stateManager.lifecycleCallAccepted();
+    if (result is Failure) {
+      // Revert the optimistic acceptance so the user can retry or reject.
+      _stateManager.lifecycleCallAccepted(accepted: false);
     }
 
     return result;
