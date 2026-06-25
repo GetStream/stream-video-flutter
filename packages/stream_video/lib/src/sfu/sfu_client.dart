@@ -27,6 +27,8 @@ class SfuClient {
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
+    this.rpcTimeout = const Duration(seconds: 10),
+    this.rpcMaxRetries = 3,
   }) : _client = signal_twirp.SignalServerProtobufClient(
          baseUrl,
          prefix,
@@ -42,6 +44,8 @@ class SfuClient {
 
   final int sessionSeq;
   final String sfuToken;
+  final Duration rpcTimeout;
+  final int rpcMaxRetries;
 
   int _retryInterval(int numberOfFailures) {
     // try to reconnect in 0.25-5 seconds (random to spread out the load from failures)
@@ -52,23 +56,21 @@ class SfuClient {
 
   Future<Result<T>> _executeWithRetry<T extends GeneratedMessage>({
     required Future<T> Function() call,
-    int maxRetries = 3,
-    Duration timeout = const Duration(seconds: 10),
   }) async {
     var attempt = 0;
     dynamic dynamicResponse;
 
-    while (attempt < maxRetries) {
+    while (attempt < rpcMaxRetries) {
       try {
         final response = await call().timeout(
-          timeout,
+          rpcTimeout,
           onTimeout: () {
             _logger.w(
               () =>
                   '[_executeWithRetry] SFU HTTP call timed out after '
-                  '${timeout.inSeconds}s',
+                  '${rpcTimeout.inSeconds}s',
             );
-            throw TimeoutException('SFU HTTP call timed out', timeout);
+            throw TimeoutException('SFU HTTP call timed out', rpcTimeout);
           },
         );
 
@@ -80,7 +82,7 @@ class SfuClient {
 
           if (error.shouldRetry) {
             attempt++;
-            if (attempt < maxRetries) {
+            if (attempt < rpcMaxRetries) {
               await Future<void>.delayed(
                 Duration(milliseconds: _retryInterval(attempt)),
               );
@@ -93,15 +95,15 @@ class SfuClient {
         }
 
         return Result.success(response);
-      } on TimeoutException {
+      } on TimeoutException catch (e, stk) {
         attempt++;
-        if (attempt < maxRetries) {
+        if (attempt < rpcMaxRetries) {
           await Future<void>.delayed(
             Duration(milliseconds: _retryInterval(attempt)),
           );
           continue;
         }
-        rethrow;
+        return Result.failure(VideoErrors.compose(e, stk));
       }
     }
 
