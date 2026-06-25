@@ -525,7 +525,8 @@ void main() {
         expect(
           fastReconnectCallCount,
           3,
-          reason: 'should attempt fast reconnect exactly 3 times before escalating',
+          reason:
+              'should attempt fast reconnect exactly 3 times before escalating',
         );
 
         // After escalation the rejoin path issues a second joinCall.
