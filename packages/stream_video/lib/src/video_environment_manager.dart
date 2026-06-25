@@ -2,6 +2,7 @@ import '../globals.dart' show streamVideoVersion;
 import '../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import 'platform_detector/platform_detector.dart';
 import 'video_environment.dart';
+import 'video_environment_collector.dart';
 
 /// Manages the current [VideoEnvironment] and derives the header / proto objects from it.
 class VideoEnvironmentManager {
@@ -20,6 +21,12 @@ class VideoEnvironmentManager {
   // ignore: use_setters_to_change_properties
   void updateEnvironment(VideoEnvironment environment) {
     _environment = environment;
+  }
+
+  /// Collects platform info and updates the managed [VideoEnvironment].
+  Future<void> collectAndUpdate() async {
+    final environment = await VideoEnvironmentCollector.collect();
+    updateEnvironment(environment);
   }
 
   /// The `X-Stream-Client` header value for the current environment.
