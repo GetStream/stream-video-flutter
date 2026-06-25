@@ -429,10 +429,10 @@ class ChatBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamChannel(
       channel: channel,
-      child: const Column(
+      child: Column(
         children: <Widget>[
-          Expanded(child: StreamMessageListView()),
-          StreamMessageInput(),
+          const Expanded(child: StreamMessageListView()),
+          StreamMessageComposer(),
         ],
       ),
     );

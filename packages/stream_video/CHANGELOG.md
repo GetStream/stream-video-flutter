@@ -1,5 +1,9 @@
 ## 1.4.1
 
+### 🔄 Changed
+
+- Increased minimum Flutter version to 3.38.0.
+
 ### 🐞 Fixed
 
 - Fixed an issue where ringing a member during an ongoing call could prematurely end the call if they declined.

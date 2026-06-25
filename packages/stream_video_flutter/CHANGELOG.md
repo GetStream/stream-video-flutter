@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🔄 Changed
+
+- Increased minimum Flutter version to 3.38.0.
+
 ## 1.4.1
 
 ### 🐞 Fixed
