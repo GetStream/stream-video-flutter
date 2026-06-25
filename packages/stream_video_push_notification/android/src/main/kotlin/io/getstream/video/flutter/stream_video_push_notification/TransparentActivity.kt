@@ -32,11 +32,20 @@ class TransparentActivity : Activity() {
 
         val data = intent.getBundleExtra("data")
 
-        val broadcastIntent = IncomingCallBroadcastReceiver.getIntent(this, intent.action!!, data)
+        // The system can recreate this activity (e.g. process death / restore
+        // from recents) with a null action. Without an action there is nothing
+        // to dispatch, so finish instead of crashing on a non-null assertion.
+        val action = intent.action ?: run {
+            finish()
+            overridePendingTransition(0, 0)
+            return
+        }
+
+        val broadcastIntent = IncomingCallBroadcastReceiver.getIntent(this, action, data)
         broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         sendBroadcast(broadcastIntent)
 
-        val activityIntent = AppUtils.getAppIntent(this, intent.action, data)
+        val activityIntent = AppUtils.getAppIntent(this, action, data)
         startActivity(activityIntent)
 
         finish()

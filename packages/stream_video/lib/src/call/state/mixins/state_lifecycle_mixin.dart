@@ -4,7 +4,6 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../logger/stream_logger.dart';
-import '../../../models/call_member_state.dart';
 import '../../../models/call_received_data.dart';
 import '../../../models/models.dart';
 import '../../../sfu/data/models/sfu_error.dart';
@@ -43,16 +42,16 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallAccepted() {
+  void lifecycleCallAccepted({bool accepted = true}) {
     final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
+    if (status is! CallStatusIncoming || status.acceptedByMe == accepted) {
       _logger.w(
         () => '[lifecycleCallAccepted] rejected (invalid status): $status',
       );
       return;
     }
     state = state.copyWith(
-      status: CallStatus.incoming(acceptedByMe: true),
+      status: CallStatus.incoming(acceptedByMe: accepted),
     );
   }
 

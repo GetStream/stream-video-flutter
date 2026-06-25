@@ -3,6 +3,7 @@
 ### 🔄 Changed
 
 - Increased minimum Flutter version to 3.38.0.
+- Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
 
 ## 1.4.0
 
