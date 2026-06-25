@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:protobuf/protobuf.dart';
@@ -26,6 +27,8 @@ class SfuClient {
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
+    this.rpcTimeout = const Duration(seconds: 10),
+    this.rpcMaxRetries = 3,
   }) : _client = signal_twirp.SignalServerProtobufClient(
          baseUrl,
          prefix,
@@ -41,6 +44,8 @@ class SfuClient {
 
   final int sessionSeq;
   final String sfuToken;
+  final Duration rpcTimeout;
+  final int rpcMaxRetries;
 
   int _retryInterval(int numberOfFailures) {
     // try to reconnect in 0.25-5 seconds (random to spread out the load from failures)
@@ -51,35 +56,55 @@ class SfuClient {
 
   Future<Result<T>> _executeWithRetry<T extends GeneratedMessage>({
     required Future<T> Function() call,
-    int maxRetries = 3,
   }) async {
     var attempt = 0;
     dynamic dynamicResponse;
 
-    while (attempt < maxRetries) {
-      final response = await call();
-      dynamicResponse = response as dynamic;
-
-      if (dynamicResponse.hasError != null &&
-          dynamicResponse.hasError() &&
-          dynamicResponse.error is sfu_models.Error) {
-        final error = dynamicResponse.error as sfu_models.Error;
-
-        if (error.shouldRetry) {
-          attempt++;
-          if (attempt < maxRetries) {
-            await Future<void>.delayed(
-              Duration(milliseconds: _retryInterval(attempt)),
+    while (attempt < rpcMaxRetries) {
+      try {
+        final response = await call().timeout(
+          rpcTimeout,
+          onTimeout: () {
+            _logger.w(
+              () =>
+                  '[_executeWithRetry] SFU HTTP call timed out after '
+                  '${rpcTimeout.inSeconds}s',
             );
-            continue;
-          }
-        }
-        return Result.failure(
-          VideoErrors.compose(error, StackTrace.current),
+            throw TimeoutException('SFU HTTP call timed out', rpcTimeout);
+          },
         );
-      }
 
-      return Result.success(response);
+        dynamicResponse = response as dynamic;
+        if (dynamicResponse.hasError != null &&
+            dynamicResponse.hasError() &&
+            dynamicResponse.error is sfu_models.Error) {
+          final error = dynamicResponse.error as sfu_models.Error;
+
+          if (error.shouldRetry) {
+            attempt++;
+            if (attempt < rpcMaxRetries) {
+              await Future<void>.delayed(
+                Duration(milliseconds: _retryInterval(attempt)),
+              );
+              continue;
+            }
+          }
+          return Result.failure(
+            VideoErrors.compose(error, StackTrace.current),
+          );
+        }
+
+        return Result.success(response);
+      } on TimeoutException catch (e, stk) {
+        attempt++;
+        if (attempt < rpcMaxRetries) {
+          await Future<void>.delayed(
+            Duration(milliseconds: _retryInterval(attempt)),
+          );
+          continue;
+        }
+        return Result.failure(VideoErrors.compose(e, stk));
+      }
     }
 
     return Result.failure(

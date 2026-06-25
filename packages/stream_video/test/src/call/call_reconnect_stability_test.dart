@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
@@ -372,6 +374,175 @@ void main() {
           ),
         );
       },
+    );
+
+    test(
+      'rejoin hint received while reconnect lock is held is not dropped',
+      () async {
+        // Override start() to return a long fastReconnectDeadline so
+        // mustPerformRejoin stays false — this isolates the _isRejoinPending
+        // flag as the sole driver of escalation.
+        when(
+          () => callSession.start(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            onRtcManagerCreatedCallback: any(
+              named: 'onRtcManagerCreatedCallback',
+            ),
+            isAnonymousUser: any(named: 'isAnonymousUser'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        ).thenAnswer(
+          (_) => Future.value(
+            Result.success((
+              callState: createTestSfuCallState(),
+              fastReconnectDeadline: const Duration(minutes: 5),
+            )),
+          ),
+        );
+
+        // fastReconnect hangs until we release the gate.
+        final fastReconnectGate = Completer<void>();
+        when(
+          () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        ).thenAnswer((_) async {
+          await fastReconnectGate.future;
+          return Result.error('simulated fast reconnect failure');
+        });
+
+        final call = buildCall();
+        await call.join();
+
+        // Consume the initial joinCall.
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+          ),
+        ).called(1);
+
+        // Start a fast reconnect — the loop acquires the reconnect lock and
+        // hangs waiting for fastReconnectGate.
+        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+        // Wait long enough for the lock to be acquired.
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // Signal a rejoin hint while the reconnect lock is held. The call
+        // must record _isRejoinPending=true and not discard the hint.
+        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+
+        // Release the gate: fast reconnect fails. The loop sees
+        // _isRejoinPending=true → shouldRejoin=true → strategy switches to
+        // rejoin → awaits 3s stability window → issues a second joinCall.
+        fastReconnectGate.complete();
+
+        // 3 s stability window + margin.
+        await Future<void>.delayed(const Duration(milliseconds: 3500));
+
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+          ),
+        ).called(1);
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
+
+    test(
+      'fast reconnect escalates to rejoin after three consecutive failures',
+      () async {
+        // A long fastReconnectDeadline keeps mustPerformRejoin false so only
+        // fastReconnectAttemptsCount >= 2 drives the escalation to rejoin.
+        when(
+          () => callSession.start(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            onRtcManagerCreatedCallback: any(
+              named: 'onRtcManagerCreatedCallback',
+            ),
+            isAnonymousUser: any(named: 'isAnonymousUser'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        ).thenAnswer(
+          (_) => Future.value(
+            Result.success((
+              callState: createTestSfuCallState(),
+              fastReconnectDeadline: const Duration(minutes: 5),
+            )),
+          ),
+        );
+
+        var fastReconnectCallCount = 0;
+        when(
+          () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        ).thenAnswer((_) async {
+          fastReconnectCallCount++;
+          return Result.error('simulated fast reconnect failure');
+        });
+
+        final call = buildCall();
+        await call.join();
+
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+          ),
+        ).called(1);
+
+        // Trigger the reconnect loop. Fast reconnect fails 3 times before
+        // fastReconnectAttemptsCount >= 2 causes escalation to rejoin.
+        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+
+        // 3 fast-reconnect failures (near-instant with zero backoff) +
+        // 3 s stability window for the subsequent rejoin + margin.
+        await Future<void>.delayed(const Duration(milliseconds: 3500));
+
+        expect(
+          fastReconnectCallCount,
+          3,
+          reason:
+              'should attempt fast reconnect exactly 3 times before escalating',
+        );
+
+        // After escalation the rejoin path issues a second joinCall.
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+          ),
+        ).called(1);
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
     );
   });
 }

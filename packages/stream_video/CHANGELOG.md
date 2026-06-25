@@ -4,6 +4,8 @@
 
 - Fixed an issue where ringing a member during an ongoing call could prematurely end the call if they declined.
 - Fixed an issue where a failed call accept attempt left the CallKit call active on iOS.
+- Improved reconnect flow reliability: fixed several issues that could cause reconnection to stall or silently fail, including delayed disconnect detection on broken connections and reconnect strategy hints being dropped while a reconnect was already in progress.
+- Fixed fast reconnect escalating to rejoin after every single failure regardless of attempt count or connection health. Escalation now follows the same backoff and strategy-promotion logic used by all other reconnect modes.
 - Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
 - Fixed incoming calls being locally rejected after accept when the coordinator WebSocket event arrived before the HTTP response ([#1254](https://github.com/GetStream/stream-video-flutter/issues/1254)).
 

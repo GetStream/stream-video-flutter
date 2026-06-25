@@ -682,10 +682,12 @@ void main() {
           await Future<void>.delayed(Duration.zero);
           internetStatusController.add(InternetStatus.connected);
 
-          // Poll until the rejoin path calls setAudioProcessingEnabled(true)
-          // again, rather than relying on a fixed sleep duration.
+          // Fast reconnect failure now correctly propagates to the outer
+          // reconnect loop, which runs a 3-second stability window before
+          // attempting REJOIN. Allow 5 seconds total for the rejoin + rebind.
           await _waitForMockCall(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
+            timeout: const Duration(seconds: 5),
           );
         },
       );
