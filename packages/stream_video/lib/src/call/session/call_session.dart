@@ -884,8 +884,11 @@ class CallSession extends Disposable {
       // After marking ICE restart, explicitly trigger renegotiation to create
       // a new offer with fresh ICE credentials and send it to the SFU.
       // pc.restartIce() only sets a flag; we must create and send the offer.
+      //
+      // Use unawaited so we don't hold _sfuEventsLock during the SetPublisher
+      // HTTP call.
       _logger.i(() => '[onIceRestart] triggering publisher renegotiation');
-      await _onRenegotiationNeeded(publisher);
+      unawaited(_onRenegotiationNeeded(publisher));
     } else if (peerType == StreamPeerType.subscriber) {
       final subscriber = rtcManager?.subscriber;
       if (subscriber == null) {

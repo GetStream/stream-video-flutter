@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:protobuf/protobuf.dart';
@@ -52,12 +53,19 @@ class SfuClient {
   Future<Result<T>> _executeWithRetry<T extends GeneratedMessage>({
     required Future<T> Function() call,
     int maxRetries = 3,
+    Duration timeout = const Duration(seconds: 10),
   }) async {
     var attempt = 0;
     dynamic dynamicResponse;
 
     while (attempt < maxRetries) {
-      final response = await call();
+      final response = await call().timeout(
+        timeout,
+        onTimeout: () {
+          _logger.w(() => '[_executeWithRetry] SFU HTTP call timed out after ${timeout.inSeconds}s');
+          throw TimeoutException('SFU HTTP call timed out', timeout);
+        },
+      );
       dynamicResponse = response as dynamic;
 
       if (dynamicResponse.hasError != null &&
