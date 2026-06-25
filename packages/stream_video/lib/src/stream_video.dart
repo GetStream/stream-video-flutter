@@ -3,16 +3,12 @@ import 'dart:async';
 import 'package:async/async.dart' as async;
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:system_info2/system_info2.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart';
 import 'audio_processing/audio_processor.dart';
@@ -235,30 +231,33 @@ class StreamVideo extends Disposable {
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
     unawaited(
-      _setClientDetails().onError((dynamic error, StackTrace stackTrace) {
-        _logger.e(
-          () =>
-              '[StreamVideo] failed to set client details: $error with stackTrace: $stackTrace',
-        );
+      videoEnvironmentManager
+          .collectAndUpdate()
+          .catchError((Object error, StackTrace stackTrace) {
+            _logger.e(
+              () =>
+                  '[StreamVideo] failed to collect environment: $error '
+                  'with stackTrace: $stackTrace',
+            );
+          })
+          .whenComplete(() {
+            if (options.autoConnect) {
+              connect(
+                includeUserDetails: options.includeUserDetailsForAutoConnect,
+              ).catchError((dynamic error, StackTrace stackTrace) {
+                _logger.e(
+                  () =>
+                      '[StreamVideo] failed to auto connect: $error '
+                      'with stackTrace: $stackTrace',
+                );
 
-        return null;
-      }),
+                return Result<UserToken>.error(
+                  'Failed to auto connect: $error',
+                );
+              });
+            }
+          }),
     );
-
-    if (options.autoConnect) {
-      unawaited(
-        connect(
-          includeUserDetails: options.includeUserDetailsForAutoConnect,
-        ).onError((dynamic error, StackTrace stackTrace) {
-          _logger.e(
-            () =>
-                '[StreamVideo] failed to auto connect: $error with stackTrace: $stackTrace',
-          );
-
-          return Result.error('Failed to auto connect: $error');
-        }),
-      );
-    }
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -1308,98 +1307,6 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
       const ConsoleStreamLogger(),
       ExternalStreamLogger(logHandlerFunction),
     ]);
-  }
-}
-
-Future<String?> _setClientDetails() async {
-  try {
-    final packageInfo = await PackageInfo.fromPlatform();
-
-    final appName = packageInfo.appName;
-    final appVersion = packageInfo.version;
-
-    sfu_models.Device? device;
-    sfu_models.Browser? browser;
-    String? webrtcVersion;
-
-    var os = sfu_models.OS(name: CurrentPlatform.name);
-
-    if (CurrentPlatform.isAndroid) {
-      final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version: deviceInfo.version.release,
-        architecture: SysInfo.rawKernelArchitecture,
-      );
-      device = sfu_models.Device(
-        name: '${deviceInfo.manufacturer} : ${deviceInfo.model}',
-      );
-      webrtcVersion = androidWebRTCVersion;
-    } else if (CurrentPlatform.isIos) {
-      final deviceInfo = await DeviceInfoPlugin().iosInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version: deviceInfo.systemVersion,
-      );
-      device = sfu_models.Device(name: deviceInfo.utsname.machine);
-      webrtcVersion = iosWebRTCVersion;
-    } else if (CurrentPlatform.isMacOS) {
-      final deviceInfo = await DeviceInfoPlugin().macOsInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version:
-            '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.patchVersion}',
-        architecture: deviceInfo.arch,
-      );
-      device = sfu_models.Device(
-        name: deviceInfo.model,
-        version: deviceInfo.osRelease,
-      );
-    } else if (CurrentPlatform.isWindows) {
-      final deviceInfo = await DeviceInfoPlugin().windowsInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version:
-            '${deviceInfo.majorVersion}.${deviceInfo.minorVersion}.${deviceInfo.buildNumber}',
-        architecture: deviceInfo.buildLabEx,
-      );
-    } else if (CurrentPlatform.isLinux) {
-      final deviceInfo = await DeviceInfoPlugin().linuxInfo;
-      os = sfu_models.OS(
-        name: CurrentPlatform.name,
-        version: '${deviceInfo.name} ${deviceInfo.version}',
-      );
-    } else if (CurrentPlatform.isWeb) {
-      final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
-      browser = sfu_models.Browser(
-        name: browserInfo.browserName.name,
-        version: browserInfo.appVersion,
-      );
-    }
-
-    final versionSplit = streamVideoVersion.split('.');
-    clientDetails = sfu_models.ClientDetails(
-      sdk: sfu_models.Sdk(
-        type: sfu_models.SdkType.SDK_TYPE_FLUTTER,
-        major: versionSplit.first,
-        minor: versionSplit.skip(1).first,
-        patch: versionSplit.last,
-      ),
-      os: os,
-      device: device,
-      browser: browser,
-      webrtcVersion: webrtcVersion,
-    );
-
-    final deviceName = (device?.name != null && device!.name.isNotEmpty)
-        ? device.name
-        : null;
-
-    return clientVersionDetails ??=
-        'app=$appName|app_version=$appVersion|os=${CurrentPlatform.name} ${os.version}${deviceName != null ? '|device_model=$deviceName' : ''}';
-  } catch (e) {
-    streamLog.e(_tag, () => '[_setClientDetails] failed: $e');
-    return null;
   }
 }
 

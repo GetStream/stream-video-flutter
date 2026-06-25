@@ -1,3 +1,7 @@
+## Upcoming
+
+- Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.
