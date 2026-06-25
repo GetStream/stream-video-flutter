@@ -1,6 +1,12 @@
 ## Upcoming
 * Increased minimum Flutter version to 3.38.0.
 
+## 1.4.1
+
+### 🐞 Fixed
+
+* [Android] Fixed a crash in `TransparentActivity` when the activity is recreated with a null intent action (e.g. after process death or restore from recents) ([#1256](https://github.com/GetStream/stream-video-flutter/pull/1256)).
+
 ## 1.4.0
 * Sync version with `stream_video_flutter` 1.4.0
 
