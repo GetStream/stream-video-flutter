@@ -59,35 +59,50 @@ class SfuClient {
     dynamic dynamicResponse;
 
     while (attempt < maxRetries) {
-      final response = await call().timeout(
-        timeout,
-        onTimeout: () {
-          _logger.w(() => '[_executeWithRetry] SFU HTTP call timed out after ${timeout.inSeconds}s');
-          throw TimeoutException('SFU HTTP call timed out', timeout);
-        },
-      );
-      dynamicResponse = response as dynamic;
-
-      if (dynamicResponse.hasError != null &&
-          dynamicResponse.hasError() &&
-          dynamicResponse.error is sfu_models.Error) {
-        final error = dynamicResponse.error as sfu_models.Error;
-
-        if (error.shouldRetry) {
-          attempt++;
-          if (attempt < maxRetries) {
-            await Future<void>.delayed(
-              Duration(milliseconds: _retryInterval(attempt)),
+      try {
+        final response = await call().timeout(
+          timeout,
+          onTimeout: () {
+            _logger.w(
+              () =>
+                  '[_executeWithRetry] SFU HTTP call timed out after '
+                  '${timeout.inSeconds}s',
             );
-            continue;
-          }
-        }
-        return Result.failure(
-          VideoErrors.compose(error, StackTrace.current),
+            throw TimeoutException('SFU HTTP call timed out', timeout);
+          },
         );
-      }
 
-      return Result.success(response);
+        dynamicResponse = response as dynamic;
+        if (dynamicResponse.hasError != null &&
+            dynamicResponse.hasError() &&
+            dynamicResponse.error is sfu_models.Error) {
+          final error = dynamicResponse.error as sfu_models.Error;
+
+          if (error.shouldRetry) {
+            attempt++;
+            if (attempt < maxRetries) {
+              await Future<void>.delayed(
+                Duration(milliseconds: _retryInterval(attempt)),
+              );
+              continue;
+            }
+          }
+          return Result.failure(
+            VideoErrors.compose(error, StackTrace.current),
+          );
+        }
+
+        return Result.success(response);
+      } on TimeoutException {
+        attempt++;
+        if (attempt < maxRetries) {
+          await Future<void>.delayed(
+            Duration(milliseconds: _retryInterval(attempt)),
+          );
+          continue;
+        }
+        rethrow;
+      }
     }
 
     return Result.failure(

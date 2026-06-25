@@ -888,7 +888,23 @@ class CallSession extends Disposable {
       // Use unawaited so we don't hold _sfuEventsLock during the SetPublisher
       // HTTP call.
       _logger.i(() => '[onIceRestart] triggering publisher renegotiation');
-      unawaited(_onRenegotiationNeeded(publisher));
+      unawaited(
+        _onRenegotiationNeeded(publisher)
+            .then((result) {
+              if (result.isFailure) {
+                _logger.w(
+                  () =>
+                      '[onIceRestart] publisher renegotiation failed: '
+                      '${result.getErrorOrNull()}',
+                );
+              }
+            })
+            .catchError((Object e, StackTrace stk) {
+              _logger.e(
+                () => '[onIceRestart] publisher renegotiation error: $e\n$stk',
+              );
+            }),
+      );
     } else if (peerType == StreamPeerType.subscriber) {
       final subscriber = rtcManager?.subscriber;
       if (subscriber == null) {
