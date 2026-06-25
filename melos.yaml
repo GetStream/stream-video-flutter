@@ -17,7 +17,7 @@ command:
     environment:
       sdk: ^3.10.0
       # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
-      flutter: ">=3.38.0"
+      flutter: ">=3.38.1"
 
     # Dependencies used in the project.
     dependencies:
