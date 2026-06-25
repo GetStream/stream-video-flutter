@@ -4,6 +4,7 @@
 
 - Fixed an issue where ringing a member during an ongoing call could prematurely end the call if they declined.
 - Fixed an issue where a failed call accept attempt left the CallKit call active on iOS.
+- Fixed incoming calls being locally rejected after accept when the coordinator WebSocket event arrived before the HTTP response ([#1254](https://github.com/GetStream/stream-video-flutter/issues/1254)).
 
 ## 1.4.0
 
