@@ -20,7 +20,6 @@ GoRouter initRouter(UserAuthController authNotifier) {
         builder: (context, state, child) {
           return StreamChat(
             client: locator.get(),
-            streamChatThemeData: StreamChatThemeData.dark(),
             child: child,
           );
         },

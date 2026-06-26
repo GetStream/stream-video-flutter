@@ -1,14 +1,14 @@
 name: stream_video
 description: The Official Low-level Client for Stream Video, a service for
   building video calls, audio rooms, and live-streaming applications.
-version: 1.4.0
+version: 1.4.1
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ^3.8.0
-  flutter: ">=3.32.0"
+  sdk: ^3.10.0
+  flutter: ">=3.38.1"
 
 dependencies:
   async: ^2.12.0
@@ -37,9 +37,9 @@ dependencies:
   state_notifier: ^1.0.0
   stream_core:
     git:
-      url: https://github.com/GetStream/stream-core-flutter/.git
+      url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: 93a4d45e875e1b941f72c810a603f0c5cd575196
+      ref: 584ff02d5caf9d99011f8f33d467eecee4ac6c68
   stream_webrtc_flutter: ^3.0.0
   synchronized: ^3.1.0
   system_info2: ^4.0.0

@@ -20,6 +20,23 @@
   - `CurrentPlatform.name` has been removed — use `CurrentPlatform.operatingSystem` instead.
 - `StreamLogger`, `Priority`, and `MessageBuilder` are now provided by `stream_core`. Import them from `stream_video` as before — the re-export is in place.
 
+## 1.4.1
+
+### 🔄 Changed
+
+- Increased minimum Flutter version to 3.38.0.
+
+### 🐞 Fixed
+
+- Fixed an issue where ringing a member during an ongoing call could prematurely end the call if they declined.
+- Fixed an issue where a failed call accept attempt left the CallKit call active on iOS.
+- Improved reconnect flow reliability: fixed several issues that could cause reconnection to stall or silently fail, including delayed disconnect detection on broken connections and reconnect strategy hints being dropped while a reconnect was already in progress.
+- Fixed fast reconnect escalating to rejoin after every single failure regardless of attempt count or connection health. Escalation now follows the same backoff and strategy-promotion logic used by all other reconnect modes.
+- Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
+- Fixed incoming calls being locally rejected after accept when the coordinator WebSocket event arrived before the HTTP response ([#1254](https://github.com/GetStream/stream-video-flutter/issues/1254)).
+- Fixed an Android crash when the push notification `TransparentActivity` is recreated with a null intent action (e.g. after process death or restore from recents) ([#1256](https://github.com/GetStream/stream-video-flutter/pull/1256)).
+
+
 ## 1.4.0
 
 Each call now owns an isolated native `PeerConnectionFactory`. This fixes cross-call audio interference, sibling-call microphone capture loss, and noise cancellation failing to engage during lobby preview.

@@ -5,6 +5,7 @@ export 'call_created_data.dart';
 export 'call_credentials.dart';
 export 'call_egress.dart';
 export 'call_joined_data.dart';
+export 'call_member_state.dart';
 export 'call_metadata.dart';
 export 'call_participant_state.dart';
 export 'call_permission.dart';

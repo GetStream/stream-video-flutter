@@ -93,6 +93,13 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       }
     }).toList();
 
+    if (!state.isRingingFlow) {
+      state = state.copyWith(callMembers: members);
+      return;
+    }
+
+    // Auto-disconnect on rejection only applies to the ringing flow (call
+    // created with `ringing: true`).
     if (state.createdByMe) {
       final everyoneElseRejected =
           state.otherParticipants.isEmpty &&

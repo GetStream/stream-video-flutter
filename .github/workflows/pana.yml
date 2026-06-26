@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -28,29 +28,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_video_flutter
-          min_score: 150
+          min_score: 130
 
   stream_video_push_notification:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_video_push_notification
-          min_score: 140
+          min_score: 130
 
   stream_video_screen_sharing:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:

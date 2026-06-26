@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' as chat;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
@@ -282,6 +283,7 @@ class _StreamDogFoodingAppContentState
         dragHandleColor: Colors.white,
       ),
       extensions: <ThemeExtension<dynamic>>[
+        chat.StreamTheme.dark(),
         StreamVideoTheme.dark().copyWith(
           callControlsTheme: StreamCallControlsThemeData(
             callReactions: const [

@@ -1492,6 +1492,7 @@ void main() {
           stateManager: stateManager,
         );
         await call.getOrCreate(
+          ringing: true,
           memberIds: members.map((m) => m.userId).toList(),
         );
 
@@ -1560,6 +1561,7 @@ void main() {
           stateManager: stateManager,
         );
         await call.getOrCreate(
+          ringing: true,
           memberIds: members.map((m) => m.userId).toList(),
         );
 
@@ -1625,6 +1627,7 @@ void main() {
           stateManager: stateManager,
         );
         await call.getOrCreate(
+          ringing: true,
           memberIds: members.map((m) => m.userId).toList(),
         );
 
@@ -1725,6 +1728,79 @@ void main() {
             .toList();
         expect(rejectedMembers.length, equals(1));
         expect(rejectedMembers.first.userId, equals(user1.id));
+      },
+    );
+
+    test(
+      'call rejected event - should not disconnect when not in ringing flow '
+      '(member rung mid-call)',
+      () async {
+        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+
+        final currentUser = SampleCallData.defaultCallUser;
+        final user1 = SampleCallData.testCallUser1;
+
+        final members = [
+          SampleCallData.createCallMember(userId: currentUser.id),
+          SampleCallData.createCallMember(userId: user1.id),
+        ];
+
+        final coordinatorClient = setupMockCoordinatorClient(
+          events: coordinatorEvents,
+          getOrCreateCallResult: SampleCallData.createCallReceivedOrCreatedData(
+            members: {
+              currentUser.id: members[0],
+              user1.id: members[1],
+            },
+            createdByUser: currentUser,
+          ),
+        );
+
+        final initialState = createActiveCallState(
+          currentByUser: currentUser,
+        );
+        final stateManager = CallStateNotifier(initialState);
+
+        final call = createTestCall(
+          coordinatorClient: coordinatorClient,
+          stateManager: stateManager,
+        );
+
+        // Non-ringing flow: the call is established normally and members are
+        // rung mid-call via Call.ring(), so a rejection must not tear it down.
+        await call.getOrCreate(
+          memberIds: members.map((m) => m.userId).toList(),
+        );
+
+        expect(call.state.value.isRingingFlow, isFalse);
+        expect(call.state.value.status, isA<CallStatusActive>());
+
+        // Even though the creator is the current user and the only other member
+        // rejects, the call should stay active outside the ringing flow.
+        final rejectedTime = DateTime.now();
+        coordinatorEvents.emit(
+          CoordinatorCallRejectedEvent(
+            callCid: call.callCid,
+            user: currentUser,
+            rejectedBy: user1,
+            createdAt: rejectedTime,
+            metadata: SampleCallData.createCallMetadata(
+              rejectedBy: {user1.id: rejectedTime},
+              createdByUser: currentUser,
+            ),
+          ),
+        );
+
+        await Future<void>.delayed(Duration.zero);
+
+        // Call stays active; only the member is marked as rejected.
+        expect(call.state.value.status, isA<CallStatusActive>());
+        expect(
+          call.state.value.callMembers
+              .firstWhereOrNull((m) => m.userId == user1.id)
+              ?.callRejectedAt,
+          equals(rejectedTime),
+        );
       },
     );
 
