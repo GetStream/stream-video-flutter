@@ -35,11 +35,7 @@ dependencies:
   rxdart: ^0.28.0
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
-  stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      path: packages/stream_core
-      ref: 584ff02d5caf9d99011f8f33d467eecee4ac6c68
+  stream_core: 0.4.0
   stream_webrtc_flutter: ^3.0.0
   synchronized: ^3.1.0
   system_info2: ^4.0.0
