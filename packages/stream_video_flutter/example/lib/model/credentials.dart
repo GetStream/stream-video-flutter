@@ -12,7 +12,7 @@ class AuthCredentials {
   factory AuthCredentials.fromJson(Map<String, Object?> json) {
     return AuthCredentials(
       apiKey: json['apiKey']! as String,
-      token: UserToken.jwt(json['token']! as String),
+      token: UserToken(json['token']! as String),
       userInfo: _parseUserInfoFromJson(json['user']! as Map<String, Object?>),
     );
   }

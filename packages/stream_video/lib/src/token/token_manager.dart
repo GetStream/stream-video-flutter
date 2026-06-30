@@ -1,5 +1,6 @@
 import 'package:async/async.dart' as async;
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' show UserToken;
 
 import '../logger/impl/tagged_logger.dart';
 import '../utils/cancelable_operation.dart';

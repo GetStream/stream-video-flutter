@@ -6,15 +6,7 @@
 library stream_video;
 
 export 'package:stream_core/stream_core.dart'
-    hide
-        AuthType,
-        LifecycleState,
-        PatternMatching,
-        TokenManager,
-        TokenProvider,
-        User,
-        UserToken,
-        UserType;
+    hide LifecycleState, TokenManager, TokenProvider;
 
 export 'open_api/video/coordinator/api.dart' hide Role, User;
 export 'open_api/video/coordinator_legacy_enums.dart';

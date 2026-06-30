@@ -138,7 +138,7 @@ MockCallStateNotifier createTestCallStateManager({
 
 MockClientState setupMockClientState() {
   final userStateEmitter = MutableStateEmitter<User>(
-    User(info: SampleCallData.defaultUserInfo),
+    User(id: SampleCallData.defaultUserInfo.id),
     sync: true,
   );
   final activeCallsEmitter = MutableStateEmitter<List<Call>>(

@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       image: googleUser.photoUrl,
     );
 
-    return _login(User(info: userInfo), _appPreferences.environment);
+    return _login(userInfo.toUser(), _appPreferences.environment);
   }
 
   Future<void> _loginWithEmail() async {
@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
       name: email,
     );
 
-    return _login(User(info: userInfo), _appPreferences.environment);
+    return _login(userInfo.toUser(), _appPreferences.environment);
   }
 
   Future<void> _loginAsGuest() async {
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     return _login(
-      User(info: userInfo, type: UserType.guest),
+      userInfo.toUser(type: UserType.guest),
       _appPreferences.environment,
     );
   }

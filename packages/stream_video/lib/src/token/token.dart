@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-import 'package:jose/jose.dart';
 import 'package:stream_core/stream_core.dart';
 
 import '../errors/video_error_composer.dart';
@@ -119,7 +117,7 @@ class _DynamicProvider implements TokenProvider {
           _initialToken = null;
         });
       }
-      final userToken = await loader.call(userId).then(UserToken.jwt);
+      final userToken = await loader.call(userId).then(UserToken.new);
       _logger.v(() => '[loadToken] completed: $userToken');
       await _onTokenUpdated?.call(userToken);
       return Result.success(userToken);
@@ -133,56 +131,4 @@ class _DynamicProvider implements TokenProvider {
   set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
     _onTokenUpdated = onTokenUpdated;
   }
-}
-
-/// Authentication type
-enum AuthType {
-  /// JWT token
-  jwt,
-
-  /// Anonymous user
-  anonymous,
-}
-
-/// Token designed to store the JWT and the user it is related to.
-class UserToken extends Equatable {
-  const UserToken._({
-    required this.userId,
-    required this.authType,
-    this.rawValue = '',
-  });
-
-  /// The token that can be used when user is unknown.
-  /// Is used by `anonymous` token provider.
-  factory UserToken.anonymous({String userId = '!anon'}) => UserToken._(
-    userId: userId,
-    authType: AuthType.anonymous,
-  );
-
-  /// Creates a [UserToken] instance from the provided [rawValue] if it's valid.
-  factory UserToken.jwt(String rawValue) {
-    final jwtBody = JsonWebToken.unverified(rawValue);
-    final userId = jwtBody.claims.getTyped<String>('user_id');
-    assert(
-      userId != null,
-      'Invalid `token`, It should contain `user_id`',
-    );
-    return UserToken._(
-      userId: userId!,
-      authType: AuthType.jwt,
-      rawValue: rawValue,
-    );
-  }
-
-  /// Authentication type of this token
-  final AuthType authType;
-
-  /// String value of the token
-  final String rawValue;
-
-  /// User id associated with this token
-  final String userId;
-
-  @override
-  List<Object?> get props => [authType, rawValue, userId];
 }

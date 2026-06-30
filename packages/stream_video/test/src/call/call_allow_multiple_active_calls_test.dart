@@ -28,8 +28,8 @@ void main() {
     late MockCoordinatorClient mockCoordinatorClient;
 
     setUp(() {
-      user = User.regular(
-        userId: 'test-user',
+      user = const User(
+        id: 'test-user',
         name: 'Test User',
       );
 

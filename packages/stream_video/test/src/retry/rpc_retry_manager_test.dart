@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_core/stream_core.dart' show UserToken;
 import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/src/retry/retry_manager.dart';
 import 'package:stream_video/src/retry/retry_policy.dart';
-import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
 import 'package:stream_video/src/utils/result.dart';
 

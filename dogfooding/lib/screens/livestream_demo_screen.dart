@@ -35,7 +35,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
 
     final streamVideo = StreamVideo.create(
       tokenResponse.apiKey,
-      user: User.regular(userId: userId),
+      user: User(id: userId),
       tokenLoader: (userId) async {
         final token = await _tokenService.loadToken(
           userId: userId,
