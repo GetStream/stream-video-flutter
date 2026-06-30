@@ -22,6 +22,6 @@ Map<String, dynamic> _$ChatReactionGroupUserResponseToJson(
   ChatReactionGroupUserResponse instance,
 ) => <String, dynamic>{
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-  'user': instance.user,
+  'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };

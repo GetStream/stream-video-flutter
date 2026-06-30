@@ -20,7 +20,7 @@ FeedsNotificationComment _$FeedsNotificationCommentFromJson(
 Map<String, dynamic> _$FeedsNotificationCommentToJson(
   FeedsNotificationComment instance,
 ) => <String, dynamic>{
-  'attachments': instance.attachments,
+  'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
   'comment': instance.comment,
   'id': instance.id,
   'user_id': instance.userId,

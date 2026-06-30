@@ -31,5 +31,5 @@ Map<String, dynamic> _$FeedsBookmarkResponseToJson(
   'object_id': instance.objectId,
   'object_type': instance.objectType,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };

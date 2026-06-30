@@ -9,49 +9,66 @@ part of 'call_session_started_event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallSessionStartedEvent {
+  CallResponse get call;
+  String get callCid;
+  DateTime get createdAt;
+  String get sessionId;
+  String get type;
 
- CallResponse get call; String get callCid; DateTime get createdAt; String get sessionId; String get type;
-/// Create a copy of CallSessionStartedEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallSessionStartedEventCopyWith<CallSessionStartedEvent> get copyWith => _$CallSessionStartedEventCopyWithImpl<CallSessionStartedEvent>(this as CallSessionStartedEvent, _$identity);
+  /// Create a copy of CallSessionStartedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallSessionStartedEventCopyWith<CallSessionStartedEvent> get copyWith =>
+      _$CallSessionStartedEventCopyWithImpl<CallSessionStartedEvent>(
+        this as CallSessionStartedEvent,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallSessionStartedEvent &&
+            (identical(other.call, call) || other.call == call) &&
+            (identical(other.callCid, callCid) || other.callCid == callCid) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.sessionId, sessionId) ||
+                other.sessionId == sessionId) &&
+            (identical(other.type, type) || other.type == type));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, call, callCid, createdAt, sessionId, type);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallSessionStartedEvent&&(identical(other.call, call) || other.call == call)&&(identical(other.callCid, callCid) || other.callCid == callCid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.type, type) || other.type == type));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,call,callCid,createdAt,sessionId,type);
-
-@override
-String toString() {
-  return 'CallSessionStartedEvent(call: $call, callCid: $callCid, createdAt: $createdAt, sessionId: $sessionId, type: $type)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallSessionStartedEvent(call: $call, callCid: $callCid, createdAt: $createdAt, sessionId: $sessionId, type: $type)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallSessionStartedEventCopyWith<$Res>  {
-  factory $CallSessionStartedEventCopyWith(CallSessionStartedEvent value, $Res Function(CallSessionStartedEvent) _then) = _$CallSessionStartedEventCopyWithImpl;
-@useResult
-$Res call({
- CallResponse call, String callCid, DateTime createdAt, String sessionId, String type
-});
-
-
-
-
+abstract mixin class $CallSessionStartedEventCopyWith<$Res> {
+  factory $CallSessionStartedEventCopyWith(
+    CallSessionStartedEvent value,
+    $Res Function(CallSessionStartedEvent) _then,
+  ) = _$CallSessionStartedEventCopyWithImpl;
+  @useResult
+  $Res call({
+    CallResponse call,
+    String callCid,
+    DateTime createdAt,
+    String sessionId,
+    String type,
+  });
 }
+
 /// @nodoc
 class _$CallSessionStartedEventCopyWithImpl<$Res>
     implements $CallSessionStartedEventCopyWith<$Res> {
@@ -60,144 +77,40 @@ class _$CallSessionStartedEventCopyWithImpl<$Res>
   final CallSessionStartedEvent _self;
   final $Res Function(CallSessionStartedEvent) _then;
 
-/// Create a copy of CallSessionStartedEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? call = null,Object? callCid = null,Object? createdAt = null,Object? sessionId = null,Object? type = null,}) {
-  return _then(CallSessionStartedEvent(
-call: null == call ? _self.call : call // ignore: cast_nullable_to_non_nullable
-as CallResponse,callCid: null == callCid ? _self.callCid : callCid // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CallSessionStartedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? call = null,
+    Object? callCid = null,
+    Object? createdAt = null,
+    Object? sessionId = null,
+    Object? type = null,
+  }) {
+    return _then(
+      CallSessionStartedEvent(
+        call: null == call
+            ? _self.call
+            : call // ignore: cast_nullable_to_non_nullable
+                  as CallResponse,
+        callCid: null == callCid
+            ? _self.callCid
+            : callCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        sessionId: null == sessionId
+            ? _self.sessionId
+            : sessionId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallSessionStartedEvent].
-extension CallSessionStartedEventPatterns on CallSessionStartedEvent {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

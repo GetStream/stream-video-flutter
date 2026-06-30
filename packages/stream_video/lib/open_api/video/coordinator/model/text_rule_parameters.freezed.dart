@@ -9,49 +9,107 @@ part of 'text_rule_parameters.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$TextRuleParameters {
+  List<String>? get blocklistMatch;
+  bool? get containsUrl;
+  List<String>? get harmLabels;
+  Map<String, String>? get llmHarmLabels;
+  double? get semanticFilterMinThreshold;
+  List<String>? get semanticFilterNames;
+  String? get severity;
+  int? get threshold;
+  String? get timeWindow;
 
- List<String>? get blocklistMatch; bool? get containsUrl; List<String>? get harmLabels; Map<String, String>? get llmHarmLabels; double? get semanticFilterMinThreshold; List<String>? get semanticFilterNames; String? get severity; int? get threshold; String? get timeWindow;
-/// Create a copy of TextRuleParameters
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$TextRuleParametersCopyWith<TextRuleParameters> get copyWith => _$TextRuleParametersCopyWithImpl<TextRuleParameters>(this as TextRuleParameters, _$identity);
+  /// Create a copy of TextRuleParameters
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $TextRuleParametersCopyWith<TextRuleParameters> get copyWith =>
+      _$TextRuleParametersCopyWithImpl<TextRuleParameters>(
+        this as TextRuleParameters,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is TextRuleParameters &&
+            const DeepCollectionEquality().equals(
+              other.blocklistMatch,
+              blocklistMatch,
+            ) &&
+            (identical(other.containsUrl, containsUrl) ||
+                other.containsUrl == containsUrl) &&
+            const DeepCollectionEquality().equals(
+              other.harmLabels,
+              harmLabels,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.llmHarmLabels,
+              llmHarmLabels,
+            ) &&
+            (identical(
+                  other.semanticFilterMinThreshold,
+                  semanticFilterMinThreshold,
+                ) ||
+                other.semanticFilterMinThreshold ==
+                    semanticFilterMinThreshold) &&
+            const DeepCollectionEquality().equals(
+              other.semanticFilterNames,
+              semanticFilterNames,
+            ) &&
+            (identical(other.severity, severity) ||
+                other.severity == severity) &&
+            (identical(other.threshold, threshold) ||
+                other.threshold == threshold) &&
+            (identical(other.timeWindow, timeWindow) ||
+                other.timeWindow == timeWindow));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(blocklistMatch),
+    containsUrl,
+    const DeepCollectionEquality().hash(harmLabels),
+    const DeepCollectionEquality().hash(llmHarmLabels),
+    semanticFilterMinThreshold,
+    const DeepCollectionEquality().hash(semanticFilterNames),
+    severity,
+    threshold,
+    timeWindow,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TextRuleParameters&&const DeepCollectionEquality().equals(other.blocklistMatch, blocklistMatch)&&(identical(other.containsUrl, containsUrl) || other.containsUrl == containsUrl)&&const DeepCollectionEquality().equals(other.harmLabels, harmLabels)&&const DeepCollectionEquality().equals(other.llmHarmLabels, llmHarmLabels)&&(identical(other.semanticFilterMinThreshold, semanticFilterMinThreshold) || other.semanticFilterMinThreshold == semanticFilterMinThreshold)&&const DeepCollectionEquality().equals(other.semanticFilterNames, semanticFilterNames)&&(identical(other.severity, severity) || other.severity == severity)&&(identical(other.threshold, threshold) || other.threshold == threshold)&&(identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(blocklistMatch),containsUrl,const DeepCollectionEquality().hash(harmLabels),const DeepCollectionEquality().hash(llmHarmLabels),semanticFilterMinThreshold,const DeepCollectionEquality().hash(semanticFilterNames),severity,threshold,timeWindow);
-
-@override
-String toString() {
-  return 'TextRuleParameters(blocklistMatch: $blocklistMatch, containsUrl: $containsUrl, harmLabels: $harmLabels, llmHarmLabels: $llmHarmLabels, semanticFilterMinThreshold: $semanticFilterMinThreshold, semanticFilterNames: $semanticFilterNames, severity: $severity, threshold: $threshold, timeWindow: $timeWindow)';
-}
-
-
+  @override
+  String toString() {
+    return 'TextRuleParameters(blocklistMatch: $blocklistMatch, containsUrl: $containsUrl, harmLabels: $harmLabels, llmHarmLabels: $llmHarmLabels, semanticFilterMinThreshold: $semanticFilterMinThreshold, semanticFilterNames: $semanticFilterNames, severity: $severity, threshold: $threshold, timeWindow: $timeWindow)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $TextRuleParametersCopyWith<$Res>  {
-  factory $TextRuleParametersCopyWith(TextRuleParameters value, $Res Function(TextRuleParameters) _then) = _$TextRuleParametersCopyWithImpl;
-@useResult
-$Res call({
- List<String>? blocklistMatch, bool? containsUrl, List<String>? harmLabels, Map<String, String>? llmHarmLabels, double? semanticFilterMinThreshold, List<String>? semanticFilterNames, String? severity, int? threshold, String? timeWindow
-});
-
-
-
-
+abstract mixin class $TextRuleParametersCopyWith<$Res> {
+  factory $TextRuleParametersCopyWith(
+    TextRuleParameters value,
+    $Res Function(TextRuleParameters) _then,
+  ) = _$TextRuleParametersCopyWithImpl;
+  @useResult
+  $Res call({
+    List<String>? blocklistMatch,
+    bool? containsUrl,
+    List<String>? harmLabels,
+    Map<String, String>? llmHarmLabels,
+    double? semanticFilterMinThreshold,
+    List<String>? semanticFilterNames,
+    String? severity,
+    int? threshold,
+    String? timeWindow,
+  });
 }
+
 /// @nodoc
 class _$TextRuleParametersCopyWithImpl<$Res>
     implements $TextRuleParametersCopyWith<$Res> {
@@ -60,148 +118,60 @@ class _$TextRuleParametersCopyWithImpl<$Res>
   final TextRuleParameters _self;
   final $Res Function(TextRuleParameters) _then;
 
-/// Create a copy of TextRuleParameters
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? blocklistMatch = freezed,Object? containsUrl = freezed,Object? harmLabels = freezed,Object? llmHarmLabels = freezed,Object? semanticFilterMinThreshold = freezed,Object? semanticFilterNames = freezed,Object? severity = freezed,Object? threshold = freezed,Object? timeWindow = freezed,}) {
-  return _then(TextRuleParameters(
-blocklistMatch: freezed == blocklistMatch ? _self.blocklistMatch : blocklistMatch // ignore: cast_nullable_to_non_nullable
-as List<String>?,containsUrl: freezed == containsUrl ? _self.containsUrl : containsUrl // ignore: cast_nullable_to_non_nullable
-as bool?,harmLabels: freezed == harmLabels ? _self.harmLabels : harmLabels // ignore: cast_nullable_to_non_nullable
-as List<String>?,llmHarmLabels: freezed == llmHarmLabels ? _self.llmHarmLabels : llmHarmLabels // ignore: cast_nullable_to_non_nullable
-as Map<String, String>?,semanticFilterMinThreshold: freezed == semanticFilterMinThreshold ? _self.semanticFilterMinThreshold : semanticFilterMinThreshold // ignore: cast_nullable_to_non_nullable
-as double?,semanticFilterNames: freezed == semanticFilterNames ? _self.semanticFilterNames : semanticFilterNames // ignore: cast_nullable_to_non_nullable
-as List<String>?,severity: freezed == severity ? _self.severity : severity // ignore: cast_nullable_to_non_nullable
-as String?,threshold: freezed == threshold ? _self.threshold : threshold // ignore: cast_nullable_to_non_nullable
-as int?,timeWindow: freezed == timeWindow ? _self.timeWindow : timeWindow // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of TextRuleParameters
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? blocklistMatch = freezed,
+    Object? containsUrl = freezed,
+    Object? harmLabels = freezed,
+    Object? llmHarmLabels = freezed,
+    Object? semanticFilterMinThreshold = freezed,
+    Object? semanticFilterNames = freezed,
+    Object? severity = freezed,
+    Object? threshold = freezed,
+    Object? timeWindow = freezed,
+  }) {
+    return _then(
+      TextRuleParameters(
+        blocklistMatch: freezed == blocklistMatch
+            ? _self.blocklistMatch
+            : blocklistMatch // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        containsUrl: freezed == containsUrl
+            ? _self.containsUrl
+            : containsUrl // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        harmLabels: freezed == harmLabels
+            ? _self.harmLabels
+            : harmLabels // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        llmHarmLabels: freezed == llmHarmLabels
+            ? _self.llmHarmLabels
+            : llmHarmLabels // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
+        semanticFilterMinThreshold: freezed == semanticFilterMinThreshold
+            ? _self.semanticFilterMinThreshold
+            : semanticFilterMinThreshold // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        semanticFilterNames: freezed == semanticFilterNames
+            ? _self.semanticFilterNames
+            : semanticFilterNames // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        severity: freezed == severity
+            ? _self.severity
+            : severity // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        threshold: freezed == threshold
+            ? _self.threshold
+            : threshold // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        timeWindow: freezed == timeWindow
+            ? _self.timeWindow
+            : timeWindow // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [TextRuleParameters].
-extension TextRuleParametersPatterns on TextRuleParameters {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

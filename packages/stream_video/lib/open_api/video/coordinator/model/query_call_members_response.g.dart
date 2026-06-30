@@ -23,7 +23,7 @@ Map<String, dynamic> _$QueryCallMembersResponseToJson(
   QueryCallMembersResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'members': instance.members,
+  'members': instance.members.map((e) => e.toJson()).toList(),
   'next': instance.next,
   'prev': instance.prev,
 };

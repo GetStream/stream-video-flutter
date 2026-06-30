@@ -26,9 +26,9 @@ Map<String, dynamic> _$CallStatsMapPublisherToJson(
   CallStatsMapPublisher instance,
 ) => <String, dynamic>{
   'is_live': instance.isLive,
-  'location': instance.location,
+  'location': instance.location?.toJson(),
   'name': instance.name,
-  'published_tracks': instance.publishedTracks,
+  'published_tracks': instance.publishedTracks.toJson(),
   'publisher_type': instance.publisherType,
   'user_id': instance.userId,
   'user_session_id': instance.userSessionId,

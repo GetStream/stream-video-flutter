@@ -66,7 +66,7 @@ Map<String, dynamic> _$QueryCallStatsMapResponseToJson(
     const EpochDateTimeConverter().toJson,
   ),
   'call_type': instance.callType,
-  'counts': instance.counts,
+  'counts': instance.counts.toJson(),
   'data_source': instance.dataSource,
   'duration': instance.duration,
   'end_time': _$JsonConverterToJson<Object, DateTime>(
@@ -77,13 +77,13 @@ Map<String, dynamic> _$QueryCallStatsMapResponseToJson(
     instance.generatedAt,
     const EpochDateTimeConverter().toJson,
   ),
-  'publishers': instance.publishers,
-  'sfus': instance.sfus,
+  'publishers': instance.publishers?.toJson(),
+  'sfus': instance.sfus?.toJson(),
   'start_time': _$JsonConverterToJson<Object, DateTime>(
     instance.startTime,
     const EpochDateTimeConverter().toJson,
   ),
-  'subscribers': instance.subscribers,
+  'subscribers': instance.subscribers?.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

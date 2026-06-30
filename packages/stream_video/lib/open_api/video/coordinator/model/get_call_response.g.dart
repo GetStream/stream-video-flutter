@@ -33,10 +33,10 @@ GetCallResponse _$GetCallResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GetCallResponseToJson(GetCallResponse instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'duration': instance.duration,
-      'members': instance.members,
-      'membership': instance.membership,
+      'members': instance.members.map((e) => e.toJson()).toList(),
+      'membership': instance.membership?.toJson(),
       'own_capabilities': instance.ownCapabilities
           .map((e) => _$OwnCapabilityEnumMap[e]!)
           .toList(),

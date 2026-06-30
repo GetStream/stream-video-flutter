@@ -73,7 +73,7 @@ FeedsV3CommentResponse _$FeedsV3CommentResponseFromJson(
 Map<String, dynamic> _$FeedsV3CommentResponseToJson(
   FeedsV3CommentResponse instance,
 ) => <String, dynamic>{
-  'attachments': instance.attachments,
+  'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
   'bookmark_count': instance.bookmarkCount,
   'confidence_score': instance.confidenceScore,
   'controversy_score': instance.controversyScore,
@@ -89,22 +89,24 @@ Map<String, dynamic> _$FeedsV3CommentResponseToJson(
     const EpochDateTimeConverter().toJson,
   ),
   'id': instance.id,
-  'latest_reactions': instance.latestReactions,
-  'mentioned_users': instance.mentionedUsers,
-  'moderation': instance.moderation,
+  'latest_reactions': instance.latestReactions?.map((e) => e.toJson()).toList(),
+  'mentioned_users': instance.mentionedUsers.map((e) => e.toJson()).toList(),
+  'moderation': instance.moderation?.toJson(),
   'object_id': instance.objectId,
   'object_type': instance.objectType,
-  'own_reactions': instance.ownReactions,
+  'own_reactions': instance.ownReactions.map((e) => e.toJson()).toList(),
   'parent_id': instance.parentId,
   'reaction_count': instance.reactionCount,
-  'reaction_groups': instance.reactionGroups,
+  'reaction_groups': instance.reactionGroups?.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
   'reply_count': instance.replyCount,
   'score': instance.score,
   'status': instance.status,
   'text': instance.text,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
   'upvote_count': instance.upvoteCount,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

@@ -90,25 +90,31 @@ ConfigResponse _$ConfigResponseFromJson(
 
 Map<String, dynamic> _$ConfigResponseToJson(ConfigResponse instance) =>
     <String, dynamic>{
-      'ai_image_config': instance.aiImageConfig,
-      'ai_image_label_definitions': instance.aiImageLabelDefinitions,
+      'ai_image_config': instance.aiImageConfig?.toJson(),
+      'ai_image_label_definitions': instance.aiImageLabelDefinitions
+          ?.map((e) => e.toJson())
+          .toList(),
       'ai_image_subclassifications': instance.aiImageSubclassifications,
-      'ai_text_config': instance.aiTextConfig,
-      'ai_video_config': instance.aiVideoConfig,
+      'ai_text_config': instance.aiTextConfig?.toJson(),
+      'ai_video_config': instance.aiVideoConfig?.toJson(),
       'async': instance.async,
-      'automod_platform_circumvention_config':
-          instance.automodPlatformCircumventionConfig,
-      'automod_semantic_filters_config': instance.automodSemanticFiltersConfig,
-      'automod_toxicity_config': instance.automodToxicityConfig,
-      'available_bodyguard_profiles': instance.availableBodyguardProfiles,
-      'block_list_config': instance.blockListConfig,
+      'automod_platform_circumvention_config': instance
+          .automodPlatformCircumventionConfig
+          ?.toJson(),
+      'automod_semantic_filters_config': instance.automodSemanticFiltersConfig
+          ?.toJson(),
+      'automod_toxicity_config': instance.automodToxicityConfig?.toJson(),
+      'available_bodyguard_profiles': instance.availableBodyguardProfiles
+          ?.map((e) => e.toJson())
+          .toList(),
+      'block_list_config': instance.blockListConfig?.toJson(),
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'flood_config': instance.floodConfig,
+      'flood_config': instance.floodConfig?.toJson(),
       'key': instance.key,
-      'llm_config': instance.llmConfig,
+      'llm_config': instance.llmConfig?.toJson(),
       'supported_video_call_harm_types': instance.supportedVideoCallHarmTypes,
       'team': instance.team,
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-      'velocity_filter_config': instance.velocityFilterConfig,
-      'video_call_rule_config': instance.videoCallRuleConfig,
+      'velocity_filter_config': instance.velocityFilterConfig?.toJson(),
+      'video_call_rule_config': instance.videoCallRuleConfig?.toJson(),
     };

@@ -9,49 +9,53 @@ part of 'update_user_group_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UpdateUserGroupResponse {
+  String get duration;
+  UserGroupResponse? get userGroup;
 
- String get duration; UserGroupResponse? get userGroup;
-/// Create a copy of UpdateUserGroupResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpdateUserGroupResponseCopyWith<UpdateUserGroupResponse> get copyWith => _$UpdateUserGroupResponseCopyWithImpl<UpdateUserGroupResponse>(this as UpdateUserGroupResponse, _$identity);
+  /// Create a copy of UpdateUserGroupResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdateUserGroupResponseCopyWith<UpdateUserGroupResponse> get copyWith =>
+      _$UpdateUserGroupResponseCopyWithImpl<UpdateUserGroupResponse>(
+        this as UpdateUserGroupResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpdateUserGroupResponse &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
+            (identical(other.userGroup, userGroup) ||
+                other.userGroup == userGroup));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, duration, userGroup);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateUserGroupResponse&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.userGroup, userGroup) || other.userGroup == userGroup));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,duration,userGroup);
-
-@override
-String toString() {
-  return 'UpdateUserGroupResponse(duration: $duration, userGroup: $userGroup)';
-}
-
-
+  @override
+  String toString() {
+    return 'UpdateUserGroupResponse(duration: $duration, userGroup: $userGroup)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UpdateUserGroupResponseCopyWith<$Res>  {
-  factory $UpdateUserGroupResponseCopyWith(UpdateUserGroupResponse value, $Res Function(UpdateUserGroupResponse) _then) = _$UpdateUserGroupResponseCopyWithImpl;
-@useResult
-$Res call({
- String duration, UserGroupResponse? userGroup
-});
-
-
-
-
+abstract mixin class $UpdateUserGroupResponseCopyWith<$Res> {
+  factory $UpdateUserGroupResponseCopyWith(
+    UpdateUserGroupResponse value,
+    $Res Function(UpdateUserGroupResponse) _then,
+  ) = _$UpdateUserGroupResponseCopyWithImpl;
+  @useResult
+  $Res call({String duration, UserGroupResponse? userGroup});
 }
+
 /// @nodoc
 class _$UpdateUserGroupResponseCopyWithImpl<$Res>
     implements $UpdateUserGroupResponseCopyWith<$Res> {
@@ -60,141 +64,22 @@ class _$UpdateUserGroupResponseCopyWithImpl<$Res>
   final UpdateUserGroupResponse _self;
   final $Res Function(UpdateUserGroupResponse) _then;
 
-/// Create a copy of UpdateUserGroupResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? duration = null,Object? userGroup = freezed,}) {
-  return _then(UpdateUserGroupResponse(
-duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
-as String,userGroup: freezed == userGroup ? _self.userGroup : userGroup // ignore: cast_nullable_to_non_nullable
-as UserGroupResponse?,
-  ));
+  /// Create a copy of UpdateUserGroupResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? duration = null, Object? userGroup = freezed}) {
+    return _then(
+      UpdateUserGroupResponse(
+        duration: null == duration
+            ? _self.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as String,
+        userGroup: freezed == userGroup
+            ? _self.userGroup
+            : userGroup // ignore: cast_nullable_to_non_nullable
+                  as UserGroupResponse?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UpdateUserGroupResponse].
-extension UpdateUserGroupResponsePatterns on UpdateUserGroupResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

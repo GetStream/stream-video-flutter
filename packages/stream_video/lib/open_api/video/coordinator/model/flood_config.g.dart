@@ -19,6 +19,6 @@ FloodConfig _$FloodConfigFromJson(Map<String, dynamic> json) => FloodConfig(
 
 Map<String, dynamic> _$FloodConfigToJson(FloodConfig instance) =>
     <String, dynamic>{
-      'identical_': instance.identical_,
-      'similar': instance.similar,
+      'identical_': instance.identical_?.toJson(),
+      'similar': instance.similar?.toJson(),
     };

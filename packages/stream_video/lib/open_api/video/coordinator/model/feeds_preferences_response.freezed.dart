@@ -9,49 +9,89 @@ part of 'feeds_preferences_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$FeedsPreferencesResponse {
+  String? get comment;
+  String? get commentMention;
+  String? get commentReaction;
+  String? get commentReply;
+  Map<String, String>? get customActivityTypes;
+  String? get follow;
+  String? get mention;
+  String? get reaction;
 
- String? get comment; String? get commentMention; String? get commentReaction; String? get commentReply; Map<String, String>? get customActivityTypes; String? get follow; String? get mention; String? get reaction;
-/// Create a copy of FeedsPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$FeedsPreferencesResponseCopyWith<FeedsPreferencesResponse> get copyWith => _$FeedsPreferencesResponseCopyWithImpl<FeedsPreferencesResponse>(this as FeedsPreferencesResponse, _$identity);
+  /// Create a copy of FeedsPreferencesResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $FeedsPreferencesResponseCopyWith<FeedsPreferencesResponse> get copyWith =>
+      _$FeedsPreferencesResponseCopyWithImpl<FeedsPreferencesResponse>(
+        this as FeedsPreferencesResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is FeedsPreferencesResponse &&
+            (identical(other.comment, comment) || other.comment == comment) &&
+            (identical(other.commentMention, commentMention) ||
+                other.commentMention == commentMention) &&
+            (identical(other.commentReaction, commentReaction) ||
+                other.commentReaction == commentReaction) &&
+            (identical(other.commentReply, commentReply) ||
+                other.commentReply == commentReply) &&
+            const DeepCollectionEquality().equals(
+              other.customActivityTypes,
+              customActivityTypes,
+            ) &&
+            (identical(other.follow, follow) || other.follow == follow) &&
+            (identical(other.mention, mention) || other.mention == mention) &&
+            (identical(other.reaction, reaction) ||
+                other.reaction == reaction));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    comment,
+    commentMention,
+    commentReaction,
+    commentReply,
+    const DeepCollectionEquality().hash(customActivityTypes),
+    follow,
+    mention,
+    reaction,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FeedsPreferencesResponse&&(identical(other.comment, comment) || other.comment == comment)&&(identical(other.commentMention, commentMention) || other.commentMention == commentMention)&&(identical(other.commentReaction, commentReaction) || other.commentReaction == commentReaction)&&(identical(other.commentReply, commentReply) || other.commentReply == commentReply)&&const DeepCollectionEquality().equals(other.customActivityTypes, customActivityTypes)&&(identical(other.follow, follow) || other.follow == follow)&&(identical(other.mention, mention) || other.mention == mention)&&(identical(other.reaction, reaction) || other.reaction == reaction));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,comment,commentMention,commentReaction,commentReply,const DeepCollectionEquality().hash(customActivityTypes),follow,mention,reaction);
-
-@override
-String toString() {
-  return 'FeedsPreferencesResponse(comment: $comment, commentMention: $commentMention, commentReaction: $commentReaction, commentReply: $commentReply, customActivityTypes: $customActivityTypes, follow: $follow, mention: $mention, reaction: $reaction)';
-}
-
-
+  @override
+  String toString() {
+    return 'FeedsPreferencesResponse(comment: $comment, commentMention: $commentMention, commentReaction: $commentReaction, commentReply: $commentReply, customActivityTypes: $customActivityTypes, follow: $follow, mention: $mention, reaction: $reaction)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $FeedsPreferencesResponseCopyWith<$Res>  {
-  factory $FeedsPreferencesResponseCopyWith(FeedsPreferencesResponse value, $Res Function(FeedsPreferencesResponse) _then) = _$FeedsPreferencesResponseCopyWithImpl;
-@useResult
-$Res call({
- String? comment, String? commentMention, String? commentReaction, String? commentReply, Map<String, String>? customActivityTypes, String? follow, String? mention, String? reaction
-});
-
-
-
-
+abstract mixin class $FeedsPreferencesResponseCopyWith<$Res> {
+  factory $FeedsPreferencesResponseCopyWith(
+    FeedsPreferencesResponse value,
+    $Res Function(FeedsPreferencesResponse) _then,
+  ) = _$FeedsPreferencesResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    String? comment,
+    String? commentMention,
+    String? commentReaction,
+    String? commentReply,
+    Map<String, String>? customActivityTypes,
+    String? follow,
+    String? mention,
+    String? reaction,
+  });
 }
+
 /// @nodoc
 class _$FeedsPreferencesResponseCopyWithImpl<$Res>
     implements $FeedsPreferencesResponseCopyWith<$Res> {
@@ -60,147 +100,55 @@ class _$FeedsPreferencesResponseCopyWithImpl<$Res>
   final FeedsPreferencesResponse _self;
   final $Res Function(FeedsPreferencesResponse) _then;
 
-/// Create a copy of FeedsPreferencesResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? comment = freezed,Object? commentMention = freezed,Object? commentReaction = freezed,Object? commentReply = freezed,Object? customActivityTypes = freezed,Object? follow = freezed,Object? mention = freezed,Object? reaction = freezed,}) {
-  return _then(FeedsPreferencesResponse(
-comment: freezed == comment ? _self.comment : comment // ignore: cast_nullable_to_non_nullable
-as String?,commentMention: freezed == commentMention ? _self.commentMention : commentMention // ignore: cast_nullable_to_non_nullable
-as String?,commentReaction: freezed == commentReaction ? _self.commentReaction : commentReaction // ignore: cast_nullable_to_non_nullable
-as String?,commentReply: freezed == commentReply ? _self.commentReply : commentReply // ignore: cast_nullable_to_non_nullable
-as String?,customActivityTypes: freezed == customActivityTypes ? _self.customActivityTypes : customActivityTypes // ignore: cast_nullable_to_non_nullable
-as Map<String, String>?,follow: freezed == follow ? _self.follow : follow // ignore: cast_nullable_to_non_nullable
-as String?,mention: freezed == mention ? _self.mention : mention // ignore: cast_nullable_to_non_nullable
-as String?,reaction: freezed == reaction ? _self.reaction : reaction // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of FeedsPreferencesResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? comment = freezed,
+    Object? commentMention = freezed,
+    Object? commentReaction = freezed,
+    Object? commentReply = freezed,
+    Object? customActivityTypes = freezed,
+    Object? follow = freezed,
+    Object? mention = freezed,
+    Object? reaction = freezed,
+  }) {
+    return _then(
+      FeedsPreferencesResponse(
+        comment: freezed == comment
+            ? _self.comment
+            : comment // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        commentMention: freezed == commentMention
+            ? _self.commentMention
+            : commentMention // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        commentReaction: freezed == commentReaction
+            ? _self.commentReaction
+            : commentReaction // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        commentReply: freezed == commentReply
+            ? _self.commentReply
+            : commentReply // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        customActivityTypes: freezed == customActivityTypes
+            ? _self.customActivityTypes
+            : customActivityTypes // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
+        follow: freezed == follow
+            ? _self.follow
+            : follow // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        mention: freezed == mention
+            ? _self.mention
+            : mention // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        reaction: freezed == reaction
+            ? _self.reaction
+            : reaction // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [FeedsPreferencesResponse].
-extension FeedsPreferencesResponsePatterns on FeedsPreferencesResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

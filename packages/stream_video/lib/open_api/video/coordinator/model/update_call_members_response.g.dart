@@ -21,5 +21,5 @@ Map<String, dynamic> _$UpdateCallMembersResponseToJson(
   UpdateCallMembersResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'members': instance.members,
+  'members': instance.members.map((e) => e.toJson()).toList(),
 };

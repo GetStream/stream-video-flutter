@@ -22,7 +22,7 @@ QueryModerationConfigsResponse _$QueryModerationConfigsResponseFromJson(
 Map<String, dynamic> _$QueryModerationConfigsResponseToJson(
   QueryModerationConfigsResponse instance,
 ) => <String, dynamic>{
-  'configs': instance.configs,
+  'configs': instance.configs.map((e) => e.toJson()).toList(),
   'duration': instance.duration,
   'next': instance.next,
   'prev': instance.prev,

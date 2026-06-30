@@ -34,6 +34,6 @@ Map<String, dynamic> _$QueryReviewQueueRequestToJson(
   'lock_items': instance.lockItems,
   'next': instance.next,
   'prev': instance.prev,
-  'sort': instance.sort,
+  'sort': instance.sort?.map((e) => e.toJson()).toList(),
   'stats_only': instance.statsOnly,
 };

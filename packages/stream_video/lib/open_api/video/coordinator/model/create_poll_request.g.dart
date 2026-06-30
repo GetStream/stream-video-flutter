@@ -38,7 +38,7 @@ Map<String, dynamic> _$CreatePollRequestToJson(CreatePollRequest instance) =>
       'is_closed': instance.isClosed,
       'max_votes_allowed': instance.maxVotesAllowed,
       'name': instance.name,
-      'options': instance.options,
+      'options': instance.options?.map((e) => e.toJson()).toList(),
       'voting_visibility':
           _$CreatePollRequestVotingVisibilityEnumMap[instance.votingVisibility],
     };

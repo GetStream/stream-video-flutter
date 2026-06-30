@@ -26,5 +26,5 @@ Map<String, dynamic> _$AutomodSemanticFiltersConfigToJson(
 ) => <String, dynamic>{
   'async': instance.async,
   'enabled': instance.enabled,
-  'rules': instance.rules,
+  'rules': instance.rules.map((e) => e.toJson()).toList(),
 };

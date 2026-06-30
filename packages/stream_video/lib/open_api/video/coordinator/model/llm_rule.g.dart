@@ -27,7 +27,7 @@ Map<String, dynamic> _$LLMRuleToJson(LLMRule instance) => <String, dynamic>{
   'action': _$LLMRuleActionEnumMap[instance.action]!,
   'description': instance.description,
   'label': instance.label,
-  'severity_rules': instance.severityRules,
+  'severity_rules': instance.severityRules.map((e) => e.toJson()).toList(),
 };
 
 const _$LLMRuleActionEnumMap = {

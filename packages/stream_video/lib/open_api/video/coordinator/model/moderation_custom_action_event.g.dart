@@ -35,12 +35,12 @@ Map<String, dynamic> _$ModerationCustomActionEventToJson(
   'action_options': instance.actionOptions,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
-  'message': instance.message,
+  'message': instance.message?.toJson(),
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,
     const EpochDateTimeConverter().toJson,
   ),
-  'review_queue_item': instance.reviewQueueItem,
+  'review_queue_item': instance.reviewQueueItem.toJson(),
   'type': instance.type,
 };
 

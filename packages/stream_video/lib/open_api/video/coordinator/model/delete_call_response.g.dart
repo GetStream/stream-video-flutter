@@ -15,7 +15,7 @@ DeleteCallResponse _$DeleteCallResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DeleteCallResponseToJson(DeleteCallResponse instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'duration': instance.duration,
       'task_id': instance.taskId,
     };

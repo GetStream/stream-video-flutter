@@ -19,5 +19,5 @@ BulkAppealResult _$BulkAppealResultFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$BulkAppealResultToJson(BulkAppealResult instance) =>
     <String, dynamic>{
       'appeal_id': instance.appealId,
-      'appeal_item': instance.appealItem,
+      'appeal_item': instance.appealItem?.toJson(),
     };

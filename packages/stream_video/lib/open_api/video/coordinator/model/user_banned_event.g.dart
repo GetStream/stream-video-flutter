@@ -51,7 +51,7 @@ Map<String, dynamic> _$UserBannedEventToJson(UserBannedEvent instance) =>
       'channel_type': instance.channelType,
       'cid': instance.cid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'created_by': instance.createdBy,
+      'created_by': instance.createdBy?.toJson(),
       'custom': instance.custom,
       'expiration': _$JsonConverterToJson<Object, DateTime>(
         instance.expiration,
@@ -67,7 +67,7 @@ Map<String, dynamic> _$UserBannedEventToJson(UserBannedEvent instance) =>
       'team': instance.team,
       'total_bans': instance.totalBans,
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

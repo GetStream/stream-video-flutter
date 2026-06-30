@@ -29,6 +29,6 @@ Map<String, dynamic> _$AITextConfigToJson(AITextConfig instance) =>
       'async': instance.async,
       'enabled': instance.enabled,
       'profile': instance.profile,
-      'rules': instance.rules,
-      'severity_rules': instance.severityRules,
+      'rules': instance.rules.map((e) => e.toJson()).toList(),
+      'severity_rules': instance.severityRules.map((e) => e.toJson()).toList(),
     };

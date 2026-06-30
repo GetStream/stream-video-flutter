@@ -22,5 +22,5 @@ Map<String, dynamic> _$ImageUploadResponseToJson(
   'duration': instance.duration,
   'file': instance.file,
   'thumb_url': instance.thumbUrl,
-  'upload_sizes': instance.uploadSizes,
+  'upload_sizes': instance.uploadSizes?.map((e) => e.toJson()).toList(),
 };

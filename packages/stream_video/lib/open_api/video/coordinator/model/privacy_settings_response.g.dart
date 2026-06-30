@@ -29,7 +29,7 @@ PrivacySettingsResponse _$PrivacySettingsResponseFromJson(
 Map<String, dynamic> _$PrivacySettingsResponseToJson(
   PrivacySettingsResponse instance,
 ) => <String, dynamic>{
-  'delivery_receipts': instance.deliveryReceipts,
-  'read_receipts': instance.readReceipts,
-  'typing_indicators': instance.typingIndicators,
+  'delivery_receipts': instance.deliveryReceipts?.toJson(),
+  'read_receipts': instance.readReceipts?.toJson(),
+  'typing_indicators': instance.typingIndicators?.toJson(),
 };

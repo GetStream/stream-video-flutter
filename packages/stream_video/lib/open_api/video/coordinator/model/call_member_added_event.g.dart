@@ -25,9 +25,9 @@ CallMemberAddedEvent _$CallMemberAddedEventFromJson(
 Map<String, dynamic> _$CallMemberAddedEventToJson(
   CallMemberAddedEvent instance,
 ) => <String, dynamic>{
-  'call': instance.call,
+  'call': instance.call.toJson(),
   'call_cid': instance.callCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-  'members': instance.members,
+  'members': instance.members.map((e) => e.toJson()).toList(),
   'type': instance.type,
 };

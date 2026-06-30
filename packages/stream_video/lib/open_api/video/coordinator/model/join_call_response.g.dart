@@ -40,16 +40,16 @@ JoinCallResponse _$JoinCallResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$JoinCallResponseToJson(JoinCallResponse instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'created': instance.created,
-      'credentials': instance.credentials,
+      'credentials': instance.credentials.toJson(),
       'duration': instance.duration,
-      'members': instance.members,
-      'membership': instance.membership,
+      'members': instance.members.map((e) => e.toJson()).toList(),
+      'membership': instance.membership?.toJson(),
       'own_capabilities': instance.ownCapabilities
           .map((e) => _$OwnCapabilityEnumMap[e]!)
           .toList(),
-      'stats_options': instance.statsOptions,
+      'stats_options': instance.statsOptions.toJson(),
     };
 
 const _$OwnCapabilityEnumMap = {

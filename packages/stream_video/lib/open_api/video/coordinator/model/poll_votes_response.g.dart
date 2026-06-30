@@ -25,5 +25,5 @@ Map<String, dynamic> _$PollVotesResponseToJson(PollVotesResponse instance) =>
       'duration': instance.duration,
       'next': instance.next,
       'prev': instance.prev,
-      'votes': instance.votes,
+      'votes': instance.votes.map((e) => e.toJson()).toList(),
     };

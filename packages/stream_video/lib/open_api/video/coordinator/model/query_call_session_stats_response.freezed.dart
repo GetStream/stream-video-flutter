@@ -9,49 +9,67 @@ part of 'query_call_session_stats_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$QueryCallSessionStatsResponse {
+  List<CallStatsSessionResponse> get callStats;
+  String get duration;
+  String? get next;
+  String? get prev;
 
- List<CallStatsSessionResponse> get callStats; String get duration; String? get next; String? get prev;
-/// Create a copy of QueryCallSessionStatsResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$QueryCallSessionStatsResponseCopyWith<QueryCallSessionStatsResponse> get copyWith => _$QueryCallSessionStatsResponseCopyWithImpl<QueryCallSessionStatsResponse>(this as QueryCallSessionStatsResponse, _$identity);
+  /// Create a copy of QueryCallSessionStatsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $QueryCallSessionStatsResponseCopyWith<QueryCallSessionStatsResponse>
+  get copyWith =>
+      _$QueryCallSessionStatsResponseCopyWithImpl<
+        QueryCallSessionStatsResponse
+      >(this as QueryCallSessionStatsResponse, _$identity);
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is QueryCallSessionStatsResponse &&
+            const DeepCollectionEquality().equals(other.callStats, callStats) &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
+            (identical(other.next, next) || other.next == next) &&
+            (identical(other.prev, prev) || other.prev == prev));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(callStats),
+    duration,
+    next,
+    prev,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QueryCallSessionStatsResponse&&const DeepCollectionEquality().equals(other.callStats, callStats)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.next, next) || other.next == next)&&(identical(other.prev, prev) || other.prev == prev));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(callStats),duration,next,prev);
-
-@override
-String toString() {
-  return 'QueryCallSessionStatsResponse(callStats: $callStats, duration: $duration, next: $next, prev: $prev)';
-}
-
-
+  @override
+  String toString() {
+    return 'QueryCallSessionStatsResponse(callStats: $callStats, duration: $duration, next: $next, prev: $prev)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $QueryCallSessionStatsResponseCopyWith<$Res>  {
-  factory $QueryCallSessionStatsResponseCopyWith(QueryCallSessionStatsResponse value, $Res Function(QueryCallSessionStatsResponse) _then) = _$QueryCallSessionStatsResponseCopyWithImpl;
-@useResult
-$Res call({
- List<CallStatsSessionResponse> callStats, String duration, String? next, String? prev
-});
-
-
-
-
+abstract mixin class $QueryCallSessionStatsResponseCopyWith<$Res> {
+  factory $QueryCallSessionStatsResponseCopyWith(
+    QueryCallSessionStatsResponse value,
+    $Res Function(QueryCallSessionStatsResponse) _then,
+  ) = _$QueryCallSessionStatsResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    List<CallStatsSessionResponse> callStats,
+    String duration,
+    String? next,
+    String? prev,
+  });
 }
+
 /// @nodoc
 class _$QueryCallSessionStatsResponseCopyWithImpl<$Res>
     implements $QueryCallSessionStatsResponseCopyWith<$Res> {
@@ -60,143 +78,35 @@ class _$QueryCallSessionStatsResponseCopyWithImpl<$Res>
   final QueryCallSessionStatsResponse _self;
   final $Res Function(QueryCallSessionStatsResponse) _then;
 
-/// Create a copy of QueryCallSessionStatsResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? callStats = null,Object? duration = null,Object? next = freezed,Object? prev = freezed,}) {
-  return _then(QueryCallSessionStatsResponse(
-callStats: null == callStats ? _self.callStats : callStats // ignore: cast_nullable_to_non_nullable
-as List<CallStatsSessionResponse>,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
-as String,next: freezed == next ? _self.next : next // ignore: cast_nullable_to_non_nullable
-as String?,prev: freezed == prev ? _self.prev : prev // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of QueryCallSessionStatsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? callStats = null,
+    Object? duration = null,
+    Object? next = freezed,
+    Object? prev = freezed,
+  }) {
+    return _then(
+      QueryCallSessionStatsResponse(
+        callStats: null == callStats
+            ? _self.callStats
+            : callStats // ignore: cast_nullable_to_non_nullable
+                  as List<CallStatsSessionResponse>,
+        duration: null == duration
+            ? _self.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as String,
+        next: freezed == next
+            ? _self.next
+            : next // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        prev: freezed == prev
+            ? _self.prev
+            : prev // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [QueryCallSessionStatsResponse].
-extension QueryCallSessionStatsResponsePatterns on QueryCallSessionStatsResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

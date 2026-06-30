@@ -30,14 +30,14 @@ Map<String, dynamic> _$UserReactivatedEventToJson(
   UserReactivatedEvent instance,
 ) => <String, dynamic>{
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-  'created_by': instance.createdBy,
+  'created_by': instance.createdBy?.toJson(),
   'custom': instance.custom,
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,
     const EpochDateTimeConverter().toJson,
   ),
   'type': instance.type,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

@@ -20,6 +20,6 @@ ListBlockListResponse _$ListBlockListResponseFromJson(
 Map<String, dynamic> _$ListBlockListResponseToJson(
   ListBlockListResponse instance,
 ) => <String, dynamic>{
-  'blocklists': instance.blocklists,
+  'blocklists': instance.blocklists.map((e) => e.toJson()).toList(),
   'duration': instance.duration,
 };

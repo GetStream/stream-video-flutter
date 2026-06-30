@@ -37,7 +37,7 @@ Map<String, dynamic> _$UpdatedCallPermissionsEventToJson(
       .map((e) => _$OwnCapabilityEnumMap[e]!)
       .toList(),
   'type': instance.type,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };
 
 const _$OwnCapabilityEnumMap = {

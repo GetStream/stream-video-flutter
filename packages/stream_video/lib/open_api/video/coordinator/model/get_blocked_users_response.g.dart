@@ -20,6 +20,6 @@ GetBlockedUsersResponse _$GetBlockedUsersResponseFromJson(
 Map<String, dynamic> _$GetBlockedUsersResponseToJson(
   GetBlockedUsersResponse instance,
 ) => <String, dynamic>{
-  'blocks': instance.blocks,
+  'blocks': instance.blocks.map((e) => e.toJson()).toList(),
   'duration': instance.duration,
 };

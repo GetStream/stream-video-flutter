@@ -50,12 +50,13 @@ QueryAggregateCallStatsResponse _$QueryAggregateCallStatsResponseFromJson(
 Map<String, dynamic> _$QueryAggregateCallStatsResponseToJson(
   QueryAggregateCallStatsResponse instance,
 ) => <String, dynamic>{
-  'call_duration_report': instance.callDurationReport,
-  'call_participant_count_report': instance.callParticipantCountReport,
-  'calls_per_day_report': instance.callsPerDayReport,
+  'call_duration_report': instance.callDurationReport?.toJson(),
+  'call_participant_count_report': instance.callParticipantCountReport
+      ?.toJson(),
+  'calls_per_day_report': instance.callsPerDayReport?.toJson(),
   'duration': instance.duration,
-  'network_metrics_report': instance.networkMetricsReport,
-  'quality_score_report': instance.qualityScoreReport,
-  'sdk_usage_report': instance.sdkUsageReport,
-  'user_feedback_report': instance.userFeedbackReport,
+  'network_metrics_report': instance.networkMetricsReport?.toJson(),
+  'quality_score_report': instance.qualityScoreReport?.toJson(),
+  'sdk_usage_report': instance.sdkUsageReport?.toJson(),
+  'user_feedback_report': instance.userFeedbackReport?.toJson(),
 };

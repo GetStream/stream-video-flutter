@@ -9,49 +9,75 @@ part of 'updated_call_permissions_event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UpdatedCallPermissionsEvent {
+  String get callCid;
+  DateTime get createdAt;
+  List<OwnCapability> get ownCapabilities;
+  String get type;
+  UserResponse get user;
 
- String get callCid; DateTime get createdAt; List<OwnCapability> get ownCapabilities; String get type; UserResponse get user;
-/// Create a copy of UpdatedCallPermissionsEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpdatedCallPermissionsEventCopyWith<UpdatedCallPermissionsEvent> get copyWith => _$UpdatedCallPermissionsEventCopyWithImpl<UpdatedCallPermissionsEvent>(this as UpdatedCallPermissionsEvent, _$identity);
+  /// Create a copy of UpdatedCallPermissionsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdatedCallPermissionsEventCopyWith<UpdatedCallPermissionsEvent>
+  get copyWith =>
+      _$UpdatedCallPermissionsEventCopyWithImpl<UpdatedCallPermissionsEvent>(
+        this as UpdatedCallPermissionsEvent,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpdatedCallPermissionsEvent &&
+            (identical(other.callCid, callCid) || other.callCid == callCid) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(
+              other.ownCapabilities,
+              ownCapabilities,
+            ) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    callCid,
+    createdAt,
+    const DeepCollectionEquality().hash(ownCapabilities),
+    type,
+    user,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdatedCallPermissionsEvent&&(identical(other.callCid, callCid) || other.callCid == callCid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.ownCapabilities, ownCapabilities)&&(identical(other.type, type) || other.type == type)&&(identical(other.user, user) || other.user == user));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,callCid,createdAt,const DeepCollectionEquality().hash(ownCapabilities),type,user);
-
-@override
-String toString() {
-  return 'UpdatedCallPermissionsEvent(callCid: $callCid, createdAt: $createdAt, ownCapabilities: $ownCapabilities, type: $type, user: $user)';
-}
-
-
+  @override
+  String toString() {
+    return 'UpdatedCallPermissionsEvent(callCid: $callCid, createdAt: $createdAt, ownCapabilities: $ownCapabilities, type: $type, user: $user)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UpdatedCallPermissionsEventCopyWith<$Res>  {
-  factory $UpdatedCallPermissionsEventCopyWith(UpdatedCallPermissionsEvent value, $Res Function(UpdatedCallPermissionsEvent) _then) = _$UpdatedCallPermissionsEventCopyWithImpl;
-@useResult
-$Res call({
- String callCid, DateTime createdAt, List<OwnCapability> ownCapabilities, String type, UserResponse user
-});
-
-
-
-
+abstract mixin class $UpdatedCallPermissionsEventCopyWith<$Res> {
+  factory $UpdatedCallPermissionsEventCopyWith(
+    UpdatedCallPermissionsEvent value,
+    $Res Function(UpdatedCallPermissionsEvent) _then,
+  ) = _$UpdatedCallPermissionsEventCopyWithImpl;
+  @useResult
+  $Res call({
+    String callCid,
+    DateTime createdAt,
+    List<OwnCapability> ownCapabilities,
+    String type,
+    UserResponse user,
+  });
 }
+
 /// @nodoc
 class _$UpdatedCallPermissionsEventCopyWithImpl<$Res>
     implements $UpdatedCallPermissionsEventCopyWith<$Res> {
@@ -60,144 +86,40 @@ class _$UpdatedCallPermissionsEventCopyWithImpl<$Res>
   final UpdatedCallPermissionsEvent _self;
   final $Res Function(UpdatedCallPermissionsEvent) _then;
 
-/// Create a copy of UpdatedCallPermissionsEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? callCid = null,Object? createdAt = null,Object? ownCapabilities = null,Object? type = null,Object? user = null,}) {
-  return _then(UpdatedCallPermissionsEvent(
-callCid: null == callCid ? _self.callCid : callCid // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,ownCapabilities: null == ownCapabilities ? _self.ownCapabilities : ownCapabilities // ignore: cast_nullable_to_non_nullable
-as List<OwnCapability>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserResponse,
-  ));
+  /// Create a copy of UpdatedCallPermissionsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? callCid = null,
+    Object? createdAt = null,
+    Object? ownCapabilities = null,
+    Object? type = null,
+    Object? user = null,
+  }) {
+    return _then(
+      UpdatedCallPermissionsEvent(
+        callCid: null == callCid
+            ? _self.callCid
+            : callCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        ownCapabilities: null == ownCapabilities
+            ? _self.ownCapabilities
+            : ownCapabilities // ignore: cast_nullable_to_non_nullable
+                  as List<OwnCapability>,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: null == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponse,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UpdatedCallPermissionsEvent].
-extension UpdatedCallPermissionsEventPatterns on UpdatedCallPermissionsEvent {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -31,11 +31,11 @@ DraftPayloadResponse _$DraftPayloadResponseFromJson(
 Map<String, dynamic> _$DraftPayloadResponseToJson(
   DraftPayloadResponse instance,
 ) => <String, dynamic>{
-  'attachments': instance.attachments,
+  'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
   'custom': instance.custom,
   'html': instance.html,
   'id': instance.id,
-  'mentioned_users': instance.mentionedUsers,
+  'mentioned_users': instance.mentionedUsers?.map((e) => e.toJson()).toList(),
   'mml': instance.mml,
   'parent_id': instance.parentId,
   'poll_id': instance.pollId,

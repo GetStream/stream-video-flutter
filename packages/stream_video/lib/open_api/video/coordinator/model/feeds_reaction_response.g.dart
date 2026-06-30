@@ -31,5 +31,5 @@ Map<String, dynamic> _$FeedsReactionResponseToJson(
   'custom': instance.custom,
   'type': instance.type,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };

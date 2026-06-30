@@ -9,49 +9,85 @@ part of 'sip_inbound_credentials.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$SipInboundCredentials {
+  String get apiKey;
+  Map<String, Object?> get callCustomData;
+  String get callId;
+  String get callType;
+  String get token;
+  Map<String, Object?> get userCustomData;
+  String get userId;
 
- String get apiKey; Map<String, Object?> get callCustomData; String get callId; String get callType; String get token; Map<String, Object?> get userCustomData; String get userId;
-/// Create a copy of SipInboundCredentials
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SipInboundCredentialsCopyWith<SipInboundCredentials> get copyWith => _$SipInboundCredentialsCopyWithImpl<SipInboundCredentials>(this as SipInboundCredentials, _$identity);
+  /// Create a copy of SipInboundCredentials
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SipInboundCredentialsCopyWith<SipInboundCredentials> get copyWith =>
+      _$SipInboundCredentialsCopyWithImpl<SipInboundCredentials>(
+        this as SipInboundCredentials,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SipInboundCredentials &&
+            (identical(other.apiKey, apiKey) || other.apiKey == apiKey) &&
+            const DeepCollectionEquality().equals(
+              other.callCustomData,
+              callCustomData,
+            ) &&
+            (identical(other.callId, callId) || other.callId == callId) &&
+            (identical(other.callType, callType) ||
+                other.callType == callType) &&
+            (identical(other.token, token) || other.token == token) &&
+            const DeepCollectionEquality().equals(
+              other.userCustomData,
+              userCustomData,
+            ) &&
+            (identical(other.userId, userId) || other.userId == userId));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    apiKey,
+    const DeepCollectionEquality().hash(callCustomData),
+    callId,
+    callType,
+    token,
+    const DeepCollectionEquality().hash(userCustomData),
+    userId,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SipInboundCredentials&&(identical(other.apiKey, apiKey) || other.apiKey == apiKey)&&const DeepCollectionEquality().equals(other.callCustomData, callCustomData)&&(identical(other.callId, callId) || other.callId == callId)&&(identical(other.callType, callType) || other.callType == callType)&&(identical(other.token, token) || other.token == token)&&const DeepCollectionEquality().equals(other.userCustomData, userCustomData)&&(identical(other.userId, userId) || other.userId == userId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,apiKey,const DeepCollectionEquality().hash(callCustomData),callId,callType,token,const DeepCollectionEquality().hash(userCustomData),userId);
-
-@override
-String toString() {
-  return 'SipInboundCredentials(apiKey: $apiKey, callCustomData: $callCustomData, callId: $callId, callType: $callType, token: $token, userCustomData: $userCustomData, userId: $userId)';
-}
-
-
+  @override
+  String toString() {
+    return 'SipInboundCredentials(apiKey: $apiKey, callCustomData: $callCustomData, callId: $callId, callType: $callType, token: $token, userCustomData: $userCustomData, userId: $userId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $SipInboundCredentialsCopyWith<$Res>  {
-  factory $SipInboundCredentialsCopyWith(SipInboundCredentials value, $Res Function(SipInboundCredentials) _then) = _$SipInboundCredentialsCopyWithImpl;
-@useResult
-$Res call({
- String apiKey, Map<String, Object?> callCustomData, String callId, String callType, String token, Map<String, Object?> userCustomData, String userId
-});
-
-
-
-
+abstract mixin class $SipInboundCredentialsCopyWith<$Res> {
+  factory $SipInboundCredentialsCopyWith(
+    SipInboundCredentials value,
+    $Res Function(SipInboundCredentials) _then,
+  ) = _$SipInboundCredentialsCopyWithImpl;
+  @useResult
+  $Res call({
+    String apiKey,
+    Map<String, Object?> callCustomData,
+    String callId,
+    String callType,
+    String token,
+    Map<String, Object?> userCustomData,
+    String userId,
+  });
 }
+
 /// @nodoc
 class _$SipInboundCredentialsCopyWithImpl<$Res>
     implements $SipInboundCredentialsCopyWith<$Res> {
@@ -60,146 +96,50 @@ class _$SipInboundCredentialsCopyWithImpl<$Res>
   final SipInboundCredentials _self;
   final $Res Function(SipInboundCredentials) _then;
 
-/// Create a copy of SipInboundCredentials
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? apiKey = null,Object? callCustomData = null,Object? callId = null,Object? callType = null,Object? token = null,Object? userCustomData = null,Object? userId = null,}) {
-  return _then(SipInboundCredentials(
-apiKey: null == apiKey ? _self.apiKey : apiKey // ignore: cast_nullable_to_non_nullable
-as String,callCustomData: null == callCustomData ? _self.callCustomData : callCustomData // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>,callId: null == callId ? _self.callId : callId // ignore: cast_nullable_to_non_nullable
-as String,callType: null == callType ? _self.callType : callType // ignore: cast_nullable_to_non_nullable
-as String,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as String,userCustomData: null == userCustomData ? _self.userCustomData : userCustomData // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of SipInboundCredentials
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? apiKey = null,
+    Object? callCustomData = null,
+    Object? callId = null,
+    Object? callType = null,
+    Object? token = null,
+    Object? userCustomData = null,
+    Object? userId = null,
+  }) {
+    return _then(
+      SipInboundCredentials(
+        apiKey: null == apiKey
+            ? _self.apiKey
+            : apiKey // ignore: cast_nullable_to_non_nullable
+                  as String,
+        callCustomData: null == callCustomData
+            ? _self.callCustomData
+            : callCustomData // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        callId: null == callId
+            ? _self.callId
+            : callId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        callType: null == callType
+            ? _self.callType
+            : callType // ignore: cast_nullable_to_non_nullable
+                  as String,
+        token: null == token
+            ? _self.token
+            : token // ignore: cast_nullable_to_non_nullable
+                  as String,
+        userCustomData: null == userCustomData
+            ? _self.userCustomData
+            : userCustomData // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [SipInboundCredentials].
-extension SipInboundCredentialsPatterns on SipInboundCredentials {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

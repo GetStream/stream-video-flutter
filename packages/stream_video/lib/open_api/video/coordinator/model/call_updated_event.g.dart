@@ -21,7 +21,7 @@ CallUpdatedEvent _$CallUpdatedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CallUpdatedEventToJson(CallUpdatedEvent instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'call_cid': instance.callCid,
       'capabilities_by_role': instance.capabilitiesByRole,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),

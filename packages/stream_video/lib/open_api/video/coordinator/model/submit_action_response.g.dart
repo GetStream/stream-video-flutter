@@ -24,8 +24,8 @@ SubmitActionResponse _$SubmitActionResponseFromJson(
 Map<String, dynamic> _$SubmitActionResponseToJson(
   SubmitActionResponse instance,
 ) => <String, dynamic>{
-  'appeal_item': instance.appealItem,
+  'appeal_item': instance.appealItem?.toJson(),
   'auto_restore_warning': instance.autoRestoreWarning,
   'duration': instance.duration,
-  'item': instance.item,
+  'item': instance.item?.toJson(),
 };

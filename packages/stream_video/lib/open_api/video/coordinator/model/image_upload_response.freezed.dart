@@ -9,49 +9,71 @@ part of 'image_upload_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ImageUploadResponse {
+  String get duration;
+  String? get file;
+  String? get thumbUrl;
+  List<ImageSize>? get uploadSizes;
 
- String get duration; String? get file; String? get thumbUrl; List<ImageSize>? get uploadSizes;
-/// Create a copy of ImageUploadResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ImageUploadResponseCopyWith<ImageUploadResponse> get copyWith => _$ImageUploadResponseCopyWithImpl<ImageUploadResponse>(this as ImageUploadResponse, _$identity);
+  /// Create a copy of ImageUploadResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ImageUploadResponseCopyWith<ImageUploadResponse> get copyWith =>
+      _$ImageUploadResponseCopyWithImpl<ImageUploadResponse>(
+        this as ImageUploadResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ImageUploadResponse &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
+            (identical(other.file, file) || other.file == file) &&
+            (identical(other.thumbUrl, thumbUrl) ||
+                other.thumbUrl == thumbUrl) &&
+            const DeepCollectionEquality().equals(
+              other.uploadSizes,
+              uploadSizes,
+            ));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    duration,
+    file,
+    thumbUrl,
+    const DeepCollectionEquality().hash(uploadSizes),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ImageUploadResponse&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.file, file) || other.file == file)&&(identical(other.thumbUrl, thumbUrl) || other.thumbUrl == thumbUrl)&&const DeepCollectionEquality().equals(other.uploadSizes, uploadSizes));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,duration,file,thumbUrl,const DeepCollectionEquality().hash(uploadSizes));
-
-@override
-String toString() {
-  return 'ImageUploadResponse(duration: $duration, file: $file, thumbUrl: $thumbUrl, uploadSizes: $uploadSizes)';
-}
-
-
+  @override
+  String toString() {
+    return 'ImageUploadResponse(duration: $duration, file: $file, thumbUrl: $thumbUrl, uploadSizes: $uploadSizes)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ImageUploadResponseCopyWith<$Res>  {
-  factory $ImageUploadResponseCopyWith(ImageUploadResponse value, $Res Function(ImageUploadResponse) _then) = _$ImageUploadResponseCopyWithImpl;
-@useResult
-$Res call({
- String duration, String? file, String? thumbUrl, List<ImageSize>? uploadSizes
-});
-
-
-
-
+abstract mixin class $ImageUploadResponseCopyWith<$Res> {
+  factory $ImageUploadResponseCopyWith(
+    ImageUploadResponse value,
+    $Res Function(ImageUploadResponse) _then,
+  ) = _$ImageUploadResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    String duration,
+    String? file,
+    String? thumbUrl,
+    List<ImageSize>? uploadSizes,
+  });
 }
+
 /// @nodoc
 class _$ImageUploadResponseCopyWithImpl<$Res>
     implements $ImageUploadResponseCopyWith<$Res> {
@@ -60,143 +82,35 @@ class _$ImageUploadResponseCopyWithImpl<$Res>
   final ImageUploadResponse _self;
   final $Res Function(ImageUploadResponse) _then;
 
-/// Create a copy of ImageUploadResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? duration = null,Object? file = freezed,Object? thumbUrl = freezed,Object? uploadSizes = freezed,}) {
-  return _then(ImageUploadResponse(
-duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
-as String,file: freezed == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
-as String?,thumbUrl: freezed == thumbUrl ? _self.thumbUrl : thumbUrl // ignore: cast_nullable_to_non_nullable
-as String?,uploadSizes: freezed == uploadSizes ? _self.uploadSizes : uploadSizes // ignore: cast_nullable_to_non_nullable
-as List<ImageSize>?,
-  ));
+  /// Create a copy of ImageUploadResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? duration = null,
+    Object? file = freezed,
+    Object? thumbUrl = freezed,
+    Object? uploadSizes = freezed,
+  }) {
+    return _then(
+      ImageUploadResponse(
+        duration: null == duration
+            ? _self.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as String,
+        file: freezed == file
+            ? _self.file
+            : file // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        thumbUrl: freezed == thumbUrl
+            ? _self.thumbUrl
+            : thumbUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        uploadSizes: freezed == uploadSizes
+            ? _self.uploadSizes
+            : uploadSizes // ignore: cast_nullable_to_non_nullable
+                  as List<ImageSize>?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ImageUploadResponse].
-extension ImageUploadResponsePatterns on ImageUploadResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

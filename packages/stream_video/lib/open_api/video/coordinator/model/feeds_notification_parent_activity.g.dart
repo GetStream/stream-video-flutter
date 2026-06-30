@@ -21,7 +21,7 @@ FeedsNotificationParentActivity _$FeedsNotificationParentActivityFromJson(
 Map<String, dynamic> _$FeedsNotificationParentActivityToJson(
   FeedsNotificationParentActivity instance,
 ) => <String, dynamic>{
-  'attachments': instance.attachments,
+  'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
   'id': instance.id,
   'text': instance.text,
   'type': instance.type,

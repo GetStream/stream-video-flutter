@@ -16,4 +16,4 @@ ChatActivityStatsResponse _$ChatActivityStatsResponseFromJson(
 
 Map<String, dynamic> _$ChatActivityStatsResponseToJson(
   ChatActivityStatsResponse instance,
-) => <String, dynamic>{'messages': instance.messages};
+) => <String, dynamic>{'messages': instance.messages?.toJson()};

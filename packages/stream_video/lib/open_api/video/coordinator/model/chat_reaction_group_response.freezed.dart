@@ -9,49 +9,76 @@ part of 'chat_reaction_group_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ChatReactionGroupResponse {
+  int get count;
+  DateTime get firstReactionAt;
+  DateTime get lastReactionAt;
+  List<ChatReactionGroupUserResponse> get latestReactionsBy;
+  int get sumScores;
 
- int get count; DateTime get firstReactionAt; DateTime get lastReactionAt; List<ChatReactionGroupUserResponse> get latestReactionsBy; int get sumScores;
-/// Create a copy of ChatReactionGroupResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ChatReactionGroupResponseCopyWith<ChatReactionGroupResponse> get copyWith => _$ChatReactionGroupResponseCopyWithImpl<ChatReactionGroupResponse>(this as ChatReactionGroupResponse, _$identity);
+  /// Create a copy of ChatReactionGroupResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ChatReactionGroupResponseCopyWith<ChatReactionGroupResponse> get copyWith =>
+      _$ChatReactionGroupResponseCopyWithImpl<ChatReactionGroupResponse>(
+        this as ChatReactionGroupResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ChatReactionGroupResponse &&
+            (identical(other.count, count) || other.count == count) &&
+            (identical(other.firstReactionAt, firstReactionAt) ||
+                other.firstReactionAt == firstReactionAt) &&
+            (identical(other.lastReactionAt, lastReactionAt) ||
+                other.lastReactionAt == lastReactionAt) &&
+            const DeepCollectionEquality().equals(
+              other.latestReactionsBy,
+              latestReactionsBy,
+            ) &&
+            (identical(other.sumScores, sumScores) ||
+                other.sumScores == sumScores));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    count,
+    firstReactionAt,
+    lastReactionAt,
+    const DeepCollectionEquality().hash(latestReactionsBy),
+    sumScores,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatReactionGroupResponse&&(identical(other.count, count) || other.count == count)&&(identical(other.firstReactionAt, firstReactionAt) || other.firstReactionAt == firstReactionAt)&&(identical(other.lastReactionAt, lastReactionAt) || other.lastReactionAt == lastReactionAt)&&const DeepCollectionEquality().equals(other.latestReactionsBy, latestReactionsBy)&&(identical(other.sumScores, sumScores) || other.sumScores == sumScores));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,count,firstReactionAt,lastReactionAt,const DeepCollectionEquality().hash(latestReactionsBy),sumScores);
-
-@override
-String toString() {
-  return 'ChatReactionGroupResponse(count: $count, firstReactionAt: $firstReactionAt, lastReactionAt: $lastReactionAt, latestReactionsBy: $latestReactionsBy, sumScores: $sumScores)';
-}
-
-
+  @override
+  String toString() {
+    return 'ChatReactionGroupResponse(count: $count, firstReactionAt: $firstReactionAt, lastReactionAt: $lastReactionAt, latestReactionsBy: $latestReactionsBy, sumScores: $sumScores)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ChatReactionGroupResponseCopyWith<$Res>  {
-  factory $ChatReactionGroupResponseCopyWith(ChatReactionGroupResponse value, $Res Function(ChatReactionGroupResponse) _then) = _$ChatReactionGroupResponseCopyWithImpl;
-@useResult
-$Res call({
- int count, DateTime firstReactionAt, DateTime lastReactionAt, List<ChatReactionGroupUserResponse> latestReactionsBy, int sumScores
-});
-
-
-
-
+abstract mixin class $ChatReactionGroupResponseCopyWith<$Res> {
+  factory $ChatReactionGroupResponseCopyWith(
+    ChatReactionGroupResponse value,
+    $Res Function(ChatReactionGroupResponse) _then,
+  ) = _$ChatReactionGroupResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    int count,
+    DateTime firstReactionAt,
+    DateTime lastReactionAt,
+    List<ChatReactionGroupUserResponse> latestReactionsBy,
+    int sumScores,
+  });
 }
+
 /// @nodoc
 class _$ChatReactionGroupResponseCopyWithImpl<$Res>
     implements $ChatReactionGroupResponseCopyWith<$Res> {
@@ -60,144 +87,40 @@ class _$ChatReactionGroupResponseCopyWithImpl<$Res>
   final ChatReactionGroupResponse _self;
   final $Res Function(ChatReactionGroupResponse) _then;
 
-/// Create a copy of ChatReactionGroupResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? count = null,Object? firstReactionAt = null,Object? lastReactionAt = null,Object? latestReactionsBy = null,Object? sumScores = null,}) {
-  return _then(ChatReactionGroupResponse(
-count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
-as int,firstReactionAt: null == firstReactionAt ? _self.firstReactionAt : firstReactionAt // ignore: cast_nullable_to_non_nullable
-as DateTime,lastReactionAt: null == lastReactionAt ? _self.lastReactionAt : lastReactionAt // ignore: cast_nullable_to_non_nullable
-as DateTime,latestReactionsBy: null == latestReactionsBy ? _self.latestReactionsBy : latestReactionsBy // ignore: cast_nullable_to_non_nullable
-as List<ChatReactionGroupUserResponse>,sumScores: null == sumScores ? _self.sumScores : sumScores // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
+  /// Create a copy of ChatReactionGroupResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? count = null,
+    Object? firstReactionAt = null,
+    Object? lastReactionAt = null,
+    Object? latestReactionsBy = null,
+    Object? sumScores = null,
+  }) {
+    return _then(
+      ChatReactionGroupResponse(
+        count: null == count
+            ? _self.count
+            : count // ignore: cast_nullable_to_non_nullable
+                  as int,
+        firstReactionAt: null == firstReactionAt
+            ? _self.firstReactionAt
+            : firstReactionAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        lastReactionAt: null == lastReactionAt
+            ? _self.lastReactionAt
+            : lastReactionAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        latestReactionsBy: null == latestReactionsBy
+            ? _self.latestReactionsBy
+            : latestReactionsBy // ignore: cast_nullable_to_non_nullable
+                  as List<ChatReactionGroupUserResponse>,
+        sumScores: null == sumScores
+            ? _self.sumScores
+            : sumScores // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ChatReactionGroupResponse].
-extension ChatReactionGroupResponsePatterns on ChatReactionGroupResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

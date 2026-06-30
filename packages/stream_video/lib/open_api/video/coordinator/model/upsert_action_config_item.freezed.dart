@@ -9,49 +9,85 @@ part of 'upsert_action_config_item.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UpsertActionConfigItem {
+  String get action;
+  Map<String, Object?>? get custom;
+  String? get description;
+  String get entityType;
+  String? get icon;
+  String? get id;
+  int get order;
+  String? get queueType;
 
- String get action; Map<String, Object?>? get custom; String? get description; String get entityType; String? get icon; String? get id; int get order; String? get queueType;
-/// Create a copy of UpsertActionConfigItem
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpsertActionConfigItemCopyWith<UpsertActionConfigItem> get copyWith => _$UpsertActionConfigItemCopyWithImpl<UpsertActionConfigItem>(this as UpsertActionConfigItem, _$identity);
+  /// Create a copy of UpsertActionConfigItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpsertActionConfigItemCopyWith<UpsertActionConfigItem> get copyWith =>
+      _$UpsertActionConfigItemCopyWithImpl<UpsertActionConfigItem>(
+        this as UpsertActionConfigItem,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpsertActionConfigItem &&
+            (identical(other.action, action) || other.action == action) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.entityType, entityType) ||
+                other.entityType == entityType) &&
+            (identical(other.icon, icon) || other.icon == icon) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.order, order) || other.order == order) &&
+            (identical(other.queueType, queueType) ||
+                other.queueType == queueType));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    action,
+    const DeepCollectionEquality().hash(custom),
+    description,
+    entityType,
+    icon,
+    id,
+    order,
+    queueType,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpsertActionConfigItem&&(identical(other.action, action) || other.action == action)&&const DeepCollectionEquality().equals(other.custom, custom)&&(identical(other.description, description) || other.description == description)&&(identical(other.entityType, entityType) || other.entityType == entityType)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.id, id) || other.id == id)&&(identical(other.order, order) || other.order == order)&&(identical(other.queueType, queueType) || other.queueType == queueType));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,action,const DeepCollectionEquality().hash(custom),description,entityType,icon,id,order,queueType);
-
-@override
-String toString() {
-  return 'UpsertActionConfigItem(action: $action, custom: $custom, description: $description, entityType: $entityType, icon: $icon, id: $id, order: $order, queueType: $queueType)';
-}
-
-
+  @override
+  String toString() {
+    return 'UpsertActionConfigItem(action: $action, custom: $custom, description: $description, entityType: $entityType, icon: $icon, id: $id, order: $order, queueType: $queueType)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UpsertActionConfigItemCopyWith<$Res>  {
-  factory $UpsertActionConfigItemCopyWith(UpsertActionConfigItem value, $Res Function(UpsertActionConfigItem) _then) = _$UpsertActionConfigItemCopyWithImpl;
-@useResult
-$Res call({
- String action, Map<String, Object?>? custom, String? description, String entityType, String? icon, String? id, int order, String? queueType
-});
-
-
-
-
+abstract mixin class $UpsertActionConfigItemCopyWith<$Res> {
+  factory $UpsertActionConfigItemCopyWith(
+    UpsertActionConfigItem value,
+    $Res Function(UpsertActionConfigItem) _then,
+  ) = _$UpsertActionConfigItemCopyWithImpl;
+  @useResult
+  $Res call({
+    String action,
+    Map<String, Object?>? custom,
+    String? description,
+    String entityType,
+    String? icon,
+    String? id,
+    int order,
+    String? queueType,
+  });
 }
+
 /// @nodoc
 class _$UpsertActionConfigItemCopyWithImpl<$Res>
     implements $UpsertActionConfigItemCopyWith<$Res> {
@@ -60,147 +96,55 @@ class _$UpsertActionConfigItemCopyWithImpl<$Res>
   final UpsertActionConfigItem _self;
   final $Res Function(UpsertActionConfigItem) _then;
 
-/// Create a copy of UpsertActionConfigItem
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? action = null,Object? custom = freezed,Object? description = freezed,Object? entityType = null,Object? icon = freezed,Object? id = freezed,Object? order = null,Object? queueType = freezed,}) {
-  return _then(UpsertActionConfigItem(
-action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
-as String,custom: freezed == custom ? _self.custom : custom // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,entityType: null == entityType ? _self.entityType : entityType // ignore: cast_nullable_to_non_nullable
-as String,icon: freezed == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as String?,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as int,queueType: freezed == queueType ? _self.queueType : queueType // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of UpsertActionConfigItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? action = null,
+    Object? custom = freezed,
+    Object? description = freezed,
+    Object? entityType = null,
+    Object? icon = freezed,
+    Object? id = freezed,
+    Object? order = null,
+    Object? queueType = freezed,
+  }) {
+    return _then(
+      UpsertActionConfigItem(
+        action: null == action
+            ? _self.action
+            : action // ignore: cast_nullable_to_non_nullable
+                  as String,
+        custom: freezed == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        description: freezed == description
+            ? _self.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        entityType: null == entityType
+            ? _self.entityType
+            : entityType // ignore: cast_nullable_to_non_nullable
+                  as String,
+        icon: freezed == icon
+            ? _self.icon
+            : icon // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        order: null == order
+            ? _self.order
+            : order // ignore: cast_nullable_to_non_nullable
+                  as int,
+        queueType: freezed == queueType
+            ? _self.queueType
+            : queueType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UpsertActionConfigItem].
-extension UpsertActionConfigItemPatterns on UpsertActionConfigItem {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

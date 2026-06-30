@@ -9,49 +9,65 @@ part of 'hls_settings_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$HLSSettingsRequest {
+  bool? get autoOn;
+  bool? get enabled;
+  List<HLSSettingsRequestQualityTracks> get qualityTracks;
 
- bool? get autoOn; bool? get enabled; List<HLSSettingsRequestQualityTracks> get qualityTracks;
-/// Create a copy of HLSSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$HLSSettingsRequestCopyWith<HLSSettingsRequest> get copyWith => _$HLSSettingsRequestCopyWithImpl<HLSSettingsRequest>(this as HLSSettingsRequest, _$identity);
+  /// Create a copy of HLSSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $HLSSettingsRequestCopyWith<HLSSettingsRequest> get copyWith =>
+      _$HLSSettingsRequestCopyWithImpl<HLSSettingsRequest>(
+        this as HLSSettingsRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is HLSSettingsRequest &&
+            (identical(other.autoOn, autoOn) || other.autoOn == autoOn) &&
+            (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            const DeepCollectionEquality().equals(
+              other.qualityTracks,
+              qualityTracks,
+            ));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    autoOn,
+    enabled,
+    const DeepCollectionEquality().hash(qualityTracks),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HLSSettingsRequest&&(identical(other.autoOn, autoOn) || other.autoOn == autoOn)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&const DeepCollectionEquality().equals(other.qualityTracks, qualityTracks));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,autoOn,enabled,const DeepCollectionEquality().hash(qualityTracks));
-
-@override
-String toString() {
-  return 'HLSSettingsRequest(autoOn: $autoOn, enabled: $enabled, qualityTracks: $qualityTracks)';
-}
-
-
+  @override
+  String toString() {
+    return 'HLSSettingsRequest(autoOn: $autoOn, enabled: $enabled, qualityTracks: $qualityTracks)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $HLSSettingsRequestCopyWith<$Res>  {
-  factory $HLSSettingsRequestCopyWith(HLSSettingsRequest value, $Res Function(HLSSettingsRequest) _then) = _$HLSSettingsRequestCopyWithImpl;
-@useResult
-$Res call({
- bool? autoOn, bool? enabled, List<HLSSettingsRequestQualityTracks> qualityTracks
-});
-
-
-
-
+abstract mixin class $HLSSettingsRequestCopyWith<$Res> {
+  factory $HLSSettingsRequestCopyWith(
+    HLSSettingsRequest value,
+    $Res Function(HLSSettingsRequest) _then,
+  ) = _$HLSSettingsRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    bool? autoOn,
+    bool? enabled,
+    List<HLSSettingsRequestQualityTracks> qualityTracks,
+  });
 }
+
 /// @nodoc
 class _$HLSSettingsRequestCopyWithImpl<$Res>
     implements $HLSSettingsRequestCopyWith<$Res> {
@@ -60,142 +76,30 @@ class _$HLSSettingsRequestCopyWithImpl<$Res>
   final HLSSettingsRequest _self;
   final $Res Function(HLSSettingsRequest) _then;
 
-/// Create a copy of HLSSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? autoOn = freezed,Object? enabled = freezed,Object? qualityTracks = null,}) {
-  return _then(HLSSettingsRequest(
-autoOn: freezed == autoOn ? _self.autoOn : autoOn // ignore: cast_nullable_to_non_nullable
-as bool?,enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
-as bool?,qualityTracks: null == qualityTracks ? _self.qualityTracks : qualityTracks // ignore: cast_nullable_to_non_nullable
-as List<HLSSettingsRequestQualityTracks>,
-  ));
+  /// Create a copy of HLSSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? autoOn = freezed,
+    Object? enabled = freezed,
+    Object? qualityTracks = null,
+  }) {
+    return _then(
+      HLSSettingsRequest(
+        autoOn: freezed == autoOn
+            ? _self.autoOn
+            : autoOn // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        enabled: freezed == enabled
+            ? _self.enabled
+            : enabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        qualityTracks: null == qualityTracks
+            ? _self.qualityTracks
+            : qualityTracks // ignore: cast_nullable_to_non_nullable
+                  as List<HLSSettingsRequestQualityTracks>,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [HLSSettingsRequest].
-extension HLSSettingsRequestPatterns on HLSSettingsRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

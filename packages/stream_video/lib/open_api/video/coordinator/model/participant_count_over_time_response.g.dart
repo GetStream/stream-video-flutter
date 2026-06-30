@@ -20,4 +20,6 @@ ParticipantCountOverTimeResponse _$ParticipantCountOverTimeResponseFromJson(
 
 Map<String, dynamic> _$ParticipantCountOverTimeResponseToJson(
   ParticipantCountOverTimeResponse instance,
-) => <String, dynamic>{'by_minute': instance.byMinute};
+) => <String, dynamic>{
+  'by_minute': instance.byMinute?.map((e) => e.toJson()).toList(),
+};

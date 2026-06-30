@@ -22,11 +22,12 @@ HarmConfig _$HarmConfigFromJson(Map<String, dynamic> json) => HarmConfig(
   threshold: (json['threshold'] as num).toInt(),
 );
 
-Map<String, dynamic> _$HarmConfigToJson(HarmConfig instance) =>
-    <String, dynamic>{
-      'action_sequences': instance.actionSequences,
-      'cooldown_period': instance.cooldownPeriod,
-      'harm_types': instance.harmTypes,
-      'severity': instance.severity,
-      'threshold': instance.threshold,
-    };
+Map<String, dynamic> _$HarmConfigToJson(
+  HarmConfig instance,
+) => <String, dynamic>{
+  'action_sequences': instance.actionSequences.map((e) => e.toJson()).toList(),
+  'cooldown_period': instance.cooldownPeriod,
+  'harm_types': instance.harmTypes,
+  'severity': instance.severity,
+  'threshold': instance.threshold,
+};

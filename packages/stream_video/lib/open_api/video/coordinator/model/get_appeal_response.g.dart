@@ -15,4 +15,7 @@ GetAppealResponse _$GetAppealResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$GetAppealResponseToJson(GetAppealResponse instance) =>
-    <String, dynamic>{'duration': instance.duration, 'item': instance.item};
+    <String, dynamic>{
+      'duration': instance.duration,
+      'item': instance.item?.toJson(),
+    };

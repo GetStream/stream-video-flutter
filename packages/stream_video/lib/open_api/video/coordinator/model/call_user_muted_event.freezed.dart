@@ -9,49 +9,79 @@ part of 'call_user_muted_event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallUserMutedEvent {
+  String get callCid;
+  DateTime get createdAt;
+  String get fromUserId;
+  List<String> get mutedUserIds;
+  String get reason;
+  String get type;
 
- String get callCid; DateTime get createdAt; String get fromUserId; List<String> get mutedUserIds; String get reason; String get type;
-/// Create a copy of CallUserMutedEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallUserMutedEventCopyWith<CallUserMutedEvent> get copyWith => _$CallUserMutedEventCopyWithImpl<CallUserMutedEvent>(this as CallUserMutedEvent, _$identity);
+  /// Create a copy of CallUserMutedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallUserMutedEventCopyWith<CallUserMutedEvent> get copyWith =>
+      _$CallUserMutedEventCopyWithImpl<CallUserMutedEvent>(
+        this as CallUserMutedEvent,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallUserMutedEvent &&
+            (identical(other.callCid, callCid) || other.callCid == callCid) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.fromUserId, fromUserId) ||
+                other.fromUserId == fromUserId) &&
+            const DeepCollectionEquality().equals(
+              other.mutedUserIds,
+              mutedUserIds,
+            ) &&
+            (identical(other.reason, reason) || other.reason == reason) &&
+            (identical(other.type, type) || other.type == type));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    callCid,
+    createdAt,
+    fromUserId,
+    const DeepCollectionEquality().hash(mutedUserIds),
+    reason,
+    type,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallUserMutedEvent&&(identical(other.callCid, callCid) || other.callCid == callCid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.fromUserId, fromUserId) || other.fromUserId == fromUserId)&&const DeepCollectionEquality().equals(other.mutedUserIds, mutedUserIds)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.type, type) || other.type == type));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,callCid,createdAt,fromUserId,const DeepCollectionEquality().hash(mutedUserIds),reason,type);
-
-@override
-String toString() {
-  return 'CallUserMutedEvent(callCid: $callCid, createdAt: $createdAt, fromUserId: $fromUserId, mutedUserIds: $mutedUserIds, reason: $reason, type: $type)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallUserMutedEvent(callCid: $callCid, createdAt: $createdAt, fromUserId: $fromUserId, mutedUserIds: $mutedUserIds, reason: $reason, type: $type)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallUserMutedEventCopyWith<$Res>  {
-  factory $CallUserMutedEventCopyWith(CallUserMutedEvent value, $Res Function(CallUserMutedEvent) _then) = _$CallUserMutedEventCopyWithImpl;
-@useResult
-$Res call({
- String callCid, DateTime createdAt, String fromUserId, List<String> mutedUserIds, String reason, String type
-});
-
-
-
-
+abstract mixin class $CallUserMutedEventCopyWith<$Res> {
+  factory $CallUserMutedEventCopyWith(
+    CallUserMutedEvent value,
+    $Res Function(CallUserMutedEvent) _then,
+  ) = _$CallUserMutedEventCopyWithImpl;
+  @useResult
+  $Res call({
+    String callCid,
+    DateTime createdAt,
+    String fromUserId,
+    List<String> mutedUserIds,
+    String reason,
+    String type,
+  });
 }
+
 /// @nodoc
 class _$CallUserMutedEventCopyWithImpl<$Res>
     implements $CallUserMutedEventCopyWith<$Res> {
@@ -60,145 +90,45 @@ class _$CallUserMutedEventCopyWithImpl<$Res>
   final CallUserMutedEvent _self;
   final $Res Function(CallUserMutedEvent) _then;
 
-/// Create a copy of CallUserMutedEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? callCid = null,Object? createdAt = null,Object? fromUserId = null,Object? mutedUserIds = null,Object? reason = null,Object? type = null,}) {
-  return _then(CallUserMutedEvent(
-callCid: null == callCid ? _self.callCid : callCid // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,fromUserId: null == fromUserId ? _self.fromUserId : fromUserId // ignore: cast_nullable_to_non_nullable
-as String,mutedUserIds: null == mutedUserIds ? _self.mutedUserIds : mutedUserIds // ignore: cast_nullable_to_non_nullable
-as List<String>,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CallUserMutedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? callCid = null,
+    Object? createdAt = null,
+    Object? fromUserId = null,
+    Object? mutedUserIds = null,
+    Object? reason = null,
+    Object? type = null,
+  }) {
+    return _then(
+      CallUserMutedEvent(
+        callCid: null == callCid
+            ? _self.callCid
+            : callCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        fromUserId: null == fromUserId
+            ? _self.fromUserId
+            : fromUserId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        mutedUserIds: null == mutedUserIds
+            ? _self.mutedUserIds
+            : mutedUserIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        reason: null == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallUserMutedEvent].
-extension CallUserMutedEventPatterns on CallUserMutedEvent {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

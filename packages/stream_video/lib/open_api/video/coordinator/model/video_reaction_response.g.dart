@@ -21,5 +21,5 @@ Map<String, dynamic> _$VideoReactionResponseToJson(
   'custom': instance.custom,
   'emoji_code': instance.emojiCode,
   'type': instance.type,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };

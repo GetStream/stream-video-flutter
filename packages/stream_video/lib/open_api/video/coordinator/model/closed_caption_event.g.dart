@@ -21,7 +21,7 @@ ClosedCaptionEvent _$ClosedCaptionEventFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ClosedCaptionEventToJson(ClosedCaptionEvent instance) =>
     <String, dynamic>{
       'call_cid': instance.callCid,
-      'closed_caption': instance.closedCaption,
+      'closed_caption': instance.closedCaption.toJson(),
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
       'type': instance.type,
     };

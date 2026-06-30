@@ -28,7 +28,7 @@ JoinCallRequest _$JoinCallRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$JoinCallRequestToJson(JoinCallRequest instance) =>
     <String, dynamic>{
       'create': instance.create,
-      'data': instance.data,
+      'data': instance.data?.toJson(),
       'hint_high_scale_livestream_publisher':
           instance.hintHighScaleLivestreamPublisher,
       'location': instance.location,

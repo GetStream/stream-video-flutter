@@ -25,5 +25,5 @@ Map<String, dynamic> _$UpdateUsersResponseToJson(
 ) => <String, dynamic>{
   'duration': instance.duration,
   'membership_deletion_task_id': instance.membershipDeletionTaskId,
-  'users': instance.users,
+  'users': instance.users.map((k, e) => MapEntry(k, e.toJson())),
 };

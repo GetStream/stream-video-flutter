@@ -15,4 +15,7 @@ _$DailyAggregateSDKUsageReportResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DailyAggregateSDKUsageReportResponseToJson(
   DailyAggregateSDKUsageReportResponse instance,
-) => <String, dynamic>{'date': instance.date, 'report': instance.report};
+) => <String, dynamic>{
+  'date': instance.date,
+  'report': instance.report.toJson(),
+};

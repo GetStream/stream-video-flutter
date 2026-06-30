@@ -48,13 +48,13 @@ Map<String, dynamic> _$PushPreferenceInputToJson(
   'call_level': _$PushPreferenceInputCallLevelEnumMap[instance.callLevel],
   'channel_cid': instance.channelCid,
   'chat_level': _$PushPreferenceInputChatLevelEnumMap[instance.chatLevel],
-  'chat_preferences': instance.chatPreferences,
+  'chat_preferences': instance.chatPreferences?.toJson(),
   'disabled_until': _$JsonConverterToJson<Object, DateTime>(
     instance.disabledUntil,
     const EpochDateTimeConverter().toJson,
   ),
   'feeds_level': _$PushPreferenceInputFeedsLevelEnumMap[instance.feedsLevel],
-  'feeds_preferences': instance.feedsPreferences,
+  'feeds_preferences': instance.feedsPreferences?.toJson(),
   'remove_disable': instance.removeDisable,
   'user_id': instance.userId,
 };

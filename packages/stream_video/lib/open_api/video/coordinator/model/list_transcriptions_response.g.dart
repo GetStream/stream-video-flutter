@@ -21,5 +21,5 @@ Map<String, dynamic> _$ListTranscriptionsResponseToJson(
   ListTranscriptionsResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'transcriptions': instance.transcriptions,
+  'transcriptions': instance.transcriptions.map((e) => e.toJson()).toList(),
 };

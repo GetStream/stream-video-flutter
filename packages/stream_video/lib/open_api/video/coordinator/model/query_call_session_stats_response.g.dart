@@ -24,7 +24,7 @@ QueryCallSessionStatsResponse _$QueryCallSessionStatsResponseFromJson(
 Map<String, dynamic> _$QueryCallSessionStatsResponseToJson(
   QueryCallSessionStatsResponse instance,
 ) => <String, dynamic>{
-  'call_stats': instance.callStats,
+  'call_stats': instance.callStats.map((e) => e.toJson()).toList(),
   'duration': instance.duration,
   'next': instance.next,
   'prev': instance.prev,

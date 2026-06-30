@@ -26,5 +26,5 @@ Map<String, dynamic> _$VideoCallRuleConfigToJson(
 ) => <String, dynamic>{
   'flag_all_labels': instance.flagAllLabels,
   'flagged_labels': instance.flaggedLabels,
-  'rules': instance.rules,
+  'rules': instance.rules.map((e) => e.toJson()).toList(),
 };

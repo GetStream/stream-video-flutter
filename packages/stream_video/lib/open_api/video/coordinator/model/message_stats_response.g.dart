@@ -16,4 +16,6 @@ MessageStatsResponse _$MessageStatsResponseFromJson(
 
 Map<String, dynamic> _$MessageStatsResponseToJson(
   MessageStatsResponse instance,
-) => <String, dynamic>{'count_over_time': instance.countOverTime};
+) => <String, dynamic>{
+  'count_over_time': instance.countOverTime?.map((e) => e.toJson()).toList(),
+};

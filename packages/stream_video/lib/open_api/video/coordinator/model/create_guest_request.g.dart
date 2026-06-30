@@ -12,4 +12,4 @@ CreateGuestRequest _$CreateGuestRequestFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$CreateGuestRequestToJson(CreateGuestRequest instance) =>
-    <String, dynamic>{'user': instance.user};
+    <String, dynamic>{'user': instance.user.toJson()};

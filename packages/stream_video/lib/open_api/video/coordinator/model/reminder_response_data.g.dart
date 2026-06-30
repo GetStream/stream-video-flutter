@@ -36,17 +36,17 @@ ReminderResponseData _$ReminderResponseDataFromJson(
 Map<String, dynamic> _$ReminderResponseDataToJson(
   ReminderResponseData instance,
 ) => <String, dynamic>{
-  'channel': instance.channel,
+  'channel': instance.channel?.toJson(),
   'channel_cid': instance.channelCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-  'message': instance.message,
+  'message': instance.message?.toJson(),
   'message_id': instance.messageId,
   'remind_at': _$JsonConverterToJson<Object, DateTime>(
     instance.remindAt,
     const EpochDateTimeConverter().toJson,
   ),
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-  'user': instance.user,
+  'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };
 

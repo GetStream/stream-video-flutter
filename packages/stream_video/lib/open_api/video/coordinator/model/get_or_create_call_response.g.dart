@@ -36,11 +36,11 @@ GetOrCreateCallResponse _$GetOrCreateCallResponseFromJson(
 Map<String, dynamic> _$GetOrCreateCallResponseToJson(
   GetOrCreateCallResponse instance,
 ) => <String, dynamic>{
-  'call': instance.call,
+  'call': instance.call.toJson(),
   'created': instance.created,
   'duration': instance.duration,
-  'members': instance.members,
-  'membership': instance.membership,
+  'members': instance.members.map((e) => e.toJson()).toList(),
+  'membership': instance.membership?.toJson(),
   'own_capabilities': instance.ownCapabilities
       .map((e) => _$OwnCapabilityEnumMap[e]!)
       .toList(),

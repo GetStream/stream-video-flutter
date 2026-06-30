@@ -23,6 +23,6 @@ Map<String, dynamic> _$LLMConfigToJson(LLMConfig instance) => <String, dynamic>{
   'app_context': instance.appContext,
   'async': instance.async,
   'enabled': instance.enabled,
-  'rules': instance.rules,
+  'rules': instance.rules.map((e) => e.toJson()).toList(),
   'severity_descriptions': instance.severityDescriptions,
 };

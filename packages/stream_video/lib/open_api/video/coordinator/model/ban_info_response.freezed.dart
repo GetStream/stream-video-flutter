@@ -9,49 +9,76 @@ part of 'ban_info_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$BanInfoResponse {
+  DateTime get createdAt;
+  UserResponse? get createdBy;
+  DateTime? get expires;
+  String? get reason;
+  bool? get shadow;
+  UserResponse? get user;
 
- DateTime get createdAt; UserResponse? get createdBy; DateTime? get expires; String? get reason; bool? get shadow; UserResponse? get user;
-/// Create a copy of BanInfoResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$BanInfoResponseCopyWith<BanInfoResponse> get copyWith => _$BanInfoResponseCopyWithImpl<BanInfoResponse>(this as BanInfoResponse, _$identity);
+  /// Create a copy of BanInfoResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $BanInfoResponseCopyWith<BanInfoResponse> get copyWith =>
+      _$BanInfoResponseCopyWithImpl<BanInfoResponse>(
+        this as BanInfoResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is BanInfoResponse &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.createdBy, createdBy) ||
+                other.createdBy == createdBy) &&
+            (identical(other.expires, expires) || other.expires == expires) &&
+            (identical(other.reason, reason) || other.reason == reason) &&
+            (identical(other.shadow, shadow) || other.shadow == shadow) &&
+            (identical(other.user, user) || other.user == user));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    createdAt,
+    createdBy,
+    expires,
+    reason,
+    shadow,
+    user,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BanInfoResponse&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.expires, expires) || other.expires == expires)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.shadow, shadow) || other.shadow == shadow)&&(identical(other.user, user) || other.user == user));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,createdAt,createdBy,expires,reason,shadow,user);
-
-@override
-String toString() {
-  return 'BanInfoResponse(createdAt: $createdAt, createdBy: $createdBy, expires: $expires, reason: $reason, shadow: $shadow, user: $user)';
-}
-
-
+  @override
+  String toString() {
+    return 'BanInfoResponse(createdAt: $createdAt, createdBy: $createdBy, expires: $expires, reason: $reason, shadow: $shadow, user: $user)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $BanInfoResponseCopyWith<$Res>  {
-  factory $BanInfoResponseCopyWith(BanInfoResponse value, $Res Function(BanInfoResponse) _then) = _$BanInfoResponseCopyWithImpl;
-@useResult
-$Res call({
- DateTime createdAt, UserResponse? createdBy, DateTime? expires, String? reason, bool? shadow, UserResponse? user
-});
-
-
-
-
+abstract mixin class $BanInfoResponseCopyWith<$Res> {
+  factory $BanInfoResponseCopyWith(
+    BanInfoResponse value,
+    $Res Function(BanInfoResponse) _then,
+  ) = _$BanInfoResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    DateTime createdAt,
+    UserResponse? createdBy,
+    DateTime? expires,
+    String? reason,
+    bool? shadow,
+    UserResponse? user,
+  });
 }
+
 /// @nodoc
 class _$BanInfoResponseCopyWithImpl<$Res>
     implements $BanInfoResponseCopyWith<$Res> {
@@ -60,145 +87,45 @@ class _$BanInfoResponseCopyWithImpl<$Res>
   final BanInfoResponse _self;
   final $Res Function(BanInfoResponse) _then;
 
-/// Create a copy of BanInfoResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? createdAt = null,Object? createdBy = freezed,Object? expires = freezed,Object? reason = freezed,Object? shadow = freezed,Object? user = freezed,}) {
-  return _then(BanInfoResponse(
-createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
-as UserResponse?,expires: freezed == expires ? _self.expires : expires // ignore: cast_nullable_to_non_nullable
-as DateTime?,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
-as String?,shadow: freezed == shadow ? _self.shadow : shadow // ignore: cast_nullable_to_non_nullable
-as bool?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserResponse?,
-  ));
+  /// Create a copy of BanInfoResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? createdAt = null,
+    Object? createdBy = freezed,
+    Object? expires = freezed,
+    Object? reason = freezed,
+    Object? shadow = freezed,
+    Object? user = freezed,
+  }) {
+    return _then(
+      BanInfoResponse(
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        createdBy: freezed == createdBy
+            ? _self.createdBy
+            : createdBy // ignore: cast_nullable_to_non_nullable
+                  as UserResponse?,
+        expires: freezed == expires
+            ? _self.expires
+            : expires // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        shadow: freezed == shadow
+            ? _self.shadow
+            : shadow // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponse?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [BanInfoResponse].
-extension BanInfoResponsePatterns on BanInfoResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

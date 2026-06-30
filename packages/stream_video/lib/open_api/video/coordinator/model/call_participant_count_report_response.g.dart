@@ -22,4 +22,4 @@ CallParticipantCountReportResponse _$CallParticipantCountReportResponseFromJson(
 
 Map<String, dynamic> _$CallParticipantCountReportResponseToJson(
   CallParticipantCountReportResponse instance,
-) => <String, dynamic>{'daily': instance.daily};
+) => <String, dynamic>{'daily': instance.daily.map((e) => e.toJson()).toList()};

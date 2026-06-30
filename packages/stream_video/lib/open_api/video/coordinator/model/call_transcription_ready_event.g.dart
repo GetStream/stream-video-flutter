@@ -24,7 +24,7 @@ Map<String, dynamic> _$CallTranscriptionReadyEventToJson(
   CallTranscriptionReadyEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'call_transcription': instance.callTranscription,
+  'call_transcription': instance.callTranscription.toJson(),
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'egress_id': instance.egressId,
   'type': instance.type,

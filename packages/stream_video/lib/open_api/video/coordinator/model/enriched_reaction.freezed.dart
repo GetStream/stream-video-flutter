@@ -9,49 +9,107 @@ part of 'enriched_reaction.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$EnrichedReaction {
+  String get activityId;
+  Map<String, int>? get childrenCounts;
+  Map<String, Object?>? get data;
+  String? get id;
+  String get kind;
+  Map<String, List<EnrichedReaction>>? get latestChildren;
+  Map<String, List<EnrichedReaction>>? get ownChildren;
+  String? get parent;
+  List<String>? get targetFeeds;
+  Data? get user;
+  String get userId;
 
- String get activityId; Map<String, int>? get childrenCounts; Map<String, Object?>? get data; String? get id; String get kind; Map<String, List<EnrichedReaction>>? get latestChildren; Map<String, List<EnrichedReaction>>? get ownChildren; String? get parent; List<String>? get targetFeeds; Data? get user; String get userId;
-/// Create a copy of EnrichedReaction
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$EnrichedReactionCopyWith<EnrichedReaction> get copyWith => _$EnrichedReactionCopyWithImpl<EnrichedReaction>(this as EnrichedReaction, _$identity);
+  /// Create a copy of EnrichedReaction
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $EnrichedReactionCopyWith<EnrichedReaction> get copyWith =>
+      _$EnrichedReactionCopyWithImpl<EnrichedReaction>(
+        this as EnrichedReaction,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is EnrichedReaction &&
+            (identical(other.activityId, activityId) ||
+                other.activityId == activityId) &&
+            const DeepCollectionEquality().equals(
+              other.childrenCounts,
+              childrenCounts,
+            ) &&
+            const DeepCollectionEquality().equals(other.data, data) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.kind, kind) || other.kind == kind) &&
+            const DeepCollectionEquality().equals(
+              other.latestChildren,
+              latestChildren,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.ownChildren,
+              ownChildren,
+            ) &&
+            (identical(other.parent, parent) || other.parent == parent) &&
+            const DeepCollectionEquality().equals(
+              other.targetFeeds,
+              targetFeeds,
+            ) &&
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.userId, userId) || other.userId == userId));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    activityId,
+    const DeepCollectionEquality().hash(childrenCounts),
+    const DeepCollectionEquality().hash(data),
+    id,
+    kind,
+    const DeepCollectionEquality().hash(latestChildren),
+    const DeepCollectionEquality().hash(ownChildren),
+    parent,
+    const DeepCollectionEquality().hash(targetFeeds),
+    user,
+    userId,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EnrichedReaction&&(identical(other.activityId, activityId) || other.activityId == activityId)&&const DeepCollectionEquality().equals(other.childrenCounts, childrenCounts)&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&const DeepCollectionEquality().equals(other.latestChildren, latestChildren)&&const DeepCollectionEquality().equals(other.ownChildren, ownChildren)&&(identical(other.parent, parent) || other.parent == parent)&&const DeepCollectionEquality().equals(other.targetFeeds, targetFeeds)&&(identical(other.user, user) || other.user == user)&&(identical(other.userId, userId) || other.userId == userId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,activityId,const DeepCollectionEquality().hash(childrenCounts),const DeepCollectionEquality().hash(data),id,kind,const DeepCollectionEquality().hash(latestChildren),const DeepCollectionEquality().hash(ownChildren),parent,const DeepCollectionEquality().hash(targetFeeds),user,userId);
-
-@override
-String toString() {
-  return 'EnrichedReaction(activityId: $activityId, childrenCounts: $childrenCounts, data: $data, id: $id, kind: $kind, latestChildren: $latestChildren, ownChildren: $ownChildren, parent: $parent, targetFeeds: $targetFeeds, user: $user, userId: $userId)';
-}
-
-
+  @override
+  String toString() {
+    return 'EnrichedReaction(activityId: $activityId, childrenCounts: $childrenCounts, data: $data, id: $id, kind: $kind, latestChildren: $latestChildren, ownChildren: $ownChildren, parent: $parent, targetFeeds: $targetFeeds, user: $user, userId: $userId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $EnrichedReactionCopyWith<$Res>  {
-  factory $EnrichedReactionCopyWith(EnrichedReaction value, $Res Function(EnrichedReaction) _then) = _$EnrichedReactionCopyWithImpl;
-@useResult
-$Res call({
- String activityId, Map<String, int>? childrenCounts, Map<String, Object?>? data, String? id, String kind, Map<String, List<EnrichedReaction>>? latestChildren, Map<String, List<EnrichedReaction>>? ownChildren, String? parent, List<String>? targetFeeds, Data? user, String userId
-});
-
-
-
-
+abstract mixin class $EnrichedReactionCopyWith<$Res> {
+  factory $EnrichedReactionCopyWith(
+    EnrichedReaction value,
+    $Res Function(EnrichedReaction) _then,
+  ) = _$EnrichedReactionCopyWithImpl;
+  @useResult
+  $Res call({
+    String activityId,
+    Map<String, int>? childrenCounts,
+    Map<String, Object?>? data,
+    String? id,
+    String kind,
+    Map<String, List<EnrichedReaction>>? latestChildren,
+    Map<String, List<EnrichedReaction>>? ownChildren,
+    String? parent,
+    List<String>? targetFeeds,
+    Data? user,
+    String userId,
+  });
 }
+
 /// @nodoc
 class _$EnrichedReactionCopyWithImpl<$Res>
     implements $EnrichedReactionCopyWith<$Res> {
@@ -60,150 +118,70 @@ class _$EnrichedReactionCopyWithImpl<$Res>
   final EnrichedReaction _self;
   final $Res Function(EnrichedReaction) _then;
 
-/// Create a copy of EnrichedReaction
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? activityId = null,Object? childrenCounts = freezed,Object? data = freezed,Object? id = freezed,Object? kind = null,Object? latestChildren = freezed,Object? ownChildren = freezed,Object? parent = freezed,Object? targetFeeds = freezed,Object? user = freezed,Object? userId = null,}) {
-  return _then(EnrichedReaction(
-activityId: null == activityId ? _self.activityId : activityId // ignore: cast_nullable_to_non_nullable
-as String,childrenCounts: freezed == childrenCounts ? _self.childrenCounts : childrenCounts // ignore: cast_nullable_to_non_nullable
-as Map<String, int>?,data: freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>?,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as String,latestChildren: freezed == latestChildren ? _self.latestChildren : latestChildren // ignore: cast_nullable_to_non_nullable
-as Map<String, List<EnrichedReaction>>?,ownChildren: freezed == ownChildren ? _self.ownChildren : ownChildren // ignore: cast_nullable_to_non_nullable
-as Map<String, List<EnrichedReaction>>?,parent: freezed == parent ? _self.parent : parent // ignore: cast_nullable_to_non_nullable
-as String?,targetFeeds: freezed == targetFeeds ? _self.targetFeeds : targetFeeds // ignore: cast_nullable_to_non_nullable
-as List<String>?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as Data?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of EnrichedReaction
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? activityId = null,
+    Object? childrenCounts = freezed,
+    Object? data = freezed,
+    Object? id = freezed,
+    Object? kind = null,
+    Object? latestChildren = freezed,
+    Object? ownChildren = freezed,
+    Object? parent = freezed,
+    Object? targetFeeds = freezed,
+    Object? user = freezed,
+    Object? userId = null,
+  }) {
+    return _then(
+      EnrichedReaction(
+        activityId: null == activityId
+            ? _self.activityId
+            : activityId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        childrenCounts: freezed == childrenCounts
+            ? _self.childrenCounts
+            : childrenCounts // ignore: cast_nullable_to_non_nullable
+                  as Map<String, int>?,
+        data: freezed == data
+            ? _self.data
+            : data // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        kind: null == kind
+            ? _self.kind
+            : kind // ignore: cast_nullable_to_non_nullable
+                  as String,
+        latestChildren: freezed == latestChildren
+            ? _self.latestChildren
+            : latestChildren // ignore: cast_nullable_to_non_nullable
+                  as Map<String, List<EnrichedReaction>>?,
+        ownChildren: freezed == ownChildren
+            ? _self.ownChildren
+            : ownChildren // ignore: cast_nullable_to_non_nullable
+                  as Map<String, List<EnrichedReaction>>?,
+        parent: freezed == parent
+            ? _self.parent
+            : parent // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        targetFeeds: freezed == targetFeeds
+            ? _self.targetFeeds
+            : targetFeeds // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as Data?,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [EnrichedReaction].
-extension EnrichedReactionPatterns on EnrichedReaction {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

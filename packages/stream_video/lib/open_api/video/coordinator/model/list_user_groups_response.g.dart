@@ -21,5 +21,5 @@ Map<String, dynamic> _$ListUserGroupsResponseToJson(
   ListUserGroupsResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'user_groups': instance.userGroups,
+  'user_groups': instance.userGroups.map((e) => e.toJson()).toList(),
 };

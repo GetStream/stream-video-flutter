@@ -9,49 +9,81 @@ part of 'bulk_action_appeals_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$BulkActionAppealsRequest {
+  BulkActionAppealsRequestActionType get actionType;
+  List<String> get appealIds;
+  MarkReviewedRequestPayload? get markReviewed;
+  RejectAppealRequestPayload? get rejectAppeal;
+  RestoreActionRequestPayload? get restore;
+  UnbanActionRequestPayload? get unban;
+  UnblockActionRequestPayload? get unblock;
 
- BulkActionAppealsRequestActionType get actionType; List<String> get appealIds; MarkReviewedRequestPayload? get markReviewed; RejectAppealRequestPayload? get rejectAppeal; RestoreActionRequestPayload? get restore; UnbanActionRequestPayload? get unban; UnblockActionRequestPayload? get unblock;
-/// Create a copy of BulkActionAppealsRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$BulkActionAppealsRequestCopyWith<BulkActionAppealsRequest> get copyWith => _$BulkActionAppealsRequestCopyWithImpl<BulkActionAppealsRequest>(this as BulkActionAppealsRequest, _$identity);
+  /// Create a copy of BulkActionAppealsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $BulkActionAppealsRequestCopyWith<BulkActionAppealsRequest> get copyWith =>
+      _$BulkActionAppealsRequestCopyWithImpl<BulkActionAppealsRequest>(
+        this as BulkActionAppealsRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is BulkActionAppealsRequest &&
+            (identical(other.actionType, actionType) ||
+                other.actionType == actionType) &&
+            const DeepCollectionEquality().equals(other.appealIds, appealIds) &&
+            (identical(other.markReviewed, markReviewed) ||
+                other.markReviewed == markReviewed) &&
+            (identical(other.rejectAppeal, rejectAppeal) ||
+                other.rejectAppeal == rejectAppeal) &&
+            (identical(other.restore, restore) || other.restore == restore) &&
+            (identical(other.unban, unban) || other.unban == unban) &&
+            (identical(other.unblock, unblock) || other.unblock == unblock));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    actionType,
+    const DeepCollectionEquality().hash(appealIds),
+    markReviewed,
+    rejectAppeal,
+    restore,
+    unban,
+    unblock,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BulkActionAppealsRequest&&(identical(other.actionType, actionType) || other.actionType == actionType)&&const DeepCollectionEquality().equals(other.appealIds, appealIds)&&(identical(other.markReviewed, markReviewed) || other.markReviewed == markReviewed)&&(identical(other.rejectAppeal, rejectAppeal) || other.rejectAppeal == rejectAppeal)&&(identical(other.restore, restore) || other.restore == restore)&&(identical(other.unban, unban) || other.unban == unban)&&(identical(other.unblock, unblock) || other.unblock == unblock));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,actionType,const DeepCollectionEquality().hash(appealIds),markReviewed,rejectAppeal,restore,unban,unblock);
-
-@override
-String toString() {
-  return 'BulkActionAppealsRequest(actionType: $actionType, appealIds: $appealIds, markReviewed: $markReviewed, rejectAppeal: $rejectAppeal, restore: $restore, unban: $unban, unblock: $unblock)';
-}
-
-
+  @override
+  String toString() {
+    return 'BulkActionAppealsRequest(actionType: $actionType, appealIds: $appealIds, markReviewed: $markReviewed, rejectAppeal: $rejectAppeal, restore: $restore, unban: $unban, unblock: $unblock)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $BulkActionAppealsRequestCopyWith<$Res>  {
-  factory $BulkActionAppealsRequestCopyWith(BulkActionAppealsRequest value, $Res Function(BulkActionAppealsRequest) _then) = _$BulkActionAppealsRequestCopyWithImpl;
-@useResult
-$Res call({
- BulkActionAppealsRequestActionType actionType, List<String> appealIds, MarkReviewedRequestPayload? markReviewed, RejectAppealRequestPayload? rejectAppeal, RestoreActionRequestPayload? restore, UnbanActionRequestPayload? unban, UnblockActionRequestPayload? unblock
-});
-
-
-
-
+abstract mixin class $BulkActionAppealsRequestCopyWith<$Res> {
+  factory $BulkActionAppealsRequestCopyWith(
+    BulkActionAppealsRequest value,
+    $Res Function(BulkActionAppealsRequest) _then,
+  ) = _$BulkActionAppealsRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    BulkActionAppealsRequestActionType actionType,
+    List<String> appealIds,
+    MarkReviewedRequestPayload? markReviewed,
+    RejectAppealRequestPayload? rejectAppeal,
+    RestoreActionRequestPayload? restore,
+    UnbanActionRequestPayload? unban,
+    UnblockActionRequestPayload? unblock,
+  });
 }
+
 /// @nodoc
 class _$BulkActionAppealsRequestCopyWithImpl<$Res>
     implements $BulkActionAppealsRequestCopyWith<$Res> {
@@ -60,146 +92,50 @@ class _$BulkActionAppealsRequestCopyWithImpl<$Res>
   final BulkActionAppealsRequest _self;
   final $Res Function(BulkActionAppealsRequest) _then;
 
-/// Create a copy of BulkActionAppealsRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? actionType = null,Object? appealIds = null,Object? markReviewed = freezed,Object? rejectAppeal = freezed,Object? restore = freezed,Object? unban = freezed,Object? unblock = freezed,}) {
-  return _then(BulkActionAppealsRequest(
-actionType: null == actionType ? _self.actionType : actionType // ignore: cast_nullable_to_non_nullable
-as BulkActionAppealsRequestActionType,appealIds: null == appealIds ? _self.appealIds : appealIds // ignore: cast_nullable_to_non_nullable
-as List<String>,markReviewed: freezed == markReviewed ? _self.markReviewed : markReviewed // ignore: cast_nullable_to_non_nullable
-as MarkReviewedRequestPayload?,rejectAppeal: freezed == rejectAppeal ? _self.rejectAppeal : rejectAppeal // ignore: cast_nullable_to_non_nullable
-as RejectAppealRequestPayload?,restore: freezed == restore ? _self.restore : restore // ignore: cast_nullable_to_non_nullable
-as RestoreActionRequestPayload?,unban: freezed == unban ? _self.unban : unban // ignore: cast_nullable_to_non_nullable
-as UnbanActionRequestPayload?,unblock: freezed == unblock ? _self.unblock : unblock // ignore: cast_nullable_to_non_nullable
-as UnblockActionRequestPayload?,
-  ));
+  /// Create a copy of BulkActionAppealsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? actionType = null,
+    Object? appealIds = null,
+    Object? markReviewed = freezed,
+    Object? rejectAppeal = freezed,
+    Object? restore = freezed,
+    Object? unban = freezed,
+    Object? unblock = freezed,
+  }) {
+    return _then(
+      BulkActionAppealsRequest(
+        actionType: null == actionType
+            ? _self.actionType
+            : actionType // ignore: cast_nullable_to_non_nullable
+                  as BulkActionAppealsRequestActionType,
+        appealIds: null == appealIds
+            ? _self.appealIds
+            : appealIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        markReviewed: freezed == markReviewed
+            ? _self.markReviewed
+            : markReviewed // ignore: cast_nullable_to_non_nullable
+                  as MarkReviewedRequestPayload?,
+        rejectAppeal: freezed == rejectAppeal
+            ? _self.rejectAppeal
+            : rejectAppeal // ignore: cast_nullable_to_non_nullable
+                  as RejectAppealRequestPayload?,
+        restore: freezed == restore
+            ? _self.restore
+            : restore // ignore: cast_nullable_to_non_nullable
+                  as RestoreActionRequestPayload?,
+        unban: freezed == unban
+            ? _self.unban
+            : unban // ignore: cast_nullable_to_non_nullable
+                  as UnbanActionRequestPayload?,
+        unblock: freezed == unblock
+            ? _self.unblock
+            : unblock // ignore: cast_nullable_to_non_nullable
+                  as UnblockActionRequestPayload?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [BulkActionAppealsRequest].
-extension BulkActionAppealsRequestPatterns on BulkActionAppealsRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

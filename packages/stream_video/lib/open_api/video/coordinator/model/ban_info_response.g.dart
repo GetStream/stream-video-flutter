@@ -28,14 +28,14 @@ BanInfoResponse _$BanInfoResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$BanInfoResponseToJson(BanInfoResponse instance) =>
     <String, dynamic>{
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'created_by': instance.createdBy,
+      'created_by': instance.createdBy?.toJson(),
       'expires': _$JsonConverterToJson<Object, DateTime>(
         instance.expires,
         const EpochDateTimeConverter().toJson,
       ),
       'reason': instance.reason,
       'shadow': instance.shadow,
-      'user': instance.user,
+      'user': instance.user?.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

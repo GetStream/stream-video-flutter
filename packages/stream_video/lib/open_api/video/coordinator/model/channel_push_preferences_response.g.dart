@@ -25,7 +25,7 @@ Map<String, dynamic> _$ChannelPushPreferencesResponseToJson(
   ChannelPushPreferencesResponse instance,
 ) => <String, dynamic>{
   'chat_level': instance.chatLevel,
-  'chat_preferences': instance.chatPreferences,
+  'chat_preferences': instance.chatPreferences?.toJson(),
   'disabled_until': _$JsonConverterToJson<Object, DateTime>(
     instance.disabledUntil,
     const EpochDateTimeConverter().toJson,

@@ -9,49 +9,70 @@ part of 'query_appeals_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$QueryAppealsRequest {
+  Map<String, Object?>? get filter;
+  int? get limit;
+  String? get next;
+  String? get prev;
+  List<SortParamRequest>? get sort;
 
- Map<String, Object?>? get filter; int? get limit; String? get next; String? get prev; List<SortParamRequest>? get sort;
-/// Create a copy of QueryAppealsRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$QueryAppealsRequestCopyWith<QueryAppealsRequest> get copyWith => _$QueryAppealsRequestCopyWithImpl<QueryAppealsRequest>(this as QueryAppealsRequest, _$identity);
+  /// Create a copy of QueryAppealsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $QueryAppealsRequestCopyWith<QueryAppealsRequest> get copyWith =>
+      _$QueryAppealsRequestCopyWithImpl<QueryAppealsRequest>(
+        this as QueryAppealsRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is QueryAppealsRequest &&
+            const DeepCollectionEquality().equals(other.filter, filter) &&
+            (identical(other.limit, limit) || other.limit == limit) &&
+            (identical(other.next, next) || other.next == next) &&
+            (identical(other.prev, prev) || other.prev == prev) &&
+            const DeepCollectionEquality().equals(other.sort, sort));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(filter),
+    limit,
+    next,
+    prev,
+    const DeepCollectionEquality().hash(sort),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QueryAppealsRequest&&const DeepCollectionEquality().equals(other.filter, filter)&&(identical(other.limit, limit) || other.limit == limit)&&(identical(other.next, next) || other.next == next)&&(identical(other.prev, prev) || other.prev == prev)&&const DeepCollectionEquality().equals(other.sort, sort));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(filter),limit,next,prev,const DeepCollectionEquality().hash(sort));
-
-@override
-String toString() {
-  return 'QueryAppealsRequest(filter: $filter, limit: $limit, next: $next, prev: $prev, sort: $sort)';
-}
-
-
+  @override
+  String toString() {
+    return 'QueryAppealsRequest(filter: $filter, limit: $limit, next: $next, prev: $prev, sort: $sort)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $QueryAppealsRequestCopyWith<$Res>  {
-  factory $QueryAppealsRequestCopyWith(QueryAppealsRequest value, $Res Function(QueryAppealsRequest) _then) = _$QueryAppealsRequestCopyWithImpl;
-@useResult
-$Res call({
- Map<String, Object?>? filter, int? limit, String? next, String? prev, List<SortParamRequest>? sort
-});
-
-
-
-
+abstract mixin class $QueryAppealsRequestCopyWith<$Res> {
+  factory $QueryAppealsRequestCopyWith(
+    QueryAppealsRequest value,
+    $Res Function(QueryAppealsRequest) _then,
+  ) = _$QueryAppealsRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    Map<String, Object?>? filter,
+    int? limit,
+    String? next,
+    String? prev,
+    List<SortParamRequest>? sort,
+  });
 }
+
 /// @nodoc
 class _$QueryAppealsRequestCopyWithImpl<$Res>
     implements $QueryAppealsRequestCopyWith<$Res> {
@@ -60,144 +81,40 @@ class _$QueryAppealsRequestCopyWithImpl<$Res>
   final QueryAppealsRequest _self;
   final $Res Function(QueryAppealsRequest) _then;
 
-/// Create a copy of QueryAppealsRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? filter = freezed,Object? limit = freezed,Object? next = freezed,Object? prev = freezed,Object? sort = freezed,}) {
-  return _then(QueryAppealsRequest(
-filter: freezed == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>?,limit: freezed == limit ? _self.limit : limit // ignore: cast_nullable_to_non_nullable
-as int?,next: freezed == next ? _self.next : next // ignore: cast_nullable_to_non_nullable
-as String?,prev: freezed == prev ? _self.prev : prev // ignore: cast_nullable_to_non_nullable
-as String?,sort: freezed == sort ? _self.sort : sort // ignore: cast_nullable_to_non_nullable
-as List<SortParamRequest>?,
-  ));
+  /// Create a copy of QueryAppealsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? filter = freezed,
+    Object? limit = freezed,
+    Object? next = freezed,
+    Object? prev = freezed,
+    Object? sort = freezed,
+  }) {
+    return _then(
+      QueryAppealsRequest(
+        filter: freezed == filter
+            ? _self.filter
+            : filter // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        limit: freezed == limit
+            ? _self.limit
+            : limit // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        next: freezed == next
+            ? _self.next
+            : next // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        prev: freezed == prev
+            ? _self.prev
+            : prev // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sort: freezed == sort
+            ? _self.sort
+            : sort // ignore: cast_nullable_to_non_nullable
+                  as List<SortParamRequest>?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [QueryAppealsRequest].
-extension QueryAppealsRequestPatterns on QueryAppealsRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

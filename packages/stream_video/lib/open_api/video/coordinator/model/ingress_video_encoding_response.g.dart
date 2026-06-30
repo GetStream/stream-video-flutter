@@ -24,4 +24,7 @@ IngressVideoEncodingResponse _$IngressVideoEncodingResponseFromJson(
 
 Map<String, dynamic> _$IngressVideoEncodingResponseToJson(
   IngressVideoEncodingResponse instance,
-) => <String, dynamic>{'layers': instance.layers, 'source': instance.source};
+) => <String, dynamic>{
+  'layers': instance.layers.map((e) => e.toJson()).toList(),
+  'source': instance.source.toJson(),
+};

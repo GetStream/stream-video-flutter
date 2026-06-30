@@ -22,7 +22,7 @@ Map<String, dynamic> _$CallStatsMapSubscriberToJson(
   CallStatsMapSubscriber instance,
 ) => <String, dynamic>{
   'is_live': instance.isLive,
-  'location': instance.location,
+  'location': instance.location?.toJson(),
   'name': instance.name,
   'user_id': instance.userId,
   'user_session_id': instance.userSessionId,

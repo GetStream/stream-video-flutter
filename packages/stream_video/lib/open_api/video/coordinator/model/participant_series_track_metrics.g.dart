@@ -47,10 +47,12 @@ Map<String, dynamic> _$ParticipantSeriesTrackMetricsToJson(
   'codec': instance.codec,
   'label': instance.label,
   'metrics': instance.metrics,
-  'metrics_meta': instance.metricsMeta,
+  'metrics_meta': instance.metricsMeta?.map((k, e) => MapEntry(k, e.toJson())),
   'metrics_order': instance.metricsOrder,
   'rid': instance.rid,
-  'thresholds': instance.thresholds,
+  'thresholds': instance.thresholds?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
   'track_id': instance.trackId,
   'track_type': instance.trackType,
 };

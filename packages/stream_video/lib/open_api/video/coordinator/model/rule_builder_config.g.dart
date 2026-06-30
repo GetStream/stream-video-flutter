@@ -15,4 +15,7 @@ RuleBuilderConfig _$RuleBuilderConfigFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$RuleBuilderConfigToJson(RuleBuilderConfig instance) =>
-    <String, dynamic>{'async': instance.async, 'rules': instance.rules};
+    <String, dynamic>{
+      'async': instance.async,
+      'rules': instance.rules?.map((e) => e.toJson()).toList(),
+    };

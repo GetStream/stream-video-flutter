@@ -84,7 +84,7 @@ Map<String, dynamic> _$UserResponsePrivacyFieldsToJson(
   ),
   'name': instance.name,
   'online': instance.online,
-  'privacy_settings': instance.privacySettings,
+  'privacy_settings': instance.privacySettings?.toJson(),
   'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
     instance.revokeTokensIssuedBefore,
     const EpochDateTimeConverter().toJson,

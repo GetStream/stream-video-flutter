@@ -27,7 +27,7 @@ Map<String, dynamic> _$AppEventResponseToJson(AppEventResponse instance) =>
     <String, dynamic>{
       'async_url_enrich_enabled': instance.asyncUrlEnrichEnabled,
       'auto_translation_enabled': instance.autoTranslationEnabled,
-      'file_upload_config': instance.fileUploadConfig,
-      'image_upload_config': instance.imageUploadConfig,
+      'file_upload_config': instance.fileUploadConfig?.toJson(),
+      'image_upload_config': instance.imageUploadConfig?.toJson(),
       'name': instance.name,
     };

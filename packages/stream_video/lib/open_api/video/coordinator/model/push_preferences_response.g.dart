@@ -33,13 +33,13 @@ Map<String, dynamic> _$PushPreferencesResponseToJson(
 ) => <String, dynamic>{
   'call_level': instance.callLevel,
   'chat_level': instance.chatLevel,
-  'chat_preferences': instance.chatPreferences,
+  'chat_preferences': instance.chatPreferences?.toJson(),
   'disabled_until': _$JsonConverterToJson<Object, DateTime>(
     instance.disabledUntil,
     const EpochDateTimeConverter().toJson,
   ),
   'feeds_level': instance.feedsLevel,
-  'feeds_preferences': instance.feedsPreferences,
+  'feeds_preferences': instance.feedsPreferences?.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

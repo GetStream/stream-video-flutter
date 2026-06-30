@@ -9,49 +9,53 @@ part of 'track_stats_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$TrackStatsResponse {
+  int get durationSeconds;
+  String get trackType;
 
- int get durationSeconds; String get trackType;
-/// Create a copy of TrackStatsResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$TrackStatsResponseCopyWith<TrackStatsResponse> get copyWith => _$TrackStatsResponseCopyWithImpl<TrackStatsResponse>(this as TrackStatsResponse, _$identity);
+  /// Create a copy of TrackStatsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $TrackStatsResponseCopyWith<TrackStatsResponse> get copyWith =>
+      _$TrackStatsResponseCopyWithImpl<TrackStatsResponse>(
+        this as TrackStatsResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is TrackStatsResponse &&
+            (identical(other.durationSeconds, durationSeconds) ||
+                other.durationSeconds == durationSeconds) &&
+            (identical(other.trackType, trackType) ||
+                other.trackType == trackType));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, durationSeconds, trackType);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrackStatsResponse&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.trackType, trackType) || other.trackType == trackType));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,durationSeconds,trackType);
-
-@override
-String toString() {
-  return 'TrackStatsResponse(durationSeconds: $durationSeconds, trackType: $trackType)';
-}
-
-
+  @override
+  String toString() {
+    return 'TrackStatsResponse(durationSeconds: $durationSeconds, trackType: $trackType)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $TrackStatsResponseCopyWith<$Res>  {
-  factory $TrackStatsResponseCopyWith(TrackStatsResponse value, $Res Function(TrackStatsResponse) _then) = _$TrackStatsResponseCopyWithImpl;
-@useResult
-$Res call({
- int durationSeconds, String trackType
-});
-
-
-
-
+abstract mixin class $TrackStatsResponseCopyWith<$Res> {
+  factory $TrackStatsResponseCopyWith(
+    TrackStatsResponse value,
+    $Res Function(TrackStatsResponse) _then,
+  ) = _$TrackStatsResponseCopyWithImpl;
+  @useResult
+  $Res call({int durationSeconds, String trackType});
 }
+
 /// @nodoc
 class _$TrackStatsResponseCopyWithImpl<$Res>
     implements $TrackStatsResponseCopyWith<$Res> {
@@ -60,141 +64,22 @@ class _$TrackStatsResponseCopyWithImpl<$Res>
   final TrackStatsResponse _self;
   final $Res Function(TrackStatsResponse) _then;
 
-/// Create a copy of TrackStatsResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? durationSeconds = null,Object? trackType = null,}) {
-  return _then(TrackStatsResponse(
-durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
-as int,trackType: null == trackType ? _self.trackType : trackType // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of TrackStatsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? durationSeconds = null, Object? trackType = null}) {
+    return _then(
+      TrackStatsResponse(
+        durationSeconds: null == durationSeconds
+            ? _self.durationSeconds
+            : durationSeconds // ignore: cast_nullable_to_non_nullable
+                  as int,
+        trackType: null == trackType
+            ? _self.trackType
+            : trackType // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [TrackStatsResponse].
-extension TrackStatsResponsePatterns on TrackStatsResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -9,49 +9,66 @@ part of 'ingress_settings_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$IngressSettingsRequest {
+  IngressAudioEncodingOptionsRequest? get audioEncodingOptions;
+  bool? get enabled;
+  Map<String, IngressVideoEncodingOptionsRequest>? get videoEncodingOptions;
 
- IngressAudioEncodingOptionsRequest? get audioEncodingOptions; bool? get enabled; Map<String, IngressVideoEncodingOptionsRequest>? get videoEncodingOptions;
-/// Create a copy of IngressSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$IngressSettingsRequestCopyWith<IngressSettingsRequest> get copyWith => _$IngressSettingsRequestCopyWithImpl<IngressSettingsRequest>(this as IngressSettingsRequest, _$identity);
+  /// Create a copy of IngressSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $IngressSettingsRequestCopyWith<IngressSettingsRequest> get copyWith =>
+      _$IngressSettingsRequestCopyWithImpl<IngressSettingsRequest>(
+        this as IngressSettingsRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is IngressSettingsRequest &&
+            (identical(other.audioEncodingOptions, audioEncodingOptions) ||
+                other.audioEncodingOptions == audioEncodingOptions) &&
+            (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            const DeepCollectionEquality().equals(
+              other.videoEncodingOptions,
+              videoEncodingOptions,
+            ));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    audioEncodingOptions,
+    enabled,
+    const DeepCollectionEquality().hash(videoEncodingOptions),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IngressSettingsRequest&&(identical(other.audioEncodingOptions, audioEncodingOptions) || other.audioEncodingOptions == audioEncodingOptions)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&const DeepCollectionEquality().equals(other.videoEncodingOptions, videoEncodingOptions));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,audioEncodingOptions,enabled,const DeepCollectionEquality().hash(videoEncodingOptions));
-
-@override
-String toString() {
-  return 'IngressSettingsRequest(audioEncodingOptions: $audioEncodingOptions, enabled: $enabled, videoEncodingOptions: $videoEncodingOptions)';
-}
-
-
+  @override
+  String toString() {
+    return 'IngressSettingsRequest(audioEncodingOptions: $audioEncodingOptions, enabled: $enabled, videoEncodingOptions: $videoEncodingOptions)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $IngressSettingsRequestCopyWith<$Res>  {
-  factory $IngressSettingsRequestCopyWith(IngressSettingsRequest value, $Res Function(IngressSettingsRequest) _then) = _$IngressSettingsRequestCopyWithImpl;
-@useResult
-$Res call({
- IngressAudioEncodingOptionsRequest? audioEncodingOptions, bool? enabled, Map<String, IngressVideoEncodingOptionsRequest>? videoEncodingOptions
-});
-
-
-
-
+abstract mixin class $IngressSettingsRequestCopyWith<$Res> {
+  factory $IngressSettingsRequestCopyWith(
+    IngressSettingsRequest value,
+    $Res Function(IngressSettingsRequest) _then,
+  ) = _$IngressSettingsRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    IngressAudioEncodingOptionsRequest? audioEncodingOptions,
+    bool? enabled,
+    Map<String, IngressVideoEncodingOptionsRequest>? videoEncodingOptions,
+  });
 }
+
 /// @nodoc
 class _$IngressSettingsRequestCopyWithImpl<$Res>
     implements $IngressSettingsRequestCopyWith<$Res> {
@@ -60,142 +77,30 @@ class _$IngressSettingsRequestCopyWithImpl<$Res>
   final IngressSettingsRequest _self;
   final $Res Function(IngressSettingsRequest) _then;
 
-/// Create a copy of IngressSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? audioEncodingOptions = freezed,Object? enabled = freezed,Object? videoEncodingOptions = freezed,}) {
-  return _then(IngressSettingsRequest(
-audioEncodingOptions: freezed == audioEncodingOptions ? _self.audioEncodingOptions : audioEncodingOptions // ignore: cast_nullable_to_non_nullable
-as IngressAudioEncodingOptionsRequest?,enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
-as bool?,videoEncodingOptions: freezed == videoEncodingOptions ? _self.videoEncodingOptions : videoEncodingOptions // ignore: cast_nullable_to_non_nullable
-as Map<String, IngressVideoEncodingOptionsRequest>?,
-  ));
+  /// Create a copy of IngressSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? audioEncodingOptions = freezed,
+    Object? enabled = freezed,
+    Object? videoEncodingOptions = freezed,
+  }) {
+    return _then(
+      IngressSettingsRequest(
+        audioEncodingOptions: freezed == audioEncodingOptions
+            ? _self.audioEncodingOptions
+            : audioEncodingOptions // ignore: cast_nullable_to_non_nullable
+                  as IngressAudioEncodingOptionsRequest?,
+        enabled: freezed == enabled
+            ? _self.enabled
+            : enabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        videoEncodingOptions: freezed == videoEncodingOptions
+            ? _self.videoEncodingOptions
+            : videoEncodingOptions // ignore: cast_nullable_to_non_nullable
+                  as Map<String, IngressVideoEncodingOptionsRequest>?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [IngressSettingsRequest].
-extension IngressSettingsRequestPatterns on IngressSettingsRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -21,4 +21,7 @@ IngressVideoEncodingOptionsRequest _$IngressVideoEncodingOptionsRequestFromJson(
 
 Map<String, dynamic> _$IngressVideoEncodingOptionsRequestToJson(
   IngressVideoEncodingOptionsRequest instance,
-) => <String, dynamic>{'layers': instance.layers, 'source': instance.source};
+) => <String, dynamic>{
+  'layers': instance.layers.map((e) => e.toJson()).toList(),
+  'source': instance.source.toJson(),
+};

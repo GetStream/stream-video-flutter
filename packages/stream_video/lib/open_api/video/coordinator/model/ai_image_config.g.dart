@@ -28,6 +28,6 @@ Map<String, dynamic> _$AIImageConfigToJson(AIImageConfig instance) =>
     <String, dynamic>{
       'async': instance.async,
       'enabled': instance.enabled,
-      'ocr_rules': instance.ocrRules,
-      'rules': instance.rules,
+      'ocr_rules': instance.ocrRules.map((e) => e.toJson()).toList(),
+      'rules': instance.rules.map((e) => e.toJson()).toList(),
     };

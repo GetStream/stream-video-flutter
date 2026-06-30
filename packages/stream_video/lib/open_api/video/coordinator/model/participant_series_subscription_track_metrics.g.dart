@@ -33,5 +33,7 @@ Map<String, dynamic> _$ParticipantSeriesSubscriptionTrackMetricsToJson(
   'publisher_name': instance.publisherName,
   'publisher_user_id': instance.publisherUserId,
   'publisher_user_session_id': instance.publisherUserSessionId,
-  'tracks': instance.tracks,
+  'tracks': instance.tracks?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
 };

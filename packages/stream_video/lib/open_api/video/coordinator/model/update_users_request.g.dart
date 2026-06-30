@@ -17,4 +17,6 @@ UpdateUsersRequest _$UpdateUsersRequestFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$UpdateUsersRequestToJson(UpdateUsersRequest instance) =>
-    <String, dynamic>{'users': instance.users};
+    <String, dynamic>{
+      'users': instance.users.map((k, e) => MapEntry(k, e.toJson())),
+    };

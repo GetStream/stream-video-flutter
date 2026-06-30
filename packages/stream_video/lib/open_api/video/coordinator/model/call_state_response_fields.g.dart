@@ -34,9 +34,9 @@ CallStateResponseFields _$CallStateResponseFieldsFromJson(
 Map<String, dynamic> _$CallStateResponseFieldsToJson(
   CallStateResponseFields instance,
 ) => <String, dynamic>{
-  'call': instance.call,
-  'members': instance.members,
-  'membership': instance.membership,
+  'call': instance.call.toJson(),
+  'members': instance.members.map((e) => e.toJson()).toList(),
+  'membership': instance.membership?.toJson(),
   'own_capabilities': instance.ownCapabilities
       .map((e) => _$OwnCapabilityEnumMap[e]!)
       .toList(),

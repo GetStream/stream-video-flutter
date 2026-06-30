@@ -45,7 +45,7 @@ Map<String, dynamic> _$QueryCallSessionParticipantStatsResponseToJson(
     instance.callEndedAt,
     const EpochDateTimeConverter().toJson,
   ),
-  'call_events': instance.callEvents,
+  'call_events': instance.callEvents?.map((e) => e.toJson()).toList(),
   'call_id': instance.callId,
   'call_session_id': instance.callSessionId,
   'call_started_at': _$JsonConverterToJson<Object, DateTime>(
@@ -53,10 +53,10 @@ Map<String, dynamic> _$QueryCallSessionParticipantStatsResponseToJson(
     const EpochDateTimeConverter().toJson,
   ),
   'call_type': instance.callType,
-  'counts': instance.counts,
+  'counts': instance.counts.toJson(),
   'duration': instance.duration,
   'next': instance.next,
-  'participants': instance.participants,
+  'participants': instance.participants.map((e) => e.toJson()).toList(),
   'prev': instance.prev,
   'tmp_data_source': instance.tmpDataSource,
 };

@@ -23,5 +23,5 @@ Map<String, dynamic> _$BlockListConfigToJson(BlockListConfig instance) =>
       'async': instance.async,
       'enabled': instance.enabled,
       'match_substring': instance.matchSubstring,
-      'rules': instance.rules,
+      'rules': instance.rules.map((e) => e.toJson()).toList(),
     };

@@ -33,5 +33,5 @@ Map<String, dynamic> _$CallClosedCaptionToJson(CallClosedCaption instance) =>
       'start_time': const EpochDateTimeConverter().toJson(instance.startTime),
       'text': instance.text,
       'translated': instance.translated,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };

@@ -24,6 +24,6 @@ Map<String, dynamic> _$CallRuleActionSequenceToJson(
   CallRuleActionSequence instance,
 ) => <String, dynamic>{
   'actions': instance.actions,
-  'call_options': instance.callOptions,
+  'call_options': instance.callOptions?.toJson(),
   'violation_number': instance.violationNumber,
 };

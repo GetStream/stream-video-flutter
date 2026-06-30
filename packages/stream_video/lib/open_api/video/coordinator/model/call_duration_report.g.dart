@@ -19,4 +19,6 @@ CallDurationReport _$CallDurationReportFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$CallDurationReportToJson(CallDurationReport instance) =>
-    <String, dynamic>{'histogram': instance.histogram};
+    <String, dynamic>{
+      'histogram': instance.histogram.map((e) => e.toJson()).toList(),
+    };

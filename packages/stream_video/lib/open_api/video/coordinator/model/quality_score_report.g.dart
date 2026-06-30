@@ -19,4 +19,6 @@ QualityScoreReport _$QualityScoreReportFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$QualityScoreReportToJson(QualityScoreReport instance) =>
-    <String, dynamic>{'histogram': instance.histogram};
+    <String, dynamic>{
+      'histogram': instance.histogram.map((e) => e.toJson()).toList(),
+    };

@@ -26,5 +26,5 @@ Map<String, dynamic> _$QueryUsersPayloadToJson(QueryUsersPayload instance) =>
       'limit': instance.limit,
       'offset': instance.offset,
       'presence': instance.presence,
-      'sort': instance.sort,
+      'sort': instance.sort?.map((e) => e.toJson()).toList(),
     };

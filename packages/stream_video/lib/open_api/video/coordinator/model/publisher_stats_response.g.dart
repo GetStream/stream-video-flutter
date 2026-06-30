@@ -19,7 +19,7 @@ PublisherStatsResponse _$PublisherStatsResponseFromJson(
 Map<String, dynamic> _$PublisherStatsResponseToJson(
   PublisherStatsResponse instance,
 ) => <String, dynamic>{
-  'by_track': instance.byTrack,
+  'by_track': instance.byTrack?.map((e) => e.toJson()).toList(),
   'total': instance.total,
   'unique': instance.unique,
 };

@@ -26,12 +26,12 @@ CallMissedEvent _$CallMissedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CallMissedEventToJson(CallMissedEvent instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'call_cid': instance.callCid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'members': instance.members,
+      'members': instance.members.map((e) => e.toJson()).toList(),
       'notify_user': instance.notifyUser,
       'session_id': instance.sessionId,
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };

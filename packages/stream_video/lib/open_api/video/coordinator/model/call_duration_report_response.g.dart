@@ -22,4 +22,4 @@ CallDurationReportResponse _$CallDurationReportResponseFromJson(
 
 Map<String, dynamic> _$CallDurationReportResponseToJson(
   CallDurationReportResponse instance,
-) => <String, dynamic>{'daily': instance.daily};
+) => <String, dynamic>{'daily': instance.daily.map((e) => e.toJson()).toList()};

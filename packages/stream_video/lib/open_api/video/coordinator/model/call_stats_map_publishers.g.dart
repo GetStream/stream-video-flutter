@@ -20,4 +20,6 @@ CallStatsMapPublishers _$CallStatsMapPublishersFromJson(
 
 Map<String, dynamic> _$CallStatsMapPublishersToJson(
   CallStatsMapPublishers instance,
-) => <String, dynamic>{'publishers': instance.publishers};
+) => <String, dynamic>{
+  'publishers': instance.publishers.map((e) => e.toJson()).toList(),
+};

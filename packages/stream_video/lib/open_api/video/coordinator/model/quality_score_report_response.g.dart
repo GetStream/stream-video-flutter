@@ -22,4 +22,4 @@ QualityScoreReportResponse _$QualityScoreReportResponseFromJson(
 
 Map<String, dynamic> _$QualityScoreReportResponseToJson(
   QualityScoreReportResponse instance,
-) => <String, dynamic>{'daily': instance.daily};
+) => <String, dynamic>{'daily': instance.daily.map((e) => e.toJson()).toList()};

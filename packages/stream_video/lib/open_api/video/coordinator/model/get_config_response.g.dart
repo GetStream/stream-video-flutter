@@ -15,4 +15,7 @@ GetConfigResponse _$GetConfigResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$GetConfigResponseToJson(GetConfigResponse instance) =>
-    <String, dynamic>{'config': instance.config, 'duration': instance.duration};
+    <String, dynamic>{
+      'config': instance.config?.toJson(),
+      'duration': instance.duration,
+    };

@@ -57,11 +57,15 @@ QueryReviewQueueResponse _$QueryReviewQueueResponseFromJson(
 Map<String, dynamic> _$QueryReviewQueueResponseToJson(
   QueryReviewQueueResponse instance,
 ) => <String, dynamic>{
-  'action_config': instance.actionConfig,
-  'default_action_config': instance.defaultActionConfig,
+  'action_config': instance.actionConfig.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
+  'default_action_config': instance.defaultActionConfig?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
   'duration': instance.duration,
-  'filter_config': instance.filterConfig,
-  'items': instance.items,
+  'filter_config': instance.filterConfig?.toJson(),
+  'items': instance.items.map((e) => e.toJson()).toList(),
   'next': instance.next,
   'prev': instance.prev,
   'stats': instance.stats,

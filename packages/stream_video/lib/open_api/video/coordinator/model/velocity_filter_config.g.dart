@@ -33,5 +33,5 @@ Map<String, dynamic> _$VelocityFilterConfigToJson(
   'cids_per_user': instance.cidsPerUser,
   'enabled': instance.enabled,
   'first_message_only': instance.firstMessageOnly,
-  'rules': instance.rules,
+  'rules': instance.rules.map((e) => e.toJson()).toList(),
 };

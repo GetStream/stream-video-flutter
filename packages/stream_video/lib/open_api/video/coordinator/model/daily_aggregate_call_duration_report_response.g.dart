@@ -17,4 +17,7 @@ _$DailyAggregateCallDurationReportResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DailyAggregateCallDurationReportResponseToJson(
   DailyAggregateCallDurationReportResponse instance,
-) => <String, dynamic>{'date': instance.date, 'report': instance.report};
+) => <String, dynamic>{
+  'date': instance.date,
+  'report': instance.report.toJson(),
+};

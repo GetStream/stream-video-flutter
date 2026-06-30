@@ -22,6 +22,6 @@ Map<String, dynamic> _$QueryPollsResponseToJson(QueryPollsResponse instance) =>
     <String, dynamic>{
       'duration': instance.duration,
       'next': instance.next,
-      'polls': instance.polls,
+      'polls': instance.polls.map((e) => e.toJson()).toList(),
       'prev': instance.prev,
     };

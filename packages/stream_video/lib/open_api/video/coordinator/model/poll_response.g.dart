@@ -12,4 +12,7 @@ PollResponse _$PollResponseFromJson(Map<String, dynamic> json) => PollResponse(
 );
 
 Map<String, dynamic> _$PollResponseToJson(PollResponse instance) =>
-    <String, dynamic>{'duration': instance.duration, 'poll': instance.poll};
+    <String, dynamic>{
+      'duration': instance.duration,
+      'poll': instance.poll.toJson(),
+    };

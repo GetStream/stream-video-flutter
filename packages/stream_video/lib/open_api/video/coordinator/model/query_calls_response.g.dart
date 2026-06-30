@@ -23,7 +23,7 @@ QueryCallsResponse _$QueryCallsResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$QueryCallsResponseToJson(QueryCallsResponse instance) =>
     <String, dynamic>{
-      'calls': instance.calls,
+      'calls': instance.calls.map((e) => e.toJson()).toList(),
       'duration': instance.duration,
       'next': instance.next,
       'prev': instance.prev,

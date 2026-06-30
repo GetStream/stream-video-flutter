@@ -18,6 +18,6 @@ UpdateBlockListResponse _$UpdateBlockListResponseFromJson(
 Map<String, dynamic> _$UpdateBlockListResponseToJson(
   UpdateBlockListResponse instance,
 ) => <String, dynamic>{
-  'blocklist': instance.blocklist,
+  'blocklist': instance.blocklist?.toJson(),
   'duration': instance.duration,
 };

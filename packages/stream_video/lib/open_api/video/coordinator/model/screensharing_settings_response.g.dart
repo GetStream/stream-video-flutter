@@ -23,5 +23,5 @@ Map<String, dynamic> _$ScreensharingSettingsResponseToJson(
 ) => <String, dynamic>{
   'access_request_enabled': instance.accessRequestEnabled,
   'enabled': instance.enabled,
-  'target_resolution': instance.targetResolution,
+  'target_resolution': instance.targetResolution?.toJson(),
 };

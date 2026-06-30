@@ -93,14 +93,14 @@ Map<String, dynamic> _$ChannelConfigWithInfoToJson(
   'automod': _$ChannelConfigWithInfoAutomodEnumMap[instance.automod]!,
   'automod_behavior':
       _$ChannelConfigWithInfoAutomodBehaviorEnumMap[instance.automodBehavior]!,
-  'automod_thresholds': instance.automodThresholds,
+  'automod_thresholds': instance.automodThresholds?.toJson(),
   'blocklist': instance.blocklist,
   'blocklist_behavior':
       _$ChannelConfigWithInfoBlocklistBehaviorEnumMap[instance
           .blocklistBehavior],
-  'blocklists': instance.blocklists,
-  'chat_preferences': instance.chatPreferences,
-  'commands': instance.commands,
+  'blocklists': instance.blocklists?.map((e) => e.toJson()).toList(),
+  'chat_preferences': instance.chatPreferences?.toJson(),
+  'commands': instance.commands.map((e) => e.toJson()).toList(),
   'connect_events': instance.connectEvents,
   'count_messages': instance.countMessages,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),

@@ -26,6 +26,6 @@ Map<String, dynamic> _$BulkActionAppealsResponseToJson(
   BulkActionAppealsResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'errors': instance.errors,
-  'results': instance.results,
+  'errors': instance.errors.map((e) => e.toJson()).toList(),
+  'results': instance.results.map((e) => e.toJson()).toList(),
 };

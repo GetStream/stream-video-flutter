@@ -18,7 +18,7 @@ CallDeletedEvent _$CallDeletedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CallDeletedEventToJson(CallDeletedEvent instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'call_cid': instance.callCid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
       'type': instance.type,

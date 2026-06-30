@@ -28,7 +28,7 @@ Map<String, dynamic> _$CallSessionParticipantLeftEventToJson(
   'call_cid': instance.callCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'duration_seconds': instance.durationSeconds,
-  'participant': instance.participant,
+  'participant': instance.participant.toJson(),
   'reason': instance.reason,
   'session_id': instance.sessionId,
   'type': instance.type,

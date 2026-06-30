@@ -9,49 +9,50 @@ part of 'calls_per_day_report_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallsPerDayReportResponse {
+  List<DailyAggregateCallsPerDayReportResponse> get daily;
 
- List<DailyAggregateCallsPerDayReportResponse> get daily;
-/// Create a copy of CallsPerDayReportResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallsPerDayReportResponseCopyWith<CallsPerDayReportResponse> get copyWith => _$CallsPerDayReportResponseCopyWithImpl<CallsPerDayReportResponse>(this as CallsPerDayReportResponse, _$identity);
+  /// Create a copy of CallsPerDayReportResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallsPerDayReportResponseCopyWith<CallsPerDayReportResponse> get copyWith =>
+      _$CallsPerDayReportResponseCopyWithImpl<CallsPerDayReportResponse>(
+        this as CallsPerDayReportResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallsPerDayReportResponse &&
+            const DeepCollectionEquality().equals(other.daily, daily));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(daily));
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallsPerDayReportResponse&&const DeepCollectionEquality().equals(other.daily, daily));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(daily));
-
-@override
-String toString() {
-  return 'CallsPerDayReportResponse(daily: $daily)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallsPerDayReportResponse(daily: $daily)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallsPerDayReportResponseCopyWith<$Res>  {
-  factory $CallsPerDayReportResponseCopyWith(CallsPerDayReportResponse value, $Res Function(CallsPerDayReportResponse) _then) = _$CallsPerDayReportResponseCopyWithImpl;
-@useResult
-$Res call({
- List<DailyAggregateCallsPerDayReportResponse> daily
-});
-
-
-
-
+abstract mixin class $CallsPerDayReportResponseCopyWith<$Res> {
+  factory $CallsPerDayReportResponseCopyWith(
+    CallsPerDayReportResponse value,
+    $Res Function(CallsPerDayReportResponse) _then,
+  ) = _$CallsPerDayReportResponseCopyWithImpl;
+  @useResult
+  $Res call({List<DailyAggregateCallsPerDayReportResponse> daily});
 }
+
 /// @nodoc
 class _$CallsPerDayReportResponseCopyWithImpl<$Res>
     implements $CallsPerDayReportResponseCopyWith<$Res> {
@@ -60,140 +61,18 @@ class _$CallsPerDayReportResponseCopyWithImpl<$Res>
   final CallsPerDayReportResponse _self;
   final $Res Function(CallsPerDayReportResponse) _then;
 
-/// Create a copy of CallsPerDayReportResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? daily = null,}) {
-  return _then(CallsPerDayReportResponse(
-daily: null == daily ? _self.daily : daily // ignore: cast_nullable_to_non_nullable
-as List<DailyAggregateCallsPerDayReportResponse>,
-  ));
+  /// Create a copy of CallsPerDayReportResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? daily = null}) {
+    return _then(
+      CallsPerDayReportResponse(
+        daily: null == daily
+            ? _self.daily
+            : daily // ignore: cast_nullable_to_non_nullable
+                  as List<DailyAggregateCallsPerDayReportResponse>,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallsPerDayReportResponse].
-extension CallsPerDayReportResponsePatterns on CallsPerDayReportResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

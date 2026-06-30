@@ -15,4 +15,7 @@ GetApplicationResponse _$GetApplicationResponseFromJson(
 
 Map<String, dynamic> _$GetApplicationResponseToJson(
   GetApplicationResponse instance,
-) => <String, dynamic>{'app': instance.app, 'duration': instance.duration};
+) => <String, dynamic>{
+  'app': instance.app.toJson(),
+  'duration': instance.duration,
+};

@@ -24,7 +24,7 @@ ResolveSipInboundRequest _$ResolveSipInboundRequestFromJson(
 Map<String, dynamic> _$ResolveSipInboundRequestToJson(
   ResolveSipInboundRequest instance,
 ) => <String, dynamic>{
-  'challenge': instance.challenge,
+  'challenge': instance.challenge?.toJson(),
   'routing_number': instance.routingNumber,
   'sip_caller_number': instance.sipCallerNumber,
   'sip_headers': instance.sipHeaders,

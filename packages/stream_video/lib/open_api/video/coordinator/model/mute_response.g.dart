@@ -22,7 +22,7 @@ MuteResponse _$MuteResponseFromJson(Map<String, dynamic> json) => MuteResponse(
 Map<String, dynamic> _$MuteResponseToJson(MuteResponse instance) =>
     <String, dynamic>{
       'duration': instance.duration,
-      'mutes': instance.mutes,
+      'mutes': instance.mutes?.map((e) => e.toJson()).toList(),
       'non_existing_users': instance.nonExistingUsers,
-      'own_user': instance.ownUser,
+      'own_user': instance.ownUser?.toJson(),
     };

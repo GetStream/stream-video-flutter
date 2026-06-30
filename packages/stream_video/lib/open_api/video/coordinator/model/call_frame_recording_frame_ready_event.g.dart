@@ -39,5 +39,5 @@ Map<String, dynamic> _$CallFrameRecordingFrameReadyEventToJson(
   'track_type': instance.trackType,
   'type': instance.type,
   'url': instance.url,
-  'users': instance.users,
+  'users': instance.users.map((k, e) => MapEntry(k, e.toJson())),
 };

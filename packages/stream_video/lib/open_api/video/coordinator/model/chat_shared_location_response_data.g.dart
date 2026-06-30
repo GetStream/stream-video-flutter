@@ -42,7 +42,7 @@ Map<String, dynamic> _$ChatSharedLocationResponseDataToJson(
   ),
   'latitude': instance.latitude,
   'longitude': instance.longitude,
-  'message': instance.message,
+  'message': instance.message?.toJson(),
   'message_id': instance.messageId,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
   'user_id': instance.userId,

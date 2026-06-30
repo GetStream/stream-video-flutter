@@ -25,7 +25,7 @@ Map<String, dynamic> _$ReportByHistogramBucketToJson(
 ) => <String, dynamic>{
   'category': instance.category,
   'count': instance.count,
-  'lower_bound': instance.lowerBound,
+  'lower_bound': instance.lowerBound?.toJson(),
   'sum': instance.sum,
-  'upper_bound': instance.upperBound,
+  'upper_bound': instance.upperBound?.toJson(),
 };

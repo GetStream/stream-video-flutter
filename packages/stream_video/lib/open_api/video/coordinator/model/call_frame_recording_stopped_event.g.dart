@@ -21,7 +21,7 @@ CallFrameRecordingStoppedEvent _$CallFrameRecordingStoppedEventFromJson(
 Map<String, dynamic> _$CallFrameRecordingStoppedEventToJson(
   CallFrameRecordingStoppedEvent instance,
 ) => <String, dynamic>{
-  'call': instance.call,
+  'call': instance.call.toJson(),
   'call_cid': instance.callCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'egress_id': instance.egressId,

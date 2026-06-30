@@ -21,7 +21,7 @@ CallSessionStartedEvent _$CallSessionStartedEventFromJson(
 Map<String, dynamic> _$CallSessionStartedEventToJson(
   CallSessionStartedEvent instance,
 ) => <String, dynamic>{
-  'call': instance.call,
+  'call': instance.call.toJson(),
   'call_cid': instance.callCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'session_id': instance.sessionId,

@@ -18,4 +18,7 @@ _$DailyAggregateCallParticipantCountReportResponseFromJson(
 
 Map<String, dynamic> _$DailyAggregateCallParticipantCountReportResponseToJson(
   DailyAggregateCallParticipantCountReportResponse instance,
-) => <String, dynamic>{'date': instance.date, 'report': instance.report};
+) => <String, dynamic>{
+  'date': instance.date,
+  'report': instance.report.toJson(),
+};

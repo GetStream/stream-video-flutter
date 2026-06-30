@@ -9,49 +9,52 @@ part of 'user_role_parameters.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UserRoleParameters {
+  String? get operator;
+  String? get role;
 
- String? get operator; String? get role;
-/// Create a copy of UserRoleParameters
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UserRoleParametersCopyWith<UserRoleParameters> get copyWith => _$UserRoleParametersCopyWithImpl<UserRoleParameters>(this as UserRoleParameters, _$identity);
+  /// Create a copy of UserRoleParameters
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UserRoleParametersCopyWith<UserRoleParameters> get copyWith =>
+      _$UserRoleParametersCopyWithImpl<UserRoleParameters>(
+        this as UserRoleParameters,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UserRoleParameters &&
+            (identical(other.operator, operator) ||
+                other.operator == operator) &&
+            (identical(other.role, role) || other.role == role));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, operator, role);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserRoleParameters&&(identical(other.operator, operator) || other.operator == operator)&&(identical(other.role, role) || other.role == role));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,operator,role);
-
-@override
-String toString() {
-  return 'UserRoleParameters(operator: $operator, role: $role)';
-}
-
-
+  @override
+  String toString() {
+    return 'UserRoleParameters(operator: $operator, role: $role)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UserRoleParametersCopyWith<$Res>  {
-  factory $UserRoleParametersCopyWith(UserRoleParameters value, $Res Function(UserRoleParameters) _then) = _$UserRoleParametersCopyWithImpl;
-@useResult
-$Res call({
- String? operator, String? role
-});
-
-
-
-
+abstract mixin class $UserRoleParametersCopyWith<$Res> {
+  factory $UserRoleParametersCopyWith(
+    UserRoleParameters value,
+    $Res Function(UserRoleParameters) _then,
+  ) = _$UserRoleParametersCopyWithImpl;
+  @useResult
+  $Res call({String? operator, String? role});
 }
+
 /// @nodoc
 class _$UserRoleParametersCopyWithImpl<$Res>
     implements $UserRoleParametersCopyWith<$Res> {
@@ -60,141 +63,22 @@ class _$UserRoleParametersCopyWithImpl<$Res>
   final UserRoleParameters _self;
   final $Res Function(UserRoleParameters) _then;
 
-/// Create a copy of UserRoleParameters
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? operator = freezed,Object? role = freezed,}) {
-  return _then(UserRoleParameters(
-operator: freezed == operator ? _self.operator : operator // ignore: cast_nullable_to_non_nullable
-as String?,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of UserRoleParameters
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? operator = freezed, Object? role = freezed}) {
+    return _then(
+      UserRoleParameters(
+        operator: freezed == operator
+            ? _self.operator
+            : operator // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        role: freezed == role
+            ? _self.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UserRoleParameters].
-extension UserRoleParametersPatterns on UserRoleParameters {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

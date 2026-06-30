@@ -44,7 +44,7 @@ Map<String, dynamic> _$UserUnbannedEventToJson(UserUnbannedEvent instance) =>
       'channel_type': instance.channelType,
       'cid': instance.cid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'created_by': instance.createdBy,
+      'created_by': instance.createdBy?.toJson(),
       'custom': instance.custom,
       'received_at': _$JsonConverterToJson<Object, DateTime>(
         instance.receivedAt,
@@ -53,7 +53,7 @@ Map<String, dynamic> _$UserUnbannedEventToJson(UserUnbannedEvent instance) =>
       'shadow': instance.shadow,
       'team': instance.team,
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

@@ -9,49 +9,64 @@ part of 'submit_action_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$SubmitActionResponse {
+  AppealItemResponse? get appealItem;
+  String? get autoRestoreWarning;
+  String get duration;
+  ReviewQueueItemResponse? get item;
 
- AppealItemResponse? get appealItem; String? get autoRestoreWarning; String get duration; ReviewQueueItemResponse? get item;
-/// Create a copy of SubmitActionResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SubmitActionResponseCopyWith<SubmitActionResponse> get copyWith => _$SubmitActionResponseCopyWithImpl<SubmitActionResponse>(this as SubmitActionResponse, _$identity);
+  /// Create a copy of SubmitActionResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SubmitActionResponseCopyWith<SubmitActionResponse> get copyWith =>
+      _$SubmitActionResponseCopyWithImpl<SubmitActionResponse>(
+        this as SubmitActionResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SubmitActionResponse &&
+            (identical(other.appealItem, appealItem) ||
+                other.appealItem == appealItem) &&
+            (identical(other.autoRestoreWarning, autoRestoreWarning) ||
+                other.autoRestoreWarning == autoRestoreWarning) &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
+            (identical(other.item, item) || other.item == item));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, appealItem, autoRestoreWarning, duration, item);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubmitActionResponse&&(identical(other.appealItem, appealItem) || other.appealItem == appealItem)&&(identical(other.autoRestoreWarning, autoRestoreWarning) || other.autoRestoreWarning == autoRestoreWarning)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.item, item) || other.item == item));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,appealItem,autoRestoreWarning,duration,item);
-
-@override
-String toString() {
-  return 'SubmitActionResponse(appealItem: $appealItem, autoRestoreWarning: $autoRestoreWarning, duration: $duration, item: $item)';
-}
-
-
+  @override
+  String toString() {
+    return 'SubmitActionResponse(appealItem: $appealItem, autoRestoreWarning: $autoRestoreWarning, duration: $duration, item: $item)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $SubmitActionResponseCopyWith<$Res>  {
-  factory $SubmitActionResponseCopyWith(SubmitActionResponse value, $Res Function(SubmitActionResponse) _then) = _$SubmitActionResponseCopyWithImpl;
-@useResult
-$Res call({
- AppealItemResponse? appealItem, String? autoRestoreWarning, String duration, ReviewQueueItemResponse? item
-});
-
-
-
-
+abstract mixin class $SubmitActionResponseCopyWith<$Res> {
+  factory $SubmitActionResponseCopyWith(
+    SubmitActionResponse value,
+    $Res Function(SubmitActionResponse) _then,
+  ) = _$SubmitActionResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    AppealItemResponse? appealItem,
+    String? autoRestoreWarning,
+    String duration,
+    ReviewQueueItemResponse? item,
+  });
 }
+
 /// @nodoc
 class _$SubmitActionResponseCopyWithImpl<$Res>
     implements $SubmitActionResponseCopyWith<$Res> {
@@ -60,143 +75,35 @@ class _$SubmitActionResponseCopyWithImpl<$Res>
   final SubmitActionResponse _self;
   final $Res Function(SubmitActionResponse) _then;
 
-/// Create a copy of SubmitActionResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? appealItem = freezed,Object? autoRestoreWarning = freezed,Object? duration = null,Object? item = freezed,}) {
-  return _then(SubmitActionResponse(
-appealItem: freezed == appealItem ? _self.appealItem : appealItem // ignore: cast_nullable_to_non_nullable
-as AppealItemResponse?,autoRestoreWarning: freezed == autoRestoreWarning ? _self.autoRestoreWarning : autoRestoreWarning // ignore: cast_nullable_to_non_nullable
-as String?,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
-as String,item: freezed == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
-as ReviewQueueItemResponse?,
-  ));
+  /// Create a copy of SubmitActionResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? appealItem = freezed,
+    Object? autoRestoreWarning = freezed,
+    Object? duration = null,
+    Object? item = freezed,
+  }) {
+    return _then(
+      SubmitActionResponse(
+        appealItem: freezed == appealItem
+            ? _self.appealItem
+            : appealItem // ignore: cast_nullable_to_non_nullable
+                  as AppealItemResponse?,
+        autoRestoreWarning: freezed == autoRestoreWarning
+            ? _self.autoRestoreWarning
+            : autoRestoreWarning // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        duration: null == duration
+            ? _self.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as String,
+        item: freezed == item
+            ? _self.item
+            : item // ignore: cast_nullable_to_non_nullable
+                  as ReviewQueueItemResponse?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [SubmitActionResponse].
-extension SubmitActionResponsePatterns on SubmitActionResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

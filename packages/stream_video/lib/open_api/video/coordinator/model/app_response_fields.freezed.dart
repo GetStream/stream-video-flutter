@@ -9,49 +9,83 @@ part of 'app_response_fields.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$AppResponseFields {
+  bool get asyncUrlEnrichEnabled;
+  bool get autoTranslationEnabled;
+  FileUploadConfig get fileUploadConfig;
+  int get id;
+  FileUploadConfig get imageUploadConfig;
+  String get name;
+  String get placement;
 
- bool get asyncUrlEnrichEnabled; bool get autoTranslationEnabled; FileUploadConfig get fileUploadConfig; int get id; FileUploadConfig get imageUploadConfig; String get name; String get placement;
-/// Create a copy of AppResponseFields
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$AppResponseFieldsCopyWith<AppResponseFields> get copyWith => _$AppResponseFieldsCopyWithImpl<AppResponseFields>(this as AppResponseFields, _$identity);
+  /// Create a copy of AppResponseFields
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $AppResponseFieldsCopyWith<AppResponseFields> get copyWith =>
+      _$AppResponseFieldsCopyWithImpl<AppResponseFields>(
+        this as AppResponseFields,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AppResponseFields &&
+            (identical(other.asyncUrlEnrichEnabled, asyncUrlEnrichEnabled) ||
+                other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled) &&
+            (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
+                other.autoTranslationEnabled == autoTranslationEnabled) &&
+            (identical(other.fileUploadConfig, fileUploadConfig) ||
+                other.fileUploadConfig == fileUploadConfig) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.imageUploadConfig, imageUploadConfig) ||
+                other.imageUploadConfig == imageUploadConfig) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.placement, placement) ||
+                other.placement == placement));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    asyncUrlEnrichEnabled,
+    autoTranslationEnabled,
+    fileUploadConfig,
+    id,
+    imageUploadConfig,
+    name,
+    placement,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppResponseFields&&(identical(other.asyncUrlEnrichEnabled, asyncUrlEnrichEnabled) || other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled)&&(identical(other.autoTranslationEnabled, autoTranslationEnabled) || other.autoTranslationEnabled == autoTranslationEnabled)&&(identical(other.fileUploadConfig, fileUploadConfig) || other.fileUploadConfig == fileUploadConfig)&&(identical(other.id, id) || other.id == id)&&(identical(other.imageUploadConfig, imageUploadConfig) || other.imageUploadConfig == imageUploadConfig)&&(identical(other.name, name) || other.name == name)&&(identical(other.placement, placement) || other.placement == placement));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,asyncUrlEnrichEnabled,autoTranslationEnabled,fileUploadConfig,id,imageUploadConfig,name,placement);
-
-@override
-String toString() {
-  return 'AppResponseFields(asyncUrlEnrichEnabled: $asyncUrlEnrichEnabled, autoTranslationEnabled: $autoTranslationEnabled, fileUploadConfig: $fileUploadConfig, id: $id, imageUploadConfig: $imageUploadConfig, name: $name, placement: $placement)';
-}
-
-
+  @override
+  String toString() {
+    return 'AppResponseFields(asyncUrlEnrichEnabled: $asyncUrlEnrichEnabled, autoTranslationEnabled: $autoTranslationEnabled, fileUploadConfig: $fileUploadConfig, id: $id, imageUploadConfig: $imageUploadConfig, name: $name, placement: $placement)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $AppResponseFieldsCopyWith<$Res>  {
-  factory $AppResponseFieldsCopyWith(AppResponseFields value, $Res Function(AppResponseFields) _then) = _$AppResponseFieldsCopyWithImpl;
-@useResult
-$Res call({
- bool asyncUrlEnrichEnabled, bool autoTranslationEnabled, FileUploadConfig fileUploadConfig, int id, FileUploadConfig imageUploadConfig, String name, String placement
-});
-
-
-
-
+abstract mixin class $AppResponseFieldsCopyWith<$Res> {
+  factory $AppResponseFieldsCopyWith(
+    AppResponseFields value,
+    $Res Function(AppResponseFields) _then,
+  ) = _$AppResponseFieldsCopyWithImpl;
+  @useResult
+  $Res call({
+    bool asyncUrlEnrichEnabled,
+    bool autoTranslationEnabled,
+    FileUploadConfig fileUploadConfig,
+    int id,
+    FileUploadConfig imageUploadConfig,
+    String name,
+    String placement,
+  });
 }
+
 /// @nodoc
 class _$AppResponseFieldsCopyWithImpl<$Res>
     implements $AppResponseFieldsCopyWith<$Res> {
@@ -60,146 +94,50 @@ class _$AppResponseFieldsCopyWithImpl<$Res>
   final AppResponseFields _self;
   final $Res Function(AppResponseFields) _then;
 
-/// Create a copy of AppResponseFields
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? asyncUrlEnrichEnabled = null,Object? autoTranslationEnabled = null,Object? fileUploadConfig = null,Object? id = null,Object? imageUploadConfig = null,Object? name = null,Object? placement = null,}) {
-  return _then(AppResponseFields(
-asyncUrlEnrichEnabled: null == asyncUrlEnrichEnabled ? _self.asyncUrlEnrichEnabled : asyncUrlEnrichEnabled // ignore: cast_nullable_to_non_nullable
-as bool,autoTranslationEnabled: null == autoTranslationEnabled ? _self.autoTranslationEnabled : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable
-as bool,fileUploadConfig: null == fileUploadConfig ? _self.fileUploadConfig : fileUploadConfig // ignore: cast_nullable_to_non_nullable
-as FileUploadConfig,id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,imageUploadConfig: null == imageUploadConfig ? _self.imageUploadConfig : imageUploadConfig // ignore: cast_nullable_to_non_nullable
-as FileUploadConfig,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,placement: null == placement ? _self.placement : placement // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of AppResponseFields
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? asyncUrlEnrichEnabled = null,
+    Object? autoTranslationEnabled = null,
+    Object? fileUploadConfig = null,
+    Object? id = null,
+    Object? imageUploadConfig = null,
+    Object? name = null,
+    Object? placement = null,
+  }) {
+    return _then(
+      AppResponseFields(
+        asyncUrlEnrichEnabled: null == asyncUrlEnrichEnabled
+            ? _self.asyncUrlEnrichEnabled
+            : asyncUrlEnrichEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        autoTranslationEnabled: null == autoTranslationEnabled
+            ? _self.autoTranslationEnabled
+            : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        fileUploadConfig: null == fileUploadConfig
+            ? _self.fileUploadConfig
+            : fileUploadConfig // ignore: cast_nullable_to_non_nullable
+                  as FileUploadConfig,
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as int,
+        imageUploadConfig: null == imageUploadConfig
+            ? _self.imageUploadConfig
+            : imageUploadConfig // ignore: cast_nullable_to_non_nullable
+                  as FileUploadConfig,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        placement: null == placement
+            ? _self.placement
+            : placement // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [AppResponseFields].
-extension AppResponseFieldsPatterns on AppResponseFields {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

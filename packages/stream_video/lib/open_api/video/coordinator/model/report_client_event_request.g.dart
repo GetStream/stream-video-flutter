@@ -18,4 +18,6 @@ ReportClientEventRequest _$ReportClientEventRequestFromJson(
 
 Map<String, dynamic> _$ReportClientEventRequestToJson(
   ReportClientEventRequest instance,
-) => <String, dynamic>{'events': instance.events};
+) => <String, dynamic>{
+  'events': instance.events.map((e) => e.toJson()).toList(),
+};

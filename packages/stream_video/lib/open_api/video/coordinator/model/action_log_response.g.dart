@@ -44,10 +44,10 @@ Map<String, dynamic> _$ActionLogResponseToJson(ActionLogResponse instance) =>
       'id': instance.id,
       'reason': instance.reason,
       'reporter_type': instance.reporterType,
-      'review_queue_item': instance.reviewQueueItem,
-      'target_user': instance.targetUser,
+      'review_queue_item': instance.reviewQueueItem?.toJson(),
+      'target_user': instance.targetUser?.toJson(),
       'target_user_id': instance.targetUserId,
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user?.toJson(),
       'user_id': instance.userId,
     };

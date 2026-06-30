@@ -13,4 +13,7 @@ GoLiveResponse _$GoLiveResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$GoLiveResponseToJson(GoLiveResponse instance) =>
-    <String, dynamic>{'call': instance.call, 'duration': instance.duration};
+    <String, dynamic>{
+      'call': instance.call.toJson(),
+      'duration': instance.duration,
+    };

@@ -82,10 +82,10 @@ Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) =>
       'auto_translation_language': instance.autoTranslationLanguage,
       'blocked': instance.blocked,
       'cid': instance.cid,
-      'config': instance.config,
+      'config': instance.config?.toJson(),
       'cooldown': instance.cooldown,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'created_by': instance.createdBy,
+      'created_by': instance.createdBy?.toJson(),
       'custom': instance.custom,
       'deleted_at': _$JsonConverterToJson<Object, DateTime>(
         instance.deletedAt,
@@ -105,7 +105,7 @@ Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) =>
         const EpochDateTimeConverter().toJson,
       ),
       'member_count': instance.memberCount,
-      'members': instance.members,
+      'members': instance.members?.map((e) => e.toJson()).toList(),
       'message_count': instance.messageCount,
       'mute_expires_at': _$JsonConverterToJson<Object, DateTime>(
         instance.muteExpiresAt,
@@ -120,7 +120,7 @@ Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) =>
         instance.truncatedAt,
         const EpochDateTimeConverter().toJson,
       ),
-      'truncated_by': instance.truncatedBy,
+      'truncated_by': instance.truncatedBy?.toJson(),
       'type': instance.type,
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
     };

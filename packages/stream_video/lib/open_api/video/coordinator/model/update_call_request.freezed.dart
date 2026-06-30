@@ -9,49 +9,64 @@ part of 'update_call_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UpdateCallRequest {
+  Map<String, Object?>? get custom;
+  CallSettingsRequest? get settingsOverride;
+  DateTime? get startsAt;
 
- Map<String, Object?>? get custom; CallSettingsRequest? get settingsOverride; DateTime? get startsAt;
-/// Create a copy of UpdateCallRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpdateCallRequestCopyWith<UpdateCallRequest> get copyWith => _$UpdateCallRequestCopyWithImpl<UpdateCallRequest>(this as UpdateCallRequest, _$identity);
+  /// Create a copy of UpdateCallRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdateCallRequestCopyWith<UpdateCallRequest> get copyWith =>
+      _$UpdateCallRequestCopyWithImpl<UpdateCallRequest>(
+        this as UpdateCallRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpdateCallRequest &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.settingsOverride, settingsOverride) ||
+                other.settingsOverride == settingsOverride) &&
+            (identical(other.startsAt, startsAt) ||
+                other.startsAt == startsAt));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(custom),
+    settingsOverride,
+    startsAt,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateCallRequest&&const DeepCollectionEquality().equals(other.custom, custom)&&(identical(other.settingsOverride, settingsOverride) || other.settingsOverride == settingsOverride)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(custom),settingsOverride,startsAt);
-
-@override
-String toString() {
-  return 'UpdateCallRequest(custom: $custom, settingsOverride: $settingsOverride, startsAt: $startsAt)';
-}
-
-
+  @override
+  String toString() {
+    return 'UpdateCallRequest(custom: $custom, settingsOverride: $settingsOverride, startsAt: $startsAt)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UpdateCallRequestCopyWith<$Res>  {
-  factory $UpdateCallRequestCopyWith(UpdateCallRequest value, $Res Function(UpdateCallRequest) _then) = _$UpdateCallRequestCopyWithImpl;
-@useResult
-$Res call({
- Map<String, Object?>? custom, CallSettingsRequest? settingsOverride, DateTime? startsAt
-});
-
-
-
-
+abstract mixin class $UpdateCallRequestCopyWith<$Res> {
+  factory $UpdateCallRequestCopyWith(
+    UpdateCallRequest value,
+    $Res Function(UpdateCallRequest) _then,
+  ) = _$UpdateCallRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    Map<String, Object?>? custom,
+    CallSettingsRequest? settingsOverride,
+    DateTime? startsAt,
+  });
 }
+
 /// @nodoc
 class _$UpdateCallRequestCopyWithImpl<$Res>
     implements $UpdateCallRequestCopyWith<$Res> {
@@ -60,142 +75,30 @@ class _$UpdateCallRequestCopyWithImpl<$Res>
   final UpdateCallRequest _self;
   final $Res Function(UpdateCallRequest) _then;
 
-/// Create a copy of UpdateCallRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? custom = freezed,Object? settingsOverride = freezed,Object? startsAt = freezed,}) {
-  return _then(UpdateCallRequest(
-custom: freezed == custom ? _self.custom : custom // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>?,settingsOverride: freezed == settingsOverride ? _self.settingsOverride : settingsOverride // ignore: cast_nullable_to_non_nullable
-as CallSettingsRequest?,startsAt: freezed == startsAt ? _self.startsAt : startsAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
-  ));
+  /// Create a copy of UpdateCallRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? custom = freezed,
+    Object? settingsOverride = freezed,
+    Object? startsAt = freezed,
+  }) {
+    return _then(
+      UpdateCallRequest(
+        custom: freezed == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        settingsOverride: freezed == settingsOverride
+            ? _self.settingsOverride
+            : settingsOverride // ignore: cast_nullable_to_non_nullable
+                  as CallSettingsRequest?,
+        startsAt: freezed == startsAt
+            ? _self.startsAt
+            : startsAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UpdateCallRequest].
-extension UpdateCallRequestPatterns on UpdateCallRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

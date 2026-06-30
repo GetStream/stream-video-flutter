@@ -32,8 +32,8 @@ Map<String, dynamic> _$ChatDraftResponseToJson(ChatDraftResponse instance) =>
     <String, dynamic>{
       'channel_cid': instance.channelCid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'message': instance.message,
+      'message': instance.message.toJson(),
       'parent_id': instance.parentId,
-      'parent_message': instance.parentMessage,
-      'quoted_message': instance.quotedMessage,
+      'parent_message': instance.parentMessage?.toJson(),
+      'quoted_message': instance.quotedMessage?.toJson(),
     };

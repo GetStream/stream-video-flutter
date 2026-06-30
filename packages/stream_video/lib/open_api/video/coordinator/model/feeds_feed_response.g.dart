@@ -47,7 +47,7 @@ Map<String, dynamic> _$FeedsFeedResponseToJson(FeedsFeedResponse instance) =>
     <String, dynamic>{
       'activity_count': instance.activityCount,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'created_by': instance.createdBy,
+      'created_by': instance.createdBy.toJson(),
       'custom': instance.custom,
       'deleted_at': _$JsonConverterToJson<Object, DateTime>(
         instance.deletedAt,
@@ -60,7 +60,7 @@ Map<String, dynamic> _$FeedsFeedResponseToJson(FeedsFeedResponse instance) =>
       'following_count': instance.followingCount,
       'group_id': instance.groupId,
       'id': instance.id,
-      'location': instance.location,
+      'location': instance.location?.toJson(),
       'member_count': instance.memberCount,
       'name': instance.name,
       'pin_count': instance.pinCount,

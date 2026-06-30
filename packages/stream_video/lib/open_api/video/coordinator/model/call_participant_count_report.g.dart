@@ -20,4 +20,6 @@ CallParticipantCountReport _$CallParticipantCountReportFromJson(
 
 Map<String, dynamic> _$CallParticipantCountReportToJson(
   CallParticipantCountReport instance,
-) => <String, dynamic>{'histogram': instance.histogram};
+) => <String, dynamic>{
+  'histogram': instance.histogram.map((e) => e.toJson()).toList(),
+};

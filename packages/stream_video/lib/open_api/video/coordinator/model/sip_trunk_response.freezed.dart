@@ -9,49 +9,93 @@ part of 'sip_trunk_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$SIPTrunkResponse {
+  List<String> get allowedIps;
+  DateTime get createdAt;
+  String get id;
+  String get name;
+  List<String> get numbers;
+  String get password;
+  DateTime get updatedAt;
+  String get uri;
+  String get username;
 
- List<String> get allowedIps; DateTime get createdAt; String get id; String get name; List<String> get numbers; String get password; DateTime get updatedAt; String get uri; String get username;
-/// Create a copy of SIPTrunkResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SIPTrunkResponseCopyWith<SIPTrunkResponse> get copyWith => _$SIPTrunkResponseCopyWithImpl<SIPTrunkResponse>(this as SIPTrunkResponse, _$identity);
+  /// Create a copy of SIPTrunkResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SIPTrunkResponseCopyWith<SIPTrunkResponse> get copyWith =>
+      _$SIPTrunkResponseCopyWithImpl<SIPTrunkResponse>(
+        this as SIPTrunkResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SIPTrunkResponse &&
+            const DeepCollectionEquality().equals(
+              other.allowedIps,
+              allowedIps,
+            ) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            const DeepCollectionEquality().equals(other.numbers, numbers) &&
+            (identical(other.password, password) ||
+                other.password == password) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.uri, uri) || other.uri == uri) &&
+            (identical(other.username, username) ||
+                other.username == username));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(allowedIps),
+    createdAt,
+    id,
+    name,
+    const DeepCollectionEquality().hash(numbers),
+    password,
+    updatedAt,
+    uri,
+    username,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SIPTrunkResponse&&const DeepCollectionEquality().equals(other.allowedIps, allowedIps)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.numbers, numbers)&&(identical(other.password, password) || other.password == password)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.uri, uri) || other.uri == uri)&&(identical(other.username, username) || other.username == username));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(allowedIps),createdAt,id,name,const DeepCollectionEquality().hash(numbers),password,updatedAt,uri,username);
-
-@override
-String toString() {
-  return 'SIPTrunkResponse(allowedIps: $allowedIps, createdAt: $createdAt, id: $id, name: $name, numbers: $numbers, password: $password, updatedAt: $updatedAt, uri: $uri, username: $username)';
-}
-
-
+  @override
+  String toString() {
+    return 'SIPTrunkResponse(allowedIps: $allowedIps, createdAt: $createdAt, id: $id, name: $name, numbers: $numbers, password: $password, updatedAt: $updatedAt, uri: $uri, username: $username)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $SIPTrunkResponseCopyWith<$Res>  {
-  factory $SIPTrunkResponseCopyWith(SIPTrunkResponse value, $Res Function(SIPTrunkResponse) _then) = _$SIPTrunkResponseCopyWithImpl;
-@useResult
-$Res call({
- List<String> allowedIps, DateTime createdAt, String id, String name, List<String> numbers, String password, DateTime updatedAt, String uri, String username
-});
-
-
-
-
+abstract mixin class $SIPTrunkResponseCopyWith<$Res> {
+  factory $SIPTrunkResponseCopyWith(
+    SIPTrunkResponse value,
+    $Res Function(SIPTrunkResponse) _then,
+  ) = _$SIPTrunkResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    List<String> allowedIps,
+    DateTime createdAt,
+    String id,
+    String name,
+    List<String> numbers,
+    String password,
+    DateTime updatedAt,
+    String uri,
+    String username,
+  });
 }
+
 /// @nodoc
 class _$SIPTrunkResponseCopyWithImpl<$Res>
     implements $SIPTrunkResponseCopyWith<$Res> {
@@ -60,148 +104,60 @@ class _$SIPTrunkResponseCopyWithImpl<$Res>
   final SIPTrunkResponse _self;
   final $Res Function(SIPTrunkResponse) _then;
 
-/// Create a copy of SIPTrunkResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? allowedIps = null,Object? createdAt = null,Object? id = null,Object? name = null,Object? numbers = null,Object? password = null,Object? updatedAt = null,Object? uri = null,Object? username = null,}) {
-  return _then(SIPTrunkResponse(
-allowedIps: null == allowedIps ? _self.allowedIps : allowedIps // ignore: cast_nullable_to_non_nullable
-as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,numbers: null == numbers ? _self.numbers : numbers // ignore: cast_nullable_to_non_nullable
-as List<String>,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,uri: null == uri ? _self.uri : uri // ignore: cast_nullable_to_non_nullable
-as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of SIPTrunkResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? allowedIps = null,
+    Object? createdAt = null,
+    Object? id = null,
+    Object? name = null,
+    Object? numbers = null,
+    Object? password = null,
+    Object? updatedAt = null,
+    Object? uri = null,
+    Object? username = null,
+  }) {
+    return _then(
+      SIPTrunkResponse(
+        allowedIps: null == allowedIps
+            ? _self.allowedIps
+            : allowedIps // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        numbers: null == numbers
+            ? _self.numbers
+            : numbers // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        password: null == password
+            ? _self.password
+            : password // ignore: cast_nullable_to_non_nullable
+                  as String,
+        updatedAt: null == updatedAt
+            ? _self.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        uri: null == uri
+            ? _self.uri
+            : uri // ignore: cast_nullable_to_non_nullable
+                  as String,
+        username: null == username
+            ? _self.username
+            : username // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [SIPTrunkResponse].
-extension SIPTrunkResponsePatterns on SIPTrunkResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

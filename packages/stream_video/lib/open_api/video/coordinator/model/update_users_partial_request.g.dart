@@ -20,4 +20,4 @@ UpdateUsersPartialRequest _$UpdateUsersPartialRequestFromJson(
 
 Map<String, dynamic> _$UpdateUsersPartialRequestToJson(
   UpdateUsersPartialRequest instance,
-) => <String, dynamic>{'users': instance.users};
+) => <String, dynamic>{'users': instance.users.map((e) => e.toJson()).toList()};

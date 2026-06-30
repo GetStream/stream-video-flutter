@@ -28,10 +28,10 @@ GetCallReportResponse _$GetCallReportResponseFromJson(
 Map<String, dynamic> _$GetCallReportResponseToJson(
   GetCallReportResponse instance,
 ) => <String, dynamic>{
-  'chat_activity': instance.chatActivity,
+  'chat_activity': instance.chatActivity?.toJson(),
   'duration': instance.duration,
-  'report': instance.report,
-  'session': instance.session,
+  'report': instance.report.toJson(),
+  'session': instance.session?.toJson(),
   'session_id': instance.sessionId,
-  'video_reactions': instance.videoReactions,
+  'video_reactions': instance.videoReactions?.map((e) => e.toJson()).toList(),
 };

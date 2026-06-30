@@ -9,49 +9,65 @@ part of 'delete_comment_request_payload.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$DeleteCommentRequestPayload {
+  String? get entityId;
+  String? get entityType;
+  bool? get hardDelete;
+  String? get reason;
 
- String? get entityId; String? get entityType; bool? get hardDelete; String? get reason;
-/// Create a copy of DeleteCommentRequestPayload
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$DeleteCommentRequestPayloadCopyWith<DeleteCommentRequestPayload> get copyWith => _$DeleteCommentRequestPayloadCopyWithImpl<DeleteCommentRequestPayload>(this as DeleteCommentRequestPayload, _$identity);
+  /// Create a copy of DeleteCommentRequestPayload
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $DeleteCommentRequestPayloadCopyWith<DeleteCommentRequestPayload>
+  get copyWith =>
+      _$DeleteCommentRequestPayloadCopyWithImpl<DeleteCommentRequestPayload>(
+        this as DeleteCommentRequestPayload,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is DeleteCommentRequestPayload &&
+            (identical(other.entityId, entityId) ||
+                other.entityId == entityId) &&
+            (identical(other.entityType, entityType) ||
+                other.entityType == entityType) &&
+            (identical(other.hardDelete, hardDelete) ||
+                other.hardDelete == hardDelete) &&
+            (identical(other.reason, reason) || other.reason == reason));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, entityId, entityType, hardDelete, reason);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeleteCommentRequestPayload&&(identical(other.entityId, entityId) || other.entityId == entityId)&&(identical(other.entityType, entityType) || other.entityType == entityType)&&(identical(other.hardDelete, hardDelete) || other.hardDelete == hardDelete)&&(identical(other.reason, reason) || other.reason == reason));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,entityId,entityType,hardDelete,reason);
-
-@override
-String toString() {
-  return 'DeleteCommentRequestPayload(entityId: $entityId, entityType: $entityType, hardDelete: $hardDelete, reason: $reason)';
-}
-
-
+  @override
+  String toString() {
+    return 'DeleteCommentRequestPayload(entityId: $entityId, entityType: $entityType, hardDelete: $hardDelete, reason: $reason)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $DeleteCommentRequestPayloadCopyWith<$Res>  {
-  factory $DeleteCommentRequestPayloadCopyWith(DeleteCommentRequestPayload value, $Res Function(DeleteCommentRequestPayload) _then) = _$DeleteCommentRequestPayloadCopyWithImpl;
-@useResult
-$Res call({
- String? entityId, String? entityType, bool? hardDelete, String? reason
-});
-
-
-
-
+abstract mixin class $DeleteCommentRequestPayloadCopyWith<$Res> {
+  factory $DeleteCommentRequestPayloadCopyWith(
+    DeleteCommentRequestPayload value,
+    $Res Function(DeleteCommentRequestPayload) _then,
+  ) = _$DeleteCommentRequestPayloadCopyWithImpl;
+  @useResult
+  $Res call({
+    String? entityId,
+    String? entityType,
+    bool? hardDelete,
+    String? reason,
+  });
 }
+
 /// @nodoc
 class _$DeleteCommentRequestPayloadCopyWithImpl<$Res>
     implements $DeleteCommentRequestPayloadCopyWith<$Res> {
@@ -60,143 +76,35 @@ class _$DeleteCommentRequestPayloadCopyWithImpl<$Res>
   final DeleteCommentRequestPayload _self;
   final $Res Function(DeleteCommentRequestPayload) _then;
 
-/// Create a copy of DeleteCommentRequestPayload
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? entityId = freezed,Object? entityType = freezed,Object? hardDelete = freezed,Object? reason = freezed,}) {
-  return _then(DeleteCommentRequestPayload(
-entityId: freezed == entityId ? _self.entityId : entityId // ignore: cast_nullable_to_non_nullable
-as String?,entityType: freezed == entityType ? _self.entityType : entityType // ignore: cast_nullable_to_non_nullable
-as String?,hardDelete: freezed == hardDelete ? _self.hardDelete : hardDelete // ignore: cast_nullable_to_non_nullable
-as bool?,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of DeleteCommentRequestPayload
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? entityId = freezed,
+    Object? entityType = freezed,
+    Object? hardDelete = freezed,
+    Object? reason = freezed,
+  }) {
+    return _then(
+      DeleteCommentRequestPayload(
+        entityId: freezed == entityId
+            ? _self.entityId
+            : entityId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        entityType: freezed == entityType
+            ? _self.entityType
+            : entityType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        hardDelete: freezed == hardDelete
+            ? _self.hardDelete
+            : hardDelete // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [DeleteCommentRequestPayload].
-extension DeleteCommentRequestPayloadPatterns on DeleteCommentRequestPayload {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on
