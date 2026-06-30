@@ -20,7 +20,7 @@ Thresholds _$ThresholdsFromJson(Map<String, dynamic> json) => Thresholds(
 
 Map<String, dynamic> _$ThresholdsToJson(Thresholds instance) =>
     <String, dynamic>{
-      'explicit': instance.explicit,
-      'spam': instance.spam,
-      'toxic': instance.toxic,
+      'explicit': instance.explicit?.toJson(),
+      'spam': instance.spam?.toJson(),
+      'toxic': instance.toxic?.toJson(),
     };

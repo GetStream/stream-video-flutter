@@ -29,5 +29,5 @@ Map<String, dynamic> _$PermissionRequestEventToJson(
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'permissions': instance.permissions,
   'type': instance.type,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };

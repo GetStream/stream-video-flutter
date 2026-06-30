@@ -41,7 +41,7 @@ GetOGResponse _$GetOGResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GetOGResponseToJson(GetOGResponse instance) =>
     <String, dynamic>{
-      'actions': instance.actions,
+      'actions': instance.actions?.map((e) => e.toJson()).toList(),
       'asset_url': instance.assetUrl,
       'author_icon': instance.authorIcon,
       'author_link': instance.authorLink,
@@ -50,10 +50,10 @@ Map<String, dynamic> _$GetOGResponseToJson(GetOGResponse instance) =>
       'custom': instance.custom,
       'duration': instance.duration,
       'fallback': instance.fallback,
-      'fields': instance.fields,
+      'fields': instance.fields?.map((e) => e.toJson()).toList(),
       'footer': instance.footer,
       'footer_icon': instance.footerIcon,
-      'giphy': instance.giphy,
+      'giphy': instance.giphy?.toJson(),
       'image_url': instance.imageUrl,
       'og_scrape_url': instance.ogScrapeUrl,
       'original_height': instance.originalHeight,

@@ -25,11 +25,11 @@ CallEndedEvent _$CallEndedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CallEndedEventToJson(CallEndedEvent instance) =>
     <String, dynamic>{
-      'call': instance.call,
+      'call': instance.call.toJson(),
       'call_cid': instance.callCid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'members': instance.members,
+      'members': instance.members?.map((e) => e.toJson()).toList(),
       'reason': instance.reason,
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user?.toJson(),
     };

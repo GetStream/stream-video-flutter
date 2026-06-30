@@ -28,5 +28,5 @@ Map<String, dynamic> _$UserRequestToJson(UserRequest instance) =>
       'invisible': instance.invisible,
       'language': instance.language,
       'name': instance.name,
-      'privacy_settings': instance.privacySettings,
+      'privacy_settings': instance.privacySettings?.toJson(),
     };

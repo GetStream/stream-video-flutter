@@ -23,7 +23,7 @@ UpdateCallRequest _$UpdateCallRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$UpdateCallRequestToJson(UpdateCallRequest instance) =>
     <String, dynamic>{
       'custom': instance.custom,
-      'settings_override': instance.settingsOverride,
+      'settings_override': instance.settingsOverride?.toJson(),
       'starts_at': _$JsonConverterToJson<Object, DateTime>(
         instance.startsAt,
         const EpochDateTimeConverter().toJson,

@@ -35,5 +35,5 @@ Map<String, dynamic> _$CallUserFeedbackSubmittedEventToJson(
   'sdk_version': instance.sdkVersion,
   'session_id': instance.sessionId,
   'type': instance.type,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };

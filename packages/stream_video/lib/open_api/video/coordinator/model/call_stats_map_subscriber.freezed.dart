@@ -9,49 +9,66 @@ part of 'call_stats_map_subscriber.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallStatsMapSubscriber {
+  bool get isLive;
+  CallStatsLocation? get location;
+  String? get name;
+  String get userId;
+  String get userSessionId;
 
- bool get isLive; CallStatsLocation? get location; String? get name; String get userId; String get userSessionId;
-/// Create a copy of CallStatsMapSubscriber
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallStatsMapSubscriberCopyWith<CallStatsMapSubscriber> get copyWith => _$CallStatsMapSubscriberCopyWithImpl<CallStatsMapSubscriber>(this as CallStatsMapSubscriber, _$identity);
+  /// Create a copy of CallStatsMapSubscriber
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallStatsMapSubscriberCopyWith<CallStatsMapSubscriber> get copyWith =>
+      _$CallStatsMapSubscriberCopyWithImpl<CallStatsMapSubscriber>(
+        this as CallStatsMapSubscriber,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallStatsMapSubscriber &&
+            (identical(other.isLive, isLive) || other.isLive == isLive) &&
+            (identical(other.location, location) ||
+                other.location == location) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.userSessionId, userSessionId) ||
+                other.userSessionId == userSessionId));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, isLive, location, name, userId, userSessionId);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallStatsMapSubscriber&&(identical(other.isLive, isLive) || other.isLive == isLive)&&(identical(other.location, location) || other.location == location)&&(identical(other.name, name) || other.name == name)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userSessionId, userSessionId) || other.userSessionId == userSessionId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,isLive,location,name,userId,userSessionId);
-
-@override
-String toString() {
-  return 'CallStatsMapSubscriber(isLive: $isLive, location: $location, name: $name, userId: $userId, userSessionId: $userSessionId)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallStatsMapSubscriber(isLive: $isLive, location: $location, name: $name, userId: $userId, userSessionId: $userSessionId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallStatsMapSubscriberCopyWith<$Res>  {
-  factory $CallStatsMapSubscriberCopyWith(CallStatsMapSubscriber value, $Res Function(CallStatsMapSubscriber) _then) = _$CallStatsMapSubscriberCopyWithImpl;
-@useResult
-$Res call({
- bool isLive, CallStatsLocation? location, String? name, String userId, String userSessionId
-});
-
-
-
-
+abstract mixin class $CallStatsMapSubscriberCopyWith<$Res> {
+  factory $CallStatsMapSubscriberCopyWith(
+    CallStatsMapSubscriber value,
+    $Res Function(CallStatsMapSubscriber) _then,
+  ) = _$CallStatsMapSubscriberCopyWithImpl;
+  @useResult
+  $Res call({
+    bool isLive,
+    CallStatsLocation? location,
+    String? name,
+    String userId,
+    String userSessionId,
+  });
 }
+
 /// @nodoc
 class _$CallStatsMapSubscriberCopyWithImpl<$Res>
     implements $CallStatsMapSubscriberCopyWith<$Res> {
@@ -60,144 +77,40 @@ class _$CallStatsMapSubscriberCopyWithImpl<$Res>
   final CallStatsMapSubscriber _self;
   final $Res Function(CallStatsMapSubscriber) _then;
 
-/// Create a copy of CallStatsMapSubscriber
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLive = null,Object? location = freezed,Object? name = freezed,Object? userId = null,Object? userSessionId = null,}) {
-  return _then(CallStatsMapSubscriber(
-isLive: null == isLive ? _self.isLive : isLive // ignore: cast_nullable_to_non_nullable
-as bool,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as CallStatsLocation?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,userSessionId: null == userSessionId ? _self.userSessionId : userSessionId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CallStatsMapSubscriber
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? isLive = null,
+    Object? location = freezed,
+    Object? name = freezed,
+    Object? userId = null,
+    Object? userSessionId = null,
+  }) {
+    return _then(
+      CallStatsMapSubscriber(
+        isLive: null == isLive
+            ? _self.isLive
+            : isLive // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        location: freezed == location
+            ? _self.location
+            : location // ignore: cast_nullable_to_non_nullable
+                  as CallStatsLocation?,
+        name: freezed == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        userSessionId: null == userSessionId
+            ? _self.userSessionId
+            : userSessionId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallStatsMapSubscriber].
-extension CallStatsMapSubscriberPatterns on CallStatsMapSubscriber {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

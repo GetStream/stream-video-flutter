@@ -18,6 +18,6 @@ CreateBlockListResponse _$CreateBlockListResponseFromJson(
 Map<String, dynamic> _$CreateBlockListResponseToJson(
   CreateBlockListResponse instance,
 ) => <String, dynamic>{
-  'blocklist': instance.blocklist,
+  'blocklist': instance.blocklist?.toJson(),
   'duration': instance.duration,
 };

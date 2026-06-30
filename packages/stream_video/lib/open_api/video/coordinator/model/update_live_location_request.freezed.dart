@@ -9,49 +9,64 @@ part of 'update_live_location_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UpdateLiveLocationRequest {
+  DateTime? get endAt;
+  double? get latitude;
+  double? get longitude;
+  String get messageId;
 
- DateTime? get endAt; double? get latitude; double? get longitude; String get messageId;
-/// Create a copy of UpdateLiveLocationRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpdateLiveLocationRequestCopyWith<UpdateLiveLocationRequest> get copyWith => _$UpdateLiveLocationRequestCopyWithImpl<UpdateLiveLocationRequest>(this as UpdateLiveLocationRequest, _$identity);
+  /// Create a copy of UpdateLiveLocationRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdateLiveLocationRequestCopyWith<UpdateLiveLocationRequest> get copyWith =>
+      _$UpdateLiveLocationRequestCopyWithImpl<UpdateLiveLocationRequest>(
+        this as UpdateLiveLocationRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpdateLiveLocationRequest &&
+            (identical(other.endAt, endAt) || other.endAt == endAt) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude) &&
+            (identical(other.messageId, messageId) ||
+                other.messageId == messageId));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, endAt, latitude, longitude, messageId);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateLiveLocationRequest&&(identical(other.endAt, endAt) || other.endAt == endAt)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.messageId, messageId) || other.messageId == messageId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,endAt,latitude,longitude,messageId);
-
-@override
-String toString() {
-  return 'UpdateLiveLocationRequest(endAt: $endAt, latitude: $latitude, longitude: $longitude, messageId: $messageId)';
-}
-
-
+  @override
+  String toString() {
+    return 'UpdateLiveLocationRequest(endAt: $endAt, latitude: $latitude, longitude: $longitude, messageId: $messageId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UpdateLiveLocationRequestCopyWith<$Res>  {
-  factory $UpdateLiveLocationRequestCopyWith(UpdateLiveLocationRequest value, $Res Function(UpdateLiveLocationRequest) _then) = _$UpdateLiveLocationRequestCopyWithImpl;
-@useResult
-$Res call({
- DateTime? endAt, double? latitude, double? longitude, String messageId
-});
-
-
-
-
+abstract mixin class $UpdateLiveLocationRequestCopyWith<$Res> {
+  factory $UpdateLiveLocationRequestCopyWith(
+    UpdateLiveLocationRequest value,
+    $Res Function(UpdateLiveLocationRequest) _then,
+  ) = _$UpdateLiveLocationRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    DateTime? endAt,
+    double? latitude,
+    double? longitude,
+    String messageId,
+  });
 }
+
 /// @nodoc
 class _$UpdateLiveLocationRequestCopyWithImpl<$Res>
     implements $UpdateLiveLocationRequestCopyWith<$Res> {
@@ -60,143 +75,35 @@ class _$UpdateLiveLocationRequestCopyWithImpl<$Res>
   final UpdateLiveLocationRequest _self;
   final $Res Function(UpdateLiveLocationRequest) _then;
 
-/// Create a copy of UpdateLiveLocationRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? endAt = freezed,Object? latitude = freezed,Object? longitude = freezed,Object? messageId = null,}) {
-  return _then(UpdateLiveLocationRequest(
-endAt: freezed == endAt ? _self.endAt : endAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
-as double?,longitude: freezed == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double?,messageId: null == messageId ? _self.messageId : messageId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of UpdateLiveLocationRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? endAt = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
+    Object? messageId = null,
+  }) {
+    return _then(
+      UpdateLiveLocationRequest(
+        endAt: freezed == endAt
+            ? _self.endAt
+            : endAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        latitude: freezed == latitude
+            ? _self.latitude
+            : latitude // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        longitude: freezed == longitude
+            ? _self.longitude
+            : longitude // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        messageId: null == messageId
+            ? _self.messageId
+            : messageId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UpdateLiveLocationRequest].
-extension UpdateLiveLocationRequestPatterns on UpdateLiveLocationRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

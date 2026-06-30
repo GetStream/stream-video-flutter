@@ -35,7 +35,7 @@ Map<String, dynamic> _$AudioSettingsResponseToJson(
       _$AudioSettingsResponseDefaultDeviceEnumMap[instance.defaultDevice]!,
   'hifi_audio_enabled': instance.hifiAudioEnabled,
   'mic_default_on': instance.micDefaultOn,
-  'noise_cancellation': instance.noiseCancellation,
+  'noise_cancellation': instance.noiseCancellation?.toJson(),
   'opus_dtx_enabled': instance.opusDtxEnabled,
   'redundant_coding_enabled': instance.redundantCodingEnabled,
   'speaker_default_on': instance.speakerDefaultOn,

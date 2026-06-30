@@ -17,5 +17,5 @@ PollOptionResponse _$PollOptionResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$PollOptionResponseToJson(PollOptionResponse instance) =>
     <String, dynamic>{
       'duration': instance.duration,
-      'poll_option': instance.pollOption,
+      'poll_option': instance.pollOption.toJson(),
     };

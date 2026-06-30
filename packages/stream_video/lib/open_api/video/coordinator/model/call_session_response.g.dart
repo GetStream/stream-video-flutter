@@ -87,7 +87,7 @@ Map<String, dynamic> _$CallSessionResponseToJson(
   'missed_by': instance.missedBy.map(
     (k, e) => MapEntry(k, const EpochDateTimeConverter().toJson(e)),
   ),
-  'participants': instance.participants,
+  'participants': instance.participants.map((e) => e.toJson()).toList(),
   'participants_count_by_role': instance.participantsCountByRole,
   'rejected_by': instance.rejectedBy.map(
     (k, e) => MapEntry(k, const EpochDateTimeConverter().toJson(e)),

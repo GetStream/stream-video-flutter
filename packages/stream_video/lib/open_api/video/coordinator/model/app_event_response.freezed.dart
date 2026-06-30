@@ -9,49 +9,74 @@ part of 'app_event_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$AppEventResponse {
+  bool? get asyncUrlEnrichEnabled;
+  bool get autoTranslationEnabled;
+  FileUploadConfig? get fileUploadConfig;
+  FileUploadConfig? get imageUploadConfig;
+  String get name;
 
- bool? get asyncUrlEnrichEnabled; bool get autoTranslationEnabled; FileUploadConfig? get fileUploadConfig; FileUploadConfig? get imageUploadConfig; String get name;
-/// Create a copy of AppEventResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$AppEventResponseCopyWith<AppEventResponse> get copyWith => _$AppEventResponseCopyWithImpl<AppEventResponse>(this as AppEventResponse, _$identity);
+  /// Create a copy of AppEventResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $AppEventResponseCopyWith<AppEventResponse> get copyWith =>
+      _$AppEventResponseCopyWithImpl<AppEventResponse>(
+        this as AppEventResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AppEventResponse &&
+            (identical(other.asyncUrlEnrichEnabled, asyncUrlEnrichEnabled) ||
+                other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled) &&
+            (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
+                other.autoTranslationEnabled == autoTranslationEnabled) &&
+            (identical(other.fileUploadConfig, fileUploadConfig) ||
+                other.fileUploadConfig == fileUploadConfig) &&
+            (identical(other.imageUploadConfig, imageUploadConfig) ||
+                other.imageUploadConfig == imageUploadConfig) &&
+            (identical(other.name, name) || other.name == name));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    asyncUrlEnrichEnabled,
+    autoTranslationEnabled,
+    fileUploadConfig,
+    imageUploadConfig,
+    name,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppEventResponse&&(identical(other.asyncUrlEnrichEnabled, asyncUrlEnrichEnabled) || other.asyncUrlEnrichEnabled == asyncUrlEnrichEnabled)&&(identical(other.autoTranslationEnabled, autoTranslationEnabled) || other.autoTranslationEnabled == autoTranslationEnabled)&&(identical(other.fileUploadConfig, fileUploadConfig) || other.fileUploadConfig == fileUploadConfig)&&(identical(other.imageUploadConfig, imageUploadConfig) || other.imageUploadConfig == imageUploadConfig)&&(identical(other.name, name) || other.name == name));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,asyncUrlEnrichEnabled,autoTranslationEnabled,fileUploadConfig,imageUploadConfig,name);
-
-@override
-String toString() {
-  return 'AppEventResponse(asyncUrlEnrichEnabled: $asyncUrlEnrichEnabled, autoTranslationEnabled: $autoTranslationEnabled, fileUploadConfig: $fileUploadConfig, imageUploadConfig: $imageUploadConfig, name: $name)';
-}
-
-
+  @override
+  String toString() {
+    return 'AppEventResponse(asyncUrlEnrichEnabled: $asyncUrlEnrichEnabled, autoTranslationEnabled: $autoTranslationEnabled, fileUploadConfig: $fileUploadConfig, imageUploadConfig: $imageUploadConfig, name: $name)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $AppEventResponseCopyWith<$Res>  {
-  factory $AppEventResponseCopyWith(AppEventResponse value, $Res Function(AppEventResponse) _then) = _$AppEventResponseCopyWithImpl;
-@useResult
-$Res call({
- bool? asyncUrlEnrichEnabled, bool autoTranslationEnabled, FileUploadConfig? fileUploadConfig, FileUploadConfig? imageUploadConfig, String name
-});
-
-
-
-
+abstract mixin class $AppEventResponseCopyWith<$Res> {
+  factory $AppEventResponseCopyWith(
+    AppEventResponse value,
+    $Res Function(AppEventResponse) _then,
+  ) = _$AppEventResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    bool? asyncUrlEnrichEnabled,
+    bool autoTranslationEnabled,
+    FileUploadConfig? fileUploadConfig,
+    FileUploadConfig? imageUploadConfig,
+    String name,
+  });
 }
+
 /// @nodoc
 class _$AppEventResponseCopyWithImpl<$Res>
     implements $AppEventResponseCopyWith<$Res> {
@@ -60,144 +85,40 @@ class _$AppEventResponseCopyWithImpl<$Res>
   final AppEventResponse _self;
   final $Res Function(AppEventResponse) _then;
 
-/// Create a copy of AppEventResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? asyncUrlEnrichEnabled = freezed,Object? autoTranslationEnabled = null,Object? fileUploadConfig = freezed,Object? imageUploadConfig = freezed,Object? name = null,}) {
-  return _then(AppEventResponse(
-asyncUrlEnrichEnabled: freezed == asyncUrlEnrichEnabled ? _self.asyncUrlEnrichEnabled : asyncUrlEnrichEnabled // ignore: cast_nullable_to_non_nullable
-as bool?,autoTranslationEnabled: null == autoTranslationEnabled ? _self.autoTranslationEnabled : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable
-as bool,fileUploadConfig: freezed == fileUploadConfig ? _self.fileUploadConfig : fileUploadConfig // ignore: cast_nullable_to_non_nullable
-as FileUploadConfig?,imageUploadConfig: freezed == imageUploadConfig ? _self.imageUploadConfig : imageUploadConfig // ignore: cast_nullable_to_non_nullable
-as FileUploadConfig?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of AppEventResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? asyncUrlEnrichEnabled = freezed,
+    Object? autoTranslationEnabled = null,
+    Object? fileUploadConfig = freezed,
+    Object? imageUploadConfig = freezed,
+    Object? name = null,
+  }) {
+    return _then(
+      AppEventResponse(
+        asyncUrlEnrichEnabled: freezed == asyncUrlEnrichEnabled
+            ? _self.asyncUrlEnrichEnabled
+            : asyncUrlEnrichEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        autoTranslationEnabled: null == autoTranslationEnabled
+            ? _self.autoTranslationEnabled
+            : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        fileUploadConfig: freezed == fileUploadConfig
+            ? _self.fileUploadConfig
+            : fileUploadConfig // ignore: cast_nullable_to_non_nullable
+                  as FileUploadConfig?,
+        imageUploadConfig: freezed == imageUploadConfig
+            ? _self.imageUploadConfig
+            : imageUploadConfig // ignore: cast_nullable_to_non_nullable
+                  as FileUploadConfig?,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [AppEventResponse].
-extension AppEventResponsePatterns on AppEventResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -9,192 +9,75 @@ part of 'mute_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$MuteRequest {
+  List<String> get targetIds;
+  int? get timeout;
 
- List<String> get targetIds; int? get timeout;
-/// Create a copy of MuteRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$MuteRequestCopyWith<MuteRequest> get copyWith => _$MuteRequestCopyWithImpl<MuteRequest>(this as MuteRequest, _$identity);
+  /// Create a copy of MuteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MuteRequestCopyWith<MuteRequest> get copyWith =>
+      _$MuteRequestCopyWithImpl<MuteRequest>(this as MuteRequest, _$identity);
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MuteRequest &&
+            const DeepCollectionEquality().equals(other.targetIds, targetIds) &&
+            (identical(other.timeout, timeout) || other.timeout == timeout));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(targetIds),
+    timeout,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MuteRequest&&const DeepCollectionEquality().equals(other.targetIds, targetIds)&&(identical(other.timeout, timeout) || other.timeout == timeout));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(targetIds),timeout);
-
-@override
-String toString() {
-  return 'MuteRequest(targetIds: $targetIds, timeout: $timeout)';
-}
-
-
+  @override
+  String toString() {
+    return 'MuteRequest(targetIds: $targetIds, timeout: $timeout)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $MuteRequestCopyWith<$Res>  {
-  factory $MuteRequestCopyWith(MuteRequest value, $Res Function(MuteRequest) _then) = _$MuteRequestCopyWithImpl;
-@useResult
-$Res call({
- List<String> targetIds, int? timeout
-});
-
-
-
-
+abstract mixin class $MuteRequestCopyWith<$Res> {
+  factory $MuteRequestCopyWith(
+    MuteRequest value,
+    $Res Function(MuteRequest) _then,
+  ) = _$MuteRequestCopyWithImpl;
+  @useResult
+  $Res call({List<String> targetIds, int? timeout});
 }
+
 /// @nodoc
-class _$MuteRequestCopyWithImpl<$Res>
-    implements $MuteRequestCopyWith<$Res> {
+class _$MuteRequestCopyWithImpl<$Res> implements $MuteRequestCopyWith<$Res> {
   _$MuteRequestCopyWithImpl(this._self, this._then);
 
   final MuteRequest _self;
   final $Res Function(MuteRequest) _then;
 
-/// Create a copy of MuteRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? targetIds = null,Object? timeout = freezed,}) {
-  return _then(MuteRequest(
-targetIds: null == targetIds ? _self.targetIds : targetIds // ignore: cast_nullable_to_non_nullable
-as List<String>,timeout: freezed == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
-as int?,
-  ));
+  /// Create a copy of MuteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? targetIds = null, Object? timeout = freezed}) {
+    return _then(
+      MuteRequest(
+        targetIds: null == targetIds
+            ? _self.targetIds
+            : targetIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        timeout: freezed == timeout
+            ? _self.timeout
+            : timeout // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [MuteRequest].
-extension MuteRequestPatterns on MuteRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -23,7 +23,7 @@ Map<String, dynamic> _$QueryAppealsResponseToJson(
   QueryAppealsResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'items': instance.items,
+  'items': instance.items.map((e) => e.toJson()).toList(),
   'next': instance.next,
   'prev': instance.prev,
 };

@@ -9,49 +9,53 @@ part of 'channel_message_count_rule_parameters.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ChannelMessageCountRuleParameters {
+  String? get operator;
+  int? get threshold;
 
- String? get operator; int? get threshold;
-/// Create a copy of ChannelMessageCountRuleParameters
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ChannelMessageCountRuleParametersCopyWith<ChannelMessageCountRuleParameters> get copyWith => _$ChannelMessageCountRuleParametersCopyWithImpl<ChannelMessageCountRuleParameters>(this as ChannelMessageCountRuleParameters, _$identity);
+  /// Create a copy of ChannelMessageCountRuleParameters
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ChannelMessageCountRuleParametersCopyWith<ChannelMessageCountRuleParameters>
+  get copyWith =>
+      _$ChannelMessageCountRuleParametersCopyWithImpl<
+        ChannelMessageCountRuleParameters
+      >(this as ChannelMessageCountRuleParameters, _$identity);
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ChannelMessageCountRuleParameters &&
+            (identical(other.operator, operator) ||
+                other.operator == operator) &&
+            (identical(other.threshold, threshold) ||
+                other.threshold == threshold));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, operator, threshold);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelMessageCountRuleParameters&&(identical(other.operator, operator) || other.operator == operator)&&(identical(other.threshold, threshold) || other.threshold == threshold));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,operator,threshold);
-
-@override
-String toString() {
-  return 'ChannelMessageCountRuleParameters(operator: $operator, threshold: $threshold)';
-}
-
-
+  @override
+  String toString() {
+    return 'ChannelMessageCountRuleParameters(operator: $operator, threshold: $threshold)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ChannelMessageCountRuleParametersCopyWith<$Res>  {
-  factory $ChannelMessageCountRuleParametersCopyWith(ChannelMessageCountRuleParameters value, $Res Function(ChannelMessageCountRuleParameters) _then) = _$ChannelMessageCountRuleParametersCopyWithImpl;
-@useResult
-$Res call({
- String? operator, int? threshold
-});
-
-
-
-
+abstract mixin class $ChannelMessageCountRuleParametersCopyWith<$Res> {
+  factory $ChannelMessageCountRuleParametersCopyWith(
+    ChannelMessageCountRuleParameters value,
+    $Res Function(ChannelMessageCountRuleParameters) _then,
+  ) = _$ChannelMessageCountRuleParametersCopyWithImpl;
+  @useResult
+  $Res call({String? operator, int? threshold});
 }
+
 /// @nodoc
 class _$ChannelMessageCountRuleParametersCopyWithImpl<$Res>
     implements $ChannelMessageCountRuleParametersCopyWith<$Res> {
@@ -60,141 +64,22 @@ class _$ChannelMessageCountRuleParametersCopyWithImpl<$Res>
   final ChannelMessageCountRuleParameters _self;
   final $Res Function(ChannelMessageCountRuleParameters) _then;
 
-/// Create a copy of ChannelMessageCountRuleParameters
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? operator = freezed,Object? threshold = freezed,}) {
-  return _then(ChannelMessageCountRuleParameters(
-operator: freezed == operator ? _self.operator : operator // ignore: cast_nullable_to_non_nullable
-as String?,threshold: freezed == threshold ? _self.threshold : threshold // ignore: cast_nullable_to_non_nullable
-as int?,
-  ));
+  /// Create a copy of ChannelMessageCountRuleParameters
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? operator = freezed, Object? threshold = freezed}) {
+    return _then(
+      ChannelMessageCountRuleParameters(
+        operator: freezed == operator
+            ? _self.operator
+            : operator // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        threshold: freezed == threshold
+            ? _self.threshold
+            : threshold // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ChannelMessageCountRuleParameters].
-extension ChannelMessageCountRuleParametersPatterns on ChannelMessageCountRuleParameters {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

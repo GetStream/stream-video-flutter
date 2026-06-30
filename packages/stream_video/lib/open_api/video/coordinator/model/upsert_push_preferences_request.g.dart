@@ -18,4 +18,6 @@ UpsertPushPreferencesRequest _$UpsertPushPreferencesRequestFromJson(
 
 Map<String, dynamic> _$UpsertPushPreferencesRequestToJson(
   UpsertPushPreferencesRequest instance,
-) => <String, dynamic>{'preferences': instance.preferences};
+) => <String, dynamic>{
+  'preferences': instance.preferences.map((e) => e.toJson()).toList(),
+};

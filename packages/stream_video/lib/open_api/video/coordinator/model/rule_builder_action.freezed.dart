@@ -9,49 +9,74 @@ part of 'rule_builder_action.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$RuleBuilderAction {
+  BanOptions? get banOptions;
+  CallActionOptions? get callOptions;
+  FlagUserOptions? get flagUserOptions;
+  bool? get skipInbox;
+  RuleBuilderActionType? get type;
 
- BanOptions? get banOptions; CallActionOptions? get callOptions; FlagUserOptions? get flagUserOptions; bool? get skipInbox; RuleBuilderActionType? get type;
-/// Create a copy of RuleBuilderAction
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$RuleBuilderActionCopyWith<RuleBuilderAction> get copyWith => _$RuleBuilderActionCopyWithImpl<RuleBuilderAction>(this as RuleBuilderAction, _$identity);
+  /// Create a copy of RuleBuilderAction
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $RuleBuilderActionCopyWith<RuleBuilderAction> get copyWith =>
+      _$RuleBuilderActionCopyWithImpl<RuleBuilderAction>(
+        this as RuleBuilderAction,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is RuleBuilderAction &&
+            (identical(other.banOptions, banOptions) ||
+                other.banOptions == banOptions) &&
+            (identical(other.callOptions, callOptions) ||
+                other.callOptions == callOptions) &&
+            (identical(other.flagUserOptions, flagUserOptions) ||
+                other.flagUserOptions == flagUserOptions) &&
+            (identical(other.skipInbox, skipInbox) ||
+                other.skipInbox == skipInbox) &&
+            (identical(other.type, type) || other.type == type));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    banOptions,
+    callOptions,
+    flagUserOptions,
+    skipInbox,
+    type,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RuleBuilderAction&&(identical(other.banOptions, banOptions) || other.banOptions == banOptions)&&(identical(other.callOptions, callOptions) || other.callOptions == callOptions)&&(identical(other.flagUserOptions, flagUserOptions) || other.flagUserOptions == flagUserOptions)&&(identical(other.skipInbox, skipInbox) || other.skipInbox == skipInbox)&&(identical(other.type, type) || other.type == type));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,banOptions,callOptions,flagUserOptions,skipInbox,type);
-
-@override
-String toString() {
-  return 'RuleBuilderAction(banOptions: $banOptions, callOptions: $callOptions, flagUserOptions: $flagUserOptions, skipInbox: $skipInbox, type: $type)';
-}
-
-
+  @override
+  String toString() {
+    return 'RuleBuilderAction(banOptions: $banOptions, callOptions: $callOptions, flagUserOptions: $flagUserOptions, skipInbox: $skipInbox, type: $type)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $RuleBuilderActionCopyWith<$Res>  {
-  factory $RuleBuilderActionCopyWith(RuleBuilderAction value, $Res Function(RuleBuilderAction) _then) = _$RuleBuilderActionCopyWithImpl;
-@useResult
-$Res call({
- BanOptions? banOptions, CallActionOptions? callOptions, FlagUserOptions? flagUserOptions, bool? skipInbox, RuleBuilderActionType? type
-});
-
-
-
-
+abstract mixin class $RuleBuilderActionCopyWith<$Res> {
+  factory $RuleBuilderActionCopyWith(
+    RuleBuilderAction value,
+    $Res Function(RuleBuilderAction) _then,
+  ) = _$RuleBuilderActionCopyWithImpl;
+  @useResult
+  $Res call({
+    BanOptions? banOptions,
+    CallActionOptions? callOptions,
+    FlagUserOptions? flagUserOptions,
+    bool? skipInbox,
+    RuleBuilderActionType? type,
+  });
 }
+
 /// @nodoc
 class _$RuleBuilderActionCopyWithImpl<$Res>
     implements $RuleBuilderActionCopyWith<$Res> {
@@ -60,144 +85,40 @@ class _$RuleBuilderActionCopyWithImpl<$Res>
   final RuleBuilderAction _self;
   final $Res Function(RuleBuilderAction) _then;
 
-/// Create a copy of RuleBuilderAction
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? banOptions = freezed,Object? callOptions = freezed,Object? flagUserOptions = freezed,Object? skipInbox = freezed,Object? type = freezed,}) {
-  return _then(RuleBuilderAction(
-banOptions: freezed == banOptions ? _self.banOptions : banOptions // ignore: cast_nullable_to_non_nullable
-as BanOptions?,callOptions: freezed == callOptions ? _self.callOptions : callOptions // ignore: cast_nullable_to_non_nullable
-as CallActionOptions?,flagUserOptions: freezed == flagUserOptions ? _self.flagUserOptions : flagUserOptions // ignore: cast_nullable_to_non_nullable
-as FlagUserOptions?,skipInbox: freezed == skipInbox ? _self.skipInbox : skipInbox // ignore: cast_nullable_to_non_nullable
-as bool?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as RuleBuilderActionType?,
-  ));
+  /// Create a copy of RuleBuilderAction
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? banOptions = freezed,
+    Object? callOptions = freezed,
+    Object? flagUserOptions = freezed,
+    Object? skipInbox = freezed,
+    Object? type = freezed,
+  }) {
+    return _then(
+      RuleBuilderAction(
+        banOptions: freezed == banOptions
+            ? _self.banOptions
+            : banOptions // ignore: cast_nullable_to_non_nullable
+                  as BanOptions?,
+        callOptions: freezed == callOptions
+            ? _self.callOptions
+            : callOptions // ignore: cast_nullable_to_non_nullable
+                  as CallActionOptions?,
+        flagUserOptions: freezed == flagUserOptions
+            ? _self.flagUserOptions
+            : flagUserOptions // ignore: cast_nullable_to_non_nullable
+                  as FlagUserOptions?,
+        skipInbox: freezed == skipInbox
+            ? _self.skipInbox
+            : skipInbox // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        type: freezed == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as RuleBuilderActionType?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [RuleBuilderAction].
-extension RuleBuilderActionPatterns on RuleBuilderAction {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

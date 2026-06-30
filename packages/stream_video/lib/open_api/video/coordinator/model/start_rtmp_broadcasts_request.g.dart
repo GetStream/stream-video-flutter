@@ -18,4 +18,6 @@ StartRTMPBroadcastsRequest _$StartRTMPBroadcastsRequestFromJson(
 
 Map<String, dynamic> _$StartRTMPBroadcastsRequestToJson(
   StartRTMPBroadcastsRequest instance,
-) => <String, dynamic>{'broadcasts': instance.broadcasts};
+) => <String, dynamic>{
+  'broadcasts': instance.broadcasts.map((e) => e.toJson()).toList(),
+};

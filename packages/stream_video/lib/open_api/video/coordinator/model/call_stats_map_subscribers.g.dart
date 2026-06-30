@@ -22,6 +22,6 @@ CallStatsMapSubscribers _$CallStatsMapSubscribersFromJson(
 Map<String, dynamic> _$CallStatsMapSubscribersToJson(
   CallStatsMapSubscribers instance,
 ) => <String, dynamic>{
-  'locations': instance.locations,
-  'participants': instance.participants,
+  'locations': instance.locations.map((e) => e.toJson()).toList(),
+  'participants': instance.participants?.map((e) => e.toJson()).toList(),
 };

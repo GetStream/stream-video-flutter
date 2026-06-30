@@ -23,5 +23,5 @@ Map<String, dynamic> _$CustomVideoEventToJson(CustomVideoEvent instance) =>
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
       'custom': instance.custom,
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };

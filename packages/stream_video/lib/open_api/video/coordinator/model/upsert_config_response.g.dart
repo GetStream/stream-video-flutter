@@ -18,6 +18,6 @@ UpsertConfigResponse _$UpsertConfigResponseFromJson(
 Map<String, dynamic> _$UpsertConfigResponseToJson(
   UpsertConfigResponse instance,
 ) => <String, dynamic>{
-  'config': instance.config,
+  'config': instance.config?.toJson(),
   'duration': instance.duration,
 };

@@ -30,7 +30,7 @@ Map<String, dynamic> _$VideoSettingsResponseToJson(
   'camera_facing':
       _$VideoSettingsResponseCameraFacingEnumMap[instance.cameraFacing]!,
   'enabled': instance.enabled,
-  'target_resolution': instance.targetResolution,
+  'target_resolution': instance.targetResolution.toJson(),
 };
 
 const _$VideoSettingsResponseCameraFacingEnumMap = {

@@ -18,4 +18,6 @@ CallStatsMapSFUs _$CallStatsMapSFUsFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$CallStatsMapSFUsToJson(CallStatsMapSFUs instance) =>
-    <String, dynamic>{'locations': instance.locations};
+    <String, dynamic>{
+      'locations': instance.locations.map((e) => e.toJson()).toList(),
+    };

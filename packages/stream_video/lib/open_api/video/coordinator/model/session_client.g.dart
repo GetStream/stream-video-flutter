@@ -22,7 +22,7 @@ SessionClient _$SessionClientFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SessionClientToJson(SessionClient instance) =>
     <String, dynamic>{
       'ip': instance.ip,
-      'location': instance.location,
+      'location': instance.location?.toJson(),
       'name': instance.name,
       'network_type': instance.networkType,
       'version': instance.version,

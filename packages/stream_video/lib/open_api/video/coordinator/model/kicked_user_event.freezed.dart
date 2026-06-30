@@ -9,49 +9,66 @@ part of 'kicked_user_event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$KickedUserEvent {
+  String get callCid;
+  DateTime get createdAt;
+  UserResponse? get kickedByUser;
+  String get type;
+  UserResponse get user;
 
- String get callCid; DateTime get createdAt; UserResponse? get kickedByUser; String get type; UserResponse get user;
-/// Create a copy of KickedUserEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$KickedUserEventCopyWith<KickedUserEvent> get copyWith => _$KickedUserEventCopyWithImpl<KickedUserEvent>(this as KickedUserEvent, _$identity);
+  /// Create a copy of KickedUserEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $KickedUserEventCopyWith<KickedUserEvent> get copyWith =>
+      _$KickedUserEventCopyWithImpl<KickedUserEvent>(
+        this as KickedUserEvent,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is KickedUserEvent &&
+            (identical(other.callCid, callCid) || other.callCid == callCid) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.kickedByUser, kickedByUser) ||
+                other.kickedByUser == kickedByUser) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, callCid, createdAt, kickedByUser, type, user);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KickedUserEvent&&(identical(other.callCid, callCid) || other.callCid == callCid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.kickedByUser, kickedByUser) || other.kickedByUser == kickedByUser)&&(identical(other.type, type) || other.type == type)&&(identical(other.user, user) || other.user == user));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,callCid,createdAt,kickedByUser,type,user);
-
-@override
-String toString() {
-  return 'KickedUserEvent(callCid: $callCid, createdAt: $createdAt, kickedByUser: $kickedByUser, type: $type, user: $user)';
-}
-
-
+  @override
+  String toString() {
+    return 'KickedUserEvent(callCid: $callCid, createdAt: $createdAt, kickedByUser: $kickedByUser, type: $type, user: $user)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $KickedUserEventCopyWith<$Res>  {
-  factory $KickedUserEventCopyWith(KickedUserEvent value, $Res Function(KickedUserEvent) _then) = _$KickedUserEventCopyWithImpl;
-@useResult
-$Res call({
- String callCid, DateTime createdAt, UserResponse? kickedByUser, String type, UserResponse user
-});
-
-
-
-
+abstract mixin class $KickedUserEventCopyWith<$Res> {
+  factory $KickedUserEventCopyWith(
+    KickedUserEvent value,
+    $Res Function(KickedUserEvent) _then,
+  ) = _$KickedUserEventCopyWithImpl;
+  @useResult
+  $Res call({
+    String callCid,
+    DateTime createdAt,
+    UserResponse? kickedByUser,
+    String type,
+    UserResponse user,
+  });
 }
+
 /// @nodoc
 class _$KickedUserEventCopyWithImpl<$Res>
     implements $KickedUserEventCopyWith<$Res> {
@@ -60,144 +77,40 @@ class _$KickedUserEventCopyWithImpl<$Res>
   final KickedUserEvent _self;
   final $Res Function(KickedUserEvent) _then;
 
-/// Create a copy of KickedUserEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? callCid = null,Object? createdAt = null,Object? kickedByUser = freezed,Object? type = null,Object? user = null,}) {
-  return _then(KickedUserEvent(
-callCid: null == callCid ? _self.callCid : callCid // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,kickedByUser: freezed == kickedByUser ? _self.kickedByUser : kickedByUser // ignore: cast_nullable_to_non_nullable
-as UserResponse?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserResponse,
-  ));
+  /// Create a copy of KickedUserEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? callCid = null,
+    Object? createdAt = null,
+    Object? kickedByUser = freezed,
+    Object? type = null,
+    Object? user = null,
+  }) {
+    return _then(
+      KickedUserEvent(
+        callCid: null == callCid
+            ? _self.callCid
+            : callCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        kickedByUser: freezed == kickedByUser
+            ? _self.kickedByUser
+            : kickedByUser // ignore: cast_nullable_to_non_nullable
+                  as UserResponse?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: null == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponse,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [KickedUserEvent].
-extension KickedUserEventPatterns on KickedUserEvent {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -29,5 +29,5 @@ Map<String, dynamic> _$QueryCallStatsResponseToJson(
   'duration': instance.duration,
   'next': instance.next,
   'prev': instance.prev,
-  'reports': instance.reports,
+  'reports': instance.reports.map((e) => e.toJson()).toList(),
 };

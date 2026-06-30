@@ -26,8 +26,8 @@ ResolveSipInboundResponse _$ResolveSipInboundResponseFromJson(
 Map<String, dynamic> _$ResolveSipInboundResponseToJson(
   ResolveSipInboundResponse instance,
 ) => <String, dynamic>{
-  'credentials': instance.credentials,
+  'credentials': instance.credentials.toJson(),
   'duration': instance.duration,
-  'sip_routing_rule': instance.sipRoutingRule,
-  'sip_trunk': instance.sipTrunk,
+  'sip_routing_rule': instance.sipRoutingRule?.toJson(),
+  'sip_trunk': instance.sipTrunk?.toJson(),
 };

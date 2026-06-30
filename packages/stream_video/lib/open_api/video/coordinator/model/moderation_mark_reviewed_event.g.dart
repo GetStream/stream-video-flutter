@@ -29,8 +29,8 @@ Map<String, dynamic> _$ModerationMarkReviewedEventToJson(
 ) => <String, dynamic>{
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
-  'item': instance.item,
-  'message': instance.message,
+  'item': instance.item.toJson(),
+  'message': instance.message?.toJson(),
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,
     const EpochDateTimeConverter().toJson,

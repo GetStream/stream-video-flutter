@@ -59,17 +59,17 @@ SIPInboundRoutingRuleResponse _$SIPInboundRoutingRuleResponseFromJson(
 Map<String, dynamic> _$SIPInboundRoutingRuleResponseToJson(
   SIPInboundRoutingRuleResponse instance,
 ) => <String, dynamic>{
-  'call_configs': instance.callConfigs,
+  'call_configs': instance.callConfigs?.toJson(),
   'called_numbers': instance.calledNumbers,
-  'caller_configs': instance.callerConfigs,
+  'caller_configs': instance.callerConfigs?.toJson(),
   'caller_numbers': instance.callerNumbers,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-  'direct_routing_configs': instance.directRoutingConfigs,
+  'direct_routing_configs': instance.directRoutingConfigs?.toJson(),
   'duration': instance.duration,
   'id': instance.id,
   'name': instance.name,
-  'pin_protection_configs': instance.pinProtectionConfigs,
-  'pin_routing_configs': instance.pinRoutingConfigs,
+  'pin_protection_configs': instance.pinProtectionConfigs?.toJson(),
+  'pin_routing_configs': instance.pinRoutingConfigs?.toJson(),
   'trunk_ids': instance.trunkIds,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
 };

@@ -48,16 +48,20 @@ EnrichedActivity _$EnrichedActivityFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$EnrichedActivityToJson(EnrichedActivity instance) =>
     <String, dynamic>{
-      'actor': instance.actor,
+      'actor': instance.actor?.toJson(),
       'foreign_id': instance.foreignId,
       'id': instance.id,
-      'latest_reactions': instance.latestReactions,
-      'object': instance.object,
-      'origin': instance.origin,
-      'own_reactions': instance.ownReactions,
+      'latest_reactions': instance.latestReactions?.map(
+        (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+      ),
+      'object': instance.object?.toJson(),
+      'origin': instance.origin?.toJson(),
+      'own_reactions': instance.ownReactions?.map(
+        (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+      ),
       'reaction_counts': instance.reactionCounts,
       'score': instance.score,
-      'target': instance.target,
+      'target': instance.target?.toJson(),
       'to': instance.to,
       'verb': instance.verb,
     };

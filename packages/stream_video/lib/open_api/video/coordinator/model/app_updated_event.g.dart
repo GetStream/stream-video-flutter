@@ -22,7 +22,7 @@ AppUpdatedEvent _$AppUpdatedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AppUpdatedEventToJson(AppUpdatedEvent instance) =>
     <String, dynamic>{
-      'app': instance.app,
+      'app': instance.app.toJson(),
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
       'custom': instance.custom,
       'received_at': _$JsonConverterToJson<Object, DateTime>(

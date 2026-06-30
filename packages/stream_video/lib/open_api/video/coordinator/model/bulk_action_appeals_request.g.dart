@@ -52,11 +52,11 @@ Map<String, dynamic> _$BulkActionAppealsRequestToJson(
   'action_type':
       _$BulkActionAppealsRequestActionTypeEnumMap[instance.actionType]!,
   'appeal_ids': instance.appealIds,
-  'mark_reviewed': instance.markReviewed,
-  'reject_appeal': instance.rejectAppeal,
-  'restore': instance.restore,
-  'unban': instance.unban,
-  'unblock': instance.unblock,
+  'mark_reviewed': instance.markReviewed?.toJson(),
+  'reject_appeal': instance.rejectAppeal?.toJson(),
+  'restore': instance.restore?.toJson(),
+  'unban': instance.unban?.toJson(),
+  'unblock': instance.unblock?.toJson(),
 };
 
 const _$BulkActionAppealsRequestActionTypeEnumMap = {

@@ -33,9 +33,9 @@ Map<String, dynamic> _$UserMuteResponseToJson(UserMuteResponse instance) =>
         instance.expires,
         const EpochDateTimeConverter().toJson,
       ),
-      'target': instance.target,
+      'target': instance.target?.toJson(),
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-      'user': instance.user,
+      'user': instance.user?.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

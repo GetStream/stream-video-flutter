@@ -22,6 +22,6 @@ Map<String, dynamic> _$CallReactionEventToJson(CallReactionEvent instance) =>
     <String, dynamic>{
       'call_cid': instance.callCid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'reaction': instance.reaction,
+      'reaction': instance.reaction.toJson(),
       'type': instance.type,
     };

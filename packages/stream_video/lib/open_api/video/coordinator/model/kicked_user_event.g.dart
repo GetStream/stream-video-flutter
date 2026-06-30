@@ -25,7 +25,7 @@ Map<String, dynamic> _$KickedUserEventToJson(KickedUserEvent instance) =>
     <String, dynamic>{
       'call_cid': instance.callCid,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'kicked_by_user': instance.kickedByUser,
+      'kicked_by_user': instance.kickedByUser?.toJson(),
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };

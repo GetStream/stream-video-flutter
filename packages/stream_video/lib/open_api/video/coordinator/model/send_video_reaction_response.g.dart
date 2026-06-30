@@ -19,5 +19,5 @@ Map<String, dynamic> _$SendVideoReactionResponseToJson(
   SendVideoReactionResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'reaction': instance.reaction,
+  'reaction': instance.reaction.toJson(),
 };

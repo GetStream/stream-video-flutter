@@ -15,4 +15,4 @@ FileUploadRequest _$FileUploadRequestFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$FileUploadRequestToJson(FileUploadRequest instance) =>
-    <String, dynamic>{'file': instance.file, 'user': instance.user};
+    <String, dynamic>{'file': instance.file, 'user': instance.user?.toJson()};

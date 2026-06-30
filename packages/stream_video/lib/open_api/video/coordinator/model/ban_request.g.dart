@@ -27,7 +27,7 @@ BanRequest _$BanRequestFromJson(Map<String, dynamic> json) => BanRequest(
 Map<String, dynamic> _$BanRequestToJson(
   BanRequest instance,
 ) => <String, dynamic>{
-  'banned_by': instance.bannedBy,
+  'banned_by': instance.bannedBy?.toJson(),
   'banned_by_id': instance.bannedById,
   'channel_cid': instance.channelCid,
   'delete_messages': _$BanRequestDeleteMessagesEnumMap[instance.deleteMessages],

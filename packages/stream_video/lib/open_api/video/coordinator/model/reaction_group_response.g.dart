@@ -36,5 +36,7 @@ Map<String, dynamic> _$ReactionGroupResponseToJson(
   'last_reaction_at': const EpochDateTimeConverter().toJson(
     instance.lastReactionAt,
   ),
-  'latest_reactions_by': instance.latestReactionsBy,
+  'latest_reactions_by': instance.latestReactionsBy
+      .map((e) => e.toJson())
+      .toList(),
 };

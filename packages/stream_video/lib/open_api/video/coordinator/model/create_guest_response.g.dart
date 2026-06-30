@@ -18,5 +18,5 @@ Map<String, dynamic> _$CreateGuestResponseToJson(
 ) => <String, dynamic>{
   'access_token': instance.accessToken,
   'duration': instance.duration,
-  'user': instance.user,
+  'user': instance.user.toJson(),
 };

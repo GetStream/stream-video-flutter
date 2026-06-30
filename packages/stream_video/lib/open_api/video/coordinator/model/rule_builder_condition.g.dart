@@ -129,30 +129,34 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
 Map<String, dynamic> _$RuleBuilderConditionToJson(
   RuleBuilderCondition instance,
 ) => <String, dynamic>{
-  'call_custom_property_params': instance.callCustomPropertyParams,
-  'call_type_rule_params': instance.callTypeRuleParams,
-  'call_violation_count_params': instance.callViolationCountParams,
-  'channel_message_count_rule_params': instance.channelMessageCountRuleParams,
-  'closed_caption_rule_params': instance.closedCaptionRuleParams,
+  'call_custom_property_params': instance.callCustomPropertyParams?.toJson(),
+  'call_type_rule_params': instance.callTypeRuleParams?.toJson(),
+  'call_violation_count_params': instance.callViolationCountParams?.toJson(),
+  'channel_message_count_rule_params': instance.channelMessageCountRuleParams
+      ?.toJson(),
+  'closed_caption_rule_params': instance.closedCaptionRuleParams?.toJson(),
   'confidence': instance.confidence,
-  'content_count_rule_params': instance.contentCountRuleParams,
-  'content_custom_property_count_params':
-      instance.contentCustomPropertyCountParams,
-  'content_flag_count_rule_params': instance.contentFlagCountRuleParams,
-  'image_content_params': instance.imageContentParams,
-  'image_rule_params': instance.imageRuleParams,
-  'keyframe_ocr_rule_params': instance.keyframeOcrRuleParams,
-  'keyframe_rule_params': instance.keyframeRuleParams,
-  'text_content_params': instance.textContentParams,
-  'text_rule_params': instance.textRuleParams,
+  'content_count_rule_params': instance.contentCountRuleParams?.toJson(),
+  'content_custom_property_count_params': instance
+      .contentCustomPropertyCountParams
+      ?.toJson(),
+  'content_flag_count_rule_params': instance.contentFlagCountRuleParams
+      ?.toJson(),
+  'image_content_params': instance.imageContentParams?.toJson(),
+  'image_rule_params': instance.imageRuleParams?.toJson(),
+  'keyframe_ocr_rule_params': instance.keyframeOcrRuleParams?.toJson(),
+  'keyframe_rule_params': instance.keyframeRuleParams?.toJson(),
+  'text_content_params': instance.textContentParams?.toJson(),
+  'text_rule_params': instance.textRuleParams?.toJson(),
   'type': instance.type,
-  'user_created_within_params': instance.userCreatedWithinParams,
-  'user_custom_property_params': instance.userCustomPropertyParams,
-  'user_flag_count_rule_params': instance.userFlagCountRuleParams,
-  'user_identical_content_count_params':
-      instance.userIdenticalContentCountParams,
-  'user_role_params': instance.userRoleParams,
-  'user_rule_params': instance.userRuleParams,
-  'video_content_params': instance.videoContentParams,
-  'video_rule_params': instance.videoRuleParams,
+  'user_created_within_params': instance.userCreatedWithinParams?.toJson(),
+  'user_custom_property_params': instance.userCustomPropertyParams?.toJson(),
+  'user_flag_count_rule_params': instance.userFlagCountRuleParams?.toJson(),
+  'user_identical_content_count_params': instance
+      .userIdenticalContentCountParams
+      ?.toJson(),
+  'user_role_params': instance.userRoleParams?.toJson(),
+  'user_rule_params': instance.userRuleParams?.toJson(),
+  'video_content_params': instance.videoContentParams?.toJson(),
+  'video_rule_params': instance.videoRuleParams?.toJson(),
 };

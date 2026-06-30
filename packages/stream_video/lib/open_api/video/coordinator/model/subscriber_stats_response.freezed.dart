@@ -9,49 +9,59 @@ part of 'subscriber_stats_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$SubscriberStatsResponse {
+  int get total;
+  int get totalSubscribedDurationSeconds;
+  int get unique;
 
- int get total; int get totalSubscribedDurationSeconds; int get unique;
-/// Create a copy of SubscriberStatsResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SubscriberStatsResponseCopyWith<SubscriberStatsResponse> get copyWith => _$SubscriberStatsResponseCopyWithImpl<SubscriberStatsResponse>(this as SubscriberStatsResponse, _$identity);
+  /// Create a copy of SubscriberStatsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SubscriberStatsResponseCopyWith<SubscriberStatsResponse> get copyWith =>
+      _$SubscriberStatsResponseCopyWithImpl<SubscriberStatsResponse>(
+        this as SubscriberStatsResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SubscriberStatsResponse &&
+            (identical(other.total, total) || other.total == total) &&
+            (identical(
+                  other.totalSubscribedDurationSeconds,
+                  totalSubscribedDurationSeconds,
+                ) ||
+                other.totalSubscribedDurationSeconds ==
+                    totalSubscribedDurationSeconds) &&
+            (identical(other.unique, unique) || other.unique == unique));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, total, totalSubscribedDurationSeconds, unique);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriberStatsResponse&&(identical(other.total, total) || other.total == total)&&(identical(other.totalSubscribedDurationSeconds, totalSubscribedDurationSeconds) || other.totalSubscribedDurationSeconds == totalSubscribedDurationSeconds)&&(identical(other.unique, unique) || other.unique == unique));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,total,totalSubscribedDurationSeconds,unique);
-
-@override
-String toString() {
-  return 'SubscriberStatsResponse(total: $total, totalSubscribedDurationSeconds: $totalSubscribedDurationSeconds, unique: $unique)';
-}
-
-
+  @override
+  String toString() {
+    return 'SubscriberStatsResponse(total: $total, totalSubscribedDurationSeconds: $totalSubscribedDurationSeconds, unique: $unique)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $SubscriberStatsResponseCopyWith<$Res>  {
-  factory $SubscriberStatsResponseCopyWith(SubscriberStatsResponse value, $Res Function(SubscriberStatsResponse) _then) = _$SubscriberStatsResponseCopyWithImpl;
-@useResult
-$Res call({
- int total, int totalSubscribedDurationSeconds, int unique
-});
-
-
-
-
+abstract mixin class $SubscriberStatsResponseCopyWith<$Res> {
+  factory $SubscriberStatsResponseCopyWith(
+    SubscriberStatsResponse value,
+    $Res Function(SubscriberStatsResponse) _then,
+  ) = _$SubscriberStatsResponseCopyWithImpl;
+  @useResult
+  $Res call({int total, int totalSubscribedDurationSeconds, int unique});
 }
+
 /// @nodoc
 class _$SubscriberStatsResponseCopyWithImpl<$Res>
     implements $SubscriberStatsResponseCopyWith<$Res> {
@@ -60,142 +70,30 @@ class _$SubscriberStatsResponseCopyWithImpl<$Res>
   final SubscriberStatsResponse _self;
   final $Res Function(SubscriberStatsResponse) _then;
 
-/// Create a copy of SubscriberStatsResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? total = null,Object? totalSubscribedDurationSeconds = null,Object? unique = null,}) {
-  return _then(SubscriberStatsResponse(
-total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,totalSubscribedDurationSeconds: null == totalSubscribedDurationSeconds ? _self.totalSubscribedDurationSeconds : totalSubscribedDurationSeconds // ignore: cast_nullable_to_non_nullable
-as int,unique: null == unique ? _self.unique : unique // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
+  /// Create a copy of SubscriberStatsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? total = null,
+    Object? totalSubscribedDurationSeconds = null,
+    Object? unique = null,
+  }) {
+    return _then(
+      SubscriberStatsResponse(
+        total: null == total
+            ? _self.total
+            : total // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalSubscribedDurationSeconds: null == totalSubscribedDurationSeconds
+            ? _self.totalSubscribedDurationSeconds
+            : totalSubscribedDurationSeconds // ignore: cast_nullable_to_non_nullable
+                  as int,
+        unique: null == unique
+            ? _self.unique
+            : unique // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [SubscriberStatsResponse].
-extension SubscriberStatsResponsePatterns on SubscriberStatsResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

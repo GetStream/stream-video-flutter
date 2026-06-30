@@ -9,49 +9,104 @@ part of 'create_poll_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CreatePollRequest {
+  bool? get allowAnswers;
+  bool? get allowUserSuggestedOptions;
+  Map<String, Object?>? get custom;
+  String? get description;
+  bool? get enforceUniqueVote;
+  String? get id;
+  bool? get isClosed;
+  int? get maxVotesAllowed;
+  String get name;
+  List<PollOptionInput>? get options;
+  CreatePollRequestVotingVisibility? get votingVisibility;
 
- bool? get allowAnswers; bool? get allowUserSuggestedOptions; Map<String, Object?>? get custom; String? get description; bool? get enforceUniqueVote; String? get id; bool? get isClosed; int? get maxVotesAllowed; String get name; List<PollOptionInput>? get options; CreatePollRequestVotingVisibility? get votingVisibility;
-/// Create a copy of CreatePollRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CreatePollRequestCopyWith<CreatePollRequest> get copyWith => _$CreatePollRequestCopyWithImpl<CreatePollRequest>(this as CreatePollRequest, _$identity);
+  /// Create a copy of CreatePollRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CreatePollRequestCopyWith<CreatePollRequest> get copyWith =>
+      _$CreatePollRequestCopyWithImpl<CreatePollRequest>(
+        this as CreatePollRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CreatePollRequest &&
+            (identical(other.allowAnswers, allowAnswers) ||
+                other.allowAnswers == allowAnswers) &&
+            (identical(
+                  other.allowUserSuggestedOptions,
+                  allowUserSuggestedOptions,
+                ) ||
+                other.allowUserSuggestedOptions == allowUserSuggestedOptions) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.enforceUniqueVote, enforceUniqueVote) ||
+                other.enforceUniqueVote == enforceUniqueVote) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.isClosed, isClosed) ||
+                other.isClosed == isClosed) &&
+            (identical(other.maxVotesAllowed, maxVotesAllowed) ||
+                other.maxVotesAllowed == maxVotesAllowed) &&
+            (identical(other.name, name) || other.name == name) &&
+            const DeepCollectionEquality().equals(other.options, options) &&
+            (identical(other.votingVisibility, votingVisibility) ||
+                other.votingVisibility == votingVisibility));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    allowAnswers,
+    allowUserSuggestedOptions,
+    const DeepCollectionEquality().hash(custom),
+    description,
+    enforceUniqueVote,
+    id,
+    isClosed,
+    maxVotesAllowed,
+    name,
+    const DeepCollectionEquality().hash(options),
+    votingVisibility,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreatePollRequest&&(identical(other.allowAnswers, allowAnswers) || other.allowAnswers == allowAnswers)&&(identical(other.allowUserSuggestedOptions, allowUserSuggestedOptions) || other.allowUserSuggestedOptions == allowUserSuggestedOptions)&&const DeepCollectionEquality().equals(other.custom, custom)&&(identical(other.description, description) || other.description == description)&&(identical(other.enforceUniqueVote, enforceUniqueVote) || other.enforceUniqueVote == enforceUniqueVote)&&(identical(other.id, id) || other.id == id)&&(identical(other.isClosed, isClosed) || other.isClosed == isClosed)&&(identical(other.maxVotesAllowed, maxVotesAllowed) || other.maxVotesAllowed == maxVotesAllowed)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.options, options)&&(identical(other.votingVisibility, votingVisibility) || other.votingVisibility == votingVisibility));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,allowAnswers,allowUserSuggestedOptions,const DeepCollectionEquality().hash(custom),description,enforceUniqueVote,id,isClosed,maxVotesAllowed,name,const DeepCollectionEquality().hash(options),votingVisibility);
-
-@override
-String toString() {
-  return 'CreatePollRequest(allowAnswers: $allowAnswers, allowUserSuggestedOptions: $allowUserSuggestedOptions, custom: $custom, description: $description, enforceUniqueVote: $enforceUniqueVote, id: $id, isClosed: $isClosed, maxVotesAllowed: $maxVotesAllowed, name: $name, options: $options, votingVisibility: $votingVisibility)';
-}
-
-
+  @override
+  String toString() {
+    return 'CreatePollRequest(allowAnswers: $allowAnswers, allowUserSuggestedOptions: $allowUserSuggestedOptions, custom: $custom, description: $description, enforceUniqueVote: $enforceUniqueVote, id: $id, isClosed: $isClosed, maxVotesAllowed: $maxVotesAllowed, name: $name, options: $options, votingVisibility: $votingVisibility)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CreatePollRequestCopyWith<$Res>  {
-  factory $CreatePollRequestCopyWith(CreatePollRequest value, $Res Function(CreatePollRequest) _then) = _$CreatePollRequestCopyWithImpl;
-@useResult
-$Res call({
- bool? allowAnswers, bool? allowUserSuggestedOptions, Map<String, Object?>? custom, String? description, bool? enforceUniqueVote, String? id, bool? isClosed, int? maxVotesAllowed, String name, List<PollOptionInput>? options, CreatePollRequestVotingVisibility? votingVisibility
-});
-
-
-
-
+abstract mixin class $CreatePollRequestCopyWith<$Res> {
+  factory $CreatePollRequestCopyWith(
+    CreatePollRequest value,
+    $Res Function(CreatePollRequest) _then,
+  ) = _$CreatePollRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    bool? allowAnswers,
+    bool? allowUserSuggestedOptions,
+    Map<String, Object?>? custom,
+    String? description,
+    bool? enforceUniqueVote,
+    String? id,
+    bool? isClosed,
+    int? maxVotesAllowed,
+    String name,
+    List<PollOptionInput>? options,
+    CreatePollRequestVotingVisibility? votingVisibility,
+  });
 }
+
 /// @nodoc
 class _$CreatePollRequestCopyWithImpl<$Res>
     implements $CreatePollRequestCopyWith<$Res> {
@@ -60,150 +115,70 @@ class _$CreatePollRequestCopyWithImpl<$Res>
   final CreatePollRequest _self;
   final $Res Function(CreatePollRequest) _then;
 
-/// Create a copy of CreatePollRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? allowAnswers = freezed,Object? allowUserSuggestedOptions = freezed,Object? custom = freezed,Object? description = freezed,Object? enforceUniqueVote = freezed,Object? id = freezed,Object? isClosed = freezed,Object? maxVotesAllowed = freezed,Object? name = null,Object? options = freezed,Object? votingVisibility = freezed,}) {
-  return _then(CreatePollRequest(
-allowAnswers: freezed == allowAnswers ? _self.allowAnswers : allowAnswers // ignore: cast_nullable_to_non_nullable
-as bool?,allowUserSuggestedOptions: freezed == allowUserSuggestedOptions ? _self.allowUserSuggestedOptions : allowUserSuggestedOptions // ignore: cast_nullable_to_non_nullable
-as bool?,custom: freezed == custom ? _self.custom : custom // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,enforceUniqueVote: freezed == enforceUniqueVote ? _self.enforceUniqueVote : enforceUniqueVote // ignore: cast_nullable_to_non_nullable
-as bool?,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,isClosed: freezed == isClosed ? _self.isClosed : isClosed // ignore: cast_nullable_to_non_nullable
-as bool?,maxVotesAllowed: freezed == maxVotesAllowed ? _self.maxVotesAllowed : maxVotesAllowed // ignore: cast_nullable_to_non_nullable
-as int?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,options: freezed == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
-as List<PollOptionInput>?,votingVisibility: freezed == votingVisibility ? _self.votingVisibility : votingVisibility // ignore: cast_nullable_to_non_nullable
-as CreatePollRequestVotingVisibility?,
-  ));
+  /// Create a copy of CreatePollRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? allowAnswers = freezed,
+    Object? allowUserSuggestedOptions = freezed,
+    Object? custom = freezed,
+    Object? description = freezed,
+    Object? enforceUniqueVote = freezed,
+    Object? id = freezed,
+    Object? isClosed = freezed,
+    Object? maxVotesAllowed = freezed,
+    Object? name = null,
+    Object? options = freezed,
+    Object? votingVisibility = freezed,
+  }) {
+    return _then(
+      CreatePollRequest(
+        allowAnswers: freezed == allowAnswers
+            ? _self.allowAnswers
+            : allowAnswers // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        allowUserSuggestedOptions: freezed == allowUserSuggestedOptions
+            ? _self.allowUserSuggestedOptions
+            : allowUserSuggestedOptions // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        custom: freezed == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        description: freezed == description
+            ? _self.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        enforceUniqueVote: freezed == enforceUniqueVote
+            ? _self.enforceUniqueVote
+            : enforceUniqueVote // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        isClosed: freezed == isClosed
+            ? _self.isClosed
+            : isClosed // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        maxVotesAllowed: freezed == maxVotesAllowed
+            ? _self.maxVotesAllowed
+            : maxVotesAllowed // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        options: freezed == options
+            ? _self.options
+            : options // ignore: cast_nullable_to_non_nullable
+                  as List<PollOptionInput>?,
+        votingVisibility: freezed == votingVisibility
+            ? _self.votingVisibility
+            : votingVisibility // ignore: cast_nullable_to_non_nullable
+                  as CreatePollRequestVotingVisibility?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CreatePollRequest].
-extension CreatePollRequestPatterns on CreatePollRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

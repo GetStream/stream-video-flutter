@@ -32,7 +32,7 @@ Map<String, dynamic> _$QueryCallSessionParticipantStatsTimelineResponseToJson(
   'call_session_id': instance.callSessionId,
   'call_type': instance.callType,
   'duration': instance.duration,
-  'events': instance.events,
+  'events': instance.events.map((e) => e.toJson()).toList(),
   'user_id': instance.userId,
   'user_session_id': instance.userSessionId,
 };

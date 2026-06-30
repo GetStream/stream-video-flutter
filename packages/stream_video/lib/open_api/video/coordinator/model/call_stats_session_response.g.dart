@@ -42,7 +42,7 @@ Map<String, dynamic> _$CallStatsSessionResponseToJson(
     const EpochDateTimeConverter().toJson,
   ),
   'call_type': instance.callType,
-  'counts': instance.counts,
+  'counts': instance.counts.toJson(),
   'generated_at': const EpochDateTimeConverter().toJson(instance.generatedAt),
 };
 

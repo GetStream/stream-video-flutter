@@ -9,49 +9,50 @@ part of 'thumbnails_settings_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ThumbnailsSettingsResponse {
+  bool get enabled;
 
- bool get enabled;
-/// Create a copy of ThumbnailsSettingsResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ThumbnailsSettingsResponseCopyWith<ThumbnailsSettingsResponse> get copyWith => _$ThumbnailsSettingsResponseCopyWithImpl<ThumbnailsSettingsResponse>(this as ThumbnailsSettingsResponse, _$identity);
+  /// Create a copy of ThumbnailsSettingsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ThumbnailsSettingsResponseCopyWith<ThumbnailsSettingsResponse>
+  get copyWith =>
+      _$ThumbnailsSettingsResponseCopyWithImpl<ThumbnailsSettingsResponse>(
+        this as ThumbnailsSettingsResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ThumbnailsSettingsResponse &&
+            (identical(other.enabled, enabled) || other.enabled == enabled));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, enabled);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThumbnailsSettingsResponse&&(identical(other.enabled, enabled) || other.enabled == enabled));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,enabled);
-
-@override
-String toString() {
-  return 'ThumbnailsSettingsResponse(enabled: $enabled)';
-}
-
-
+  @override
+  String toString() {
+    return 'ThumbnailsSettingsResponse(enabled: $enabled)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ThumbnailsSettingsResponseCopyWith<$Res>  {
-  factory $ThumbnailsSettingsResponseCopyWith(ThumbnailsSettingsResponse value, $Res Function(ThumbnailsSettingsResponse) _then) = _$ThumbnailsSettingsResponseCopyWithImpl;
-@useResult
-$Res call({
- bool enabled
-});
-
-
-
-
+abstract mixin class $ThumbnailsSettingsResponseCopyWith<$Res> {
+  factory $ThumbnailsSettingsResponseCopyWith(
+    ThumbnailsSettingsResponse value,
+    $Res Function(ThumbnailsSettingsResponse) _then,
+  ) = _$ThumbnailsSettingsResponseCopyWithImpl;
+  @useResult
+  $Res call({bool enabled});
 }
+
 /// @nodoc
 class _$ThumbnailsSettingsResponseCopyWithImpl<$Res>
     implements $ThumbnailsSettingsResponseCopyWith<$Res> {
@@ -60,140 +61,18 @@ class _$ThumbnailsSettingsResponseCopyWithImpl<$Res>
   final ThumbnailsSettingsResponse _self;
   final $Res Function(ThumbnailsSettingsResponse) _then;
 
-/// Create a copy of ThumbnailsSettingsResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,}) {
-  return _then(ThumbnailsSettingsResponse(
-enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
+  /// Create a copy of ThumbnailsSettingsResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? enabled = null}) {
+    return _then(
+      ThumbnailsSettingsResponse(
+        enabled: null == enabled
+            ? _self.enabled
+            : enabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ThumbnailsSettingsResponse].
-extension ThumbnailsSettingsResponsePatterns on ThumbnailsSettingsResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

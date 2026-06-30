@@ -48,10 +48,14 @@ Map<String, dynamic> _$EnrichedReactionToJson(EnrichedReaction instance) =>
       'data': instance.data,
       'id': instance.id,
       'kind': instance.kind,
-      'latest_children': instance.latestChildren,
-      'own_children': instance.ownChildren,
+      'latest_children': instance.latestChildren?.map(
+        (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+      ),
+      'own_children': instance.ownChildren?.map(
+        (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+      ),
       'parent': instance.parent,
       'target_feeds': instance.targetFeeds,
-      'user': instance.user,
+      'user': instance.user?.toJson(),
       'user_id': instance.userId,
     };

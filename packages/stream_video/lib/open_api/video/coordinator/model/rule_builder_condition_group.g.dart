@@ -18,6 +18,6 @@ RuleBuilderConditionGroup _$RuleBuilderConditionGroupFromJson(
 Map<String, dynamic> _$RuleBuilderConditionGroupToJson(
   RuleBuilderConditionGroup instance,
 ) => <String, dynamic>{
-  'conditions': instance.conditions,
+  'conditions': instance.conditions?.map((e) => e.toJson()).toList(),
   'logic': instance.logic,
 };

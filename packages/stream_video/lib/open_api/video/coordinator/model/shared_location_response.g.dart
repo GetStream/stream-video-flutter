@@ -37,7 +37,7 @@ SharedLocationResponse _$SharedLocationResponseFromJson(
 Map<String, dynamic> _$SharedLocationResponseToJson(
   SharedLocationResponse instance,
 ) => <String, dynamic>{
-  'channel': instance.channel,
+  'channel': instance.channel?.toJson(),
   'channel_cid': instance.channelCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'created_by_device_id': instance.createdByDeviceId,
@@ -48,7 +48,7 @@ Map<String, dynamic> _$SharedLocationResponseToJson(
   ),
   'latitude': instance.latitude,
   'longitude': instance.longitude,
-  'message': instance.message,
+  'message': instance.message?.toJson(),
   'message_id': instance.messageId,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
   'user_id': instance.userId,

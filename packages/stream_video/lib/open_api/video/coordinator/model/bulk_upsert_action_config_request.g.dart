@@ -20,4 +20,6 @@ BulkUpsertActionConfigRequest _$BulkUpsertActionConfigRequestFromJson(
 
 Map<String, dynamic> _$BulkUpsertActionConfigRequestToJson(
   BulkUpsertActionConfigRequest instance,
-) => <String, dynamic>{'action_configs': instance.actionConfigs};
+) => <String, dynamic>{
+  'action_configs': instance.actionConfigs.map((e) => e.toJson()).toList(),
+};

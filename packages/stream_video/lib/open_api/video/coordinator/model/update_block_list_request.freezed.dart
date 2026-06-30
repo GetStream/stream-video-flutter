@@ -9,49 +9,68 @@ part of 'update_block_list_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UpdateBlockListRequest {
+  bool? get isLeetCheckEnabled;
+  bool? get isPluralCheckEnabled;
+  String? get team;
+  List<String>? get words;
 
- bool? get isLeetCheckEnabled; bool? get isPluralCheckEnabled; String? get team; List<String>? get words;
-/// Create a copy of UpdateBlockListRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpdateBlockListRequestCopyWith<UpdateBlockListRequest> get copyWith => _$UpdateBlockListRequestCopyWithImpl<UpdateBlockListRequest>(this as UpdateBlockListRequest, _$identity);
+  /// Create a copy of UpdateBlockListRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdateBlockListRequestCopyWith<UpdateBlockListRequest> get copyWith =>
+      _$UpdateBlockListRequestCopyWithImpl<UpdateBlockListRequest>(
+        this as UpdateBlockListRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpdateBlockListRequest &&
+            (identical(other.isLeetCheckEnabled, isLeetCheckEnabled) ||
+                other.isLeetCheckEnabled == isLeetCheckEnabled) &&
+            (identical(other.isPluralCheckEnabled, isPluralCheckEnabled) ||
+                other.isPluralCheckEnabled == isPluralCheckEnabled) &&
+            (identical(other.team, team) || other.team == team) &&
+            const DeepCollectionEquality().equals(other.words, words));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    isLeetCheckEnabled,
+    isPluralCheckEnabled,
+    team,
+    const DeepCollectionEquality().hash(words),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateBlockListRequest&&(identical(other.isLeetCheckEnabled, isLeetCheckEnabled) || other.isLeetCheckEnabled == isLeetCheckEnabled)&&(identical(other.isPluralCheckEnabled, isPluralCheckEnabled) || other.isPluralCheckEnabled == isPluralCheckEnabled)&&(identical(other.team, team) || other.team == team)&&const DeepCollectionEquality().equals(other.words, words));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,isLeetCheckEnabled,isPluralCheckEnabled,team,const DeepCollectionEquality().hash(words));
-
-@override
-String toString() {
-  return 'UpdateBlockListRequest(isLeetCheckEnabled: $isLeetCheckEnabled, isPluralCheckEnabled: $isPluralCheckEnabled, team: $team, words: $words)';
-}
-
-
+  @override
+  String toString() {
+    return 'UpdateBlockListRequest(isLeetCheckEnabled: $isLeetCheckEnabled, isPluralCheckEnabled: $isPluralCheckEnabled, team: $team, words: $words)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UpdateBlockListRequestCopyWith<$Res>  {
-  factory $UpdateBlockListRequestCopyWith(UpdateBlockListRequest value, $Res Function(UpdateBlockListRequest) _then) = _$UpdateBlockListRequestCopyWithImpl;
-@useResult
-$Res call({
- bool? isLeetCheckEnabled, bool? isPluralCheckEnabled, String? team, List<String>? words
-});
-
-
-
-
+abstract mixin class $UpdateBlockListRequestCopyWith<$Res> {
+  factory $UpdateBlockListRequestCopyWith(
+    UpdateBlockListRequest value,
+    $Res Function(UpdateBlockListRequest) _then,
+  ) = _$UpdateBlockListRequestCopyWithImpl;
+  @useResult
+  $Res call({
+    bool? isLeetCheckEnabled,
+    bool? isPluralCheckEnabled,
+    String? team,
+    List<String>? words,
+  });
 }
+
 /// @nodoc
 class _$UpdateBlockListRequestCopyWithImpl<$Res>
     implements $UpdateBlockListRequestCopyWith<$Res> {
@@ -60,143 +79,35 @@ class _$UpdateBlockListRequestCopyWithImpl<$Res>
   final UpdateBlockListRequest _self;
   final $Res Function(UpdateBlockListRequest) _then;
 
-/// Create a copy of UpdateBlockListRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLeetCheckEnabled = freezed,Object? isPluralCheckEnabled = freezed,Object? team = freezed,Object? words = freezed,}) {
-  return _then(UpdateBlockListRequest(
-isLeetCheckEnabled: freezed == isLeetCheckEnabled ? _self.isLeetCheckEnabled : isLeetCheckEnabled // ignore: cast_nullable_to_non_nullable
-as bool?,isPluralCheckEnabled: freezed == isPluralCheckEnabled ? _self.isPluralCheckEnabled : isPluralCheckEnabled // ignore: cast_nullable_to_non_nullable
-as bool?,team: freezed == team ? _self.team : team // ignore: cast_nullable_to_non_nullable
-as String?,words: freezed == words ? _self.words : words // ignore: cast_nullable_to_non_nullable
-as List<String>?,
-  ));
+  /// Create a copy of UpdateBlockListRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? isLeetCheckEnabled = freezed,
+    Object? isPluralCheckEnabled = freezed,
+    Object? team = freezed,
+    Object? words = freezed,
+  }) {
+    return _then(
+      UpdateBlockListRequest(
+        isLeetCheckEnabled: freezed == isLeetCheckEnabled
+            ? _self.isLeetCheckEnabled
+            : isLeetCheckEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        isPluralCheckEnabled: freezed == isPluralCheckEnabled
+            ? _self.isPluralCheckEnabled
+            : isPluralCheckEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        team: freezed == team
+            ? _self.team
+            : team // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        words: freezed == words
+            ? _self.words
+            : words // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UpdateBlockListRequest].
-extension UpdateBlockListRequestPatterns on UpdateBlockListRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

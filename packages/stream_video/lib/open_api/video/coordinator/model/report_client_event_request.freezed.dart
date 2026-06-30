@@ -9,49 +9,50 @@ part of 'report_client_event_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ReportClientEventRequest {
+  List<ClientEvent> get events;
 
- List<ClientEvent> get events;
-/// Create a copy of ReportClientEventRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ReportClientEventRequestCopyWith<ReportClientEventRequest> get copyWith => _$ReportClientEventRequestCopyWithImpl<ReportClientEventRequest>(this as ReportClientEventRequest, _$identity);
+  /// Create a copy of ReportClientEventRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ReportClientEventRequestCopyWith<ReportClientEventRequest> get copyWith =>
+      _$ReportClientEventRequestCopyWithImpl<ReportClientEventRequest>(
+        this as ReportClientEventRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ReportClientEventRequest &&
+            const DeepCollectionEquality().equals(other.events, events));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(events));
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportClientEventRequest&&const DeepCollectionEquality().equals(other.events, events));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(events));
-
-@override
-String toString() {
-  return 'ReportClientEventRequest(events: $events)';
-}
-
-
+  @override
+  String toString() {
+    return 'ReportClientEventRequest(events: $events)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ReportClientEventRequestCopyWith<$Res>  {
-  factory $ReportClientEventRequestCopyWith(ReportClientEventRequest value, $Res Function(ReportClientEventRequest) _then) = _$ReportClientEventRequestCopyWithImpl;
-@useResult
-$Res call({
- List<ClientEvent> events
-});
-
-
-
-
+abstract mixin class $ReportClientEventRequestCopyWith<$Res> {
+  factory $ReportClientEventRequestCopyWith(
+    ReportClientEventRequest value,
+    $Res Function(ReportClientEventRequest) _then,
+  ) = _$ReportClientEventRequestCopyWithImpl;
+  @useResult
+  $Res call({List<ClientEvent> events});
 }
+
 /// @nodoc
 class _$ReportClientEventRequestCopyWithImpl<$Res>
     implements $ReportClientEventRequestCopyWith<$Res> {
@@ -60,140 +61,18 @@ class _$ReportClientEventRequestCopyWithImpl<$Res>
   final ReportClientEventRequest _self;
   final $Res Function(ReportClientEventRequest) _then;
 
-/// Create a copy of ReportClientEventRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? events = null,}) {
-  return _then(ReportClientEventRequest(
-events: null == events ? _self.events : events // ignore: cast_nullable_to_non_nullable
-as List<ClientEvent>,
-  ));
+  /// Create a copy of ReportClientEventRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? events = null}) {
+    return _then(
+      ReportClientEventRequest(
+        events: null == events
+            ? _self.events
+            : events // ignore: cast_nullable_to_non_nullable
+                  as List<ClientEvent>,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ReportClientEventRequest].
-extension ReportClientEventRequestPatterns on ReportClientEventRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

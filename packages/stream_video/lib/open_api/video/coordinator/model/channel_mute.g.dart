@@ -27,14 +27,14 @@ ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
 
 Map<String, dynamic> _$ChannelMuteToJson(ChannelMute instance) =>
     <String, dynamic>{
-      'channel': instance.channel,
+      'channel': instance.channel?.toJson(),
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
       'expires': _$JsonConverterToJson<Object, DateTime>(
         instance.expires,
         const EpochDateTimeConverter().toJson,
       ),
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-      'user': instance.user,
+      'user': instance.user?.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

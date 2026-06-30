@@ -19,5 +19,5 @@ Map<String, dynamic> _$UpdateUserGroupResponseToJson(
   UpdateUserGroupResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'user_group': instance.userGroup,
+  'user_group': instance.userGroup?.toJson(),
 };

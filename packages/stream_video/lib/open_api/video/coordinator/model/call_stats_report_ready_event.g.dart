@@ -28,10 +28,12 @@ Map<String, dynamic> _$CallStatsReportReadyEventToJson(
   CallStatsReportReadyEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'counts': instance.counts,
+  'counts': instance.counts.toJson(),
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'is_trimmed': instance.isTrimmed,
-  'participants_overview': instance.participantsOverview,
+  'participants_overview': instance.participantsOverview
+      ?.map((e) => e.toJson())
+      .toList(),
   'session_id': instance.sessionId,
   'type': instance.type,
 };

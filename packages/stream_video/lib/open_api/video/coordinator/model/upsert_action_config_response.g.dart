@@ -20,6 +20,6 @@ UpsertActionConfigResponse _$UpsertActionConfigResponseFromJson(
 Map<String, dynamic> _$UpsertActionConfigResponseToJson(
   UpsertActionConfigResponse instance,
 ) => <String, dynamic>{
-  'action_config': instance.actionConfig,
+  'action_config': instance.actionConfig?.toJson(),
   'duration': instance.duration,
 };

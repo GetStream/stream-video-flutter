@@ -22,6 +22,6 @@ Map<String, dynamic> _$BroadcastSettingsRequestToJson(
   BroadcastSettingsRequest instance,
 ) => <String, dynamic>{
   'enabled': instance.enabled,
-  'hls': instance.hls,
-  'rtmp': instance.rtmp,
+  'hls': instance.hls?.toJson(),
+  'rtmp': instance.rtmp?.toJson(),
 };

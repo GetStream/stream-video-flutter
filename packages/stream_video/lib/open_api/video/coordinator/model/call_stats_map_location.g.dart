@@ -21,5 +21,5 @@ Map<String, dynamic> _$CallStatsMapLocationToJson(
 ) => <String, dynamic>{
   'count': instance.count,
   'live_count': instance.liveCount,
-  'location': instance.location,
+  'location': instance.location?.toJson(),
 };

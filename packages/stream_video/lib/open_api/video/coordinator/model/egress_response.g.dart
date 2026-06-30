@@ -44,10 +44,10 @@ EgressResponse _$EgressResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$EgressResponseToJson(EgressResponse instance) =>
     <String, dynamic>{
       'broadcasting': instance.broadcasting,
-      'composite_recording': instance.compositeRecording,
-      'frame_recording': instance.frameRecording,
-      'hls': instance.hls,
-      'individual_recording': instance.individualRecording,
-      'raw_recording': instance.rawRecording,
-      'rtmps': instance.rtmps,
+      'composite_recording': instance.compositeRecording?.toJson(),
+      'frame_recording': instance.frameRecording?.toJson(),
+      'hls': instance.hls?.toJson(),
+      'individual_recording': instance.individualRecording?.toJson(),
+      'raw_recording': instance.rawRecording?.toJson(),
+      'rtmps': instance.rtmps.map((e) => e.toJson()).toList(),
     };

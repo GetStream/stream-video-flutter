@@ -31,11 +31,11 @@ PublishedTrackMetrics _$PublishedTrackMetricsFromJson(
 Map<String, dynamic> _$PublishedTrackMetricsToJson(
   PublishedTrackMetrics instance,
 ) => <String, dynamic>{
-  'bitrate': instance.bitrate,
+  'bitrate': instance.bitrate?.toJson(),
   'codec': instance.codec,
-  'framerate': instance.framerate,
-  'resolution': instance.resolution,
+  'framerate': instance.framerate?.toJson(),
+  'resolution': instance.resolution?.toJson(),
   'track_id': instance.trackId,
   'track_type': instance.trackType,
-  'warnings': instance.warnings,
+  'warnings': instance.warnings?.map((e) => e.toJson()).toList(),
 };

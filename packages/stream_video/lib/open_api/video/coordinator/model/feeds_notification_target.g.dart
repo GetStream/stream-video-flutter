@@ -33,12 +33,12 @@ FeedsNotificationTarget _$FeedsNotificationTargetFromJson(
 Map<String, dynamic> _$FeedsNotificationTargetToJson(
   FeedsNotificationTarget instance,
 ) => <String, dynamic>{
-  'attachments': instance.attachments,
-  'comment': instance.comment,
+  'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
+  'comment': instance.comment?.toJson(),
   'custom': instance.custom,
   'id': instance.id,
   'name': instance.name,
-  'parent_activity': instance.parentActivity,
+  'parent_activity': instance.parentActivity?.toJson(),
   'text': instance.text,
   'type': instance.type,
   'user_id': instance.userId,

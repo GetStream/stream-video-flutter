@@ -21,5 +21,5 @@ Map<String, dynamic> _$UpdateCallMembersRequestToJson(
   UpdateCallMembersRequest instance,
 ) => <String, dynamic>{
   'remove_members': instance.removeMembers,
-  'update_members': instance.updateMembers,
+  'update_members': instance.updateMembers?.map((e) => e.toJson()).toList(),
 };

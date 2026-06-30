@@ -24,5 +24,5 @@ Map<String, dynamic> _$QueryAppealsRequestToJson(
   'limit': instance.limit,
   'next': instance.next,
   'prev': instance.prev,
-  'sort': instance.sort,
+  'sort': instance.sort?.map((e) => e.toJson()).toList(),
 };

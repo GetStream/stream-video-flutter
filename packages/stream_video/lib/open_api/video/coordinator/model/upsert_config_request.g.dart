@@ -81,23 +81,25 @@ UpsertConfigRequest _$UpsertConfigRequestFromJson(
 Map<String, dynamic> _$UpsertConfigRequestToJson(
   UpsertConfigRequest instance,
 ) => <String, dynamic>{
-  'ai_image_config': instance.aiImageConfig,
-  'ai_text_config': instance.aiTextConfig,
-  'ai_video_config': instance.aiVideoConfig,
+  'ai_image_config': instance.aiImageConfig?.toJson(),
+  'ai_text_config': instance.aiTextConfig?.toJson(),
+  'ai_video_config': instance.aiVideoConfig?.toJson(),
   'async': instance.async,
-  'automod_platform_circumvention_config':
-      instance.automodPlatformCircumventionConfig,
-  'automod_semantic_filters_config': instance.automodSemanticFiltersConfig,
-  'automod_toxicity_config': instance.automodToxicityConfig,
-  'aws_rekognition_config': instance.awsRekognitionConfig,
-  'block_list_config': instance.blockListConfig,
-  'bodyguard_config': instance.bodyguardConfig,
-  'flood_config': instance.floodConfig,
-  'google_vision_config': instance.googleVisionConfig,
+  'automod_platform_circumvention_config': instance
+      .automodPlatformCircumventionConfig
+      ?.toJson(),
+  'automod_semantic_filters_config': instance.automodSemanticFiltersConfig
+      ?.toJson(),
+  'automod_toxicity_config': instance.automodToxicityConfig?.toJson(),
+  'aws_rekognition_config': instance.awsRekognitionConfig?.toJson(),
+  'block_list_config': instance.blockListConfig?.toJson(),
+  'bodyguard_config': instance.bodyguardConfig?.toJson(),
+  'flood_config': instance.floodConfig?.toJson(),
+  'google_vision_config': instance.googleVisionConfig?.toJson(),
   'key': instance.key,
-  'llm_config': instance.llmConfig,
-  'rule_builder_config': instance.ruleBuilderConfig,
+  'llm_config': instance.llmConfig?.toJson(),
+  'rule_builder_config': instance.ruleBuilderConfig?.toJson(),
   'team': instance.team,
-  'velocity_filter_config': instance.velocityFilterConfig,
-  'video_call_rule_config': instance.videoCallRuleConfig,
+  'velocity_filter_config': instance.velocityFilterConfig?.toJson(),
+  'video_call_rule_config': instance.videoCallRuleConfig?.toJson(),
 };

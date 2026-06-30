@@ -9,49 +9,92 @@ part of 'device_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$DeviceResponse {
+  DateTime get createdAt;
+  bool? get disabled;
+  String? get disabledReason;
+  String? get hardwareId;
+  String get id;
+  String get pushProvider;
+  String? get pushProviderName;
+  String get userId;
+  bool? get voip;
 
- DateTime get createdAt; bool? get disabled; String? get disabledReason; String? get hardwareId; String get id; String get pushProvider; String? get pushProviderName; String get userId; bool? get voip;
-/// Create a copy of DeviceResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$DeviceResponseCopyWith<DeviceResponse> get copyWith => _$DeviceResponseCopyWithImpl<DeviceResponse>(this as DeviceResponse, _$identity);
+  /// Create a copy of DeviceResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $DeviceResponseCopyWith<DeviceResponse> get copyWith =>
+      _$DeviceResponseCopyWithImpl<DeviceResponse>(
+        this as DeviceResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is DeviceResponse &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.disabled, disabled) ||
+                other.disabled == disabled) &&
+            (identical(other.disabledReason, disabledReason) ||
+                other.disabledReason == disabledReason) &&
+            (identical(other.hardwareId, hardwareId) ||
+                other.hardwareId == hardwareId) &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.pushProvider, pushProvider) ||
+                other.pushProvider == pushProvider) &&
+            (identical(other.pushProviderName, pushProviderName) ||
+                other.pushProviderName == pushProviderName) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.voip, voip) || other.voip == voip));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    createdAt,
+    disabled,
+    disabledReason,
+    hardwareId,
+    id,
+    pushProvider,
+    pushProviderName,
+    userId,
+    voip,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceResponse&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.disabledReason, disabledReason) || other.disabledReason == disabledReason)&&(identical(other.hardwareId, hardwareId) || other.hardwareId == hardwareId)&&(identical(other.id, id) || other.id == id)&&(identical(other.pushProvider, pushProvider) || other.pushProvider == pushProvider)&&(identical(other.pushProviderName, pushProviderName) || other.pushProviderName == pushProviderName)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.voip, voip) || other.voip == voip));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,createdAt,disabled,disabledReason,hardwareId,id,pushProvider,pushProviderName,userId,voip);
-
-@override
-String toString() {
-  return 'DeviceResponse(createdAt: $createdAt, disabled: $disabled, disabledReason: $disabledReason, hardwareId: $hardwareId, id: $id, pushProvider: $pushProvider, pushProviderName: $pushProviderName, userId: $userId, voip: $voip)';
-}
-
-
+  @override
+  String toString() {
+    return 'DeviceResponse(createdAt: $createdAt, disabled: $disabled, disabledReason: $disabledReason, hardwareId: $hardwareId, id: $id, pushProvider: $pushProvider, pushProviderName: $pushProviderName, userId: $userId, voip: $voip)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $DeviceResponseCopyWith<$Res>  {
-  factory $DeviceResponseCopyWith(DeviceResponse value, $Res Function(DeviceResponse) _then) = _$DeviceResponseCopyWithImpl;
-@useResult
-$Res call({
- DateTime createdAt, bool? disabled, String? disabledReason, String? hardwareId, String id, String pushProvider, String? pushProviderName, String userId, bool? voip
-});
-
-
-
-
+abstract mixin class $DeviceResponseCopyWith<$Res> {
+  factory $DeviceResponseCopyWith(
+    DeviceResponse value,
+    $Res Function(DeviceResponse) _then,
+  ) = _$DeviceResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    DateTime createdAt,
+    bool? disabled,
+    String? disabledReason,
+    String? hardwareId,
+    String id,
+    String pushProvider,
+    String? pushProviderName,
+    String userId,
+    bool? voip,
+  });
 }
+
 /// @nodoc
 class _$DeviceResponseCopyWithImpl<$Res>
     implements $DeviceResponseCopyWith<$Res> {
@@ -60,148 +103,60 @@ class _$DeviceResponseCopyWithImpl<$Res>
   final DeviceResponse _self;
   final $Res Function(DeviceResponse) _then;
 
-/// Create a copy of DeviceResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? createdAt = null,Object? disabled = freezed,Object? disabledReason = freezed,Object? hardwareId = freezed,Object? id = null,Object? pushProvider = null,Object? pushProviderName = freezed,Object? userId = null,Object? voip = freezed,}) {
-  return _then(DeviceResponse(
-createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,disabled: freezed == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
-as bool?,disabledReason: freezed == disabledReason ? _self.disabledReason : disabledReason // ignore: cast_nullable_to_non_nullable
-as String?,hardwareId: freezed == hardwareId ? _self.hardwareId : hardwareId // ignore: cast_nullable_to_non_nullable
-as String?,id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,pushProvider: null == pushProvider ? _self.pushProvider : pushProvider // ignore: cast_nullable_to_non_nullable
-as String,pushProviderName: freezed == pushProviderName ? _self.pushProviderName : pushProviderName // ignore: cast_nullable_to_non_nullable
-as String?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,voip: freezed == voip ? _self.voip : voip // ignore: cast_nullable_to_non_nullable
-as bool?,
-  ));
+  /// Create a copy of DeviceResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? createdAt = null,
+    Object? disabled = freezed,
+    Object? disabledReason = freezed,
+    Object? hardwareId = freezed,
+    Object? id = null,
+    Object? pushProvider = null,
+    Object? pushProviderName = freezed,
+    Object? userId = null,
+    Object? voip = freezed,
+  }) {
+    return _then(
+      DeviceResponse(
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        disabled: freezed == disabled
+            ? _self.disabled
+            : disabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        disabledReason: freezed == disabledReason
+            ? _self.disabledReason
+            : disabledReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        hardwareId: freezed == hardwareId
+            ? _self.hardwareId
+            : hardwareId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        id: null == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        pushProvider: null == pushProvider
+            ? _self.pushProvider
+            : pushProvider // ignore: cast_nullable_to_non_nullable
+                  as String,
+        pushProviderName: freezed == pushProviderName
+            ? _self.pushProviderName
+            : pushProviderName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        voip: freezed == voip
+            ? _self.voip
+            : voip // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [DeviceResponse].
-extension DeviceResponsePatterns on DeviceResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

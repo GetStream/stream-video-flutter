@@ -28,7 +28,7 @@ Map<String, dynamic> _$BodyguardRuleToJson(BodyguardRule instance) =>
     <String, dynamic>{
       'action': _$BodyguardRuleActionEnumMap[instance.action]!,
       'label': instance.label,
-      'severity_rules': instance.severityRules,
+      'severity_rules': instance.severityRules.map((e) => e.toJson()).toList(),
     };
 
 const _$BodyguardRuleActionEnumMap = {

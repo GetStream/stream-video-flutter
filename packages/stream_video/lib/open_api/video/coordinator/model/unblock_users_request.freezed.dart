@@ -9,49 +9,50 @@ part of 'unblock_users_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$UnblockUsersRequest {
+  String get blockedUserId;
 
- String get blockedUserId;
-/// Create a copy of UnblockUsersRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UnblockUsersRequestCopyWith<UnblockUsersRequest> get copyWith => _$UnblockUsersRequestCopyWithImpl<UnblockUsersRequest>(this as UnblockUsersRequest, _$identity);
+  /// Create a copy of UnblockUsersRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UnblockUsersRequestCopyWith<UnblockUsersRequest> get copyWith =>
+      _$UnblockUsersRequestCopyWithImpl<UnblockUsersRequest>(
+        this as UnblockUsersRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UnblockUsersRequest &&
+            (identical(other.blockedUserId, blockedUserId) ||
+                other.blockedUserId == blockedUserId));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, blockedUserId);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnblockUsersRequest&&(identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,blockedUserId);
-
-@override
-String toString() {
-  return 'UnblockUsersRequest(blockedUserId: $blockedUserId)';
-}
-
-
+  @override
+  String toString() {
+    return 'UnblockUsersRequest(blockedUserId: $blockedUserId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $UnblockUsersRequestCopyWith<$Res>  {
-  factory $UnblockUsersRequestCopyWith(UnblockUsersRequest value, $Res Function(UnblockUsersRequest) _then) = _$UnblockUsersRequestCopyWithImpl;
-@useResult
-$Res call({
- String blockedUserId
-});
-
-
-
-
+abstract mixin class $UnblockUsersRequestCopyWith<$Res> {
+  factory $UnblockUsersRequestCopyWith(
+    UnblockUsersRequest value,
+    $Res Function(UnblockUsersRequest) _then,
+  ) = _$UnblockUsersRequestCopyWithImpl;
+  @useResult
+  $Res call({String blockedUserId});
 }
+
 /// @nodoc
 class _$UnblockUsersRequestCopyWithImpl<$Res>
     implements $UnblockUsersRequestCopyWith<$Res> {
@@ -60,140 +61,18 @@ class _$UnblockUsersRequestCopyWithImpl<$Res>
   final UnblockUsersRequest _self;
   final $Res Function(UnblockUsersRequest) _then;
 
-/// Create a copy of UnblockUsersRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? blockedUserId = null,}) {
-  return _then(UnblockUsersRequest(
-blockedUserId: null == blockedUserId ? _self.blockedUserId : blockedUserId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of UnblockUsersRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? blockedUserId = null}) {
+    return _then(
+      UnblockUsersRequest(
+        blockedUserId: null == blockedUserId
+            ? _self.blockedUserId
+            : blockedUserId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [UnblockUsersRequest].
-extension UnblockUsersRequestPatterns on UnblockUsersRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

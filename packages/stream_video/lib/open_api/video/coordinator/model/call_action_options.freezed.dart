@@ -9,49 +9,84 @@ part of 'call_action_options.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallActionOptions {
+  int? get duration;
+  String? get flagReason;
+  String? get kickReason;
+  bool? get muteAudio;
+  bool? get muteVideo;
+  String? get reason;
+  String? get warningText;
 
- int? get duration; String? get flagReason; String? get kickReason; bool? get muteAudio; bool? get muteVideo; String? get reason; String? get warningText;
-/// Create a copy of CallActionOptions
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallActionOptionsCopyWith<CallActionOptions> get copyWith => _$CallActionOptionsCopyWithImpl<CallActionOptions>(this as CallActionOptions, _$identity);
+  /// Create a copy of CallActionOptions
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallActionOptionsCopyWith<CallActionOptions> get copyWith =>
+      _$CallActionOptionsCopyWithImpl<CallActionOptions>(
+        this as CallActionOptions,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallActionOptions &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
+            (identical(other.flagReason, flagReason) ||
+                other.flagReason == flagReason) &&
+            (identical(other.kickReason, kickReason) ||
+                other.kickReason == kickReason) &&
+            (identical(other.muteAudio, muteAudio) ||
+                other.muteAudio == muteAudio) &&
+            (identical(other.muteVideo, muteVideo) ||
+                other.muteVideo == muteVideo) &&
+            (identical(other.reason, reason) || other.reason == reason) &&
+            (identical(other.warningText, warningText) ||
+                other.warningText == warningText));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    duration,
+    flagReason,
+    kickReason,
+    muteAudio,
+    muteVideo,
+    reason,
+    warningText,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallActionOptions&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.flagReason, flagReason) || other.flagReason == flagReason)&&(identical(other.kickReason, kickReason) || other.kickReason == kickReason)&&(identical(other.muteAudio, muteAudio) || other.muteAudio == muteAudio)&&(identical(other.muteVideo, muteVideo) || other.muteVideo == muteVideo)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.warningText, warningText) || other.warningText == warningText));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,duration,flagReason,kickReason,muteAudio,muteVideo,reason,warningText);
-
-@override
-String toString() {
-  return 'CallActionOptions(duration: $duration, flagReason: $flagReason, kickReason: $kickReason, muteAudio: $muteAudio, muteVideo: $muteVideo, reason: $reason, warningText: $warningText)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallActionOptions(duration: $duration, flagReason: $flagReason, kickReason: $kickReason, muteAudio: $muteAudio, muteVideo: $muteVideo, reason: $reason, warningText: $warningText)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallActionOptionsCopyWith<$Res>  {
-  factory $CallActionOptionsCopyWith(CallActionOptions value, $Res Function(CallActionOptions) _then) = _$CallActionOptionsCopyWithImpl;
-@useResult
-$Res call({
- int? duration, String? flagReason, String? kickReason, bool? muteAudio, bool? muteVideo, String? reason, String? warningText
-});
-
-
-
-
+abstract mixin class $CallActionOptionsCopyWith<$Res> {
+  factory $CallActionOptionsCopyWith(
+    CallActionOptions value,
+    $Res Function(CallActionOptions) _then,
+  ) = _$CallActionOptionsCopyWithImpl;
+  @useResult
+  $Res call({
+    int? duration,
+    String? flagReason,
+    String? kickReason,
+    bool? muteAudio,
+    bool? muteVideo,
+    String? reason,
+    String? warningText,
+  });
 }
+
 /// @nodoc
 class _$CallActionOptionsCopyWithImpl<$Res>
     implements $CallActionOptionsCopyWith<$Res> {
@@ -60,146 +95,50 @@ class _$CallActionOptionsCopyWithImpl<$Res>
   final CallActionOptions _self;
   final $Res Function(CallActionOptions) _then;
 
-/// Create a copy of CallActionOptions
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? duration = freezed,Object? flagReason = freezed,Object? kickReason = freezed,Object? muteAudio = freezed,Object? muteVideo = freezed,Object? reason = freezed,Object? warningText = freezed,}) {
-  return _then(CallActionOptions(
-duration: freezed == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
-as int?,flagReason: freezed == flagReason ? _self.flagReason : flagReason // ignore: cast_nullable_to_non_nullable
-as String?,kickReason: freezed == kickReason ? _self.kickReason : kickReason // ignore: cast_nullable_to_non_nullable
-as String?,muteAudio: freezed == muteAudio ? _self.muteAudio : muteAudio // ignore: cast_nullable_to_non_nullable
-as bool?,muteVideo: freezed == muteVideo ? _self.muteVideo : muteVideo // ignore: cast_nullable_to_non_nullable
-as bool?,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
-as String?,warningText: freezed == warningText ? _self.warningText : warningText // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of CallActionOptions
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? duration = freezed,
+    Object? flagReason = freezed,
+    Object? kickReason = freezed,
+    Object? muteAudio = freezed,
+    Object? muteVideo = freezed,
+    Object? reason = freezed,
+    Object? warningText = freezed,
+  }) {
+    return _then(
+      CallActionOptions(
+        duration: freezed == duration
+            ? _self.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        flagReason: freezed == flagReason
+            ? _self.flagReason
+            : flagReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        kickReason: freezed == kickReason
+            ? _self.kickReason
+            : kickReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        muteAudio: freezed == muteAudio
+            ? _self.muteAudio
+            : muteAudio // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        muteVideo: freezed == muteVideo
+            ? _self.muteVideo
+            : muteVideo // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        warningText: freezed == warningText
+            ? _self.warningText
+            : warningText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallActionOptions].
-extension CallActionOptionsPatterns on CallActionOptions {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

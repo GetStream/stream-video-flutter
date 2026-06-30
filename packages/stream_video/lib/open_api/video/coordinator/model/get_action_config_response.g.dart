@@ -29,6 +29,8 @@ GetActionConfigResponse _$GetActionConfigResponseFromJson(
 Map<String, dynamic> _$GetActionConfigResponseToJson(
   GetActionConfigResponse instance,
 ) => <String, dynamic>{
-  'action_config': instance.actionConfig,
+  'action_config': instance.actionConfig.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
   'duration': instance.duration,
 };

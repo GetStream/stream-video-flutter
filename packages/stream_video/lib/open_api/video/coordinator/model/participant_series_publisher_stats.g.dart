@@ -52,8 +52,12 @@ Map<String, dynamic> _$ParticipantSeriesPublisherStatsToJson(
   ParticipantSeriesPublisherStats instance,
 ) => <String, dynamic>{
   'global': instance.global,
-  'global_meta': instance.globalMeta,
+  'global_meta': instance.globalMeta?.map((k, e) => MapEntry(k, e.toJson())),
   'global_metrics_order': instance.globalMetricsOrder,
-  'global_thresholds': instance.globalThresholds,
-  'tracks': instance.tracks,
+  'global_thresholds': instance.globalThresholds?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
+  'tracks': instance.tracks?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
 };

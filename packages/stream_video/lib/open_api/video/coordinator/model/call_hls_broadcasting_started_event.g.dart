@@ -21,7 +21,7 @@ CallHLSBroadcastingStartedEvent _$CallHLSBroadcastingStartedEventFromJson(
 Map<String, dynamic> _$CallHLSBroadcastingStartedEventToJson(
   CallHLSBroadcastingStartedEvent instance,
 ) => <String, dynamic>{
-  'call': instance.call,
+  'call': instance.call.toJson(),
   'call_cid': instance.callCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'hls_playlist_url': instance.hlsPlaylistUrl,

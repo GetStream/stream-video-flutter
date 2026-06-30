@@ -24,6 +24,6 @@ BulkUpsertActionConfigResponse _$BulkUpsertActionConfigResponseFromJson(
 Map<String, dynamic> _$BulkUpsertActionConfigResponseToJson(
   BulkUpsertActionConfigResponse instance,
 ) => <String, dynamic>{
-  'action_configs': instance.actionConfigs,
+  'action_configs': instance.actionConfigs.map((e) => e.toJson()).toList(),
   'duration': instance.duration,
 };

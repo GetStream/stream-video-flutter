@@ -31,9 +31,9 @@ RuleBuilderAction _$RuleBuilderActionFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RuleBuilderActionToJson(RuleBuilderAction instance) =>
     <String, dynamic>{
-      'ban_options': instance.banOptions,
-      'call_options': instance.callOptions,
-      'flag_user_options': instance.flagUserOptions,
+      'ban_options': instance.banOptions?.toJson(),
+      'call_options': instance.callOptions?.toJson(),
+      'flag_user_options': instance.flagUserOptions?.toJson(),
       'skip_inbox': instance.skipInbox,
       'type': _$RuleBuilderActionTypeEnumMap[instance.type],
     };

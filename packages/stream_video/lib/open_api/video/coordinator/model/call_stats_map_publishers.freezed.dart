@@ -9,49 +9,53 @@ part of 'call_stats_map_publishers.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallStatsMapPublishers {
+  List<CallStatsMapPublisher> get publishers;
 
- List<CallStatsMapPublisher> get publishers;
-/// Create a copy of CallStatsMapPublishers
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallStatsMapPublishersCopyWith<CallStatsMapPublishers> get copyWith => _$CallStatsMapPublishersCopyWithImpl<CallStatsMapPublishers>(this as CallStatsMapPublishers, _$identity);
+  /// Create a copy of CallStatsMapPublishers
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallStatsMapPublishersCopyWith<CallStatsMapPublishers> get copyWith =>
+      _$CallStatsMapPublishersCopyWithImpl<CallStatsMapPublishers>(
+        this as CallStatsMapPublishers,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallStatsMapPublishers &&
+            const DeepCollectionEquality().equals(
+              other.publishers,
+              publishers,
+            ));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(publishers));
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallStatsMapPublishers&&const DeepCollectionEquality().equals(other.publishers, publishers));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(publishers));
-
-@override
-String toString() {
-  return 'CallStatsMapPublishers(publishers: $publishers)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallStatsMapPublishers(publishers: $publishers)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallStatsMapPublishersCopyWith<$Res>  {
-  factory $CallStatsMapPublishersCopyWith(CallStatsMapPublishers value, $Res Function(CallStatsMapPublishers) _then) = _$CallStatsMapPublishersCopyWithImpl;
-@useResult
-$Res call({
- List<CallStatsMapPublisher> publishers
-});
-
-
-
-
+abstract mixin class $CallStatsMapPublishersCopyWith<$Res> {
+  factory $CallStatsMapPublishersCopyWith(
+    CallStatsMapPublishers value,
+    $Res Function(CallStatsMapPublishers) _then,
+  ) = _$CallStatsMapPublishersCopyWithImpl;
+  @useResult
+  $Res call({List<CallStatsMapPublisher> publishers});
 }
+
 /// @nodoc
 class _$CallStatsMapPublishersCopyWithImpl<$Res>
     implements $CallStatsMapPublishersCopyWith<$Res> {
@@ -60,140 +64,18 @@ class _$CallStatsMapPublishersCopyWithImpl<$Res>
   final CallStatsMapPublishers _self;
   final $Res Function(CallStatsMapPublishers) _then;
 
-/// Create a copy of CallStatsMapPublishers
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? publishers = null,}) {
-  return _then(CallStatsMapPublishers(
-publishers: null == publishers ? _self.publishers : publishers // ignore: cast_nullable_to_non_nullable
-as List<CallStatsMapPublisher>,
-  ));
+  /// Create a copy of CallStatsMapPublishers
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? publishers = null}) {
+    return _then(
+      CallStatsMapPublishers(
+        publishers: null == publishers
+            ? _self.publishers
+            : publishers // ignore: cast_nullable_to_non_nullable
+                  as List<CallStatsMapPublisher>,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallStatsMapPublishers].
-extension CallStatsMapPublishersPatterns on CallStatsMapPublishers {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

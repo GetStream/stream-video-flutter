@@ -18,5 +18,8 @@ SDKUsageReport _$SDKUsageReportFromJson(Map<String, dynamic> json) =>
           {},
     );
 
-Map<String, dynamic> _$SDKUsageReportToJson(SDKUsageReport instance) =>
-    <String, dynamic>{'per_sdk_usage': instance.perSdkUsage};
+Map<String, dynamic> _$SDKUsageReportToJson(
+  SDKUsageReport instance,
+) => <String, dynamic>{
+  'per_sdk_usage': instance.perSdkUsage.map((k, e) => MapEntry(k, e.toJson())),
+};

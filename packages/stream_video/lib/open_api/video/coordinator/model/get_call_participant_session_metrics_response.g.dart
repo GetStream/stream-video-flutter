@@ -32,7 +32,7 @@ _$GetCallParticipantSessionMetricsResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$GetCallParticipantSessionMetricsResponseToJson(
   GetCallParticipantSessionMetricsResponse instance,
 ) => <String, dynamic>{
-  'client': instance.client,
+  'client': instance.client?.toJson(),
   'duration': instance.duration,
   'is_publisher': instance.isPublisher,
   'is_subscriber': instance.isSubscriber,
@@ -40,7 +40,7 @@ Map<String, dynamic> _$GetCallParticipantSessionMetricsResponseToJson(
     instance.joinedAt,
     const EpochDateTimeConverter().toJson,
   ),
-  'published_tracks': instance.publishedTracks,
+  'published_tracks': instance.publishedTracks?.map((e) => e.toJson()).toList(),
   'publisher_type': instance.publisherType,
   'user_id': instance.userId,
   'user_session_id': instance.userSessionId,

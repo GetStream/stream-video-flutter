@@ -34,7 +34,7 @@ Map<String, dynamic> _$MemberResponseToJson(MemberResponse instance) =>
       ),
       'role': instance.role,
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-      'user': instance.user,
+      'user': instance.user.toJson(),
       'user_id': instance.userId,
     };
 

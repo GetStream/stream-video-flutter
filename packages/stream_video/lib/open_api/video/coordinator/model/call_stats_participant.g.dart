@@ -35,7 +35,7 @@ Map<String, dynamic> _$CallStatsParticipantToJson(
   ),
   'name': instance.name,
   'roles': instance.roles,
-  'sessions': instance.sessions,
+  'sessions': instance.sessions.map((e) => e.toJson()).toList(),
   'user_id': instance.userId,
 };
 

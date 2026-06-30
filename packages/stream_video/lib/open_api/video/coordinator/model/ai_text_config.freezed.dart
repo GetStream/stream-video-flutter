@@ -9,195 +9,114 @@ part of 'ai_text_config.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$AITextConfig {
+  bool? get async;
+  bool get enabled;
+  String get profile;
+  List<BodyguardRule> get rules;
+  List<BodyguardSeverityRule> get severityRules;
 
- bool? get async; bool get enabled; String get profile; List<BodyguardRule> get rules; List<BodyguardSeverityRule> get severityRules;
-/// Create a copy of AITextConfig
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$AITextConfigCopyWith<AITextConfig> get copyWith => _$AITextConfigCopyWithImpl<AITextConfig>(this as AITextConfig, _$identity);
+  /// Create a copy of AITextConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $AITextConfigCopyWith<AITextConfig> get copyWith =>
+      _$AITextConfigCopyWithImpl<AITextConfig>(
+        this as AITextConfig,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AITextConfig &&
+            (identical(other.async, async) || other.async == async) &&
+            (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            (identical(other.profile, profile) || other.profile == profile) &&
+            const DeepCollectionEquality().equals(other.rules, rules) &&
+            const DeepCollectionEquality().equals(
+              other.severityRules,
+              severityRules,
+            ));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    async,
+    enabled,
+    profile,
+    const DeepCollectionEquality().hash(rules),
+    const DeepCollectionEquality().hash(severityRules),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AITextConfig&&(identical(other.async, async) || other.async == async)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other.rules, rules)&&const DeepCollectionEquality().equals(other.severityRules, severityRules));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,async,enabled,profile,const DeepCollectionEquality().hash(rules),const DeepCollectionEquality().hash(severityRules));
-
-@override
-String toString() {
-  return 'AITextConfig(async: $async, enabled: $enabled, profile: $profile, rules: $rules, severityRules: $severityRules)';
-}
-
-
+  @override
+  String toString() {
+    return 'AITextConfig(async: $async, enabled: $enabled, profile: $profile, rules: $rules, severityRules: $severityRules)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $AITextConfigCopyWith<$Res>  {
-  factory $AITextConfigCopyWith(AITextConfig value, $Res Function(AITextConfig) _then) = _$AITextConfigCopyWithImpl;
-@useResult
-$Res call({
- bool? async, bool enabled, String profile, List<BodyguardRule> rules, List<BodyguardSeverityRule> severityRules
-});
-
-
-
-
+abstract mixin class $AITextConfigCopyWith<$Res> {
+  factory $AITextConfigCopyWith(
+    AITextConfig value,
+    $Res Function(AITextConfig) _then,
+  ) = _$AITextConfigCopyWithImpl;
+  @useResult
+  $Res call({
+    bool? async,
+    bool enabled,
+    String profile,
+    List<BodyguardRule> rules,
+    List<BodyguardSeverityRule> severityRules,
+  });
 }
+
 /// @nodoc
-class _$AITextConfigCopyWithImpl<$Res>
-    implements $AITextConfigCopyWith<$Res> {
+class _$AITextConfigCopyWithImpl<$Res> implements $AITextConfigCopyWith<$Res> {
   _$AITextConfigCopyWithImpl(this._self, this._then);
 
   final AITextConfig _self;
   final $Res Function(AITextConfig) _then;
 
-/// Create a copy of AITextConfig
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? async = freezed,Object? enabled = null,Object? profile = null,Object? rules = null,Object? severityRules = null,}) {
-  return _then(AITextConfig(
-async: freezed == async ? _self.async : async // ignore: cast_nullable_to_non_nullable
-as bool?,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
-as bool,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as String,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
-as List<BodyguardRule>,severityRules: null == severityRules ? _self.severityRules : severityRules // ignore: cast_nullable_to_non_nullable
-as List<BodyguardSeverityRule>,
-  ));
+  /// Create a copy of AITextConfig
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? async = freezed,
+    Object? enabled = null,
+    Object? profile = null,
+    Object? rules = null,
+    Object? severityRules = null,
+  }) {
+    return _then(
+      AITextConfig(
+        async: freezed == async
+            ? _self.async
+            : async // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        enabled: null == enabled
+            ? _self.enabled
+            : enabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        profile: null == profile
+            ? _self.profile
+            : profile // ignore: cast_nullable_to_non_nullable
+                  as String,
+        rules: null == rules
+            ? _self.rules
+            : rules // ignore: cast_nullable_to_non_nullable
+                  as List<BodyguardRule>,
+        severityRules: null == severityRules
+            ? _self.severityRules
+            : severityRules // ignore: cast_nullable_to_non_nullable
+                  as List<BodyguardSeverityRule>,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [AITextConfig].
-extension AITextConfigPatterns on AITextConfig {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

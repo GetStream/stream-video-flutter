@@ -9,49 +9,52 @@ part of 'backstage_settings_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$BackstageSettingsRequest {
+  bool? get enabled;
+  int? get joinAheadTimeSeconds;
 
- bool? get enabled; int? get joinAheadTimeSeconds;
-/// Create a copy of BackstageSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$BackstageSettingsRequestCopyWith<BackstageSettingsRequest> get copyWith => _$BackstageSettingsRequestCopyWithImpl<BackstageSettingsRequest>(this as BackstageSettingsRequest, _$identity);
+  /// Create a copy of BackstageSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $BackstageSettingsRequestCopyWith<BackstageSettingsRequest> get copyWith =>
+      _$BackstageSettingsRequestCopyWithImpl<BackstageSettingsRequest>(
+        this as BackstageSettingsRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is BackstageSettingsRequest &&
+            (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            (identical(other.joinAheadTimeSeconds, joinAheadTimeSeconds) ||
+                other.joinAheadTimeSeconds == joinAheadTimeSeconds));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, enabled, joinAheadTimeSeconds);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BackstageSettingsRequest&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.joinAheadTimeSeconds, joinAheadTimeSeconds) || other.joinAheadTimeSeconds == joinAheadTimeSeconds));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,enabled,joinAheadTimeSeconds);
-
-@override
-String toString() {
-  return 'BackstageSettingsRequest(enabled: $enabled, joinAheadTimeSeconds: $joinAheadTimeSeconds)';
-}
-
-
+  @override
+  String toString() {
+    return 'BackstageSettingsRequest(enabled: $enabled, joinAheadTimeSeconds: $joinAheadTimeSeconds)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $BackstageSettingsRequestCopyWith<$Res>  {
-  factory $BackstageSettingsRequestCopyWith(BackstageSettingsRequest value, $Res Function(BackstageSettingsRequest) _then) = _$BackstageSettingsRequestCopyWithImpl;
-@useResult
-$Res call({
- bool? enabled, int? joinAheadTimeSeconds
-});
-
-
-
-
+abstract mixin class $BackstageSettingsRequestCopyWith<$Res> {
+  factory $BackstageSettingsRequestCopyWith(
+    BackstageSettingsRequest value,
+    $Res Function(BackstageSettingsRequest) _then,
+  ) = _$BackstageSettingsRequestCopyWithImpl;
+  @useResult
+  $Res call({bool? enabled, int? joinAheadTimeSeconds});
 }
+
 /// @nodoc
 class _$BackstageSettingsRequestCopyWithImpl<$Res>
     implements $BackstageSettingsRequestCopyWith<$Res> {
@@ -60,141 +63,25 @@ class _$BackstageSettingsRequestCopyWithImpl<$Res>
   final BackstageSettingsRequest _self;
   final $Res Function(BackstageSettingsRequest) _then;
 
-/// Create a copy of BackstageSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = freezed,Object? joinAheadTimeSeconds = freezed,}) {
-  return _then(BackstageSettingsRequest(
-enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
-as bool?,joinAheadTimeSeconds: freezed == joinAheadTimeSeconds ? _self.joinAheadTimeSeconds : joinAheadTimeSeconds // ignore: cast_nullable_to_non_nullable
-as int?,
-  ));
+  /// Create a copy of BackstageSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enabled = freezed,
+    Object? joinAheadTimeSeconds = freezed,
+  }) {
+    return _then(
+      BackstageSettingsRequest(
+        enabled: freezed == enabled
+            ? _self.enabled
+            : enabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        joinAheadTimeSeconds: freezed == joinAheadTimeSeconds
+            ? _self.joinAheadTimeSeconds
+            : joinAheadTimeSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [BackstageSettingsRequest].
-extension BackstageSettingsRequestPatterns on BackstageSettingsRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

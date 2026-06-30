@@ -9,49 +9,79 @@ part of 'participant_series_publisher_stats.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ParticipantSeriesPublisherStats {
+  Map<String, List<List<double>>>? get global;
+  Map<String, MetricDescriptor>? get globalMeta;
+  List<String>? get globalMetricsOrder;
+  Map<String, List<MetricThreshold>>? get globalThresholds;
+  Map<String, List<ParticipantSeriesTrackMetrics>>? get tracks;
 
- Map<String, List<List<double>>>? get global; Map<String, MetricDescriptor>? get globalMeta; List<String>? get globalMetricsOrder; Map<String, List<MetricThreshold>>? get globalThresholds; Map<String, List<ParticipantSeriesTrackMetrics>>? get tracks;
-/// Create a copy of ParticipantSeriesPublisherStats
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ParticipantSeriesPublisherStatsCopyWith<ParticipantSeriesPublisherStats> get copyWith => _$ParticipantSeriesPublisherStatsCopyWithImpl<ParticipantSeriesPublisherStats>(this as ParticipantSeriesPublisherStats, _$identity);
+  /// Create a copy of ParticipantSeriesPublisherStats
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ParticipantSeriesPublisherStatsCopyWith<ParticipantSeriesPublisherStats>
+  get copyWith =>
+      _$ParticipantSeriesPublisherStatsCopyWithImpl<
+        ParticipantSeriesPublisherStats
+      >(this as ParticipantSeriesPublisherStats, _$identity);
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ParticipantSeriesPublisherStats &&
+            const DeepCollectionEquality().equals(other.global, global) &&
+            const DeepCollectionEquality().equals(
+              other.globalMeta,
+              globalMeta,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.globalMetricsOrder,
+              globalMetricsOrder,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.globalThresholds,
+              globalThresholds,
+            ) &&
+            const DeepCollectionEquality().equals(other.tracks, tracks));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(global),
+    const DeepCollectionEquality().hash(globalMeta),
+    const DeepCollectionEquality().hash(globalMetricsOrder),
+    const DeepCollectionEquality().hash(globalThresholds),
+    const DeepCollectionEquality().hash(tracks),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ParticipantSeriesPublisherStats&&const DeepCollectionEquality().equals(other.global, global)&&const DeepCollectionEquality().equals(other.globalMeta, globalMeta)&&const DeepCollectionEquality().equals(other.globalMetricsOrder, globalMetricsOrder)&&const DeepCollectionEquality().equals(other.globalThresholds, globalThresholds)&&const DeepCollectionEquality().equals(other.tracks, tracks));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(global),const DeepCollectionEquality().hash(globalMeta),const DeepCollectionEquality().hash(globalMetricsOrder),const DeepCollectionEquality().hash(globalThresholds),const DeepCollectionEquality().hash(tracks));
-
-@override
-String toString() {
-  return 'ParticipantSeriesPublisherStats(global: $global, globalMeta: $globalMeta, globalMetricsOrder: $globalMetricsOrder, globalThresholds: $globalThresholds, tracks: $tracks)';
-}
-
-
+  @override
+  String toString() {
+    return 'ParticipantSeriesPublisherStats(global: $global, globalMeta: $globalMeta, globalMetricsOrder: $globalMetricsOrder, globalThresholds: $globalThresholds, tracks: $tracks)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ParticipantSeriesPublisherStatsCopyWith<$Res>  {
-  factory $ParticipantSeriesPublisherStatsCopyWith(ParticipantSeriesPublisherStats value, $Res Function(ParticipantSeriesPublisherStats) _then) = _$ParticipantSeriesPublisherStatsCopyWithImpl;
-@useResult
-$Res call({
- Map<String, List<List<double>>>? global, Map<String, MetricDescriptor>? globalMeta, List<String>? globalMetricsOrder, Map<String, List<MetricThreshold>>? globalThresholds, Map<String, List<ParticipantSeriesTrackMetrics>>? tracks
-});
-
-
-
-
+abstract mixin class $ParticipantSeriesPublisherStatsCopyWith<$Res> {
+  factory $ParticipantSeriesPublisherStatsCopyWith(
+    ParticipantSeriesPublisherStats value,
+    $Res Function(ParticipantSeriesPublisherStats) _then,
+  ) = _$ParticipantSeriesPublisherStatsCopyWithImpl;
+  @useResult
+  $Res call({
+    Map<String, List<List<double>>>? global,
+    Map<String, MetricDescriptor>? globalMeta,
+    List<String>? globalMetricsOrder,
+    Map<String, List<MetricThreshold>>? globalThresholds,
+    Map<String, List<ParticipantSeriesTrackMetrics>>? tracks,
+  });
 }
+
 /// @nodoc
 class _$ParticipantSeriesPublisherStatsCopyWithImpl<$Res>
     implements $ParticipantSeriesPublisherStatsCopyWith<$Res> {
@@ -60,144 +90,40 @@ class _$ParticipantSeriesPublisherStatsCopyWithImpl<$Res>
   final ParticipantSeriesPublisherStats _self;
   final $Res Function(ParticipantSeriesPublisherStats) _then;
 
-/// Create a copy of ParticipantSeriesPublisherStats
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? global = freezed,Object? globalMeta = freezed,Object? globalMetricsOrder = freezed,Object? globalThresholds = freezed,Object? tracks = freezed,}) {
-  return _then(ParticipantSeriesPublisherStats(
-global: freezed == global ? _self.global : global // ignore: cast_nullable_to_non_nullable
-as Map<String, List<List<double>>>?,globalMeta: freezed == globalMeta ? _self.globalMeta : globalMeta // ignore: cast_nullable_to_non_nullable
-as Map<String, MetricDescriptor>?,globalMetricsOrder: freezed == globalMetricsOrder ? _self.globalMetricsOrder : globalMetricsOrder // ignore: cast_nullable_to_non_nullable
-as List<String>?,globalThresholds: freezed == globalThresholds ? _self.globalThresholds : globalThresholds // ignore: cast_nullable_to_non_nullable
-as Map<String, List<MetricThreshold>>?,tracks: freezed == tracks ? _self.tracks : tracks // ignore: cast_nullable_to_non_nullable
-as Map<String, List<ParticipantSeriesTrackMetrics>>?,
-  ));
+  /// Create a copy of ParticipantSeriesPublisherStats
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? global = freezed,
+    Object? globalMeta = freezed,
+    Object? globalMetricsOrder = freezed,
+    Object? globalThresholds = freezed,
+    Object? tracks = freezed,
+  }) {
+    return _then(
+      ParticipantSeriesPublisherStats(
+        global: freezed == global
+            ? _self.global
+            : global // ignore: cast_nullable_to_non_nullable
+                  as Map<String, List<List<double>>>?,
+        globalMeta: freezed == globalMeta
+            ? _self.globalMeta
+            : globalMeta // ignore: cast_nullable_to_non_nullable
+                  as Map<String, MetricDescriptor>?,
+        globalMetricsOrder: freezed == globalMetricsOrder
+            ? _self.globalMetricsOrder
+            : globalMetricsOrder // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        globalThresholds: freezed == globalThresholds
+            ? _self.globalThresholds
+            : globalThresholds // ignore: cast_nullable_to_non_nullable
+                  as Map<String, List<MetricThreshold>>?,
+        tracks: freezed == tracks
+            ? _self.tracks
+            : tracks // ignore: cast_nullable_to_non_nullable
+                  as Map<String, List<ParticipantSeriesTrackMetrics>>?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ParticipantSeriesPublisherStats].
-extension ParticipantSeriesPublisherStatsPatterns on ParticipantSeriesPublisherStats {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

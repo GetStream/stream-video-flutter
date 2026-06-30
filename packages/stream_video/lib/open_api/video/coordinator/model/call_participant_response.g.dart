@@ -22,6 +22,6 @@ Map<String, dynamic> _$CallParticipantResponseToJson(
 ) => <String, dynamic>{
   'joined_at': const EpochDateTimeConverter().toJson(instance.joinedAt),
   'role': instance.role,
-  'user': instance.user,
+  'user': instance.user.toJson(),
   'user_session_id': instance.userSessionId,
 };

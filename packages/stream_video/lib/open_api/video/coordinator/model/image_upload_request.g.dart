@@ -20,6 +20,6 @@ ImageUploadRequest _$ImageUploadRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ImageUploadRequestToJson(ImageUploadRequest instance) =>
     <String, dynamic>{
       'file': instance.file,
-      'upload_sizes': instance.uploadSizes,
-      'user': instance.user,
+      'upload_sizes': instance.uploadSizes?.map((e) => e.toJson()).toList(),
+      'user': instance.user?.toJson(),
     };

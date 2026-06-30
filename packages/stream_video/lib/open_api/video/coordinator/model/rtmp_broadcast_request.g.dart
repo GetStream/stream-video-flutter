@@ -25,7 +25,7 @@ RTMPBroadcastRequest _$RTMPBroadcastRequestFromJson(
 Map<String, dynamic> _$RTMPBroadcastRequestToJson(
   RTMPBroadcastRequest instance,
 ) => <String, dynamic>{
-  'layout': instance.layout,
+  'layout': instance.layout?.toJson(),
   'name': instance.name,
   'quality': _$RTMPBroadcastRequestQualityEnumMap[instance.quality],
   'stream_key': instance.streamKey,

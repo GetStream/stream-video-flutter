@@ -43,7 +43,7 @@ Map<String, dynamic> _$UserDeletedEventToJson(UserDeletedEvent instance) =>
         const EpochDateTimeConverter().toJson,
       ),
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

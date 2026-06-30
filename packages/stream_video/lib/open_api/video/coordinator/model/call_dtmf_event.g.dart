@@ -31,5 +31,5 @@ Map<String, dynamic> _$CallDTMFEventToJson(CallDTMFEvent instance) =>
       'seq_number': instance.seqNumber,
       'timestamp': const EpochDateTimeConverter().toJson(instance.timestamp),
       'type': instance.type,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };

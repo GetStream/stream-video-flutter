@@ -29,7 +29,7 @@ Map<String, dynamic> _$CallRecordingReadyEventToJson(
   CallRecordingReadyEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'call_recording': instance.callRecording,
+  'call_recording': instance.callRecording.toJson(),
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
   'egress_id': instance.egressId,
   'recording_type':

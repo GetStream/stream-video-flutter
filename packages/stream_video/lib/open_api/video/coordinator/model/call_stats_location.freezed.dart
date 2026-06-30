@@ -9,49 +9,88 @@ part of 'call_stats_location.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallStatsLocation {
+  int? get accuracyRadiusMeters;
+  String? get city;
+  String? get continent;
+  String? get country;
+  String? get countryIsoCode;
+  double? get latitude;
+  double? get longitude;
+  String? get subdivision;
 
- int? get accuracyRadiusMeters; String? get city; String? get continent; String? get country; String? get countryIsoCode; double? get latitude; double? get longitude; String? get subdivision;
-/// Create a copy of CallStatsLocation
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallStatsLocationCopyWith<CallStatsLocation> get copyWith => _$CallStatsLocationCopyWithImpl<CallStatsLocation>(this as CallStatsLocation, _$identity);
+  /// Create a copy of CallStatsLocation
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallStatsLocationCopyWith<CallStatsLocation> get copyWith =>
+      _$CallStatsLocationCopyWithImpl<CallStatsLocation>(
+        this as CallStatsLocation,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallStatsLocation &&
+            (identical(other.accuracyRadiusMeters, accuracyRadiusMeters) ||
+                other.accuracyRadiusMeters == accuracyRadiusMeters) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.continent, continent) ||
+                other.continent == continent) &&
+            (identical(other.country, country) || other.country == country) &&
+            (identical(other.countryIsoCode, countryIsoCode) ||
+                other.countryIsoCode == countryIsoCode) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude) &&
+            (identical(other.subdivision, subdivision) ||
+                other.subdivision == subdivision));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    accuracyRadiusMeters,
+    city,
+    continent,
+    country,
+    countryIsoCode,
+    latitude,
+    longitude,
+    subdivision,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallStatsLocation&&(identical(other.accuracyRadiusMeters, accuracyRadiusMeters) || other.accuracyRadiusMeters == accuracyRadiusMeters)&&(identical(other.city, city) || other.city == city)&&(identical(other.continent, continent) || other.continent == continent)&&(identical(other.country, country) || other.country == country)&&(identical(other.countryIsoCode, countryIsoCode) || other.countryIsoCode == countryIsoCode)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.subdivision, subdivision) || other.subdivision == subdivision));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,accuracyRadiusMeters,city,continent,country,countryIsoCode,latitude,longitude,subdivision);
-
-@override
-String toString() {
-  return 'CallStatsLocation(accuracyRadiusMeters: $accuracyRadiusMeters, city: $city, continent: $continent, country: $country, countryIsoCode: $countryIsoCode, latitude: $latitude, longitude: $longitude, subdivision: $subdivision)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallStatsLocation(accuracyRadiusMeters: $accuracyRadiusMeters, city: $city, continent: $continent, country: $country, countryIsoCode: $countryIsoCode, latitude: $latitude, longitude: $longitude, subdivision: $subdivision)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallStatsLocationCopyWith<$Res>  {
-  factory $CallStatsLocationCopyWith(CallStatsLocation value, $Res Function(CallStatsLocation) _then) = _$CallStatsLocationCopyWithImpl;
-@useResult
-$Res call({
- int? accuracyRadiusMeters, String? city, String? continent, String? country, String? countryIsoCode, double? latitude, double? longitude, String? subdivision
-});
-
-
-
-
+abstract mixin class $CallStatsLocationCopyWith<$Res> {
+  factory $CallStatsLocationCopyWith(
+    CallStatsLocation value,
+    $Res Function(CallStatsLocation) _then,
+  ) = _$CallStatsLocationCopyWithImpl;
+  @useResult
+  $Res call({
+    int? accuracyRadiusMeters,
+    String? city,
+    String? continent,
+    String? country,
+    String? countryIsoCode,
+    double? latitude,
+    double? longitude,
+    String? subdivision,
+  });
 }
+
 /// @nodoc
 class _$CallStatsLocationCopyWithImpl<$Res>
     implements $CallStatsLocationCopyWith<$Res> {
@@ -60,147 +99,55 @@ class _$CallStatsLocationCopyWithImpl<$Res>
   final CallStatsLocation _self;
   final $Res Function(CallStatsLocation) _then;
 
-/// Create a copy of CallStatsLocation
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? accuracyRadiusMeters = freezed,Object? city = freezed,Object? continent = freezed,Object? country = freezed,Object? countryIsoCode = freezed,Object? latitude = freezed,Object? longitude = freezed,Object? subdivision = freezed,}) {
-  return _then(CallStatsLocation(
-accuracyRadiusMeters: freezed == accuracyRadiusMeters ? _self.accuracyRadiusMeters : accuracyRadiusMeters // ignore: cast_nullable_to_non_nullable
-as int?,city: freezed == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
-as String?,continent: freezed == continent ? _self.continent : continent // ignore: cast_nullable_to_non_nullable
-as String?,country: freezed == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
-as String?,countryIsoCode: freezed == countryIsoCode ? _self.countryIsoCode : countryIsoCode // ignore: cast_nullable_to_non_nullable
-as String?,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
-as double?,longitude: freezed == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double?,subdivision: freezed == subdivision ? _self.subdivision : subdivision // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
+  /// Create a copy of CallStatsLocation
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? accuracyRadiusMeters = freezed,
+    Object? city = freezed,
+    Object? continent = freezed,
+    Object? country = freezed,
+    Object? countryIsoCode = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
+    Object? subdivision = freezed,
+  }) {
+    return _then(
+      CallStatsLocation(
+        accuracyRadiusMeters: freezed == accuracyRadiusMeters
+            ? _self.accuracyRadiusMeters
+            : accuracyRadiusMeters // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        city: freezed == city
+            ? _self.city
+            : city // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        continent: freezed == continent
+            ? _self.continent
+            : continent // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        country: freezed == country
+            ? _self.country
+            : country // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        countryIsoCode: freezed == countryIsoCode
+            ? _self.countryIsoCode
+            : countryIsoCode // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        latitude: freezed == latitude
+            ? _self.latitude
+            : latitude // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        longitude: freezed == longitude
+            ? _self.longitude
+            : longitude // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        subdivision: freezed == subdivision
+            ? _self.subdivision
+            : subdivision // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallStatsLocation].
-extension CallStatsLocationPatterns on CallStatsLocation {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

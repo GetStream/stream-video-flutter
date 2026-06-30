@@ -9,49 +9,51 @@ part of 'count_by_minute_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CountByMinuteResponse {
+  int get count;
+  DateTime get startTs;
 
- int get count; DateTime get startTs;
-/// Create a copy of CountByMinuteResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CountByMinuteResponseCopyWith<CountByMinuteResponse> get copyWith => _$CountByMinuteResponseCopyWithImpl<CountByMinuteResponse>(this as CountByMinuteResponse, _$identity);
+  /// Create a copy of CountByMinuteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CountByMinuteResponseCopyWith<CountByMinuteResponse> get copyWith =>
+      _$CountByMinuteResponseCopyWithImpl<CountByMinuteResponse>(
+        this as CountByMinuteResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CountByMinuteResponse &&
+            (identical(other.count, count) || other.count == count) &&
+            (identical(other.startTs, startTs) || other.startTs == startTs));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, count, startTs);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CountByMinuteResponse&&(identical(other.count, count) || other.count == count)&&(identical(other.startTs, startTs) || other.startTs == startTs));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,count,startTs);
-
-@override
-String toString() {
-  return 'CountByMinuteResponse(count: $count, startTs: $startTs)';
-}
-
-
+  @override
+  String toString() {
+    return 'CountByMinuteResponse(count: $count, startTs: $startTs)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CountByMinuteResponseCopyWith<$Res>  {
-  factory $CountByMinuteResponseCopyWith(CountByMinuteResponse value, $Res Function(CountByMinuteResponse) _then) = _$CountByMinuteResponseCopyWithImpl;
-@useResult
-$Res call({
- int count, DateTime startTs
-});
-
-
-
-
+abstract mixin class $CountByMinuteResponseCopyWith<$Res> {
+  factory $CountByMinuteResponseCopyWith(
+    CountByMinuteResponse value,
+    $Res Function(CountByMinuteResponse) _then,
+  ) = _$CountByMinuteResponseCopyWithImpl;
+  @useResult
+  $Res call({int count, DateTime startTs});
 }
+
 /// @nodoc
 class _$CountByMinuteResponseCopyWithImpl<$Res>
     implements $CountByMinuteResponseCopyWith<$Res> {
@@ -60,141 +62,22 @@ class _$CountByMinuteResponseCopyWithImpl<$Res>
   final CountByMinuteResponse _self;
   final $Res Function(CountByMinuteResponse) _then;
 
-/// Create a copy of CountByMinuteResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? count = null,Object? startTs = null,}) {
-  return _then(CountByMinuteResponse(
-count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
-as int,startTs: null == startTs ? _self.startTs : startTs // ignore: cast_nullable_to_non_nullable
-as DateTime,
-  ));
+  /// Create a copy of CountByMinuteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? count = null, Object? startTs = null}) {
+    return _then(
+      CountByMinuteResponse(
+        count: null == count
+            ? _self.count
+            : count // ignore: cast_nullable_to_non_nullable
+                  as int,
+        startTs: null == startTs
+            ? _self.startTs
+            : startTs // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CountByMinuteResponse].
-extension CountByMinuteResponsePatterns on CountByMinuteResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

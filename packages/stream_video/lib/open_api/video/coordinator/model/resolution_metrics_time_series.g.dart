@@ -19,4 +19,7 @@ ResolutionMetricsTimeSeries _$ResolutionMetricsTimeSeriesFromJson(
 
 Map<String, dynamic> _$ResolutionMetricsTimeSeriesToJson(
   ResolutionMetricsTimeSeries instance,
-) => <String, dynamic>{'height': instance.height, 'width': instance.width};
+) => <String, dynamic>{
+  'height': instance.height?.toJson(),
+  'width': instance.width?.toJson(),
+};

@@ -43,14 +43,14 @@ QueryCallParticipantsResponse _$QueryCallParticipantsResponseFromJson(
 Map<String, dynamic> _$QueryCallParticipantsResponseToJson(
   QueryCallParticipantsResponse instance,
 ) => <String, dynamic>{
-  'call': instance.call,
+  'call': instance.call.toJson(),
   'duration': instance.duration,
-  'members': instance.members,
-  'membership': instance.membership,
+  'members': instance.members.map((e) => e.toJson()).toList(),
+  'membership': instance.membership?.toJson(),
   'own_capabilities': instance.ownCapabilities
       .map((e) => _$OwnCapabilityEnumMap[e]!)
       .toList(),
-  'participants': instance.participants,
+  'participants': instance.participants.map((e) => e.toJson()).toList(),
   'total_participants': instance.totalParticipants,
 };
 

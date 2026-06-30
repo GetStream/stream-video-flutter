@@ -18,7 +18,7 @@ Credentials _$CredentialsFromJson(Map<String, dynamic> json) => Credentials(
 
 Map<String, dynamic> _$CredentialsToJson(Credentials instance) =>
     <String, dynamic>{
-      'ice_servers': instance.iceServers,
-      'server': instance.server,
+      'ice_servers': instance.iceServers.map((e) => e.toJson()).toList(),
+      'server': instance.server.toJson(),
       'token': instance.token,
     };

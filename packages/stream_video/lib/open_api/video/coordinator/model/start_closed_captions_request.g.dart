@@ -29,7 +29,7 @@ Map<String, dynamic> _$StartClosedCaptionsRequestToJson(
   'enable_transcription': instance.enableTranscription,
   'external_storage': instance.externalStorage,
   'language': _$StartClosedCaptionsRequestLanguageEnumMap[instance.language],
-  'speech_segment_config': instance.speechSegmentConfig,
+  'speech_segment_config': instance.speechSegmentConfig?.toJson(),
 };
 
 const _$StartClosedCaptionsRequestLanguageEnumMap = {

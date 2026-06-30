@@ -21,7 +21,7 @@ GetOrCreateCallRequest _$GetOrCreateCallRequestFromJson(
 Map<String, dynamic> _$GetOrCreateCallRequestToJson(
   GetOrCreateCallRequest instance,
 ) => <String, dynamic>{
-  'data': instance.data,
+  'data': instance.data?.toJson(),
   'members_limit': instance.membersLimit,
   'notify': instance.notify,
   'ring': instance.ring,

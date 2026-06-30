@@ -63,15 +63,19 @@ Map<String, dynamic> _$ReactionToJson(Reaction instance) => <String, dynamic>{
   ),
   'id': instance.id,
   'kind': instance.kind,
-  'latest_children': instance.latestChildren,
+  'latest_children': instance.latestChildren?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
   'moderation': instance.moderation,
-  'own_children': instance.ownChildren,
+  'own_children': instance.ownChildren?.map(
+    (k, e) => MapEntry(k, e.map((e) => e.toJson()).toList()),
+  ),
   'parent': instance.parent,
   'score': instance.score,
   'target_feeds': instance.targetFeeds,
   'target_feeds_extra_data': instance.targetFeedsExtraData,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-  'user': instance.user,
+  'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };
 

@@ -9,49 +9,71 @@ part of 'call_moderation_blur_event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallModerationBlurEvent {
+  String get callCid;
+  DateTime get createdAt;
+  Map<String, Object?> get custom;
+  String get type;
+  String get userId;
 
- String get callCid; DateTime get createdAt; Map<String, Object?> get custom; String get type; String get userId;
-/// Create a copy of CallModerationBlurEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallModerationBlurEventCopyWith<CallModerationBlurEvent> get copyWith => _$CallModerationBlurEventCopyWithImpl<CallModerationBlurEvent>(this as CallModerationBlurEvent, _$identity);
+  /// Create a copy of CallModerationBlurEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallModerationBlurEventCopyWith<CallModerationBlurEvent> get copyWith =>
+      _$CallModerationBlurEventCopyWithImpl<CallModerationBlurEvent>(
+        this as CallModerationBlurEvent,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallModerationBlurEvent &&
+            (identical(other.callCid, callCid) || other.callCid == callCid) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.userId, userId) || other.userId == userId));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    callCid,
+    createdAt,
+    const DeepCollectionEquality().hash(custom),
+    type,
+    userId,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallModerationBlurEvent&&(identical(other.callCid, callCid) || other.callCid == callCid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.custom, custom)&&(identical(other.type, type) || other.type == type)&&(identical(other.userId, userId) || other.userId == userId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,callCid,createdAt,const DeepCollectionEquality().hash(custom),type,userId);
-
-@override
-String toString() {
-  return 'CallModerationBlurEvent(callCid: $callCid, createdAt: $createdAt, custom: $custom, type: $type, userId: $userId)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallModerationBlurEvent(callCid: $callCid, createdAt: $createdAt, custom: $custom, type: $type, userId: $userId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallModerationBlurEventCopyWith<$Res>  {
-  factory $CallModerationBlurEventCopyWith(CallModerationBlurEvent value, $Res Function(CallModerationBlurEvent) _then) = _$CallModerationBlurEventCopyWithImpl;
-@useResult
-$Res call({
- String callCid, DateTime createdAt, Map<String, Object?> custom, String type, String userId
-});
-
-
-
-
+abstract mixin class $CallModerationBlurEventCopyWith<$Res> {
+  factory $CallModerationBlurEventCopyWith(
+    CallModerationBlurEvent value,
+    $Res Function(CallModerationBlurEvent) _then,
+  ) = _$CallModerationBlurEventCopyWithImpl;
+  @useResult
+  $Res call({
+    String callCid,
+    DateTime createdAt,
+    Map<String, Object?> custom,
+    String type,
+    String userId,
+  });
 }
+
 /// @nodoc
 class _$CallModerationBlurEventCopyWithImpl<$Res>
     implements $CallModerationBlurEventCopyWith<$Res> {
@@ -60,144 +82,40 @@ class _$CallModerationBlurEventCopyWithImpl<$Res>
   final CallModerationBlurEvent _self;
   final $Res Function(CallModerationBlurEvent) _then;
 
-/// Create a copy of CallModerationBlurEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? callCid = null,Object? createdAt = null,Object? custom = null,Object? type = null,Object? userId = null,}) {
-  return _then(CallModerationBlurEvent(
-callCid: null == callCid ? _self.callCid : callCid // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,custom: null == custom ? _self.custom : custom // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CallModerationBlurEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? callCid = null,
+    Object? createdAt = null,
+    Object? custom = null,
+    Object? type = null,
+    Object? userId = null,
+  }) {
+    return _then(
+      CallModerationBlurEvent(
+        callCid: null == callCid
+            ? _self.callCid
+            : callCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallModerationBlurEvent].
-extension CallModerationBlurEventPatterns on CallModerationBlurEvent {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

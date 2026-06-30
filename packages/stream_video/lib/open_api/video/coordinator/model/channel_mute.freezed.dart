@@ -9,195 +9,104 @@ part of 'channel_mute.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ChannelMute {
+  ChannelResponse? get channel;
+  DateTime get createdAt;
+  DateTime? get expires;
+  DateTime get updatedAt;
+  UserResponse? get user;
 
- ChannelResponse? get channel; DateTime get createdAt; DateTime? get expires; DateTime get updatedAt; UserResponse? get user;
-/// Create a copy of ChannelMute
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ChannelMuteCopyWith<ChannelMute> get copyWith => _$ChannelMuteCopyWithImpl<ChannelMute>(this as ChannelMute, _$identity);
+  /// Create a copy of ChannelMute
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ChannelMuteCopyWith<ChannelMute> get copyWith =>
+      _$ChannelMuteCopyWithImpl<ChannelMute>(this as ChannelMute, _$identity);
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ChannelMute &&
+            (identical(other.channel, channel) || other.channel == channel) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.expires, expires) || other.expires == expires) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.user, user) || other.user == user));
+  }
 
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, channel, createdAt, expires, updatedAt, user);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelMute&&(identical(other.channel, channel) || other.channel == channel)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.expires, expires) || other.expires == expires)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.user, user) || other.user == user));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,channel,createdAt,expires,updatedAt,user);
-
-@override
-String toString() {
-  return 'ChannelMute(channel: $channel, createdAt: $createdAt, expires: $expires, updatedAt: $updatedAt, user: $user)';
-}
-
-
+  @override
+  String toString() {
+    return 'ChannelMute(channel: $channel, createdAt: $createdAt, expires: $expires, updatedAt: $updatedAt, user: $user)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ChannelMuteCopyWith<$Res>  {
-  factory $ChannelMuteCopyWith(ChannelMute value, $Res Function(ChannelMute) _then) = _$ChannelMuteCopyWithImpl;
-@useResult
-$Res call({
- ChannelResponse? channel, DateTime createdAt, DateTime? expires, DateTime updatedAt, UserResponse? user
-});
-
-
-
-
+abstract mixin class $ChannelMuteCopyWith<$Res> {
+  factory $ChannelMuteCopyWith(
+    ChannelMute value,
+    $Res Function(ChannelMute) _then,
+  ) = _$ChannelMuteCopyWithImpl;
+  @useResult
+  $Res call({
+    ChannelResponse? channel,
+    DateTime createdAt,
+    DateTime? expires,
+    DateTime updatedAt,
+    UserResponse? user,
+  });
 }
+
 /// @nodoc
-class _$ChannelMuteCopyWithImpl<$Res>
-    implements $ChannelMuteCopyWith<$Res> {
+class _$ChannelMuteCopyWithImpl<$Res> implements $ChannelMuteCopyWith<$Res> {
   _$ChannelMuteCopyWithImpl(this._self, this._then);
 
   final ChannelMute _self;
   final $Res Function(ChannelMute) _then;
 
-/// Create a copy of ChannelMute
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? channel = freezed,Object? createdAt = null,Object? expires = freezed,Object? updatedAt = null,Object? user = freezed,}) {
-  return _then(ChannelMute(
-channel: freezed == channel ? _self.channel : channel // ignore: cast_nullable_to_non_nullable
-as ChannelResponse?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,expires: freezed == expires ? _self.expires : expires // ignore: cast_nullable_to_non_nullable
-as DateTime?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserResponse?,
-  ));
+  /// Create a copy of ChannelMute
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? channel = freezed,
+    Object? createdAt = null,
+    Object? expires = freezed,
+    Object? updatedAt = null,
+    Object? user = freezed,
+  }) {
+    return _then(
+      ChannelMute(
+        channel: freezed == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ChannelResponse?,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        expires: freezed == expires
+            ? _self.expires
+            : expires // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        updatedAt: null == updatedAt
+            ? _self.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponse?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [ChannelMute].
-extension ChannelMutePatterns on ChannelMute {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

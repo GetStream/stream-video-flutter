@@ -20,6 +20,6 @@ Map<String, dynamic> _$ConnectedEventToJson(ConnectedEvent instance) =>
     <String, dynamic>{
       'connection_id': instance.connectionId,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-      'me': instance.me,
+      'me': instance.me.toJson(),
       'type': instance.type,
     };

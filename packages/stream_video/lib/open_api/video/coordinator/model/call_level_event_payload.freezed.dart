@@ -9,49 +9,68 @@ part of 'call_level_event_payload.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallLevelEventPayload {
+  String get eventType;
+  Map<String, Object?>? get payload;
+  int get timestamp;
+  String get userId;
 
- String get eventType; Map<String, Object?>? get payload; int get timestamp; String get userId;
-/// Create a copy of CallLevelEventPayload
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallLevelEventPayloadCopyWith<CallLevelEventPayload> get copyWith => _$CallLevelEventPayloadCopyWithImpl<CallLevelEventPayload>(this as CallLevelEventPayload, _$identity);
+  /// Create a copy of CallLevelEventPayload
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallLevelEventPayloadCopyWith<CallLevelEventPayload> get copyWith =>
+      _$CallLevelEventPayloadCopyWithImpl<CallLevelEventPayload>(
+        this as CallLevelEventPayload,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallLevelEventPayload &&
+            (identical(other.eventType, eventType) ||
+                other.eventType == eventType) &&
+            const DeepCollectionEquality().equals(other.payload, payload) &&
+            (identical(other.timestamp, timestamp) ||
+                other.timestamp == timestamp) &&
+            (identical(other.userId, userId) || other.userId == userId));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    eventType,
+    const DeepCollectionEquality().hash(payload),
+    timestamp,
+    userId,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallLevelEventPayload&&(identical(other.eventType, eventType) || other.eventType == eventType)&&const DeepCollectionEquality().equals(other.payload, payload)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.userId, userId) || other.userId == userId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,eventType,const DeepCollectionEquality().hash(payload),timestamp,userId);
-
-@override
-String toString() {
-  return 'CallLevelEventPayload(eventType: $eventType, payload: $payload, timestamp: $timestamp, userId: $userId)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallLevelEventPayload(eventType: $eventType, payload: $payload, timestamp: $timestamp, userId: $userId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallLevelEventPayloadCopyWith<$Res>  {
-  factory $CallLevelEventPayloadCopyWith(CallLevelEventPayload value, $Res Function(CallLevelEventPayload) _then) = _$CallLevelEventPayloadCopyWithImpl;
-@useResult
-$Res call({
- String eventType, Map<String, Object?>? payload, int timestamp, String userId
-});
-
-
-
-
+abstract mixin class $CallLevelEventPayloadCopyWith<$Res> {
+  factory $CallLevelEventPayloadCopyWith(
+    CallLevelEventPayload value,
+    $Res Function(CallLevelEventPayload) _then,
+  ) = _$CallLevelEventPayloadCopyWithImpl;
+  @useResult
+  $Res call({
+    String eventType,
+    Map<String, Object?>? payload,
+    int timestamp,
+    String userId,
+  });
 }
+
 /// @nodoc
 class _$CallLevelEventPayloadCopyWithImpl<$Res>
     implements $CallLevelEventPayloadCopyWith<$Res> {
@@ -60,143 +79,35 @@ class _$CallLevelEventPayloadCopyWithImpl<$Res>
   final CallLevelEventPayload _self;
   final $Res Function(CallLevelEventPayload) _then;
 
-/// Create a copy of CallLevelEventPayload
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? eventType = null,Object? payload = freezed,Object? timestamp = null,Object? userId = null,}) {
-  return _then(CallLevelEventPayload(
-eventType: null == eventType ? _self.eventType : eventType // ignore: cast_nullable_to_non_nullable
-as String,payload: freezed == payload ? _self.payload : payload // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>?,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
-as int,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CallLevelEventPayload
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? eventType = null,
+    Object? payload = freezed,
+    Object? timestamp = null,
+    Object? userId = null,
+  }) {
+    return _then(
+      CallLevelEventPayload(
+        eventType: null == eventType
+            ? _self.eventType
+            : eventType // ignore: cast_nullable_to_non_nullable
+                  as String,
+        payload: freezed == payload
+            ? _self.payload
+            : payload // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        timestamp: null == timestamp
+            ? _self.timestamp
+            : timestamp // ignore: cast_nullable_to_non_nullable
+                  as int,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallLevelEventPayload].
-extension CallLevelEventPayloadPatterns on CallLevelEventPayload {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

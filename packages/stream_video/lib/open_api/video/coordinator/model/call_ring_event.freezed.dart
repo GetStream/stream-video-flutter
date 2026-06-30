@@ -9,49 +9,84 @@ part of 'call_ring_event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallRingEvent {
+  CallResponse get call;
+  String get callCid;
+  DateTime get createdAt;
+  List<MemberResponse> get members;
+  String get sessionId;
+  String get type;
+  UserResponse get user;
+  bool get video;
 
- CallResponse get call; String get callCid; DateTime get createdAt; List<MemberResponse> get members; String get sessionId; String get type; UserResponse get user; bool get video;
-/// Create a copy of CallRingEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallRingEventCopyWith<CallRingEvent> get copyWith => _$CallRingEventCopyWithImpl<CallRingEvent>(this as CallRingEvent, _$identity);
+  /// Create a copy of CallRingEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallRingEventCopyWith<CallRingEvent> get copyWith =>
+      _$CallRingEventCopyWithImpl<CallRingEvent>(
+        this as CallRingEvent,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallRingEvent &&
+            (identical(other.call, call) || other.call == call) &&
+            (identical(other.callCid, callCid) || other.callCid == callCid) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.members, members) &&
+            (identical(other.sessionId, sessionId) ||
+                other.sessionId == sessionId) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.video, video) || other.video == video));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    call,
+    callCid,
+    createdAt,
+    const DeepCollectionEquality().hash(members),
+    sessionId,
+    type,
+    user,
+    video,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallRingEvent&&(identical(other.call, call) || other.call == call)&&(identical(other.callCid, callCid) || other.callCid == callCid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.members, members)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.type, type) || other.type == type)&&(identical(other.user, user) || other.user == user)&&(identical(other.video, video) || other.video == video));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,call,callCid,createdAt,const DeepCollectionEquality().hash(members),sessionId,type,user,video);
-
-@override
-String toString() {
-  return 'CallRingEvent(call: $call, callCid: $callCid, createdAt: $createdAt, members: $members, sessionId: $sessionId, type: $type, user: $user, video: $video)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallRingEvent(call: $call, callCid: $callCid, createdAt: $createdAt, members: $members, sessionId: $sessionId, type: $type, user: $user, video: $video)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallRingEventCopyWith<$Res>  {
-  factory $CallRingEventCopyWith(CallRingEvent value, $Res Function(CallRingEvent) _then) = _$CallRingEventCopyWithImpl;
-@useResult
-$Res call({
- CallResponse call, String callCid, DateTime createdAt, List<MemberResponse> members, String sessionId, String type, UserResponse user, bool video
-});
-
-
-
-
+abstract mixin class $CallRingEventCopyWith<$Res> {
+  factory $CallRingEventCopyWith(
+    CallRingEvent value,
+    $Res Function(CallRingEvent) _then,
+  ) = _$CallRingEventCopyWithImpl;
+  @useResult
+  $Res call({
+    CallResponse call,
+    String callCid,
+    DateTime createdAt,
+    List<MemberResponse> members,
+    String sessionId,
+    String type,
+    UserResponse user,
+    bool video,
+  });
 }
+
 /// @nodoc
 class _$CallRingEventCopyWithImpl<$Res>
     implements $CallRingEventCopyWith<$Res> {
@@ -60,147 +95,55 @@ class _$CallRingEventCopyWithImpl<$Res>
   final CallRingEvent _self;
   final $Res Function(CallRingEvent) _then;
 
-/// Create a copy of CallRingEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? call = null,Object? callCid = null,Object? createdAt = null,Object? members = null,Object? sessionId = null,Object? type = null,Object? user = null,Object? video = null,}) {
-  return _then(CallRingEvent(
-call: null == call ? _self.call : call // ignore: cast_nullable_to_non_nullable
-as CallResponse,callCid: null == callCid ? _self.callCid : callCid // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,members: null == members ? _self.members : members // ignore: cast_nullable_to_non_nullable
-as List<MemberResponse>,sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserResponse,video: null == video ? _self.video : video // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
+  /// Create a copy of CallRingEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? call = null,
+    Object? callCid = null,
+    Object? createdAt = null,
+    Object? members = null,
+    Object? sessionId = null,
+    Object? type = null,
+    Object? user = null,
+    Object? video = null,
+  }) {
+    return _then(
+      CallRingEvent(
+        call: null == call
+            ? _self.call
+            : call // ignore: cast_nullable_to_non_nullable
+                  as CallResponse,
+        callCid: null == callCid
+            ? _self.callCid
+            : callCid // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        members: null == members
+            ? _self.members
+            : members // ignore: cast_nullable_to_non_nullable
+                  as List<MemberResponse>,
+        sessionId: null == sessionId
+            ? _self.sessionId
+            : sessionId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: null == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponse,
+        video: null == video
+            ? _self.video
+            : video // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallRingEvent].
-extension CallRingEventPatterns on CallRingEvent {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

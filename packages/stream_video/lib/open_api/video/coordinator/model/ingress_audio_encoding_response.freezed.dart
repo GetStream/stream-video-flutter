@@ -9,49 +9,56 @@ part of 'ingress_audio_encoding_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$IngressAudioEncodingResponse {
+  int get bitrate;
+  int get channels;
+  bool get enableDtx;
 
- int get bitrate; int get channels; bool get enableDtx;
-/// Create a copy of IngressAudioEncodingResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$IngressAudioEncodingResponseCopyWith<IngressAudioEncodingResponse> get copyWith => _$IngressAudioEncodingResponseCopyWithImpl<IngressAudioEncodingResponse>(this as IngressAudioEncodingResponse, _$identity);
+  /// Create a copy of IngressAudioEncodingResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $IngressAudioEncodingResponseCopyWith<IngressAudioEncodingResponse>
+  get copyWith =>
+      _$IngressAudioEncodingResponseCopyWithImpl<IngressAudioEncodingResponse>(
+        this as IngressAudioEncodingResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is IngressAudioEncodingResponse &&
+            (identical(other.bitrate, bitrate) || other.bitrate == bitrate) &&
+            (identical(other.channels, channels) ||
+                other.channels == channels) &&
+            (identical(other.enableDtx, enableDtx) ||
+                other.enableDtx == enableDtx));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, bitrate, channels, enableDtx);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IngressAudioEncodingResponse&&(identical(other.bitrate, bitrate) || other.bitrate == bitrate)&&(identical(other.channels, channels) || other.channels == channels)&&(identical(other.enableDtx, enableDtx) || other.enableDtx == enableDtx));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,bitrate,channels,enableDtx);
-
-@override
-String toString() {
-  return 'IngressAudioEncodingResponse(bitrate: $bitrate, channels: $channels, enableDtx: $enableDtx)';
-}
-
-
+  @override
+  String toString() {
+    return 'IngressAudioEncodingResponse(bitrate: $bitrate, channels: $channels, enableDtx: $enableDtx)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $IngressAudioEncodingResponseCopyWith<$Res>  {
-  factory $IngressAudioEncodingResponseCopyWith(IngressAudioEncodingResponse value, $Res Function(IngressAudioEncodingResponse) _then) = _$IngressAudioEncodingResponseCopyWithImpl;
-@useResult
-$Res call({
- int bitrate, int channels, bool enableDtx
-});
-
-
-
-
+abstract mixin class $IngressAudioEncodingResponseCopyWith<$Res> {
+  factory $IngressAudioEncodingResponseCopyWith(
+    IngressAudioEncodingResponse value,
+    $Res Function(IngressAudioEncodingResponse) _then,
+  ) = _$IngressAudioEncodingResponseCopyWithImpl;
+  @useResult
+  $Res call({int bitrate, int channels, bool enableDtx});
 }
+
 /// @nodoc
 class _$IngressAudioEncodingResponseCopyWithImpl<$Res>
     implements $IngressAudioEncodingResponseCopyWith<$Res> {
@@ -60,142 +67,30 @@ class _$IngressAudioEncodingResponseCopyWithImpl<$Res>
   final IngressAudioEncodingResponse _self;
   final $Res Function(IngressAudioEncodingResponse) _then;
 
-/// Create a copy of IngressAudioEncodingResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? bitrate = null,Object? channels = null,Object? enableDtx = null,}) {
-  return _then(IngressAudioEncodingResponse(
-bitrate: null == bitrate ? _self.bitrate : bitrate // ignore: cast_nullable_to_non_nullable
-as int,channels: null == channels ? _self.channels : channels // ignore: cast_nullable_to_non_nullable
-as int,enableDtx: null == enableDtx ? _self.enableDtx : enableDtx // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
+  /// Create a copy of IngressAudioEncodingResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? bitrate = null,
+    Object? channels = null,
+    Object? enableDtx = null,
+  }) {
+    return _then(
+      IngressAudioEncodingResponse(
+        bitrate: null == bitrate
+            ? _self.bitrate
+            : bitrate // ignore: cast_nullable_to_non_nullable
+                  as int,
+        channels: null == channels
+            ? _self.channels
+            : channels // ignore: cast_nullable_to_non_nullable
+                  as int,
+        enableDtx: null == enableDtx
+            ? _self.enableDtx
+            : enableDtx // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [IngressAudioEncodingResponse].
-extension IngressAudioEncodingResponsePatterns on IngressAudioEncodingResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

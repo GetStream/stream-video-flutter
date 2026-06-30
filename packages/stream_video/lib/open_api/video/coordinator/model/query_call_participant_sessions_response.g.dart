@@ -39,9 +39,11 @@ Map<String, dynamic> _$QueryCallParticipantSessionsResponseToJson(
   'call_type': instance.callType,
   'duration': instance.duration,
   'next': instance.next,
-  'participants_sessions': instance.participantsSessions,
+  'participants_sessions': instance.participantsSessions
+      .map((e) => e.toJson())
+      .toList(),
   'prev': instance.prev,
-  'session': instance.session,
+  'session': instance.session?.toJson(),
   'total_participant_duration': instance.totalParticipantDuration,
   'total_participant_sessions': instance.totalParticipantSessions,
 };

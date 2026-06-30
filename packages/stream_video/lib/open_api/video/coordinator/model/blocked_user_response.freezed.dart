@@ -9,49 +9,73 @@ part of 'blocked_user_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$BlockedUserResponse {
+  UserResponse get blockedUser;
+  String get blockedUserId;
+  DateTime get createdAt;
+  UserResponse get user;
+  String get userId;
 
- UserResponse get blockedUser; String get blockedUserId; DateTime get createdAt; UserResponse get user; String get userId;
-/// Create a copy of BlockedUserResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$BlockedUserResponseCopyWith<BlockedUserResponse> get copyWith => _$BlockedUserResponseCopyWithImpl<BlockedUserResponse>(this as BlockedUserResponse, _$identity);
+  /// Create a copy of BlockedUserResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $BlockedUserResponseCopyWith<BlockedUserResponse> get copyWith =>
+      _$BlockedUserResponseCopyWithImpl<BlockedUserResponse>(
+        this as BlockedUserResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is BlockedUserResponse &&
+            (identical(other.blockedUser, blockedUser) ||
+                other.blockedUser == blockedUser) &&
+            (identical(other.blockedUserId, blockedUserId) ||
+                other.blockedUserId == blockedUserId) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.userId, userId) || other.userId == userId));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    blockedUser,
+    blockedUserId,
+    createdAt,
+    user,
+    userId,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BlockedUserResponse&&(identical(other.blockedUser, blockedUser) || other.blockedUser == blockedUser)&&(identical(other.blockedUserId, blockedUserId) || other.blockedUserId == blockedUserId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.user, user) || other.user == user)&&(identical(other.userId, userId) || other.userId == userId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,blockedUser,blockedUserId,createdAt,user,userId);
-
-@override
-String toString() {
-  return 'BlockedUserResponse(blockedUser: $blockedUser, blockedUserId: $blockedUserId, createdAt: $createdAt, user: $user, userId: $userId)';
-}
-
-
+  @override
+  String toString() {
+    return 'BlockedUserResponse(blockedUser: $blockedUser, blockedUserId: $blockedUserId, createdAt: $createdAt, user: $user, userId: $userId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $BlockedUserResponseCopyWith<$Res>  {
-  factory $BlockedUserResponseCopyWith(BlockedUserResponse value, $Res Function(BlockedUserResponse) _then) = _$BlockedUserResponseCopyWithImpl;
-@useResult
-$Res call({
- UserResponse blockedUser, String blockedUserId, DateTime createdAt, UserResponse user, String userId
-});
-
-
-
-
+abstract mixin class $BlockedUserResponseCopyWith<$Res> {
+  factory $BlockedUserResponseCopyWith(
+    BlockedUserResponse value,
+    $Res Function(BlockedUserResponse) _then,
+  ) = _$BlockedUserResponseCopyWithImpl;
+  @useResult
+  $Res call({
+    UserResponse blockedUser,
+    String blockedUserId,
+    DateTime createdAt,
+    UserResponse user,
+    String userId,
+  });
 }
+
 /// @nodoc
 class _$BlockedUserResponseCopyWithImpl<$Res>
     implements $BlockedUserResponseCopyWith<$Res> {
@@ -60,144 +84,40 @@ class _$BlockedUserResponseCopyWithImpl<$Res>
   final BlockedUserResponse _self;
   final $Res Function(BlockedUserResponse) _then;
 
-/// Create a copy of BlockedUserResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? blockedUser = null,Object? blockedUserId = null,Object? createdAt = null,Object? user = null,Object? userId = null,}) {
-  return _then(BlockedUserResponse(
-blockedUser: null == blockedUser ? _self.blockedUser : blockedUser // ignore: cast_nullable_to_non_nullable
-as UserResponse,blockedUserId: null == blockedUserId ? _self.blockedUserId : blockedUserId // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserResponse,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of BlockedUserResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? blockedUser = null,
+    Object? blockedUserId = null,
+    Object? createdAt = null,
+    Object? user = null,
+    Object? userId = null,
+  }) {
+    return _then(
+      BlockedUserResponse(
+        blockedUser: null == blockedUser
+            ? _self.blockedUser
+            : blockedUser // ignore: cast_nullable_to_non_nullable
+                  as UserResponse,
+        blockedUserId: null == blockedUserId
+            ? _self.blockedUserId
+            : blockedUserId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        user: null == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponse,
+        userId: null == userId
+            ? _self.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [BlockedUserResponse].
-extension BlockedUserResponsePatterns on BlockedUserResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

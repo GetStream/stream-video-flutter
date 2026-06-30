@@ -22,7 +22,7 @@ FeedsNotificationTrigger _$FeedsNotificationTriggerFromJson(
 Map<String, dynamic> _$FeedsNotificationTriggerToJson(
   FeedsNotificationTrigger instance,
 ) => <String, dynamic>{
-  'comment': instance.comment,
+  'comment': instance.comment?.toJson(),
   'custom': instance.custom,
   'text': instance.text,
   'type': instance.type,

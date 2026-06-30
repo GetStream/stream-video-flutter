@@ -9,49 +9,55 @@ part of 'sdk_usage_report.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$SDKUsageReport {
+  Map<String, PerSDKUsageReport> get perSdkUsage;
 
- Map<String, PerSDKUsageReport> get perSdkUsage;
-/// Create a copy of SDKUsageReport
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SDKUsageReportCopyWith<SDKUsageReport> get copyWith => _$SDKUsageReportCopyWithImpl<SDKUsageReport>(this as SDKUsageReport, _$identity);
+  /// Create a copy of SDKUsageReport
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SDKUsageReportCopyWith<SDKUsageReport> get copyWith =>
+      _$SDKUsageReportCopyWithImpl<SDKUsageReport>(
+        this as SDKUsageReport,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SDKUsageReport &&
+            const DeepCollectionEquality().equals(
+              other.perSdkUsage,
+              perSdkUsage,
+            ));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(perSdkUsage),
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SDKUsageReport&&const DeepCollectionEquality().equals(other.perSdkUsage, perSdkUsage));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(perSdkUsage));
-
-@override
-String toString() {
-  return 'SDKUsageReport(perSdkUsage: $perSdkUsage)';
-}
-
-
+  @override
+  String toString() {
+    return 'SDKUsageReport(perSdkUsage: $perSdkUsage)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $SDKUsageReportCopyWith<$Res>  {
-  factory $SDKUsageReportCopyWith(SDKUsageReport value, $Res Function(SDKUsageReport) _then) = _$SDKUsageReportCopyWithImpl;
-@useResult
-$Res call({
- Map<String, PerSDKUsageReport> perSdkUsage
-});
-
-
-
-
+abstract mixin class $SDKUsageReportCopyWith<$Res> {
+  factory $SDKUsageReportCopyWith(
+    SDKUsageReport value,
+    $Res Function(SDKUsageReport) _then,
+  ) = _$SDKUsageReportCopyWithImpl;
+  @useResult
+  $Res call({Map<String, PerSDKUsageReport> perSdkUsage});
 }
+
 /// @nodoc
 class _$SDKUsageReportCopyWithImpl<$Res>
     implements $SDKUsageReportCopyWith<$Res> {
@@ -60,140 +66,18 @@ class _$SDKUsageReportCopyWithImpl<$Res>
   final SDKUsageReport _self;
   final $Res Function(SDKUsageReport) _then;
 
-/// Create a copy of SDKUsageReport
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? perSdkUsage = null,}) {
-  return _then(SDKUsageReport(
-perSdkUsage: null == perSdkUsage ? _self.perSdkUsage : perSdkUsage // ignore: cast_nullable_to_non_nullable
-as Map<String, PerSDKUsageReport>,
-  ));
+  /// Create a copy of SDKUsageReport
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? perSdkUsage = null}) {
+    return _then(
+      SDKUsageReport(
+        perSdkUsage: null == perSdkUsage
+            ? _self.perSdkUsage
+            : perSdkUsage // ignore: cast_nullable_to_non_nullable
+                  as Map<String, PerSDKUsageReport>,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [SDKUsageReport].
-extension SDKUsageReportPatterns on SDKUsageReport {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

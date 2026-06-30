@@ -45,8 +45,8 @@ Map<String, dynamic> _$TranscriptionSettingsResponseToJson(
   'language':
       _$TranscriptionSettingsResponseLanguageEnumMap[instance.language]!,
   'mode': _$TranscriptionSettingsResponseModeEnumMap[instance.mode]!,
-  'speech_segment_config': instance.speechSegmentConfig,
-  'translation': instance.translation,
+  'speech_segment_config': instance.speechSegmentConfig?.toJson(),
+  'translation': instance.translation?.toJson(),
 };
 
 const _$TranscriptionSettingsResponseClosedCaptionModeEnumMap = {

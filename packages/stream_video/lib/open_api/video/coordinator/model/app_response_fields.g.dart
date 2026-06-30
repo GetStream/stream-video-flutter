@@ -25,9 +25,9 @@ Map<String, dynamic> _$AppResponseFieldsToJson(AppResponseFields instance) =>
     <String, dynamic>{
       'async_url_enrich_enabled': instance.asyncUrlEnrichEnabled,
       'auto_translation_enabled': instance.autoTranslationEnabled,
-      'file_upload_config': instance.fileUploadConfig,
+      'file_upload_config': instance.fileUploadConfig.toJson(),
       'id': instance.id,
-      'image_upload_config': instance.imageUploadConfig,
+      'image_upload_config': instance.imageUploadConfig.toJson(),
       'name': instance.name,
       'placement': instance.placement,
     };

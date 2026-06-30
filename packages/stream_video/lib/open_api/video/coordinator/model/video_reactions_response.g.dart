@@ -20,6 +20,6 @@ VideoReactionsResponse _$VideoReactionsResponseFromJson(
 Map<String, dynamic> _$VideoReactionsResponseToJson(
   VideoReactionsResponse instance,
 ) => <String, dynamic>{
-  'count_over_time': instance.countOverTime,
+  'count_over_time': instance.countOverTime?.toJson(),
   'reaction': instance.reaction,
 };

@@ -22,9 +22,9 @@ SFULocationResponse _$SFULocationResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SFULocationResponseToJson(
   SFULocationResponse instance,
 ) => <String, dynamic>{
-  'coordinates': instance.coordinates,
+  'coordinates': instance.coordinates.toJson(),
   'count': instance.count,
   'datacenter': instance.datacenter,
   'id': instance.id,
-  'location': instance.location,
+  'location': instance.location.toJson(),
 };

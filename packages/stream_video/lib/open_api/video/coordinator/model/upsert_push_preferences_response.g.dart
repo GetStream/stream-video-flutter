@@ -39,6 +39,10 @@ Map<String, dynamic> _$UpsertPushPreferencesResponseToJson(
   UpsertPushPreferencesResponse instance,
 ) => <String, dynamic>{
   'duration': instance.duration,
-  'user_channel_preferences': instance.userChannelPreferences,
-  'user_preferences': instance.userPreferences,
+  'user_channel_preferences': instance.userChannelPreferences.map(
+    (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))),
+  ),
+  'user_preferences': instance.userPreferences.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
 };

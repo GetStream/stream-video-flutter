@@ -65,7 +65,7 @@ AppealItemResponse _$AppealItemResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AppealItemResponseToJson(AppealItemResponse instance) =>
     <String, dynamic>{
-      'actions': instance.actions,
+      'actions': instance.actions?.map((e) => e.toJson()).toList(),
       'ai_text_severity': instance.aiTextSeverity,
       'appeal_reason': instance.appealReason,
       'attachments': instance.attachments,
@@ -73,19 +73,19 @@ Map<String, dynamic> _$AppealItemResponseToJson(AppealItemResponse instance) =>
       'config_key': instance.configKey,
       'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
       'decision_reason': instance.decisionReason,
-      'entity_content': instance.entityContent,
+      'entity_content': instance.entityContent?.toJson(),
       'entity_id': instance.entityId,
       'entity_type': instance.entityType,
       'flag_labels': instance.flagLabels,
       'flag_types': instance.flagTypes,
-      'flags': instance.flags,
+      'flags': instance.flags?.map((e) => e.toJson()).toList(),
       'id': instance.id,
-      'moderation_action': instance.moderationAction,
-      'original_moderation_action': instance.originalModerationAction,
+      'moderation_action': instance.moderationAction?.toJson(),
+      'original_moderation_action': instance.originalModerationAction?.toJson(),
       'recommended_action': instance.recommendedAction,
       'review_queue_item_id': instance.reviewQueueItemId,
       'severity': instance.severity,
       'status': instance.status,
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-      'user': instance.user,
+      'user': instance.user?.toJson(),
     };

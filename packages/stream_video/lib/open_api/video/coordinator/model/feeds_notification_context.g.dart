@@ -23,4 +23,7 @@ FeedsNotificationContext _$FeedsNotificationContextFromJson(
 
 Map<String, dynamic> _$FeedsNotificationContextToJson(
   FeedsNotificationContext instance,
-) => <String, dynamic>{'target': instance.target, 'trigger': instance.trigger};
+) => <String, dynamic>{
+  'target': instance.target?.toJson(),
+  'trigger': instance.trigger?.toJson(),
+};

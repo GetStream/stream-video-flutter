@@ -44,14 +44,16 @@ ParticipantReportResponse _$ParticipantReportResponseFromJson(
 Map<String, dynamic> _$ParticipantReportResponseToJson(
   ParticipantReportResponse instance,
 ) => <String, dynamic>{
-  'by_browser': instance.byBrowser,
-  'by_country': instance.byCountry,
-  'by_device': instance.byDevice,
-  'by_operating_system': instance.byOperatingSystem,
-  'count_over_time': instance.countOverTime,
+  'by_browser': instance.byBrowser?.map((e) => e.toJson()).toList(),
+  'by_country': instance.byCountry?.map((e) => e.toJson()).toList(),
+  'by_device': instance.byDevice?.map((e) => e.toJson()).toList(),
+  'by_operating_system': instance.byOperatingSystem
+      ?.map((e) => e.toJson())
+      .toList(),
+  'count_over_time': instance.countOverTime?.toJson(),
   'max_concurrent': instance.maxConcurrent,
-  'publishers': instance.publishers,
-  'subscribers': instance.subscribers,
+  'publishers': instance.publishers?.toJson(),
+  'subscribers': instance.subscribers?.toJson(),
   'sum': instance.sum,
   'unique': instance.unique,
 };

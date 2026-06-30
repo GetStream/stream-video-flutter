@@ -9,49 +9,68 @@ part of 'call_participant_timeline.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CallParticipantTimeline {
+  Map<String, Object?> get data;
+  String get severity;
+  DateTime get timestamp;
+  String get type;
 
- Map<String, Object?> get data; String get severity; DateTime get timestamp; String get type;
-/// Create a copy of CallParticipantTimeline
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CallParticipantTimelineCopyWith<CallParticipantTimeline> get copyWith => _$CallParticipantTimelineCopyWithImpl<CallParticipantTimeline>(this as CallParticipantTimeline, _$identity);
+  /// Create a copy of CallParticipantTimeline
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CallParticipantTimelineCopyWith<CallParticipantTimeline> get copyWith =>
+      _$CallParticipantTimelineCopyWithImpl<CallParticipantTimeline>(
+        this as CallParticipantTimeline,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CallParticipantTimeline &&
+            const DeepCollectionEquality().equals(other.data, data) &&
+            (identical(other.severity, severity) ||
+                other.severity == severity) &&
+            (identical(other.timestamp, timestamp) ||
+                other.timestamp == timestamp) &&
+            (identical(other.type, type) || other.type == type));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(data),
+    severity,
+    timestamp,
+    type,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallParticipantTimeline&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.severity, severity) || other.severity == severity)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.type, type) || other.type == type));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data),severity,timestamp,type);
-
-@override
-String toString() {
-  return 'CallParticipantTimeline(data: $data, severity: $severity, timestamp: $timestamp, type: $type)';
-}
-
-
+  @override
+  String toString() {
+    return 'CallParticipantTimeline(data: $data, severity: $severity, timestamp: $timestamp, type: $type)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CallParticipantTimelineCopyWith<$Res>  {
-  factory $CallParticipantTimelineCopyWith(CallParticipantTimeline value, $Res Function(CallParticipantTimeline) _then) = _$CallParticipantTimelineCopyWithImpl;
-@useResult
-$Res call({
- Map<String, Object?> data, String severity, DateTime timestamp, String type
-});
-
-
-
-
+abstract mixin class $CallParticipantTimelineCopyWith<$Res> {
+  factory $CallParticipantTimelineCopyWith(
+    CallParticipantTimeline value,
+    $Res Function(CallParticipantTimeline) _then,
+  ) = _$CallParticipantTimelineCopyWithImpl;
+  @useResult
+  $Res call({
+    Map<String, Object?> data,
+    String severity,
+    DateTime timestamp,
+    String type,
+  });
 }
+
 /// @nodoc
 class _$CallParticipantTimelineCopyWithImpl<$Res>
     implements $CallParticipantTimelineCopyWith<$Res> {
@@ -60,143 +79,35 @@ class _$CallParticipantTimelineCopyWithImpl<$Res>
   final CallParticipantTimeline _self;
   final $Res Function(CallParticipantTimeline) _then;
 
-/// Create a copy of CallParticipantTimeline
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? severity = null,Object? timestamp = null,Object? type = null,}) {
-  return _then(CallParticipantTimeline(
-data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as Map<String, Object?>,severity: null == severity ? _self.severity : severity // ignore: cast_nullable_to_non_nullable
-as String,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
-as DateTime,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CallParticipantTimeline
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? data = null,
+    Object? severity = null,
+    Object? timestamp = null,
+    Object? type = null,
+  }) {
+    return _then(
+      CallParticipantTimeline(
+        data: null == data
+            ? _self.data
+            : data // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        severity: null == severity
+            ? _self.severity
+            : severity // ignore: cast_nullable_to_non_nullable
+                  as String,
+        timestamp: null == timestamp
+            ? _self.timestamp
+            : timestamp // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CallParticipantTimeline].
-extension CallParticipantTimelinePatterns on CallParticipantTimeline {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

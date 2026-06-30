@@ -17,4 +17,7 @@ QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$QueryUsersResponseToJson(QueryUsersResponse instance) =>
-    <String, dynamic>{'duration': instance.duration, 'users': instance.users};
+    <String, dynamic>{
+      'duration': instance.duration,
+      'users': instance.users.map((e) => e.toJson()).toList(),
+    };

@@ -9,49 +9,51 @@ part of 'rtmp_settings_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$RTMPSettingsRequest {
+  bool? get enabled;
+  RTMPSettingsRequestQuality? get quality;
 
- bool? get enabled; RTMPSettingsRequestQuality? get quality;
-/// Create a copy of RTMPSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$RTMPSettingsRequestCopyWith<RTMPSettingsRequest> get copyWith => _$RTMPSettingsRequestCopyWithImpl<RTMPSettingsRequest>(this as RTMPSettingsRequest, _$identity);
+  /// Create a copy of RTMPSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $RTMPSettingsRequestCopyWith<RTMPSettingsRequest> get copyWith =>
+      _$RTMPSettingsRequestCopyWithImpl<RTMPSettingsRequest>(
+        this as RTMPSettingsRequest,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is RTMPSettingsRequest &&
+            (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            (identical(other.quality, quality) || other.quality == quality));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, enabled, quality);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RTMPSettingsRequest&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.quality, quality) || other.quality == quality));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,enabled,quality);
-
-@override
-String toString() {
-  return 'RTMPSettingsRequest(enabled: $enabled, quality: $quality)';
-}
-
-
+  @override
+  String toString() {
+    return 'RTMPSettingsRequest(enabled: $enabled, quality: $quality)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $RTMPSettingsRequestCopyWith<$Res>  {
-  factory $RTMPSettingsRequestCopyWith(RTMPSettingsRequest value, $Res Function(RTMPSettingsRequest) _then) = _$RTMPSettingsRequestCopyWithImpl;
-@useResult
-$Res call({
- bool? enabled, RTMPSettingsRequestQuality? quality
-});
-
-
-
-
+abstract mixin class $RTMPSettingsRequestCopyWith<$Res> {
+  factory $RTMPSettingsRequestCopyWith(
+    RTMPSettingsRequest value,
+    $Res Function(RTMPSettingsRequest) _then,
+  ) = _$RTMPSettingsRequestCopyWithImpl;
+  @useResult
+  $Res call({bool? enabled, RTMPSettingsRequestQuality? quality});
 }
+
 /// @nodoc
 class _$RTMPSettingsRequestCopyWithImpl<$Res>
     implements $RTMPSettingsRequestCopyWith<$Res> {
@@ -60,141 +62,22 @@ class _$RTMPSettingsRequestCopyWithImpl<$Res>
   final RTMPSettingsRequest _self;
   final $Res Function(RTMPSettingsRequest) _then;
 
-/// Create a copy of RTMPSettingsRequest
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = freezed,Object? quality = freezed,}) {
-  return _then(RTMPSettingsRequest(
-enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
-as bool?,quality: freezed == quality ? _self.quality : quality // ignore: cast_nullable_to_non_nullable
-as RTMPSettingsRequestQuality?,
-  ));
+  /// Create a copy of RTMPSettingsRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? enabled = freezed, Object? quality = freezed}) {
+    return _then(
+      RTMPSettingsRequest(
+        enabled: freezed == enabled
+            ? _self.enabled
+            : enabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        quality: freezed == quality
+            ? _self.quality
+            : quality // ignore: cast_nullable_to_non_nullable
+                  as RTMPSettingsRequestQuality?,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [RTMPSettingsRequest].
-extension RTMPSettingsRequestPatterns on RTMPSettingsRequest {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

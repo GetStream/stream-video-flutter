@@ -25,6 +25,6 @@ Map<String, dynamic> _$FlagRequestToJson(FlagRequest instance) =>
       'entity_creator_id': instance.entityCreatorId,
       'entity_id': instance.entityId,
       'entity_type': instance.entityType,
-      'moderation_payload': instance.moderationPayload,
+      'moderation_payload': instance.moderationPayload?.toJson(),
       'reason': instance.reason,
     };

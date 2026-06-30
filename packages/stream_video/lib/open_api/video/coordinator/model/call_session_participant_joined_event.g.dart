@@ -25,7 +25,7 @@ Map<String, dynamic> _$CallSessionParticipantJoinedEventToJson(
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
   'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
-  'participant': instance.participant,
+  'participant': instance.participant.toJson(),
   'session_id': instance.sessionId,
   'type': instance.type,
 };

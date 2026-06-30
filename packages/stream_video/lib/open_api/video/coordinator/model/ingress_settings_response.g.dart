@@ -27,7 +27,9 @@ IngressSettingsResponse _$IngressSettingsResponseFromJson(
 Map<String, dynamic> _$IngressSettingsResponseToJson(
   IngressSettingsResponse instance,
 ) => <String, dynamic>{
-  'audio_encoding_options': instance.audioEncodingOptions,
+  'audio_encoding_options': instance.audioEncodingOptions?.toJson(),
   'enabled': instance.enabled,
-  'video_encoding_options': instance.videoEncodingOptions,
+  'video_encoding_options': instance.videoEncodingOptions?.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
 };

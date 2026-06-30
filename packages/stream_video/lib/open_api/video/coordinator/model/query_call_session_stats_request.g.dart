@@ -25,5 +25,5 @@ Map<String, dynamic> _$QueryCallSessionStatsRequestToJson(
   'limit': instance.limit,
   'next': instance.next,
   'prev': instance.prev,
-  'sort': instance.sort,
+  'sort': instance.sort?.map((e) => e.toJson()).toList(),
 };

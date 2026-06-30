@@ -30,6 +30,6 @@ Map<String, dynamic> _$ReactionResponseToJson(ReactionResponse instance) =>
       'score': instance.score,
       'type': instance.type,
       'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-      'user': instance.user,
+      'user': instance.user.toJson(),
       'user_id': instance.userId,
     };

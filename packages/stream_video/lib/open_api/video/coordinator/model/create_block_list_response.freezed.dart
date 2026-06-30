@@ -9,49 +9,53 @@ part of 'create_block_list_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$CreateBlockListResponse {
+  BlockListResponse? get blocklist;
+  String get duration;
 
- BlockListResponse? get blocklist; String get duration;
-/// Create a copy of CreateBlockListResponse
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$CreateBlockListResponseCopyWith<CreateBlockListResponse> get copyWith => _$CreateBlockListResponseCopyWithImpl<CreateBlockListResponse>(this as CreateBlockListResponse, _$identity);
+  /// Create a copy of CreateBlockListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $CreateBlockListResponseCopyWith<CreateBlockListResponse> get copyWith =>
+      _$CreateBlockListResponseCopyWithImpl<CreateBlockListResponse>(
+        this as CreateBlockListResponse,
+        _$identity,
+      );
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is CreateBlockListResponse &&
+            (identical(other.blocklist, blocklist) ||
+                other.blocklist == blocklist) &&
+            (identical(other.duration, duration) ||
+                other.duration == duration));
+  }
 
+  @override
+  int get hashCode => Object.hash(runtimeType, blocklist, duration);
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateBlockListResponse&&(identical(other.blocklist, blocklist) || other.blocklist == blocklist)&&(identical(other.duration, duration) || other.duration == duration));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,blocklist,duration);
-
-@override
-String toString() {
-  return 'CreateBlockListResponse(blocklist: $blocklist, duration: $duration)';
-}
-
-
+  @override
+  String toString() {
+    return 'CreateBlockListResponse(blocklist: $blocklist, duration: $duration)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $CreateBlockListResponseCopyWith<$Res>  {
-  factory $CreateBlockListResponseCopyWith(CreateBlockListResponse value, $Res Function(CreateBlockListResponse) _then) = _$CreateBlockListResponseCopyWithImpl;
-@useResult
-$Res call({
- BlockListResponse? blocklist, String duration
-});
-
-
-
-
+abstract mixin class $CreateBlockListResponseCopyWith<$Res> {
+  factory $CreateBlockListResponseCopyWith(
+    CreateBlockListResponse value,
+    $Res Function(CreateBlockListResponse) _then,
+  ) = _$CreateBlockListResponseCopyWithImpl;
+  @useResult
+  $Res call({BlockListResponse? blocklist, String duration});
 }
+
 /// @nodoc
 class _$CreateBlockListResponseCopyWithImpl<$Res>
     implements $CreateBlockListResponseCopyWith<$Res> {
@@ -60,141 +64,22 @@ class _$CreateBlockListResponseCopyWithImpl<$Res>
   final CreateBlockListResponse _self;
   final $Res Function(CreateBlockListResponse) _then;
 
-/// Create a copy of CreateBlockListResponse
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? blocklist = freezed,Object? duration = null,}) {
-  return _then(CreateBlockListResponse(
-blocklist: freezed == blocklist ? _self.blocklist : blocklist // ignore: cast_nullable_to_non_nullable
-as BlockListResponse?,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
+  /// Create a copy of CreateBlockListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? blocklist = freezed, Object? duration = null}) {
+    return _then(
+      CreateBlockListResponse(
+        blocklist: freezed == blocklist
+            ? _self.blocklist
+            : blocklist // ignore: cast_nullable_to_non_nullable
+                  as BlockListResponse?,
+        duration: null == duration
+            ? _self.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [CreateBlockListResponse].
-extension CreateBlockListResponsePatterns on CreateBlockListResponse {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

@@ -29,8 +29,8 @@ Map<String, dynamic> _$CallRequestToJson(CallRequest instance) =>
     <String, dynamic>{
       'channel_cid': instance.channelCid,
       'custom': instance.custom,
-      'members': instance.members,
-      'settings_override': instance.settingsOverride,
+      'members': instance.members?.map((e) => e.toJson()).toList(),
+      'settings_override': instance.settingsOverride?.toJson(),
       'starts_at': _$JsonConverterToJson<Object, DateTime>(
         instance.startsAt,
         const EpochDateTimeConverter().toJson,

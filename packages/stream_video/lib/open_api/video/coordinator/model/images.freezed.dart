@@ -9,197 +9,131 @@ part of 'images.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$Images {
+  ImageData get fixedHeight;
+  ImageData get fixedHeightDownsampled;
+  ImageData get fixedHeightStill;
+  ImageData get fixedWidth;
+  ImageData get fixedWidthDownsampled;
+  ImageData get fixedWidthStill;
+  ImageData get original;
 
- ImageData get fixedHeight; ImageData get fixedHeightDownsampled; ImageData get fixedHeightStill; ImageData get fixedWidth; ImageData get fixedWidthDownsampled; ImageData get fixedWidthStill; ImageData get original;
-/// Create a copy of Images
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ImagesCopyWith<Images> get copyWith => _$ImagesCopyWithImpl<Images>(this as Images, _$identity);
+  /// Create a copy of Images
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ImagesCopyWith<Images> get copyWith =>
+      _$ImagesCopyWithImpl<Images>(this as Images, _$identity);
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is Images &&
+            (identical(other.fixedHeight, fixedHeight) ||
+                other.fixedHeight == fixedHeight) &&
+            (identical(other.fixedHeightDownsampled, fixedHeightDownsampled) ||
+                other.fixedHeightDownsampled == fixedHeightDownsampled) &&
+            (identical(other.fixedHeightStill, fixedHeightStill) ||
+                other.fixedHeightStill == fixedHeightStill) &&
+            (identical(other.fixedWidth, fixedWidth) ||
+                other.fixedWidth == fixedWidth) &&
+            (identical(other.fixedWidthDownsampled, fixedWidthDownsampled) ||
+                other.fixedWidthDownsampled == fixedWidthDownsampled) &&
+            (identical(other.fixedWidthStill, fixedWidthStill) ||
+                other.fixedWidthStill == fixedWidthStill) &&
+            (identical(other.original, original) ||
+                other.original == original));
+  }
 
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    fixedHeight,
+    fixedHeightDownsampled,
+    fixedHeightStill,
+    fixedWidth,
+    fixedWidthDownsampled,
+    fixedWidthStill,
+    original,
+  );
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Images&&(identical(other.fixedHeight, fixedHeight) || other.fixedHeight == fixedHeight)&&(identical(other.fixedHeightDownsampled, fixedHeightDownsampled) || other.fixedHeightDownsampled == fixedHeightDownsampled)&&(identical(other.fixedHeightStill, fixedHeightStill) || other.fixedHeightStill == fixedHeightStill)&&(identical(other.fixedWidth, fixedWidth) || other.fixedWidth == fixedWidth)&&(identical(other.fixedWidthDownsampled, fixedWidthDownsampled) || other.fixedWidthDownsampled == fixedWidthDownsampled)&&(identical(other.fixedWidthStill, fixedWidthStill) || other.fixedWidthStill == fixedWidthStill)&&(identical(other.original, original) || other.original == original));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,fixedHeight,fixedHeightDownsampled,fixedHeightStill,fixedWidth,fixedWidthDownsampled,fixedWidthStill,original);
-
-@override
-String toString() {
-  return 'Images(fixedHeight: $fixedHeight, fixedHeightDownsampled: $fixedHeightDownsampled, fixedHeightStill: $fixedHeightStill, fixedWidth: $fixedWidth, fixedWidthDownsampled: $fixedWidthDownsampled, fixedWidthStill: $fixedWidthStill, original: $original)';
-}
-
-
+  @override
+  String toString() {
+    return 'Images(fixedHeight: $fixedHeight, fixedHeightDownsampled: $fixedHeightDownsampled, fixedHeightStill: $fixedHeightStill, fixedWidth: $fixedWidth, fixedWidthDownsampled: $fixedWidthDownsampled, fixedWidthStill: $fixedWidthStill, original: $original)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $ImagesCopyWith<$Res>  {
-  factory $ImagesCopyWith(Images value, $Res Function(Images) _then) = _$ImagesCopyWithImpl;
-@useResult
-$Res call({
- ImageData fixedHeight, ImageData fixedHeightDownsampled, ImageData fixedHeightStill, ImageData fixedWidth, ImageData fixedWidthDownsampled, ImageData fixedWidthStill, ImageData original
-});
-
-
-
-
+abstract mixin class $ImagesCopyWith<$Res> {
+  factory $ImagesCopyWith(Images value, $Res Function(Images) _then) =
+      _$ImagesCopyWithImpl;
+  @useResult
+  $Res call({
+    ImageData fixedHeight,
+    ImageData fixedHeightDownsampled,
+    ImageData fixedHeightStill,
+    ImageData fixedWidth,
+    ImageData fixedWidthDownsampled,
+    ImageData fixedWidthStill,
+    ImageData original,
+  });
 }
+
 /// @nodoc
-class _$ImagesCopyWithImpl<$Res>
-    implements $ImagesCopyWith<$Res> {
+class _$ImagesCopyWithImpl<$Res> implements $ImagesCopyWith<$Res> {
   _$ImagesCopyWithImpl(this._self, this._then);
 
   final Images _self;
   final $Res Function(Images) _then;
 
-/// Create a copy of Images
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fixedHeight = null,Object? fixedHeightDownsampled = null,Object? fixedHeightStill = null,Object? fixedWidth = null,Object? fixedWidthDownsampled = null,Object? fixedWidthStill = null,Object? original = null,}) {
-  return _then(Images(
-fixedHeight: null == fixedHeight ? _self.fixedHeight : fixedHeight // ignore: cast_nullable_to_non_nullable
-as ImageData,fixedHeightDownsampled: null == fixedHeightDownsampled ? _self.fixedHeightDownsampled : fixedHeightDownsampled // ignore: cast_nullable_to_non_nullable
-as ImageData,fixedHeightStill: null == fixedHeightStill ? _self.fixedHeightStill : fixedHeightStill // ignore: cast_nullable_to_non_nullable
-as ImageData,fixedWidth: null == fixedWidth ? _self.fixedWidth : fixedWidth // ignore: cast_nullable_to_non_nullable
-as ImageData,fixedWidthDownsampled: null == fixedWidthDownsampled ? _self.fixedWidthDownsampled : fixedWidthDownsampled // ignore: cast_nullable_to_non_nullable
-as ImageData,fixedWidthStill: null == fixedWidthStill ? _self.fixedWidthStill : fixedWidthStill // ignore: cast_nullable_to_non_nullable
-as ImageData,original: null == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
-as ImageData,
-  ));
+  /// Create a copy of Images
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fixedHeight = null,
+    Object? fixedHeightDownsampled = null,
+    Object? fixedHeightStill = null,
+    Object? fixedWidth = null,
+    Object? fixedWidthDownsampled = null,
+    Object? fixedWidthStill = null,
+    Object? original = null,
+  }) {
+    return _then(
+      Images(
+        fixedHeight: null == fixedHeight
+            ? _self.fixedHeight
+            : fixedHeight // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+        fixedHeightDownsampled: null == fixedHeightDownsampled
+            ? _self.fixedHeightDownsampled
+            : fixedHeightDownsampled // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+        fixedHeightStill: null == fixedHeightStill
+            ? _self.fixedHeightStill
+            : fixedHeightStill // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+        fixedWidth: null == fixedWidth
+            ? _self.fixedWidth
+            : fixedWidth // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+        fixedWidthDownsampled: null == fixedWidthDownsampled
+            ? _self.fixedWidthDownsampled
+            : fixedWidthDownsampled // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+        fixedWidthStill: null == fixedWidthStill
+            ? _self.fixedWidthStill
+            : fixedWidthStill // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+        original: null == original
+            ? _self.original
+            : original // ignore: cast_nullable_to_non_nullable
+                  as ImageData,
+      ),
+    );
+  }
 }
-
-}
-
-
-/// Adds pattern-matching-related methods to [Images].
-extension ImagesPatterns on Images {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(){
-final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>() {final _that = this;
-switch (_that) {
-case _:
-  return null;
-
-}
-}
-
-}
-
-// dart format on

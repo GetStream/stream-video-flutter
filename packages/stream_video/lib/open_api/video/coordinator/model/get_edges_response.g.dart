@@ -17,4 +17,7 @@ GetEdgesResponse _$GetEdgesResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$GetEdgesResponseToJson(GetEdgesResponse instance) =>
-    <String, dynamic>{'duration': instance.duration, 'edges': instance.edges};
+    <String, dynamic>{
+      'duration': instance.duration,
+      'edges': instance.edges.map((e) => e.toJson()).toList(),
+    };

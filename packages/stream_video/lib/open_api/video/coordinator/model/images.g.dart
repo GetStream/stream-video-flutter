@@ -25,11 +25,11 @@ Images _$ImagesFromJson(Map<String, dynamic> json) => Images(
 );
 
 Map<String, dynamic> _$ImagesToJson(Images instance) => <String, dynamic>{
-  'fixed_height': instance.fixedHeight,
-  'fixed_height_downsampled': instance.fixedHeightDownsampled,
-  'fixed_height_still': instance.fixedHeightStill,
-  'fixed_width': instance.fixedWidth,
-  'fixed_width_downsampled': instance.fixedWidthDownsampled,
-  'fixed_width_still': instance.fixedWidthStill,
-  'original': instance.original,
+  'fixed_height': instance.fixedHeight.toJson(),
+  'fixed_height_downsampled': instance.fixedHeightDownsampled.toJson(),
+  'fixed_height_still': instance.fixedHeightStill.toJson(),
+  'fixed_width': instance.fixedWidth.toJson(),
+  'fixed_width_downsampled': instance.fixedWidthDownsampled.toJson(),
+  'fixed_width_still': instance.fixedWidthStill.toJson(),
+  'original': instance.original.toJson(),
 };

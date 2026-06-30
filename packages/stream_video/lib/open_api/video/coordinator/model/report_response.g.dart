@@ -19,7 +19,7 @@ ReportResponse _$ReportResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ReportResponseToJson(ReportResponse instance) =>
     <String, dynamic>{
-      'call': instance.call,
-      'participants': instance.participants,
-      'user_ratings': instance.userRatings,
+      'call': instance.call.toJson(),
+      'participants': instance.participants.toJson(),
+      'user_ratings': instance.userRatings.toJson(),
     };

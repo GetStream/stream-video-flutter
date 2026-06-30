@@ -16,7 +16,7 @@ CallIngressResponse _$CallIngressResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CallIngressResponseToJson(
   CallIngressResponse instance,
 ) => <String, dynamic>{
-  'rtmp': instance.rtmp,
-  'srt': instance.srt,
-  'whip': instance.whip,
+  'rtmp': instance.rtmp.toJson(),
+  'srt': instance.srt.toJson(),
+  'whip': instance.whip.toJson(),
 };

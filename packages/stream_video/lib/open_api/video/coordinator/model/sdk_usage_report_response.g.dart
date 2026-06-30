@@ -22,4 +22,4 @@ SDKUsageReportResponse _$SDKUsageReportResponseFromJson(
 
 Map<String, dynamic> _$SDKUsageReportResponseToJson(
   SDKUsageReportResponse instance,
-) => <String, dynamic>{'daily': instance.daily};
+) => <String, dynamic>{'daily': instance.daily.map((e) => e.toJson()).toList()};

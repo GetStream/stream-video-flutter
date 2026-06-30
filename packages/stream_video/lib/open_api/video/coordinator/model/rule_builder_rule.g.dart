@@ -31,14 +31,15 @@ RuleBuilderRule _$RuleBuilderRuleFromJson(Map<String, dynamic> json) =>
       ruleType: json['rule_type'] as String,
     );
 
-Map<String, dynamic> _$RuleBuilderRuleToJson(RuleBuilderRule instance) =>
-    <String, dynamic>{
-      'action': instance.action,
-      'action_sequences': instance.actionSequences,
-      'conditions': instance.conditions,
-      'cooldown_period': instance.cooldownPeriod,
-      'groups': instance.groups,
-      'id': instance.id,
-      'logic': instance.logic,
-      'rule_type': instance.ruleType,
-    };
+Map<String, dynamic> _$RuleBuilderRuleToJson(
+  RuleBuilderRule instance,
+) => <String, dynamic>{
+  'action': instance.action?.toJson(),
+  'action_sequences': instance.actionSequences?.map((e) => e.toJson()).toList(),
+  'conditions': instance.conditions?.map((e) => e.toJson()).toList(),
+  'cooldown_period': instance.cooldownPeriod,
+  'groups': instance.groups?.map((e) => e.toJson()).toList(),
+  'id': instance.id,
+  'logic': instance.logic,
+  'rule_type': instance.ruleType,
+};

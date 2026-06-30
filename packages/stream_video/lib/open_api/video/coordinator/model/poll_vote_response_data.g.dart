@@ -36,6 +36,6 @@ Map<String, dynamic> _$PollVoteResponseDataToJson(
   'option_id': instance.optionId,
   'poll_id': instance.pollId,
   'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
-  'user': instance.user,
+  'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };
