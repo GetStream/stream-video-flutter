@@ -19,7 +19,7 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<void> registerProcessor() async {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
       );
     }
 
@@ -31,7 +31,7 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<bool?> isEnabled() async {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
       );
     }
 
@@ -43,7 +43,7 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<void> setEnabled(bool enabled) {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
       );
     }
 
@@ -55,7 +55,7 @@ class MethodChannelStreamVideoNoiseCancellation
   Future<bool?> deviceSupportsAdvancedAudioProcessing() {
     if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
       throw UnimplementedError(
-        'The current platform (${CurrentPlatform.name}) does not support audio processing.',
+        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
       );
     }
 

@@ -27,7 +27,7 @@ void main() {
     });
 
     test('acceptedBy values are parsed as DateTime', () {
-      final result = CallSessionResponse.fromJson(json)!;
+      final result = CallSessionResponse.fromJson(json);
 
       expect(result.acceptedBy, isA<Map<String, DateTime>>());
       expect(result.acceptedBy['user-1'], DateTime.utc(2024, 5, 1, 10));
@@ -35,14 +35,14 @@ void main() {
     });
 
     test('missedBy values are parsed as DateTime', () {
-      final result = CallSessionResponse.fromJson(json)!;
+      final result = CallSessionResponse.fromJson(json);
 
       expect(result.missedBy, isA<Map<String, DateTime>>());
       expect(result.missedBy['user-3'], DateTime.utc(2024, 5, 1, 10, 2));
     });
 
     test('rejectedBy values are parsed as DateTime', () {
-      final result = CallSessionResponse.fromJson(json)!;
+      final result = CallSessionResponse.fromJson(json);
 
       expect(result.rejectedBy, isA<Map<String, DateTime>>());
       expect(result.rejectedBy['user-4'], DateTime.utc(2024, 5, 1, 10, 3));
@@ -53,7 +53,7 @@ void main() {
       json['missed_by'] = <String, dynamic>{};
       json['rejected_by'] = <String, dynamic>{};
 
-      final result = CallSessionResponse.fromJson(json)!;
+      final result = CallSessionResponse.fromJson(json);
 
       expect(result.acceptedBy, isEmpty);
       expect(result.missedBy, isEmpty);
@@ -69,11 +69,11 @@ void main() {
       final result = DurationResponse.fromJson(json);
 
       expect(result, isNotNull);
-      expect(result!.duration, '42ms');
+      expect(result.duration, '42ms');
     });
 
     test('DurationResponse serializes to JSON', () {
-      final response = DurationResponse(duration: '100ms');
+      const response = DurationResponse(duration: '100ms');
 
       final json = response.toJson();
 
@@ -88,11 +88,13 @@ void main() {
     Map<String, dynamic> minimalUserJson({
       required Map<String, dynamic> custom,
     }) => {
+      'banned': false,
       'blocked_user_ids': <dynamic>[],
       'created_at': '2024-01-01T00:00:00.000Z',
       'custom': custom,
       'id': 'user-1',
       'language': 'en',
+      'online': false,
       'role': 'admin',
       'teams': <dynamic>[],
       'updated_at': '2024-01-01T00:00:00.000Z',
@@ -107,7 +109,7 @@ void main() {
         },
       );
 
-      final result = UserResponse.fromJson(json)!;
+      final result = UserResponse.fromJson(json);
 
       expect(() => result.custom.values.toList(), returnsNormally);
       expect(result.custom.values, contains(isNull));
@@ -121,7 +123,7 @@ void main() {
         },
       );
 
-      final result = UserResponse.fromJson(json)!;
+      final result = UserResponse.fromJson(json);
 
       expect(() => result.custom.entries.toList(), returnsNormally);
       expect(result.custom.entries.length, 2);
@@ -139,7 +141,7 @@ void main() {
         },
       );
 
-      final result = CallUpdatedEvent.fromJson(json)!;
+      final result = CallUpdatedEvent.fromJson(json);
 
       expect(result.capabilitiesByRole, isA<Map<String, List<String>>>());
       expect(result.capabilitiesByRole['admin'], hasLength(3));
@@ -162,7 +164,7 @@ void main() {
           returnsNormally,
         );
 
-        final result = CallUpdatedEvent.fromJson(json)!;
+        final result = CallUpdatedEvent.fromJson(json);
         expect(result.capabilitiesByRole['admin'], ['send-audio']);
         expect(
           result.capabilitiesByRole.containsKey('broken_role'),
@@ -191,7 +193,7 @@ void main() {
             returnsNormally,
           );
 
-          final result = CallMemberUpdatedPermissionEvent.fromJson(json)!;
+          final result = CallMemberUpdatedPermissionEvent.fromJson(json);
           expect(result.capabilitiesByRole['moderator'], ['mute-users']);
           expect(
             result.capabilitiesByRole.containsKey('broken_role'),
@@ -211,11 +213,11 @@ void main() {
         'mode': 'disabled',
       };
 
-      final result = TranscriptionSettingsResponse.fromJson(json)!;
+      final result = TranscriptionSettingsResponse.fromJson(json);
 
       expect(
         result.language,
-        TranscriptionSettingsResponseLanguageEnum.auto,
+        TranscriptionSettingsResponseLanguage.auto,
       );
     });
 
@@ -226,11 +228,11 @@ void main() {
         'mode': 'available',
       };
 
-      final result = TranscriptionSettingsResponse.fromJson(json)!;
+      final result = TranscriptionSettingsResponse.fromJson(json);
 
       expect(
         result.language,
-        TranscriptionSettingsResponseLanguageEnum.en,
+        TranscriptionSettingsResponseLanguage.en,
       );
     });
 
@@ -241,11 +243,11 @@ void main() {
         'mode': 'disabled',
       };
 
-      final result = TranscriptionSettingsResponse.fromJson(json)!;
+      final result = TranscriptionSettingsResponse.fromJson(json);
 
       expect(
         result.language,
-        TranscriptionSettingsResponseLanguageEnum.auto,
+        TranscriptionSettingsResponseLanguage.auto,
       );
     });
   });
@@ -268,13 +270,13 @@ void main() {
         'metrics_order': ['jitter', 'bitrate'],
       };
 
-      final result = ParticipantSeriesTrackMetrics.fromJson(json)!;
+      final result = ParticipantSeriesTrackMetrics.fromJson(json);
 
       expect(result.metrics, isA<Map<String, List<List<double>>>>());
-      expect(result.metrics['jitter'], hasLength(2));
-      expect(result.metrics['jitter']![0], [1.5, 2.0, 3.5]);
-      expect(result.metrics['jitter']![1], [4.0, 5.5, 6.0]);
-      expect(result.metrics['bitrate']![0], [100.0, 200.0]);
+      expect(result.metrics!['jitter'], hasLength(2));
+      expect(result.metrics!['jitter']![0], [1.5, 2.0, 3.5]);
+      expect(result.metrics!['jitter']![1], [4.0, 5.5, 6.0]);
+      expect(result.metrics!['bitrate']![0], [100.0, 200.0]);
     });
 
     test('metrics with integer values are converted to double', () {
@@ -289,21 +291,21 @@ void main() {
         'metrics_order': ['fps'],
       };
 
-      final result = ParticipantSeriesTrackMetrics.fromJson(json)!;
+      final result = ParticipantSeriesTrackMetrics.fromJson(json);
 
-      expect(result.metrics['fps']![0], isA<List<double>>());
-      expect(result.metrics['fps']![0], [30.0, 60.0, 24.0]);
+      expect(result.metrics!['fps']![0], isA<List<double>>());
+      expect(result.metrics!['fps']![0], [30.0, 60.0, 24.0]);
     });
 
-    test('null metrics produces empty map', () {
+    test('null metrics produces null map', () {
       final json = {
         'track_id': 'track-3',
         'metrics': null,
       };
 
-      final result = ParticipantSeriesTrackMetrics.fromJson(json)!;
+      final result = ParticipantSeriesTrackMetrics.fromJson(json);
 
-      expect(result.metrics, isEmpty);
+      expect(result.metrics, isNull);
     });
   });
 
@@ -321,11 +323,11 @@ void main() {
         'global_metrics_order': ['packet_loss'],
       };
 
-      final result = ParticipantSeriesPublisherStats.fromJson(json)!;
+      final result = ParticipantSeriesPublisherStats.fromJson(json);
 
       expect(result.global, isA<Map<String, List<List<double>>>>());
-      expect(result.global['packet_loss']![0], [0.1, 0.2]);
-      expect(result.global['packet_loss']![1], [0.3, 0.4]);
+      expect(result.global!['packet_loss']![0], [0.1, 0.2]);
+      expect(result.global!['packet_loss']![1], [0.3, 0.4]);
     });
 
     test('global with integer values converts to double', () {
@@ -339,9 +341,9 @@ void main() {
         'global_metrics_order': ['rtt'],
       };
 
-      final result = ParticipantSeriesPublisherStats.fromJson(json)!;
+      final result = ParticipantSeriesPublisherStats.fromJson(json);
 
-      expect(result.global['rtt']![0], [10.0, 20.0, 30.0]);
+      expect(result.global!['rtt']![0], [10.0, 20.0, 30.0]);
     });
   });
 
@@ -359,10 +361,10 @@ void main() {
         'subscriptions': <dynamic>[],
       };
 
-      final result = ParticipantSeriesSubscriberStats.fromJson(json)!;
+      final result = ParticipantSeriesSubscriberStats.fromJson(json);
 
       expect(result.global, isA<Map<String, List<List<double>>>>());
-      expect(result.global['latency']![0], [50.0, 55.0]);
+      expect(result.global!['latency']![0], [50.0, 55.0]);
     });
   });
 
@@ -379,10 +381,10 @@ void main() {
         'metrics_order': ['cpu_usage'],
       };
 
-      final result = ParticipantSeriesUserStats.fromJson(json)!;
+      final result = ParticipantSeriesUserStats.fromJson(json);
 
       expect(result.metrics, isA<Map<String, List<List<double>>>>());
-      expect(result.metrics['cpu_usage']![0], [0.5, 0.6, 0.7]);
+      expect(result.metrics!['cpu_usage']![0], [0.5, 0.6, 0.7]);
     });
 
     test('mixed int/double values are all converted to double', () {
@@ -396,25 +398,10 @@ void main() {
         'metrics_order': ['memory'],
       };
 
-      final result = ParticipantSeriesUserStats.fromJson(json)!;
+      final result = ParticipantSeriesUserStats.fromJson(json);
 
-      expect(result.metrics['memory']![0], isA<List<double>>());
-      expect(result.metrics['memory']![0], [512.0, 1024.5, 2048.0]);
-    });
-  });
-
-  // ApiClient: DurationResponse registered in the deserialize type map
-  group('ApiClient – DurationResponse registered', () {
-    test('ApiClient can deserialize DurationResponse by type name', () {
-      final client = ApiClient();
-      final result = client.deserialize(
-        '{"duration":"50ms"}',
-        'DurationResponse',
-        growable: true,
-      );
-
-      expect(result, isA<DurationResponse>());
-      expect((result as DurationResponse).duration, '50ms');
+      expect(result.metrics!['memory']![0], isA<List<double>>());
+      expect(result.metrics!['memory']![0], [512.0, 1024.5, 2048.0]);
     });
   });
 }
@@ -472,11 +459,13 @@ Map<String, dynamic> _minimalCallResponseJson() => {
 };
 
 Map<String, dynamic> _minimalUserResponseJson() => {
+  'banned': false,
   'blocked_user_ids': <dynamic>[],
   'created_at': '2024-01-01T00:00:00.000Z',
   'custom': <String, dynamic>{},
   'id': 'user-fixture',
   'language': 'en',
+  'online': false,
   'role': 'user',
   'teams': <dynamic>[],
   'updated_at': '2024-01-01T00:00:00.000Z',

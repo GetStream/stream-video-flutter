@@ -1,7 +1,5 @@
 // ignore_for_file: must_be_immutable
 
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/session/call_session.dart';
@@ -16,7 +14,12 @@ import '../../../test_helpers.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
-class MockRtcManager extends Mock implements RtcManager {}
+class MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
 
 /// Minimal [RtcTrack] implementation that records which lifecycle methods were
 /// called without requiring a real native media stack.
@@ -149,7 +152,7 @@ CallSession _buildTestSession({
     onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded ?? (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),
-    statsOptions: StatsOptions(
+    statsOptions: const StatsOptions(
       enableRtcStats: false,
       reportingIntervalMs: 500,
     ),

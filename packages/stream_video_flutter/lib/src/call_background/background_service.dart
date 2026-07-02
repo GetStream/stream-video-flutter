@@ -429,7 +429,7 @@ class StreamBackgroundService {
 }
 
 NotificationOptions _callDefaultOptions(Call call) {
-  final participants = call.state.valueOrNull?.callParticipants ?? [];
+  final participants = call.state.value.callParticipants;
   final participantUserIds = participants.map((p) => p.userId).join(', ');
 
   final notificationContent = NotificationContent(

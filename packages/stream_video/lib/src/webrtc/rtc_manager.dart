@@ -9,7 +9,6 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../stream_video.dart';
 import '../call/state/call_state_notifier.dart';
-import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
@@ -160,11 +159,11 @@ class RtcManager extends Disposable {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
       return publisher?.addIceCandidate(candidate) ??
-          Result.error('no publisher created');
+          failureWithError('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
       return subscriber.addIceCandidate(candidate);
     }
-    return Result.error('unexpected peerType: $peerType');
+    return failureWithError('unexpected peerType: $peerType');
   }
 
   void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
@@ -712,7 +711,7 @@ extension PublisherRtcManager on RtcManager {
     if (track is RtcLocalAudioTrack) return publishAudioTrack(track: track);
     if (track is RtcLocalVideoTrack) return publishVideoTrack(track: track);
 
-    return Result.error('Unsupported track type: ${track.runtimeType}');
+    return Result.failure('Unsupported track type: ${track.runtimeType}');
   }
 
   Future<Result<RtcLocalAudioTrack>> publishAudioTrack({
@@ -817,7 +816,7 @@ extension PublisherRtcManager on RtcManager {
         () =>
             '[publishVideoTrack] No publish options found for track type: ${videoTrack.trackType}',
       );
-      return Result.error(
+      return failureWithError(
         'No publish options found for track type: ${videoTrack.trackType}',
       );
     }
@@ -929,7 +928,9 @@ extension PublisherRtcManager on RtcManager {
     RtcTrackPublishOptions trackPublishOptions,
   ) async {
     if (publisher == null) {
-      return Result.error('Publisher is not created, cannot add transceiver');
+      return failureWithError(
+        'Publisher is not created, cannot add transceiver',
+      );
     }
 
     Result<rtc.RTCRtpTransceiver>? transceiverResult;
@@ -968,7 +969,7 @@ extension PublisherRtcManager on RtcManager {
         degradationPreference: publishOptions.degradationPreference,
       );
     } else {
-      return Result.error('Unsupported track type: ${track.runtimeType}');
+      return failureWithError('Unsupported track type: ${track.runtimeType}');
     }
 
     // Return early if the transceiver could not be added.
@@ -1044,12 +1045,12 @@ extension PublisherRtcManager on RtcManager {
 
     if (originalTrack == null) {
       _logger.w(() => 'muteTrack: track not found');
-      return Result.error('Track not found');
+      return failureWithError('Track not found');
     }
 
     if (originalTrack is! RtcLocalTrack) {
       _logger.w(() => 'muteTrack: track is not local');
-      return Result.error('Track is not local');
+      return failureWithError('Track is not local');
     }
 
     final track = originalTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
@@ -1069,12 +1070,12 @@ extension PublisherRtcManager on RtcManager {
     final track = tracks[trackId];
     if (track == null) {
       _logger.w(() => 'unmuteTrack: track not found');
-      return Result.error('Track not found');
+      return failureWithError('Track not found');
     }
 
     if (track is! RtcLocalTrack) {
       _logger.w(() => 'unmuteTrack: track is not local');
-      return Result.error('Track is not local');
+      return failureWithError('Track is not local');
     }
 
     // If the track was released before, restart it.
@@ -1118,7 +1119,7 @@ extension PublisherRtcManager on RtcManager {
     _logger.d(() => '[createAudioTrack] constraints: ${constraints?.toMap()}');
 
     if (publisher == null || publisherId == null) {
-      return Result.error(
+      return failureWithError(
         'Publisher is not created, cannot create audio track',
       );
     }
@@ -1144,7 +1145,7 @@ extension PublisherRtcManager on RtcManager {
     _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
 
     if (publisher == null || publisherId == null) {
-      return Result.error(
+      return failureWithError(
         'Publisher is not created, cannot create camera track',
       );
     }
@@ -1172,7 +1173,7 @@ extension PublisherRtcManager on RtcManager {
     );
 
     if (publisher == null || publisherId == null) {
-      return Result.error(
+      return failureWithError(
         'Publisher is not created, cannot create screen share track',
       );
     }
@@ -1198,11 +1199,11 @@ extension PublisherRtcManager on RtcManager {
     _logger.d(() => '[setTrackFacingMode] facingMode: $facingMode');
 
     final track = getPublisherTrackByType(SfuTrackType.video);
-    if (track == null) return Result.error('Track not found');
+    if (track == null) return failureWithError('Track not found');
 
     if (track is! RtcLocalCameraTrack) {
       _logger.w(() => '[setTrackFacingMode] rejected (track is not camera)');
-      return Result.error('Track is not camera');
+      return failureWithError('Track is not camera');
     }
 
     final transceivers = transceiversManager
@@ -1227,14 +1228,14 @@ extension PublisherRtcManager on RtcManager {
 
     if (track == null) {
       _logger.w(() => '[setCameraVideoParameters] rejected (track not found)');
-      return Result.error('Track not found');
+      return failureWithError('Track not found');
     }
 
     if (track is! RtcLocalCameraTrack) {
       _logger.w(
         () => '[setCameraVideoParameters] rejected (track is not camera)',
       );
-      return Result.error('Track is not camera');
+      return failureWithError('Track is not camera');
     }
 
     final transceivers = transceiversManager
@@ -1259,18 +1260,18 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> flipCamera() async {
     if (CurrentPlatform.isWeb) {
       _logger.e(() => '[switchCamera] rejected (not supported on web)');
-      return Result.error('Not supported on web');
+      return failureWithError('Not supported on web');
     }
 
     final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.e(() => '[switchCamera] rejected (track is null)');
-      return Result.error('Track is null');
+      return failureWithError('Track is null');
     }
 
     if (track is! RtcLocalCameraTrack) {
       _logger.e(() => '[switchCamera] rejected (track is not camera)');
-      return Result.error('Track is not camera');
+      return failureWithError('Track is not camera');
     }
 
     track.disable();
@@ -1292,12 +1293,12 @@ extension RtcManagerTrackHelper on RtcManager {
     final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
-      return Result.error('Track is null');
+      return failureWithError('Track is null');
     }
 
     if (track is! RtcLocalCameraTrack) {
       _logger.w(() => '[setCameraDeviceId] rejected (track is not camera)');
-      return Result.error('Track is not camera');
+      return failureWithError('Track is not camera');
     }
 
     final transceivers = transceiversManager
@@ -1316,15 +1317,15 @@ extension RtcManagerTrackHelper on RtcManager {
     final track = getPublisherTrackByType(SfuTrackType.audio);
     if (track == null) {
       _logger.d(() => '[setMicrophoneDeviceId] rejected (track is null)');
-      return Result.errorWithCause(
+      return failureWithError(
         'Track is null',
-        TrackMissingException(trackType: SfuTrackType.audio),
+        cause: TrackMissingException(trackType: SfuTrackType.audio),
       );
     }
 
     if (track is! RtcLocalAudioTrack) {
       _logger.w(() => '[setMicrophoneDeviceId] rejected (track is not audio)');
-      return Result.error('Track is not audio');
+      return failureWithError('Track is not audio');
     }
 
     final transceivers = transceiversManager
@@ -1353,7 +1354,7 @@ extension RtcManagerTrackHelper on RtcManager {
           () =>
               '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
         );
-        return Result.error(
+        return failureWithError(
           'Audio Output device change is not supported on this browser.',
         );
       }
@@ -1369,7 +1370,7 @@ extension RtcManagerTrackHelper on RtcManager {
     try {
       if (CurrentPlatform.isIos &&
           device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+            AudioSettingsRequestDefaultDevice.speaker.name,
           )) {
         await setAppleAudioConfiguration(
           speakerOn: true,
@@ -1496,7 +1497,7 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     // Track not found and enabled is false, return error.
-    return Result.error('Track not found and enabled is false');
+    return failureWithError('Track not found and enabled is false');
   }
 
   Future<RtcLocalTrack> _toggleTrackMuteState({
@@ -1541,14 +1542,14 @@ extension RtcManagerTrackHelper on RtcManager {
         final errorMessage =
             'Invalid media constraints type ${constraints.runtimeType}, $CameraConstraints expected';
         _logger.e(() => errorMessage);
-        return Result.error(errorMessage);
+        return failureWithError(errorMessage);
       }
 
       final cameraTrackResult = await createCameraTrack(
         constraints:
             (constraints ?? const CameraConstraints()) as CameraConstraints,
       );
-      return cameraTrackResult.fold(
+      return cameraTrackResult.foldResult(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
       );
@@ -1557,14 +1558,14 @@ extension RtcManagerTrackHelper on RtcManager {
         final errorMessage =
             'Invalid media constraints type ${constraints.runtimeType}, $AudioConstraints expected';
         _logger.e(() => errorMessage);
-        return Result.error(errorMessage);
+        return failureWithError(errorMessage);
       }
 
       final audioTrackResult = await createAudioTrack(
         constraints:
             (constraints ?? _defaultAudioConstraints) as AudioConstraints,
       );
-      return audioTrackResult.fold(
+      return audioTrackResult.foldResult(
         success: (it) => publishAudioTrack(track: it.data),
         failure: (it) => it,
       );
@@ -1573,7 +1574,7 @@ extension RtcManagerTrackHelper on RtcManager {
         final errorMessage =
             'Invalid media constraints type ${constraints.runtimeType}, $ScreenShareConstraints expected';
         _logger.e(() => errorMessage);
-        return Result.error(errorMessage);
+        return failureWithError(errorMessage);
       }
 
       final screenShareTrackResult = await createScreenShareTrack(
@@ -1582,14 +1583,14 @@ extension RtcManagerTrackHelper on RtcManager {
                 as ScreenShareConstraints,
       );
 
-      return screenShareTrackResult.fold(
+      return screenShareTrackResult.foldResult(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
       );
     }
 
     _logger.e(() => 'Unsupported trackType $trackType');
-    return Result.error('Unsupported trackType $trackType');
+    return failureWithError('Unsupported trackType $trackType');
   }
 
   Future<T> awaitNativeWebRtcEvent<T extends NativeWebRtcEvent>() {

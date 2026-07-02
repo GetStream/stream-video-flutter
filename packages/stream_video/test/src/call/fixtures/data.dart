@@ -77,7 +77,7 @@ class SampleCallData {
     members: const {},
     users: const {},
     duration: '0',
-    statsOptions: StatsOptions(
+    statsOptions: const StatsOptions(
       enableRtcStats: true,
       reportingIntervalMs: 5000,
     ),

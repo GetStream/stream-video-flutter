@@ -5,8 +5,7 @@ import 'package:system_info2/system_info2.dart';
 
 import '../globals.dart'
     show androidWebRTCVersion, iosWebRTCVersion, streamVideoVersion;
-import 'logger/stream_log.dart';
-import 'platform_detector/platform_detector.dart';
+import '../stream_video.dart';
 import 'video_environment.dart';
 
 const _tag = 'SV:EnvCollector';
@@ -88,7 +87,7 @@ class VideoEnvironmentCollector {
 
       return VideoEnvironment(
         sdkVersion: streamVideoVersion,
-        osName: CurrentPlatform.name,
+        osName: CurrentPlatform.operatingSystem,
         appName: appName,
         appVersion: appVersion,
         osVersion: osVersion,
@@ -106,7 +105,7 @@ class VideoEnvironmentCollector {
       );
       return VideoEnvironment(
         sdkVersion: streamVideoVersion,
-        osName: CurrentPlatform.name,
+        osName: CurrentPlatform.operatingSystem,
       );
     }
   }

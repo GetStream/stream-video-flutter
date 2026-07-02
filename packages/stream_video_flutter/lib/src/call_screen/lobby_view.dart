@@ -116,9 +116,9 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     _fetchSubscription?.cancel();
     _fetchSubscription = widget.call.getOrCreate().asStream().listen((result) {
       result.fold(
-        success: (it) {
-          _logger.v(() => '[fetchCall] completed: ${it.data}');
-          final metadata = it.data.data.metadata;
+        onSuccess: (callData) {
+          _logger.v(() => '[fetchCall] completed: $callData');
+          final metadata = callData.data.metadata;
 
           setState(() {
             _users = metadata.users;
@@ -128,8 +128,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                 .toList();
           });
         },
-        failure: (it) {
-          _logger.e(() => '[fetchCall] failed: ${it.error}');
+        onFailure: (error, stackTrace) {
+          _logger.e(() => '[fetchCall] failed: $error');
         },
       );
     });

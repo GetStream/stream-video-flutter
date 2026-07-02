@@ -4,6 +4,11 @@
 
 - Increased minimum Flutter version to 3.38.0.
 
+## ⚠️ Breaking
+
+- The `Sort` and `Filter` typedefs in `call_participants.dart` have been renamed to `CallParticipantSort` and `CallParticipantFilter` respectively.
+
+
 ## 1.4.1
 
 ### 🐞 Fixed

@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
-
-import '../../utils/standard.dart';
-import '../stream_logger.dart';
+import 'package:stream_core/stream_core.dart';
 
 const String _tag = 'SV:FileLogger';
 const int _defaultSize = 12 * 1024 * 1024;

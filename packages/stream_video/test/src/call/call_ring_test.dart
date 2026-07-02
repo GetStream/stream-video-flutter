@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/open_api/video/coordinator/api.dart' as open;
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/errors/video_error.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -26,14 +25,14 @@ void main() {
   Future<
     ({
       Call call,
-      MutableSharedEmitterImpl<CoordinatorEvent> events,
+      MutableSharedEmitter<CoordinatorEvent> events,
       MockCoordinatorClient coordinatorClient,
     })
   >
   setupOngoingCall({
     Map<String, CallMember>? members,
   }) async {
-    final coordinatorEvents = MutableSharedEmitterImpl<CoordinatorEvent>();
+    final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
 
     final currentUser = SampleCallData.defaultCallUser;
     final effectiveMembers =
@@ -172,7 +171,7 @@ void main() {
         final result = await setup.call.ring(userIds: ['user1']);
 
         expect(result.isFailure, isTrue);
-        expect((result as Failure).error.message, equals('ring failed'));
+        expect((result as Failure).videoError.message, equals('ring failed'));
       },
     );
 

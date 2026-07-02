@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
+import 'package:stream_core/stream_core.dart';
 
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
-import '../../state_emitter.dart';
 import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
@@ -25,7 +25,7 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateSfuMixin,
         StateCallActionsMixin {
   CallStateNotifier(CallState initialState) : super(initialState) {
-    callStateStream = MutableStateEmitterImpl<CallState>(
+    callStateStream = MutableStateEmitter<CallState>(
       initialState,
       sync: true,
     );
@@ -35,11 +35,11 @@ class CallStateNotifier extends StateNotifier<CallState>
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
 
-  late final MutableStateEmitterImpl<CallState> callStateStream;
+  late final MutableStateEmitter<CallState> callStateStream;
   CallState get callState => callStateStream.value;
 
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
-    return callStateStream.valueStream
+    return callStateStream
         .map(selector)
         .distinct(
           (previous, current) =>

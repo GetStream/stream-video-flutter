@@ -18,11 +18,11 @@ class UserAuthRepository {
     final response = await videoClient.connect();
 
     return response.fold(
-      success: (success) {
-        return UserCredentials(token: success.data, userInfo: currentUser);
+      onSuccess: (success) {
+        return UserCredentials(token: success, userInfo: currentUser);
       },
-      failure: (failure) {
-        throw failure.error;
+      onFailure: (error, stackTrace) {
+        throw error.toVideoError(stackTrace);
       },
     );
   }

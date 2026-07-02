@@ -5,18 +5,13 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 
 import '../../../globals.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
+import '../../../stream_video.dart';
 import '../../core/network_monitor_flutter.dart';
 import '../../core/video_error.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/user_info.dart';
-import '../../retry/retry_policy.dart';
-import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
 import '../../ws/health/health_monitor.dart';
 import '../../ws/ws.dart';
-import '../models/coordinator_events.dart';
+import '../models/healh_check_event.dart';
 import 'error/open_api_error.dart';
 import 'error/open_api_error_code.dart';
 import 'event/open_api_event.dart';
@@ -92,7 +87,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   bool _refreshToken = false;
 
   SharedEmitter<CoordinatorEvent> get events => _events;
-  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
+  final _events = MutableSharedEmitter<CoordinatorEvent>();
 
   String? userId;
   String? connectionId;
@@ -250,7 +245,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     }
   }
 
-  void _handleApiError(open.APIError apiError) {
+  void _handleApiError(open.StreamApiError apiError) {
     if (OpenApiErrorCode.tokenRelated.contains(apiError.code)) {
       _logger.i(() => '[handleApiError] token related error: ${apiError.code}');
       _refreshToken = true;
@@ -267,7 +262,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     connectionId ??= event.connectionId;
   }
 
-  void _handleHealthCheckEvent(open.HealthCheckEvent event) {
+  void _handleHealthCheckEvent(HealthCheckEvent event) {
     _logger.i(() => '[handleHealthCheckEvent] no args');
     healthMonitor.onPongReceived();
   }

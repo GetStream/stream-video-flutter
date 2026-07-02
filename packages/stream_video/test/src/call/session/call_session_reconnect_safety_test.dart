@@ -1,3 +1,5 @@
+// ignore_for_file: missing_override_of_must_be_overridden
+
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -56,7 +58,7 @@ CallSession _buildTestSession({
     onSuspendedAudioTrackRecorded: (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),
-    statsOptions: StatsOptions(
+    statsOptions: const StatsOptions(
       enableRtcStats: false,
       reportingIntervalMs: 500,
     ),

@@ -27,7 +27,7 @@ class AndroidPipOverlay extends StatefulWidget {
   final Call call;
   final PictureInPictureConfiguration? pictureInPictureConfiguration;
   @Deprecated('Use [pictureInPictureConfiguration.sort] instead')
-  final Sort<CallParticipantState>? sort;
+  final CallParticipantSort<CallParticipantState>? sort;
   @Deprecated(
     'Use [pictureInPictureConfiguration.androidPiPConfiguration.customBuilder] instead',
   )
@@ -42,10 +42,10 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
   StreamSubscription<List<CallParticipantState>?>? _participantsSubscription;
 
   @override
-  Filter<CallParticipantState>? get participantFilter => null;
+  CallParticipantFilter<CallParticipantState>? get participantFilter => null;
 
   @override
-  Sort<CallParticipantState>? get participantSort =>
+  CallParticipantSort<CallParticipantState> get participantSort =>
       widget.pictureInPictureConfiguration?.sort ??
       widget.sort ??
       CallParticipantSortingPresets.pictureInPicture;

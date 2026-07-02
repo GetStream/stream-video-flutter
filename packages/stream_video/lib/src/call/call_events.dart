@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:stream_core/stream_core.dart';
 
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -11,7 +12,6 @@ import '../sfu/data/models/sfu_connection_info.dart';
 import '../sfu/data/models/sfu_pin.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/sfu_extensions.dart';
-import '../shared_emitter.dart';
 
 abstract class StreamCallEvent extends Equatable {
   const StreamCallEvent(this.callCid);
@@ -979,7 +979,7 @@ class StreamCallModerationBlurEvent extends StreamCallEvent {
   final String userId;
 
   /// Custom data associated with the moderation action
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
 
   @override
   List<Object?> get props => [
@@ -1009,7 +1009,7 @@ class StreamCallModerationWarningEvent extends StreamCallEvent {
   final String message;
 
   /// Custom data associated with the moderation action
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
 
   @override
   List<Object?> get props => [
@@ -1177,7 +1177,7 @@ class StreamCallUserFeedbackSubmittedEvent extends StreamCallEvent {
   final String? sdk;
   final String? sdkVersion;
   final CallUser user;
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
 
   @override
   List<Object?> get props => [
@@ -1390,7 +1390,7 @@ class StreamCallReactionEvent extends StreamCallEvent {
   final String reactionType;
   final String? emojiCode;
   final CallUser user;
-  final Map<String, Object>? custom;
+  final Map<String, Object?>? custom;
 
   @override
   List<Object?> get props => [
@@ -1414,7 +1414,7 @@ class StreamCallCustomEvent extends StreamCallEvent {
   final String senderUserId;
   final DateTime createdAt;
   final String eventType;
-  final Map<String, Object>? custom;
+  final Map<String, Object?>? custom;
   final Map<String, CallUser> users;
 
   @override
@@ -1830,7 +1830,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           sdk: event.sdk,
           sdkVersion: event.sdkVersion,
           user: event.user,
-          custom: event.custom,
+          custom: event.custom ?? const <String, Object?>{},
         ),
       final CoordinatorCallTranscriptionReadyEvent event =>
         StreamCallTranscriptionReadyEvent(

@@ -14,8 +14,6 @@ import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
-import 'package:stream_video/src/shared_emitter.dart';
-import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
 import 'package:stream_video/stream_video.dart';
@@ -33,7 +31,7 @@ void registerMockFallbackValues() {
   );
   registerFallbackValue(InternetConnection());
   registerFallbackValue(
-    StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
+    const StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
   );
   registerFallbackValue(SfuReconnectionStrategy.fast);
   registerFallbackValue(SampleCallData.defaultMediaDevice);
@@ -119,11 +117,11 @@ CallState createTestCallState({
 }
 
 MockCallStateNotifier createTestCallStateManager({
-  MutableStateEmitterImpl<CallState>? callState,
+  MutableStateEmitter<CallState>? callState,
 }) {
   final callStateStream =
       callState ??
-      MutableStateEmitterImpl<CallState>(createTestCallState(), sync: true);
+      MutableStateEmitter<CallState>(createTestCallState(), sync: true);
 
   final stateManager = MockCallStateNotifier();
 
@@ -139,15 +137,15 @@ MockCallStateNotifier createTestCallStateManager({
 }
 
 MockClientState setupMockClientState() {
-  final userStateEmitter = MutableStateEmitterImpl<User>(
+  final userStateEmitter = MutableStateEmitter<User>(
     User(info: SampleCallData.defaultUserInfo),
     sync: true,
   );
-  final activeCallsEmitter = MutableStateEmitterImpl<List<Call>>(
+  final activeCallsEmitter = MutableStateEmitter<List<Call>>(
     [],
     sync: true,
   );
-  final outgoingCallEmitter = MutableStateEmitterImpl<Call?>(null, sync: true);
+  final outgoingCallEmitter = MutableStateEmitter<Call?>(null, sync: true);
 
   final clientState = MockClientState();
   when(() => clientState.user).thenAnswer((_) => userStateEmitter);
@@ -188,7 +186,7 @@ MockCoordinatorClient setupMockCoordinatorClient({
 }) {
   final coordinatorClient = MockCoordinatorClient();
   final coordinatorEventStream =
-      events ?? MutableSharedEmitterImpl<CoordinatorEvent>();
+      events ?? MutableSharedEmitter<CoordinatorEvent>();
   when(() => coordinatorClient.events).thenAnswer(
     (_) => coordinatorEventStream,
   );
@@ -299,8 +297,8 @@ MockCallSession setupMockCallSession() {
 
   when(() => callSession.sfuClient).thenReturn(sfuClient);
   when(() => callSession.sessionId).thenReturn('test-session-id');
-  final callSessionEvents = MutableSharedEmitterImpl<SfuEvent>();
-  when(() => callSession.events).thenReturn(callSessionEvents);
+  final callSessionEvents = MutableSharedEmitter<SfuEvent>();
+  when(() => callSession.events).thenAnswer((_) => callSessionEvents);
   when(() => callSession.config).thenReturn(
     CallSessionConfig(
       sfuName: SampleCallData.defaultCredentials.sfuServer.name,
