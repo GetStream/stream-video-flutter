@@ -21,7 +21,7 @@ class ChatReactionGroupResponse with _$ChatReactionGroupResponse {
     required this.count,
     required this.firstReactionAt,
     required this.lastReactionAt,
-    required this.latestReactionsBy,
+    this.latestReactionsBy = const [],
     required this.sumScores,
   });
 

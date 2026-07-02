@@ -18,7 +18,7 @@ part 'upsert_push_preferences_request.freezed.dart';
 @JsonSerializable()
 class UpsertPushPreferencesRequest with _$UpsertPushPreferencesRequest {
   const UpsertPushPreferencesRequest({
-    required this.preferences,
+    this.preferences = const [],
   });
 
   @override

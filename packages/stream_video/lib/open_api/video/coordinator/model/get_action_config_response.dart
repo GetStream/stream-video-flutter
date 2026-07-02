@@ -18,7 +18,7 @@ part 'get_action_config_response.freezed.dart';
 @JsonSerializable()
 class GetActionConfigResponse with _$GetActionConfigResponse {
   const GetActionConfigResponse({
-    required this.actionConfig,
+    this.actionConfig = const {},
     required this.duration,
   });
 

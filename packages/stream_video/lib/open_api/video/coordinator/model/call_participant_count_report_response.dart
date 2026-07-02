@@ -19,7 +19,7 @@ part 'call_participant_count_report_response.freezed.dart';
 class CallParticipantCountReportResponse
     with _$CallParticipantCountReportResponse {
   const CallParticipantCountReportResponse({
-    required this.daily,
+    this.daily = const [],
   });
 
   @override

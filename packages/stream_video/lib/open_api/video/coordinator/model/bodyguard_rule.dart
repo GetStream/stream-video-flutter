@@ -44,7 +44,7 @@ class BodyguardRule with _$BodyguardRule {
   const BodyguardRule({
     required this.action,
     required this.label,
-    required this.severityRules,
+    this.severityRules = const [],
   });
 
   @override

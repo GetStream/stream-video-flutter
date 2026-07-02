@@ -21,7 +21,7 @@ class AutomodPlatformCircumventionConfig
   const AutomodPlatformCircumventionConfig({
     this.async,
     required this.enabled,
-    required this.rules,
+    this.rules = const [],
   });
 
   @override

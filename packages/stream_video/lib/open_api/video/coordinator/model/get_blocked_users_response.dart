@@ -18,7 +18,7 @@ part 'get_blocked_users_response.freezed.dart';
 @JsonSerializable()
 class GetBlockedUsersResponse with _$GetBlockedUsersResponse {
   const GetBlockedUsersResponse({
-    required this.blocks,
+    this.blocks = const [],
     required this.duration,
   });
 

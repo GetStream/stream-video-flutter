@@ -19,7 +19,7 @@ part 'query_users_response.freezed.dart';
 class QueryUsersResponse with _$QueryUsersResponse {
   const QueryUsersResponse({
     required this.duration,
-    required this.users,
+    this.users = const [],
   });
 
   @override

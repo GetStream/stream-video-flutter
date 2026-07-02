@@ -21,7 +21,7 @@ class ReactionGroupResponse with _$ReactionGroupResponse {
     required this.count,
     required this.firstReactionAt,
     required this.lastReactionAt,
-    required this.latestReactionsBy,
+    this.latestReactionsBy = const [],
   });
 
   @override

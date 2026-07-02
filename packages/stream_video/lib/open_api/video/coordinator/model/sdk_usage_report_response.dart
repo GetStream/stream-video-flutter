@@ -18,7 +18,7 @@ part 'sdk_usage_report_response.freezed.dart';
 @JsonSerializable()
 class SDKUsageReportResponse with _$SDKUsageReportResponse {
   const SDKUsageReportResponse({
-    required this.daily,
+    this.daily = const [],
   });
 
   @override

@@ -18,7 +18,7 @@ part 'query_call_session_stats_response.freezed.dart';
 @JsonSerializable()
 class QueryCallSessionStatsResponse with _$QueryCallSessionStatsResponse {
   const QueryCallSessionStatsResponse({
-    required this.callStats,
+    this.callStats = const [],
     required this.duration,
     this.next,
     this.prev,

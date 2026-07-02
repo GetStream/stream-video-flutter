@@ -19,7 +19,7 @@ part 'member_response.freezed.dart';
 class MemberResponse with _$MemberResponse {
   const MemberResponse({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.deletedAt,
     this.role,
     required this.updatedAt,

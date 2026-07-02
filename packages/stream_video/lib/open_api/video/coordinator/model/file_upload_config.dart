@@ -18,10 +18,10 @@ part 'file_upload_config.freezed.dart';
 @JsonSerializable()
 class FileUploadConfig with _$FileUploadConfig {
   const FileUploadConfig({
-    required this.allowedFileExtensions,
-    required this.allowedMimeTypes,
-    required this.blockedFileExtensions,
-    required this.blockedMimeTypes,
+    this.allowedFileExtensions = const [],
+    this.allowedMimeTypes = const [],
+    this.blockedFileExtensions = const [],
+    this.blockedMimeTypes = const [],
     required this.sizeLimit,
   });
 

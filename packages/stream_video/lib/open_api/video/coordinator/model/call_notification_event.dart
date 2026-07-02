@@ -21,7 +21,7 @@ class CallNotificationEvent extends core.WsEvent with _$CallNotificationEvent {
     required this.call,
     required this.callCid,
     required this.createdAt,
-    required this.members,
+    this.members = const [],
     required this.sessionId,
     required this.type,
     required this.user,

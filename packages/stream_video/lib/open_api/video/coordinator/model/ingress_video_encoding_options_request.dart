@@ -19,7 +19,7 @@ part 'ingress_video_encoding_options_request.freezed.dart';
 class IngressVideoEncodingOptionsRequest
     with _$IngressVideoEncodingOptionsRequest {
   const IngressVideoEncodingOptionsRequest({
-    required this.layers,
+    this.layers = const [],
     required this.source,
   });
 

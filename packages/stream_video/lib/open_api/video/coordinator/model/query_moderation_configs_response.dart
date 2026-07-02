@@ -18,7 +18,7 @@ part 'query_moderation_configs_response.freezed.dart';
 @JsonSerializable()
 class QueryModerationConfigsResponse with _$QueryModerationConfigsResponse {
   const QueryModerationConfigsResponse({
-    required this.configs,
+    this.configs = const [],
     required this.duration,
     this.next,
     this.prev,

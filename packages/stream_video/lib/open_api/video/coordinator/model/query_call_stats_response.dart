@@ -21,7 +21,7 @@ class QueryCallStatsResponse with _$QueryCallStatsResponse {
     required this.duration,
     this.next,
     this.prev,
-    required this.reports,
+    this.reports = const [],
   });
 
   @override

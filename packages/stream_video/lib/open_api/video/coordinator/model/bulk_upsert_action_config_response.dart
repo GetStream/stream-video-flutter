@@ -18,7 +18,7 @@ part 'bulk_upsert_action_config_response.freezed.dart';
 @JsonSerializable()
 class BulkUpsertActionConfigResponse with _$BulkUpsertActionConfigResponse {
   const BulkUpsertActionConfigResponse({
-    required this.actionConfigs,
+    this.actionConfigs = const [],
     required this.duration,
   });
 

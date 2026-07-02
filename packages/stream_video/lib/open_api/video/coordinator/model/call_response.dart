@@ -19,14 +19,14 @@ part 'call_response.freezed.dart';
 class CallResponse with _$CallResponse {
   const CallResponse({
     required this.backstage,
-    required this.blockedUserIds,
+    this.blockedUserIds = const [],
     required this.captioning,
     this.channelCid,
     required this.cid,
     required this.createdAt,
     required this.createdBy,
     required this.currentSessionId,
-    required this.custom,
+    this.custom = const {},
     required this.egress,
     this.endedAt,
     required this.id,

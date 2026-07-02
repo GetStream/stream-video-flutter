@@ -19,7 +19,7 @@ part 'update_call_members_response.freezed.dart';
 class UpdateCallMembersResponse with _$UpdateCallMembersResponse {
   const UpdateCallMembersResponse({
     required this.duration,
-    required this.members,
+    this.members = const [],
   });
 
   @override

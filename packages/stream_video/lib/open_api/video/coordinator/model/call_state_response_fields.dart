@@ -19,9 +19,9 @@ part 'call_state_response_fields.freezed.dart';
 class CallStateResponseFields with _$CallStateResponseFields {
   const CallStateResponseFields({
     required this.call,
-    required this.members,
+    this.members = const [],
     this.membership,
-    required this.ownCapabilities,
+    this.ownCapabilities = const [],
   });
 
   @override

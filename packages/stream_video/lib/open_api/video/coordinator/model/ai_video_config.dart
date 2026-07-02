@@ -20,7 +20,7 @@ class AIVideoConfig with _$AIVideoConfig {
   const AIVideoConfig({
     this.async,
     required this.enabled,
-    required this.rules,
+    this.rules = const [],
   });
 
   @override

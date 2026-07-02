@@ -18,11 +18,11 @@ part 'sip_trunk_response.freezed.dart';
 @JsonSerializable()
 class SIPTrunkResponse with _$SIPTrunkResponse {
   const SIPTrunkResponse({
-    required this.allowedIps,
+    this.allowedIps = const [],
     required this.createdAt,
     required this.id,
     required this.name,
-    required this.numbers,
+    this.numbers = const [],
     required this.password,
     required this.updatedAt,
     required this.uri,

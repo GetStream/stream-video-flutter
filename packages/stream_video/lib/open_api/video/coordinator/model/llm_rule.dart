@@ -41,7 +41,7 @@ class LLMRule with _$LLMRule {
     required this.action,
     required this.description,
     required this.label,
-    required this.severityRules,
+    this.severityRules = const [],
   });
 
   @override

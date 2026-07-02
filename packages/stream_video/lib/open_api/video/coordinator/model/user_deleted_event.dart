@@ -19,7 +19,7 @@ part 'user_deleted_event.freezed.dart';
 class UserDeletedEvent extends core.WsEvent with _$UserDeletedEvent {
   const UserDeletedEvent({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.deleteConversation,
     required this.deleteConversationChannels,
     required this.deleteMessages,

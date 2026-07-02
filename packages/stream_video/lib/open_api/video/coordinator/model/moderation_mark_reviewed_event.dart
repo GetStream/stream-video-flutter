@@ -20,7 +20,7 @@ class ModerationMarkReviewedEvent extends core.WsEvent
     with _$ModerationMarkReviewedEvent {
   const ModerationMarkReviewedEvent({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.item,
     this.message,
     this.receivedAt,

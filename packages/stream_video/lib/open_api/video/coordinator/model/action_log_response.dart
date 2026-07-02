@@ -18,9 +18,9 @@ part 'action_log_response.freezed.dart';
 @JsonSerializable()
 class ActionLogResponse with _$ActionLogResponse {
   const ActionLogResponse({
-    required this.aiProviders,
+    this.aiProviders = const [],
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.id,
     required this.reason,
     required this.reporterType,

@@ -33,7 +33,7 @@ class ConfigResponse with _$ConfigResponse {
     this.floodConfig,
     required this.key,
     this.llmConfig,
-    required this.supportedVideoCallHarmTypes,
+    this.supportedVideoCallHarmTypes = const [],
     required this.team,
     required this.updatedAt,
     this.velocityFilterConfig,

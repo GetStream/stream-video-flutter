@@ -18,7 +18,7 @@ part 'start_rtmp_broadcasts_request.freezed.dart';
 @JsonSerializable()
 class StartRTMPBroadcastsRequest with _$StartRTMPBroadcastsRequest {
   const StartRTMPBroadcastsRequest({
-    required this.broadcasts,
+    this.broadcasts = const [],
   });
 
   @override

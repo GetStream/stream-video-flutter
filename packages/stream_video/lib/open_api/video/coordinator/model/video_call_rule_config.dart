@@ -19,8 +19,8 @@ part 'video_call_rule_config.freezed.dart';
 class VideoCallRuleConfig with _$VideoCallRuleConfig {
   const VideoCallRuleConfig({
     required this.flagAllLabels,
-    required this.flaggedLabels,
-    required this.rules,
+    this.flaggedLabels = const [],
+    this.rules = const [],
   });
 
   @override

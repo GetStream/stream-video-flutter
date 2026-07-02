@@ -18,7 +18,7 @@ part 'mute_request.freezed.dart';
 @JsonSerializable()
 class MuteRequest with _$MuteRequest {
   const MuteRequest({
-    required this.targetIds,
+    this.targetIds = const [],
     this.timeout,
   });
 

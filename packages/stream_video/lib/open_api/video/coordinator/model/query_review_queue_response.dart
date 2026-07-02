@@ -18,14 +18,14 @@ part 'query_review_queue_response.freezed.dart';
 @JsonSerializable()
 class QueryReviewQueueResponse with _$QueryReviewQueueResponse {
   const QueryReviewQueueResponse({
-    required this.actionConfig,
+    this.actionConfig = const {},
     this.defaultActionConfig,
     required this.duration,
     this.filterConfig,
-    required this.items,
+    this.items = const [],
     this.next,
     this.prev,
-    required this.stats,
+    this.stats = const {},
   });
 
   @override

@@ -22,9 +22,9 @@ class JoinCallResponse with _$JoinCallResponse {
     required this.created,
     required this.credentials,
     required this.duration,
-    required this.members,
+    this.members = const [],
     this.membership,
-    required this.ownCapabilities,
+    this.ownCapabilities = const [],
     required this.statsOptions,
   });
 

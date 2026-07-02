@@ -21,8 +21,8 @@ class AITextConfig with _$AITextConfig {
     this.async,
     required this.enabled,
     required this.profile,
-    required this.rules,
-    required this.severityRules,
+    this.rules = const [],
+    this.severityRules = const [],
   });
 
   @override

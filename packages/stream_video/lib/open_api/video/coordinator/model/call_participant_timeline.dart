@@ -18,7 +18,7 @@ part 'call_participant_timeline.freezed.dart';
 @JsonSerializable()
 class CallParticipantTimeline with _$CallParticipantTimeline {
   const CallParticipantTimeline({
-    required this.data,
+    this.data = const {},
     required this.severity,
     required this.timestamp,
     required this.type,

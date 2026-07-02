@@ -21,7 +21,7 @@ class CallStatsParticipant with _$CallStatsParticipant {
     this.latestActivityAt,
     this.name,
     this.roles,
-    required this.sessions,
+    this.sessions = const [],
     required this.userId,
   });
 

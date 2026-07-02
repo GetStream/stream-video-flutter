@@ -18,7 +18,7 @@ part 'shared_locations_response.freezed.dart';
 @JsonSerializable()
 class SharedLocationsResponse with _$SharedLocationsResponse {
   const SharedLocationsResponse({
-    required this.activeLiveLocations,
+    this.activeLiveLocations = const [],
     required this.duration,
   });
 

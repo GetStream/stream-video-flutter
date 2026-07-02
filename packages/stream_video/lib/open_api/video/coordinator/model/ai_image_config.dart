@@ -20,8 +20,8 @@ class AIImageConfig with _$AIImageConfig {
   const AIImageConfig({
     this.async,
     required this.enabled,
-    required this.ocrRules,
-    required this.rules,
+    this.ocrRules = const [],
+    this.rules = const [],
   });
 
   @override

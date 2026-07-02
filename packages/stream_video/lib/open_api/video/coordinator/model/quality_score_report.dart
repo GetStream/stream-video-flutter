@@ -18,7 +18,7 @@ part 'quality_score_report.freezed.dart';
 @JsonSerializable()
 class QualityScoreReport with _$QualityScoreReport {
   const QualityScoreReport({
-    required this.histogram,
+    this.histogram = const [],
   });
 
   @override

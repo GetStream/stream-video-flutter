@@ -21,7 +21,7 @@ class PermissionRequestEvent extends core.WsEvent
   const PermissionRequestEvent({
     required this.callCid,
     required this.createdAt,
-    required this.permissions,
+    this.permissions = const [],
     required this.type,
     required this.user,
   });

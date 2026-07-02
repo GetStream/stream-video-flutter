@@ -26,7 +26,7 @@ class ChannelResponse with _$ChannelResponse {
     this.cooldown,
     required this.createdAt,
     this.createdBy,
-    required this.custom,
+    this.custom = const {},
     this.deletedAt,
     required this.disabled,
     this.filterTags,

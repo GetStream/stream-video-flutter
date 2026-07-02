@@ -41,7 +41,7 @@ class CreateBlockListRequest with _$CreateBlockListRequest {
     required this.name,
     this.team,
     this.type,
-    required this.words,
+    this.words = const [],
   });
 
   @override

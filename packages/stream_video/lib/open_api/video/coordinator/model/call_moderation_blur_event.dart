@@ -21,7 +21,7 @@ class CallModerationBlurEvent extends core.WsEvent
   const CallModerationBlurEvent({
     required this.callCid,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.type,
     required this.userId,
   });

@@ -20,7 +20,7 @@ class UpdateUsersResponse with _$UpdateUsersResponse {
   const UpdateUsersResponse({
     required this.duration,
     required this.membershipDeletionTaskId,
-    required this.users,
+    this.users = const {},
   });
 
   @override

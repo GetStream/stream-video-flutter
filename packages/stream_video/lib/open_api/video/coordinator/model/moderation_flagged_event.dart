@@ -21,7 +21,7 @@ class ModerationFlaggedEvent extends core.WsEvent
   const ModerationFlaggedEvent({
     required this.contentType,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.objectId,
     this.receivedAt,
     required this.type,

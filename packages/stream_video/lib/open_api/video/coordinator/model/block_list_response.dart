@@ -26,7 +26,7 @@ class BlockListResponse with _$BlockListResponse {
     this.team,
     required this.type,
     this.updatedAt,
-    required this.words,
+    this.words = const [],
   });
 
   @override

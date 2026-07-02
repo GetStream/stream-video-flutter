@@ -21,7 +21,7 @@ class CallUserMutedEvent extends core.WsEvent with _$CallUserMutedEvent {
     required this.callCid,
     required this.createdAt,
     required this.fromUserId,
-    required this.mutedUserIds,
+    this.mutedUserIds = const [],
     required this.reason,
     required this.type,
   });

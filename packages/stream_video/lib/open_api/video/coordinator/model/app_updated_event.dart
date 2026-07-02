@@ -20,7 +20,7 @@ class AppUpdatedEvent extends core.WsEvent with _$AppUpdatedEvent {
   const AppUpdatedEvent({
     required this.app,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.receivedAt,
     required this.type,
   });

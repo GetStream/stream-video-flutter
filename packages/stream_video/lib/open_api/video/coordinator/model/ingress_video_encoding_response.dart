@@ -18,7 +18,7 @@ part 'ingress_video_encoding_response.freezed.dart';
 @JsonSerializable()
 class IngressVideoEncodingResponse with _$IngressVideoEncodingResponse {
   const IngressVideoEncodingResponse({
-    required this.layers,
+    this.layers = const [],
     required this.source,
   });
 

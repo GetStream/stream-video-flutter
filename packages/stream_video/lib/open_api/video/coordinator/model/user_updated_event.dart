@@ -19,7 +19,7 @@ part 'user_updated_event.freezed.dart';
 class UserUpdatedEvent extends core.WsEvent with _$UserUpdatedEvent {
   const UserUpdatedEvent({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.receivedAt,
     required this.type,
     required this.user,

@@ -18,7 +18,7 @@ part 'bulk_delete_action_config_request.freezed.dart';
 @JsonSerializable()
 class BulkDeleteActionConfigRequest with _$BulkDeleteActionConfigRequest {
   const BulkDeleteActionConfigRequest({
-    required this.ids,
+    this.ids = const [],
   });
 
   @override

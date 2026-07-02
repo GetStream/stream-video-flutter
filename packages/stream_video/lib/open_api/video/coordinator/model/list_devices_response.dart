@@ -18,7 +18,7 @@ part 'list_devices_response.freezed.dart';
 @JsonSerializable()
 class ListDevicesResponse with _$ListDevicesResponse {
   const ListDevicesResponse({
-    required this.devices,
+    this.devices = const [],
     required this.duration,
   });
 

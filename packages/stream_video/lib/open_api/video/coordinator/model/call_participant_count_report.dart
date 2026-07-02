@@ -18,7 +18,7 @@ part 'call_participant_count_report.freezed.dart';
 @JsonSerializable()
 class CallParticipantCountReport with _$CallParticipantCountReport {
   const CallParticipantCountReport({
-    required this.histogram,
+    this.histogram = const [],
   });
 
   @override

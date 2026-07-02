@@ -18,7 +18,7 @@ part 'quality_score_report_response.freezed.dart';
 @JsonSerializable()
 class QualityScoreReportResponse with _$QualityScoreReportResponse {
   const QualityScoreReportResponse({
-    required this.daily,
+    this.daily = const [],
   });
 
   @override

@@ -19,7 +19,7 @@ part 'list_recordings_response.freezed.dart';
 class ListRecordingsResponse with _$ListRecordingsResponse {
   const ListRecordingsResponse({
     required this.duration,
-    required this.recordings,
+    this.recordings = const [],
   });
 
   @override

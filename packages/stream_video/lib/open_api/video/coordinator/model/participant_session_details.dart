@@ -22,7 +22,7 @@ class ParticipantSessionDetails with _$ParticipantSessionDetails {
     this.joinedAt,
     this.leftAt,
     required this.publisherType,
-    required this.roles,
+    this.roles = const [],
     required this.userId,
     required this.userSessionId,
   });

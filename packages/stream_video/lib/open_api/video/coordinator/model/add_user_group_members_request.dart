@@ -19,7 +19,7 @@ part 'add_user_group_members_request.freezed.dart';
 class AddUserGroupMembersRequest with _$AddUserGroupMembersRequest {
   const AddUserGroupMembersRequest({
     this.asAdmin,
-    required this.memberIds,
+    this.memberIds = const [],
     this.teamId,
   });
 

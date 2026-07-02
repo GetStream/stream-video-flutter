@@ -18,7 +18,7 @@ part 'update_users_partial_request.freezed.dart';
 @JsonSerializable()
 class UpdateUsersPartialRequest with _$UpdateUsersPartialRequest {
   const UpdateUsersPartialRequest({
-    required this.users,
+    this.users = const [],
   });
 
   @override

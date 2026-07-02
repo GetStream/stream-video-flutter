@@ -21,7 +21,7 @@ class LLMConfig with _$LLMConfig {
     this.appContext,
     this.async,
     required this.enabled,
-    required this.rules,
+    this.rules = const [],
     this.severityDescriptions,
   });
 

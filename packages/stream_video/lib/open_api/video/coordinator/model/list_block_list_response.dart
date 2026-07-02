@@ -18,7 +18,7 @@ part 'list_block_list_response.freezed.dart';
 @JsonSerializable()
 class ListBlockListResponse with _$ListBlockListResponse {
   const ListBlockListResponse({
-    required this.blocklists,
+    this.blocklists = const [],
     required this.duration,
   });
 

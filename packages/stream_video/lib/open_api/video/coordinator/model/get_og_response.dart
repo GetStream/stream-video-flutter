@@ -24,7 +24,7 @@ class GetOGResponse with _$GetOGResponse {
     this.authorLink,
     this.authorName,
     this.color,
-    required this.custom,
+    this.custom = const {},
     required this.duration,
     this.fallback,
     this.fields,

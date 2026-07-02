@@ -18,9 +18,9 @@ part 'harm_config.freezed.dart';
 @JsonSerializable()
 class HarmConfig with _$HarmConfig {
   const HarmConfig({
-    required this.actionSequences,
+    this.actionSequences = const [],
     required this.cooldownPeriod,
-    required this.harmTypes,
+    this.harmTypes = const [],
     required this.severity,
     required this.threshold,
   });

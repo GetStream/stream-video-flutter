@@ -21,7 +21,7 @@ class Role with _$Role {
     required this.createdAt,
     required this.custom,
     required this.name,
-    required this.scopes,
+    this.scopes = const [],
     required this.updatedAt,
   });
 

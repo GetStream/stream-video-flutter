@@ -24,7 +24,7 @@ class QueryCallParticipantSessionsResponse
     required this.callType,
     required this.duration,
     this.next,
-    required this.participantsSessions,
+    this.participantsSessions = const [],
     this.prev,
     this.session,
     required this.totalParticipantDuration,

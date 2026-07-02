@@ -30,7 +30,7 @@ class CallUpdatedEvent extends core.WsEvent with _$CallUpdatedEvent {
   const CallUpdatedEvent({
     required this.call,
     required this.callCid,
-    required this.capabilitiesByRole,
+    this.capabilitiesByRole = const {},
     required this.createdAt,
     required this.type,
   });

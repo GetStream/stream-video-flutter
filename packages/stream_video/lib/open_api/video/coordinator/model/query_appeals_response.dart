@@ -19,7 +19,7 @@ part 'query_appeals_response.freezed.dart';
 class QueryAppealsResponse with _$QueryAppealsResponse {
   const QueryAppealsResponse({
     required this.duration,
-    required this.items,
+    this.items = const [],
     this.next,
     this.prev,
   });

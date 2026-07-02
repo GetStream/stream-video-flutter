@@ -18,12 +18,12 @@ part 'review_queue_item_response.freezed.dart';
 @JsonSerializable()
 class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   const ReviewQueueItemResponse({
-    required this.actions,
+    this.actions = const [],
     this.activity,
     required this.aiTextSeverity,
     this.appeal,
     this.assignedTo,
-    required this.bans,
+    this.bans = const [],
     this.call,
     this.completedAt,
     this.configKey,
@@ -40,10 +40,10 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
     this.feedsV2Reaction,
     this.feedsV3Activity,
     this.feedsV3Comment,
-    required this.flags,
+    this.flags = const [],
     required this.flagsCount,
     required this.id,
-    required this.languages,
+    this.languages = const [],
     required this.latestModeratorAction,
     this.message,
     this.moderationPayload,

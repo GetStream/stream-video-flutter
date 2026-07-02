@@ -20,10 +20,10 @@ class QueryCallParticipantsResponse with _$QueryCallParticipantsResponse {
   const QueryCallParticipantsResponse({
     required this.call,
     required this.duration,
-    required this.members,
+    this.members = const [],
     this.membership,
-    required this.ownCapabilities,
-    required this.participants,
+    this.ownCapabilities = const [],
+    this.participants = const [],
     required this.totalParticipants,
   });
 

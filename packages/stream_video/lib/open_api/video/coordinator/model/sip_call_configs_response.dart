@@ -18,7 +18,7 @@ part 'sip_call_configs_response.freezed.dart';
 @JsonSerializable()
 class SIPCallConfigsResponse with _$SIPCallConfigsResponse {
   const SIPCallConfigsResponse({
-    required this.customData,
+    this.customData = const {},
   });
 
   @override

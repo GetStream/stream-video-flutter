@@ -31,9 +31,9 @@ class CallMemberUpdatedPermissionEvent extends core.WsEvent
   const CallMemberUpdatedPermissionEvent({
     required this.call,
     required this.callCid,
-    required this.capabilitiesByRole,
+    this.capabilitiesByRole = const {},
     required this.createdAt,
-    required this.members,
+    this.members = const [],
     required this.type,
   });
 

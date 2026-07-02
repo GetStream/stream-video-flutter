@@ -35,7 +35,7 @@ enum BulkActionAppealsRequestActionType {
 class BulkActionAppealsRequest with _$BulkActionAppealsRequest {
   const BulkActionAppealsRequest({
     required this.actionType,
-    required this.appealIds,
+    this.appealIds = const [],
     this.markReviewed,
     this.rejectAppeal,
     this.restore,

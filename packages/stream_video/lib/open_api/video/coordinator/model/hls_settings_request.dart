@@ -46,7 +46,7 @@ class HLSSettingsRequest with _$HLSSettingsRequest {
   const HLSSettingsRequest({
     this.autoOn,
     this.enabled,
-    required this.qualityTracks,
+    this.qualityTracks = const [],
   });
 
   @override

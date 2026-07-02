@@ -501,16 +501,22 @@ extension on open.IngressSourceResponse {
   }
 }
 
+extension IngressVideoLayerRequestCodecExt on IngressVideoLayerRequestCodec {
+  static IngressVideoLayerRequestCodec fromString(String value) {
+    return switch (value) {
+      'h264' => IngressVideoLayerRequestCodec.h264,
+      'vp8' => IngressVideoLayerRequestCodec.vp8,
+      '_unknown' => IngressVideoLayerRequestCodec.unknown,
+      _ => IngressVideoLayerRequestCodec.h264,
+    };
+  }
+}
+
 extension on open.IngressVideoLayerResponse {
   StreamIngressVideoLayer toSettingsDomain() {
     return StreamIngressVideoLayer(
       bitrate: bitrate,
-      codec: switch (codec) {
-        'h264' => IngressVideoLayerRequestCodec.h264,
-        'vp8' => IngressVideoLayerRequestCodec.vp8,
-        '_unknown' => IngressVideoLayerRequestCodec.unknown,
-        _ => IngressVideoLayerRequestCodec.h264,
-      },
+      codec: IngressVideoLayerRequestCodecExt.fromString(codec),
       frameRateLimit: frameRateLimit,
       maxDimension: maxDimension,
       minDimension: minDimension,

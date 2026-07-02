@@ -21,7 +21,7 @@ class FilterConfigResponse with _$FilterConfigResponse {
     this.aiTextLabels,
     this.configKeys,
     this.filterableCustomKeys,
-    required this.llmLabels,
+    this.llmLabels = const [],
   });
 
   @override

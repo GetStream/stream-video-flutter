@@ -78,7 +78,7 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
     this.blocklistBehavior,
     this.blocklists,
     this.chatPreferences,
-    required this.commands,
+    this.commands = const [],
     required this.connectEvents,
     required this.countMessages,
     required this.createdAt,

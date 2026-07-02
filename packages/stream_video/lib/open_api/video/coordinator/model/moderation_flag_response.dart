@@ -26,7 +26,7 @@ class ModerationFlagResponse with _$ModerationFlagResponse {
     this.labels,
     this.moderationPayload,
     this.reason,
-    required this.result,
+    this.result = const [],
     this.reviewQueueItem,
     this.reviewQueueItemId,
     required this.type,

@@ -19,7 +19,7 @@ part 'draft_payload_response.freezed.dart';
 class DraftPayloadResponse with _$DraftPayloadResponse {
   const DraftPayloadResponse({
     this.attachments,
-    required this.custom,
+    this.custom = const {},
     this.html,
     required this.id,
     this.mentionedUsers,

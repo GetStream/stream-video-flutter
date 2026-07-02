@@ -26,7 +26,7 @@ class UserBannedEvent extends core.WsEvent with _$UserBannedEvent {
     this.cid,
     required this.createdAt,
     this.createdBy,
-    required this.custom,
+    this.custom = const {},
     this.expiration,
     this.reason,
     this.receivedAt,

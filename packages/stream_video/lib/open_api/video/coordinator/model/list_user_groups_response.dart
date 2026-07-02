@@ -19,7 +19,7 @@ part 'list_user_groups_response.freezed.dart';
 class ListUserGroupsResponse with _$ListUserGroupsResponse {
   const ListUserGroupsResponse({
     required this.duration,
-    required this.userGroups,
+    this.userGroups = const [],
   });
 
   @override

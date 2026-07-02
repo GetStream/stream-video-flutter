@@ -20,7 +20,7 @@ class UserPresenceChangedEvent extends core.WsEvent
     with _$UserPresenceChangedEvent {
   const UserPresenceChangedEvent({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.receivedAt,
     required this.type,
     required this.user,

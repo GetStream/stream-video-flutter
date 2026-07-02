@@ -30,7 +30,7 @@ enum RequestPermissionRequestPermissions {
 @JsonSerializable()
 class RequestPermissionRequest with _$RequestPermissionRequest {
   const RequestPermissionRequest({
-    required this.permissions,
+    this.permissions = const [],
   });
 
   @override

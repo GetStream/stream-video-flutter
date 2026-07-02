@@ -19,7 +19,7 @@ part 'ice_server_response.freezed.dart';
 class ICEServerResponse with _$ICEServerResponse {
   const ICEServerResponse({
     required this.password,
-    required this.urls,
+    this.urls = const [],
     required this.username,
   });
 

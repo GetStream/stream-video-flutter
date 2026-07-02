@@ -19,11 +19,11 @@ part 'sip_inbound_credentials.freezed.dart';
 class SipInboundCredentials with _$SipInboundCredentials {
   const SipInboundCredentials({
     required this.apiKey,
-    required this.callCustomData,
+    this.callCustomData = const {},
     required this.callId,
     required this.callType,
     required this.token,
-    required this.userCustomData,
+    this.userCustomData = const {},
     required this.userId,
   });
 

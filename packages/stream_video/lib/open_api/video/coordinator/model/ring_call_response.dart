@@ -19,7 +19,7 @@ part 'ring_call_response.freezed.dart';
 class RingCallResponse with _$RingCallResponse {
   const RingCallResponse({
     required this.duration,
-    required this.membersIds,
+    this.membersIds = const [],
   });
 
   @override

@@ -21,7 +21,7 @@ class CallMissedEvent extends core.WsEvent with _$CallMissedEvent {
     required this.call,
     required this.callCid,
     required this.createdAt,
-    required this.members,
+    this.members = const [],
     required this.notifyUser,
     required this.sessionId,
     required this.type,

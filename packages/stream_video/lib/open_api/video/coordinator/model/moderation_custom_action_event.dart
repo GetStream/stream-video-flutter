@@ -22,7 +22,7 @@ class ModerationCustomActionEvent extends core.WsEvent
     required this.actionId,
     this.actionOptions,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.message,
     this.receivedAt,
     required this.reviewQueueItem,
