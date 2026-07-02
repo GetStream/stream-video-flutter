@@ -19,7 +19,10 @@ void main() {
       mockCall = MockCall();
       mockCallState = MockCallState();
       mockLocalParticipant = MockCallParticipantState();
-      callStateEmitter = MutableStateEmitter<CallState>(mockCallState, sync: true);
+      callStateEmitter = MutableStateEmitter<CallState>(
+        mockCallState,
+        sync: true,
+      );
 
       when(() => mockCall.state).thenAnswer((_) => callStateEmitter);
       when(
