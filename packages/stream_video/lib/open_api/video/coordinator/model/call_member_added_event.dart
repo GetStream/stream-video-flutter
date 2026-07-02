@@ -21,7 +21,7 @@ class CallMemberAddedEvent extends core.WsEvent with _$CallMemberAddedEvent {
     required this.call,
     required this.callCid,
     required this.createdAt,
-    required this.members,
+    this.members = const [],
     required this.type,
   });
 

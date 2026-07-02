@@ -18,7 +18,7 @@ part 'call_duration_report.freezed.dart';
 @JsonSerializable()
 class CallDurationReport with _$CallDurationReport {
   const CallDurationReport({
-    required this.histogram,
+    this.histogram = const [],
   });
 
   @override

@@ -24,7 +24,7 @@ class VelocityFilterConfig with _$VelocityFilterConfig {
     required this.cidsPerUser,
     required this.enabled,
     required this.firstMessageOnly,
-    required this.rules,
+    this.rules = const [],
   });
 
   @override

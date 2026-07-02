@@ -19,7 +19,7 @@ part 'chat_draft_payload_response.freezed.dart';
 class ChatDraftPayloadResponse with _$ChatDraftPayloadResponse {
   const ChatDraftPayloadResponse({
     this.attachments,
-    required this.custom,
+    this.custom = const {},
     this.html,
     required this.id,
     this.mentionedUsers,

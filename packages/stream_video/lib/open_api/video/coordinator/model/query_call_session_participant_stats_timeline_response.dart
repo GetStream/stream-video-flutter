@@ -23,7 +23,7 @@ class QueryCallSessionParticipantStatsTimelineResponse
     required this.callSessionId,
     required this.callType,
     required this.duration,
-    required this.events,
+    this.events = const [],
     required this.userId,
     required this.userSessionId,
   });

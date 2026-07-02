@@ -48,21 +48,24 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   final bool isAnonymous;
 
-  late final Dio _dio = Dio(BaseOptions(baseUrl: _rpcUrl))
-    ..interceptors.add(
-      _Authentication(
-        apiKey: _apiKey,
-        getToken: () async {
-          final tokenResult = await _tokenManager.getToken();
-          if (tokenResult is! Success<UserToken>) {
-            throw (tokenResult as Failure).videoError;
-          }
-          return tokenResult.data;
-        },
-        getConnectionId: () => _ws?.connectionId,
-      ),
-    );
-  late final _defaultApi = open.DefaultApi(_dio);
+  late final StreamCoreHttpClient _httpClient = StreamCoreHttpClient(
+    options: BaseOptions(
+      baseUrl: _rpcUrl,
+    ),
+    interceptors: _buildInterceptors(
+      apiKey: _apiKey,
+      getToken: () async {
+        final tokenResult = await _tokenManager.getToken();
+        if (tokenResult is! Success<UserToken>) {
+          throw (tokenResult as Failure).videoError;
+        }
+        return tokenResult.data;
+      },
+      getConnectionId: () => _ws?.connectionId,
+    ),
+  );
+
+  late final _defaultApi = open.DefaultApi(_httpClient);
   late final _locationService = LocationService();
 
   @override
@@ -1717,14 +1720,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[loadGuest] id: $id');
-      final dio = Dio(BaseOptions(baseUrl: _rpcUrl))
-        ..interceptors.add(
-          _Authentication(
-            apiKey: _apiKey,
-            getToken: () => UserToken.anonymous(userId: id),
-            getConnectionId: () => _ws?.connectionId,
-          ),
-        );
+      final dio = StreamCoreHttpClient(
+        options: BaseOptions(baseUrl: _rpcUrl),
+        interceptors: _buildInterceptors(
+          apiKey: _apiKey,
+          getToken: () => UserToken.anonymous(userId: id),
+          getConnectionId: () => _ws?.connectionId,
+        ),
+      );
       final defaultApi = open.DefaultApi(dio);
 
       final result = await defaultApi.createGuest(
@@ -1752,16 +1755,48 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 typedef GetConnectionId = String? Function();
 typedef GetToken = FutureOr<UserToken> Function();
 
-class _Authentication extends Interceptor {
-  _Authentication({
-    required this.apiKey,
-    required this.getToken,
-    required this.getConnectionId,
-  });
+final _httpLogger = taggedLogger(tag: 'SV:CoordHttp');
+
+List<Interceptor> _buildInterceptors({
+  required String apiKey,
+  required GetToken getToken,
+  required GetConnectionId getConnectionId,
+}) {
+  return [
+    _ApiKeyInterceptor(apiKey),
+    ConnectionIdInterceptor(getConnectionId),
+    _AuthInterceptor(getToken),
+    const _ClientInfoInterceptor(),
+    const ApiErrorInterceptor(),
+    LoggingInterceptor(
+      requestHeader: true,
+      logPrint: (_, object) => _httpLogger.v(() => object.toString()),
+    ),
+  ];
+}
+
+/// Adds the Stream `api_key` as a query parameter to every request.
+class _ApiKeyInterceptor extends Interceptor {
+  const _ApiKeyInterceptor(this.apiKey);
 
   final String apiKey;
+
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) {
+    options.queryParameters['api_key'] = apiKey;
+    handler.next(options);
+  }
+}
+
+/// Attaches the auth headers for the current user token, rejecting the request
+/// if the token cannot be resolved.
+class _AuthInterceptor extends Interceptor {
+  const _AuthInterceptor(this.getToken);
+
   final GetToken getToken;
-  final GetConnectionId getConnectionId;
 
   @override
   Future<void> onRequest(
@@ -1769,18 +1804,11 @@ class _Authentication extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      options.queryParameters['api_key'] = apiKey;
-      final connectionId = getConnectionId();
-      if (connectionId != null) {
-        options.queryParameters['connection_id'] = connectionId;
-      }
       final userToken = await getToken();
       options.headers['stream-auth-type'] = userToken.authType.name;
       if (userToken.rawValue.isNotEmpty) {
         options.headers['Authorization'] = userToken.rawValue;
       }
-      options.headers['X-Stream-Client'] = xStreamClientHeader;
-      options.headers['x-client-request-id'] = const Uuid().v4();
       handler.next(options);
     } catch (error, stackTrace) {
       handler.reject(
@@ -1791,6 +1819,21 @@ class _Authentication extends Interceptor {
         ),
       );
     }
+  }
+}
+
+/// Adds the `X-Stream-Client` header and a unique per-request id header.
+class _ClientInfoInterceptor extends Interceptor {
+  const _ClientInfoInterceptor();
+
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) {
+    options.headers['X-Stream-Client'] = xStreamClientHeader;
+    options.headers['x-client-request-id'] = const Uuid().v4();
+    handler.next(options);
   }
 }
 

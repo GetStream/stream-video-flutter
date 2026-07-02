@@ -18,7 +18,7 @@ part 'geofence_settings_response.freezed.dart';
 @JsonSerializable()
 class GeofenceSettingsResponse with _$GeofenceSettingsResponse {
   const GeofenceSettingsResponse({
-    required this.names,
+    this.names = const [],
   });
 
   @override

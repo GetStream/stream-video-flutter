@@ -20,7 +20,7 @@ class AutomodToxicityConfig with _$AutomodToxicityConfig {
   const AutomodToxicityConfig({
     this.async,
     required this.enabled,
-    required this.rules,
+    this.rules = const [],
   });
 
   @override

@@ -21,7 +21,7 @@ class CallModerationWarningEvent extends core.WsEvent
   const CallModerationWarningEvent({
     required this.callCid,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.message,
     required this.type,
     required this.userId,

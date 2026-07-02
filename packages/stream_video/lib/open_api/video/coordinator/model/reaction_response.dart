@@ -19,7 +19,7 @@ part 'reaction_response.freezed.dart';
 class ReactionResponse with _$ReactionResponse {
   const ReactionResponse({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.messageId,
     required this.score,
     required this.type,

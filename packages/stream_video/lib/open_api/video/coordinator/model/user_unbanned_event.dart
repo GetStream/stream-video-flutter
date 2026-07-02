@@ -26,7 +26,7 @@ class UserUnbannedEvent extends core.WsEvent with _$UserUnbannedEvent {
     this.cid,
     required this.createdAt,
     this.createdBy,
-    required this.custom,
+    this.custom = const {},
     this.receivedAt,
     this.shadow,
     this.team,

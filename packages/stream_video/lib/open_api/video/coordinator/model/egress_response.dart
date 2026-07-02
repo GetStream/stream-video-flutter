@@ -24,7 +24,7 @@ class EgressResponse with _$EgressResponse {
     this.hls,
     this.individualRecording,
     this.rawRecording,
-    required this.rtmps,
+    this.rtmps = const [],
   });
 
   @override

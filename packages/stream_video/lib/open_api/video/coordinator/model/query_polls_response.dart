@@ -20,7 +20,7 @@ class QueryPollsResponse with _$QueryPollsResponse {
   const QueryPollsResponse({
     required this.duration,
     this.next,
-    required this.polls,
+    this.polls = const [],
     this.prev,
   });
 

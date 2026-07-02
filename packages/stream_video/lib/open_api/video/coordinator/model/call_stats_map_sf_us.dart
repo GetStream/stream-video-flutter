@@ -18,7 +18,7 @@ part 'call_stats_map_sf_us.freezed.dart';
 @JsonSerializable()
 class CallStatsMapSFUs with _$CallStatsMapSFUs {
   const CallStatsMapSFUs({
-    required this.locations,
+    this.locations = const [],
   });
 
   @override

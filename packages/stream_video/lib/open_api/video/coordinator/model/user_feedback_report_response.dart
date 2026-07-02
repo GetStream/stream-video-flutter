@@ -18,7 +18,7 @@ part 'user_feedback_report_response.freezed.dart';
 @JsonSerializable()
 class UserFeedbackReportResponse with _$UserFeedbackReportResponse {
   const UserFeedbackReportResponse({
-    required this.daily,
+    this.daily = const [],
   });
 
   @override

@@ -18,7 +18,7 @@ part 'update_users_request.freezed.dart';
 @JsonSerializable()
 class UpdateUsersRequest with _$UpdateUsersRequest {
   const UpdateUsersRequest({
-    required this.users,
+    this.users = const {},
   });
 
   @override

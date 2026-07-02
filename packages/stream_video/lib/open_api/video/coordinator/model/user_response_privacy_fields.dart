@@ -20,9 +20,9 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
   const UserResponsePrivacyFields({
     this.avgResponseTime,
     required this.banned,
-    required this.blockedUserIds,
+    this.blockedUserIds = const [],
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.deactivatedAt,
     this.deletedAt,
     required this.id,
@@ -35,7 +35,7 @@ class UserResponsePrivacyFields with _$UserResponsePrivacyFields {
     this.privacySettings,
     this.revokeTokensIssuedBefore,
     required this.role,
-    required this.teams,
+    this.teams = const [],
     this.teamsRole,
     required this.updatedAt,
   });

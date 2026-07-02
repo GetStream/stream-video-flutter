@@ -19,7 +19,7 @@ part 'feeds_enriched_collection_response.freezed.dart';
 class FeedsEnrichedCollectionResponse with _$FeedsEnrichedCollectionResponse {
   const FeedsEnrichedCollectionResponse({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.id,
     required this.name,
     required this.status,

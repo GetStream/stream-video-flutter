@@ -28,7 +28,7 @@ class QueryCallSessionParticipantStatsResponse
     required this.counts,
     required this.duration,
     this.next,
-    required this.participants,
+    this.participants = const [],
     this.prev,
     this.tmpDataSource,
   });

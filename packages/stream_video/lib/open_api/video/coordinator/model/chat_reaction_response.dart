@@ -19,7 +19,7 @@ part 'chat_reaction_response.freezed.dart';
 class ChatReactionResponse with _$ChatReactionResponse {
   const ChatReactionResponse({
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.messageId,
     required this.score,
     required this.type,

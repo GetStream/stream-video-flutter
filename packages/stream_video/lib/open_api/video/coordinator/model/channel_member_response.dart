@@ -23,7 +23,7 @@ class ChannelMemberResponse with _$ChannelMemberResponse {
     required this.banned,
     required this.channelRole,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     this.deletedAt,
     this.deletedMessages,
     this.inviteAcceptedAt,

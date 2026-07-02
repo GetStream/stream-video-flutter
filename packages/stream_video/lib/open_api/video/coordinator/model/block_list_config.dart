@@ -21,7 +21,7 @@ class BlockListConfig with _$BlockListConfig {
     this.async,
     required this.enabled,
     this.matchSubstring,
-    required this.rules,
+    this.rules = const [],
   });
 
   @override

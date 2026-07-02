@@ -20,7 +20,7 @@ class CustomVideoEvent extends core.WsEvent with _$CustomVideoEvent {
   const CustomVideoEvent({
     required this.callCid,
     required this.createdAt,
-    required this.custom,
+    this.custom = const {},
     required this.type,
     required this.user,
   });

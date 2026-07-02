@@ -20,9 +20,9 @@ class UpdateCallResponse with _$UpdateCallResponse {
   const UpdateCallResponse({
     required this.call,
     required this.duration,
-    required this.members,
+    this.members = const [],
     this.membership,
-    required this.ownCapabilities,
+    this.ownCapabilities = const [],
   });
 
   @override

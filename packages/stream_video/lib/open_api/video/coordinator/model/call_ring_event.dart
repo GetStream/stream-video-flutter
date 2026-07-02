@@ -21,7 +21,7 @@ class CallRingEvent extends core.WsEvent with _$CallRingEvent {
     required this.call,
     required this.callCid,
     required this.createdAt,
-    required this.members,
+    this.members = const [],
     required this.sessionId,
     required this.type,
     required this.user,

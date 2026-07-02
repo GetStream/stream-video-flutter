@@ -19,8 +19,8 @@ part 'bulk_action_appeals_response.freezed.dart';
 class BulkActionAppealsResponse with _$BulkActionAppealsResponse {
   const BulkActionAppealsResponse({
     required this.duration,
-    required this.errors,
-    required this.results,
+    this.errors = const [],
+    this.results = const [],
   });
 
   @override

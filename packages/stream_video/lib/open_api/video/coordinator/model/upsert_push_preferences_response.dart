@@ -19,8 +19,8 @@ part 'upsert_push_preferences_response.freezed.dart';
 class UpsertPushPreferencesResponse with _$UpsertPushPreferencesResponse {
   const UpsertPushPreferencesResponse({
     required this.duration,
-    required this.userChannelPreferences,
-    required this.userPreferences,
+    this.userChannelPreferences = const {},
+    this.userPreferences = const {},
   });
 
   @override

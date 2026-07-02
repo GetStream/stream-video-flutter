@@ -19,7 +19,7 @@ part 'get_edges_response.freezed.dart';
 class GetEdgesResponse with _$GetEdgesResponse {
   const GetEdgesResponse({
     required this.duration,
-    required this.edges,
+    this.edges = const [],
   });
 
   @override

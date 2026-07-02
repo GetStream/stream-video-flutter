@@ -20,7 +20,7 @@ class UserDeactivatedEvent extends core.WsEvent with _$UserDeactivatedEvent {
   const UserDeactivatedEvent({
     required this.createdAt,
     this.createdBy,
-    required this.custom,
+    this.custom = const {},
     this.receivedAt,
     required this.type,
     required this.user,

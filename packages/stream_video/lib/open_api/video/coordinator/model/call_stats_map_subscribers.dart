@@ -18,7 +18,7 @@ part 'call_stats_map_subscribers.freezed.dart';
 @JsonSerializable()
 class CallStatsMapSubscribers with _$CallStatsMapSubscribers {
   const CallStatsMapSubscribers({
-    required this.locations,
+    this.locations = const [],
     this.participants,
   });
 

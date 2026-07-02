@@ -20,7 +20,7 @@ class HLSSettingsResponse with _$HLSSettingsResponse {
   const HLSSettingsResponse({
     required this.autoOn,
     required this.enabled,
-    required this.qualityTracks,
+    this.qualityTracks = const [],
   });
 
   @override

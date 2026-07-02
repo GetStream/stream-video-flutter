@@ -18,7 +18,7 @@ part 'query_users_payload.freezed.dart';
 @JsonSerializable()
 class QueryUsersPayload with _$QueryUsersPayload {
   const QueryUsersPayload({
-    required this.filterConditions,
+    this.filterConditions = const {},
     this.includeDeactivatedUsers,
     this.limit,
     this.offset,

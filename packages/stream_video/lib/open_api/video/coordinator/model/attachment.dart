@@ -24,7 +24,7 @@ class Attachment with _$Attachment {
     this.authorLink,
     this.authorName,
     this.color,
-    required this.custom,
+    this.custom = const {},
     this.fallback,
     this.fields,
     this.footer,

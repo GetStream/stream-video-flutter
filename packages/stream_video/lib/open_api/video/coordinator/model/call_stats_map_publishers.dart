@@ -18,7 +18,7 @@ part 'call_stats_map_publishers.freezed.dart';
 @JsonSerializable()
 class CallStatsMapPublishers with _$CallStatsMapPublishers {
   const CallStatsMapPublishers({
-    required this.publishers,
+    this.publishers = const [],
   });
 
   @override

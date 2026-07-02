@@ -21,7 +21,7 @@ class LimitsSettingsResponse with _$LimitsSettingsResponse {
     this.maxDurationSeconds,
     this.maxParticipants,
     this.maxParticipantsExcludeOwner,
-    required this.maxParticipantsExcludeRoles,
+    this.maxParticipantsExcludeRoles = const [],
   });
 
   @override

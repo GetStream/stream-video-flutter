@@ -18,7 +18,7 @@ part 'per_sdk_usage_report.freezed.dart';
 @JsonSerializable()
 class PerSDKUsageReport with _$PerSDKUsageReport {
   const PerSDKUsageReport({
-    required this.byVersion,
+    this.byVersion = const {},
     required this.total,
   });
 

@@ -19,7 +19,7 @@ part 'search_user_groups_response.freezed.dart';
 class SearchUserGroupsResponse with _$SearchUserGroupsResponse {
   const SearchUserGroupsResponse({
     required this.duration,
-    required this.userGroups,
+    this.userGroups = const [],
   });
 
   @override

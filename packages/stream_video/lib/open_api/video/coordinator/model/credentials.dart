@@ -18,7 +18,7 @@ part 'credentials.freezed.dart';
 @JsonSerializable()
 class Credentials with _$Credentials {
   const Credentials({
-    required this.iceServers,
+    this.iceServers = const [],
     required this.server,
     required this.token,
   });

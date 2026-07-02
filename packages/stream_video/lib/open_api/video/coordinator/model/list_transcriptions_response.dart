@@ -19,7 +19,7 @@ part 'list_transcriptions_response.freezed.dart';
 class ListTranscriptionsResponse with _$ListTranscriptionsResponse {
   const ListTranscriptionsResponse({
     required this.duration,
-    required this.transcriptions,
+    this.transcriptions = const [],
   });
 
   @override

@@ -18,7 +18,7 @@ part 'sdk_usage_report.freezed.dart';
 @JsonSerializable()
 class SDKUsageReport with _$SDKUsageReport {
   const SDKUsageReport({
-    required this.perSdkUsage,
+    this.perSdkUsage = const {},
   });
 
   @override

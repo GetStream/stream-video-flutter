@@ -27,7 +27,7 @@ class CallFrameRecordingFrameReadyEvent extends core.WsEvent
     required this.trackType,
     required this.type,
     required this.url,
-    required this.users,
+    this.users = const {},
   });
 
   @override

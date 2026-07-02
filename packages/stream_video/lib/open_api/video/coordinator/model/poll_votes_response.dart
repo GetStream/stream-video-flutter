@@ -21,7 +21,7 @@ class PollVotesResponse with _$PollVotesResponse {
     required this.duration,
     this.next,
     this.prev,
-    required this.votes,
+    this.votes = const [],
   });
 
   @override

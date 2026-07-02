@@ -18,7 +18,7 @@ part 'user_feedback_report.freezed.dart';
 @JsonSerializable()
 class UserFeedbackReport with _$UserFeedbackReport {
   const UserFeedbackReport({
-    required this.countByRating,
+    this.countByRating = const {},
     required this.unreportedCount,
   });
 

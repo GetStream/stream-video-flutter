@@ -19,7 +19,7 @@ part 'sip_inbound_routing_rule_response.freezed.dart';
 class SIPInboundRoutingRuleResponse with _$SIPInboundRoutingRuleResponse {
   const SIPInboundRoutingRuleResponse({
     this.callConfigs,
-    required this.calledNumbers,
+    this.calledNumbers = const [],
     this.callerConfigs,
     this.callerNumbers,
     required this.createdAt,
@@ -29,7 +29,7 @@ class SIPInboundRoutingRuleResponse with _$SIPInboundRoutingRuleResponse {
     required this.name,
     this.pinProtectionConfigs,
     this.pinRoutingConfigs,
-    required this.trunkIds,
+    this.trunkIds = const [],
     required this.updatedAt,
   });
 

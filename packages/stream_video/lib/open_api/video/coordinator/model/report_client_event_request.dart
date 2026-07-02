@@ -18,7 +18,7 @@ part 'report_client_event_request.freezed.dart';
 @JsonSerializable()
 class ReportClientEventRequest with _$ReportClientEventRequest {
   const ReportClientEventRequest({
-    required this.events,
+    this.events = const [],
   });
 
   @override

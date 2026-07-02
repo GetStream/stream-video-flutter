@@ -22,7 +22,7 @@ class CallSessionParticipantCountsUpdatedEvent extends core.WsEvent
     required this.anonymousParticipantCount,
     required this.callCid,
     required this.createdAt,
-    required this.participantsCountByRole,
+    this.participantsCountByRole = const {},
     required this.sessionId,
     required this.type,
   });

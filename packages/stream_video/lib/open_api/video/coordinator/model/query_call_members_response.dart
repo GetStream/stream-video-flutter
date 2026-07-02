@@ -19,7 +19,7 @@ part 'query_call_members_response.freezed.dart';
 class QueryCallMembersResponse with _$QueryCallMembersResponse {
   const QueryCallMembersResponse({
     required this.duration,
-    required this.members,
+    this.members = const [],
     this.next,
     this.prev,
   });

@@ -19,7 +19,7 @@ part 'search_roles_response.freezed.dart';
 class SearchRolesResponse with _$SearchRolesResponse {
   const SearchRolesResponse({
     required this.duration,
-    required this.roles,
+    this.roles = const [],
   });
 
   @override

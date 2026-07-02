@@ -18,7 +18,7 @@ part 'poll_option_response_data.freezed.dart';
 @JsonSerializable()
 class PollOptionResponseData with _$PollOptionResponseData {
   const PollOptionResponseData({
-    required this.custom,
+    this.custom = const {},
     required this.id,
     required this.text,
   });

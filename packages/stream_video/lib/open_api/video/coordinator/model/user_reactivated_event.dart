@@ -20,7 +20,7 @@ class UserReactivatedEvent extends core.WsEvent with _$UserReactivatedEvent {
   const UserReactivatedEvent({
     required this.createdAt,
     this.createdBy,
-    required this.custom,
+    this.custom = const {},
     this.receivedAt,
     required this.type,
     required this.user,

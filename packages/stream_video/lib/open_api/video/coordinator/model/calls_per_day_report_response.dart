@@ -18,7 +18,7 @@ part 'calls_per_day_report_response.freezed.dart';
 @JsonSerializable()
 class CallsPerDayReportResponse with _$CallsPerDayReportResponse {
   const CallsPerDayReportResponse({
-    required this.daily,
+    this.daily = const [],
   });
 
   @override

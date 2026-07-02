@@ -18,16 +18,16 @@ part 'call_session_response.freezed.dart';
 @JsonSerializable()
 class CallSessionResponse with _$CallSessionResponse {
   const CallSessionResponse({
-    required this.acceptedBy,
+    this.acceptedBy = const {},
     required this.anonymousParticipantCount,
     this.endedAt,
     required this.id,
     this.liveEndedAt,
     this.liveStartedAt,
-    required this.missedBy,
-    required this.participants,
-    required this.participantsCountByRole,
-    required this.rejectedBy,
+    this.missedBy = const {},
+    this.participants = const [],
+    this.participantsCountByRole = const {},
+    this.rejectedBy = const {},
     this.startedAt,
     this.timerEndsAt,
   });

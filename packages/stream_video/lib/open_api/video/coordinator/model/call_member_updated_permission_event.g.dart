@@ -11,9 +11,11 @@ CallMemberUpdatedPermissionEvent _$CallMemberUpdatedPermissionEventFromJson(
 ) => CallMemberUpdatedPermissionEvent(
   call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
   callCid: json['call_cid'] as String,
-  capabilitiesByRole: _capabilitiesByRoleFromJson(
-    json['capabilities_by_role'] as Map<String, dynamic>,
-  ),
+  capabilitiesByRole: json['capabilities_by_role'] == null
+      ? const {}
+      : _capabilitiesByRoleFromJson(
+          json['capabilities_by_role'] as Map<String, dynamic>,
+        ),
   createdAt: const EpochDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),

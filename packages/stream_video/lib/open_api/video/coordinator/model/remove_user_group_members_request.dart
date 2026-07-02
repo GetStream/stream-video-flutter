@@ -18,7 +18,7 @@ part 'remove_user_group_members_request.freezed.dart';
 @JsonSerializable()
 class RemoveUserGroupMembersRequest with _$RemoveUserGroupMembersRequest {
   const RemoveUserGroupMembersRequest({
-    required this.memberIds,
+    this.memberIds = const [],
     this.teamId,
   });
 
