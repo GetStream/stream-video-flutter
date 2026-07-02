@@ -2,18 +2,18 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart';
+import '../../open_api/video/coordinator/api.dart' hide User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
@@ -26,15 +26,12 @@ import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/call_received_data.dart';
 import '../models/models.dart';
-import '../platform_detector/platform_detector.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_track_type.dart';
-import '../shared_emitter.dart';
-import '../state_emitter.dart';
 import '../stream_video.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
@@ -42,7 +39,6 @@ import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
-import '../utils/standard.dart';
 import '../utils/subscriptions.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
@@ -415,7 +411,7 @@ class Call {
   >
   get stats => _stats;
   late final _stats =
-      MutableSharedEmitterImpl<
+      MutableSharedEmitter<
         ({
           PeerConnectionStatsBundle publisherStatsBundle,
           PeerConnectionStatsBundle subscriberStatsBundle,
@@ -423,11 +419,10 @@ class Call {
       >();
 
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
-  final _callEvents = MutableSharedEmitterImpl<StreamCallEvent>();
+  final _callEvents = MutableSharedEmitter<StreamCallEvent>();
 
-  Stream<List<StreamClosedCaption>> get closedCaptions =>
-      _closedCaptions.asStream();
-  final _closedCaptions = MutableStateEmitterImpl<List<StreamClosedCaption>>(
+  Stream<List<StreamClosedCaption>> get closedCaptions => _closedCaptions;
+  final _closedCaptions = MutableStateEmitter<List<StreamClosedCaption>>(
     [],
   );
 
@@ -530,7 +525,7 @@ class Call {
   void _observeUserId() {
     _subscriptions.add(
       _idUserId,
-      _streamVideo.state.user.asStream().map((u) => u.id).distinct().listen((
+      _streamVideo.state.user.map((u) => u.id).distinct().listen((
         userId,
       ) {
         final stateUserId = _stateManager.callState.currentUserId;
@@ -879,10 +874,10 @@ class Call {
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
       _logger.w(() => '[accept] rejected (invalid status): $status');
-      return Result.error('invalid status: $status');
+      return failureWithError('invalid status: $status');
     }
 
-    final outgoingCall = _streamVideo.state.outgoingCall.valueOrNull;
+    final outgoingCall = _streamVideo.state.outgoingCall.value;
     if (outgoingCall != null && outgoingCall.callCid != callCid) {
       _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
       await outgoingCall.reject(reason: CallRejectReason.cancel());
@@ -942,7 +937,7 @@ class Call {
 
     if (state.value.status is! CallStatusActive) {
       _logger.w(() => '[end] rejected (invalid status): ${state.value.status}');
-      return Result.error('invalid status: ${state.value.status}');
+      return failureWithError('invalid status: ${state.value.status}');
     }
 
     try {
@@ -993,7 +988,7 @@ class Call {
         () => '[join] rejected (a call with the same cid is in progress)',
       );
 
-      return Result.error('a call with the same cid is in progress');
+      return failureWithError('a call with the same cid is in progress');
     }
 
     if (state.value.status is CallStatusConnecting ||
@@ -1001,12 +996,13 @@ class Call {
       _logger.v(() => '[join] await ongoing connect to resolve');
 
       try {
-        final currentState = await state.firstWhere(
-          (it) =>
-              it.status is! CallStatusConnecting &&
-              it.status is! CallStatusJoining,
-          timeLimit: _stateManager.callState.preferences.connectTimeout,
-        );
+        final currentState = await state
+            .firstWhere(
+              (it) =>
+                  it.status is! CallStatusConnecting &&
+                  it.status is! CallStatusJoining,
+            )
+            .timeout(_stateManager.callState.preferences.connectTimeout);
 
         if (currentState.status is CallStatusConnected ||
             currentState.status is CallStatusJoined) {
@@ -1016,13 +1012,13 @@ class Call {
           _logger.e(
             () => '[join] ongoing connect failed: ${currentState.status}',
           );
-          return Result.error(
+          return failureWithError(
             'ongoing connect failed: ${currentState.status}',
           );
         }
       } on TimeoutException {
         _logger.e(() => '[join] timed out waiting for ongoing connect');
-        return Result.error('timed out waiting for ongoing connect');
+        return failureWithError('timed out waiting for ongoing connect');
       }
     }
 
@@ -1037,7 +1033,7 @@ class Call {
             )
             .asCancelable()
             .storeIn(_idConnect, _cancelables)
-            .valueOrDefault(Result.error('connect cancelled'));
+            .valueOrDefault(failureWithError('connect cancelled'));
 
     if (result.isSuccess) {
       _logger.v(() => '[join] finished: $result');
@@ -1064,7 +1060,7 @@ class Call {
   }) async {
     if (_callJoinLock.locked) {
       _logger.w(() => '[join] rejected (already joining)');
-      return Result.error('already joining');
+      return failureWithError('already joining');
     }
 
     return _callJoinLock.synchronized(() async {
@@ -1155,7 +1151,7 @@ class Call {
         );
       }
 
-      return Result.error(
+      return failureWithError(
         'failed to join after $maxJoinRetries attempts',
       );
     });
@@ -1218,7 +1214,7 @@ class Call {
 
     if (_callLifecycleCompleter.isCompleted) {
       _logger.w(() => '[join] rejected (call was left)');
-      return Result.error('call was left');
+      return failureWithError('call was left');
     }
 
     _stateManager.lifecycleCallConnecting(
@@ -1237,7 +1233,7 @@ class Call {
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[join] coordinator joining failed: $joinedResult');
 
-      final error = (joinedResult as Failure).error;
+      final error = (joinedResult as Failure).videoError;
       await leave(reason: DisconnectReason.failure(error));
       return joinedResult;
     }
@@ -1247,7 +1243,7 @@ class Call {
 
     if (_callLifecycleCompleter.isCompleted) {
       _logger.w(() => '[join] rejected (call was left during joining)');
-      return Result.error('call was left');
+      return failureWithError('call was left');
     }
 
     final reconnectDetails =
@@ -1314,7 +1310,7 @@ class Call {
         _logger.w(
           () => '[join] rejected (call was left during session creation)',
         );
-        return Result.error('call was left');
+        return failureWithError('call was left');
       }
 
       _logger.d(() => '[join] starting sfu session');
@@ -1327,10 +1323,10 @@ class Call {
       if (sessionResult is! Success<None>) {
         _logger.e(() => '[join] sfu session start failed: $sessionResult');
 
-        final error = (sessionResult as Failure).error;
-        return Result.errorWithCause(
+        final error = (sessionResult as Failure).videoError;
+        return failureWithError(
           error.message,
-          SessionConnectionFailure(error: error),
+          cause: SessionConnectionFailure(error: error),
         );
       }
     } else {
@@ -1350,7 +1346,7 @@ class Call {
 
       if (result.isFailure) {
         _logger.e(() => '[join] fast reconnecting failed: $result');
-        return Result.error('fast reconnecting failed');
+        return failureWithError('fast reconnecting failed');
       }
 
       _logger.v(() => '[join] fast reconnecting success');
@@ -1453,7 +1449,7 @@ class Call {
         hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
       );
 
-      return joinedResult.fold(
+      return joinedResult.foldResult(
         success: (success) {
           _credentials = success.data.credentials;
           _sfuStatsOptions = success.data.statsOptions;
@@ -1496,7 +1492,7 @@ class Call {
 
     if (_callLifecycleCompleter.isCompleted) {
       _logger.w(() => '[joinCall] rejected (call was left)');
-      return Result.error('call was left');
+      return failureWithError('call was left');
     }
 
     final joinResult = await _coordinatorClient.joinCall(
@@ -1656,7 +1652,7 @@ class Call {
 
     if (_callLifecycleCompleter.isCompleted) {
       _logger.w(() => '[startSession] rejected (call was left)');
-      return Result.error('call was left');
+      return failureWithError('call was left');
     }
 
     final result = await session.start(
@@ -1714,7 +1710,7 @@ class Call {
           );
     }
 
-    return result.fold(
+    return result.foldResult(
       success: (success) {
         _logger.v(() => '[startSession] success: $success');
         _fastReconnectDeadline = success.data.fastReconnectDeadline;
@@ -2012,7 +2008,7 @@ class Call {
         } catch (error) {
           switch (error) {
             case OpenApiError() when error.apiError.unrecoverable ?? false:
-            case APIError() when error.unrecoverable ?? false:
+            case StreamApiError() when error.unrecoverable ?? false:
               _logger.w(() => '[reconnect] unrecoverable error');
               _stateManager.lifecycleCallReconnectingFailed();
 
@@ -2073,10 +2069,10 @@ class Call {
     final migrationResult = await _awaitMigrationCompleteFuture;
     if (migrationResult == null) {
       _logger.e(() => '[reconnectMigrate] migration failed');
-      return Result.error('migration failed');
+      return failureWithError('migration failed');
     }
 
-    return migrationResult.fold<Result<None>>(
+    return migrationResult.foldResult(
       success: (_) {
         _stateManager.lifecycleCallConnected();
         migrateTimeStopwatch.stop();
@@ -2092,7 +2088,7 @@ class Call {
         _logger.e(
           () => '[reconnectMigrate] migration did not complete correctly',
         );
-        return Result.error('migration did not complete correctly');
+        return failureWithError('migration did not complete correctly');
       },
     );
   }
@@ -2222,7 +2218,7 @@ class Call {
       final lifecycleFuture = _callLifecycleCompleter.future.then<Result<None>>(
         (_) {
           _logger.w(() => '[awaitIfNeeded] call was left');
-          return Result.error('call was left');
+          return const Result.failure('call was left');
         },
       );
 
@@ -2387,7 +2383,7 @@ class Call {
     await dynascaleManager.dispose();
 
     await _streamVideo.state.removeActiveCall(this);
-    if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
+    if (_streamVideo.state.outgoingCall.value?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
     }
 
@@ -2425,7 +2421,7 @@ class Call {
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
     final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices();
 
-    final mediaDevices = mediaDevicesResult.fold(
+    final mediaDevices = mediaDevicesResult.foldResult(
       success: (success) => success.data,
       failure: (failure) => <RtcMediaDevice>[],
     );
@@ -2448,7 +2444,7 @@ class Call {
         settings.video.cameraDefaultOn ||
         settings.audio.speakerDefaultOn ||
         settings.audio.defaultDevice ==
-            AudioSettingsRequestDefaultDeviceEnum.speaker;
+            AudioSettingsRequestDefaultDevice.speaker;
 
     // Determine default audio output with priority:
     // 1. External device (if available)
@@ -2461,14 +2457,14 @@ class Call {
       if (speakerOnWithSettingsPriority) {
         defaultAudioOutput = audioOutputs.firstWhereOrNull(
           (device) => device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+            AudioSettingsRequestDefaultDevice.speaker.name,
           ),
         );
       } else {
         // 3. First non-speaker device
         defaultAudioOutput = audioOutputs.firstWhereOrNull(
           (device) => !device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+            AudioSettingsRequestDefaultDevice.speaker.name,
           ),
         );
       }
@@ -2498,8 +2494,7 @@ class Call {
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
       cameraFacingMode:
-          settings.video.cameraFacing ==
-              VideoSettingsRequestCameraFacingEnum.front
+          settings.video.cameraFacing == VideoSettingsRequestCameraFacing.front
           ? FacingMode.user
           : FacingMode.environment,
       speakerDefaultOn:
@@ -2617,7 +2612,7 @@ class Call {
     final session = _session;
     if (session == null) {
       _logger.w(() => '[setLocalTrack] rejected (session is null);');
-      return Result.error('no call session');
+      return failureWithError('no call session');
     }
     final result = await session.setLocalTrack(track);
     _logger.v(() => '[setLocalTrack] completed: $result');
@@ -2658,8 +2653,8 @@ class Call {
             final status = state.status;
             return status is CallStatusIncoming && status.acceptedByMe;
           },
-          timeLimit: timeLimit,
         )
+        .timeout(timeLimit)
         .then((value) {
           _logger.i(() => '[awaitIncomingToBeAccepted] completed');
           return const Result.success(none);
@@ -2677,8 +2672,8 @@ class Call {
             final status = state.status;
             return status is CallStatusOutgoing && status.acceptedByCallee;
           },
-          timeLimit: timeLimit,
         )
+        .timeout(timeLimit)
         .then((value) {
           _logger.i(() => '[awaitOutgoingToBeAccepted] completed');
           return const Result.success(none);
@@ -2695,8 +2690,8 @@ class Call {
           (state) {
             return state.status is CallStatusJoined;
           },
-          timeLimit: const Duration(seconds: 60),
         )
+        .timeout(const Duration(seconds: 60))
         .then((value) {
           _logger.d(() => '[awaitCallToBeJoined] completed');
           return const Result.success(none);
@@ -2818,7 +2813,7 @@ class Call {
 
     final response = await coordinatorCall();
 
-    return response.fold(
+    return response.foldResult(
       success: (success) async {
         _logger.v(() => '[performGetOperation] success: $success');
 
@@ -3159,14 +3154,18 @@ class Call {
   }) async {
     if (!_streamVideo.isAudioProcessorConfigured()) {
       _logger.w(() => '[startAudioProcessing] rejected (not configured)');
-      return Result.error('Cannot start audio processing (not configured)');
+      return failureWithError(
+        'Cannot start audio processing (not configured)',
+      );
     }
 
     if (!_permissionsManager.hasPermission(
       CallPermission.enableNoiseCancellation,
     )) {
       _logger.w(() => '[startAudioProcessing] rejected (no permission)');
-      return Result.error('Cannot start audio processing (no permission)');
+      return failureWithError(
+        'Cannot start audio processing (no permission)',
+      );
     }
 
     if (requireAdvancedAudioProcessingSupport) {
@@ -3174,16 +3173,13 @@ class Call {
           .deviceSupportsAdvancedAudioProcessing();
 
       if (supportResult.isFailure) {
-        return Result.error(
+        return failureWithError(
           'Cannot start audio processing (faild to check advanced audio processing support)',
         );
       } else {
         if (!(supportResult.getDataOrNull() ?? false)) {
-          return const Result.failure(
-            VideoError(
-              message:
-                  'Cannot start audio processing (device does not support required advanced audio processing)',
-            ),
+          return failureWithError(
+            'Cannot start audio processing (device does not support required advanced audio processing)',
           );
         }
       }
@@ -3203,7 +3199,9 @@ class Call {
   Future<Result<None>> stopAudioProcessing() async {
     if (!_streamVideo.isAudioProcessorConfigured()) {
       _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
-      return Result.error('Cannot stop audio processing (not configured)');
+      return failureWithError(
+        'Cannot stop audio processing (not configured)',
+      );
     }
 
     final result = await _streamVideo.setAudioProcessingEnabled(false);
@@ -3313,7 +3311,7 @@ class Call {
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
     final result =
         await _session?.setCameraPosition(cameraPosition) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     if (result.isSuccess) {
       _stateManager.participantUpdateCameraPosition(
@@ -3326,14 +3324,14 @@ class Call {
 
   Future<Result<None>> flipCamera() async {
     final result =
-        await _session?.flipCamera() ?? Result.error('Session is null');
+        await _session?.flipCamera() ?? failureWithError('Session is null');
 
-    await result.fold(
+    await result.foldResult(
       success: (success) async {
         final mediaDevicesResult = await _rtcMediaDeviceNotifier
             .enumerateDevices();
 
-        final mediaDevices = mediaDevicesResult.fold(
+        final mediaDevices = mediaDevicesResult.foldResult(
           success: (success) => success.data,
           failure: (failure) => <RtcMediaDevice>[],
         );
@@ -3368,9 +3366,9 @@ class Call {
           return Result.success(result);
         } catch (error, stackTrace) {
           _logger.e(() => 'Failed to set multitasking camera access: $error');
-          return Result.error(
+          return failureWithError(
             'Failed to set multitasking camera access',
-            stackTrace,
+            stackTrace: stackTrace,
           );
         }
       }
@@ -3388,7 +3386,7 @@ class Call {
 
     if (localTrackIdPrefix == null) {
       _logger.w(() => '[setZoom] local participant not found');
-      return Result.error('Local participant not found');
+      return failureWithError('Local participant not found');
     }
     final localTrack = _session?.getTrack(
       localTrackIdPrefix,
@@ -3397,7 +3395,7 @@ class Call {
 
     if (localTrack == null) {
       _logger.w(() => '[setZoom] local track not found');
-      return Result.error('Local track not found');
+      return failureWithError('Local track not found');
     }
 
     try {
@@ -3405,7 +3403,7 @@ class Call {
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[setZoom] Failed to set zoom: $error');
-      return Result.error('Failed to set zoom', stackTrace);
+      return failureWithError('Failed to set zoom', stackTrace: stackTrace);
     }
   }
 
@@ -3416,7 +3414,7 @@ class Call {
 
     if (localTrackIdPrefix == null) {
       _logger.w(() => '[focus] local participant not found');
-      return Result.error('Local participant not found');
+      return failureWithError('Local participant not found');
     }
 
     final localTrack = _session?.getTrack(
@@ -3425,7 +3423,7 @@ class Call {
     );
     if (localTrack == null) {
       _logger.w(() => '[focus] local track not found');
-      return Result.error('Local track not found');
+      return failureWithError('Local track not found');
     }
 
     try {
@@ -3433,7 +3431,7 @@ class Call {
       await Helper.setExposurePoint(localTrack.mediaTrack, focusPoint);
     } catch (error, stackTrace) {
       _logger.e(() => '[focus] Failed to set focus: $error');
-      return Result.error('Failed to set focus', stackTrace);
+      return failureWithError('Failed to set focus', stackTrace: stackTrace);
     }
 
     return const Result.success(none);
@@ -3442,7 +3440,7 @@ class Call {
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
     final result =
         await _session?.setVideoInputDevice(device) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     if (result.isSuccess) {
       final track = result.getDataOrNull()!;
@@ -3469,14 +3467,14 @@ class Call {
         state.value.isVideoModerated &&
         state.value.preferences.videoModerationConfig.muteVideo) {
       _logger.w(() => '[setCameraEnabled] blocked by video moderation');
-      return Result.error('Blocked by video moderation');
+      return failureWithError('Blocked by video moderation');
     }
     if (enabled && !hasPermission(CallPermission.sendVideo)) {
-      return Result.error('Missing permission to send video');
+      return failureWithError('Missing permission to send video');
     }
     final result =
         await _session?.setCameraEnabled(enabled, constraints: constraints) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     if (result.isSuccess) {
       _sfuStatsTimers.add(
@@ -3552,10 +3550,10 @@ class Call {
         state.value.isVideoModerated &&
         state.value.preferences.videoModerationConfig.muteAudio) {
       _logger.w(() => '[setMicrophoneEnabled] blocked by video moderation');
-      return Result.error('Blocked by video moderation');
+      return failureWithError('Blocked by video moderation');
     }
     if (enabled && !hasPermission(CallPermission.sendAudio)) {
-      return Result.error('Missing permission to send audio');
+      return failureWithError('Missing permission to send audio');
     }
 
     final result =
@@ -3563,7 +3561,7 @@ class Call {
           enabled,
           constraints: constraints,
         ) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     if (result.isSuccess) {
       // Make sure the audio input device is set
@@ -3617,7 +3615,9 @@ class Call {
     // Checks to ensure the user can share their screen.
     final canShare = hasPermission(CallPermission.screenshare);
     if (enabled && !canShare) {
-      return Result.error('Missing permission to share screen for the user');
+      return failureWithError(
+        'Missing permission to share screen for the user',
+      );
     }
 
     final updatedConstraints = (constraints ?? const ScreenShareConstraints())
@@ -3634,7 +3634,7 @@ class Call {
           enabled,
           constraints: updatedConstraints,
         ) ??
-        Result.error('Call session is null, cannot start screen share');
+        failureWithError('Call session is null, cannot start screen share');
 
     // In case of iOS Broadcast Extension, we don't update the state here
     // We listen to the ScreenShareStarted event instead
@@ -3669,7 +3669,7 @@ class Call {
   Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
     final result =
         await _session?.setAudioInputDevice(device) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     _connectOptions = _connectOptions.copyWith(audioInputDevice: device);
 
@@ -3699,7 +3699,7 @@ class Call {
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
     final result =
         await _session?.setAudioOutputDevice(device) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
@@ -3714,7 +3714,9 @@ class Call {
 
   Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
     if (!state.value.settings.audio.hifiAudioEnabled) {
-      return Result.error('High Fidelity audio is not enabled for this call');
+      return failureWithError(
+        'High Fidelity audio is not enabled for this call',
+      );
     }
 
     if (_streamVideo.isAudioProcessorConfigured()) {
@@ -3893,7 +3895,7 @@ class Call {
 
     final result =
         await _session?.updateViewportVisibility(change) ??
-        Result.error('Session is null');
+        failureWithError('Session is null');
 
     if (result.isSuccess) {
       _stateManager.participantUpdateViewportVisibility(
@@ -4137,7 +4139,7 @@ CallStateNotifier _makeStateManager(
   StateEmitter<User?> currentUser,
   CallPreferences callPreferences,
 ) {
-  final currentUserId = currentUser.valueOrNull?.id ?? '';
+  final currentUserId = currentUser.value?.id ?? '';
 
   return CallStateNotifier(
     CallState(

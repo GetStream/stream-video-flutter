@@ -13,7 +13,6 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
-import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -23,7 +22,6 @@ import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_extensions.dart';
 import '../../sfu/ws/sfu_ws.dart';
-import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
@@ -78,7 +76,6 @@ class CallSession extends Disposable {
          cid: callCid.value,
          userId: streamVideo.currentUser.id,
          apiKey: streamVideo.apiKey,
-         networkMonitor: networkMonitor,
        ),
        rtcManagerFactory = RtcManagerFactory(
          sessionId: sessionId,
@@ -138,7 +135,7 @@ class CallSession extends Disposable {
   late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
     duration: _debounceDuration,
     onBuffered: updateViewportVisibilities,
-    onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
+    onCancel: () => failureWithError('UpdateViewportVisibility cancelled'),
   );
 
   List<TraceSlice> getTrace() {
@@ -209,7 +206,6 @@ class CallSession extends Disposable {
 
       // Buffer sfu events until rtc manager is set
       final bufferedStream = sfuWS.events
-          .asStream()
           .takeWhile((_) => !_rtcManagerSubject!.hasValue)
           .buffer(_rtcManagerSubject!)
           .expand((event) => event);
@@ -217,7 +213,7 @@ class CallSession extends Disposable {
       // Delay rest of the sfu events until rtc manager is set
       final delayedStream = Rx.combineLatest2(
         _rtcManagerSubject!,
-        sfuWS.events.asStream(),
+        sfuWS.events,
         (_, event) => event,
       ).skip(1);
 
@@ -303,7 +299,7 @@ class CallSession extends Disposable {
 
       if (event is SfuErrorEvent) {
         _logger.e(() => '[start] sfu error: ${event.error}');
-        return Result.errorWithCause(event.error.message, event.error);
+        return failureWithError(event.error.message, cause: event.error);
       }
 
       final joinResponseEvent = event as SfuJoinResponseEvent;
@@ -639,7 +635,9 @@ class CallSession extends Disposable {
 
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set local track, Call not connected');
+      return failureWithError(
+        'Unable to set local track, Call not connected',
+      );
     }
 
     final result = await rtcManager.publishTrack(track);
@@ -738,7 +736,7 @@ class CallSession extends Disposable {
     final participant = callParticipants.firstWhereOrNull(matchParticipant);
 
     if (participant == null) {
-      return Result.error('Participant not found: $userId:$sessionId');
+      return failureWithError('Participant not found: $userId:$sessionId');
     }
 
     final trackIdPrefix = participant.trackIdPrefix;
@@ -746,7 +744,7 @@ class CallSession extends Disposable {
 
     // If the track is not found, return an error.
     if (track == null) {
-      return Result.error('Track not found: $trackIdPrefix:$trackType');
+      return failureWithError('Track not found: $trackIdPrefix:$trackType');
     }
 
     // If the track is found, return it.
@@ -938,8 +936,8 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentVideoInputDevice() async {
-    final state = stateManager.callStateStream.valueOrNull;
-    final videoInputDevice = state?.videoInputDevice;
+    final state = stateManager.callStateStream.value;
+    final videoInputDevice = state.videoInputDevice;
     if (videoInputDevice != null) {
       await setVideoInputDevice(videoInputDevice);
     }
@@ -1007,12 +1005,12 @@ class CallSession extends Disposable {
   Future<Result<void>> _onRenegotiationNeeded(StreamPeerConnection pc) async {
     if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(() => '[negotiate] call is disconnected');
-      return Result.error('Call is disconnected');
+      return failureWithError('Call is disconnected');
     }
 
     if (!sfuWS.isConnected) {
       _logger.w(() => '[negotiate] skipped — SFU WS not connected');
-      return Result.error('SFU WS is not connected');
+      return failureWithError('SFU WS is not connected');
     }
 
     await _negotiationLock.synchronized(() async {
@@ -1020,7 +1018,7 @@ class CallSession extends Disposable {
 
       final offer = await pc.createOffer();
       if (offer is! Success<rtc.RTCSessionDescription>) {
-        return Result<void>.error(
+        return failureWithError<void>(
           'Failed to create offer: ${offer.getErrorOrNull()}',
         );
       }
@@ -1096,8 +1094,8 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentAudioOutputDevice() async {
-    final state = stateManager.callStateStream.valueOrNull;
-    final audioOutputDevice = state?.audioOutputDevice;
+    final state = stateManager.callStateStream.value;
+    final audioOutputDevice = state.audioOutputDevice;
     if (audioOutputDevice != null) {
       await setAudioOutputDevice(audioOutputDevice);
     }
@@ -1173,7 +1171,9 @@ class CallSession extends Disposable {
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set speaker device, Call not connected');
+      return const Result.failure(
+        'Unable to set speaker device, Call not connected',
+      );
     }
 
     final result = await rtcManager.setAudioOutputDevice(device: device);
@@ -1186,7 +1186,7 @@ class CallSession extends Disposable {
   }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set camera, Call not connected');
+      return failureWithError('Unable to set camera, Call not connected');
     }
 
     final result = TracerZone.run(
@@ -1209,7 +1209,9 @@ class CallSession extends Disposable {
   }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set microphone, Call not connected');
+      return failureWithError(
+        'Unable to set microphone, Call not connected',
+      );
     }
 
     final result = TracerZone.run(_zonedTracer, ++zonedTracerSeq, () async {
@@ -1225,7 +1227,9 @@ class CallSession extends Disposable {
   Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set audioInput, Call not connected');
+      return failureWithError(
+        'Unable to set audioInput, Call not connected',
+      );
     }
 
     final result = await rtcManager.setAudioInputDevice(device: device);
@@ -1238,7 +1242,9 @@ class CallSession extends Disposable {
   }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set ScreenShare, Call not connected');
+      return failureWithError(
+        'Unable to set ScreenShare, Call not connected',
+      );
     }
 
     final result = await rtcManager.setScreenShareEnabled(
@@ -1252,7 +1258,7 @@ class CallSession extends Disposable {
   Future<Result<RtcLocalTrack<CameraConstraints>>> flipCamera() async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to flip camera, Call not connected');
+      return failureWithError('Unable to flip camera, Call not connected');
     }
 
     final result = await rtcManager.flipCamera();
@@ -1264,7 +1270,9 @@ class CallSession extends Disposable {
   ) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set video input, Call not connected');
+      return failureWithError(
+        'Unable to set video input, Call not connected',
+      );
     }
 
     return rtcManager.setVideoInputDevice(device: device);
@@ -1273,7 +1281,9 @@ class CallSession extends Disposable {
   Future<Result<None>> setCameraPosition(CameraPosition position) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set camera position, Call not connected');
+      return failureWithError(
+        'Unable to set camera position, Call not connected',
+      );
     }
 
     final result = await rtcManager.setCameraPosition(cameraPosition: position);

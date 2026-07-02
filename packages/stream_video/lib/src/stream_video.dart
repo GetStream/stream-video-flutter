@@ -6,11 +6,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_core/stream_core.dart'
+    hide LifecycleState, TokenManager, TokenProvider;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
-import '../open_api/video/coordinator/api.dart';
+import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_reject_reason.dart';
@@ -22,7 +24,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'core/client_state.dart';
 import 'core/connection_state.dart';
-import 'disposable.dart';
+import 'core/internet_connection_network_state_provider.dart';
 import 'errors/video_error.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
@@ -36,7 +38,6 @@ import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
-import 'logger/stream_logger.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
 import 'models/call_preferences.dart';
@@ -52,7 +53,6 @@ import 'models/queried_calls.dart';
 import 'models/user.dart';
 import 'models/user_info.dart';
 import 'network_monitor_settings.dart';
-import 'platform_detector/platform_detector.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
 import 'token/token.dart';
@@ -61,7 +61,6 @@ import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
-import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
@@ -203,8 +202,8 @@ class StreamVideo extends Disposable {
     }
 
     final tokenProvider = switch (user.type) {
-      UserType.authenticated => TokenProvider.from(
-        userToken?.let(UserToken.jwt),
+      UserType.regular => TokenProvider.from(
+        userToken?.let(UserToken.new),
         tokenLoader,
         onTokenUpdated,
       ),
@@ -215,12 +214,18 @@ class StreamVideo extends Disposable {
       UserType.guest => TokenProvider.dynamic((userId) async {
         final result = await _client.loadGuest(id: userId);
         if (result is! Success<GuestCreatedData>) {
-          throw (result as Failure).error;
+          throw (result as Failure).videoError;
         }
         final updatedUser = result.data.user;
+        final updatedInfo = updatedUser.toUserInfo();
         _state.user.value = User(
+          id: updatedInfo.id,
+          name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
+          image: updatedInfo.image,
+          role: updatedInfo.role,
+          teams: updatedInfo.teams,
+          custom: updatedInfo.extraData,
           type: user.type,
-          info: updatedUser.toUserInfo(),
         );
         return result.data.accessToken;
       }, onTokenUpdated: onTokenUpdated),
@@ -251,7 +256,7 @@ class StreamVideo extends Disposable {
                       'with stackTrace: $stackTrace',
                 );
 
-                return Result<UserToken>.error(
+                return failureWithError<UserToken>(
                   'Failed to auto connect: $error',
                 );
               });
@@ -306,7 +311,7 @@ class StreamVideo extends Disposable {
   final Map<String, Timer> _incomingAutoRejectTimers = {};
 
   /// Returns the current user.
-  UserInfo get currentUser => _state.currentUser.info;
+  UserInfo get currentUser => _state.currentUser.toUserInfo();
 
   /// Returns the current user type.
   UserType get currentUserType => _state.currentUser.type;
@@ -331,7 +336,7 @@ class StreamVideo extends Disposable {
   /// Please note that subscribing to WebSocket events is an advanced use-case,
   /// for most use-cases it should be enough to watch for changes
   /// in the reactive [Call.state].
-  Stream<CoordinatorEvent> get events => _client.events.asStream();
+  Stream<CoordinatorEvent> get events => _client.events;
 
   async.CancelableOperation<Result<UserToken>>? _connectOperation;
   async.CancelableOperation<Result<None>>? _disconnectOperation;
@@ -353,7 +358,7 @@ class StreamVideo extends Disposable {
   }) async {
     if (currentUserType == UserType.anonymous) {
       _logger.w(() => '[connect] rejected (anonymous user)');
-      return Result.error(
+      return failureWithError(
         'Cannot connect anonymous user to the WS due to Missing Permissions',
       );
     }
@@ -364,7 +369,7 @@ class StreamVideo extends Disposable {
     ).asCancelable();
 
     return _connectOperation!
-        .valueOrDefault(Result.error('connect was cancelled'))
+        .valueOrDefault(failureWithError('connect was cancelled'))
         .whenComplete(() {
           _logger.i(() => '[connect] clear shared operation');
           _connectOperation = null;
@@ -375,7 +380,7 @@ class StreamVideo extends Disposable {
   Future<Result<None>> disconnect() async {
     _disconnectOperation ??= _disconnect().asCancelable();
     return _disconnectOperation!
-        .valueOrDefault(Result.error('disconnect was cancelled'))
+        .valueOrDefault(failureWithError('disconnect was cancelled'))
         .whenComplete(() {
           _logger.i(() => '[disconnect] clear shared operation');
           _disconnectOperation = null;
@@ -392,7 +397,9 @@ class StreamVideo extends Disposable {
       _logger.w(() => '[connect] rejected (already connected)');
       final token = _tokenManager.getCachedToken();
       if (token == null) {
-        return Result.error('[connect] userToken is null in Connected state');
+        return failureWithError(
+          '[connect] userToken is null in Connected state',
+        );
       }
       return Result.success(token);
     }
@@ -405,7 +412,7 @@ class StreamVideo extends Disposable {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
       _connectionState = ConnectionState.failed(
         _state.currentUser.id,
-        error: (tokenResult as Failure).error,
+        error: (tokenResult as Failure).videoError,
       );
       return tokenResult;
     }
@@ -415,14 +422,14 @@ class StreamVideo extends Disposable {
     try {
       await _disconnectOperation?.cancel();
       final result = await _client.connectUser(
-        user.info,
+        user.toUserInfo(),
         includeUserDetails: includeUserDetails,
       );
       _logger.v(() => '[connect] completed: $result');
       if (result is Failure) {
         _connectionState = ConnectionState.failed(
           _state.currentUser.id,
-          error: result.error,
+          error: result.videoError,
         );
         return result;
       }
@@ -498,9 +505,8 @@ class StreamVideo extends Disposable {
 
       // In a edge case where call with the same CID as the incoming call is also an outgoing call
       // we want to use the same Call instance.
-      if (state.outgoingCall.valueOrNull?.callCid.value ==
-          event.data.callCid.value) {
-        _state.incomingCall.value = state.outgoingCall.valueOrNull;
+      if (state.outgoingCall.value?.callCid.value == event.data.callCid.value) {
+        _state.incomingCall.value = state.outgoingCall.value;
         return;
       }
 
@@ -1007,7 +1013,7 @@ class StreamVideo extends Disposable {
     final activeCall = activeCalls.firstWhereOrNull(
       (call) => call.callCid.value == cid,
     );
-    final incomingCall = _state.incomingCall.valueOrNull;
+    final incomingCall = _state.incomingCall.value;
 
     if (activeCall?.callCid.value == cid) {
       final result = await activeCall?.leave(
@@ -1162,7 +1168,7 @@ class StreamVideo extends Disposable {
     final call = makeCall(callType: callType, id: id);
     final callResult = await call.get(watch: false);
 
-    return callResult.fold(
+    return callResult.foldResult(
       failure: (failure) {
         _logger.e(() => '[getCallRingingState] failed: $failure');
         return CallRingingState.ended;
@@ -1216,7 +1222,7 @@ class StreamVideo extends Disposable {
     }
 
     // If call was already created by consuming ringing event, use the same instance.
-    if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
+    if (_state.incomingCall.value?.callCid.value == cid) {
       final call = _state.incomingCall.value!;
       if (preferences != null) {
         call.updateCallPreferences(preferences);
@@ -1284,6 +1290,7 @@ CoordinatorClient buildCoordinatorClient({
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
+
   return CoordinatorClientRetry(
     retryPolicy: retryPolicy,
     tokenManager: tokenManager,
@@ -1291,11 +1298,13 @@ CoordinatorClient buildCoordinatorClient({
       apiKey: apiKey,
       tokenManager: tokenManager,
       latencyService: LatencyService(settings: latencySettings),
-      networkMonitor: networkMonitor,
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,
       isAnonymous: user.type == UserType.anonymous,
+      networkStateProvider: InternetConnectionNetworkStateProvider(
+        networkMonitor,
+      ),
     ),
   );
 }

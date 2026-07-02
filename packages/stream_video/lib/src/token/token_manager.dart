@@ -1,5 +1,6 @@
 import 'package:async/async.dart' as async;
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' show UserToken;
 
 import '../logger/impl/tagged_logger.dart';
 import '../utils/cancelable_operation.dart';
@@ -62,7 +63,7 @@ class TokenManager {
     }
     return _tokenOperation!
         .valueOrDefault(
-          Result.error('provideToken was cancelled'),
+          failureWithError('provideToken was cancelled'),
         )
         .whenComplete(() {
           _logger.v(() => '[provideToken] drop cached future');
@@ -101,7 +102,9 @@ class _StubTokenProvider implements TokenProvider {
 
   @override
   Future<Result<UserToken>> getToken(String userId) async {
-    return Result.error('StubTokenProvider is unable to provide a real token');
+    return failureWithError(
+      'StubTokenProvider is unable to provide a real token',
+    );
   }
 
   @override

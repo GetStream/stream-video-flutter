@@ -36,7 +36,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
   );
 
   final apiKey = tokenResponse.apiKey;
-  final token = UserToken.jwt(tokenResponse.token);
+  final token = UserToken(tokenResponse.token);
 
   streamLog.i(_tag, () => '[connectUser] api_key: ${tokenResponse.apiKey}');
   final client = await StreamVideoSdk.initialize(

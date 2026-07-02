@@ -205,7 +205,7 @@ class _StreamDogFoodingAppContentState
     await AppInjector.init(forceEnvironment: environment);
 
     final authController = locator.get<UserAuthController>();
-    await authController.login(User(info: user), environment);
+    await authController.login(user.toUser(), environment);
 
     String? callId;
     for (final segment in uri.pathSegments.indexed) {

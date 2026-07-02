@@ -27,7 +27,7 @@ void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    user = User.regular(userId: 'test-user', name: 'Test User');
+    user = const User(id: 'test-user', name: 'Test User');
     userToken =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSm9obiBEb2UifQ.hrrtiYCtfs2cowE2sx2dypxoXhsEE8pQl-V6Nq4i8qU';
 

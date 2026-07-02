@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/latency/latency_service.dart';
 import 'package:stream_video/src/latency/latency_settings.dart';
 import 'package:stream_video/src/logger/impl/tagged_logger.dart';
 import 'package:stream_video/src/logger/stream_log.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
 import 'package:stream_video/src/utils/none.dart';
 
 import '../logger/impl/test_logger.dart';

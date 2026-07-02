@@ -1,24 +1,16 @@
 import 'dart:async';
 
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
-import '../../core/network_monitor_flutter.dart';
+import '../../../stream_video.dart';
 import '../../errors/video_error_composer.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../logger/stream_log.dart';
-import '../../shared_emitter.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../../ws/health/health_monitor.dart';
-import '../../ws/ws.dart';
-import '../data/events/sfu_event_mapper_extensions.dart';
+import '../../ws/ws.dart' show StreamWebSocketCloseCode;
 import '../data/events/sfu_events.dart';
+import 'sfu_message_codec.dart';
 
 const _tag = 'SV:Sfu-WS';
 
-class SfuWebSocket extends StreamWebSocket implements HealthListener {
+class SfuWebSocket {
   factory SfuWebSocket({
     required int sessionSeq,
     required String sessionId,
@@ -27,13 +19,14 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
     required String apiKey,
     required String sfuUrl,
     required String sfuWsEndpoint,
-    required InternetConnection networkMonitor,
     Iterable<String>? protocols,
   }) {
     final tag = '$_tag-$sessionSeq';
     streamLog.i(tag, () => '<factory> sessionId: $sessionId');
+
     final sfuUri = Uri.parse(sfuUrl);
     streamLog.i(tag, () => '<factory> sfuUri: $sfuUri');
+
     final String wsEndpoint;
     if (sfuUri.host.startsWith('localhost') ||
         sfuUri.host.startsWith('127.0.0.1') ||
@@ -47,180 +40,101 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
           )
           .toString();
     }
+
     final finalWsEndpoint =
         '$sfuWsEndpoint?X-Stream-Client=$xStreamClientHeader&attempt=${++sessionSeq}&cid=$cid&user_id=$userId&api_key=$apiKey&user_session_id=$sessionId';
+
     streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     streamLog.i(tag, () => '<factory> sfuWsEndpoint: $sfuWsEndpoint');
     streamLog.i(tag, () => '<factory> finalWsEndpoint: $finalWsEndpoint');
 
     return SfuWebSocket._(
-      finalWsEndpoint,
-      protocols: protocols,
       sessionSeq: sessionSeq,
       sessionId: sessionId,
-      networkMonitor: networkMonitor,
+      url: finalWsEndpoint,
+      protocols: protocols,
     );
   }
 
-  /// TODO
-  SfuWebSocket._(
-    super.url, {
-    super.protocols,
+  SfuWebSocket._({
     required this.sessionSeq,
     required this.sessionId,
-    required this.networkMonitor,
-  }) : super(tag: '$_tag-$sessionSeq') {
+    required String url,
+    Iterable<String>? protocols,
+  }) {
     _logger.i(() => '<init> sessionId: $sessionId');
-
-    onConnectionStateUpdated = (it) {};
+    _client = StreamWebSocketClient(
+      options: WebSocketOptions(url: url, protocols: protocols),
+      messageCodec: const SfuMessageCodec(),
+      pingRequestBuilder: ([_]) => SfuWsRequest(
+        sfu_events.SfuRequest(
+          healthCheckRequest: sfu_events.HealthCheckRequest(),
+        ),
+      ),
+    );
+    _client.connectionState.listen(_onConnectionStateChanged);
+    _client.events.listen(_onWsEvent);
   }
 
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
-  late final HealthMonitor healthMonitor = HealthMonitorImpl(
-    'Sfu',
-    this,
-    networkMonitor: NetworkMonitorFlutter.fromInternetConnection(
-      networkMonitor,
-    ),
-  );
-
   final int sessionSeq;
   final String sessionId;
-  final InternetConnection networkMonitor;
 
-  bool _manuallyClosed = false;
-  bool _recreating = false;
+  late final StreamWebSocketClient _client;
+  String get url => _client.options.url;
 
   SharedEmitter<SfuEvent> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEvent>();
-  StreamSubscription<InternetStatus>? _networkChangeSubscription;
+  final _events = MutableSharedEmitter<SfuEvent>();
 
-  @override
-  Future<Result<None>> recreate() {
-    _recreating = true;
-    return super.recreate();
-  }
+  bool get isConnected => _client.connectionState.value.isConnected;
 
-  @override
-  Future<Result<None>> connect() {
-    _logger.i(() => '[connect] connectionState: $connectionState');
-    connectionState = ConnectionState.connecting;
-    healthMonitor.start();
-
-    return super.connect();
-  }
-
-  @override
-  void onOpen() {
-    _logger.i(() => '[onOpen] url: $url');
-    connectionState = ConnectionState.connected;
-    _recreating = false;
-    healthMonitor.onSocketOpen();
-
-    _events.emit(SfuSocketConnected(sessionId: sessionId, url: url));
-  }
-
-  @override
-  void onError(Object error, [StackTrace? stackTrace]) {
-    _logger.w(() => '[onError] error: $error');
-    healthMonitor.onSocketError(error);
-
-    _events.emit(
-      SfuSocketFailed(
-        sessionId: sessionId,
-        url: url,
-        error: VideoErrors.compose(error),
-      ),
-    );
-  }
-
-  @override
-  void onMessage(dynamic message) {
-    sfu_events.SfuEvent? rawEvent;
-    try {
-      rawEvent = sfu_events.SfuEvent.fromBuffer(message);
-    } catch (e, stk) {
-      _logger.w(() => '[onMessage] failed: $e, stacktrace: $stk');
-    }
-
-    if (rawEvent == null) return;
-
-    _logger.v(() => '[onRawMessage] message: $rawEvent');
-
-    final event = rawEvent.toDomain();
-    _handleEvent(event);
-    _events.emit(event);
-  }
-
-  void _handleEvent(SfuEvent event) {
-    if (event is SfuJoinResponseEvent) {
-      _logger.d(() => '[handleEvent] event.type: SfuJoinResponseEvent');
-      connectionState = ConnectionState.connected;
-      healthMonitor.onPongReceived();
-    } else if (event is SfuHealthCheckResponseEvent) {
-      _logger.d(() => '[handleEvent] event.type: SfuHealthCheckResponseEvent');
-      healthMonitor.onPongReceived();
-    }
-  }
-
-  @override
-  void onClose(int? closeCode, String? closeReason) {
+  Future<Result<None>> connect() async {
     _logger.i(
-      () =>
-          '[onClose] closeCode: $closeCode, closeReason: $closeReason, '
-          'manuallyClosed: $_manuallyClosed',
+      () => '[connect] connectionState: ${_client.connectionState.value}',
     );
-
-    healthMonitor.onSocketClose();
-    connectionState = ConnectionState.disconnected;
-
-    if (_manuallyClosed || _recreating) {
-      return;
-    }
-
-    _events.emit(
-      SfuSocketDisconnected(
-        sessionId: sessionId,
-        url: url,
-        reason: DisconnectionReason(
-          closeCode: closeCode,
-          closeReason: closeReason,
-        ),
-      ),
-    );
+    await _client.connect();
+    return const Result.success(none);
   }
 
-  @override
   Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     _logger.i(
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
-
-    await _networkChangeSubscription?.cancel();
-
-    // Stop sending keep alive messages.
-    healthMonitor.stop();
-
-    if (connectionState == ConnectionState.disconnected) {
+    if (_client.connectionState.value is Disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       return const Result.success(none);
     }
-
-    // If no close code is provided,
-    // means we are manually closing the connection.
-    if (closeCode == null) {
-      _logger.v(() => '[disconnect] mark as "manuallyClosed"');
-      _manuallyClosed = true;
-    }
-
-    return super.disconnect(closeCode, closeReason);
+    await _client.disconnect(
+      closeCode: closeCode != null
+          ? CloseCode(closeCode)
+          : CloseCode.normalClosure,
+      source: closeCode != null
+          ? const DisconnectionSource.systemInitiated()
+          : const DisconnectionSource.userInitiated(),
+    );
+    return const Result.success(none);
   }
 
-  void leave({
-    String? sessionId,
-    String? reason,
-  }) {
+  Future<Result<None>> recreate() async {
+    _logger.i(() => '[recreate] no args');
+    await _client.disconnect(
+      closeCode: CloseCode(StreamWebSocketCloseCode.disposeOldSocket.value),
+      source: const DisconnectionSource.systemInitiated(),
+    );
+
+    // disconnect() uses unawaited engine.close() internally
+    // wait for Disconnected with timeout
+    await _client.connectionState
+        .firstWhere((s) => s is Disconnected)
+        .timeout(const Duration(seconds: 10))
+        .catchError((_) => _client.connectionState.value);
+
+    await _client.connect();
+    return const Result.success(none);
+  }
+
+  void leave({String? sessionId, String? reason}) {
     _logger.d(() => '[leave] no args');
     send(
       sfu_events.SfuRequest(
@@ -241,32 +155,61 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
     );
   }
 
-  @override
   void send(sfu_events.SfuRequest message) {
     _logger.v(() => '[send] message: $message');
-    super.send(message.writeToBuffer());
+    _client.send(SfuWsRequest(message));
   }
 
-  @override
-  Future<void> onPongTimeout(Duration timeout) async {
-    _logger.v(() => '[onPongTimeout] timeout: $timeout');
-
-    await disconnect();
+  void _onWsEvent(WsEvent wsEvent) {
+    if (wsEvent is! SfuWsEvent) return;
+    _events.emit(wsEvent.event);
   }
 
-  @override
-  void onPingRequested() {
-    _logger.v(() => '[onPingRequested] no args');
-    sendPing();
+  void _onConnectionStateChanged(WebSocketConnectionState state) {
+    _logger.d(() => '[onConnectionStateChanged] state: $state');
+    switch (state) {
+      case Authenticating():
+        _events.emit(SfuSocketConnected(sessionId: sessionId, url: url));
+      case Disconnected(:final source):
+        _handleDisconnected(source);
+      default:
+        break;
+    }
   }
 
-  @override
-  void onNetworkDisconnected() {
-    _logger.i(() => '[onNetworkDisconnected] no args');
-  }
-
-  @override
-  void onNetworkConnected() {
-    _logger.i(() => '[onNetworkConnected] no args');
+  void _handleDisconnected(DisconnectionSource source) {
+    switch (source) {
+      case ServerInitiated(:final error?):
+        if (error.error != null) {
+          _events.emit(
+            SfuSocketFailed(
+              sessionId: sessionId,
+              url: url,
+              error: VideoErrors.compose(error.error),
+            ),
+          );
+        } else {
+          _events.emit(
+            SfuSocketDisconnected(
+              sessionId: sessionId,
+              url: url,
+              reason: DisconnectionReason(
+                closeCode: error.code != 0 ? error.code : null,
+                closeReason: error.reason != 'Unknown' ? error.reason : null,
+              ),
+            ),
+          );
+        }
+      case UnHealthyConnection():
+        _events.emit(
+          SfuSocketDisconnected(
+            sessionId: sessionId,
+            url: url,
+            reason: DisconnectionReason(closeReason: 'Unhealthy connection'),
+          ),
+        );
+      case UserInitiated() || SystemInitiated() || ServerInitiated():
+        break; // manual close or recreate — suppress
+    }
   }
 }

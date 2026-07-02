@@ -8,5 +8,3 @@ class MockCall extends Mock implements Call {}
 class MockCallState extends Mock implements CallState {}
 
 class MockCallParticipantState extends Mock implements CallParticipantState {}
-
-class MockStateEmitter<T> extends Mock implements StateEmitter<T> {}

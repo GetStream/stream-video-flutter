@@ -2,8 +2,7 @@
 
 import 'package:meta/meta.dart';
 
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../platform_detector/platform_detector.dart';
+import '../../../../stream_video.dart';
 import '../codec/sdp_codec.dart';
 import '../policy/sdp_policy.dart';
 import '../sdp.dart';

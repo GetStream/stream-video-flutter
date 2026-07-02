@@ -17,8 +17,8 @@ void main() {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
 
-      user = User.regular(
-        userId: 'test-user',
+      user = const User(
+        id: 'test-user',
         name: 'Test User',
       );
 

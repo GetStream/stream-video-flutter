@@ -1,11 +1,7 @@
 import 'package:collection/collection.dart';
 
-import '../../stream_video.dart'
-    show DisconnectReason, MultiCallAudioPolicy, StreamVideoOptions;
-import '../call/call.dart';
+import '../../stream_video.dart';
 import '../lifecycle/lifecycle_state.dart';
-import '../models/user.dart';
-import '../state_emitter.dart';
 import 'connection_state.dart';
 
 abstract class ClientState {
@@ -58,16 +54,16 @@ abstract class ClientState {
 
 class MutableClientState implements ClientState {
   MutableClientState(User user, this.options)
-    : user = MutableStateEmitterImpl(user),
-      activeCalls = MutableStateEmitterImpl([]),
-      activeCall = MutableStateEmitterImpl(null),
-      watchedCalls = MutableStateEmitterImpl([]),
-      incomingCall = MutableStateEmitterImpl(null),
-      outgoingCall = MutableStateEmitterImpl(null),
-      connection = MutableStateEmitterImpl(
+    : user = MutableStateEmitter(user),
+      activeCalls = MutableStateEmitter([]),
+      activeCall = MutableStateEmitter(null),
+      watchedCalls = MutableStateEmitter([]),
+      incomingCall = MutableStateEmitter(null),
+      outgoingCall = MutableStateEmitter(null),
+      connection = MutableStateEmitter(
         ConnectionState.disconnected(user.id),
       ),
-      appLifecycleState = MutableStateEmitterImpl(null);
+      appLifecycleState = MutableStateEmitter(null);
 
   final StreamVideoOptions options;
 
@@ -115,7 +111,7 @@ class MutableClientState implements ClientState {
   }
 
   List<Call> getActiveCalls() => activeCalls.value;
-  Call? getOutgoingCall() => outgoingCall.valueOrNull;
+  Call? getOutgoingCall() => outgoingCall.value;
 
   @override
   Future<void> setActiveCall(Call? call) async {
@@ -168,7 +164,6 @@ class MutableClientState implements ClientState {
   @override
   Future<void> removeActiveCall(Call call) async {
     if (!options.allowMultipleActiveCalls &&
-        activeCall.hasValue &&
         activeCall.value?.callCid == call.callCid) {
       activeCall.value = null;
     }

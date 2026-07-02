@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../platform_detector/platform_detector.dart';
+import '../../../../../stream_video.dart';
 import '../../codec/sdp_codec.dart';
 import '../../editor/rule/rule_set_opus_red_enabled.dart';
 import '../../sdp.dart';

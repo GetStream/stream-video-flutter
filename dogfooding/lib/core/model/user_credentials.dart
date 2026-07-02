@@ -8,7 +8,7 @@ class UserCredentials {
 
   factory UserCredentials.fromJson(Map<String, Object?> json) {
     return UserCredentials(
-      token: UserToken.jwt(json['token']! as String),
+      token: UserToken(json['token']! as String),
       userInfo: _parseUserInfoFromJson(json['user']! as Map<String, Object?>),
     );
   }

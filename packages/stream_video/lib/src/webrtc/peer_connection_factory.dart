@@ -1,16 +1,10 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart';
+import '../../stream_video.dart';
 import '../call/session/call_session_config.dart';
 import '../call/stats/tracer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/audio_configuration_policy.dart';
-import '../models/call_cid.dart';
-import '../platform_detector/platform_detector.dart';
 import '../sfu/sfu_client.dart';
-import '../types/other.dart';
-import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
 import 'traced_peer_connection.dart';
 

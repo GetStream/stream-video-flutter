@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -28,8 +27,8 @@ void main() {
     late MockRtcMediaDeviceNotifier mockDeviceNotifier;
 
     setUp(() {
-      user = User.regular(
-        userId: 'test-user',
+      user = const User(
+        id: 'test-user',
         name: 'Test User',
       );
 
@@ -42,7 +41,7 @@ void main() {
       // Mock coordinator client methods that might be called
       when(
         () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      ).thenAnswer((_) => MutableSharedEmitter<CoordinatorEvent>());
 
       // Default device enumeration mocking - returns built-in devices only
       when(mockDeviceNotifier.enumerateDevices).thenAnswer(
@@ -70,7 +69,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: true),
           audio: StreamAudioSettings(
             speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+            defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
           ),
         );
 
@@ -100,7 +99,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
           audio: StreamAudioSettings(
             speakerDefaultOn: true,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+            defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
           ),
         );
 
@@ -128,7 +127,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
           audio: StreamAudioSettings(
             speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.speaker,
+            defaultDevice: AudioSettingsRequestDefaultDevice.speaker,
           ),
         );
 
@@ -158,7 +157,7 @@ void main() {
             video: StreamVideoSettings(cameraDefaultOn: false),
             audio: StreamAudioSettings(
               speakerDefaultOn: false,
-              defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+              defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
             ),
           );
 
@@ -194,7 +193,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
           audio: StreamAudioSettings(
             speakerDefaultOn: true,
-            defaultDevice: AudioSettingsRequestDefaultDeviceEnum.speaker,
+            defaultDevice: AudioSettingsRequestDefaultDevice.speaker,
           ),
         );
 
@@ -232,7 +231,7 @@ void main() {
             video: StreamVideoSettings(cameraDefaultOn: false),
             audio: StreamAudioSettings(
               speakerDefaultOn: false,
-              defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+              defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
             ),
           );
 
@@ -270,7 +269,7 @@ void main() {
             ), // This normally enables speaker
             audio: StreamAudioSettings(
               speakerDefaultOn: false,
-              defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+              defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
             ),
           );
 
@@ -308,7 +307,7 @@ void main() {
         // Arrange
         const callSettings = CallSettings(
           video: StreamVideoSettings(
-            cameraFacing: VideoSettingsRequestCameraFacingEnum.front,
+            cameraFacing: VideoSettingsRequestCameraFacing.front,
           ),
         );
 
@@ -331,7 +330,7 @@ void main() {
         // Arrange
         const callSettings = CallSettings(
           video: StreamVideoSettings(
-            cameraFacing: VideoSettingsRequestCameraFacingEnum.back,
+            cameraFacing: VideoSettingsRequestCameraFacing.back,
           ),
         );
 

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:stream_core/stream_core.dart' hide LifecycleState;
 
 import '../logger/impl/tagged_logger.dart';
-import '../utils/standard.dart';
 import 'lifecycle_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:LifecycleUtilsM');

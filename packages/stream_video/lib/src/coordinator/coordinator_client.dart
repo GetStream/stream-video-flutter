@@ -1,24 +1,8 @@
 // ignore_for_file: comment_references
 
 import '../../open_api/video/coordinator/api.dart' as open;
-import '../models/call_cid.dart';
-import '../models/call_egress.dart';
-import '../models/call_metadata.dart';
-import '../models/call_permission.dart';
-import '../models/call_reaction.dart';
-import '../models/call_received_created_data.dart';
+import '../../stream_video.dart';
 import '../models/call_received_data.dart';
-import '../models/call_settings.dart';
-import '../models/guest_created_data.dart';
-import '../models/push_device.dart';
-import '../models/push_provider.dart';
-import '../models/queried_calls.dart';
-import '../models/queried_members.dart';
-import '../models/user_info.dart';
-import '../shared_emitter.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
-import 'models/coordinator_events.dart';
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {

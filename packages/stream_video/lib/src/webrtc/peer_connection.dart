@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
-import '../disposable.dart';
 import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
@@ -13,7 +13,6 @@ import '../sfu/data/models/sfu_error.dart';
 import '../sfu/sfu_client.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
-import '../utils/standard.dart';
 import 'model/stats/rtc_printable_stats.dart';
 import 'model/stats/rtc_stats.dart';
 import 'model/stats/rtc_stats_mapper.dart';
@@ -182,14 +181,14 @@ class StreamPeerConnection extends Disposable {
 
       if (modifiedSdp == null || modifiedSdp.isEmpty) {
         _logger.w(() => '[createOffer] rejected (SDP is null/empty)');
-        return Result.error('createOffer produced null/empty SDP');
+        return failureWithError('createOffer produced null/empty SDP');
       }
 
       final modifiedOffer = localOffer.copyWith(sdp: modifiedSdp);
 
       final setResult = await setLocalDescription(modifiedOffer);
       if (setResult is Failure) {
-        return Result.failure(setResult.error);
+        return setResult;
       }
 
       return Result.success(modifiedOffer);
@@ -224,7 +223,7 @@ class StreamPeerConnection extends Disposable {
         _logger.w(
           () => '[createLocalAnswer] #$type; rejected (SDP is null/empty)',
         );
-        return Result.error('createAnswer produced null/empty SDP');
+        return failureWithError('createAnswer produced null/empty SDP');
       }
 
       final modifiedAnswer = localAnswer.copyWith(sdp: modifiedSdp);
@@ -235,7 +234,7 @@ class StreamPeerConnection extends Disposable {
 
       final setResult = await setLocalDescription(modifiedAnswer);
       if (setResult is Failure) {
-        return Result.failure(setResult.error);
+        return setResult;
       }
       return Result.success(modifiedAnswer);
     } catch (e, stk) {
@@ -325,7 +324,7 @@ class StreamPeerConnection extends Disposable {
       final remoteDescription = await pc.getRemoteDescription();
       if (remoteDescription == null) {
         _pendingCandidates.add(candidate);
-        return Result.error('no remoteDescription set');
+        return failureWithError('no remoteDescription set');
       }
       await pc.addCandidate(candidate);
       return const Result.success(none);

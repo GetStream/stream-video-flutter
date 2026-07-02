@@ -35,7 +35,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
 
     final streamVideo = StreamVideo.create(
       tokenResponse.apiKey,
-      user: User.regular(userId: userId),
+      user: User(id: userId),
       tokenLoader: (userId) async {
         final token = await _tokenService.loadToken(
           userId: userId,
@@ -58,16 +58,16 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
     _streamVideo = streamVideo;
 
     result.fold(
-      success: (data) {
+      onSuccess: (_) {
         _call = call;
         if (mounted) {
           setState(() {});
         }
       },
-      failure: (error) {
+      onFailure: (error, stackTrace) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ).showSnackBar(SnackBar(content: Text('$error')));
       },
     );
   }

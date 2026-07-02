@@ -6,10 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
+import 'fixtures/call_test_helpers.dart';
 
 void main() {
   setUpAll(() {
@@ -28,15 +28,11 @@ void main() {
     late MockCoordinatorClient mockCoordinatorClient;
 
     setUp(() {
-      mockCoordinatorClient = MockCoordinatorClient();
-
-      when(
-        () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      mockCoordinatorClient = setupMockCoordinatorClient();
 
       streamVideo = StreamVideo.create(
         'test-api-key',
-        user: User.regular(userId: 'test-user', name: 'Test User'),
+        user: const User(id: 'test-user', name: 'Test User'),
         userToken:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSm9obiBEb2UifQ.hrrtiYCtfs2cowE2sx2dypxoXhsEE8pQl-V6Nq4i8qU',
         options: StreamVideoOptions(
@@ -105,7 +101,7 @@ void main() {
     test('reverts acceptedByMe when coordinator accept fails', () async {
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
-      ).thenAnswer((_) async => Result.error('network error'));
+      ).thenAnswer((_) async => failureWithError('network error'));
 
       final call = createIncomingCall();
       final result = await call.accept();
@@ -122,7 +118,7 @@ void main() {
       ).thenAnswer((_) async {
         acceptAttempts++;
         if (acceptAttempts == 1) {
-          return Result.error('network error');
+          return failureWithError('network error');
         }
         return const Result.success(none);
       });
