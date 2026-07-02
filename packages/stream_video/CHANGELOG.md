@@ -1,3 +1,25 @@
+## Unreleased
+
+### ⚠️ Breaking
+
+- Generated enum types no longer use the `Enum` suffix (e.g. `AudioSettingsRequestDefaultDeviceEnum` → `AudioSettingsRequestDefaultDevice`). The old names remain available as deprecated aliases and will be removed in a future release — please migrate to the new names.
+- `custom` map fields now allow null values (`Map<String, Object?>`). Code that assumed non-null values may need null handling.
+- `Result`, `Success`, and `Failure` are now provided by `stream_core`. Several API changes follow:
+  - `Result.fold()` now takes `{onSuccess:, onFailure:}` parameters instead of `{success:, failure:}`. Use the new `foldResult()` extension method to keep the previous `{success: (Success<T>), failure: (Failure)}` style.
+  - `Result.error(String)` constructor has been removed. Use the top-level `failureWithError('...')` function instead.
+  - `Result.failureWithCause(String, Object, [StackTrace?])` is no longer a named constructor — use the top-level `failureWithError(..., cause: ...)` function instead.
+  - `Failure.error` is now typed as `Object` instead of `VideoError`. Use the `.videoError` getter to obtain a typed `VideoError`.
+- `StateEmitter`, `MutableStateEmitter`, `SharedEmitter`, and `MutableSharedEmitter` are now provided by `stream_core`. Several behavioural and API changes follow:
+  - `MutableStateEmitter` is **always seeded** — it requires an initial value and `.value` is always available. Use `.value` instead of `.valueOrNull` or `hasValue` checks.
+  - Equal consecutive values are **conflated** — setting the same value twice emits only once. Previously every assignment produced an event regardless of equality.
+  - `StateEmitter` and `SharedEmitter` now **implement `Stream` directly**. Use the emitter itself (e.g. `.listen()`, `.firstWhere()`) instead of `.asStream()` or `.valueStream`.
+  - `MutableStateEmitterImpl<T>` is now a typedef for `StateEmitterImpl<T>` from `stream_core`. Existing call sites continue to compile, but the concrete type has changed.
+  - `MutableSharedEmitterImpl<T>` is now a typedef for `MutableSharedEmitter<T>` from `stream_core`. Existing call sites continue to compile, but the concrete type has changed.
+  - `SharedEmitter.firstWhere` no longer accepts a `timeLimit` parameter — use `waitFor` with an optional `timeLimit`, or call `.firstWhere(...).timeout(...)`.
+- `CurrentPlatform` and `PlatformType` are now provided by `stream_core`:
+  - `CurrentPlatform.name` has been removed — use `CurrentPlatform.operatingSystem` instead.
+- `StreamLogger`, `Priority`, and `MessageBuilder` are now provided by `stream_core`. Import them from `stream_video` as before — the re-export is in place.
+
 ## 1.4.1
 
 ### 🔄 Changed
@@ -13,6 +35,7 @@
 - Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
 - Fixed incoming calls being locally rejected after accept when the coordinator WebSocket event arrived before the HTTP response ([#1254](https://github.com/GetStream/stream-video-flutter/issues/1254)).
 - Fixed an Android crash when the push notification `TransparentActivity` is recreated with a null intent action (e.g. after process death or restore from recents) ([#1256](https://github.com/GetStream/stream-video-flutter/pull/1256)).
+
 
 ## 1.4.0
 

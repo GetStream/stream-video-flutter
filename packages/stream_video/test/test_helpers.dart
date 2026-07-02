@@ -18,7 +18,12 @@ class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
-class MockStreamVideo extends Mock implements StreamVideo {}
+class MockStreamVideo extends Mock implements StreamVideo {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
 
 class MockCallStateNotifier extends Mock implements CallStateNotifier {}
 
@@ -36,6 +41,7 @@ class MockSdpEditor extends Mock implements SdpEditor {}
 
 class MockTracer extends Mock implements Tracer {}
 
+// ignore: missing_override_of_must_be_overridden
 class MockCallSession extends Mock implements CallSession {}
 
 class MockSfuClient extends Mock implements SfuClient {}

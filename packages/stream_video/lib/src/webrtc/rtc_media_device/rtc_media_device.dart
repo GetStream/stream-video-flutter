@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../platform_detector/platform_detector.dart';
+import '../../../stream_video.dart';
 
 enum RtcMediaDeviceKind {
   audioInput('audioinput'),

@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       result.fold(
-        success: (success) {
+        onSuccess: (_) {
           if (mounted) {
             if (isRinging) {
               CallRoute(
@@ -122,11 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           }
         },
-        failure: (failure) {
+        onFailure: (error, stackTrace) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               duration: const Duration(seconds: 20),
-              content: Text('Error: ${failure.error.message}'),
+              content: Text('Error: $error'),
             ),
           );
         },

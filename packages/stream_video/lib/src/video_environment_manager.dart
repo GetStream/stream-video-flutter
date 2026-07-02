@@ -1,6 +1,6 @@
 import '../globals.dart' show streamVideoVersion;
 import '../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
-import 'platform_detector/platform_detector.dart';
+import '../stream_video.dart';
 import 'video_environment.dart';
 import 'video_environment_collector.dart';
 
@@ -11,7 +11,7 @@ class VideoEnvironmentManager {
           environment ??
           VideoEnvironment(
             sdkVersion: streamVideoVersion,
-            osName: CurrentPlatform.name,
+            osName: CurrentPlatform.operatingSystem,
           );
 
   VideoEnvironment _environment;

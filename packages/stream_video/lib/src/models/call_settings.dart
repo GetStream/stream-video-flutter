@@ -105,7 +105,7 @@ class StreamAudioSettings extends MediaSettings {
     super.accessRequestEnabled = false,
     this.opusDtxEnabled = false,
     this.redundantCodingEnabled = false,
-    this.defaultDevice = AudioSettingsRequestDefaultDeviceEnum.speaker,
+    this.defaultDevice = AudioSettingsRequestDefaultDevice.speaker,
     this.micDefaultOn = true,
     this.speakerDefaultOn = true,
     this.noiseCancellation,
@@ -118,7 +118,7 @@ class StreamAudioSettings extends MediaSettings {
   /// When true, the call will send additional audio streams to ensure calls are more resistant to poor network conditions.
   final bool redundantCodingEnabled;
 
-  final AudioSettingsRequestDefaultDeviceEnum defaultDevice;
+  final AudioSettingsRequestDefaultDevice defaultDevice;
   final bool micDefaultOn;
   final bool speakerDefaultOn;
   final StreamNoiceCancellingSettings? noiseCancellation;
@@ -157,7 +157,7 @@ class StreamVideoSettings extends MediaSettings {
     super.accessRequestEnabled = false,
     this.enabled = false,
     this.cameraDefaultOn = true,
-    this.cameraFacing = VideoSettingsRequestCameraFacingEnum.front,
+    this.cameraFacing = VideoSettingsRequestCameraFacing.front,
     this.targetResolution = const StreamTargetResolution(
       height: 720,
       width: 1280,
@@ -166,7 +166,7 @@ class StreamVideoSettings extends MediaSettings {
 
   final bool enabled;
   final bool cameraDefaultOn;
-  final VideoSettingsRequestCameraFacingEnum cameraFacing;
+  final VideoSettingsRequestCameraFacing cameraFacing;
   final StreamTargetResolution targetResolution;
 
   @override
@@ -484,7 +484,7 @@ class StreamNoiceCancellingSettings extends AbstractSettings {
 
   NoiseCancellationSettings toOpenDto() {
     return NoiseCancellationSettings(
-      mode: mode.toOpenDto(),
+      mode: mode,
     );
   }
 }
@@ -663,7 +663,7 @@ class StreamIngressVideoEncodingOptions extends AbstractSettings {
   IngressVideoEncodingOptionsRequest toOpenDto() {
     return IngressVideoEncodingOptionsRequest(
       layers: layers.map((e) => e.toOpenDto()).toList(),
-      source_: source.toOpenDto(),
+      source: source.toOpenDto(),
     );
   }
 }
@@ -713,12 +713,12 @@ enum StreamIngressSourceFps {
     }
   }
 
-  IngressSourceRequestFpsEnum toOpenDto() {
+  IngressSourceRequestFps toOpenDto() {
     switch (this) {
       case StreamIngressSourceFps.fps30:
-        return IngressSourceRequestFpsEnum.number30;
+        return IngressSourceRequestFps.n30;
       case StreamIngressSourceFps.fps60:
-        return IngressSourceRequestFpsEnum.number60;
+        return IngressSourceRequestFps.n60;
     }
   }
 }
@@ -733,7 +733,7 @@ class StreamIngressVideoLayer extends AbstractSettings {
   });
 
   final int bitrate;
-  final IngressVideoLayerRequestCodecEnum codec;
+  final IngressVideoLayerRequestCodec codec;
   final int frameRateLimit;
   final int maxDimension;
   final int minDimension;
@@ -765,12 +765,12 @@ enum IngressAudioChannels {
   const IngressAudioChannels(this.value);
   final int value;
 
-  IngressAudioEncodingOptionsRequestChannelsEnum toOpenDto() {
+  IngressAudioEncodingOptionsRequestChannels toOpenDto() {
     switch (this) {
       case IngressAudioChannels.mono:
-        return IngressAudioEncodingOptionsRequestChannelsEnum.number1;
+        return IngressAudioEncodingOptionsRequestChannels.n1;
       case IngressAudioChannels.stereo:
-        return IngressAudioEncodingOptionsRequestChannelsEnum.number2;
+        return IngressAudioEncodingOptionsRequestChannels.n2;
     }
   }
 
@@ -794,14 +794,14 @@ enum StreamTranscriptionMode {
   @override
   String toString() => name;
 
-  TranscriptionSettingsResponseModeEnum toOpenDto() {
+  TranscriptionSettingsResponseMode toOpenDto() {
     switch (this) {
       case StreamTranscriptionMode.available:
-        return TranscriptionSettingsResponseModeEnum.available;
+        return TranscriptionSettingsResponseMode.available;
       case StreamTranscriptionMode.disabled:
-        return TranscriptionSettingsResponseModeEnum.disabled;
+        return TranscriptionSettingsResponseMode.disabled;
       case StreamTranscriptionMode.autoOn:
-        return TranscriptionSettingsResponseModeEnum.autoOn;
+        return TranscriptionSettingsResponseMode.autoOn;
     }
   }
 
@@ -827,14 +827,14 @@ enum RecordSettingsMode {
   @override
   String toString() => name;
 
-  RecordSettingsRequestModeEnum toOpenDto() {
+  RecordSettingsRequestMode toOpenDto() {
     switch (this) {
       case RecordSettingsMode.available:
-        return RecordSettingsRequestModeEnum.available;
+        return RecordSettingsRequestMode.available;
       case RecordSettingsMode.disabled:
-        return RecordSettingsRequestModeEnum.disabled;
+        return RecordSettingsRequestMode.disabled;
       case RecordSettingsMode.autoOn:
-        return RecordSettingsRequestModeEnum.autoOn;
+        return RecordSettingsRequestMode.autoOn;
     }
   }
 
@@ -860,14 +860,14 @@ enum IndividualRecordingSettingsMode {
   @override
   String toString() => name;
 
-  IndividualRecordingSettingsRequestModeEnum toOpenDto() {
+  IndividualRecordingSettingsRequestMode toOpenDto() {
     switch (this) {
       case IndividualRecordingSettingsMode.available:
-        return IndividualRecordingSettingsRequestModeEnum.available;
+        return IndividualRecordingSettingsRequestMode.available;
       case IndividualRecordingSettingsMode.disabled:
-        return IndividualRecordingSettingsRequestModeEnum.disabled;
+        return IndividualRecordingSettingsRequestMode.disabled;
       case IndividualRecordingSettingsMode.autoOn:
-        return IndividualRecordingSettingsRequestModeEnum.autoOn;
+        return IndividualRecordingSettingsRequestMode.autoOn;
     }
   }
 
@@ -896,22 +896,22 @@ enum IndividualRecordingOutputType {
   @override
   String toString() => name;
 
-  IndividualRecordingSettingsRequestOutputTypesEnum toOpenDto() {
+  IndividualRecordingSettingsRequestOutputTypes toOpenDto() {
     switch (this) {
       case IndividualRecordingOutputType.audioOnly:
-        return IndividualRecordingSettingsRequestOutputTypesEnum.audioOnly;
+        return IndividualRecordingSettingsRequestOutputTypes.audioOnly;
       case IndividualRecordingOutputType.videoOnly:
-        return IndividualRecordingSettingsRequestOutputTypesEnum.videoOnly;
+        return IndividualRecordingSettingsRequestOutputTypes.videoOnly;
       case IndividualRecordingOutputType.audioVideo:
-        return IndividualRecordingSettingsRequestOutputTypesEnum.audioVideo;
+        return IndividualRecordingSettingsRequestOutputTypes.audioVideo;
       case IndividualRecordingOutputType.screenshareAudioOnly:
-        return IndividualRecordingSettingsRequestOutputTypesEnum
+        return IndividualRecordingSettingsRequestOutputTypes
             .screenshareAudioOnly;
       case IndividualRecordingOutputType.screenshareVideoOnly:
-        return IndividualRecordingSettingsRequestOutputTypesEnum
+        return IndividualRecordingSettingsRequestOutputTypes
             .screenshareVideoOnly;
       case IndividualRecordingOutputType.screenshareAudioVideo:
-        return IndividualRecordingSettingsRequestOutputTypesEnum
+        return IndividualRecordingSettingsRequestOutputTypes
             .screenshareAudioVideo;
     }
   }
@@ -944,14 +944,14 @@ enum RawRecordingSettingsMode {
   @override
   String toString() => name;
 
-  RawRecordingSettingsRequestModeEnum toOpenDto() {
+  RawRecordingSettingsRequestMode toOpenDto() {
     switch (this) {
       case RawRecordingSettingsMode.available:
-        return RawRecordingSettingsRequestModeEnum.available;
+        return RawRecordingSettingsRequestMode.available;
       case RawRecordingSettingsMode.disabled:
-        return RawRecordingSettingsRequestModeEnum.disabled;
+        return RawRecordingSettingsRequestMode.disabled;
       case RawRecordingSettingsMode.autoOn:
-        return RawRecordingSettingsRequestModeEnum.autoOn;
+        return RawRecordingSettingsRequestMode.autoOn;
     }
   }
 
@@ -977,14 +977,14 @@ enum FrameRecordingSettingsMode {
   @override
   String toString() => name;
 
-  FrameRecordingSettingsRequestModeEnum toOpenDto() {
+  FrameRecordingSettingsRequestMode toOpenDto() {
     switch (this) {
       case FrameRecordingSettingsMode.available:
-        return FrameRecordingSettingsRequestModeEnum.available;
+        return FrameRecordingSettingsRequestMode.available;
       case FrameRecordingSettingsMode.disabled:
-        return FrameRecordingSettingsRequestModeEnum.disabled;
+        return FrameRecordingSettingsRequestMode.disabled;
       case FrameRecordingSettingsMode.autoOn:
-        return FrameRecordingSettingsRequestModeEnum.autoOn;
+        return FrameRecordingSettingsRequestMode.autoOn;
     }
   }
 
@@ -998,6 +998,49 @@ enum FrameRecordingSettingsMode {
         return FrameRecordingSettingsMode.autoOn;
       default:
         return FrameRecordingSettingsMode.disabled;
+    }
+  }
+}
+
+enum FrameRecordingSettingsQuality {
+  n360p,
+  n480p,
+  n720p,
+  n1080p,
+  n1440p;
+
+  @override
+  String toString() => name;
+
+  FrameRecordingSettingsRequestQuality toOpenDto() {
+    switch (this) {
+      case FrameRecordingSettingsQuality.n360p:
+        return FrameRecordingSettingsRequestQuality.n360p;
+      case FrameRecordingSettingsQuality.n480p:
+        return FrameRecordingSettingsRequestQuality.n480p;
+      case FrameRecordingSettingsQuality.n720p:
+        return FrameRecordingSettingsRequestQuality.n720p;
+      case FrameRecordingSettingsQuality.n1080p:
+        return FrameRecordingSettingsRequestQuality.n1080p;
+      case FrameRecordingSettingsQuality.n1440p:
+        return FrameRecordingSettingsRequestQuality.n1440p;
+    }
+  }
+
+  static FrameRecordingSettingsQuality fromString(String quality) {
+    switch (quality) {
+      case 'n360p':
+        return FrameRecordingSettingsQuality.n360p;
+      case 'n480p':
+        return FrameRecordingSettingsQuality.n480p;
+      case 'n720p':
+        return FrameRecordingSettingsQuality.n720p;
+      case 'n1080p':
+        return FrameRecordingSettingsQuality.n1080p;
+      case 'n1440p':
+        return FrameRecordingSettingsQuality.n1440p;
+      default:
+        return FrameRecordingSettingsQuality.n360p;
     }
   }
 }
@@ -1017,28 +1060,28 @@ enum RTMPSettingsQuality {
   @override
   String toString() => name;
 
-  RTMPSettingsRequestQualityEnum toOpenDto() {
+  RTMPSettingsRequestQuality toOpenDto() {
     switch (this) {
       case RTMPSettingsQuality.n360p:
-        return RTMPSettingsRequestQualityEnum.n360p;
+        return RTMPSettingsRequestQuality.n360p;
       case RTMPSettingsQuality.n480p:
-        return RTMPSettingsRequestQualityEnum.n480p;
+        return RTMPSettingsRequestQuality.n480p;
       case RTMPSettingsQuality.n720p:
-        return RTMPSettingsRequestQualityEnum.n720p;
+        return RTMPSettingsRequestQuality.n720p;
       case RTMPSettingsQuality.n1080p:
-        return RTMPSettingsRequestQualityEnum.n1080p;
+        return RTMPSettingsRequestQuality.n1080p;
       case RTMPSettingsQuality.n1440p:
-        return RTMPSettingsRequestQualityEnum.n1440p;
+        return RTMPSettingsRequestQuality.n1440p;
       case RTMPSettingsQuality.portrait360x640:
-        return RTMPSettingsRequestQualityEnum.portrait360x640;
+        return RTMPSettingsRequestQuality.portrait360x640;
       case RTMPSettingsQuality.portrait480x854:
-        return RTMPSettingsRequestQualityEnum.portrait480x854;
+        return RTMPSettingsRequestQuality.portrait480x854;
       case RTMPSettingsQuality.portrait720x1280:
-        return RTMPSettingsRequestQualityEnum.portrait720x1280;
+        return RTMPSettingsRequestQuality.portrait720x1280;
       case RTMPSettingsQuality.portrait1080x1920:
-        return RTMPSettingsRequestQualityEnum.portrait1080x1920;
+        return RTMPSettingsRequestQuality.portrait1080x1920;
       case RTMPSettingsQuality.portrait1440x2560:
-        return RTMPSettingsRequestQualityEnum.portrait1440x2560;
+        return RTMPSettingsRequestQuality.portrait1440x2560;
     }
   }
 
@@ -1080,18 +1123,18 @@ enum RecordSettingsQuality {
   @override
   String toString() => name;
 
-  RecordSettingsRequestQualityEnum toOpenDto() {
+  RecordSettingsRequestQuality toOpenDto() {
     switch (this) {
       case RecordSettingsQuality.n360p:
-        return RecordSettingsRequestQualityEnum.n360p;
+        return RecordSettingsRequestQuality.n360p;
       case RecordSettingsQuality.n480p:
-        return RecordSettingsRequestQualityEnum.n480p;
+        return RecordSettingsRequestQuality.n480p;
       case RecordSettingsQuality.n720p:
-        return RecordSettingsRequestQualityEnum.n720p;
+        return RecordSettingsRequestQuality.n720p;
       case RecordSettingsQuality.n1080p:
-        return RecordSettingsRequestQualityEnum.n1080p;
+        return RecordSettingsRequestQuality.n1080p;
       case RecordSettingsQuality.n1440p:
-        return RecordSettingsRequestQualityEnum.n1440p;
+        return RecordSettingsRequestQuality.n1440p;
     }
   }
 
@@ -1113,45 +1156,22 @@ enum RecordSettingsQuality {
   }
 }
 
-enum FrameRecordingSettingsQuality {
-  n360p,
-  n480p,
-  n720p,
-  n1080p,
-  n1440p;
+enum ClosedCaptionSettingsMode {
+  available,
+  disabled,
+  autoOn;
 
   @override
   String toString() => name;
 
-  FrameRecordingSettingsRequestQualityEnum toOpenDto() {
+  TranscriptionSettingsRequestClosedCaptionMode toOpenDto() {
     switch (this) {
-      case FrameRecordingSettingsQuality.n360p:
-        return FrameRecordingSettingsRequestQualityEnum.n360p;
-      case FrameRecordingSettingsQuality.n480p:
-        return FrameRecordingSettingsRequestQualityEnum.n480p;
-      case FrameRecordingSettingsQuality.n720p:
-        return FrameRecordingSettingsRequestQualityEnum.n720p;
-      case FrameRecordingSettingsQuality.n1080p:
-        return FrameRecordingSettingsRequestQualityEnum.n1080p;
-      case FrameRecordingSettingsQuality.n1440p:
-        return FrameRecordingSettingsRequestQualityEnum.n1440p;
-    }
-  }
-
-  static FrameRecordingSettingsQuality fromString(String quality) {
-    switch (quality) {
-      case 'n360p':
-        return FrameRecordingSettingsQuality.n360p;
-      case 'n480p':
-        return FrameRecordingSettingsQuality.n480p;
-      case 'n720p':
-        return FrameRecordingSettingsQuality.n720p;
-      case 'n1080p':
-        return FrameRecordingSettingsQuality.n1080p;
-      case 'n1440p':
-        return FrameRecordingSettingsQuality.n1440p;
-      default:
-        return FrameRecordingSettingsQuality.n360p;
+      case ClosedCaptionSettingsMode.available:
+        return TranscriptionSettingsRequestClosedCaptionMode.available;
+      case ClosedCaptionSettingsMode.disabled:
+        return TranscriptionSettingsRequestClosedCaptionMode.disabled;
+      case ClosedCaptionSettingsMode.autoOn:
+        return TranscriptionSettingsRequestClosedCaptionMode.autoOn;
     }
   }
 }
@@ -1164,14 +1184,14 @@ enum TranscriptionSettingsMode {
   @override
   String toString() => name;
 
-  TranscriptionSettingsRequestModeEnum toOpenDto() {
+  TranscriptionSettingsRequestMode toOpenDto() {
     switch (this) {
       case TranscriptionSettingsMode.available:
-        return TranscriptionSettingsRequestModeEnum.available;
+        return TranscriptionSettingsRequestMode.available;
       case TranscriptionSettingsMode.disabled:
-        return TranscriptionSettingsRequestModeEnum.disabled;
+        return TranscriptionSettingsRequestMode.disabled;
       case TranscriptionSettingsMode.autoOn:
-        return TranscriptionSettingsRequestModeEnum.autoOn;
+        return TranscriptionSettingsRequestMode.autoOn;
     }
   }
 }
@@ -1221,45 +1241,25 @@ enum TranscriptionSettingsLanguage {
   @override
   String toString() => value;
 
-  TranscriptionSettingsRequestLanguageEnum toOpenDto() {
-    return TranscriptionSettingsRequestLanguageEnumTypeTransformer().decode(
-          value,
-        ) ??
-        TranscriptionSettingsRequestLanguageEnum.auto;
+  TranscriptionSettingsRequestLanguage toOpenDto() {
+    return TranscriptionSettingsRequestLanguage.values.firstWhere(
+      (e) => e.name == name,
+      orElse: () => TranscriptionSettingsRequestLanguage.auto,
+    );
   }
 
-  StartTranscriptionRequestLanguageEnum toStartTranscriptionDto() {
-    return StartTranscriptionRequestLanguageEnumTypeTransformer().decode(
-          value,
-        ) ??
-        StartTranscriptionRequestLanguageEnum.auto;
+  StartTranscriptionRequestLanguage toStartTranscriptionDto() {
+    return StartTranscriptionRequestLanguage.values.firstWhere(
+      (e) => e.name == name,
+      orElse: () => StartTranscriptionRequestLanguage.auto,
+    );
   }
 
-  StartClosedCaptionsRequestLanguageEnum toStartClosedCaptionsDto() {
-    return StartClosedCaptionsRequestLanguageEnumTypeTransformer().decode(
-          value,
-        ) ??
-        StartClosedCaptionsRequestLanguageEnum.auto;
-  }
-}
-
-enum ClosedCaptionSettingsMode {
-  available,
-  disabled,
-  autoOn;
-
-  @override
-  String toString() => name;
-
-  TranscriptionSettingsRequestClosedCaptionModeEnum toOpenDto() {
-    switch (this) {
-      case ClosedCaptionSettingsMode.available:
-        return TranscriptionSettingsRequestClosedCaptionModeEnum.available;
-      case ClosedCaptionSettingsMode.disabled:
-        return TranscriptionSettingsRequestClosedCaptionModeEnum.disabled;
-      case ClosedCaptionSettingsMode.autoOn:
-        return TranscriptionSettingsRequestClosedCaptionModeEnum.autoOn;
-    }
+  StartClosedCaptionsRequestLanguage toStartClosedCaptionsDto() {
+    return StartClosedCaptionsRequestLanguage.values.firstWhere(
+      (e) => e.name == name,
+      orElse: () => StartClosedCaptionsRequestLanguage.auto,
+    );
   }
 }
 
@@ -1292,29 +1292,6 @@ enum RecordingType {
         return RecordingType.raw;
       default:
         return RecordingType.composite;
-    }
-  }
-}
-
-@Deprecated('Use NoiseCancellationSettingsMode instead.')
-typedef NoiceCancellationSettingsMode = NoiseCancellationSettingsMode;
-
-enum NoiseCancellationSettingsMode {
-  available,
-  disabled,
-  autoOn;
-
-  @override
-  String toString() => name;
-
-  NoiseCancellationSettingsModeEnum toOpenDto() {
-    switch (this) {
-      case NoiseCancellationSettingsMode.available:
-        return NoiseCancellationSettingsModeEnum.available;
-      case NoiseCancellationSettingsMode.disabled:
-        return NoiseCancellationSettingsModeEnum.disabled;
-      case NoiseCancellationSettingsMode.autoOn:
-        return NoiseCancellationSettingsModeEnum.autoOn;
     }
   }
 }

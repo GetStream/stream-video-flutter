@@ -5,14 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 import 'package:thermal/thermal.dart';
 
-import '../../models/models.dart';
-import '../../platform_detector/platform_detector.dart';
-import '../../webrtc/model/stats/rtc_codec.dart';
-import '../../webrtc/model/stats/rtc_ice_candidate_pair.dart';
-import '../../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
-import '../../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
-import '../../webrtc/model/stats/rtc_printable_stats.dart';
-import '../../webrtc/peer_type.dart';
+import '../../../stream_video.dart';
 import '../../webrtc/rtc_manager.dart';
 
 class StatsReporter extends StateNotifier<CallMetrics?> {

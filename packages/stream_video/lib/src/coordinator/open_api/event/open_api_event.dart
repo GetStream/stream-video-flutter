@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../logger/stream_log.dart';
+import '../../models/healh_check_event.dart';
 import 'event_type.dart';
 
 const _tag = 'SV:OpenApiEvent';
@@ -88,7 +89,7 @@ class OpenApiEvent with EquatableMixin {
         final event = open.ConnectedEvent.fromJson(jsonObj);
         return result.copyWith(connected: event);
       case EventType.healthCheck:
-        final event = open.HealthCheckEvent.fromJson(jsonObj);
+        final event = HealthCheckEvent.fromJson(jsonObj);
         return result.copyWith(healthCheck: event);
       case EventType.callCreated:
         final event = open.CallCreatedEvent.fromJson(jsonObj);
@@ -265,7 +266,7 @@ class OpenApiEvent with EquatableMixin {
 
   final EventType type;
   final open.ConnectedEvent? connected;
-  final open.HealthCheckEvent? healthCheck;
+  final HealthCheckEvent? healthCheck;
   final open.CallCreatedEvent? callCreated;
   final open.CallMissedEvent? callMissed;
   final open.CallRingEvent? callRing;
@@ -327,7 +328,7 @@ class OpenApiEvent with EquatableMixin {
   OpenApiEvent copyWith({
     EventType? type,
     open.ConnectedEvent? connected,
-    open.HealthCheckEvent? healthCheck,
+    HealthCheckEvent? healthCheck,
     open.CallCreatedEvent? callCreated,
     open.CallMissedEvent? callMissed,
     open.CallRingEvent? callRing,

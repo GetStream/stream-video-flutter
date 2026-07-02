@@ -45,7 +45,7 @@ enum CallPermission {
 
   factory CallPermission.fromAlias(String alias) {
     return CallPermission.values.firstWhere(
-      (e) => e.alias == alias,
+      (e) => e.alias == alias || e.name == alias,
       orElse: () {
         streamLog.w(_tag, () => '[fromAlias] unexpected alias: $alias');
         return CallPermission.unknown;

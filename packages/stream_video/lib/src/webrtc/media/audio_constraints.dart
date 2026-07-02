@@ -1,5 +1,4 @@
-import '../../platform_detector/platform_detector.dart';
-import 'media_constraints.dart';
+import '../../../stream_video.dart';
 
 /// Options used when creating an AudioTrack.
 class AudioConstraints extends MediaConstraints {

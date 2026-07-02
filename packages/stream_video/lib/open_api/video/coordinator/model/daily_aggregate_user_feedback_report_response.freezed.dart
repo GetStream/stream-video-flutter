@@ -1,0 +1,88 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'daily_aggregate_user_feedback_report_response.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$DailyAggregateUserFeedbackReportResponse {
+  String get date;
+  UserFeedbackReport get report;
+
+  /// Create a copy of DailyAggregateUserFeedbackReportResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $DailyAggregateUserFeedbackReportResponseCopyWith<
+    DailyAggregateUserFeedbackReportResponse
+  >
+  get copyWith =>
+      _$DailyAggregateUserFeedbackReportResponseCopyWithImpl<
+        DailyAggregateUserFeedbackReportResponse
+      >(this as DailyAggregateUserFeedbackReportResponse, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is DailyAggregateUserFeedbackReportResponse &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.report, report) || other.report == report));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, date, report);
+
+  @override
+  String toString() {
+    return 'DailyAggregateUserFeedbackReportResponse(date: $date, report: $report)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $DailyAggregateUserFeedbackReportResponseCopyWith<$Res> {
+  factory $DailyAggregateUserFeedbackReportResponseCopyWith(
+    DailyAggregateUserFeedbackReportResponse value,
+    $Res Function(DailyAggregateUserFeedbackReportResponse) _then,
+  ) = _$DailyAggregateUserFeedbackReportResponseCopyWithImpl;
+  @useResult
+  $Res call({String date, UserFeedbackReport report});
+}
+
+/// @nodoc
+class _$DailyAggregateUserFeedbackReportResponseCopyWithImpl<$Res>
+    implements $DailyAggregateUserFeedbackReportResponseCopyWith<$Res> {
+  _$DailyAggregateUserFeedbackReportResponseCopyWithImpl(
+    this._self,
+    this._then,
+  );
+
+  final DailyAggregateUserFeedbackReportResponse _self;
+  final $Res Function(DailyAggregateUserFeedbackReportResponse) _then;
+
+  /// Create a copy of DailyAggregateUserFeedbackReportResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? date = null, Object? report = null}) {
+    return _then(
+      DailyAggregateUserFeedbackReportResponse(
+        date: null == date
+            ? _self.date
+            : date // ignore: cast_nullable_to_non_nullable
+                  as String,
+        report: null == report
+            ? _self.report
+            : report // ignore: cast_nullable_to_non_nullable
+                  as UserFeedbackReport,
+      ),
+    );
+  }
+}

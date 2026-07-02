@@ -14,7 +14,12 @@ import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/data.dart';
 
-class _MockPeerConnection extends Mock implements StreamPeerConnection {}
+class _MockPeerConnection extends Mock implements StreamPeerConnection {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
 
 void main() {
   setUpAll(() {
@@ -411,7 +416,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           await fastReconnectGate.future;
-          return Result.error('simulated fast reconnect failure');
+          return failureWithError('simulated fast reconnect failure');
         });
 
         final call = buildCall();
@@ -496,7 +501,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           fastReconnectCallCount++;
-          return Result.error('simulated fast reconnect failure');
+          return failureWithError('simulated fast reconnect failure');
         });
 
         final call = buildCall();

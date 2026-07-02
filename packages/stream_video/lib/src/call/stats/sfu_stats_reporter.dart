@@ -8,16 +8,10 @@ import 'package:thermal/thermal.dart';
 
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../globals.dart';
-import '../../../open_api/video/coordinator/api.dart';
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pb.dart';
+import '../../../stream_video.dart';
 import '../../extensions/thermal_status_ext.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/models.dart';
-import '../../platform_detector/platform_detector.dart';
-import '../../sfu/data/models/sfu_error.dart';
-import '../../webrtc/rtc_media_device/rtc_media_device.dart';
-import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import 'trace_record.dart';

@@ -3,7 +3,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -42,7 +41,7 @@ void main() {
       // Mock coordinator client methods and events that might be called
       when(
         () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      ).thenAnswer((_) => MutableSharedEmitter<CoordinatorEvent>());
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
       ).thenAnswer((_) async => const Result.success(none));
@@ -62,7 +61,9 @@ void main() {
           video: any(named: 'video'),
           membersLimit: any(named: 'membersLimit'),
         ),
-      ).thenAnswer((_) async => Result.error('join not implemented in test'));
+      ).thenAnswer(
+        (_) async => const Result.failure('join not implemented in test'),
+      );
     });
 
     group('when allowMultipleActiveCalls is false', () {

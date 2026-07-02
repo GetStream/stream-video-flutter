@@ -1,7 +1,7 @@
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../logger/stream_log.dart';
-import '../../../utils/standard.dart';
 import 'rtc_audio_source.dart';
 import 'rtc_codec.dart';
 import 'rtc_ice_candidate.dart';

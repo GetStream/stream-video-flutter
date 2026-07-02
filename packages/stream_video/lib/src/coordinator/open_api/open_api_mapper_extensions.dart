@@ -95,7 +95,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           metadata: event.call.toCallMetadata(),
           type: event.type,
           reason: event.reason,
-          members: event.members.map((it) => it.toCallMember()).toList(),
+          members: event.members?.map((it) => it.toCallMember()).toList() ?? [],
         );
       case EventType.callSessionStarted:
         final event = callSessionStarted!;
@@ -161,7 +161,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
           ownCapabilities: event.ownCapabilities.map(
-            (it) => CallPermission.fromAlias(it.value),
+            (it) => CallPermission.fromAlias(it.name),
           ),
           user: event.user.toCallUser(),
         );
@@ -171,7 +171,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallRecordingStartedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
-          recordingType: RecordingType.fromString(event.recordingType.value),
+          recordingType: RecordingType.fromString(event.recordingType.name),
         );
       case EventType.callRecordingStopped:
         final event = callRecordingStopped!;
@@ -179,7 +179,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallRecordingStoppedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
-          recordingType: RecordingType.fromString(event.recordingType.value),
+          recordingType: RecordingType.fromString(event.recordingType.name),
         );
       case EventType.callRecordingFailed:
         final event = callRecordingFailed!;
@@ -187,7 +187,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallRecordingFailedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
-          recordingType: RecordingType.fromString(event.recordingType.value),
+          recordingType: RecordingType.fromString(event.recordingType.name),
         );
       case EventType.callBroadcastingStarted:
         final event = callBroadcastingStarted!;
@@ -422,7 +422,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           url: event.callRecording.url,
           endTime: event.callRecording.endTime,
           filename: event.callRecording.filename,
-          recordingType: RecordingType.fromString(event.recordingType.value),
+          recordingType: RecordingType.fromString(event.recordingType.name),
           sessionId: event.callRecording.sessionId,
           startTime: event.callRecording.startTime,
           egressId: event.egressId,

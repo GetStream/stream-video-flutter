@@ -22,7 +22,7 @@ class StreamLivestreamHosts extends StatefulWidget {
     super.key,
     required this.call,
     required this.hosts,
-    Sort<CallParticipantState>? sort,
+    CallParticipantSort<CallParticipantState>? sort,
     this.callParticipantBuilder = _defaultParticipantBuilder,
     this.screenShareContentBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
@@ -36,7 +36,7 @@ class StreamLivestreamHosts extends StatefulWidget {
   final List<CallParticipantState> hosts;
 
   /// Used for sorting the hosts.
-  final Sort<CallParticipantState> sort;
+  final CallParticipantSort<CallParticipantState> sort;
 
   /// Builder function used to build a host grid item.
   final CallParticipantBuilder callParticipantBuilder;
@@ -73,10 +73,10 @@ class StreamLivestreamHosts extends StatefulWidget {
 class _StreamLivestreamHostsState extends State<StreamLivestreamHosts>
     with CallParticipantsSortingMixin {
   @override
-  Filter<CallParticipantState>? get participantFilter => null;
+  CallParticipantFilter<CallParticipantState>? get participantFilter => null;
 
   @override
-  Sort<CallParticipantState>? get participantSort => widget.sort;
+  CallParticipantSort<CallParticipantState> get participantSort => widget.sort;
 
   @override
   void initState() {

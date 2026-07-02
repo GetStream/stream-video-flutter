@@ -18,7 +18,7 @@ class CallParticipantsList extends StatelessWidget {
 
     return StreamBuilder<CallState>(
       initialData: call.state.value,
-      stream: call.state.asStream(),
+      stream: call.state,
       builder: (context, snapshot) {
         final callState = snapshot.requireData;
         final participants = callState.callParticipants;
@@ -154,16 +154,16 @@ class CallParticipantsList extends StatelessWidget {
     final result = await call.ring(userIds: [member.userId]);
 
     result.fold(
-      success: (_) {
+      onSuccess: (_) {
         messenger.showSnackBar(
           SnackBar(content: Text('Ringing ${member.name}...')),
         );
       },
-      failure: (failure) {
+      onFailure: (error, stackTrace) {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              'Failed to ring ${member.name}: ${failure.error.message}',
+              'Failed to ring ${member.name}: $error',
             ),
           ),
         );
@@ -225,15 +225,15 @@ class CallParticipantsList extends StatelessWidget {
     final result = await call.addMembers([UserInfo(id: userId)]);
 
     result.fold(
-      success: (_) {
+      onSuccess: (_) {
         messenger.showSnackBar(
           SnackBar(content: Text('Added $userId to the call')),
         );
       },
-      failure: (failure) {
+      onFailure: (error, stackTrace) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Failed to add $userId: ${failure.error.message}'),
+            content: Text('Failed to add $userId: $error'),
           ),
         );
       },

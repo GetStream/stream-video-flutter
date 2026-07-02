@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
+import 'package:stream_core/stream_core.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
 import '../../logger/stream_log.dart';
 import '../../models/models.dart';
-import '../../utils/standard.dart';
 
 extension MemberExt on open.MemberResponse {
   CallMember toCallMember() {
@@ -116,7 +116,7 @@ extension EnvelopeExt on open.CallResponse {
       team: team ?? '',
       ownCapabilities:
           ownCapabilities?.map(
-            (it) => CallPermission.fromAlias(it.value),
+            (it) => CallPermission.fromAlias(it.name),
           ) ??
           [],
       blockedUserIds: List.unmodifiable(blockedUserIds),
@@ -162,53 +162,53 @@ extension EgressRtmpExt on open.EgressRTMPResponse {
 }
 
 extension VideoQualityRtmpExt on StreamVideoQuality {
-  open.RTMPBroadcastRequestQualityEnum toRtmpQualityDomain() {
+  open.RTMPBroadcastRequestQuality toRtmpQualityDomain() {
     switch (this) {
       case StreamVideoQuality.p360:
-        return open.RTMPBroadcastRequestQualityEnum.n360p;
+        return open.RTMPBroadcastRequestQuality.n360p;
       case StreamVideoQuality.p480:
-        return open.RTMPBroadcastRequestQualityEnum.n480p;
+        return open.RTMPBroadcastRequestQuality.n480p;
       case StreamVideoQuality.p720:
-        return open.RTMPBroadcastRequestQualityEnum.n720p;
+        return open.RTMPBroadcastRequestQuality.n720p;
       case StreamVideoQuality.p1080:
-        return open.RTMPBroadcastRequestQualityEnum.n1080p;
+        return open.RTMPBroadcastRequestQuality.n1080p;
       case StreamVideoQuality.p1440:
-        return open.RTMPBroadcastRequestQualityEnum.n1440p;
+        return open.RTMPBroadcastRequestQuality.n1440p;
       case StreamVideoQuality.portrait360x640:
-        return open.RTMPBroadcastRequestQualityEnum.portrait360x640;
+        return open.RTMPBroadcastRequestQuality.portrait360x640;
       case StreamVideoQuality.portrait480x854:
-        return open.RTMPBroadcastRequestQualityEnum.portrait480x854;
+        return open.RTMPBroadcastRequestQuality.portrait480x854;
       case StreamVideoQuality.portrait720x1280:
-        return open.RTMPBroadcastRequestQualityEnum.portrait720x1280;
+        return open.RTMPBroadcastRequestQuality.portrait720x1280;
       case StreamVideoQuality.portrait1080x1920:
-        return open.RTMPBroadcastRequestQualityEnum.portrait1080x1920;
+        return open.RTMPBroadcastRequestQuality.portrait1080x1920;
       case StreamVideoQuality.portrait1440x2560:
-        return open.RTMPBroadcastRequestQualityEnum.portrait1440x2560;
+        return open.RTMPBroadcastRequestQuality.portrait1440x2560;
     }
   }
 
-  open.HLSSettingsRequestQualityTracksEnum toHlsQualityTrackDomain() {
+  open.HLSSettingsRequestQualityTracks toHlsQualityTrackDomain() {
     switch (this) {
       case StreamVideoQuality.p360:
-        return open.HLSSettingsRequestQualityTracksEnum.n360p;
+        return open.HLSSettingsRequestQualityTracks.n360p;
       case StreamVideoQuality.p480:
-        return open.HLSSettingsRequestQualityTracksEnum.n480p;
+        return open.HLSSettingsRequestQualityTracks.n480p;
       case StreamVideoQuality.p720:
-        return open.HLSSettingsRequestQualityTracksEnum.n720p;
+        return open.HLSSettingsRequestQualityTracks.n720p;
       case StreamVideoQuality.p1080:
-        return open.HLSSettingsRequestQualityTracksEnum.n1080p;
+        return open.HLSSettingsRequestQualityTracks.n1080p;
       case StreamVideoQuality.p1440:
-        return open.HLSSettingsRequestQualityTracksEnum.n1440p;
+        return open.HLSSettingsRequestQualityTracks.n1440p;
       case StreamVideoQuality.portrait360x640:
-        return open.HLSSettingsRequestQualityTracksEnum.portrait360x640;
+        return open.HLSSettingsRequestQualityTracks.portrait360x640;
       case StreamVideoQuality.portrait480x854:
-        return open.HLSSettingsRequestQualityTracksEnum.portrait480x854;
+        return open.HLSSettingsRequestQualityTracks.portrait480x854;
       case StreamVideoQuality.portrait720x1280:
-        return open.HLSSettingsRequestQualityTracksEnum.portrait720x1280;
+        return open.HLSSettingsRequestQualityTracks.portrait720x1280;
       case StreamVideoQuality.portrait1080x1920:
-        return open.HLSSettingsRequestQualityTracksEnum.portrait1080x1920;
+        return open.HLSSettingsRequestQualityTracks.portrait1080x1920;
       case StreamVideoQuality.portrait1440x2560:
-        return open.HLSSettingsRequestQualityTracksEnum.portrait1440x2560;
+        return open.HLSSettingsRequestQualityTracks.portrait1440x2560;
     }
   }
 }
@@ -284,16 +284,18 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ),
       individualRecording: StreamIndividualRecordingSettings(
         mode: IndividualRecordingSettingsMode.fromString(
-          individualRecording.mode.value,
+          individualRecording.mode.name,
         ),
-        outputTypes: individualRecording.outputTypes
-            .map(IndividualRecordingOutputType.fromString)
-            .nonNulls
-            .toList(),
+        outputTypes:
+            individualRecording.outputTypes
+                ?.map(IndividualRecordingOutputType.fromString)
+                .nonNulls
+                .toList() ??
+            [],
       ),
       rawRecording: StreamRawRecordingSettings(
         mode: RawRecordingSettingsMode.fromString(
-          rawRecording.mode.value,
+          rawRecording.mode.name,
         ),
         audioOnly: rawRecording.audioOnly,
       ),
@@ -303,79 +305,74 @@ extension CallSettingsExt on open.CallSettingsResponse {
 }
 
 extension CallPermissionRequestPermissionsExt on CallPermission {
-  open.RequestPermissionRequestPermissionsEnum? toRequestPermissionDomain() {
+  open.RequestPermissionRequestPermissions? toRequestPermissionDomain() {
     switch (this) {
       case CallPermission.screenshare:
-        return open.RequestPermissionRequestPermissionsEnum.screenshare;
+        return open.RequestPermissionRequestPermissions.screenshare;
       case CallPermission.sendAudio:
-        return open.RequestPermissionRequestPermissionsEnum.sendAudio;
+        return open.RequestPermissionRequestPermissions.sendAudio;
       case CallPermission.sendVideo:
-        return open.RequestPermissionRequestPermissionsEnum.sendVideo;
+        return open.RequestPermissionRequestPermissions.sendVideo;
       default:
         return null;
     }
   }
 
-  open.UpdateUserPermissionsRequestGrantPermissionsEnum?
-  toGrantPermissionDomain() {
+  open.UpdateUserPermissionsRequestGrantPermissions? toGrantPermissionDomain() {
     switch (this) {
       case CallPermission.screenshare:
-        return open
-            .UpdateUserPermissionsRequestGrantPermissionsEnum
-            .screenshare;
+        return open.UpdateUserPermissionsRequestGrantPermissions.screenshare;
       case CallPermission.sendAudio:
-        return open.UpdateUserPermissionsRequestGrantPermissionsEnum.sendAudio;
+        return open.UpdateUserPermissionsRequestGrantPermissions.sendAudio;
       case CallPermission.sendVideo:
-        return open.UpdateUserPermissionsRequestGrantPermissionsEnum.sendVideo;
+        return open.UpdateUserPermissionsRequestGrantPermissions.sendVideo;
       default:
         return null;
     }
   }
 
-  open.UpdateUserPermissionsRequestRevokePermissionsEnum?
+  open.UpdateUserPermissionsRequestRevokePermissions?
   toRevokePermissionDomain() {
     switch (this) {
       case CallPermission.screenshare:
-        return open
-            .UpdateUserPermissionsRequestRevokePermissionsEnum
-            .screenshare;
+        return open.UpdateUserPermissionsRequestRevokePermissions.screenshare;
       case CallPermission.sendAudio:
-        return open.UpdateUserPermissionsRequestRevokePermissionsEnum.sendAudio;
+        return open.UpdateUserPermissionsRequestRevokePermissions.sendAudio;
       case CallPermission.sendVideo:
-        return open.UpdateUserPermissionsRequestRevokePermissionsEnum.sendVideo;
+        return open.UpdateUserPermissionsRequestRevokePermissions.sendVideo;
       default:
         return null;
     }
   }
 }
 
-extension on open.AudioSettingsResponseDefaultDeviceEnum {
-  AudioSettingsRequestDefaultDeviceEnum toRequestDomain() {
-    if (this == open.AudioSettingsResponseDefaultDeviceEnum.speaker) {
-      return AudioSettingsRequestDefaultDeviceEnum.speaker;
+extension on open.AudioSettingsResponseDefaultDevice {
+  AudioSettingsRequestDefaultDevice toRequestDomain() {
+    if (this == open.AudioSettingsResponseDefaultDevice.speaker) {
+      return AudioSettingsRequestDefaultDevice.speaker;
     } else {
-      return AudioSettingsRequestDefaultDeviceEnum.earpiece;
+      return AudioSettingsRequestDefaultDevice.earpiece;
     }
   }
 }
 
-extension on open.VideoSettingsResponseCameraFacingEnum {
-  VideoSettingsRequestCameraFacingEnum toRequestDomain() {
-    if (this == open.VideoSettingsResponseCameraFacingEnum.front) {
-      return VideoSettingsRequestCameraFacingEnum.front;
-    } else if (this == open.VideoSettingsResponseCameraFacingEnum.back) {
-      return VideoSettingsRequestCameraFacingEnum.back;
+extension on open.VideoSettingsResponseCameraFacing {
+  VideoSettingsRequestCameraFacing toRequestDomain() {
+    if (this == open.VideoSettingsResponseCameraFacing.front) {
+      return VideoSettingsRequestCameraFacing.front;
+    } else if (this == open.VideoSettingsResponseCameraFacing.back) {
+      return VideoSettingsRequestCameraFacing.back;
     } else {
-      return VideoSettingsRequestCameraFacingEnum.external_;
+      return VideoSettingsRequestCameraFacing.external;
     }
   }
 }
 
-extension on open.TranscriptionSettingsResponseModeEnum {
+extension on open.TranscriptionSettingsResponseMode {
   TranscriptionSettingsMode toSettingsDomain() {
-    if (this == open.TranscriptionSettingsResponseModeEnum.autoOn) {
+    if (this == open.TranscriptionSettingsResponseMode.autoOn) {
       return TranscriptionSettingsMode.autoOn;
-    } else if (this == open.TranscriptionSettingsResponseModeEnum.available) {
+    } else if (this == open.TranscriptionSettingsResponseMode.available) {
       return TranscriptionSettingsMode.available;
     } else {
       return TranscriptionSettingsMode.disabled;
@@ -383,22 +380,21 @@ extension on open.TranscriptionSettingsResponseModeEnum {
   }
 }
 
-extension on open.TranscriptionSettingsResponseLanguageEnum {
+extension on open.TranscriptionSettingsResponseLanguage {
   TranscriptionSettingsLanguage toSettingsDomain() {
     return TranscriptionSettingsLanguage.values.firstWhereOrNull(
-          (it) => it.value == value,
+          (it) => it.value == name,
         ) ??
         TranscriptionSettingsLanguage.auto;
   }
 }
 
-extension on open.TranscriptionSettingsResponseClosedCaptionModeEnum {
+extension on open.TranscriptionSettingsResponseClosedCaptionMode {
   ClosedCaptionSettingsMode toSettingsDomain() {
-    if (this ==
-        open.TranscriptionSettingsResponseClosedCaptionModeEnum.autoOn) {
+    if (this == open.TranscriptionSettingsResponseClosedCaptionMode.autoOn) {
       return ClosedCaptionSettingsMode.autoOn;
     } else if (this ==
-        open.TranscriptionSettingsResponseClosedCaptionModeEnum.available) {
+        open.TranscriptionSettingsResponseClosedCaptionMode.available) {
       return ClosedCaptionSettingsMode.available;
     } else {
       return ClosedCaptionSettingsMode.disabled;
@@ -414,11 +410,11 @@ extension on open.NoiseCancellationSettings {
   }
 }
 
-extension on open.NoiseCancellationSettingsModeEnum {
+extension on open.NoiseCancellationSettingsMode {
   NoiseCancellationSettingsMode toSettingsDomain() {
-    if (this == open.NoiseCancellationSettingsModeEnum.autoOn) {
+    if (this == open.NoiseCancellationSettingsMode.autoOn) {
       return NoiseCancellationSettingsMode.autoOn;
-    } else if (this == open.NoiseCancellationSettingsModeEnum.available) {
+    } else if (this == open.NoiseCancellationSettingsMode.available) {
       return NoiseCancellationSettingsMode.available;
     } else {
       return NoiseCancellationSettingsMode.disabled;
@@ -467,9 +463,11 @@ extension on open.IngressSettingsResponse {
     return StreamIngressSettings(
       enabled: enabled,
       audioEncodingOptions: audioEncodingOptions?.toSettingsDomain(),
-      videoEncodingOptions: videoEncodingOptions.map(
-        (key, value) => MapEntry(key, value.toSettingsDomain()),
-      ),
+      videoEncodingOptions:
+          videoEncodingOptions?.map(
+            (key, value) => MapEntry(key, value.toSettingsDomain()),
+          ) ??
+          {},
     );
   }
 }
@@ -488,7 +486,7 @@ extension on open.IngressVideoEncodingResponse {
   StreamIngressVideoEncodingOptions toSettingsDomain() {
     return StreamIngressVideoEncodingOptions(
       layers: layers.map((e) => e.toSettingsDomain()).toList(),
-      source: source_.toSettingsDomain(),
+      source: source.toSettingsDomain(),
     );
   }
 }
@@ -503,13 +501,22 @@ extension on open.IngressSourceResponse {
   }
 }
 
+extension IngressVideoLayerRequestCodecExt on IngressVideoLayerRequestCodec {
+  static IngressVideoLayerRequestCodec fromString(String value) {
+    return switch (value) {
+      'h264' => IngressVideoLayerRequestCodec.h264,
+      'vp8' => IngressVideoLayerRequestCodec.vp8,
+      '_unknown' => IngressVideoLayerRequestCodec.unknown,
+      _ => IngressVideoLayerRequestCodec.h264,
+    };
+  }
+}
+
 extension on open.IngressVideoLayerResponse {
   StreamIngressVideoLayer toSettingsDomain() {
     return StreamIngressVideoLayer(
       bitrate: bitrate,
-      codec:
-          IngressVideoLayerRequestCodecEnumTypeTransformer().decode(codec) ??
-          IngressVideoLayerRequestCodecEnum.h264,
+      codec: IngressVideoLayerRequestCodecExt.fromString(codec),
       frameRateLimit: frameRateLimit,
       maxDimension: maxDimension,
       minDimension: minDimension,
@@ -633,16 +640,16 @@ extension ParticipantListExt on List<open.CallParticipantResponse> {
   }
 }
 
-extension CreateDeviceRequestPushProviderEnumX
-    on open.CreateDeviceRequestPushProviderEnum {
+extension CreateDeviceRequestPushProviderX
+    on open.CreateDeviceRequestPushProvider {
   PushProvider toPushProvider() {
-    if (this == open.CreateDeviceRequestPushProviderEnum.firebase) {
+    if (this == open.CreateDeviceRequestPushProvider.firebase) {
       return PushProvider.firebase;
-    } else if (this == open.CreateDeviceRequestPushProviderEnum.xiaomi) {
+    } else if (this == open.CreateDeviceRequestPushProvider.xiaomi) {
       return PushProvider.xiaomi;
-    } else if (this == open.CreateDeviceRequestPushProviderEnum.huawei) {
+    } else if (this == open.CreateDeviceRequestPushProvider.huawei) {
       return PushProvider.huawei;
-    } else if (this == open.CreateDeviceRequestPushProviderEnum.apn) {
+    } else if (this == open.CreateDeviceRequestPushProvider.apn) {
       return PushProvider.apn;
     }
     throw VideoError(message: 'Unknown push provider: $this');

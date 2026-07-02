@@ -1,4 +1,4 @@
-import '../../logger/logger.dart';
+import '../../logger/stream_log.dart';
 
 /// Connection state type used throughout the SDK.
 enum ConnectionState {

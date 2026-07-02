@@ -44,7 +44,7 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
 
       return const Result.success(false);
     } catch (err, stackTrace) {
-      return Result.error(err.toString(), stackTrace);
+      return failureWithError(err.toString(), stackTrace: stackTrace);
     }
   }
 
@@ -59,11 +59,11 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
         () => 'Noise cancellation is not supported on this platform: $e',
       );
 
-      return Result.error(
+      return failureWithError(
         'Noise cancellation is not supported on this platform',
       );
     } catch (err, stackTrace) {
-      return Result.error(err.toString(), stackTrace);
+      return failureWithError(err.toString(), stackTrace: stackTrace);
     }
   }
 
@@ -83,7 +83,7 @@ class NoiseCancellationAudioProcessor extends AudioProcessor {
 
       return const Result.success(false);
     } catch (err, stackTrace) {
-      return Result.error(err.toString(), stackTrace);
+      return failureWithError(err.toString(), stackTrace: stackTrace);
     }
   }
 }

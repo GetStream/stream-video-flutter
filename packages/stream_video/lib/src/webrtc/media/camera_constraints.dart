@@ -1,8 +1,4 @@
-import '../../platform_detector/platform_detector.dart';
-import '../model/rtc_video_parameters.dart';
-import 'constraints/facing_mode.dart';
-import 'constraints/mirror_mode.dart';
-import 'video_constraints.dart';
+import '../../../stream_video.dart';
 
 /// Options used when creating a video track that captures the camera.
 ///

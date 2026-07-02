@@ -135,7 +135,7 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
                     );
 
                     result.fold(
-                      success: (_) {
+                      onSuccess: (_) {
                         hideFeedbackDialog(context);
 
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -144,7 +144,7 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
                           ),
                         );
                       },
-                      failure: (error) {
+                      onFailure: (error, stackTrace) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Failed to submit feedback: $error'),

@@ -211,12 +211,12 @@ class RtcMediaDeviceNotifier {
             (kind == null || kind == RtcMediaDeviceKind.audioOutput) &&
             devices.none(
               (d) => d.deviceId.equalsIgnoreCase(
-                AudioSettingsRequestDefaultDeviceEnum.earpiece.value,
+                AudioSettingsRequestDefaultDevice.earpiece.name,
               ),
             ))
           RtcMediaDevice(
-            id: AudioSettingsRequestDefaultDeviceEnum.earpiece.value,
-            label: AudioSettingsRequestDefaultDeviceEnum.earpiece.value
+            id: AudioSettingsRequestDefaultDevice.earpiece.name,
+            label: AudioSettingsRequestDefaultDevice.earpiece.name
                 .capitalizeFirstLetter(),
             kind: RtcMediaDeviceKind.audioOutput,
           ),
@@ -232,12 +232,12 @@ class RtcMediaDeviceNotifier {
       if (kind != null) {
         final devices = mediaDevices.where((d) => d.kind == kind);
         if (devices.isEmpty) {
-          return Result.error('No devices found for kind: $kind');
+          return failureWithError('No devices found for kind: $kind');
         }
         return Result.success(devices.toList());
       }
 
-      if (mediaDevices.isEmpty) return Result.error('No devices found');
+      if (mediaDevices.isEmpty) return failureWithError('No devices found');
       return Result.success(mediaDevices.toList());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
