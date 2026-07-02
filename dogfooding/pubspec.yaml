@@ -44,6 +44,11 @@ dependencies:
   stream_video_screen_sharing: ^1.4.1
 
 dependency_overrides:
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      path: packages/stream_core
+      ref: 31ca84f0885eccea9ad6114719499e6f523991b0
   file_picker: ^12.0.0-beta.4
   share_plus: ^13.2.0
 
