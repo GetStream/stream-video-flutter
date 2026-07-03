@@ -114,6 +114,12 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onTrack}
   OnTrack? onTrack;
 
+  /// Telemetry hook: fires on every raw ICE connection-state change.
+  void Function(rtc.RTCIceConnectionState state)? onIceConnectionStateUpdated;
+
+  /// Telemetry hook: fires on every raw PC connection-state change.
+  void Function(rtc.RTCPeerConnectionState state)? onConnectionStateUpdated;
+
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
 
   /// Attempts to restart ICE on the `RTCPeerConnection`.
@@ -473,6 +479,8 @@ class StreamPeerConnection extends Disposable {
   void _onIceConnectionState(rtc.RTCIceConnectionState state) {
     _logger.v(() => '[onIceConnectionState] state: $state');
 
+    onIceConnectionStateUpdated?.call(state);
+
     switch (state) {
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
         // in the `failed` state, we try to restart ICE immediately
@@ -505,6 +513,8 @@ class StreamPeerConnection extends Disposable {
   }
 
   void _onConnectionState(rtc.RTCPeerConnectionState state) {
+    onConnectionStateUpdated?.call(state);
+
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
       onReconnectionNeeded?.call(this, SfuReconnectionStrategy.rejoin);
@@ -563,6 +573,8 @@ class StreamPeerConnection extends Disposable {
     onReconnectionNeeded = null;
     onIceCandidate = null;
     onTrack = null;
+    onIceConnectionStateUpdated = null;
+    onConnectionStateUpdated = null;
     _pendingCandidates.clear();
     await pc.dispose();
     return await super.dispose();

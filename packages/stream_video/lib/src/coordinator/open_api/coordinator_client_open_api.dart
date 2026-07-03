@@ -16,6 +16,7 @@ import '../../models/models.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../state_emitter.dart';
+import '../../telemetry/client_event_reporter.dart';
 import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
@@ -41,13 +42,15 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required RetryPolicy retryPolicy,
     required InternetConnection networkMonitor,
     this.isAnonymous = false,
+    ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
   }) : _rpcUrl = rpcUrl,
        _wsUrl = wsUrl,
        _apiKey = apiKey,
        _tokenManager = tokenManager,
        _latencyService = latencyService,
        _networkMonitor = networkMonitor,
-       _retryPolicy = retryPolicy;
+       _retryPolicy = retryPolicy,
+       _clientEventReporter = clientEventReporter;
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String _rpcUrl;
@@ -58,6 +61,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
   final InternetConnection _networkMonitor;
+  final ClientEventReporter _clientEventReporter;
 
   final bool isAnonymous;
 
@@ -251,6 +255,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       retryPolicy: _retryPolicy,
       includeUserDetails: includeUserDetails,
       networkMonitor: _networkMonitor,
+      clientEventReporter: _clientEventReporter,
     );
   }
 

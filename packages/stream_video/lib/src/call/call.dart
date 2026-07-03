@@ -36,6 +36,7 @@ import '../sfu/data/models/sfu_track_type.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../stream_video.dart';
+import '../telemetry/client_event_types.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/extensions.dart';
@@ -1027,6 +1028,11 @@ class Call {
     }
 
     await _streamVideo.state.setActiveCall(this);
+
+    _streamVideo.clientEventReporter
+      ..registerCall(callCid)
+      ..reportEvent(callCid, ClientEventStage.joinInitiated);
+
     final result =
         await _join(
               connectOptions: connectOptions,
@@ -1499,6 +1505,12 @@ class Call {
       return Result.error('call was left');
     }
 
+    final reporter = _streamVideo.clientEventReporter;
+    final joinStageId = reporter.beginStage(
+      callCid,
+      ClientEventStage.coordinatorJoin,
+    );
+
     final joinResult = await _coordinatorClient.joinCall(
       callCid: callCid,
       create: create,
@@ -1510,9 +1522,16 @@ class Call {
     );
 
     if (joinResult is! Success<CoordinatorJoined>) {
+      final failure = joinResult as Failure;
+      reporter.failStageWithError(joinStageId, failure.error);
       _logger.e(() => '[joinCall] join failed: $joinResult');
-      return joinResult as Failure;
+      return failure;
     }
+
+    // Server call_session_id is now known; stamp it on subsequent stages.
+    reporter
+      ..setCallSessionId(callCid, joinResult.data.metadata.session.id)
+      ..completeStage(joinStageId, outcome: ClientEventOutcome.success);
 
     final receivedOrCreated = CallReceivedOrCreatedData(
       wasCreated: joinResult.data.wasCreated,
@@ -1694,6 +1713,10 @@ class Call {
             .listen(
               (stats) {
                 _stats.emit(stats);
+                // Telemetry: feed subscriber stats for first-frame detection.
+                session.rtcManager?.onSubscriberStats(
+                  stats.subscriberStatsBundle.stats,
+                );
               },
             ),
       );
@@ -1955,6 +1978,14 @@ class Call {
           // capture BEFORE dispatch — strategy may change inside the helper
           final wasMigrating =
               _reconnectStrategy == SfuReconnectionStrategy.migrate;
+
+          final joinReason = _reconnectStrategy.joinReason;
+          if (joinReason != null) {
+            _streamVideo.clientEventReporter.newJoinAttempt(
+              callCid,
+              reason: joinReason,
+            );
+          }
 
           final reconnectResult = switch (_reconnectStrategy) {
             SfuReconnectionStrategy.fast => await _reconnectFast(
@@ -2242,6 +2273,18 @@ class Call {
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) async {
     _logger.i(() => '[leave] reason: $reason');
+
+    final abortCode = switch (reason) {
+      DisconnectReasonEnded() ||
+      DisconnectReasonCallEnded() => ClientEventStandardCode.backendLeave,
+      // Reconnection gave up — treat as a device-offline
+      DisconnectReasonReconnectionFailed() =>
+        ClientEventStandardCode.networkOffline,
+      _ => ClientEventStandardCode.clientAborted,
+    };
+    _streamVideo.clientEventReporter
+      ..abort(callCid, abortCode)
+      ..unregisterCall(callCid);
 
     try {
       final didDisconnect = await _disconnect(
