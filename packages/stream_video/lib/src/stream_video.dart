@@ -7,7 +7,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart'
-    hide LifecycleState, TokenManager, TokenProvider, User, UserToken, UserType;
+    hide LifecycleState, TokenManager, TokenProvider;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:uuid/uuid.dart';
 
@@ -24,6 +24,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'core/client_state.dart';
 import 'core/connection_state.dart';
+import 'core/internet_connection_network_state_provider.dart';
 import 'errors/video_error.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
@@ -201,8 +202,8 @@ class StreamVideo extends Disposable {
     }
 
     final tokenProvider = switch (user.type) {
-      UserType.authenticated => TokenProvider.from(
-        userToken?.let(UserToken.jwt),
+      UserType.regular => TokenProvider.from(
+        userToken?.let(UserToken.new),
         tokenLoader,
         onTokenUpdated,
       ),
@@ -216,9 +217,15 @@ class StreamVideo extends Disposable {
           throw (result as Failure).videoError;
         }
         final updatedUser = result.data.user;
+        final updatedInfo = updatedUser.toUserInfo();
         _state.user.value = User(
+          id: updatedInfo.id,
+          name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
+          image: updatedInfo.image,
+          role: updatedInfo.role,
+          teams: updatedInfo.teams,
+          custom: updatedInfo.extraData,
           type: user.type,
-          info: updatedUser.toUserInfo(),
         );
         return result.data.accessToken;
       }, onTokenUpdated: onTokenUpdated),
@@ -304,7 +311,7 @@ class StreamVideo extends Disposable {
   final Map<String, Timer> _incomingAutoRejectTimers = {};
 
   /// Returns the current user.
-  UserInfo get currentUser => _state.currentUser.info;
+  UserInfo get currentUser => _state.currentUser.toUserInfo();
 
   /// Returns the current user type.
   UserType get currentUserType => _state.currentUser.type;
@@ -415,7 +422,7 @@ class StreamVideo extends Disposable {
     try {
       await _disconnectOperation?.cancel();
       final result = await _client.connectUser(
-        user.info,
+        user.toUserInfo(),
         includeUserDetails: includeUserDetails,
       );
       _logger.v(() => '[connect] completed: $result');
@@ -1283,6 +1290,7 @@ CoordinatorClient buildCoordinatorClient({
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
+
   return CoordinatorClientRetry(
     retryPolicy: retryPolicy,
     tokenManager: tokenManager,
@@ -1290,11 +1298,13 @@ CoordinatorClient buildCoordinatorClient({
       apiKey: apiKey,
       tokenManager: tokenManager,
       latencyService: LatencyService(settings: latencySettings),
-      networkMonitor: networkMonitor,
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,
       isAnonymous: user.type == UserType.anonymous,
+      networkStateProvider: InternetConnectionNetworkStateProvider(
+        networkMonitor,
+      ),
     ),
   );
 }

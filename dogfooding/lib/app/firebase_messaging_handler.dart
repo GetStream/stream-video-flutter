@@ -33,7 +33,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     // Initialise the video client.
     final streamVideo = AppInjector.registerStreamVideo(
       tokenResponse,
-      User(info: credentials.userInfo),
+      credentials.userInfo.toUser(),
       prefs.environment,
     );
 

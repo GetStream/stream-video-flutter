@@ -7,7 +7,7 @@ void main() {
   // Initialize StreamVideo with noise cancellation audio processor
   final client = StreamVideo(
     'your-api-key',
-    user: User.regular(userId: 'user-id'),
+    user: User(id: 'user-id'),
     userToken: 'your-user-token',
     options: StreamVideoOptions(
       audioProcessor: NoiseCancellationAudioProcessor(),

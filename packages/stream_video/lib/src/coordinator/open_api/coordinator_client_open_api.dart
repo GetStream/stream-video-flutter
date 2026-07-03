@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
@@ -27,15 +26,15 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required TokenManager tokenManager,
     required LatencyService latencyService,
     required RetryPolicy retryPolicy,
-    required InternetConnection networkMonitor,
     this.isAnonymous = false,
+    NetworkStateProvider? networkStateProvider,
   }) : _rpcUrl = rpcUrl,
        _wsUrl = wsUrl,
        _apiKey = apiKey,
        _tokenManager = tokenManager,
        _latencyService = latencyService,
-       _networkMonitor = networkMonitor,
-       _retryPolicy = retryPolicy;
+       _retryPolicy = retryPolicy,
+       _networkStateProvider = networkStateProvider;
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String _rpcUrl;
@@ -45,7 +44,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   // ignore: unused_field
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
-  final InternetConnection _networkMonitor;
+  final NetworkStateProvider? _networkStateProvider;
 
   final bool isAnonymous;
 
@@ -226,13 +225,15 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     _user = null;
 
     final closedResult = await closeConnection();
+
+    // Always dispose regardless of closeConnection result
+    await _ws?.dispose();
+    _ws = null;
+    await _wsSubscription?.cancel();
+    _wsSubscription = null;
+
     return closedResult.when(
-      success: (_) async {
-        _ws = null;
-        await _wsSubscription?.cancel();
-        _wsSubscription = null;
-        return const Result.success(none);
-      },
+      success: (_) => const Result.success(none),
       failure: Result.failure,
     );
   }
@@ -246,9 +247,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       apiKey: _apiKey,
       userInfo: user,
       tokenManager: _tokenManager,
-      retryPolicy: _retryPolicy,
       includeUserDetails: includeUserDetails,
-      networkMonitor: _networkMonitor,
+      networkStateProvider: _networkStateProvider,
+      retryPolicy: _retryPolicy,
     );
   }
 

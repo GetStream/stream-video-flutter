@@ -18,7 +18,7 @@ class StreamVideoSdk {
     }
     return StreamVideo(
       apiKey,
-      user: User(info: user),
+      user: user.toUser(),
       userToken: userToken.rawValue,
       pushNotificationManagerProvider:
           StreamVideoPushNotificationManager.create(

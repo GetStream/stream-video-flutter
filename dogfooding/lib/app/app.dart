@@ -79,7 +79,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
 
     final authController = locator.get<UserAuthController>();
     await authController.login(
-      User(info: credentials.userInfo),
+      credentials.userInfo.toUser(),
       prefs.environment,
     );
   }

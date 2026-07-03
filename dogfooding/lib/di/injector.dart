@@ -96,7 +96,7 @@ class AppInjector {
         user,
         initialToken: tokenResponse.token,
         tokenLoader: switch (user.type) {
-          UserType.authenticated => (String userId) {
+          UserType.regular => (String userId) {
             final tokenService = locator<TokenService>();
             return tokenService
                 .loadToken(userId: userId, environment: environment)

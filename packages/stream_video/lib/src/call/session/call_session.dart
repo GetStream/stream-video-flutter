@@ -76,7 +76,6 @@ class CallSession extends Disposable {
          cid: callCid.value,
          userId: streamVideo.currentUser.id,
          apiKey: streamVideo.apiKey,
-         networkMonitor: networkMonitor,
        ),
        rtcManagerFactory = RtcManagerFactory(
          sessionId: sessionId,

@@ -19,6 +19,17 @@
 - `CurrentPlatform` and `PlatformType` are now provided by `stream_core`:
   - `CurrentPlatform.name` has been removed — use `CurrentPlatform.operatingSystem` instead.
 - `StreamLogger`, `Priority`, and `MessageBuilder` are now provided by `stream_core`. Import them from `stream_video` as before — the re-export is in place.
+- `User`, `UserType`, `UserToken`, and `AuthType` are now provided by `stream_core`. Several API changes follow:
+  - `User` constructor signature changed: the `info` field is gone. Pass fields directly — `User(id: 'x', name: 'X', custom: {...})` — instead of wrapping them in `UserInfo`.
+  - `User.regular(userId:, extraData:, ...)` factory has been removed. Use the `User(id:, custom:, ...)` constructor directly.
+  - `User.anonymous({String userId})` no longer accepts a custom `userId`. The id is always `'!anon'`. Use `User.anonymous()`.
+  - `User.guest({required String userId, String? name, String? image})` signature changed to `User.guest(String userId, {String? name})` — `userId` is now a positional argument, `name` remains optional, and `image` is no longer settable via this constructor.
+  - `user.info` (the `UserInfo` wrapper) has been removed. Properties (`id`, `name`, `image`, `role`, `teams`) are now flat on `User`.
+  - `user.extraData` has been renamed to `user.custom`.
+  - `user.name` return type changed from `String?` to `String`. It now falls back to `user.id` when no name was provided, so null checks on `user.name` are no longer needed.
+  - `UserType.authenticated` has been renamed to `UserType.regular`.
+  - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
+  - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
 
 ## 1.4.1
 

@@ -6,6 +6,6 @@ Future<void> main() async {
 
   StreamVideo.create(
     'api_token',
-    user: User.guest(userId: 'user_id'),
+    user: const User.guest('user_id'),
   );
 }

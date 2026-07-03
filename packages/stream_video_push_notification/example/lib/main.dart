@@ -7,7 +7,7 @@ void main() {
   // Initialize StreamVideo with push notification support
   final client = StreamVideo(
     'your-api-key',
-    user: User.regular(userId: 'user-id'),
+    user: User(id: 'user-id'),
     userToken: 'your-user-token',
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(
