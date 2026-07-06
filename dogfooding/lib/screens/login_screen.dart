@@ -50,7 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final googleService = await locator.getAsync<GoogleSignIn>();
     _googleAuthSubscription = googleService.authenticationEvents.listen(
       _handleGoogleAuthEvent,
-      onError: (Object e) => debugPrint('Google auth event error: $e'),
+      onError: (Object e) {
+        debugPrint('Google auth event error: $e');
+        _showSnackBar('Google sign-in failed: $e');
+      },
     );
   }
 
@@ -82,26 +85,35 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       debugPrint('Google sign-in failed: $e');
+      _showSnackBar('Google sign-in failed: $e');
     }
   }
 
   /// Web Google sign-in via Firebase Auth's popup flow.
   Future<void> _loginWithGoogleWeb() async {
-    final provider = fb.GoogleAuthProvider()
-      // Hints Google to restrict the account chooser to the Stream domain.
-      ..setCustomParameters(const {'hd': 'getstream.io'});
+    try {
+      final provider = fb.GoogleAuthProvider()
+        // Hints Google to restrict the account chooser to the Stream domain.
+        ..setCustomParameters(const {'hd': 'getstream.io'});
 
-    final credential = await fb.FirebaseAuth.instance.signInWithPopup(provider);
-    final user = credential.user;
-    if (user == null) {
-      return debugPrint('Google sign-in returned no user');
+      final credential =
+          await fb.FirebaseAuth.instance.signInWithPopup(provider);
+      final user = credential.user;
+      if (user == null) {
+        debugPrint('Google sign-in returned no user');
+        _showSnackBar('Google sign-in failed: no user returned.');
+        return;
+      }
+
+      await _completeGoogleLogin(
+        email: user.email,
+        name: user.displayName ?? '',
+        image: user.photoURL,
+      );
+    } catch (e) {
+      debugPrint('Google sign-in failed: $e');
+      _showSnackBar('Google sign-in failed: $e');
     }
-
-    await _completeGoogleLogin(
-      email: user.email,
-      name: user.displayName ?? '',
-      image: user.photoURL,
-    );
   }
 
   Future<void> _completeGoogleLogin({
@@ -109,8 +121,14 @@ class _LoginScreenState extends State<LoginScreen> {
     required String name,
     String? image,
   }) async {
+    if (email == null || email.isEmpty) {
+      debugPrint('Google sign-in returned no email');
+      _showSnackBar('Google sign-in failed: no email address returned.');
+      return;
+    }
+
     final userInfo = UserInfo(
-      id: createValidId(email!),
+      id: createValidId(email),
       name: name,
       image: image,
     );
