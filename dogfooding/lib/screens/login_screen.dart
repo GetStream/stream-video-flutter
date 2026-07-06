@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,48 +29,102 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _appPreferences = locator<AppPreferences>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
 
-  Future<void> _loginWithGoogle() async {
-    final googleService = locator<GoogleSignIn>();
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _googleAuthSubscription;
+  bool _isLoggingIn = false;
 
-    GoogleSignInAccount? googleUser;
-    try {
-      googleUser = await googleService.attemptLightweightAuthentication();
-    } catch (e) {
-      debugPrint('Google lightweight auth failed: $e');
-    }
-
-    if (googleUser == null && googleService.supportsAuthenticate()) {
-      try {
-        googleUser = await googleService.authenticate();
-      } catch (e) {
-        return debugPrint('Google sign-in failed: $e');
-      }
-    }
-
-    if (googleUser == null) {
-      return debugPrint('Google login cancelled or unavailable');
-    }
-
-    final userInfo = UserInfo(
-      role: 'admin',
-      id: createValidId(googleUser.email),
-      name: googleUser.displayName ?? '',
-      image: googleUser.photoUrl,
-    );
-
-    return _login(User(info: userInfo), _appPreferences.environment);
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initGoogleSignIn());
   }
 
-  Future<void> _loginWithEmail() async {
-    final email = _emailController.text;
-    if (email.isEmpty) return debugPrint('Email is empty');
+  /// Subscribes to Google auth events so the result of the mobile/macOS
+  /// `authenticate()` call is handled. Web uses Firebase Auth's popup flow
+  /// instead (see [_loginWithGoogleWeb]), so there is no google_sign_in plugin
+  /// to subscribe to there.
+  Future<void> _initGoogleSignIn() async {
+    if (kIsWeb) return;
+
+    final googleService = await locator.getAsync<GoogleSignIn>();
+    _googleAuthSubscription = googleService.authenticationEvents.listen(
+      _handleGoogleAuthEvent,
+      onError: (Object e) => debugPrint('Google auth event error: $e'),
+    );
+  }
+
+  void _handleGoogleAuthEvent(GoogleSignInAuthenticationEvent event) {
+    if (event is! GoogleSignInAuthenticationEventSignIn) return;
+
+    final googleUser = event.user;
+    unawaited(
+      _completeGoogleLogin(
+        email: googleUser.email,
+        name: googleUser.displayName ?? '',
+        image: googleUser.photoUrl,
+      ),
+    );
+  }
+
+  /// Triggers an interactive Google sign-in from the button tap.
+  Future<void> _loginWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        await _loginWithGoogleWeb();
+        return;
+      }
+
+      final googleService = await locator.getAsync<GoogleSignIn>();
+      if (googleService.supportsAuthenticate()) {
+        // Result delivered via authenticationEvents -> _handleGoogleAuthEvent.
+        await googleService.authenticate();
+      }
+    } catch (e) {
+      debugPrint('Google sign-in failed: $e');
+    }
+  }
+
+  /// Web Google sign-in via Firebase Auth's popup flow.
+  Future<void> _loginWithGoogleWeb() async {
+    final provider = fb.GoogleAuthProvider()
+      // Hints Google to restrict the account chooser to the Stream domain.
+      ..setCustomParameters(const {'hd': 'getstream.io'});
+
+    final credential = await fb.FirebaseAuth.instance.signInWithPopup(provider);
+    final user = credential.user;
+    if (user == null) {
+      return debugPrint('Google sign-in returned no user');
+    }
+
+    await _completeGoogleLogin(
+      email: user.email,
+      name: user.displayName ?? '',
+      image: user.photoURL,
+    );
+  }
+
+  Future<void> _completeGoogleLogin({
+    required String? email,
+    required String name,
+    String? image,
+  }) async {
+    final userInfo = UserInfo(
+      id: createValidId(email!),
+      name: name,
+      image: image,
+    );
+
+    await _login(User(info: userInfo), _appPreferences.environment);
+  }
+
+  Future<void> _loginWithUsername() async {
+    final username = _usernameController.text;
+    if (username.isEmpty) return debugPrint('Username is empty');
 
     final userInfo = UserInfo(
-      role: 'admin',
-      id: createValidId(email),
-      name: email,
+      id: createValidId(username),
+      name: username,
     );
 
     return _login(User(info: userInfo), _appPreferences.environment);
@@ -78,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loginAsGuest() async {
     final userId = randomId(size: 6);
     final userInfo = UserInfo(
-      role: 'admin',
       id: userId,
       name: userId,
       image:
@@ -92,6 +146,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login(User user, Environment environment) async {
+    if (_isLoggingIn) return;
+    _isLoggingIn = true;
+
     if (mounted) unawaited(showLoadingIndicator(context));
 
     // Register StreamVideo client with the user.
@@ -100,21 +157,27 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await authController.login(user, environment);
     } catch (e, _) {
-      if (mounted) {
-        hideLoadingIndicator(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: const Duration(seconds: 20),
-            content: Text('Error: $e'),
-          ),
-        );
-      }
+      if (mounted) hideLoadingIndicator(context);
+      _showSnackBar('Error: $e');
+    } finally {
+      _isLoggingIn = false;
     }
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 20),
+        content: Text(message),
+      ),
+    );
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    unawaited(_googleAuthSubscription?.cancel());
+    _usernameController.dispose();
     super.dispose();
   }
 
@@ -131,6 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
           if (!kIsProd)
             EnvironmentSwitcher(
               currentEnvironment: _appPreferences.environment,
+              // Rebuild so the Google button visibility tracks the environment.
+              onEnvironmentChanged: (_) => setState(() {}),
             ),
         ],
       ),
@@ -162,12 +227,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextField(
-                      controller: _emailController,
+                      controller: _usernameController,
                       style: theme.textTheme.bodyMedium?.apply(
                         color: Colors.white,
                       ),
                       decoration: const InputDecoration(
-                        labelText: 'Enter Email',
+                        labelText: 'Enter Username',
                         isDense: true,
                         border: OutlineInputBorder(),
                       ),
@@ -177,12 +242,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamButton.active(
-                      label: 'Sign up with email',
+                      label: 'Sign up with username',
                       icon: const Icon(
-                        Icons.email_outlined,
+                        Icons.person_outline,
                         color: Colors.white,
                       ),
-                      onPressed: _loginWithEmail,
+                      onPressed: _loginWithUsername,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -203,11 +268,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GoogleLoginButton(onPressed: _loginWithGoogle),
-                  ),
+                  // Google (Stream employee) sign-in is only available on
+                  // Pronto environments.
+                  if (_appPreferences.environment.isPronto) ...[
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GoogleLoginButton(onPressed: _loginWithGoogle),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
