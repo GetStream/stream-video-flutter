@@ -1,7 +1,11 @@
 import 'dart:async';
 
+import 'package:uuid/uuid.dart';
+
 import '../../../globals.dart';
 import '../../../stream_video.dart';
+import '../../telemetry/client_event_reporter.dart';
+import '../../telemetry/client_event_types.dart';
 import '../../token/token_manager.dart';
 import 'coordinator_message_codec.dart';
 
@@ -23,6 +27,7 @@ class CoordinatorWebSocket {
     required this.userInfo,
     required this.tokenManager,
     this.includeUserDetails = false,
+    this.clientEventReporter = const ClientEventReporter.noOp(),
     NetworkStateProvider? networkStateProvider,
     RetryPolicy? retryPolicy,
   }) {
@@ -57,6 +62,10 @@ class CoordinatorWebSocket {
   final TokenManager tokenManager;
   final bool includeUserDetails;
 
+  /// Reports the `CoordinatorWS` telemetry stage, which follows this socket's
+  /// connection lifecycle.
+  final ClientEventReporter clientEventReporter;
+
   late final StreamWebSocketClient _client;
   late final ConnectionRecoveryHandler _recoveryHandler;
 
@@ -68,6 +77,11 @@ class CoordinatorWebSocket {
 
   bool _refreshToken = false;
   bool _isReconnecting = false;
+
+  final _uuid = const Uuid();
+
+  /// The in-flight `CoordinatorWS` stage id, if a connect attempt is pending.
+  String? _coordinatorWsStageId;
 
   String? get connectionId => _connectionId;
 
@@ -156,6 +170,9 @@ class CoordinatorWebSocket {
 
   void _onConnectionStateChanged(WebSocketConnectionState state) {
     _logger.d(() => '[onConnectionStateChanged] state: $state');
+
+    _reportCoordinatorWsStage(state);
+
     if (state is! Disconnected) return;
 
     final source = state.source;
@@ -180,6 +197,43 @@ class CoordinatorWebSocket {
     // CoordinatorReconnectedEvent is emitted when the handler reconnects.
     if (source is! UserInitiated) {
       _isReconnecting = true;
+    }
+  }
+
+  void _reportCoordinatorWsStage(WebSocketConnectionState state) {
+    switch (state) {
+      case Connecting():
+        if (_coordinatorWsStageId != null) break;
+        final stageId = clientEventReporter.beginConnectionStage(
+          ClientEventStage.coordinatorWs,
+          connectId: _uuid.v4(),
+        );
+        _coordinatorWsStageId = stageId.isEmpty ? null : stageId;
+      case Connected():
+        final stageId = _coordinatorWsStageId;
+        if (stageId == null) break;
+        _coordinatorWsStageId = null;
+        clientEventReporter.completeStage(
+          stageId,
+          outcome: ClientEventOutcome.success,
+        );
+      case Disconnected(:final source):
+        final stageId = _coordinatorWsStageId;
+        if (stageId == null) break;
+        _coordinatorWsStageId = null;
+        clientEventReporter.failStage(
+          stageId,
+          failure: source is UserInitiated
+              ? const ClientEventFailure.clientAborted(
+                  'Coordinator WS disconnected',
+                )
+              : ClientEventFailure(
+                  ClientEventStandardCode.serverError,
+                  'Coordinator WS disconnected (${source.closeReason})',
+                ),
+        );
+      case Initialized() || Authenticating() || Disconnecting():
+        break;
     }
   }
 }

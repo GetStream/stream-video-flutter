@@ -78,6 +78,7 @@ class RtcManagerFactory {
       stateManager: stateManager,
       streamVideo: streamVideo,
       pcFactory: pcFactory,
+      sfuId: callSessionConfig?.sfuName,
     );
   }
 }

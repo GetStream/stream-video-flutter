@@ -1,14 +1,13 @@
 import 'dart:async';
 
-import 'package:uuid/uuid.dart';
-
 import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../../globals.dart';
 import '../../../stream_video.dart';
 import '../../errors/video_error_composer.dart';
+import '../../http/stream_api_interceptors.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
 import '../../models/call_received_data.dart';
+import '../../telemetry/client_event_reporter.dart';
 import '../../token/token_manager.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_models.dart';
@@ -28,13 +27,15 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required RetryPolicy retryPolicy,
     this.isAnonymous = false,
     NetworkStateProvider? networkStateProvider,
+    ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
   }) : _rpcUrl = rpcUrl,
        _wsUrl = wsUrl,
        _apiKey = apiKey,
        _tokenManager = tokenManager,
        _latencyService = latencyService,
        _retryPolicy = retryPolicy,
-       _networkStateProvider = networkStateProvider;
+       _networkStateProvider = networkStateProvider,
+       _clientEventReporter = clientEventReporter;
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String _rpcUrl;
@@ -45,6 +46,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
   final NetworkStateProvider? _networkStateProvider;
+  final ClientEventReporter _clientEventReporter;
 
   final bool isAnonymous;
 
@@ -250,6 +252,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       includeUserDetails: includeUserDetails,
       networkStateProvider: _networkStateProvider,
       retryPolicy: _retryPolicy,
+      clientEventReporter: _clientEventReporter,
     );
   }
 
@@ -1753,7 +1756,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 }
 
 typedef GetConnectionId = String? Function();
-typedef GetToken = FutureOr<UserToken> Function();
 
 final _httpLogger = taggedLogger(tag: 'SV:CoordHttp');
 
@@ -1765,8 +1767,8 @@ List<Interceptor> _buildInterceptors({
   return [
     _ApiKeyInterceptor(apiKey),
     ConnectionIdInterceptor(getConnectionId),
-    _AuthInterceptor(getToken),
-    const _ClientInfoInterceptor(),
+    StreamAuthInterceptor(getToken),
+    const StreamClientInfoInterceptor(),
     const ApiErrorInterceptor(),
     LoggingInterceptor(
       requestHeader: true,
@@ -1787,52 +1789,6 @@ class _ApiKeyInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) {
     options.queryParameters['api_key'] = apiKey;
-    handler.next(options);
-  }
-}
-
-/// Attaches the auth headers for the current user token, rejecting the request
-/// if the token cannot be resolved.
-class _AuthInterceptor extends Interceptor {
-  const _AuthInterceptor(this.getToken);
-
-  final GetToken getToken;
-
-  @override
-  Future<void> onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    try {
-      final userToken = await getToken();
-      options.headers['stream-auth-type'] = userToken.authType.name;
-      if (userToken.rawValue.isNotEmpty) {
-        options.headers['Authorization'] = userToken.rawValue;
-      }
-      handler.next(options);
-    } catch (error, stackTrace) {
-      handler.reject(
-        DioException(
-          requestOptions: options,
-          error: error,
-          stackTrace: stackTrace,
-        ),
-      );
-    }
-  }
-}
-
-/// Adds the `X-Stream-Client` header and a unique per-request id header.
-class _ClientInfoInterceptor extends Interceptor {
-  const _ClientInfoInterceptor();
-
-  @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) {
-    options.headers['X-Stream-Client'] = xStreamClientHeader;
-    options.headers['x-client-request-id'] = const Uuid().v4();
     handler.next(options);
   }
 }

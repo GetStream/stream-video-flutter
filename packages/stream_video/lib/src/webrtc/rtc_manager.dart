@@ -13,6 +13,9 @@ import '../errors/video_error_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
+import '../telemetry/client_event_types.dart';
+import '../telemetry/media_frame_reporter.dart';
+import '../telemetry/peer_connection_connect_reporter.dart';
 import '../utils/extensions.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
@@ -56,8 +59,10 @@ class RtcManager extends Disposable {
     required this.stateManager,
     required StreamVideo streamVideo,
     required this.pcFactory,
+    this.sfuId,
   }) : _streamVideo = streamVideo {
     subscriber.onTrack = _onRemoteTrack;
+    _initClientEventReporting();
   }
 
   final _logger = taggedLogger(tag: _tag);
@@ -69,6 +74,11 @@ class RtcManager extends Disposable {
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
   final StreamVideo _streamVideo;
+  final String? sfuId;
+
+  PeerConnectionConnectReporter? _publisherConnectReporter;
+  PeerConnectionConnectReporter? _subscriberConnectReporter;
+  MediaFrameReporter? _mediaFrameReporter;
 
   final StreamPeerConnectionFactory pcFactory;
 
@@ -99,6 +109,51 @@ class RtcManager extends Disposable {
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
   OnRemoteTrackReceived? onRemoteTrackReceived;
+
+  void _initClientEventReporting() {
+    if (!_streamVideo.options.clientEventsReportingEnabled) return;
+
+    final reporter = _streamVideo.clientEventReporter;
+
+    _mediaFrameReporter = MediaFrameReporter(
+      reporter: reporter,
+      callCid: callCid,
+      sfuId: sfuId,
+    );
+
+    _subscriberConnectReporter = PeerConnectionConnectReporter(
+      reporter: reporter,
+      callCid: callCid,
+      role: ClientEventPeerConnectionRole.subscribe,
+      sfuId: sfuId,
+    );
+
+    subscriber
+      ..onIceConnectionStateUpdated =
+          _subscriberConnectReporter!.onIceConnectionState
+      ..onConnectionStateUpdated =
+          _subscriberConnectReporter!.onConnectionState;
+
+    final pub = publisher;
+    if (pub != null) {
+      _publisherConnectReporter = PeerConnectionConnectReporter(
+        reporter: reporter,
+        callCid: callCid,
+        role: ClientEventPeerConnectionRole.publish,
+        sfuId: sfuId,
+      );
+      pub
+        ..onIceConnectionStateUpdated =
+            _publisherConnectReporter!.onIceConnectionState
+        ..onConnectionStateUpdated =
+            _publisherConnectReporter!.onConnectionState;
+    }
+  }
+
+  /// Feeds the subscriber's periodic WebRTC [stats] to first-frame telemetry
+  void onSubscriberStats(List<RtcStats> stats) {
+    _mediaFrameReporter?.onSubscriberStats(stats);
+  }
 
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
@@ -203,6 +258,21 @@ class RtcManager extends Disposable {
     onRemoteTrackReceived?.call(pc, remoteTrack);
     tracks[remoteTrack.trackId] = remoteTrack;
     _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
+
+    // Telemetry: first-frame detection for remote media.
+    final frameReporter = _mediaFrameReporter;
+    if (frameReporter != null) {
+      if (track.kind == 'audio') {
+        frameReporter.onRemoteAudioTrack(trackId: remoteTrack.trackId);
+      } else if (track.kind == 'video') {
+        unawaited(
+          frameReporter.onRemoteVideoTrack(
+            stream: stream,
+            trackId: remoteTrack.trackId,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> changeDefaultAudioConstraints(
@@ -498,6 +568,11 @@ class RtcManager extends Disposable {
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
+
+    // Fail any peer-connection attempt that never finished connecting.
+    _publisherConnectReporter?.abortInFlight();
+    _subscriberConnectReporter?.abortInFlight();
+    _mediaFrameReporter?.dispose();
 
     await Future.wait([
       if (publisher != null)

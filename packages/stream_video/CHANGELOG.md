@@ -30,6 +30,9 @@
   - `UserType.authenticated` has been renamed to `UserType.regular`.
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
+### ✅ Added
+
+- Added client-side call join telemetry (`ClientEventReporter`): the SDK reports each stage of the join funnel — `JoinInitiated`, `CoordinatorWS`, `CoordinatorJoin`, `WSJoin`, `PeerConnectionConnect` (publish/subscribe), `FirstVideoFrame`, and `FirstAudioFrame` — to the backend so join success/failure can be reconciled. Enabled by default; disable via `StreamVideoOptions.clientEventsReportingEnabled`.
 
 ## 1.4.1
 
