@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- Fixed connection quality indicator blanking after reconnect.
+
 ## 1.4.1
 
 ### 🔄 Changed
