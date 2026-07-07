@@ -28,7 +28,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _appPreferences = locator<AppPreferences>();
-  final _emailController = TextEditingController();
+  final _userNameController = TextEditingController();
+  var _userNameHasError = false;
 
   Future<void> _loginWithGoogle() async {
     final googleService = locator<GoogleSignIn>();
@@ -62,14 +63,24 @@ class _LoginScreenState extends State<LoginScreen> {
     return _login(User(info: userInfo), _appPreferences.environment);
   }
 
-  Future<void> _loginWithEmail() async {
-    final email = _emailController.text;
-    if (email.isEmpty) return debugPrint('Email is empty');
+  Future<void> _loginWithName() async {
+    final userName = _userNameController.text;
+    if (userName.isEmpty) {
+      setState(() {
+        _userNameHasError = true;
+      });
+      return debugPrint('User name is empty');
+    }
+    if (_userNameHasError) {
+      setState(() {
+        _userNameHasError = false;
+      });
+    }
 
     final userInfo = UserInfo(
       role: 'admin',
-      id: createValidId(email),
-      name: email,
+      id: createValidId(userName),
+      name: userName,
     );
 
     return _login(User(info: userInfo), _appPreferences.environment);
@@ -114,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _userNameController.dispose();
     super.dispose();
   }
 
@@ -162,14 +173,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: TextField(
-                      controller: _emailController,
+                      controller: _userNameController,
                       style: theme.textTheme.bodyMedium?.apply(
                         color: Colors.white,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Enter Email',
+                      decoration: InputDecoration(
+                        labelText: 'Choose display name',
                         isDense: true,
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        errorText: _userNameHasError
+                            ? 'Please enter a name'
+                            : null,
                       ),
                     ),
                   ),
@@ -177,12 +191,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamButton.active(
-                      label: 'Sign up with email',
-                      icon: const Icon(
-                        Icons.email_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: _loginWithEmail,
+                      label: 'Continue',
+                      onPressed: _loginWithName,
                     ),
                   ),
                   const SizedBox(height: 16),
