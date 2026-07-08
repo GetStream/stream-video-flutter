@@ -29,6 +29,15 @@ class ScreenSharingStartedEvent extends NativeWebRtcEvent {
   final Map<dynamic, dynamic>? data;
 }
 
+/// Emitted (iOS) when the active audio output route changes outside of an
+/// explicit [Call.setAudioOutputDevice] call, e.g. when the user picks a
+/// different output through the native route-selection UI
+/// ([RtcMediaDeviceNotifier.triggeriOSAudioRouteSelectionUI]).
+class AudioRouteChangedEvent extends NativeWebRtcEvent {
+  AudioRouteChangedEvent({required this.device});
+  final RtcMediaDevice device;
+}
+
 sealed class SpeechActivityEvent {
   const SpeechActivityEvent();
 }
@@ -129,6 +138,17 @@ class RtcMediaDeviceNotifier {
               return ScreenSharingStoppedEvent(data: values);
             case 'screenSharingStarted':
               return ScreenSharingStartedEvent(data: values);
+            case 'onAudioRouteChange':
+              final deviceId = values?['deviceId'] as String?;
+              if (deviceId == null || deviceId.isEmpty) return null;
+              return AudioRouteChangedEvent(
+                device: RtcMediaDevice(
+                  id: deviceId,
+                  label: values?['label'] as String? ?? deviceId,
+                  groupId: values?['groupId'] as String?,
+                  kind: RtcMediaDeviceKind.audioOutput,
+                ),
+              );
             default:
               return null;
           }
