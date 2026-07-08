@@ -1,3 +1,9 @@
+## Upcoming
+
+### ✅ Added
+
+- Added client-side call join telemetry (`ClientEventReporter`).
+
 ## 1.4.1
 
 ### 🔄 Changed

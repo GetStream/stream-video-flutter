@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
@@ -11,6 +12,8 @@ import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
+import '../../telemetry/client_event_reporter.dart';
+import '../../telemetry/client_event_types.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -44,6 +47,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     required this.retryPolicy,
     required this.networkMonitor,
     this.includeUserDetails = false,
+    this.clientEventReporter = const ClientEventReporter.noOp(),
   }) : super(
          _buildUrl(url, apiKey),
          protocols: protocols,
@@ -59,6 +63,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
           ),
         );
       }
+      _reportCoordinatorWsStage(event);
     };
   }
 
@@ -89,6 +94,10 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   /// Decides whether to pass user details to backend when connecting the user.
   final bool includeUserDetails;
 
+  /// Reports the `CoordinatorWS` telemetry stage, which follows this socket's
+  /// connection lifecycle.
+  final ClientEventReporter clientEventReporter;
+
   bool _refreshToken = false;
 
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -96,6 +105,62 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
 
   String? userId;
   String? connectionId;
+
+  final _uuid = const Uuid();
+
+  /// The in-flight `CoordinatorWS` stage id, if a connect attempt is pending.
+  String? _coordinatorWsStageId;
+
+  /// Retry count captured when the in-flight `CoordinatorWS` stage began.
+  int _coordinatorWsStageRetryCount = 0;
+
+  void _reportCoordinatorWsStage(ConnectionStateUpdatedEvent event) {
+    switch (event.newState) {
+      case ConnectionState.connecting:
+        if (_coordinatorWsStageId != null) break;
+        _coordinatorWsStageRetryCount = _reconnectAttempt;
+        final stageId = clientEventReporter.beginConnectionStage(
+          ClientEventStage.coordinatorWs,
+          connectId: _uuid.v4(),
+        );
+        _coordinatorWsStageId = stageId.isEmpty ? null : stageId;
+      case ConnectionState.connected:
+        final stageId = _coordinatorWsStageId;
+        if (stageId == null) break;
+        _coordinatorWsStageId = null;
+        clientEventReporter.completeStage(
+          stageId,
+          outcome: ClientEventOutcome.success,
+          retryCount: _coordinatorWsStageRetryCount,
+        );
+      case ConnectionState.failed:
+      case ConnectionState.closed:
+        final stageId = _coordinatorWsStageId;
+        if (stageId == null) break;
+        _coordinatorWsStageId = null;
+        clientEventReporter.failStage(
+          stageId,
+          failure: ClientEventFailure(
+            ClientEventStandardCode.serverError,
+            'Coordinator WS ${event.newState.name}',
+          ),
+          retryCount: _coordinatorWsStageRetryCount,
+        );
+      case ConnectionState.disconnected:
+        final stageId = _coordinatorWsStageId;
+        if (stageId == null) break;
+        _coordinatorWsStageId = null;
+        clientEventReporter.failStage(
+          stageId,
+          failure: const ClientEventFailure.clientAborted(
+            'Coordinator WS disconnected',
+          ),
+          retryCount: _coordinatorWsStageRetryCount,
+        );
+      case ConnectionState.reconnecting:
+        break;
+    }
+  }
 
   @override
   Future<Result<None>> connect() {

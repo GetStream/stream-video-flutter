@@ -47,6 +47,7 @@ void main() {
             ),
             isAnonymousUser: any(named: 'isAnonymousUser'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
           ),
         ).thenAnswer(
           (_) async => const Result.failure(
@@ -81,6 +82,7 @@ void main() {
             isAnonymousUser: any(named: 'isAnonymousUser'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
           ),
           () => mockCallSession.start(
             reconnectDetails: any(named: 'reconnectDetails'),
@@ -90,6 +92,7 @@ void main() {
             isAnonymousUser: any(named: 'isAnonymousUser'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
           ),
           () => coordinatorClient.joinCall(
             callCid: any(named: 'callCid'),
@@ -108,6 +111,7 @@ void main() {
             isAnonymousUser: any(named: 'isAnonymousUser'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
           ),
         ]);
       },
