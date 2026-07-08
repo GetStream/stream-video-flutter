@@ -88,6 +88,9 @@ class SfuStatsReporter {
   Timer? _timer;
   int _reportCount = 0;
   bool _stopped = false;
+  bool _flushing = false;
+
+  static const _flushTimeout = Duration(seconds: 2);
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -116,22 +119,39 @@ class SfuStatsReporter {
     }
   }
 
+  Future<void> flush() async {
+    if (_stopped) return;
+    _flushing = true;
+    try {
+      await sendSfuStats().timeout(
+        _flushTimeout,
+        onTimeout: () {
+          _logger.v(() => 'SFU stats flush timed out during sampling');
+        },
+      );
+    } catch (e) {
+      _logger.v(() => 'Failed to flush SFU stats: $e');
+    } finally {
+      _flushing = false;
+    }
+  }
+
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    if (_stopped) return;
+    if (_stopped && !_flushing) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_stopped) return;
+        if (_stopped && !_flushing) return;
         final publisherStatsBundle = await callSession.rtcManager?.publisher
             ?.getStats();
 
-        if (_stopped) return;
+        if (_stopped && !_flushing) return;
         final subscriberStatsBundle = await callSession.rtcManager?.subscriber
             .getStats();
 
-        if (_stopped ||
+        if ((_stopped && !_flushing) ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
