@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- Fixed SFU stats not being flushed on call end.
+
 ## 1.4.1
 
 ### 🔄 Changed
