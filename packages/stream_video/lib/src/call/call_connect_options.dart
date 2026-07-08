@@ -5,7 +5,7 @@ import '../webrtc/media/media_constraints.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
 
-class CallConnectOptions with EquatableMixin {
+class CallConnectOptions with Equatable {
   const CallConnectOptions({
     this.camera = TrackDisabled._instance,
     this.microphone = TrackDisabled._instance,
@@ -105,7 +105,7 @@ class CallConnectOptions with EquatableMixin {
   }
 }
 
-abstract class TrackOption with EquatableMixin {
+abstract class TrackOption with Equatable {
   const TrackOption();
 
   factory TrackOption.fromSetting({required bool enabled}) =>

@@ -11,7 +11,7 @@ import '../../models/call_settings.dart';
 
 /// Represents the events coming in from the socket.
 @immutable
-abstract class CoordinatorEvent with EquatableMixin {
+abstract class CoordinatorEvent with Equatable {
   const CoordinatorEvent();
 
   @override

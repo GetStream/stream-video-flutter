@@ -14,7 +14,7 @@ import 'viewport_visibility.dart';
 
 @immutable
 class CallParticipantState
-    with EquatableMixin
+    with Equatable
     implements Comparable<CallParticipantState> {
   CallParticipantState({
     required this.userId,

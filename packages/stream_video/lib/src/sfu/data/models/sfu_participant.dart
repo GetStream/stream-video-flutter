@@ -4,7 +4,7 @@ import 'sfu_connection_quality.dart';
 import 'sfu_participant_source.dart';
 import 'sfu_track_type.dart';
 
-class SfuParticipant with EquatableMixin {
+class SfuParticipant with Equatable {
   SfuParticipant({
     required this.userId,
     required this.userName,
@@ -103,7 +103,7 @@ class SfuParticipant with EquatableMixin {
   ];
 }
 
-class SfuParticipantCount with EquatableMixin {
+class SfuParticipantCount with Equatable {
   SfuParticipantCount({
     required this.total,
     required this.anonymous,

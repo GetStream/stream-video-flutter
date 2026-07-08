@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../protobuf/video/sfu/models/models.pbenum.dart';
 
-class SfuError with EquatableMixin {
+class SfuError with Equatable {
   SfuError({
     required this.message,
     required this.code,

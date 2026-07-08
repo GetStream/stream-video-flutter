@@ -5,7 +5,7 @@ import '../call/call_events.dart';
 import 'models.dart';
 
 @immutable
-class StreamClosedCaption with EquatableMixin {
+class StreamClosedCaption with Equatable {
   StreamClosedCaption({
     required this.startTime,
     required this.endTime,

@@ -6,7 +6,7 @@ import 'call_metadata.dart';
 import 'user_info.dart';
 
 @immutable
-class CallMemberState with EquatableMixin {
+class CallMemberState with Equatable {
   const CallMemberState({
     required this.userId,
     required this.roles,

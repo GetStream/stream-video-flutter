@@ -8,7 +8,7 @@ import 'event_type.dart';
 
 const _tag = 'SV:OpenApiEvent';
 
-class OpenApiEvent with EquatableMixin {
+class OpenApiEvent with Equatable {
   const OpenApiEvent({
     required this.type,
     this.connected,

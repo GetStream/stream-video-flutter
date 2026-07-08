@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class CallParticipantPin with EquatableMixin {
+class CallParticipantPin with Equatable {
   const CallParticipantPin({
     required this.isLocalPin,
     required this.pinnedAt,

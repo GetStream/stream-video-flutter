@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'sfu_codec.dart';
 
-class SfuVideoLayerSetting with EquatableMixin {
+class SfuVideoLayerSetting with Equatable {
   SfuVideoLayerSetting({
     required this.name,
     required this.active,

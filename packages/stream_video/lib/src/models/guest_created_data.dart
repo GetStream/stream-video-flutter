@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'user_info.dart';
 
 @immutable
-class GuestCreatedData with EquatableMixin {
+class GuestCreatedData with Equatable {
   /// Returns a new [GuestCreatedData] instance.
   GuestCreatedData({
     required this.accessToken,
@@ -41,7 +41,7 @@ class GuestCreatedData with EquatableMixin {
 }
 
 @immutable
-class UserResponseData with EquatableMixin {
+class UserResponseData with Equatable {
   /// Returns a new [UserResponseData] instance.
   const UserResponseData({
     required this.createdAt,

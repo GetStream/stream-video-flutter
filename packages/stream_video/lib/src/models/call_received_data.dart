@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'models.dart';
 
 @immutable
-class CallReceivedData with EquatableMixin {
+class CallReceivedData with Equatable {
   const CallReceivedData({
     required this.callCid,
     required this.metadata,

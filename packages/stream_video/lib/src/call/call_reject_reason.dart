@@ -10,7 +10,7 @@ import 'package:equatable/equatable.dart';
 ///   cancelled, or all other participants rejected) before the user answered
 /// callEndedLocally - when the local SDK already ended the call and the
 ///   ringing flow is being brought back in sync
-class CallRejectReason with EquatableMixin {
+class CallRejectReason with Equatable {
   const CallRejectReason._(this.value);
 
   factory CallRejectReason.decline() => const CallRejectReason._('decline');

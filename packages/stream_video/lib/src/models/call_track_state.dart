@@ -6,7 +6,7 @@ import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 
 @immutable
-abstract class TrackState with EquatableMixin {
+abstract class TrackState with Equatable {
   const TrackState({required this.muted});
 
   factory TrackState.local({

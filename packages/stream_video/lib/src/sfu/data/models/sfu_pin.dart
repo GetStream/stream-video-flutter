@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class SfuPin with EquatableMixin {
+class SfuPin with Equatable {
   SfuPin({
     required this.userId,
     required this.sessionId,

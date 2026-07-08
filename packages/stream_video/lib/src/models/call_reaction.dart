@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'call_metadata.dart';
 
-class CallReaction with EquatableMixin {
+class CallReaction with Equatable {
   const CallReaction({
     required this.type,
     required this.user,
@@ -22,7 +22,7 @@ class CallReaction with EquatableMixin {
   List<Object?> get props => [type, user, emojiCode, custom];
 }
 
-class CallReactionData with EquatableMixin {
+class CallReactionData with Equatable {
   const CallReactionData({
     required this.type,
     required this.icon,

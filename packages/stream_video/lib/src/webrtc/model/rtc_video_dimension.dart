@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class RtcVideoDimension with EquatableMixin {
+class RtcVideoDimension with Equatable {
   const RtcVideoDimension({
     required this.width,
     required this.height,

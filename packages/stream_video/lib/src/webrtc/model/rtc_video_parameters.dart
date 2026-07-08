@@ -6,7 +6,7 @@ import 'rtc_video_encoding.dart';
 
 @immutable
 class RtcVideoParameters
-    with EquatableMixin
+    with Equatable
     implements Comparable<RtcVideoParameters> {
   const RtcVideoParameters({
     this.description,

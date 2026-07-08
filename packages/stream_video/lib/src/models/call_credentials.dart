@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class CallCredentials with EquatableMixin {
+class CallCredentials with Equatable {
   const CallCredentials({
     required this.sfuServer,
     required this.sfuToken,
@@ -24,7 +24,7 @@ class CallCredentials with EquatableMixin {
 }
 
 @immutable
-class CallSfuServer with EquatableMixin {
+class CallSfuServer with Equatable {
   const CallSfuServer({
     required this.name,
     required this.url,
@@ -45,7 +45,7 @@ class CallSfuServer with EquatableMixin {
 }
 
 @immutable
-class CallIceServer with EquatableMixin {
+class CallIceServer with Equatable {
   const CallIceServer({
     required this.username,
     required this.password,

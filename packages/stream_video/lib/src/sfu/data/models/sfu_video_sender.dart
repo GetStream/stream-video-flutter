@@ -5,7 +5,7 @@ import 'sfu_codec.dart';
 import 'sfu_track_type.dart';
 import 'sfu_video_layer_setting.dart';
 
-class SfuVideoSender with EquatableMixin {
+class SfuVideoSender with Equatable {
   SfuVideoSender({
     required this.codec,
     required this.layers,

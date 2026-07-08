@@ -373,7 +373,7 @@ class SfuSocketFailed extends SfuSocketEvent {
   List<Object?> get props => [sessionId, url, error];
 }
 
-class DisconnectionReason with EquatableMixin {
+class DisconnectionReason with Equatable {
   DisconnectionReason({
     this.closeCode,
     this.closeReason,
