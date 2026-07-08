@@ -1,6 +1,7 @@
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/permissions/permissions_manager.dart';
+import 'package:stream_video/src/telemetry/client_event_reporter.dart';
 import 'package:stream_video/src/call/session/call_session.dart';
 import 'package:stream_video/src/call/session/call_session_factory.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
