@@ -134,15 +134,32 @@ void main() {
     final firstId = captured.last['join_attempt_id'];
     expect(captured.last['join_reason'], 'first-attempt');
 
-    reporter
-      ..newJoinAttempt(cid, reason: JoinReason.migration)
-      ..reportEvent(cid, ClientEventStage.joinInitiated);
+    reporter.reportJoinAttempt(cid, reason: JoinReason.migration);
     await flush();
     final secondId = captured.last['join_attempt_id'];
 
     expect(secondId, isNot(firstId));
     expect(captured.last['join_reason'], 'migration');
+    expect(captured.last['stage'], 'JoinInitiated');
   });
+
+  test(
+    'reportJoinAttempt with networkAvailable reuses join_attempt_id',
+    () async {
+      reporter
+        ..registerCall(cid)
+        ..reportEvent(cid, ClientEventStage.joinInitiated);
+      await flush();
+      final firstId = captured.last['join_attempt_id'];
+
+      reporter.reportJoinAttempt(cid, reason: JoinReason.networkAvailable);
+      await flush();
+
+      expect(captured.last['join_attempt_id'], firstId);
+      expect(captured.last['join_reason'], 'network-available');
+      expect(captured.last['stage'], 'JoinInitiated');
+    },
+  );
 
   test(
     'setCallSessionId + setCoordinatorConnectId stamp later events',

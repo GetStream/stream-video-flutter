@@ -50,12 +50,14 @@ void main() {
   PeerConnectionConnectReporter tracker({
     ClientEventPeerConnectionRole role =
         ClientEventPeerConnectionRole.subscribe,
+    int retryCount = 0,
   }) {
     return PeerConnectionConnectReporter(
       reporter: reporter,
       callCid: cid,
       role: role,
       sfuId: 'sfu-1',
+      retryCount: retryCount,
     );
   }
 
@@ -158,6 +160,22 @@ void main() {
       expect(initiateds[1]['previously_connected_timestamp'], isNotNull);
     },
   );
+
+  test('retryCount is attached to stage completions', () async {
+    tracker(retryCount: 3)
+      ..onIceConnectionState(
+        rtc.RTCIceConnectionState.RTCIceConnectionStateChecking,
+      )
+      ..onConnectionState(
+        rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected,
+      );
+    await flush();
+
+    final completed = captured.firstWhere(
+      (e) => e['event_type'] == 'completed',
+    );
+    expect(completed['retry_count_attempt'], 3);
+  });
 
   test('abortInFlight fails an in-progress attempt only', () async {
     final t = tracker()

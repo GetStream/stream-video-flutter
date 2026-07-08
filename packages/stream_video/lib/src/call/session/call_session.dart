@@ -193,6 +193,7 @@ class CallSession extends Disposable {
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
     bool isAnonymousUser = false,
     String? unifiedSessionId,
+    int clientEventRetryCount = 0,
   }) async {
     final reporter = _streamVideo.clientEventReporter;
     final wsJoinDetails = ClientEventDetails(sfuId: config.sfuName);
@@ -240,6 +241,7 @@ class CallSession extends Disposable {
           wsJoinStageId,
           (wsResult as Failure).error,
           details: wsJoinDetails,
+          retryCount: clientEventRetryCount,
         );
         _logger.e(() => '[start] ws connect failed: $wsResult');
         return const Result.failure(
@@ -319,6 +321,7 @@ class CallSession extends Disposable {
           wsJoinStageId,
           event.error,
           details: wsJoinDetails,
+          retryCount: clientEventRetryCount,
         );
         _logger.e(() => '[start] sfu error: ${event.error}');
         return failureWithError(event.error.message, cause: event.error);
@@ -330,6 +333,7 @@ class CallSession extends Disposable {
         wsJoinStageId,
         outcome: ClientEventOutcome.success,
         details: wsJoinDetails,
+        retryCount: clientEventRetryCount,
       );
 
       _logger.v(() => '[start] sfu joined: $event');
@@ -348,6 +352,7 @@ class CallSession extends Disposable {
                 statsOptions: statsOptions,
                 callSessionConfig: config,
                 publishOptions: joinResponseEvent.publishOptions,
+                clientEventRetryCount: clientEventRetryCount,
               )
               ..onSubscriberIceCandidate = _onLocalIceCandidate
               ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -374,6 +379,7 @@ class CallSession extends Disposable {
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
                 callSessionConfig: config,
+                clientEventRetryCount: clientEventRetryCount,
               )
               ..onPublisherIceCandidate = _onLocalIceCandidate
               ..onSubscriberIceCandidate = _onLocalIceCandidate
@@ -418,12 +424,18 @@ class CallSession extends Disposable {
         wsJoinStageId,
         failure: ClientEventFailure.requestTimeout(message),
         details: wsJoinDetails,
+        retryCount: clientEventRetryCount,
       );
       _tracer.trace('joinRequestTimeout', message);
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     } catch (e, stk) {
-      reporter.failStageWithError(wsJoinStageId, e, details: wsJoinDetails);
+      reporter.failStageWithError(
+        wsJoinStageId,
+        e,
+        details: wsJoinDetails,
+        retryCount: clientEventRetryCount,
+      );
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }

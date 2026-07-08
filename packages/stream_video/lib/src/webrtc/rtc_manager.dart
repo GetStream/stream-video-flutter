@@ -60,6 +60,7 @@ class RtcManager extends Disposable {
     required StreamVideo streamVideo,
     required this.pcFactory,
     this.sfuId,
+    this.clientEventRetryCount = 0,
   }) : _streamVideo = streamVideo {
     subscriber.onTrack = _onRemoteTrack;
     _initClientEventReporting();
@@ -75,6 +76,7 @@ class RtcManager extends Disposable {
   final TracedStreamPeerConnection subscriber;
   final StreamVideo _streamVideo;
   final String? sfuId;
+  final int clientEventRetryCount;
 
   PeerConnectionConnectReporter? _publisherConnectReporter;
   PeerConnectionConnectReporter? _subscriberConnectReporter;
@@ -126,6 +128,7 @@ class RtcManager extends Disposable {
       callCid: callCid,
       role: ClientEventPeerConnectionRole.subscribe,
       sfuId: sfuId,
+      retryCount: clientEventRetryCount,
     );
 
     subscriber
@@ -141,6 +144,7 @@ class RtcManager extends Disposable {
         callCid: callCid,
         role: ClientEventPeerConnectionRole.publish,
         sfuId: sfuId,
+        retryCount: clientEventRetryCount,
       );
       pub
         ..onIceConnectionStateUpdated =

@@ -43,12 +43,14 @@ class CoordinatorWebSocket {
           HealthCheckPingEvent(connectionId: info?.connectionId),
     );
 
+    _retryStrategy = retryPolicy != null
+        ? _RetryPolicyStrategy(retryPolicy)
+        : null;
+
     _recoveryHandler = ConnectionRecoveryHandler(
       client: _client,
       networkStateProvider: networkStateProvider,
-      retryStrategy: retryPolicy != null
-          ? _RetryPolicyStrategy(retryPolicy)
-          : null,
+      retryStrategy: _retryStrategy,
     );
 
     _client.connectionState.listen(_onConnectionStateChanged);
@@ -68,6 +70,7 @@ class CoordinatorWebSocket {
 
   late final StreamWebSocketClient _client;
   late final ConnectionRecoveryHandler _recoveryHandler;
+  late final RetryStrategy? _retryStrategy;
 
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitter<CoordinatorEvent>();
@@ -200,10 +203,15 @@ class CoordinatorWebSocket {
     }
   }
 
+  /// Retry count captured when the in-flight `CoordinatorWS` stage began.
+  int _coordinatorWsStageRetryCount = 0;
+
   void _reportCoordinatorWsStage(WebSocketConnectionState state) {
     switch (state) {
       case Connecting():
         if (_coordinatorWsStageId != null) break;
+        _coordinatorWsStageRetryCount =
+            _retryStrategy?.consecutiveFailuresCount ?? 0;
         final stageId = clientEventReporter.beginConnectionStage(
           ClientEventStage.coordinatorWs,
           connectId: _uuid.v4(),
@@ -216,6 +224,7 @@ class CoordinatorWebSocket {
         clientEventReporter.completeStage(
           stageId,
           outcome: ClientEventOutcome.success,
+          retryCount: _coordinatorWsStageRetryCount,
         );
       case Disconnected(:final source):
         final stageId = _coordinatorWsStageId;
@@ -231,6 +240,7 @@ class CoordinatorWebSocket {
                   ClientEventStandardCode.serverError,
                   'Coordinator WS disconnected (${source.closeReason})',
                 ),
+          retryCount: _coordinatorWsStageRetryCount,
         );
       case Initialized() || Authenticating() || Disconnecting():
         break;
