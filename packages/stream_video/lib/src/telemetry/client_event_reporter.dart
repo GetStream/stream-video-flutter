@@ -89,6 +89,12 @@ abstract interface class ClientEventReporter {
   /// Generates a fresh `join_attempt_id` for [cid] (full rejoin / migration)
   void newJoinAttempt(StreamCallCid cid, {required JoinReason reason});
 
+  /// Starts (or continues) a join attempt and emits `JoinInitiated`.
+  ///
+  /// Mints a new `join_attempt_id` when [reason] requires it, otherwise only
+  /// updates `join_reason` (e.g. `network-available`).
+  void reportJoinAttempt(StreamCallCid cid, {required JoinReason reason});
+
   /// Records the server-side `call_session_id` for [cid], known after the
   /// coordinator join.
   void setCallSessionId(StreamCallCid cid, String callSessionId);
@@ -238,6 +244,23 @@ class _ClientEventReporterImpl implements ClientEventReporter {
           '[newJoinAttempt] cid: ${cid.value}, '
           'id: ${call.joinAttemptId}, reason: ${reason.wireValue}',
     );
+  }
+
+  @override
+  void reportJoinAttempt(StreamCallCid cid, {required JoinReason reason}) {
+    if (reason.mintsNewAttempt) {
+      newJoinAttempt(cid, reason: reason);
+    } else {
+      final call = _calls[cid.value];
+      if (call == null) return;
+      call.joinReason = reason;
+      _logger.d(
+        () =>
+            '[reportJoinAttempt] cid: ${cid.value}, '
+            'reason: ${reason.wireValue} (reused join_attempt_id)',
+      );
+    }
+    reportEvent(cid, ClientEventStage.joinInitiated);
   }
 
   @override
@@ -460,6 +483,9 @@ class _NoOpClientEventReporter implements ClientEventReporter {
 
   @override
   void newJoinAttempt(StreamCallCid cid, {required JoinReason reason}) {}
+
+  @override
+  void reportJoinAttempt(StreamCallCid cid, {required JoinReason reason}) {}
 
   @override
   void setCallSessionId(StreamCallCid cid, String callSessionId) {}

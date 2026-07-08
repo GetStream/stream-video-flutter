@@ -11,12 +11,14 @@ class PeerConnectionConnectReporter {
     required this.callCid,
     required this.role,
     this.sfuId,
+    this.retryCount = 0,
   });
 
   final ClientEventReporter reporter;
   final StreamCallCid callCid;
   final ClientEventPeerConnectionRole role;
   final String? sfuId;
+  final int retryCount;
 
   String? _stageId;
   bool _wasPreviouslyConnected = false;
@@ -76,6 +78,7 @@ class PeerConnectionConnectReporter {
       stageId,
       outcome: ClientEventOutcome.success,
       details: _details(ClientEventIceState.connected),
+      retryCount: retryCount,
     );
 
     _wasPreviouslyConnected = true;
@@ -91,6 +94,7 @@ class PeerConnectionConnectReporter {
       stageId,
       failure: failure,
       details: _details(_observedIceState()),
+      retryCount: retryCount,
     );
   }
 

@@ -111,10 +111,14 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   /// The in-flight `CoordinatorWS` stage id, if a connect attempt is pending.
   String? _coordinatorWsStageId;
 
+  /// Retry count captured when the in-flight `CoordinatorWS` stage began.
+  int _coordinatorWsStageRetryCount = 0;
+
   void _reportCoordinatorWsStage(ConnectionStateUpdatedEvent event) {
     switch (event.newState) {
       case ConnectionState.connecting:
         if (_coordinatorWsStageId != null) break;
+        _coordinatorWsStageRetryCount = _reconnectAttempt;
         final stageId = clientEventReporter.beginConnectionStage(
           ClientEventStage.coordinatorWs,
           connectId: _uuid.v4(),
@@ -127,6 +131,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
         clientEventReporter.completeStage(
           stageId,
           outcome: ClientEventOutcome.success,
+          retryCount: _coordinatorWsStageRetryCount,
         );
       case ConnectionState.failed:
       case ConnectionState.closed:
@@ -139,6 +144,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
             ClientEventStandardCode.serverError,
             'Coordinator WS ${event.newState.name}',
           ),
+          retryCount: _coordinatorWsStageRetryCount,
         );
       case ConnectionState.disconnected:
         final stageId = _coordinatorWsStageId;
@@ -149,6 +155,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
           failure: const ClientEventFailure.clientAborted(
             'Coordinator WS disconnected',
           ),
+          retryCount: _coordinatorWsStageRetryCount,
         );
       case ConnectionState.reconnecting:
         break;
