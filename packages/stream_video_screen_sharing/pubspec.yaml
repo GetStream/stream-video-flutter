@@ -21,6 +21,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+platforms:
+  ios:
+
 flutter:
   plugin:
     platforms:

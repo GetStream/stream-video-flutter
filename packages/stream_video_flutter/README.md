@@ -31,6 +31,23 @@ Stream provides UI components and state handling that make it easy to build vide
 Stream is free for most side and hobby projects. To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue. Makers get $100 in monthly credit for video for free.
 For more details, check out the [Maker Account](https://getstream.io/maker-account?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Flutter_Video_SDK&utm_term=DevRelOss).
 
+## Supported Platforms
+
+The Stream Video Flutter SDK is only fully supported on iOS and Android.
+Basic features do work on Linux, Macos, Web and Windows, but some features may not be available and support is limited.
+
+The Android and iOS SDK's are fully supported and tested. Internally we do use the sdk regularly on web and macos, but we do not test extensively on these platforms. 
+For Windows and Linux we only regularly check if the basic example app still compiles, but we do not test these platforms at all.
+
+All new features are always implemented for both Android and iOS when possible, but only added to web and macos when the specific platform work is limited. Most features are platform agnostic and should work on all platforms, but background filters and noise cancellation are only supported on Android and iOS.
+
+| Feature                                                                                    | iOS | Android  | Web | Macos | Windows | Linux |
+|--------------------------------------------------------------------------------------------|-----|----------|-----|-------|---------|-------|
+| Basic functionality                                                                        | ✅   | ✅       | ✅  | ✅    | ⚠️       | ⚠️    |
+| [Advanced features](#-features-)                                                           | ✅   | ✅       | ☑️  | ☑️    | ❌       | ❌    |
+| [Dogfooding app](https://github.com/GetStream/stream-video-flutter/tree/main/dogfooding)   | ✅   | ✅       | ☑️  | ☑️    | ❌       | ❌    |
+| Official support                                                                           | ✅   | ✅       |⚠️   | ⚠️    | ❌       | ❌    |
+
 ## 💡 Features 💡
 
 Here are some of the features we support:
@@ -61,7 +78,6 @@ Here are some of the features we support:
 | Call recording                                       | ✅   | ✅       |                                                |
 | Broadcasting to HLS                                  | ✅   | ✅       |                                                |
 | Picture in picture support                           | ✅   | ✅       |                                                |
-
 
 ## 🗺️ Roadmap
 Video roadmap and changelog is available [here](https://github.com/GetStream/protocol/discussions/127). 
