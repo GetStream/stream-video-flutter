@@ -26,6 +26,8 @@ class AppInjector {
 
   // Register dependencies
   static Future<void> init({Environment? forceEnvironment}) async {
+    StreamVideoFlutter.ensureInitialized();
+
     // Google sign in
     locator.registerSingletonAsync<GoogleSignIn>(() async {
       await GoogleSignIn.instance.initialize(hostedDomain: 'getstream.io');

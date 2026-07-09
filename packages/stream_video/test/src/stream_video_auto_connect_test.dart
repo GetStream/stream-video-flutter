@@ -3,7 +3,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/globals.dart';
 import 'package:stream_video/src/core/connection_state.dart';
-import 'package:stream_video/src/video_environment.dart';
 import 'package:stream_video/src/video_environment_collector.dart';
 import 'package:stream_video/stream_video.dart';
 

@@ -13,21 +13,26 @@ environment:
 resolution: workspace
 
 dependencies:
+  battery_plus: ^7.0.0
   cached_network_image: ^3.4.1
   characters: ^1.4.0
   collection: ^1.19.1
+  device_info_plus: ">=12.1.0 <14.0.0"
   equatable: ^2.0.7
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   intl: ">=0.18.1 <=0.21.0"
+  package_info_plus: ">=9.0.0 <11.0.0"
   permission_handler: ^12.0.1
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
   rxdart: ^0.28.0
   stream_video: ^1.4.1
   stream_webrtc_flutter: ^3.0.0
+  system_info2: ^4.0.0
+  thermal: ^1.1.11
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:

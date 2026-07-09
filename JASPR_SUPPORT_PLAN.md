@@ -196,10 +196,14 @@ Tick items as they land. Each phase should keep `melos analyze` + tests green.
 
 Verified: `dart analyze packages/stream_video` and `packages/stream_video_flutter` clean (no new issues); `flutter test` in `packages/stream_video` — 336/336 passing.
 
-### Phase 1 — Provider registry scaffold
-- [ ] Create `packages/stream_video/lib/src/platform/stream_video_platform.dart` with the 6 provider interfaces + pure-Dart defaults
-- [ ] Add `StreamVideoFlutter.ensureInitialized()` registration entrypoint in `stream_video_flutter`
-- [ ] Wire `ensureInitialized()` into the native `StreamVideo` bootstrap path
+### Phase 1 — Provider registry scaffold ✅ (done)
+- [x] Create `packages/stream_video/lib/src/platform/` with 4 provider interfaces + pure-Dart defaults: `DeviceStateProvider`, `EnvironmentInfoProvider`, `AppLifecycleProvider`, `DisplayMetricsProvider` (barrel: `stream_video_platform.dart`)
+- [x] Add `StreamVideoFlutter.ensureInitialized()` registration entrypoint in `stream_video_flutter` (`lib/src/platform/`), with native impls wrapping `battery_plus`+`thermal`, `device_info_plus`+`package_info_plus`+`system_info2`, and `WidgetsBinding` (lifecycle + display metrics)
+- [x] Wire `ensureInitialized()` into the dogfooding app's bootstrap (`dogfooding/lib/di/injector.dart`)
+
+Note: `StreamWebRtc` (WebRTC engine) is deferred to Phase 3, and the `NetworkMonitor` promotion is deferred to Phase 4, as those need the deeper structural work described there — scoping Phase 1 to the 4 telemetry/lifecycle providers avoided half-built abstractions. Used direct `Provider.instance = ...` field assignment rather than a separate `register()` method (equivalent, simpler, avoids a lint). Also had to export `video_environment.dart` and `lifecycle/lifecycle_state.dart` from the main `stream_video.dart` barrel since the new provider interfaces reference those types in their public contracts.
+
+Verified: `dart analyze` clean on `stream_video`, `stream_video_flutter` (pre-existing generated-file warnings only), and `dogfooding`; full test suites green (336 + 5 tests).
 
 ### Phase 2 — WebRTC standard-type swap
 - [ ] Swap `stream_webrtc_flutter as rtc` → `dart_webrtc as rtc` across the ~13 `src/webrtc/**` files

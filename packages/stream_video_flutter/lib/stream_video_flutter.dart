@@ -51,6 +51,7 @@ export 'src/livestream/livestream_player.dart';
 export 'src/livestream/livestream_speakerphone_option.dart';
 export 'src/models/mute_toggle_titles.dart';
 export 'src/models/stream_icon_toggle.dart';
+export 'src/platform/stream_video_flutter_init.dart';
 export 'src/renderer/video_renderer.dart';
 export 'src/screen_share/screen_share.dart';
 export 'src/theme/themes.dart';
