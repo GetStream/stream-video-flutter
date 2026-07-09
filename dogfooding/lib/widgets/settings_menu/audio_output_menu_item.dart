@@ -35,7 +35,9 @@ class ChooseAudioOutputMenuItem extends StatelessWidget {
                     textAlign: TextAlign.end,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppColorPalette.secondaryText),
+                    style: const TextStyle(
+                      color: AppColorPalette.secondaryText,
+                    ),
                   ),
                 ),
         ),

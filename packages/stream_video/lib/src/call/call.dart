@@ -613,6 +613,7 @@ class Call {
             break;
           }
 
+          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
           _stateManager.participantSetAudioOutputDevice(device: device);
           _stateManager.audioOutputSelectedByUser = false;
           break;
