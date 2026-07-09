@@ -401,9 +401,9 @@ void main() {
       'sfuConnectionQualityChanged preserves previous quality when update is unspecified',
       () {
         stateNotifier.sfuConnectionQualityChanged(
-          SfuConnectionQualityChangedEvent(
+          const SfuConnectionQualityChangedEvent(
             connectionQualityUpdates: [
-              const SfuConnectionQualityInfo(
+              SfuConnectionQualityInfo(
                 userId: 'remote-user',
                 sessionId: 'remote-session',
                 connectionQuality: SfuConnectionQuality.unspecified,
@@ -423,9 +423,9 @@ void main() {
       'sfuConnectionQualityChanged applies specified quality updates',
       () {
         stateNotifier.sfuConnectionQualityChanged(
-          SfuConnectionQualityChangedEvent(
+          const SfuConnectionQualityChangedEvent(
             connectionQualityUpdates: [
-              const SfuConnectionQualityInfo(
+              SfuConnectionQualityInfo(
                 userId: 'remote-user',
                 sessionId: 'remote-session',
                 connectionQuality: SfuConnectionQuality.poor,
