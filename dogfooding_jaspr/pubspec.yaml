@@ -1,0 +1,25 @@
+name: dogfooding_jaspr
+description: Simplified Jaspr (web) dogfooding app for Stream Video — proves
+  a Jaspr client can join a call with the Flutter dogfooding app.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+resolution: workspace
+
+dependencies:
+  http: ^1.1.0
+  jaspr: ^0.23.1
+  stream_video: ^1.4.1
+  stream_video_jaspr: ^0.0.1
+
+dev_dependencies:
+  build_runner: ^2.10.0
+  build_web_compilers: ^4.8.0
+  jaspr_builder: ^0.23.1
+  lints: ^6.0.0
+
+jaspr:
+  mode: client
