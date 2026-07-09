@@ -4,7 +4,6 @@ import 'dart:js_interop' as jsutil;
 import 'dart:js_interop_unsafe';
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 
@@ -42,9 +41,8 @@ void stopAudio(String id) {
 
 void setSinkId(String id, String deviceId) {
   if (!checkIfAudioOutputChangeSupported()) {
-    debugPrint(
-      'Audio Output device change is not supported on this browser.',
-    );
+    // ignore: avoid_print
+    print('Audio Output device change is not supported on this browser.');
     return;
   }
 

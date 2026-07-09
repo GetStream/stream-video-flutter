@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../stream_logger.dart';
 
 class ConsoleStreamLogger extends StreamLogger {
@@ -15,6 +13,7 @@ class ConsoleStreamLogger extends StreamLogger {
   ]) {
     final emoji = super.emoji(priority);
     final name = super.name(priority);
-    debugPrint('${DateTime.now()} $emoji ($name/$tag): ${message()}');
+    // ignore: avoid_print
+    print('${DateTime.now()} $emoji ($name/$tag): ${message()}');
   }
 }

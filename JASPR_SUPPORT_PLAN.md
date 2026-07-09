@@ -188,11 +188,13 @@ Works when both clients share: same **apiKey** (both fetched from the same `/api
 
 Tick items as they land. Each phase should keep `melos analyze` + tests green.
 
-### Phase 0 — Cosmetic quick-wins
-- [ ] Replace `debugPrint` in `console_logger.dart` and `rtc_audio_html.dart`
-- [ ] Replace `@immutable` (flutter/cupertino) with `package:meta` in `call_status.dart`, `disconnect_reason.dart`
-- [ ] Replace `VoidCallback` (dart:ui) with `void Function()` in `moderation_blur_config.dart`
-- [ ] Remove vestigial `flutter/foundation` import in `rtc_media_device_notifier.dart`
+### Phase 0 — Cosmetic quick-wins ✅ (done)
+- [x] Replace `debugPrint` in `console_logger.dart` and `rtc_audio_html.dart`
+- [x] Replace `@immutable` (flutter/cupertino) with `package:meta` in `call_status.dart`, `disconnect_reason.dart`
+- [x] Replace `VoidCallback` (dart:ui) with `void Function()` in `moderation_blur_config.dart`
+- [x] Remove vestigial `flutter/foundation` import in `rtc_media_device_notifier.dart`
+
+Verified: `dart analyze packages/stream_video` and `packages/stream_video_flutter` clean (no new issues); `flutter test` in `packages/stream_video` — 336/336 passing.
 
 ### Phase 1 — Provider registry scaffold
 - [ ] Create `packages/stream_video/lib/src/platform/stream_video_platform.dart` with the 6 provider interfaces + pure-Dart defaults

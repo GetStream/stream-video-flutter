@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 /// Configures how the SDK handles `call.moderation` events.
 ///
 /// Convenience constructors [VideoModerationConfig.disabled],
@@ -56,9 +54,9 @@ class VideoModerationConfig {
 
   final Duration? duration;
 
-  final VoidCallback? onApply;
+  final void Function()? onApply;
   final void Function(String)? onWarning;
-  final VoidCallback? onClear;
+  final void Function()? onClear;
 
   /// Whether this config takes no automatic action.
   bool get isDisabled =>
