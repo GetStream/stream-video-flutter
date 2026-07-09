@@ -122,8 +122,13 @@ class SfuStatsReporter {
   Future<void> flush() async {
     if (_stopped) return;
     _flushing = true;
+
+    final sendStatsFuture = sendSfuStats().whenComplete(() {
+      _flushing = false;
+    });
+
     try {
-      await sendSfuStats().timeout(
+      await sendStatsFuture.timeout(
         _flushTimeout,
         onTimeout: () {
           _logger.v(() => 'SFU stats flush timed out during sampling');
@@ -131,8 +136,6 @@ class SfuStatsReporter {
       );
     } catch (e) {
       _logger.v(() => 'Failed to flush SFU stats: $e');
-    } finally {
-      _flushing = false;
     }
   }
 
