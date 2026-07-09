@@ -36,10 +36,10 @@ For more details, check out the [Maker Account](https://getstream.io/maker-accou
 The Stream Video Flutter SDK is only fully supported on iOS and Android.
 Basic features do work on Linux, Macos, Web and Windows, but some features may not be available and support is limited.
 
-The Android and iOS SDK's are fully supported and tested. Internally we do use the sdk regularly on web and macos, but we do not test extensively on these platforms. 
-For Windows and Linux we only regularly check if the basic example app still compiles, but we do not test these platforms at all.
+The Android and iOS SDK's are fully supported and tested. Internally we do use the sdk regularly on web and macos, but we don't support these platforms officially.
+For Windows and Linux we only regularly check if the basic example app still compiles.
 
-All new features are always implemented for both Android and iOS when possible, but only added to web and macos when the specific platform work is limited. Most features are platform agnostic and should work on all platforms, but background filters and noise cancellation are only supported on Android and iOS.
+All new features are always implemented for both Android and iOS when possible, but only added to web and macos when the specific platform work is limited. Most features are platform agnostic and should work on all platforms, but for example background filters and noise cancellation are only supported on Android and iOS.
 
 | Feature                                                                                    | iOS | Android  | Web | Macos | Windows | Linux |
 |--------------------------------------------------------------------------------------------|-----|----------|-----|-------|---------|-------|
