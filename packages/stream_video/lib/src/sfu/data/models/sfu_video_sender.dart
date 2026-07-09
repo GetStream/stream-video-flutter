@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import 'sfu_codec.dart';
 import 'sfu_track_type.dart';

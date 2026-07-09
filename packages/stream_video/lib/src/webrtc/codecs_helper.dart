@@ -3,7 +3,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
 
 import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_publish_options.dart';

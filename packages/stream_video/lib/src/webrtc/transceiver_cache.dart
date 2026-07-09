@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_track_type.dart';

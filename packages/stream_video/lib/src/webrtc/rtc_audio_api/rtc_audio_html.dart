@@ -4,8 +4,8 @@ import 'dart:js_interop' as jsutil;
 import 'dart:js_interop_unsafe';
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
+import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
 
 const audioContainerId = 'stream_audio_container';
 const audioPrefix = 'stream_audio_';

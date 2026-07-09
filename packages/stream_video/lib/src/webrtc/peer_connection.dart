@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';

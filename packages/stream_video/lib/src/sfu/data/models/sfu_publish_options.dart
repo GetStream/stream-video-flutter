@@ -1,4 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../webrtc/model/rtc_video_dimension.dart';
 import 'sfu_audio_bitrate.dart';

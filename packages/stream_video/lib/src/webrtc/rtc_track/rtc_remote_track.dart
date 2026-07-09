@@ -1,4 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
 
 import '../../logger/stream_log.dart';
 import '../../sfu/data/models/sfu_track_type.dart';

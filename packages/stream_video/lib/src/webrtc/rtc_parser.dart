@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 mixin RtcIceCandidateParser {
   static RTCIceCandidate fromJsonString(String jsonText) {

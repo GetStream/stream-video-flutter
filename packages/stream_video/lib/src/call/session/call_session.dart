@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
+import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
 
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;

@@ -1,4 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/models/models.pbenum.dart' as sfu_enums;

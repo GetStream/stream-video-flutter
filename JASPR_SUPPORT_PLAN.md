@@ -50,15 +50,19 @@ Independently shippable; shrinks the Flutter surface without yet removing the de
 
 Add the `platform/` interfaces + pure-Dart defaults and the `StreamVideoFlutter.ensureInitialized()` registration entrypoint in `stream_video_flutter`. Nothing consumes them yet → zero behavior change.
 
-## Phase 2 — WebRTC standard-type swap (behavior-neutral)
+## Phase 2 — WebRTC standard-type swap (corrected: `webrtc_interface`, not `dart_webrtc`)
 
-In the ~13 `src/webrtc/**` files, swap `import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;` → `import 'package:dart_webrtc/dart_webrtc.dart' as rtc;` (dart_webrtc re-exports all of `webrtc_interface`). Standard types (`MediaStream`, `RTCPeerConnection`, `RTCSessionDescription`, `RTCRtpTransceiver`, `RTCDegradationPreference`, …) then resolve against the interface; native concrete classes implement it, so objects flow through unchanged. **Keep `stream_webrtc_flutter` in pubspec for now** — native globals still come from it. Run full `melos analyze`/`test` here.
+**First attempt (reverted):** swapping `stream_webrtc_flutter` → `dart_webrtc` imports directly does **not** work. `dart_webrtc`'s barrel (`lib/dart_webrtc.dart`) unconditionally exports JS-interop-only implementation classes (confirmed by reading the package source — no `dart.library.io` branch at all). Importing it directly in any file also compiled for native Flutter targets breaks native compilation (`flutter test` failed with `getProperty` isn't defined for the type 'RTCRtpCodecParameters'` — a dart2js/web-only JS-interop extension method that doesn't resolve on the VM). Caught immediately (336/336 → 54 passing/29 failing), reverted, confirmed green again.
 
-Key files: `webrtc/peer_connection.dart`, `peer_connection_factory.dart`, `rtc_manager.dart`, `media/media_constraints.dart`, `rtc_track/*`.
+**Corrected approach — target `webrtc_interface` instead, for the files that qualify.** `webrtc_interface` (already a `stream_video` dependency) is **pure abstract Dart with zero platform-specific code** — no `dart:js_interop`, no implementation, works identically on the VM and on web. Critically, several of its types are **concrete, constructible value classes** defined directly in the package itself (not just abstract interfaces needing a live implementation): `RTCSessionDescription`, `RTCIceCandidate`, `RTCRtpEncoding`, `RTCRtpTransceiverInit`, `RTCTrackEvent`, plus all the enums (`RTCIceConnectionState`, `RTCPeerConnectionState`, `RTCDegradationPreference`, …). The abstract "live object" types (`MediaStream`, `RTCPeerConnection`, `MediaStreamTrack`, `RTCRtpTransceiver`, …) are also safely usable **as type annotations** — polymorphism means a file that only refers to `MediaStream` as a parameter/return type never cares which concrete implementation (native plugin or `dart_webrtc`) is actually plugged in.
+
+Auditing all 25 files that import `stream_webrtc_flutter`, the split is:
+- **16 files use only types/concrete value-classes from `webrtc_interface`** — no factory globals, no plugin-only symbols: `call/session/call_session.dart`, `sfu/data/models/{sfu_model_mapper_extensions,sfu_publish_options,sfu_video_sender}.dart`, `telemetry/peer_connection_connect_reporter.dart`, `webrtc/codecs_helper.dart`, `webrtc/model/stats/rtc_stats_mapper.dart`, `webrtc/peer_connection.dart`, `webrtc/rtc_audio_api/{rtc_audio_html,rtc_audio_native,rtc_audio_stub}.dart`, `webrtc/rtc_parser.dart`, `webrtc/rtc_track/{rtc_remote_track,rtc_track}.dart`, `webrtc/traced_peer_connection.dart`, `webrtc/transceiver_cache.dart`. These swap straight to `import 'package:webrtc_interface/webrtc_interface.dart' as rtc;` — **no conditional barrel needed at all**, since there's no platform-specific implementation to get wrong. This is real, permanent, zero-risk decoupling progress: once `stream_webrtc_flutter` is eventually removed from the pubspec (Phase 3), these 16 files need no further change.
+- **9 files need real concrete objects** (`rtc.createPeerConnection`, `rtc.navigator`/`mediaDevices`, `rtc.eventStream`) and/or genuinely plugin-only symbols (`NativePeerConnectionFactory`, `Helper`, `WebRTC.initialize`, Android audio enums, `RTCVideoRenderer`, `AndroidAudioConfiguration`) that exist in neither `webrtc_interface` alone: `call/call.dart`, `models/audio_configuration_policy.dart`, `webrtc/peer_connection_factory.dart`, `webrtc/rtc_manager.dart`, `webrtc/rtc_media_device/rtc_media_device_notifier.dart`, `webrtc/rtc_track/rtc_local_track.dart`, `webrtc/media/media_constraints.dart`, `stream_video.dart`, `telemetry/media_frame_reporter.dart`. These stay on `stream_webrtc_flutter` for now and get the full `StreamWebRtc` engine injection in Phase 3 (a conditional-import barrel alone isn't a separate step for these — the engine design subsumes it, since the web-side `DartWebRtcEngine` implementation lives in a file that's only ever reached on the web target, following the same `if (dart.library.io)`/`if (dart.library.js_interop)` file-selection pattern already used for `lifecycle_utils.dart`/`lifecycle_utils_io.dart`).
 
 ## Phase 3 — WebRTC engine injection (deepest structural work) → get the Jaspr call working (vertical slice)
 
-Introduce `StreamWebRtc` owning the platform-varying globals that are **not** in `dart_webrtc`/`webrtc_interface`:
+The 9 files identified in Phase 2 (`call/call.dart`, `models/audio_configuration_policy.dart`, `webrtc/peer_connection_factory.dart`, `webrtc/rtc_manager.dart`, `webrtc/rtc_media_device/rtc_media_device_notifier.dart`, `webrtc/rtc_track/rtc_local_track.dart`, `webrtc/media/media_constraints.dart`, `stream_video.dart`, `telemetry/media_frame_reporter.dart`) use concrete factory globals (`createPeerConnection`, `navigator`/`mediaDevices`, `eventStream`) and/or genuinely plugin-only symbols (`NativePeerConnectionFactory`, `Helper`, `WebRTC.initialize`, Android audio enums, `RTCVideoRenderer`, `AndroidAudioConfiguration`) with no equivalent in `webrtc_interface` alone. These need the full `StreamWebRtc` engine injection — introduce `StreamWebRtc` owning these platform-varying globals:
 
 ```dart
 abstract class StreamWebRtc {
@@ -69,15 +73,16 @@ abstract class StreamWebRtc {
 }
 ```
 
-- **Web/Jaspr default `DartWebRtcEngine`** (in `stream_video`): `createPeerConnection` → dart_webrtc global; `helper` → no-op / `mediaDevices`-based; `createNativeFactory` → `null` (exactly today's web fallback in `peer_connection_factory.dart`).
-- **Native `FlutterWebRtcEngine`** (in `stream_video_flutter`): wraps `stream_webrtc_flutter`'s `createPeerConnection`, `Helper`, `WebRTC.initialize`, and `NativePeerConnectionFactory`. Registered in `ensureInitialized()`.
+- **Web/Jaspr default `DartWebRtcEngine`** (in `stream_video`): `createPeerConnection` → dart_webrtc global; `helper` → no-op / `mediaDevices`-based; `createNativeFactory` → `null` (exactly today's web fallback in `peer_connection_factory.dart`); a lightweight headless "first frame" detector built on `dart_webrtc`'s `RTCVideoElement` (listen for the `canplay`/`loadeddata` DOM event) replacing `media_frame_reporter.dart`'s use of `RTCVideoRenderer`.
+- **Native `FlutterWebRtcEngine`** (in `stream_video_flutter`): wraps `stream_webrtc_flutter`'s `createPeerConnection`, `Helper`, `WebRTC.initialize`, `NativePeerConnectionFactory`, and `RTCVideoRenderer`. Registered in `ensureInitialized()`.
 - Replace plugin-only symbols with stream_video-defined interfaces routed through the engine:
   - `NativePeerConnectionFactory` → `StreamNativeFactory?` (methods `create`/`createPeerConnection`/`suspendAudio`/`resumeAudio`/`dispose`/`factoryId`).
   - `Helper` → `StreamWebRtcHelper` (`selectAudioOutput`, `switchCamera`, `selectAudioInput`, `setAppleAudioConfiguration`, `triggeriOSAudioRouteSelectionUI`, `pause/resumeAudioPlayout`, `regainAndroidAudioFocus`, `setiOSStereoPlayoutPreferred`).
   - `WebRTC.initialize` → `StreamWebRtc.initialize`. **Cross the boundary with `Map` payloads, not plugin enums** — `AudioConfigurationPolicy` already exposes `.getAndroidConfiguration().toMap()`, so plugin-only enums (`AndroidInterruptionSource`, `AndroidAudioAttributesUsageType/ContentType`) never enter `stream_video`.
+  - `AndroidAudioConfiguration` (the deprecated `StreamVideoOptions.androidAudioConfiguration` field) → either drop with the deprecation, or re-type as a `stream_video`-defined equivalent converted to/from the plugin type only inside `FlutterWebRtcEngine`.
   - Device enumeration in `rtc_media_device_notifier.dart` → dart_webrtc `mediaDevices` (web) vs plugin (native) via the engine.
 
-Then **remove `stream_webrtc_flutter` from `stream_video`'s pubspec** (keeps `dart_webrtc` + `webrtc_interface`).
+**Important given the Phase 2 lesson:** `DartWebRtcEngine`'s implementation file must itself be reached only via the established `if (dart.library.io)`/`if (dart.library.js_interop)` conditional-file-selection pattern (like `lifecycle_utils.dart`/`lifecycle_utils_io.dart`) — never imported unconditionally — so `dart_webrtc`'s JS-interop internals are never pulled into a native compile unit. `stream_video`'s pubspec keeps `stream_webrtc_flutter` declared until this phase's file-by-file migration is complete; once no file under `stream_video/lib` references it at all, **remove `stream_webrtc_flutter` from `stream_video`'s pubspec** (keeps `dart_webrtc` + `webrtc_interface`) — this is the step that actually unblocks a pure-Dart `dart pub get` for Jaspr.
 
 **Vertical-slice checkpoint:** with the web WebRTC engine working, build the minimal `stream_video_jaspr` renderer + `dogfooding_jaspr` (Phases 6–7) *in parallel* and prove a real Jaspr↔Flutter call before finishing the telemetry cleanup. This de-risks the core unknown early.
 
@@ -172,8 +177,8 @@ Works when both clients share: same **apiKey** (both fetched from the same `/api
 |---|---|---|
 | Phase 0 cosmetic | XS | Very low |
 | Phase 1 registry scaffold | S | Low |
-| Phase 2 WebRTC type swap | M (~13 files) | Low–med (compile-surfaced) |
-| Phase 3 WebRTC engine injection | L | **High** (registration timing, native regressions) |
+| Phase 2 `webrtc_interface` swap (16 files) | M | Low (no platform-specific code to get wrong; verify via `flutter test`) |
+| Phase 3 WebRTC engine injection (9 files + engine) | L | **High** (registration timing, native regressions — a naive `dart_webrtc` import swap already broke native tests once) |
 | Phase 4.1–4.3 env/battery/thermal/connectivity | M | Low (graceful no-op) |
 | Phase 4.4 NetworkMonitor promotion | L | **High** (reconnection logic + public API) |
 | Phase 5 lifecycle/display + drop Flutter dep | S | Med (needs Dart-only resolution guard) |
@@ -205,17 +210,22 @@ Note: `StreamWebRtc` (WebRTC engine) is deferred to Phase 3, and the `NetworkMon
 
 Verified: `dart analyze` clean on `stream_video`, `stream_video_flutter` (pre-existing generated-file warnings only), and `dogfooding`; full test suites green (336 + 5 tests).
 
-### Phase 2 — WebRTC standard-type swap
-- [ ] Swap `stream_webrtc_flutter as rtc` → `dart_webrtc as rtc` across the ~13 `src/webrtc/**` files
-- [ ] `melos analyze` + `melos test` green (native behavior unchanged, `stream_webrtc_flutter` still in pubspec)
+### Phase 2 — WebRTC standard-type swap (corrected: `webrtc_interface`) ✅ (done)
+- [x] ~~Swap `stream_webrtc_flutter as rtc` → `dart_webrtc as rtc` directly~~ — **reverted**: `dart_webrtc`'s implementation classes are unconditionally JS-interop-only (no native/VM branch), so a direct swap breaks `flutter test` immediately (336/336 → 54 passing/29 failing, `getProperty` isn't defined for `RTCRtpCodecParameters`). Confirmed by reading `dart_webrtc`'s barrel export — no `dart.library.io` conditional at all. All 18 touched files reverted to `stream_webrtc_flutter`; re-verified 336/336 green before proceeding.
+- [x] Swap the 16 qualifying files (types/value-classes only — see Phase 2 write-up above) to `import 'package:webrtc_interface/webrtc_interface.dart' as rtc;` — no conditional barrel needed, `webrtc_interface` has zero platform-specific code
+- [x] `flutter test` green (native/VM) — this is the step that broke before with `dart_webrtc`; re-verified: 336/336 passing
+- [x] `dart analyze` clean on `stream_video`, `stream_video_flutter` (pre-existing generated-file warnings only), `dogfooding`
+
+`stream_video_flutter` full test suite also re-verified green (5/5). These 16 files now have zero remaining Flutter-plugin coupling and need no further change in Phase 3/5 — real, permanent decoupling progress banked early.
 
 ### Phase 3 — WebRTC engine injection (vertical slice)
-- [ ] Define `StreamWebRtc` + `StreamWebRtcHelper` + `StreamNativeFactory` interfaces
-- [ ] Web/Jaspr default `DartWebRtcEngine` in `stream_video`
+- [ ] Define `StreamWebRtc` + `StreamWebRtcHelper` + `StreamNativeFactory` interfaces for the remaining 9 files (`call.dart`, `audio_configuration_policy.dart`, `peer_connection_factory.dart`, `rtc_manager.dart`, `rtc_media_device_notifier.dart`, `rtc_local_track.dart`, `media_constraints.dart`, `stream_video.dart`, `media_frame_reporter.dart`)
+- [ ] `DartWebRtcEngine`'s implementation file must be reached only via `if (dart.library.io)`/`if (dart.library.js_interop)` file selection (like `lifecycle_utils_io.dart`) — never import `dart_webrtc` unconditionally
+- [ ] Web/Jaspr default `DartWebRtcEngine` in `stream_video`, incl. a headless first-frame detector on `dart_webrtc`'s `RTCVideoElement` (replacing `media_frame_reporter.dart`'s `RTCVideoRenderer` use)
 - [ ] Native `FlutterWebRtcEngine` in `stream_video_flutter`, registered in `ensureInitialized()`
-- [ ] Route `NativePeerConnectionFactory`, `Helper`, `WebRTC.initialize`, device enumeration through the engine (Map payloads, no plugin enums)
+- [ ] Route `NativePeerConnectionFactory`, `Helper`, `WebRTC.initialize`, `AndroidAudioConfiguration`, device enumeration through the engine (Map payloads, no plugin enums)
 - [ ] Make WebRTC default throw on native platforms if unregistered
-- [ ] Remove `stream_webrtc_flutter` from `stream_video/pubspec.yaml`
+- [ ] Remove `stream_webrtc_flutter` from `stream_video/pubspec.yaml` once no file references it even conditionally
 - [ ] `melos analyze` + tests green; Flutter web/desktop smoke
 
 ### Phase 4 — Telemetry migration (full decoupling)
