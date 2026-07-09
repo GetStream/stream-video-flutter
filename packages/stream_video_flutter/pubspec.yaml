@@ -34,6 +34,7 @@ dependencies:
   system_info2: ^4.0.0
   thermal: ^1.1.11
   visibility_detector: ^0.4.0+2
+  webrtc_interface: ^1.5.1
 
 dev_dependencies:
   alchemist: ^0.12.1

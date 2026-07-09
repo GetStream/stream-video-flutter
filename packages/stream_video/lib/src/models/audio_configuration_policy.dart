@@ -1,4 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'audio_configuration.dart';
 
 /// A policy that defines how audio should be configured on both iOS and Android.
 ///
@@ -89,17 +89,17 @@ sealed class AudioConfigurationPolicy {
   /// and use [basePolicy] to define defaults for the other platform.
   const factory AudioConfigurationPolicy.custom({
     AudioConfigurationPolicy basePolicy,
-    rtc.AppleAudioConfiguration Function({bool defaultToSpeaker})?
+    StreamAppleAudioConfiguration Function({bool defaultToSpeaker})?
     appleConfiguration,
-    rtc.AndroidAudioConfiguration? androidConfiguration,
+    StreamAndroidAudioConfiguration? androidConfiguration,
     bool bypassVoiceProcessing,
   }) = CustomAudioPolicy;
 
-  rtc.AppleAudioConfiguration getAppleConfiguration({
+  StreamAppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   });
 
-  rtc.AndroidAudioConfiguration getAndroidConfiguration();
+  StreamAndroidAudioConfiguration getAndroidConfiguration();
 
   bool get bypassVoiceProcessing;
 }
@@ -119,34 +119,34 @@ class BroadcasterAudioPolicy extends AudioConfigurationPolicy {
   const BroadcasterAudioPolicy();
 
   @override
-  rtc.AppleAudioConfiguration getAppleConfiguration({
+  StreamAppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
-    return rtc.AppleAudioConfiguration(
+    return StreamAppleAudioConfiguration(
       appleAudioMode: defaultToSpeaker
-          ? rtc.AppleAudioMode.videoChat
-          : rtc.AppleAudioMode.voiceChat,
-      appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
+          ? StreamAppleAudioMode.videoChat
+          : StreamAppleAudioMode.voiceChat,
+      appleAudioCategory: StreamAppleAudioCategory.playAndRecord,
       appleAudioCategoryOptions: {
-        if (defaultToSpeaker) rtc.AppleAudioCategoryOption.defaultToSpeaker,
-        rtc.AppleAudioCategoryOption.mixWithOthers,
-        rtc.AppleAudioCategoryOption.allowBluetooth,
-        rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
-        rtc.AppleAudioCategoryOption.allowAirPlay,
+        if (defaultToSpeaker) StreamAppleAudioCategoryOption.defaultToSpeaker,
+        StreamAppleAudioCategoryOption.mixWithOthers,
+        StreamAppleAudioCategoryOption.allowBluetooth,
+        StreamAppleAudioCategoryOption.allowBluetoothA2DP,
+        StreamAppleAudioCategoryOption.allowAirPlay,
       },
     );
   }
 
   @override
-  rtc.AndroidAudioConfiguration getAndroidConfiguration() {
-    return rtc.AndroidAudioConfiguration(
-      androidAudioMode: rtc.AndroidAudioMode.inCommunication,
-      androidAudioStreamType: rtc.AndroidAudioStreamType.voiceCall,
+  StreamAndroidAudioConfiguration getAndroidConfiguration() {
+    return const StreamAndroidAudioConfiguration(
+      androidAudioMode: StreamAndroidAudioMode.inCommunication,
+      androidAudioStreamType: StreamAndroidAudioStreamType.voiceCall,
       androidAudioAttributesUsageType:
-          rtc.AndroidAudioAttributesUsageType.voiceCommunication,
+          StreamAndroidAudioAttributesUsageType.voiceCommunication,
       androidAudioAttributesContentType:
-          rtc.AndroidAudioAttributesContentType.speech,
-      androidAudioFocusMode: rtc.AndroidAudioFocusMode.gain,
+          StreamAndroidAudioAttributesContentType.speech,
+      androidAudioFocusMode: StreamAndroidAudioFocusMode.gain,
       forceHandleAudioRouting: true,
     );
   }
@@ -170,31 +170,31 @@ class ViewerAudioPolicy extends AudioConfigurationPolicy {
   const ViewerAudioPolicy();
 
   @override
-  rtc.AppleAudioConfiguration getAppleConfiguration({
+  StreamAppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
-    return rtc.AppleAudioConfiguration(
-      appleAudioMode: rtc.AppleAudioMode.default_,
-      appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
+    return StreamAppleAudioConfiguration(
+      appleAudioMode: StreamAppleAudioMode.default_,
+      appleAudioCategory: StreamAppleAudioCategory.playAndRecord,
       appleAudioCategoryOptions: {
-        if (defaultToSpeaker) rtc.AppleAudioCategoryOption.defaultToSpeaker,
-        rtc.AppleAudioCategoryOption.mixWithOthers,
-        rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
-        rtc.AppleAudioCategoryOption.allowAirPlay,
+        if (defaultToSpeaker) StreamAppleAudioCategoryOption.defaultToSpeaker,
+        StreamAppleAudioCategoryOption.mixWithOthers,
+        StreamAppleAudioCategoryOption.allowBluetoothA2DP,
+        StreamAppleAudioCategoryOption.allowAirPlay,
       },
     );
   }
 
   @override
-  rtc.AndroidAudioConfiguration getAndroidConfiguration() {
-    return rtc.AndroidAudioConfiguration(
-      androidAudioMode: rtc.AndroidAudioMode.normal,
-      androidAudioStreamType: rtc.AndroidAudioStreamType.music,
+  StreamAndroidAudioConfiguration getAndroidConfiguration() {
+    return const StreamAndroidAudioConfiguration(
+      androidAudioMode: StreamAndroidAudioMode.normal,
+      androidAudioStreamType: StreamAndroidAudioStreamType.music,
       androidAudioAttributesUsageType:
-          rtc.AndroidAudioAttributesUsageType.media,
+          StreamAndroidAudioAttributesUsageType.media,
       androidAudioAttributesContentType:
-          rtc.AndroidAudioAttributesContentType.music,
-      androidAudioFocusMode: rtc.AndroidAudioFocusMode.gain,
+          StreamAndroidAudioAttributesContentType.music,
+      androidAudioFocusMode: StreamAndroidAudioFocusMode.gain,
       forceHandleAudioRouting: false,
     );
   }
@@ -228,31 +228,31 @@ class HiFiAudioPolicy extends AudioConfigurationPolicy {
   const HiFiAudioPolicy();
 
   @override
-  rtc.AppleAudioConfiguration getAppleConfiguration({
+  StreamAppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
-    return rtc.AppleAudioConfiguration(
-      appleAudioMode: rtc.AppleAudioMode.default_,
-      appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
+    return StreamAppleAudioConfiguration(
+      appleAudioMode: StreamAppleAudioMode.default_,
+      appleAudioCategory: StreamAppleAudioCategory.playAndRecord,
       appleAudioCategoryOptions: {
-        if (defaultToSpeaker) rtc.AppleAudioCategoryOption.defaultToSpeaker,
-        rtc.AppleAudioCategoryOption.mixWithOthers,
-        rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
-        rtc.AppleAudioCategoryOption.allowAirPlay,
+        if (defaultToSpeaker) StreamAppleAudioCategoryOption.defaultToSpeaker,
+        StreamAppleAudioCategoryOption.mixWithOthers,
+        StreamAppleAudioCategoryOption.allowBluetoothA2DP,
+        StreamAppleAudioCategoryOption.allowAirPlay,
       },
     );
   }
 
   @override
-  rtc.AndroidAudioConfiguration getAndroidConfiguration() {
-    return rtc.AndroidAudioConfiguration(
-      androidAudioMode: rtc.AndroidAudioMode.normal,
-      androidAudioStreamType: rtc.AndroidAudioStreamType.music,
+  StreamAndroidAudioConfiguration getAndroidConfiguration() {
+    return const StreamAndroidAudioConfiguration(
+      androidAudioMode: StreamAndroidAudioMode.normal,
+      androidAudioStreamType: StreamAndroidAudioStreamType.music,
       androidAudioAttributesUsageType:
-          rtc.AndroidAudioAttributesUsageType.media,
+          StreamAndroidAudioAttributesUsageType.media,
       androidAudioAttributesContentType:
-          rtc.AndroidAudioAttributesContentType.music,
-      androidAudioFocusMode: rtc.AndroidAudioFocusMode.gain,
+          StreamAndroidAudioAttributesContentType.music,
+      androidAudioFocusMode: StreamAndroidAudioFocusMode.gain,
       forceHandleAudioRouting: false,
     );
   }
@@ -277,16 +277,16 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
   /// is not provided. Defaults to [BroadcasterAudioPolicy].
   final AudioConfigurationPolicy basePolicy;
 
-  final rtc.AppleAudioConfiguration Function({bool defaultToSpeaker})?
+  final StreamAppleAudioConfiguration Function({bool defaultToSpeaker})?
   appleConfiguration;
 
-  final rtc.AndroidAudioConfiguration? androidConfiguration;
+  final StreamAndroidAudioConfiguration? androidConfiguration;
 
   @override
   final bool bypassVoiceProcessing;
 
   @override
-  rtc.AppleAudioConfiguration getAppleConfiguration({
+  StreamAppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
     return appleConfiguration?.call(defaultToSpeaker: defaultToSpeaker) ??
@@ -294,7 +294,7 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
   }
 
   @override
-  rtc.AndroidAudioConfiguration getAndroidConfiguration() {
+  StreamAndroidAudioConfiguration getAndroidConfiguration() {
     return androidConfiguration ?? basePolicy.getAndroidConfiguration();
   }
 }

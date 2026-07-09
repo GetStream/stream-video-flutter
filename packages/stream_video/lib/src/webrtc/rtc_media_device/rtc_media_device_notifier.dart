@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../call/stats/tracer.dart';
@@ -43,7 +42,7 @@ class SpeechActivityEnded extends SpeechActivityEvent {
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
-    rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
+    StreamWebRtc.instance.mediaDevices.ondevicechange = _onDeviceChange;
     // Triggers the initial device change event to get the devices list.
     _onDeviceChange(null);
 
@@ -95,26 +94,18 @@ class RtcMediaDeviceNotifier {
   Future<void> handleCallInterruptionCallbacks({
     void Function()? onInterruptionStart,
     void Function()? onInterruptionEnd,
-    rtc.AndroidInterruptionSource androidInterruptionSource =
-        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
+    StreamAndroidInterruptionSource androidInterruptionSource =
+        StreamAndroidInterruptionSource.audioFocusAndTelephony,
   }) {
-    return rtc.handleCallInterruptionCallbacks(
-      onInterruptionStart,
-      onInterruptionEnd,
+    return StreamWebRtc.instance.handleCallInterruptionCallbacks(
+      onInterruptionStart: onInterruptionStart,
+      onInterruptionEnd: onInterruptionEnd,
       androidInterruptionSource: androidInterruptionSource,
     );
   }
 
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
-    return rtc.eventStream
+    return StreamWebRtc.instance.nativeEventStream
         .map<NativeWebRtcEvent?>((data) {
           if (data.isEmpty) return null;
 
@@ -137,7 +128,7 @@ class RtcMediaDeviceNotifier {
   }
 
   void _listenForAudioProcessingStateChanges() {
-    rtc.eventStream.listen((data) {
+    StreamWebRtc.instance.nativeEventStream.listen((data) {
       if (data.isEmpty) return;
 
       final event = data.keys.first;
@@ -168,7 +159,7 @@ class RtcMediaDeviceNotifier {
   }
 
   void _listenForSpeechActivityChanges() {
-    rtc.eventStream.listen((data) {
+    StreamWebRtc.instance.nativeEventStream.listen((data) {
       if (data.isEmpty) return;
 
       final event = data.keys.first;
@@ -194,7 +185,8 @@ class RtcMediaDeviceNotifier {
     RtcMediaDeviceKind? kind,
   }) async {
     try {
-      final devices = await rtc.navigator.mediaDevices.enumerateDevices();
+      final devices = await StreamWebRtc.instance.mediaDevices
+          .enumerateDevices();
 
       final mediaDevices = [
         ...devices.map((it) {
@@ -256,7 +248,7 @@ class RtcMediaDeviceNotifier {
   }
 
   Future<void> triggeriOSAudioRouteSelectionUI() {
-    return rtc.Helper.triggeriOSAudioRouteSelectionUI();
+    return StreamWebRtc.instance.helper.triggeriOSAudioRouteSelectionUI();
   }
 
   /// Temporarily mutes all audio output (playout) from the app.
@@ -264,14 +256,14 @@ class RtcMediaDeviceNotifier {
   /// Use as a global "mute all sounds" toggle or when the app goes to background.
   Future<void> pauseAudioPlayout() {
     _tracer.trace('navigator.mediaDevices.pauseAudioPlayout', null);
-    return rtc.Helper.pauseAudioPlayout();
+    return StreamWebRtc.instance.helper.pauseAudioPlayout();
   }
 
   /// Resumes audio output (playout) muted via [pauseAudioPlayout].
   /// Does not change microphone state or remote track subscriptions.
   Future<void> resumeAudioPlayout() {
     _tracer.trace('navigator.mediaDevices.resumeAudioPlayout', null);
-    return rtc.Helper.resumeAudioPlayout();
+    return StreamWebRtc.instance.helper.resumeAudioPlayout();
   }
 
   /// Regains Android audio focus if it was lost.
@@ -281,7 +273,7 @@ class RtcMediaDeviceNotifier {
   /// [resumeAudioPlayout] (e.g., when the app resumes from background).
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace('navigator.mediaDevices.regainAndroidAudioFocus', null);
-    return rtc.Helper.regainAndroidAudioFocus();
+    return StreamWebRtc.instance.helper.regainAndroidAudioFocus();
   }
 
   /// Refreshes the snapshot the implicit native peer-connection factory will
@@ -292,7 +284,7 @@ class RtcMediaDeviceNotifier {
   Future<void> reinitializeAudioConfiguration(
     AudioConfigurationPolicy policy,
   ) async {
-    await rtc.WebRTC.initialize(
+    await StreamWebRtc.instance.initializeAudioConfiguration(
       refresh: true,
       options: {
         'bypassVoiceProcessing': policy.bypassVoiceProcessing,
@@ -305,7 +297,7 @@ class RtcMediaDeviceNotifier {
     // When voice processing is bypassed (e.g. ViewerAudioPolicy), stereo
     // playout is preferred for high-fidelity audio.
     if (CurrentPlatform.isIos) {
-      await rtc.Helper.setiOSStereoPlayoutPreferred(
+      await StreamWebRtc.instance.helper.setiOSStereoPlayoutPreferred(
         policy.bypassVoiceProcessing,
       );
     }

@@ -218,15 +218,18 @@ Verified: `dart analyze` clean on `stream_video`, `stream_video_flutter` (pre-ex
 
 `stream_video_flutter` full test suite also re-verified green (5/5). These 16 files now have zero remaining Flutter-plugin coupling and need no further change in Phase 3/5 — real, permanent decoupling progress banked early.
 
-### Phase 3 — WebRTC engine injection (vertical slice)
-- [ ] Define `StreamWebRtc` + `StreamWebRtcHelper` + `StreamNativeFactory` interfaces for the remaining 9 files (`call.dart`, `audio_configuration_policy.dart`, `peer_connection_factory.dart`, `rtc_manager.dart`, `rtc_media_device_notifier.dart`, `rtc_local_track.dart`, `media_constraints.dart`, `stream_video.dart`, `media_frame_reporter.dart`)
-- [ ] `DartWebRtcEngine`'s implementation file must be reached only via `if (dart.library.io)`/`if (dart.library.js_interop)` file selection (like `lifecycle_utils_io.dart`) — never import `dart_webrtc` unconditionally
-- [ ] Web/Jaspr default `DartWebRtcEngine` in `stream_video`, incl. a headless first-frame detector on `dart_webrtc`'s `RTCVideoElement` (replacing `media_frame_reporter.dart`'s `RTCVideoRenderer` use)
-- [ ] Native `FlutterWebRtcEngine` in `stream_video_flutter`, registered in `ensureInitialized()`
-- [ ] Route `NativePeerConnectionFactory`, `Helper`, `WebRTC.initialize`, `AndroidAudioConfiguration`, device enumeration through the engine (Map payloads, no plugin enums)
-- [ ] Make WebRTC default throw on native platforms if unregistered
-- [ ] Remove `stream_webrtc_flutter` from `stream_video/pubspec.yaml` once no file references it even conditionally
-- [ ] `melos analyze` + tests green; Flutter web/desktop smoke
+### Phase 3 — WebRTC engine injection (vertical slice) ✅ (done)
+- [x] Define `StreamWebRtc` + `StreamWebRtcHelper` + `StreamNativeFactory` interfaces for the remaining 9 files (`call.dart`, `audio_configuration_policy.dart`, `peer_connection_factory.dart`, `rtc_manager.dart`, `rtc_media_device_notifier.dart`, `rtc_local_track.dart`, `media_constraints.dart`, `stream_video.dart`, `media_frame_reporter.dart`)
+- [x] `DartWebRtcEngine`'s implementation file is reached only via `if (dart.library.js_interop)` conditional-file selection (`stream_web_rtc_default.dart` throwing stub as the io/native default, `stream_web_rtc_default_web.dart` as the web override) — never imports `dart_webrtc` unconditionally
+- [x] Web/Jaspr default `DartWebRtcEngine` in `stream_video`, incl. a headless first-frame detector on `dart_webrtc`'s `RTCVideoElement` (`onCanPlay`, replacing `media_frame_reporter.dart`'s `RTCVideoRenderer` use)
+- [x] Native `FlutterWebRtcEngine` in `stream_video_flutter`, registered in `ensureInitialized()`
+- [x] Route `NativePeerConnectionFactory`, `Helper` (11 methods), `WebRTC.initialize`, device enumeration through the engine (Map payloads, no plugin enums)
+- [x] `AndroidAudioConfiguration`/`AppleAudioConfiguration` — full public-API redesign: new neutral `StreamAndroidAudioConfiguration`/`StreamAppleAudioConfiguration` + enum mirrors in `models/audio_configuration.dart`; `AudioConfigurationPolicy`'s public API now returns these instead of the plugin types (confirmed zero external usage of the affected `.custom()` params before changing)
+- [x] WebRTC default throws (`UnsupportedError` via `noSuchMethod`) on any platform where nothing registered a `StreamWebRtc`
+- [x] Removed `stream_webrtc_flutter` from `stream_video/pubspec.yaml`'s main `dependencies:` — kept only in `dev_dependencies:` since the test suite's `flutter_test_config.dart` needs a native-backed `StreamWebRtc` (stream_video's tests can't depend on `stream_video_flutter`, which would be a package cycle)
+- [x] `dart analyze` clean on all 3 packages; full test suites green (336 + 5); **Flutter web build succeeded** (`flutter build web`) — confirms `stream_web_rtc_default_web.dart`'s `dart_webrtc` integration actually compiles under a real web/dart2js toolchain, not just `dart analyze`. Native macOS build hit a pre-existing, unrelated CocoaPods/Firebase version conflict (not caused by this work) — not fixed, out of scope.
+
+Also fixed along the way: `globals.dart`'s `androidWebRTCVersion`/`iosWebRTCVersion` (previously read from the plugin) are now literal strings — a small, contained leftover for Phase 4 to route through `EnvironmentInfoProvider` properly instead.
 
 ### Phase 4 — Telemetry migration (full decoupling)
 - [ ] `EnvironmentInfoProvider` (device/package/system info) — web default + native impl moved

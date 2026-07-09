@@ -4,9 +4,10 @@ import 'flutter_app_lifecycle_provider.dart';
 import 'flutter_device_state_provider.dart';
 import 'flutter_display_metrics_provider.dart';
 import 'flutter_environment_info_provider.dart';
+import 'flutter_web_rtc_engine.dart';
 
 /// Registers the plugin-backed native implementations of `stream_video`'s
-/// platform providers (telemetry, lifecycle, display metrics).
+/// platform providers (telemetry, lifecycle, display metrics, WebRTC engine).
 ///
 /// Call once, early in `main()`, before constructing [StreamVideo]. Safe to
 /// call more than once (idempotent).
@@ -22,5 +23,6 @@ abstract final class StreamVideoFlutter {
     EnvironmentInfoProvider.instance = const FlutterEnvironmentInfoProvider();
     AppLifecycleProvider.instance = const FlutterAppLifecycleProvider();
     DisplayMetricsProvider.instance = const FlutterDisplayMetricsProvider();
+    StreamWebRtc.instance = FlutterWebRtcEngine();
   }
 }

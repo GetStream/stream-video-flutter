@@ -1,5 +1,4 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as webrtc;
 
 import 'protobuf/video/sfu/models/models.pb.dart';
 import 'src/video_environment_manager.dart';
@@ -8,8 +7,12 @@ const String streamSdkName = 'stream-flutter';
 const String streamVideoVersion = '1.4.1';
 const String openapiModelsVersion = '225.14.0';
 const String protocolModelsVersion = '1.48.0';
-const String androidWebRTCVersion = webrtc.androidWebRTCVersion;
-const String iosWebRTCVersion = webrtc.iosWebRTCVersion;
+
+// Bundled native WebRTC.org version from `stream_webrtc_flutter`. Kept as a
+// literal (rather than importing the plugin) so stream_video has no
+// dependency on it; bump this alongside the plugin's own version.
+const String androidWebRTCVersion = '145.9.0';
+const String iosWebRTCVersion = '145.9.0';
 
 const String streamDefaultUserAgent =
     'stream-video-flutter-v$streamVideoVersion';

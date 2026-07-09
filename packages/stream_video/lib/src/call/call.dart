@@ -8,8 +8,6 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
@@ -26,6 +24,7 @@ import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/call_received_data.dart';
 import '../models/models.dart';
+import '../platform/stream_web_rtc.dart';
 import '../platform_detector/platform_detector.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
@@ -296,7 +295,7 @@ class Call {
     );
   }
 
-  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
+  Future<StreamNativeFactory?> ensureNativeFactory() {
     return _ensurePcFactory().ensureNativeFactory();
   }
 
@@ -3435,7 +3434,7 @@ class Call {
     return _multitaskingCameraLock.synchronized(() async {
       if (CurrentPlatform.isIos) {
         try {
-          final result = await rtc.Helper.enableIOSMultitaskingCameraAccess(
+          final result = await StreamWebRtc.instance.helper.enableIOSMultitaskingCameraAccess(
             enabled,
           );
           return Result.success(result);
@@ -3474,7 +3473,7 @@ class Call {
     }
 
     try {
-      await rtc.Helper.setZoom(localTrack.mediaTrack, zoomLevel);
+      await StreamWebRtc.instance.helper.setZoom(localTrack.mediaTrack, zoomLevel);
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[setZoom] Failed to set zoom: $error');
@@ -3502,8 +3501,8 @@ class Call {
     }
 
     try {
-      await Helper.setFocusPoint(localTrack.mediaTrack, focusPoint);
-      await Helper.setExposurePoint(localTrack.mediaTrack, focusPoint);
+      await StreamWebRtc.instance.helper.setFocusPoint(localTrack.mediaTrack, focusPoint);
+      await StreamWebRtc.instance.helper.setExposurePoint(localTrack.mediaTrack, focusPoint);
     } catch (error, stackTrace) {
       _logger.e(() => '[focus] Failed to set focus: $error');
       return Result.error('Failed to set focus', stackTrace);
@@ -3680,7 +3679,7 @@ class Call {
       return nativeFactory.requestCapturePermission();
     }
 
-    return Helper.requestCapturePermission();
+    return StreamWebRtc.instance.helper.requestCapturePermission();
   }
 
   Future<Result<None>> setScreenShareEnabled({
@@ -3807,7 +3806,7 @@ class Call {
 
     // On iOS, toggle stereo playout preference when switching HiFi audio modes.
     if (CurrentPlatform.isIos) {
-      unawaited(rtc.Helper.setiOSStereoPlayoutPreferred(stereo));
+      unawaited(StreamWebRtc.instance.helper.setiOSStereoPlayoutPreferred(stereo));
     }
 
     _session?.rtcManager?.changeDefaultAudioConstraints(

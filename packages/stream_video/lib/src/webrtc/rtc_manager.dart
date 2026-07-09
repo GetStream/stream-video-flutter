@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../stream_video.dart';
@@ -163,13 +162,13 @@ class RtcManager extends Disposable {
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
 
-  static final Map<rtc.TransceiverDirection, String> _cachedGenericSdp = {};
+  static final Map<TransceiverDirection, String> _cachedGenericSdp = {};
 
   /// Returns a generic sdp. Results are cached since device capabilities
   /// don't change between calls.
   static Future<String> getGenericSdp(
-    rtc.TransceiverDirection direction, {
-    required rtc.NativePeerConnectionFactory? pcFactory,
+    TransceiverDirection direction, {
+    required StreamNativeFactory? pcFactory,
   }) async {
     // Check cache first
     if (_cachedGenericSdp.containsKey(direction)) {
@@ -178,16 +177,16 @@ class RtcManager extends Disposable {
 
     final tempPC = pcFactory != null
         ? await pcFactory.createPeerConnection({}, {})
-        : await rtc.createPeerConnection({});
+        : await StreamWebRtc.instance.createPeerConnection({});
 
     await tempPC.addTransceiver(
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: rtc.RTCRtpTransceiverInit(direction: direction),
+      kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
+      init: RTCRtpTransceiverInit(direction: direction),
     );
 
     await tempPC.addTransceiver(
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: rtc.RTCRtpTransceiverInit(direction: direction),
+      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+      init: RTCRtpTransceiverInit(direction: direction),
     );
 
     final offer = await tempPC.createOffer();
@@ -226,7 +225,7 @@ class RtcManager extends Disposable {
     return Result.error('unexpected peerType: $peerType');
   }
 
-  void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
+  void _onRemoteTrack(StreamPeerConnection pc, RTCTrackEvent event) {
     _logger.d(
       () => '[onRemoteTrack] event.streams.length: ${event.streams.length}',
     );
@@ -635,7 +634,7 @@ extension PublisherRtcManager on RtcManager {
   }
 
   String extractMid(
-    rtc.RTCRtpTransceiver transceiver,
+    RTCRtpTransceiver transceiver,
     int transceiverInitIndex,
     String? sdp,
   ) {
@@ -976,8 +975,8 @@ extension PublisherRtcManager on RtcManager {
   /// In SVC, we need to send only one video encoding (layer).
   /// this layer will have the additional spatial and temporal layers
   /// defined via the scalabilityMode property.
-  List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
-    rtc.RTCRtpEncoding? findByRid(String rid) {
+  List<RTCRtpEncoding> toSvcEncodings(List<RTCRtpEncoding> layers) {
+    RTCRtpEncoding? findByRid(String rid) {
       for (final layer in layers) {
         if (layer.rid == rid) return layer;
       }
@@ -988,7 +987,7 @@ extension PublisherRtcManager on RtcManager {
     if (highestLayer == null) return [];
 
     return [
-      rtc.RTCRtpEncoding(
+      RTCRtpEncoding(
         rid: 'q',
         active: highestLayer.active,
         maxBitrate: highestLayer.maxBitrate,
@@ -1002,7 +1001,7 @@ extension PublisherRtcManager on RtcManager {
     ];
   }
 
-  Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
+  Future<Result<RTCRtpTransceiver>> _addTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
     RtcTrackPublishOptions trackPublishOptions,
@@ -1011,7 +1010,7 @@ extension PublisherRtcManager on RtcManager {
       return Result.error('Publisher is not created, cannot add transceiver');
     }
 
-    Result<rtc.RTCRtpTransceiver>? transceiverResult;
+    Result<RTCRtpTransceiver>? transceiverResult;
 
     _logger.v(
       () =>
@@ -1461,7 +1460,7 @@ extension RtcManagerTrackHelper on RtcManager {
       }
 
       // Change the audio output device for all remote audio tracks.
-      await rtc.Helper.selectAudioOutput(device.id);
+      await StreamWebRtc.instance.helper.selectAudioOutput(device.id);
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
         tracks[updatedTrack.trackId] = updatedTrack;
@@ -1698,7 +1697,7 @@ extension RtcManagerTrackHelper on RtcManager {
     bool speakerOn = false,
   }) async {
     try {
-      await rtc.Helper.setAppleAudioConfiguration(
+      await StreamWebRtc.instance.helper.setAppleAudioConfiguration(
         policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
       );
       return const Result.success(none);

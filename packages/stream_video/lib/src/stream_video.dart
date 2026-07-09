@@ -6,7 +6,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
@@ -37,6 +36,7 @@ import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
 import 'logger/stream_logger.dart';
+import 'models/audio_configuration.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
 import 'models/call_preferences.dart';
@@ -1422,7 +1422,7 @@ class StreamVideoOptions {
   @Deprecated(
     'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
   )
-  final rtc.AndroidAudioConfiguration? androidAudioConfiguration;
+  final StreamAndroidAudioConfiguration? androidAudioConfiguration;
 
   /// The audio configuration policy for the SDK.
   ///

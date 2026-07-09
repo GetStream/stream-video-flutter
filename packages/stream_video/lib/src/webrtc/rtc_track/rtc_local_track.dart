@@ -1,8 +1,9 @@
 import 'package:collection/collection.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
 
 import '../../exceptions/video_exception.dart';
 import '../../logger/stream_log.dart';
+import '../../platform/stream_web_rtc.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
 import '../../utils/result.dart';
@@ -37,16 +38,16 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// Per-call native factory the track is pinned to. Carried on the track so
   /// [recreate] can target the same factory. Null on web, which has no
   /// per-call factory concept.
-  final rtc.NativePeerConnectionFactory? nativeFactory;
+  final StreamNativeFactory? nativeFactory;
 
   static Future<RtcLocalAudioTrack> audio({
     String trackIdPrefix = kLocalTrackIdPrefix,
     AudioConstraints constraints = const AudioConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    StreamNativeFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating audio track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await StreamWebRtc.instance.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -72,10 +73,10 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalCameraTrack> camera({
     String trackIdPrefix = kLocalTrackIdPrefix,
     CameraConstraints constraints = const CameraConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    StreamNativeFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating camera track');
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await StreamWebRtc.instance.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -110,11 +111,11 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalScreenShareTrack> screenShare({
     String trackIdPrefix = kLocalTrackIdPrefix,
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    StreamNativeFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating screen share track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await StreamWebRtc.instance.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -223,7 +224,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
     List<rtc.MediaStreamTrack>? clonedTracks,
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    StreamNativeFactory? nativeFactory,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -253,7 +254,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     // Create a new track with the new constraints, pinned to the same
     // per-call factory the original was attached to.
-    final newStream = await rtc.navigator.mediaDevices.getMedia(
+    final newStream = await StreamWebRtc.instance.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -340,7 +341,9 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     }
 
     // Use the native switchCamera method.
-    final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
+    final isFrontCamera = await StreamWebRtc.instance.helper.switchCamera(
+      mediaTrack,
+    );
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
         .enumerateDevices(
@@ -427,7 +430,7 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
     }
 
     try {
-      await rtc.Helper.selectAudioInput(device.id);
+      await StreamWebRtc.instance.helper.selectAudioInput(device.id);
       return copyWith(mediaConstraints: updatedConstraints);
     } catch (e) {
       streamLog.e(_audioTag, () => 'Error selecting audio input: $e');

@@ -25,6 +25,7 @@ export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';
 export 'src/logger/stream_log.dart';
 export 'src/logger/stream_logger.dart';
+export 'src/models/audio_configuration.dart';
 export 'src/models/audio_configuration_policy.dart';
 export 'src/models/models.dart';
 export 'src/network_monitor_settings.dart';

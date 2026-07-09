@@ -1,7 +1,10 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'dart:async';
+
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../platform/stream_web_rtc.dart';
 import '../webrtc/model/stats/rtc_inbound_rtp_audio_stream.dart';
 import '../webrtc/model/stats/rtc_stats.dart';
 import 'client_event.dart';
@@ -13,8 +16,8 @@ const _tag = 'SV:MediaFrameReporter';
 /// Emits the single-shot `FirstAudioFrame` / `FirstVideoFrame` telemetry events
 /// for one call session. Each fires at most once.
 ///
-/// - `FirstVideoFrame` uses a headless [rtc.RTCVideoRenderer] per remote video
-///   track.
+/// - `FirstVideoFrame` uses a headless renderer per remote video track, via
+///   [StreamWebRtc.watchFirstVideoFrame].
 /// - `FirstAudioFrame` is detected from inbound-audio RTP stats
 ///   (`packetsReceived > 0`).
 class MediaFrameReporter {
@@ -34,7 +37,7 @@ class MediaFrameReporter {
   bool _videoReported = false;
   bool _disposed = false;
 
-  final Map<String, rtc.RTCVideoRenderer> _renderers = {};
+  final Map<String, Future<Future<void> Function()>> _rendererDisposers = {};
 
   String? _audioTrackId;
 
@@ -58,24 +61,29 @@ class MediaFrameReporter {
   /// Attaches a headless renderer to a remote video track to detect its first
   /// decoded/rendered frame.
   Future<void> onRemoteVideoTrack({
-    required rtc.MediaStream stream,
+    required MediaStream stream,
     required String trackId,
   }) async {
-    if (_videoReported || _disposed || _renderers.containsKey(trackId)) return;
+    if (_videoReported ||
+        _disposed ||
+        _rendererDisposers.containsKey(trackId)) {
+      return;
+    }
 
     try {
-      final renderer = rtc.RTCVideoRenderer();
-      await renderer.initialize();
+      final disposeFuture = StreamWebRtc.instance.watchFirstVideoFrame(
+        stream: stream,
+        onFirstFrame: () => _reportVideo(trackId),
+      );
+      _rendererDisposers[trackId] = disposeFuture;
+      final dispose = await disposeFuture;
 
-      // State may have changed while awaiting initialize().
+      // State may have changed while awaiting setup.
       if (_videoReported || _disposed) {
-        await renderer.dispose();
-        return;
+        await dispose();
+        // ignore: unawaited_futures
+        _rendererDisposers.remove(trackId);
       }
-
-      renderer.onFirstFrameRendered = () => _reportVideo(trackId);
-      renderer.srcObject = stream;
-      _renderers[trackId] = renderer;
     } catch (e) {
       _logger.w(() => '[onRemoteVideoTrack] renderer setup failed: $e');
     }
@@ -103,12 +111,10 @@ class MediaFrameReporter {
   }
 
   void _disposeRenderers() {
-    for (final renderer in _renderers.values) {
-      renderer
-        ..srcObject = null
-        ..dispose();
+    for (final disposeFuture in _rendererDisposers.values) {
+      unawaited(disposeFuture.then((dispose) => dispose()));
     }
-    _renderers.clear();
+    _rendererDisposers.clear();
   }
 
   void dispose() {
