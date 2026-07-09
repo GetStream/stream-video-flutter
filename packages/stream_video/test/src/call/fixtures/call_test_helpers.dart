@@ -285,6 +285,7 @@ MockCallSession setupMockCallSession() {
       isAnonymousUser: any(named: 'isAnonymousUser'),
       capabilities: any(named: 'capabilities'),
       unifiedSessionId: any(named: 'unifiedSessionId'),
+      clientEventRetryCount: any(named: 'clientEventRetryCount'),
     ),
   ).thenAnswer(
     (_) => Future.value(

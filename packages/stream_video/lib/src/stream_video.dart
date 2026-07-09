@@ -55,6 +55,8 @@ import 'network_monitor_settings.dart';
 import 'platform_detector/platform_detector.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
+import 'telemetry/client_event_reporter.dart';
+import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
 import 'token/token_manager.dart';
 import 'utils/cancelable_operation.dart';
@@ -170,6 +172,17 @@ class StreamVideo extends Disposable {
                     .toList(),
         );
 
+    _clientEventReporter = _options.clientEventsReportingEnabled
+        ? ClientEventReporter(
+            transport: ClientEventTransport(
+              baseUrl: _options.coordinatorRpcUrl,
+              apiKey: apiKey,
+              authHeadersProvider: _clientEventAuthHeaders,
+            ),
+            resolveUserId: () => _state.currentUser.info.id,
+          )
+        : const ClientEventReporter.noOp();
+
     _client = buildCoordinatorClient(
       user: user,
       apiKey: apiKey,
@@ -179,6 +192,7 @@ class StreamVideo extends Disposable {
       rpcUrl: _options.coordinatorRpcUrl,
       wsUrl: _options.coordinatorWsUrl,
       networkMonitor: _networkMonitor,
+      clientEventReporter: _clientEventReporter,
     );
 
     // Initialize the push notification manager if the provider is provided.
@@ -300,6 +314,23 @@ class StreamVideo extends Disposable {
   late final CoordinatorClient _client;
   late final InternetConnection _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
+
+  late final ClientEventReporter _clientEventReporter;
+
+  @internal
+  ClientEventReporter get clientEventReporter => _clientEventReporter;
+
+  /// Stream auth headers for the telemetry transport, mirroring the coordinator
+  /// client's authentication.
+  Future<Map<String, String>> _clientEventAuthHeaders() async {
+    final tokenResult = await _tokenManager.getToken();
+    if (tokenResult is! Success<UserToken>) return const {};
+    final token = tokenResult.data;
+    return {
+      'stream-auth-type': token.authType.name,
+      if (token.rawValue.isNotEmpty) 'Authorization': token.rawValue,
+    };
+  }
 
   final Map<String, bool> _mutedCameraByStateChange = {};
   final Map<String, bool> _mutedAudioByStateChange = {};
@@ -483,6 +514,7 @@ class StreamVideo extends Disposable {
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
+    _clientEventReporter.dispose();
     await _state.clear();
 
     return super.dispose();
@@ -1280,6 +1312,7 @@ CoordinatorClient buildCoordinatorClient({
   required RetryPolicy retryPolicy,
   required LatencySettings latencySettings,
   required InternetConnection networkMonitor,
+  ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
 }) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
@@ -1296,6 +1329,7 @@ CoordinatorClient buildCoordinatorClient({
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,
       isAnonymous: user.type == UserType.anonymous,
+      clientEventReporter: clientEventReporter,
     ),
   );
 }
@@ -1340,6 +1374,7 @@ class StreamVideoOptions {
     this.networkMonitorSettings = const NetworkMonitorSettings(),
     this.allowMultipleActiveCalls = false,
     this.multiCallAudioPolicy = MultiCallAudioPolicy.suspendExisting,
+    this.clientEventsReportingEnabled = true,
     @Deprecated(
       'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
     )
@@ -1377,6 +1412,9 @@ class StreamVideoOptions {
   ///
   /// Ignored when [allowMultipleActiveCalls] is `false`.
   final MultiCallAudioPolicy multiCallAudioPolicy;
+
+  /// Whether to report join-lifecycle telemetry
+  final bool clientEventsReportingEnabled;
 
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;
