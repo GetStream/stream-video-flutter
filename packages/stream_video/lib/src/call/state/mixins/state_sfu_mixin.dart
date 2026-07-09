@@ -285,9 +285,10 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
               trackIdPrefix: participant.trackLookupPrefix,
               isSpeaking: participant.isSpeaking,
               isDominantSpeaker: participant.isDominantSpeaker,
-              connectionQuality: participant.connectionQuality.mergeWithPrevious(
-                it.connectionQuality,
-              ),
+              connectionQuality: participant.connectionQuality
+                  .mergeWithPrevious(
+                    it.connectionQuality,
+                  ),
               roles: participant.roles,
             )
             .copyWithUpdatedAudioLevels(audioLevel: participant.audioLevel);
