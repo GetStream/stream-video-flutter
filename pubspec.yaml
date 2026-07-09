@@ -6,10 +6,12 @@ environment:
 
 workspace:
   - dogfooding
+  - dogfooding_jaspr
   - packages/stream_video
   - packages/stream_video_filters
   - packages/stream_video_flutter
   - packages/stream_video_flutter/example
+  - packages/stream_video_jaspr
   - packages/stream_video_noise_cancellation
   - packages/stream_video_noise_cancellation/example
   - packages/stream_video_push_notification
