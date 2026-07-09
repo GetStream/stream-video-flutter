@@ -16,8 +16,17 @@ import '../webrtc/model/rtc_video_dimension.dart';
 import 'data/events/sfu_events.dart';
 import 'data/models/sfu_audio_bitrate.dart';
 import 'data/models/sfu_connection_info.dart';
+import 'data/models/sfu_connection_quality.dart';
 import 'data/models/sfu_model_mapper_extensions.dart';
 import 'data/models/sfu_participant.dart';
+
+extension SfuConnectionQualityMergeX on SfuConnectionQuality {
+  SfuConnectionQuality mergeWithPrevious(SfuConnectionQuality? previous) {
+    return this != SfuConnectionQuality.unspecified
+        ? this
+        : (previous ?? SfuConnectionQuality.unspecified);
+  }
+}
 
 extension CodecX on sfu_models.Codec {
   Map<String, dynamic> toJson() {
@@ -61,6 +70,10 @@ extension SfuParticipantX on SfuParticipant {
       isSpeaking: isSpeaking,
       audioLevel: audioLevel,
       isDominantSpeaker: isDominantSpeaker,
+      // Keep the last known quality to avoid the indicator blanking out on every reconnect.
+      connectionQuality: connectionQuality.mergeWithPrevious(
+        existing?.connectionQuality,
+      ),
       participantSource: participantSource,
     );
   }
