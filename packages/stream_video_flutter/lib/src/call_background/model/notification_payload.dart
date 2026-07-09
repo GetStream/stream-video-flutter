@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'notification_options.dart';
 
-class NotificationPayload with EquatableMixin {
+class NotificationPayload extends Equatable {
   const NotificationPayload({
     required this.callCid,
     this.options,

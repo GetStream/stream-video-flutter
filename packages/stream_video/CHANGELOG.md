@@ -1,5 +1,9 @@
 ## Upcoming
 
+### ✅ Added
+
+- Added client-side call join telemetry (`ClientEventReporter`).
+
 ### 🐞 Fixed
 
 - Fixed connection quality indicator blanking after reconnect.

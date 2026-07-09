@@ -6,8 +6,8 @@ import '../sdp.dart';
 /// Represents 'rtpmap' attribute
 /// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.
 /// Format: a=rtpmap:<payload type> <encoding name>/<clock rate> [/<encoding parameters>]
-class Rtpmap with EquatableMixin {
-  Rtpmap({
+class Rtpmap extends Equatable {
+  const Rtpmap({
     required this.payloadType,
     required this.encodingName,
     required this.clockRate,
