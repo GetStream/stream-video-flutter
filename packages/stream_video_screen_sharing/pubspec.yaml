@@ -23,6 +23,7 @@ dev_dependencies:
 
 platforms:
   ios:
+  android:
 
 flutter:
   plugin:
