@@ -7,7 +7,7 @@ typedef CallKitEvent = RingingEvent;
 ///
 /// Instances of this class are used to signify different call events that can be
 /// received from [PushNotificationManager].
-sealed class RingingEvent with EquatableMixin {
+sealed class RingingEvent extends Equatable {
   const RingingEvent();
 
   @override
@@ -261,7 +261,7 @@ class ActionCallCustom extends RingingEvent {
 /// This class encapsulates information about an ongoing or past call, including
 /// unique identifiers, caller's avatar, handle, name, video availability, and
 /// additional extra data associated with the call.
-class CallData with EquatableMixin {
+class CallData extends Equatable {
   /// Creates a [CallData] instance with the provided details.
   const CallData({
     this.uuid,
