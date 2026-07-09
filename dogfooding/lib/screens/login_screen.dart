@@ -33,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   StreamSubscription<GoogleSignInAuthenticationEvent>? _googleAuthSubscription;
   bool _isLoggingIn = false;
+  var _userNameHasError = false;
 
   @override
   void initState() {
@@ -96,8 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
         // Hints Google to restrict the account chooser to the Stream domain.
         ..setCustomParameters(const {'hd': 'getstream.io'});
 
-      final credential =
-          await fb.FirebaseAuth.instance.signInWithPopup(provider);
+      final credential = await fb.FirebaseAuth.instance.signInWithPopup(
+        provider,
+      );
       final user = credential.user;
       if (user == null) {
         debugPrint('Google sign-in returned no user');
@@ -138,7 +140,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginWithUsername() async {
     final username = _usernameController.text;
-    if (username.isEmpty) return debugPrint('Username is empty');
+    if (username.isEmpty) {
+      setState(() {
+        _userNameHasError = true;
+      });
+      _showSnackBar('Please enter a name');
+      return;
+    }
+
+    if (_userNameHasError) {
+      setState(() {
+        _userNameHasError = false;
+      });
+    }
 
     final userInfo = UserInfo(
       id: createValidId(username),
@@ -249,10 +263,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: theme.textTheme.bodyMedium?.apply(
                         color: Colors.white,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Enter Username',
                         isDense: true,
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
+                        errorText: _userNameHasError
+                            ? 'Please enter a name'
+                            : null,
                       ),
                     ),
                   ),
