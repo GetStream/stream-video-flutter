@@ -9,7 +9,10 @@ runs:
 
     - name: "Bootstrap Workspace"
       shell: bash
-      run: melos bootstrap --verbose
+      run: |
+        # Remove dogfooding from pubspec.yaml to avoid resolving it.
+        sed -i '/^  - dogfooding$/d' pubspec.yaml
+        melos bootstrap --verbose --ignore=flutter_dogfooding
       env:
         MELOS_PACKAGES: stream_**,example
 

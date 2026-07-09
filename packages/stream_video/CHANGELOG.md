@@ -1,7 +1,12 @@
 ## Upcoming
 
+### ✅ Added
+
+- Added client-side call join telemetry (`ClientEventReporter`).
+
 ### 🐞 Fixed
 
+- Fixed connection quality indicator blanking after reconnect.
 - Fixed SFU stats not being flushed on call end.
 
 ## 1.4.1

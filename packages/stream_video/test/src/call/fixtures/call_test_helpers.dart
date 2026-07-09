@@ -267,7 +267,7 @@ MockRetryPolicy setupMockRetryPolicy() {
 SfuCallState createTestSfuCallState() {
   return SfuCallState(
     participants: const [],
-    participantCount: SfuParticipantCount(total: 0, anonymous: 0),
+    participantCount: const SfuParticipantCount(total: 0, anonymous: 0),
     startedAt: DateTime.now(),
     pins: const [],
   );
@@ -285,6 +285,7 @@ MockCallSession setupMockCallSession() {
       isAnonymousUser: any(named: 'isAnonymousUser'),
       capabilities: any(named: 'capabilities'),
       unifiedSessionId: any(named: 'unifiedSessionId'),
+      clientEventRetryCount: any(named: 'clientEventRetryCount'),
     ),
   ).thenAnswer(
     (_) => Future.value(

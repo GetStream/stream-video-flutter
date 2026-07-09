@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class NotificationOptions with EquatableMixin {
+class NotificationOptions extends Equatable {
   const NotificationOptions({
     this.content,
     this.avatar,
@@ -30,7 +30,7 @@ class NotificationOptions with EquatableMixin {
   ];
 }
 
-class NotificationContent with EquatableMixin {
+class NotificationContent extends Equatable {
   const NotificationContent({
     this.title,
     this.text,
@@ -53,7 +53,7 @@ class NotificationContent with EquatableMixin {
   List<Object?> get props => [title, text];
 }
 
-class NotificationAvatar with EquatableMixin {
+class NotificationAvatar extends Equatable {
   const NotificationAvatar({
     required this.url,
     this.httpHeaders = const {},

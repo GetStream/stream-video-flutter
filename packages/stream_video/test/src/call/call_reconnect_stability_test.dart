@@ -391,6 +391,7 @@ void main() {
             isAnonymousUser: any(named: 'isAnonymousUser'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
           ),
         ).thenAnswer(
           (_) => Future.value(
@@ -477,6 +478,7 @@ void main() {
             isAnonymousUser: any(named: 'isAnonymousUser'),
             capabilities: any(named: 'capabilities'),
             unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
           ),
         ).thenAnswer(
           (_) => Future.value(

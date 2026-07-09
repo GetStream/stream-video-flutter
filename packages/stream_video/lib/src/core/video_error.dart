@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class StreamVideoError with EquatableMixin implements Exception {
+class StreamVideoError extends Equatable implements Exception {
   const StreamVideoError(this.message);
 
   /// Error message

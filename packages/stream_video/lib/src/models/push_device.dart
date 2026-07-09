@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'models.dart';
 
 @immutable
-class PushDevice with EquatableMixin {
+class PushDevice extends Equatable {
   const PushDevice({
     required this.pushToken,
     required this.pushProvider,

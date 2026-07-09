@@ -5,7 +5,7 @@ import '../../../open_api/video/coordinator/api.dart';
 import '../../models/models.dart';
 
 @immutable
-abstract class CoordinatorModel with EquatableMixin {
+abstract class CoordinatorModel extends Equatable {
   const CoordinatorModel();
 
   @override

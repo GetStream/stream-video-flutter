@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'sfu_track_type.dart';
 
-class SfuInboundVideoState with EquatableMixin {
+class SfuInboundVideoState extends Equatable {
   const SfuInboundVideoState({
     required this.userId,
     required this.sessionId,
