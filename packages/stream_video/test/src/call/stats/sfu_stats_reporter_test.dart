@@ -3,11 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
     as sfu;
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/call/stats/sfu_stats_reporter.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
-import 'package:stream_video/src/call/state/call_state_notifier.dart';
-import 'package:stream_video/src/webrtc/model/stats/rtc_printable_stats.dart';
-import 'package:stream_video/src/webrtc/model/stats/rtc_stats.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
@@ -73,14 +71,14 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('dev.fluttercommunity.plus/battery'),
-      (call) async {
-        if (call.method == 'isInBatterySaveMode') {
-          return false;
-        }
-        return null;
-      },
-    );
+          const MethodChannel('dev.fluttercommunity.plus/battery'),
+          (call) async {
+            if (call.method == 'isInBatterySaveMode') {
+              return false;
+            }
+            return null;
+          },
+        );
   });
 
   group('SfuStatsReporter.flush', () {
