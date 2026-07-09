@@ -22,6 +22,8 @@ import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_extensions.dart';
 import '../../sfu/ws/sfu_ws.dart';
+import '../../telemetry/client_event.dart';
+import '../../telemetry/client_event_types.dart';
 import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
@@ -191,7 +193,12 @@ class CallSession extends Disposable {
     FutureOr<void> Function(RtcManager)? onRtcManagerCreatedCallback,
     bool isAnonymousUser = false,
     String? unifiedSessionId,
+    int clientEventRetryCount = 0,
   }) async {
+    final reporter = _streamVideo.clientEventReporter;
+    final wsJoinDetails = ClientEventDetails(sfuId: config.sfuName);
+    var wsJoinStageId = '';
+
     try {
       _logger.d(
         () =>
@@ -222,8 +229,20 @@ class CallSession extends Disposable {
           .mergeWith([delayedStream])
           .listen(_onSfuEvent);
 
+      wsJoinStageId = reporter.beginStage(
+        callCid,
+        ClientEventStage.wsJoin,
+        details: wsJoinDetails,
+      );
+
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
+        reporter.failStageWithError(
+          wsJoinStageId,
+          (wsResult as Failure).error,
+          details: wsJoinDetails,
+          retryCount: clientEventRetryCount,
+        );
         _logger.e(() => '[start] ws connect failed: $wsResult');
         return const Result.failure(
           VideoError(message: 'Failed to connect to WS'),
@@ -298,11 +317,24 @@ class CallSession extends Disposable {
       final event = await Future.any([joinResponseFuture, sfuErrorFuture]);
 
       if (event is SfuErrorEvent) {
+        reporter.failStageWithError(
+          wsJoinStageId,
+          event.error,
+          details: wsJoinDetails,
+          retryCount: clientEventRetryCount,
+        );
         _logger.e(() => '[start] sfu error: ${event.error}');
         return failureWithError(event.error.message, cause: event.error);
       }
 
       final joinResponseEvent = event as SfuJoinResponseEvent;
+
+      reporter.completeStage(
+        wsJoinStageId,
+        outcome: ClientEventOutcome.success,
+        details: wsJoinDetails,
+        retryCount: clientEventRetryCount,
+      );
 
       _logger.v(() => '[start] sfu joined: $event');
 
@@ -320,6 +352,7 @@ class CallSession extends Disposable {
                 statsOptions: statsOptions,
                 callSessionConfig: config,
                 publishOptions: joinResponseEvent.publishOptions,
+                clientEventRetryCount: clientEventRetryCount,
               )
               ..onSubscriberIceCandidate = _onLocalIceCandidate
               ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -346,6 +379,7 @@ class CallSession extends Disposable {
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
                 callSessionConfig: config,
+                clientEventRetryCount: clientEventRetryCount,
               )
               ..onPublisherIceCandidate = _onLocalIceCandidate
               ..onSubscriberIceCandidate = _onLocalIceCandidate
@@ -386,10 +420,22 @@ class CallSession extends Disposable {
     } on TimeoutException catch (e, stk) {
       final message =
           'Waiting for "joinResponse" has timed out after ${joinResponseTimeout.inMilliseconds}ms';
+      reporter.failStage(
+        wsJoinStageId,
+        failure: ClientEventFailure.requestTimeout(message),
+        details: wsJoinDetails,
+        retryCount: clientEventRetryCount,
+      );
       _tracer.trace('joinRequestTimeout', message);
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     } catch (e, stk) {
+      reporter.failStageWithError(
+        wsJoinStageId,
+        e,
+        details: wsJoinDetails,
+        retryCount: clientEventRetryCount,
+      );
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
