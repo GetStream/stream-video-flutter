@@ -8,8 +8,10 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.1+1
 
 environment:
-  sdk: ^3.10.0
+  sdk: ">=3.10.0 <4.0.0"
   flutter: ">=3.38.1"
+
+resolution: workspace
 
 dependencies:
   cupertino_icons: ^1.0.5
@@ -33,18 +35,10 @@ dependencies:
   stream_video_push_notification: ^1.4.1
   stream_webrtc_flutter: ^3.0.0
 
-dependency_overrides:
-  stream_video:
-    path: ../../stream_video
-  stream_video_flutter:
-    path: ../../stream_video_flutter
-  stream_video_push_notification:
-    path: ../../stream_video_push_notification
-
 dev_dependencies:
   build_runner: ^2.4.6
   envied_generator: ^1.2.1
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
 

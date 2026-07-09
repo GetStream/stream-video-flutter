@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'call_metadata.dart';
 
-class QueriedMembers with EquatableMixin {
+class QueriedMembers extends Equatable {
   factory QueriedMembers({
     required Map<String, CallMember> members,
     required Map<String, CallUser> users,

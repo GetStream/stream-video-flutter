@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'call_created_data.dart';
 
 @immutable
-class CallReceivedOrCreatedData with EquatableMixin {
+class CallReceivedOrCreatedData extends Equatable {
   const CallReceivedOrCreatedData({
     required this.wasCreated,
     required this.data,

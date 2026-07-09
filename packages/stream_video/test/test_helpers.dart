@@ -7,6 +7,7 @@ import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
+import 'package:stream_video/src/telemetry/client_event_reporter.dart';
 import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -18,7 +19,13 @@ class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
-class MockStreamVideo extends Mock implements StreamVideo {}
+class MockStreamVideo extends Mock implements StreamVideo {
+  /// Telemetry is a no-op in tests unless a test overrides it, so call sites
+  /// (join/leave) don't need to stub it.
+  @override
+  ClientEventReporter get clientEventReporter =>
+      const ClientEventReporter.noOp();
+}
 
 class MockCallStateNotifier extends Mock implements CallStateNotifier {}
 
