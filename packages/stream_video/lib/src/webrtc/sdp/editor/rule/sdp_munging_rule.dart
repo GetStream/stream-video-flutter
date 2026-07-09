@@ -8,7 +8,7 @@ import 'rule_mirror_sprop_stereo.dart';
 import 'rule_prioritize_codec.dart';
 import 'rule_set_opus_dtx_enabled.dart';
 
-abstract class SdpMungingRule with Equatable {
+abstract class SdpMungingRule extends Equatable {
   const SdpMungingRule({
     this.platforms = const [],
     this.types = const [],

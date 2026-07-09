@@ -3,7 +3,8 @@ import 'package:meta/meta.dart';
 
 /// A type that represents video encoding information.
 @immutable
-class RtcVideoEncoding with Equatable implements Comparable<RtcVideoEncoding> {
+class RtcVideoEncoding extends Equatable
+    implements Comparable<RtcVideoEncoding> {
   const RtcVideoEncoding({
     required this.maxFramerate,
     required this.maxBitrate,

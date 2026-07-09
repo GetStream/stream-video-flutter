@@ -4,9 +4,9 @@ import 'package:meta/meta.dart';
 import 'user_info.dart';
 
 @immutable
-class GuestCreatedData with Equatable {
+class GuestCreatedData extends Equatable {
   /// Returns a new [GuestCreatedData] instance.
-  GuestCreatedData({
+  const GuestCreatedData({
     required this.accessToken,
     required this.duration,
     required this.user,
@@ -41,7 +41,7 @@ class GuestCreatedData with Equatable {
 }
 
 @immutable
-class UserResponseData with Equatable {
+class UserResponseData extends Equatable {
   /// Returns a new [UserResponseData] instance.
   const UserResponseData({
     required this.createdAt,

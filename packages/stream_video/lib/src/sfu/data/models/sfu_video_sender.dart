@@ -5,8 +5,8 @@ import 'sfu_codec.dart';
 import 'sfu_track_type.dart';
 import 'sfu_video_layer_setting.dart';
 
-class SfuVideoSender with Equatable {
-  SfuVideoSender({
+class SfuVideoSender extends Equatable {
+  const SfuVideoSender({
     required this.codec,
     required this.layers,
     required this.trackType,

@@ -13,8 +13,7 @@ import 'user_info.dart';
 import 'viewport_visibility.dart';
 
 @immutable
-class CallParticipantState
-    with Equatable
+class CallParticipantState extends Equatable
     implements Comparable<CallParticipantState> {
   CallParticipantState({
     required this.userId,
@@ -42,7 +41,7 @@ class CallParticipantState
   }) : audioLevels = audioLevels ?? [audioLevel];
 
   /// Internal constructor to be used with copyWith methods
-  CallParticipantState._({
+  const CallParticipantState._({
     required this.userId,
     required this.roles,
     required this.name,

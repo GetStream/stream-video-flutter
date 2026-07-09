@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'call_metadata.dart';
 
-class CallReaction with Equatable {
+class CallReaction extends Equatable {
   const CallReaction({
     required this.type,
     required this.user,
@@ -22,7 +22,7 @@ class CallReaction with Equatable {
   List<Object?> get props => [type, user, emojiCode, custom];
 }
 
-class CallReactionData with Equatable {
+class CallReactionData extends Equatable {
   const CallReactionData({
     required this.type,
     required this.icon,

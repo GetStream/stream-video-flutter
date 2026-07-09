@@ -5,8 +5,7 @@ import 'rtc_video_dimension.dart';
 import 'rtc_video_encoding.dart';
 
 @immutable
-class RtcVideoParameters
-    with Equatable
+class RtcVideoParameters extends Equatable
     implements Comparable<RtcVideoParameters> {
   const RtcVideoParameters({
     this.description,

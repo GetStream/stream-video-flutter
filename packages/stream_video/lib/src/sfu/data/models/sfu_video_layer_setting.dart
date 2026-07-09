@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 
 import 'sfu_codec.dart';
 
-class SfuVideoLayerSetting with Equatable {
-  SfuVideoLayerSetting({
+class SfuVideoLayerSetting extends Equatable {
+  const SfuVideoLayerSetting({
     required this.name,
     required this.active,
     required this.maxBitrate,

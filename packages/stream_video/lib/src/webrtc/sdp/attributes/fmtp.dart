@@ -5,7 +5,7 @@ import '../sdp.dart';
 /// Represents 'fmtp' attribute
 /// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.
 /// Format: a=fmtp:<format> <format specific parameters>
-class Fmtp with Equatable {
+class Fmtp extends Equatable {
   const Fmtp({
     required this.payloadType,
     required this.parameters,

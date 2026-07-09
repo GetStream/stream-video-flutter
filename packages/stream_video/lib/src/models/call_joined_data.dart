@@ -7,7 +7,7 @@ import 'call_credentials.dart';
 import 'call_metadata.dart';
 
 @immutable
-class CallJoinedData with Equatable {
+class CallJoinedData extends Equatable {
   const CallJoinedData({
     required this.callCid,
     required this.wasCreated,

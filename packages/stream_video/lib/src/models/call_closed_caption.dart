@@ -5,8 +5,8 @@ import '../call/call_events.dart';
 import 'models.dart';
 
 @immutable
-class StreamClosedCaption with Equatable {
-  StreamClosedCaption({
+class StreamClosedCaption extends Equatable {
+  const StreamClosedCaption({
     required this.startTime,
     required this.endTime,
     required this.speakerId,

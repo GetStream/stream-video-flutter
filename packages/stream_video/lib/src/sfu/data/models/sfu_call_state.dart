@@ -5,7 +5,7 @@ import 'sfu_participant.dart';
 import 'sfu_pin.dart';
 
 @immutable
-class SfuCallState with Equatable {
+class SfuCallState extends Equatable {
   const SfuCallState({
     required this.participants,
     required this.participantCount,

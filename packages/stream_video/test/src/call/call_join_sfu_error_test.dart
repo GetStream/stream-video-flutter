@@ -41,7 +41,7 @@ void main() {
               unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
           ).thenAnswer(
-            (_) async => Result.failure(
+            (_) async => const Result.failure(
               VideoErrorWithCause(
                 message: 'SFU disconnect',
                 cause: SfuError(
@@ -216,7 +216,7 @@ void main() {
               unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
           ).thenAnswer(
-            (_) async => Result.failure(
+            (_) async => const Result.failure(
               VideoErrorWithCause(
                 message: 'Internal server error',
                 cause: SfuError(
@@ -304,7 +304,7 @@ void main() {
           ).thenAnswer((_) async {
             callCount++;
             if (callCount == 1) {
-              return Result.failure(
+              return const Result.failure(
                 VideoErrorWithCause(
                   message: 'Participant not found',
                   cause: SfuError(
@@ -376,7 +376,7 @@ void main() {
               unifiedSessionId: any(named: 'unifiedSessionId'),
             ),
           ).thenAnswer(
-            (_) async => Result.failure(
+            (_) async => const Result.failure(
               VideoErrorWithCause(
                 message: 'Media transport failure',
                 cause: SfuError(

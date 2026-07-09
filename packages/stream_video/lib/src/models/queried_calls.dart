@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'call_metadata.dart';
 
-class QueriedCalls with Equatable {
+class QueriedCalls extends Equatable {
   factory QueriedCalls({
     required List<QueriedCall> calls,
     String? next,
@@ -34,8 +34,8 @@ class QueriedCalls with Equatable {
   List<Object?> get props => [calls, next, prev];
 }
 
-class QueriedCall with Equatable {
-  QueriedCall({
+class QueriedCall extends Equatable {
+  const QueriedCall({
     required this.call,
     required this.members,
     this.membership,

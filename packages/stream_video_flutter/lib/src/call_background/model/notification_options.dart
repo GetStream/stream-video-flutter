@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class NotificationOptions with Equatable {
+class NotificationOptions extends Equatable {
   const NotificationOptions({
     this.content,
     this.avatar,
@@ -30,7 +30,7 @@ class NotificationOptions with Equatable {
   ];
 }
 
-class NotificationContent with Equatable {
+class NotificationContent extends Equatable {
   const NotificationContent({
     this.title,
     this.text,
@@ -53,7 +53,7 @@ class NotificationContent with Equatable {
   List<Object?> get props => [title, text];
 }
 
-class NotificationAvatar with Equatable {
+class NotificationAvatar extends Equatable {
   const NotificationAvatar({
     required this.url,
     this.httpHeaders = const {},

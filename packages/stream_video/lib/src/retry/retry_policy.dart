@@ -38,7 +38,7 @@ Duration _defaultBackoff(RetryConfig config, int retryAttempt) {
   return config.maxBackoff;
 }
 
-class RetryConfig with Equatable {
+class RetryConfig extends Equatable {
   const RetryConfig({
     this.rpcMaxRetries = _defaultRpcMaxRetries,
     this.maxBackoff = _defaultMaxBackoff,

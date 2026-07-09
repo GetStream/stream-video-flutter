@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../sdp.dart';
 
-class SdpPolicy with Equatable {
+class SdpPolicy extends Equatable {
   const SdpPolicy({
     this.spdEditingEnabled = true,
     this.mungingEnabled = false,

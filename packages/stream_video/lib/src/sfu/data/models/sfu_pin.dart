@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class SfuPin with Equatable {
-  SfuPin({
+class SfuPin extends Equatable {
+  const SfuPin({
     required this.userId,
     required this.sessionId,
   });

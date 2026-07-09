@@ -5,7 +5,7 @@ typedef Role = String;
 typedef UserSessionId = String;
 
 @immutable
-class CallSessionData with Equatable {
+class CallSessionData extends Equatable {
   const CallSessionData({
     this.id = '',
     this.participants = const {},
@@ -42,7 +42,7 @@ class CallSessionData with Equatable {
 }
 
 @immutable
-class CallParticipant with Equatable {
+class CallParticipant extends Equatable {
   const CallParticipant({
     required this.userSessionId,
     required this.userId,

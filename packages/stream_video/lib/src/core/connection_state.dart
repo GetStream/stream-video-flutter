@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../errors/video_error.dart';
 
-sealed class ConnectionState with Equatable {
+sealed class ConnectionState extends Equatable {
   const ConnectionState();
 
   factory ConnectionState.connected(String userId) {

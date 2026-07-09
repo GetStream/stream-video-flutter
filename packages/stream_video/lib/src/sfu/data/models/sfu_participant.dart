@@ -4,8 +4,8 @@ import 'sfu_connection_quality.dart';
 import 'sfu_participant_source.dart';
 import 'sfu_track_type.dart';
 
-class SfuParticipant with Equatable {
-  SfuParticipant({
+class SfuParticipant extends Equatable {
+  const SfuParticipant({
     required this.userId,
     required this.userName,
     required this.userImage,
@@ -103,8 +103,8 @@ class SfuParticipant with Equatable {
   ];
 }
 
-class SfuParticipantCount with Equatable {
-  SfuParticipantCount({
+class SfuParticipantCount extends Equatable {
+  const SfuParticipantCount({
     required this.total,
     required this.anonymous,
   });

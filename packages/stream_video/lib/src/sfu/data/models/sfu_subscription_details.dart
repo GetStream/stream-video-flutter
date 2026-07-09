@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../webrtc/model/rtc_video_dimension.dart';
 import 'sfu_track_type.dart';
 
-class SfuSubscriptionDetails with Equatable {
+class SfuSubscriptionDetails extends Equatable {
   const SfuSubscriptionDetails({
     required this.userId,
     required this.sessionId,

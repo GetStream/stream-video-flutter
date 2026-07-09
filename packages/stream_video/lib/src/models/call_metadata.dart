@@ -8,7 +8,7 @@ import 'call_session_data.dart';
 import 'call_settings.dart';
 
 @immutable
-class CallMetadata with Equatable {
+class CallMetadata extends Equatable {
   const CallMetadata({
     required this.cid,
     required this.details,
@@ -36,7 +36,7 @@ class CallMetadata with Equatable {
 }
 
 @immutable
-class CallDetails with Equatable {
+class CallDetails extends Equatable {
   const CallDetails({
     required this.createdBy,
     required this.team,
@@ -96,7 +96,7 @@ class CallDetails with Equatable {
 }
 
 @immutable
-class CallMember with Equatable {
+class CallMember extends Equatable {
   const CallMember({
     required this.userId,
     required this.roles,
@@ -130,7 +130,7 @@ class CallMember with Equatable {
 }
 
 @immutable
-class CallUser with Equatable {
+class CallUser extends Equatable {
   const CallUser({
     required this.id,
     required this.name,

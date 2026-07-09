@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import '../call/call_type.dart';
 
 @immutable
-class StreamCallCid with Equatable {
+class StreamCallCid extends Equatable {
   factory StreamCallCid({
     required String cid,
   }) {

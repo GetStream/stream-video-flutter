@@ -5,8 +5,8 @@ import '../sdp.dart';
 
 // https://www.rfc-editor.org/rfc/rfc4566#section-5.14
 // m=<media> <port>/<number of ports> <proto> <fmt>
-class MediaDescription with Equatable {
-  MediaDescription({
+class MediaDescription extends Equatable {
+  const MediaDescription({
     required this.media,
     required this.port,
     this.numberOfPorts,

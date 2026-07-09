@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 
-class CallEgress with Equatable {
+class CallEgress extends Equatable {
   const CallEgress({
     this.broadcasting = false,
     this.hlsPlaylistUrl,
@@ -65,7 +65,7 @@ class CallEgress with Equatable {
 }
 
 /// Describes an RTMP destination to start broadcasting to.
-class StreamRtmpBroadcastRequest with Equatable {
+class StreamRtmpBroadcastRequest extends Equatable {
   const StreamRtmpBroadcastRequest({
     required this.name,
     required this.streamUrl,
@@ -115,7 +115,7 @@ enum StreamVideoQuality {
       StreamVideoQuality.values.firstWhereOrNull((it) => it.alias == alias);
 }
 
-class CallEgressRtmp with Equatable {
+class CallEgressRtmp extends Equatable {
   const CallEgressRtmp({
     required this.name,
     this.streamKey,
