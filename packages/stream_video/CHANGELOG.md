@@ -3,6 +3,11 @@
 ### ✅ Added
 
 - [iOS] `Call.state.audioOutputDevice` now stays in sync with the active native audio route when the output changes outside of `Call.setAudioOutputDevice` (e.g. via the native route-selection UI, or when the system re-routes on device connect/disconnect).
+- Added client-side call join telemetry (`ClientEventReporter`).
+
+### 🐞 Fixed
+
+- Fixed connection quality indicator blanking after reconnect.
 
 ## 1.4.1
 

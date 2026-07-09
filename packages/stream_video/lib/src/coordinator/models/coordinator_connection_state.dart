@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-sealed class CoordinatorConnectionState with EquatableMixin {
+sealed class CoordinatorConnectionState extends Equatable {
   const CoordinatorConnectionState();
 
   factory CoordinatorConnectionState.connected({
