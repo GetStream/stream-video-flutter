@@ -20,6 +20,14 @@ import 'data/models/sfu_connection_quality.dart';
 import 'data/models/sfu_model_mapper_extensions.dart';
 import 'data/models/sfu_participant.dart';
 
+extension SfuConnectionQualityMergeX on SfuConnectionQuality {
+  SfuConnectionQuality mergeWithPrevious(SfuConnectionQuality? previous) {
+    return this != SfuConnectionQuality.unspecified
+        ? this
+        : (previous ?? SfuConnectionQuality.unspecified);
+  }
+}
+
 extension CodecX on sfu_models.Codec {
   Map<String, dynamic> toJson() {
     return {
@@ -63,9 +71,9 @@ extension SfuParticipantX on SfuParticipant {
       audioLevel: audioLevel,
       isDominantSpeaker: isDominantSpeaker,
       // Keep the last known quality to avoid the indicator blanking out on every reconnect.
-      connectionQuality: connectionQuality != SfuConnectionQuality.unspecified
-          ? connectionQuality
-          : (existing?.connectionQuality ?? SfuConnectionQuality.unspecified),
+      connectionQuality: connectionQuality.mergeWithPrevious(
+        existing?.connectionQuality,
+      ),
       participantSource: participantSource,
     );
   }

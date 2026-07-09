@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_connection_info.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -360,6 +361,149 @@ void main() {
         expect(stateNotifier.state.callParticipants.length, 1);
         final participant = stateNotifier.state.callParticipants.first;
         expect(participant.publishedTracks, isEmpty);
+      },
+    );
+  });
+
+  group('CallStateNotifier connection quality preservation tests', () {
+    late CallStateNotifier stateNotifier;
+
+    setUp(() {
+      stateNotifier = CallStateNotifier(
+        CallState(
+          callCid: StreamCallCid.from(
+            type: StreamCallType.defaultType(),
+            id: 'test-call',
+          ),
+          currentUserId: 'current-user',
+          preferences: DefaultCallPreferences(),
+        ).copyWith(
+          callParticipants: [
+            CallParticipantState(
+              userId: 'remote-user',
+              sessionId: 'remote-session',
+              name: 'Remote User',
+              roles: const [],
+              custom: const {},
+              trackIdPrefix: 'remote-track',
+              connectionQuality: SfuConnectionQuality.excellent,
+            ),
+          ],
+        ),
+      );
+    });
+
+    tearDown(() {
+      stateNotifier.dispose();
+    });
+
+    test(
+      'sfuConnectionQualityChanged preserves previous quality when update is unspecified',
+      () {
+        stateNotifier.sfuConnectionQualityChanged(
+          SfuConnectionQualityChangedEvent(
+            connectionQualityUpdates: [
+              const SfuConnectionQualityInfo(
+                userId: 'remote-user',
+                sessionId: 'remote-session',
+                connectionQuality: SfuConnectionQuality.unspecified,
+              ),
+            ],
+          ),
+        );
+
+        expect(
+          stateNotifier.state.callParticipants.first.connectionQuality,
+          SfuConnectionQuality.excellent,
+        );
+      },
+    );
+
+    test(
+      'sfuConnectionQualityChanged applies specified quality updates',
+      () {
+        stateNotifier.sfuConnectionQualityChanged(
+          SfuConnectionQualityChangedEvent(
+            connectionQualityUpdates: [
+              const SfuConnectionQualityInfo(
+                userId: 'remote-user',
+                sessionId: 'remote-session',
+                connectionQuality: SfuConnectionQuality.poor,
+              ),
+            ],
+          ),
+        );
+
+        expect(
+          stateNotifier.state.callParticipants.first.connectionQuality,
+          SfuConnectionQuality.poor,
+        );
+      },
+    );
+
+    test(
+      'sfuParticipantUpdated preserves previous quality when participant is unspecified',
+      () {
+        stateNotifier.sfuParticipantUpdated(
+          SfuParticipantUpdatedEvent(
+            callCid: 'test:test-call',
+            participant: SfuParticipant(
+              userId: 'remote-user',
+              userName: 'Remote User',
+              userImage: '',
+              sessionId: 'remote-session',
+              custom: const {},
+              customData: const {},
+              publishedTracks: const [],
+              joinedAt: DateTime.now(),
+              trackLookupPrefix: 'remote-track',
+              connectionQuality: SfuConnectionQuality.unspecified,
+              isSpeaking: false,
+              isDominantSpeaker: false,
+              audioLevel: 0,
+              roles: const [],
+              participantSource: SfuParticipantSource.webrtc,
+            ),
+          ),
+        );
+
+        expect(
+          stateNotifier.state.callParticipants.first.connectionQuality,
+          SfuConnectionQuality.excellent,
+        );
+      },
+    );
+
+    test(
+      'sfuParticipantUpdated applies specified participant quality',
+      () {
+        stateNotifier.sfuParticipantUpdated(
+          SfuParticipantUpdatedEvent(
+            callCid: 'test:test-call',
+            participant: SfuParticipant(
+              userId: 'remote-user',
+              userName: 'Remote User',
+              userImage: '',
+              sessionId: 'remote-session',
+              custom: const {},
+              customData: const {},
+              publishedTracks: const [],
+              joinedAt: DateTime.now(),
+              trackLookupPrefix: 'remote-track',
+              connectionQuality: SfuConnectionQuality.good,
+              isSpeaking: false,
+              isDominantSpeaker: false,
+              audioLevel: 0,
+              roles: const [],
+              participantSource: SfuParticipantSource.webrtc,
+            ),
+          ),
+        );
+
+        expect(
+          stateNotifier.state.callParticipants.first.connectionQuality,
+          SfuConnectionQuality.good,
+        );
       },
     );
   });

@@ -207,7 +207,9 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         });
         if (update != null) {
           return participant.copyWith(
-            connectionQuality: update.connectionQuality,
+            connectionQuality: update.connectionQuality.mergeWithPrevious(
+              participant.connectionQuality,
+            ),
           );
         } else {
           return participant;
@@ -283,7 +285,9 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
               trackIdPrefix: participant.trackLookupPrefix,
               isSpeaking: participant.isSpeaking,
               isDominantSpeaker: participant.isDominantSpeaker,
-              connectionQuality: participant.connectionQuality,
+              connectionQuality: participant.connectionQuality.mergeWithPrevious(
+                it.connectionQuality,
+              ),
               roles: participant.roles,
             )
             .copyWithUpdatedAudioLevels(audioLevel: participant.audioLevel);
