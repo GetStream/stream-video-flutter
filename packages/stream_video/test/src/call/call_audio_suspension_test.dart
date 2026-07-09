@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
@@ -47,13 +46,13 @@ void main() {
   // suspendAudio
   // -------------------------------------------------------------------------
   group('Call.suspendAudio()', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
     late MockCallSession callSession;
     late MockStreamVideo mockStreamVideo;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
       callSession = _mockSessionForAudioSuspension();
       mockStreamVideo = setupMockStreamVideo();
@@ -66,7 +65,7 @@ void main() {
       () async {
         // Before join, _pcFactory is null → early-return path.
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -81,7 +80,7 @@ void main() {
 
     test('sets isAudioSuspended to true after join', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -96,7 +95,7 @@ void main() {
 
     test('is idempotent — second call does not change state again', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -118,13 +117,13 @@ void main() {
   // resumeAudio
   // -------------------------------------------------------------------------
   group('Call.resumeAudio()', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
     late MockCallSession callSession;
     late MockStreamVideo mockStreamVideo;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
       callSession = _mockSessionForAudioSuspension();
       mockStreamVideo = setupMockStreamVideo();
@@ -134,7 +133,7 @@ void main() {
 
     test('is a no-op when called before join (no factory)', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -148,7 +147,7 @@ void main() {
 
     test('sets isAudioSuspended to false after a prior suspend', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -165,7 +164,7 @@ void main() {
 
     test('calls resumeSuspendedAudioTracks on the active session', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -183,7 +182,7 @@ void main() {
 
     test('suspend → resume → suspend cycle updates state correctly', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -207,13 +206,13 @@ void main() {
   // Call.end() — unified _disconnect path
   // -------------------------------------------------------------------------
   group('Call.end()', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
     late MockCallSession callSession;
     late MockStreamVideo mockStreamVideo;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
       callSession = setupMockCallSession();
       mockStreamVideo = setupMockStreamVideo();
@@ -223,7 +222,7 @@ void main() {
 
     test('returns an error when the call is not active', () async {
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -242,7 +241,7 @@ void main() {
       'succeeds and sets status to disconnected when call is active',
       () async {
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -263,7 +262,7 @@ void main() {
     test('calls endCall() on the permissions manager', () async {
       final permissionsManager = _mockPermissionsWithEndCall();
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -280,7 +279,7 @@ void main() {
     test('is idempotent — second end() after disconnect is a no-op', () async {
       final permissionsManager = _mockPermissionsWithEndCall();
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -304,7 +303,7 @@ void main() {
       () async {
         final permissionsManager = _mockPermissionsWithEndCall();
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           sessionFactory: setupMockSessionFactory(callSession: callSession),
@@ -328,11 +327,11 @@ void main() {
   // updateViewportVisibility disconnected guard
   // -------------------------------------------------------------------------
   group('Call.updateViewportVisibility() disconnected guard', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
     });
 
@@ -341,7 +340,7 @@ void main() {
     test('returns success immediately when call is disconnected', () async {
       final callSession = setupMockCallSession();
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),

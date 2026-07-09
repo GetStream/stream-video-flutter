@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/widgets.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
@@ -956,17 +955,20 @@ extension PublisherRtcManager on RtcManager {
     var dimension = track.getVideoDimension();
 
     if (track.trackType == SfuTrackType.screenShare) {
-      final physicalSize =
-          WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+      final physicalSize = DisplayMetricsProvider.instance.physicalScreenSize;
 
-      final screenDimension = RtcVideoDimension(
-        width: physicalSize.width.toInt(),
-        height: physicalSize.height.toInt(),
-      );
+      if (physicalSize != null) {
+        final screenDimension = RtcVideoDimension(
+          width: physicalSize.width.toInt(),
+          height: physicalSize.height.toInt(),
+        );
 
-      _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
+        _logger.v(
+          () => '[publishVideoTrack] screenDimension: $screenDimension',
+        );
 
-      dimension = screenDimension;
+        dimension = screenDimension;
+      }
     }
 
     return dimension;

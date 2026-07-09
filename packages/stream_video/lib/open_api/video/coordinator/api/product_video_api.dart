@@ -73,14 +73,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'AcceptCallResponse',
@@ -155,14 +155,14 @@ class ProductVideoApi {
       id,
       blockUserRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'BlockUserResponse',
@@ -235,14 +235,14 @@ class ProductVideoApi {
       id,
       collectUserFeedbackRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'CollectUserFeedbackResponse',
@@ -302,14 +302,14 @@ class ProductVideoApi {
     final response = await createDeviceWithHttpInfo(
       createDeviceRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'DurationResponse',
@@ -366,14 +366,14 @@ class ProductVideoApi {
     final response = await createGuestWithHttpInfo(
       createGuestRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'CreateGuestResponse',
@@ -448,14 +448,14 @@ class ProductVideoApi {
       id,
       deleteCallRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'DeleteCallResponse',
@@ -515,14 +515,14 @@ class ProductVideoApi {
     final response = await deleteDeviceWithHttpInfo(
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'DurationResponse',
@@ -604,14 +604,14 @@ class ProductVideoApi {
       session,
       filename,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'DeleteRecordingResponse',
@@ -693,14 +693,14 @@ class ProductVideoApi {
       session,
       filename,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'DeleteTranscriptionResponse',
@@ -766,14 +766,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'EndCallResponse',
@@ -890,14 +890,14 @@ class ProductVideoApi {
       notify: notify,
       video: video,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GetCallResponse',
@@ -1010,14 +1010,14 @@ class ProductVideoApi {
       since: since,
       until: until,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GetCallParticipantSessionMetricsResponse',
@@ -1094,14 +1094,14 @@ class ProductVideoApi {
       id,
       sessionId: sessionId,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GetCallReportResponse',
@@ -1224,14 +1224,14 @@ class ProductVideoApi {
       until: until,
       maxPoints: maxPoints,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GetCallSessionParticipantStatsDetailsResponse',
@@ -1354,14 +1354,14 @@ class ProductVideoApi {
       endTime: endTime,
       severity: severity,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallSessionParticipantStatsTimelineResponse',
@@ -1488,14 +1488,14 @@ class ProductVideoApi {
       excludeSubscribers: excludeSubscribers,
       excludeSfus: excludeSfus,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallStatsMapResponse',
@@ -1538,14 +1538,14 @@ class ProductVideoApi {
   /// Returns the list of all edges available for video calls.
   Future<GetEdgesResponse?> getEdges() async {
     final response = await getEdgesWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GetEdgesResponse',
@@ -1631,14 +1631,14 @@ class ProductVideoApi {
       getOrCreateCallRequest,
       connectionId: connectionId,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GetOrCreateCallResponse',
@@ -1713,14 +1713,14 @@ class ProductVideoApi {
       id,
       goLiveRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'GoLiveResponse',
@@ -1806,14 +1806,14 @@ class ProductVideoApi {
       joinCallRequest,
       connectionId: connectionId,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'JoinCallResponse',
@@ -1888,14 +1888,14 @@ class ProductVideoApi {
       id,
       kickUserRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'KickUserResponse',
@@ -1938,14 +1938,14 @@ class ProductVideoApi {
   /// Returns all available devices
   Future<ListDevicesResponse?> listDevices() async {
     final response = await listDevicesWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'ListDevicesResponse',
@@ -2011,14 +2011,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'ListRecordingsResponse',
@@ -2084,14 +2084,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'ListTranscriptionsResponse',
@@ -2166,14 +2166,14 @@ class ProductVideoApi {
       id,
       muteUsersRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'MuteUsersResponse',
@@ -2230,14 +2230,14 @@ class ProductVideoApi {
     final response = await queryAggregateCallStatsWithHttpInfo(
       queryAggregateCallStatsRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryAggregateCallStatsResponse',
@@ -2294,14 +2294,14 @@ class ProductVideoApi {
     final response = await queryCallMembersWithHttpInfo(
       queryCallMembersRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallMembersResponse',
@@ -2418,14 +2418,14 @@ class ProductVideoApi {
       next: next,
       filterConditions: filterConditions,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallParticipantSessionsResponse',
@@ -2509,14 +2509,14 @@ class ProductVideoApi {
       queryCallParticipantsRequest,
       limit: limit,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallParticipantsResponse',
@@ -2644,14 +2644,14 @@ class ProductVideoApi {
       prev: prev,
       next: next,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallSessionParticipantStatsResponse',
@@ -2708,14 +2708,14 @@ class ProductVideoApi {
     final response = await queryCallStatsWithHttpInfo(
       queryCallStatsRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallStatsResponse',
@@ -2785,14 +2785,14 @@ class ProductVideoApi {
       queryCallsRequest,
       connectionId: connectionId,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'QueryCallsResponse',
@@ -2867,14 +2867,14 @@ class ProductVideoApi {
       id,
       rejectCallRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'RejectCallResponse',
@@ -2949,14 +2949,14 @@ class ProductVideoApi {
       id,
       requestPermissionRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'RequestPermissionResponse',
@@ -3015,14 +3015,14 @@ class ProductVideoApi {
     final response = await resolveSipAuthWithHttpInfo(
       resolveSipAuthRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'ResolveSipAuthResponse',
@@ -3081,14 +3081,14 @@ class ProductVideoApi {
     final response = await resolveSipInboundWithHttpInfo(
       resolveSipInboundRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'ResolveSipInboundResponse',
@@ -3163,14 +3163,14 @@ class ProductVideoApi {
       id,
       ringCallRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'RingCallResponse',
@@ -3245,14 +3245,14 @@ class ProductVideoApi {
       id,
       sendCallEventRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'SendCallEventResponse',
@@ -3325,14 +3325,14 @@ class ProductVideoApi {
       id,
       sendVideoReactionRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'SendVideoReactionResponse',
@@ -3405,14 +3405,14 @@ class ProductVideoApi {
       id,
       startClosedCaptionsRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StartClosedCaptionsResponse',
@@ -3487,14 +3487,14 @@ class ProductVideoApi {
       id,
       startFrameRecordingRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StartFrameRecordingResponse',
@@ -3560,14 +3560,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StartHLSBroadcastingResponse',
@@ -3642,14 +3642,14 @@ class ProductVideoApi {
       id,
       startRTMPBroadcastsRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StartRTMPBroadcastsResponse',
@@ -3732,14 +3732,14 @@ class ProductVideoApi {
       recordingType,
       startRecordingRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StartRecordingResponse',
@@ -3812,14 +3812,14 @@ class ProductVideoApi {
       id,
       startTranscriptionRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StartTranscriptionResponse',
@@ -3885,14 +3885,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopAllRTMPBroadcastsResponse',
@@ -3965,14 +3965,14 @@ class ProductVideoApi {
       id,
       stopClosedCaptionsRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopClosedCaptionsResponse',
@@ -4038,14 +4038,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopFrameRecordingResponse',
@@ -4111,14 +4111,14 @@ class ProductVideoApi {
       type,
       id,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopHLSBroadcastingResponse',
@@ -4193,14 +4193,14 @@ class ProductVideoApi {
       id,
       stopLiveRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopLiveResponse',
@@ -4283,14 +4283,14 @@ class ProductVideoApi {
       name,
       body,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopRTMPBroadcastsResponse',
@@ -4371,14 +4371,14 @@ class ProductVideoApi {
       recordingType,
       body,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopRecordingResponse',
@@ -4451,14 +4451,14 @@ class ProductVideoApi {
       id,
       stopTranscriptionRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'StopTranscriptionResponse',
@@ -4533,14 +4533,14 @@ class ProductVideoApi {
       id,
       unblockUserRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'UnblockUserResponse',
@@ -4615,14 +4615,14 @@ class ProductVideoApi {
       id,
       updateCallRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'UpdateCallResponse',
@@ -4697,14 +4697,14 @@ class ProductVideoApi {
       id,
       updateCallMembersRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'UpdateCallMembersResponse',
@@ -4777,14 +4777,14 @@ class ProductVideoApi {
       id,
       updateUserPermissionsRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'UpdateUserPermissionsResponse',
@@ -4827,7 +4827,7 @@ class ProductVideoApi {
   /// Establishes WebSocket connection for user to video  Sends events: - connection.ok - health.check
   Future<void> videoConnect() async {
     final response = await videoConnectWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
@@ -4898,14 +4898,14 @@ class ProductVideoApi {
       id,
       pinRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'PinResponse',
@@ -4980,14 +4980,14 @@ class ProductVideoApi {
       id,
       unpinRequest,
     );
-    if (response.statusCode >= HttpStatus.badRequest) {
+    if (response.statusCode >= _httpStatusBadRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty &&
-        response.statusCode != HttpStatus.noContent) {
+        response.statusCode != _httpStatusNoContent) {
       return await apiClient.deserializeAsync(
         await _decodeBodyBytes(response),
         'UnpinResponse',

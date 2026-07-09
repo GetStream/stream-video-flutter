@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
@@ -22,6 +21,7 @@ import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../utils/standard.dart';
+import '../../ws/health/network_monitor.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_events.dart';
@@ -40,7 +40,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required TokenManager tokenManager,
     required LatencyService latencyService,
     required RetryPolicy retryPolicy,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     this.isAnonymous = false,
     ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
   }) : _rpcUrl = rpcUrl,
@@ -60,7 +60,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   // ignore: unused_field
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
-  final InternetConnection _networkMonitor;
+  final NetworkMonitor _networkMonitor;
   final ClientEventReporter _clientEventReporter;
 
   final bool isAnonymous;

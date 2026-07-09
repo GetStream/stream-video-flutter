@@ -1,4 +1,3 @@
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/permissions/permissions_manager.dart';
 import 'package:stream_video/src/call/session/call_session.dart';
@@ -31,7 +30,7 @@ class MockCallStateNotifier extends Mock implements CallStateNotifier {}
 
 class MockPermissionsManager extends Mock implements PermissionsManager {}
 
-class MockInternetConnection extends Mock implements InternetConnection {}
+class MockNetworkMonitor extends Mock implements NetworkMonitor {}
 
 class MockRetryPolicy extends Mock implements RetryPolicy {}
 
@@ -147,7 +146,7 @@ Call createCallWithMockedResponse(
     callCid: callCid,
     coordinatorClient: mockCoordinatorClient,
     streamVideo: streamVideo,
-    networkMonitor: InternetConnection.createInstance(),
+    networkMonitor: HttpNetworkMonitor(settings: const NetworkMonitorSettings()),
     rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
   );
 }

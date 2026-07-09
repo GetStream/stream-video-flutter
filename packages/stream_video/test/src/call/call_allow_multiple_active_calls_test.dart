@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
@@ -172,7 +171,7 @@ void main() {
             data: ringingData,
             coordinatorClient: mockCoordinatorClient,
             streamVideo: streamVideo,
-            networkMonitor: InternetConnection.createInstance(),
+            networkMonitor: HttpNetworkMonitor(settings: const NetworkMonitorSettings()),
           );
 
           // Act - accept the ringing call (should remove existing active call but not make ringing call active yet)
@@ -314,7 +313,7 @@ void main() {
             data: ringingData,
             coordinatorClient: mockCoordinatorClient,
             streamVideo: streamVideo,
-            networkMonitor: InternetConnection.createInstance(),
+            networkMonitor: HttpNetworkMonitor(settings: const NetworkMonitorSettings()),
           );
 
           // Act - accept the ringing call (should NOT remove existing active call in multiple calls mode)

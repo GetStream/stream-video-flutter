@@ -55,7 +55,7 @@ CallSession _buildTestSession({
     onReconnectionNeeded: onReconnectionNeeded,
     onSuspendedAudioTrackRecorded: (_) {},
     sdpEditor: MockSdpEditor(),
-    networkMonitor: setupMockInternetConnection(),
+    networkMonitor: setupMockNetworkMonitor(),
     statsOptions: StatsOptions(
       enableRtcStats: false,
       reportingIntervalMs: 500,

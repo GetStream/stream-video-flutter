@@ -231,36 +231,45 @@ Verified: `dart analyze` clean on `stream_video`, `stream_video_flutter` (pre-ex
 
 Also fixed along the way: `globals.dart`'s `androidWebRTCVersion`/`iosWebRTCVersion` (previously read from the plugin) are now literal strings — a small, contained leftover for Phase 4 to route through `EnvironmentInfoProvider` properly instead.
 
-### Phase 4 — Telemetry migration (full decoupling)
-- [ ] `EnvironmentInfoProvider` (device/package/system info) — web default + native impl moved
-- [ ] `DeviceStateProvider` (battery + thermal) + neutral `StreamThermalStatus` enum
-- [ ] Remove `connectivity_plus` from `stream_video`
-- [ ] Promote `NetworkMonitor` (add `currentStatus()`); replace `InternetConnection`/`InternetStatus` across `call.dart`, `sfu_ws.dart`, `call_session*.dart`, `coordinator_ws.dart`
-- [ ] Web `HttpNetworkMonitor` default + native `PluginNetworkMonitor` moved to `stream_video_flutter`
-- [ ] Resolve `NetworkMonitorSettings.internetConnectionInstance` public-API change (deprecate/add field)
-- [ ] Reconnection tests + Flutter web/desktop smoke
+### Phase 4 — Telemetry migration (full decoupling) ✅ (done)
+- [x] `EnvironmentInfoProvider` (device/package/system info) — web default + native impl moved (done in Phase 1's scaffold; consumed via `video_environment_manager.dart`, replacing the deleted `video_environment_collector.dart`)
+- [x] `DeviceStateProvider` (battery + thermal) + neutral `StreamThermalStatus` enum — consumed in `stats_reporter.dart`/`sfu_stats_reporter.dart`, deleted the internal `_ThermalMonitor` class
+- [x] Remove `connectivity_plus`/`internet_connection_checker_plus`/`battery_plus`/`thermal`/`device_info_plus`/`package_info_plus`/`system_info2` from `stream_video`'s pubspec `dependencies:` (moved to `stream_video_flutter`, which already needed most; added the two missing network ones)
+- [x] Promote `NetworkMonitor` (added `currentStatus`, `checkInterval`, `setIntervalAndResetTimer`); replaced `InternetConnection`/`InternetStatus` across `call.dart`, `sfu_ws.dart`, `call_session*.dart`, `coordinator_ws.dart`, `coordinator_client_open_api.dart`
+- [x] Web `HttpNetworkMonitor`/`NetworkMonitorFactory` default (periodic `http` HEAD polling) + native `FlutterNetworkMonitorFactory` (wraps `InternetConnection`+`Connectivity`) moved to `stream_video_flutter`; deleted `core/network_monitor_flutter.dart`
+- [x] Resolved `NetworkMonitorSettings.internetConnectionInstance` — replaced with a `networkMonitor` field of the new neutral type
+- [x] Reconnection tests pass (`call_reconnect_stability_test.dart`, 8 tests) + full `stream_video` suite (336/336) + `stream_video_flutter` suite (5/5)
 
-### Phase 5 — Lifecycle + display metrics + drop Flutter dep
-- [ ] `AppLifecycleProvider` — move `lifecycle_utils_io.dart` into `stream_video_flutter`
-- [ ] `DisplayMetricsProvider` for `rtc_manager.dart` screen size
-- [ ] Remove `flutter: sdk: flutter` + `environment: flutter:` from `stream_video/pubspec.yaml`
-- [ ] Add pure-Dart resolution guard (Dart-only `dart pub get` against `stream_video`)
+Found and fixed along the way: bulk test-helper migration needed a `registerFallbackValue(Duration.zero)` (mocktail's `any()` on `setIntervalAndResetTimer(Duration)` had no fallback registered) — a one-line fix once diagnosed via the failing-test stack trace.
 
-### Phase 6 — `stream_video_jaspr` package
-- [ ] Create package + add to root `workspace:` list; `dart pub get`
-- [ ] `CallStateBuilder` (StateEmitter → setState bridge)
-- [ ] `VideoTrackRenderer` (GlobalNodeKey host + append `RTCVideoElement.htmlElement`)
-- [ ] `StreamVideoView` (track selection + placeholder) + minimal dynascale on attach
-- [ ] `ParticipantTile` / `ParticipantGrid`
-- [ ] `CallControls` (mic / camera / leave)
-- [ ] `StreamCallContent` (grid + controls)
+### Phase 5 — Lifecycle + display metrics + drop Flutter dep ✅ (done)
+- [x] `AppLifecycleProvider` — `lifecycle_utils.dart` now delegates to `AppLifecycleProvider.instance.appState`; deleted `lifecycle_utils_io.dart` (its `WidgetsBinding` implementation already existed in `stream_video_flutter`'s `FlutterAppLifecycleProvider` from Phase 1, just needed the io file's direct `package:flutter` import removed and the conditional import in `stream_video.dart` dropped)
+- [x] `DisplayMetricsProvider` for `rtc_manager.dart`'s screen-share sizing — same story, `FlutterDisplayMetricsProvider` already existed from Phase 1
+- [x] Removed `flutter: sdk: flutter` from `stream_video/pubspec.yaml`'s `dependencies:` (kept `environment: flutter:` and `flutter_test`/`stream_webrtc_flutter` as **dev_dependencies only** — dev deps don't leak into consumers' resolution, so this alone is sufficient to keep `stream_video`'s own `flutter test` working while unblocking every downstream Dart-only consumer)
+- [x] **Definitive pure-Dart resolution guard, done for real**: `jaspr build` on `dogfooding_jaspr` is the guard — it failed three times in sequence as each remaining Flutter/native leak surfaced, each fixed in turn:
+  1. `dart:ui`/`sky_engine` FFI crash in jaspr_builder's VM-mode style-extraction pass — caused by `flutter: sdk: flutter` still being a regular (non-dev) dependency; fixed by the pubspec change above.
+  2. `dart_webrtc`'s JS-interop internals (`.toJS`/`getProperty<T>`) failing to compile under the same VM-mode pass — caused by `stream_video_jaspr`'s `video_track_renderer.dart`/`stream_video_view.dart` importing `dart_webrtc`/`package:web` **unconditionally**; fixed by extracting a `StreamVideoElement` abstraction gated behind `if (dart.library.js_interop)` (mirroring `stream_web_rtc.dart`'s existing pattern) and switching `package:web` → `package:universal_web` (already conditionally-safe).
+  3. Two unconditional `dart:io` leaks in `stream_video`'s public barrel: `src/logger/impl/file_logger.dart` (moved wholesale to `stream_video_flutter/lib/src/platform/`, a genuinely native-only feature) and the generated `open_api/video/coordinator/api.dart`/`api_client.dart`/`product_video_api.dart` (`HttpStatus`/`SocketException`/`TlsException`/`IOException` — replaced with local int constants and dropped the three redundant specific catches, marked `// MANUAL_EDIT` per the repo's existing convention for hand-patched generated files).
+  4. Also missing: `dogfooding_jaspr`'s `build_web_compilers` dev dependency (without it, `jaspr build` silently skips the actual `dart compile js` step with only a warning, producing no `main.client.dart.js`).
+- [x] `jaspr build` now succeeds end-to-end: real `dart compile js` run, ~2MB `main.client.dart.js` + `main.css` + `index.html` produced in `build/jaspr/`.
 
-### Phase 7 — `dogfooding_jaspr` app
-- [ ] Scaffold app + add to root `workspace:` list
-- [ ] Token service (`/api/auth/create-token`) + hardcoded-token fallback for CORS
-- [ ] Login screen (user id) + connect
-- [ ] Call screen (`makeCall` → `getOrCreate` → `join` → `StreamCallContent`)
-- [ ] `jaspr serve` runs and joins a call
+### Phase 6 — `stream_video_jaspr` package ✅ (done, pending live cross-client verification)
+- [x] Package created + added to root `workspace:` list; resolves and analyzes clean
+- [x] `CallStateBuilder` (StateEmitter → setState bridge)
+- [x] `VideoTrackRenderer` (GlobalNodeKey host + append video element) — refactored this session behind a `StreamVideoElement` interface (`video_element.dart` / `_default.dart` / `_default_web.dart`) so `dart_webrtc` is never imported unconditionally
+- [x] `StreamVideoView` (track selection + placeholder) + minimal dynascale on attach
+- [x] `ParticipantTile` / `ParticipantGrid`
+- [x] `CallControls` (mic / camera / leave)
+- [x] `StreamCallContent` (grid + controls)
+- [x] `dart analyze` clean; builds successfully as part of `dogfooding_jaspr`'s `jaspr build`
+
+### Phase 7 — `dogfooding_jaspr` app ✅ (build verified, live call test pending)
+- [x] Scaffolded app + added to root `workspace:` list
+- [x] Token service (`/api/auth/create-token`) + config for `pronto` env
+- [x] Login screen (user id) + connect
+- [x] Call screen (`makeCall` → `getOrCreate` → `join` → `StreamCallContent`)
+- [x] `jaspr build` succeeds (see Phase 5 for the chain of fixes this required)
+- [ ] `jaspr serve` manual smoke + actual join
 
 ### Acceptance
-- [ ] Cross-client call: Flutter dogfooding ↔ `dogfooding_jaspr` in the same call, both see/hear each other, mic/camera/leave reflected across clients
+- [ ] Cross-client call: Flutter dogfooding ↔ `dogfooding_jaspr` in the same call, both see/hear each other, mic/camera/leave reflected across clients — **not yet run**; the build now succeeds so this is the immediate next step

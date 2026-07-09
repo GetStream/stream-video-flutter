@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/state_emitter.dart';
@@ -15,14 +14,14 @@ void main() {
   });
 
   group('Call.leave()', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
     late MockCoordinatorClient coordinatorClient;
     late MockCallSession callSession;
     late MockStreamVideo mockStreamVideo;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
       coordinatorClient = setupMockCoordinatorClient();
       callSession = setupMockCallSession();
@@ -38,7 +37,7 @@ void main() {
       () async {
         // Arrange
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -75,7 +74,7 @@ void main() {
       () async {
         // Arrange
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -107,7 +106,7 @@ void main() {
     test('should return success when already disconnected', () async {
       // Arrange - join and then leave to get into disconnected state
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -141,7 +140,7 @@ void main() {
       );
 
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -175,7 +174,7 @@ void main() {
       );
 
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -200,7 +199,7 @@ void main() {
     test('should accept disconnect reason parameter', () async {
       // Arrange
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -224,7 +223,7 @@ void main() {
     test('should handle leave during reconnection', () async {
       // Arrange
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -237,7 +236,7 @@ void main() {
       await call.join();
 
       // Simulate network disconnection
-      internetStatusController.add(InternetStatus.disconnected);
+      internetStatusController.add(NetworkStatus.disconnected);
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       // Act - leave during reconnection

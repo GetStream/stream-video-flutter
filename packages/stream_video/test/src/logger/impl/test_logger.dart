@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:stream_video/src/logger/stream_logger.dart';
 
 class TestStreamLogger extends StreamLogger {
@@ -18,6 +17,7 @@ class TestStreamLogger extends StreamLogger {
     final emoji = super.emoji(priority);
     final name = super.name(priority);
 
-    debugPrint('$elapsed $emoji ($name/$tag): ${message()}');
+    // ignore: avoid_print
+    print('$elapsed $emoji ($name/$tag): ${message()}');
   }
 }

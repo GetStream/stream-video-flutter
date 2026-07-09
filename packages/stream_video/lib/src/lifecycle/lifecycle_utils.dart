@@ -1,11 +1,4 @@
-import 'dart:async';
-
-import '../logger/impl/tagged_logger.dart';
+import '../platform/app_lifecycle_provider.dart';
 import 'lifecycle_state.dart';
 
-final _logger = taggedLogger(tag: 'SV:LifecycleUtils');
-
-Stream<LifecycleState> get appState {
-  _logger.w(() => '[appState] stub implementation');
-  return const Stream.empty();
-}
+Stream<LifecycleState> get appState => AppLifecycleProvider.instance.appState;

@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
-import '../../core/network_monitor_flutter.dart';
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
@@ -72,9 +70,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   late final HealthMonitor healthMonitor = HealthMonitorImpl(
     'Coord',
     this,
-    networkMonitor: NetworkMonitorFlutter.fromInternetConnection(
-      networkMonitor,
-    ),
+    networkMonitor: networkMonitor,
   );
 
   /// The API key used to authenticate the user.
@@ -89,7 +85,7 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   /// The retry policy is used for reconnection flow.
   final RetryPolicy retryPolicy;
 
-  final InternetConnection networkMonitor;
+  final NetworkMonitor networkMonitor;
 
   /// Decides whether to pass user details to backend when connecting the user.
   final bool includeUserDetails;

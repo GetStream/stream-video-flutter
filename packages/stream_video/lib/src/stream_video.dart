@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:async/async.dart' as async;
 import 'package:collection/collection.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
@@ -28,9 +26,7 @@ import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
 import 'lifecycle/lifecycle_state.dart';
-import 'lifecycle/lifecycle_utils.dart'
-    if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart'
-    as lifecycle;
+import 'lifecycle/lifecycle_utils.dart' as lifecycle;
 import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
@@ -67,6 +63,8 @@ import 'utils/standard.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
+import 'ws/health/network_monitor.dart';
+import 'ws/health/network_monitor_factory.dart';
 
 const _tag = 'SV:Client';
 
@@ -157,20 +155,9 @@ class StreamVideo extends Disposable {
     PNManagerProvider? pushNotificationManagerProvider,
   }) : _options = options,
        _state = MutableClientState(user, options) {
-    _networkMonitor =
-        _options.networkMonitorSettings.internetConnectionInstance ??
-        InternetConnection.createInstance(
-          checkInterval: _options.networkMonitorSettings.checkInterval,
-          triggerStream: Connectivity().onConnectivityChanged,
-          useDefaultOptions:
-              _options.networkMonitorSettings.customEndpoints.isEmpty,
-          customCheckOptions:
-              _options.networkMonitorSettings.customEndpoints.isEmpty
-              ? null
-              : _options.networkMonitorSettings.customEndpoints
-                    .map((option) => option.toInternetCheckOption())
-                    .toList(),
-        );
+    _networkMonitor = NetworkMonitorFactory.instance.create(
+      _options.networkMonitorSettings,
+    );
 
     _clientEventReporter = _options.clientEventsReportingEnabled
         ? ClientEventReporter(
@@ -312,7 +299,7 @@ class StreamVideo extends Disposable {
   final _subscriptions = Subscriptions();
 
   late final CoordinatorClient _client;
-  late final InternetConnection _networkMonitor;
+  late final NetworkMonitor _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
 
   late final ClientEventReporter _clientEventReporter;
@@ -1311,7 +1298,7 @@ CoordinatorClient buildCoordinatorClient({
   required TokenManager tokenManager,
   required RetryPolicy retryPolicy,
   required LatencySettings latencySettings,
-  required InternetConnection networkMonitor,
+  required NetworkMonitor networkMonitor,
   ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
 }) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');

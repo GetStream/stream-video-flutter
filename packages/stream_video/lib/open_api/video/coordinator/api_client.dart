@@ -132,37 +132,21 @@ class ApiClient {
             headers: nullableHeaderParams,
           );
       }
-    } on SocketException catch (error, trace) {
-      throw ApiException.withInner(
-        HttpStatus.badRequest,
-        'Socket operation failed: $method $path',
-        error,
-        trace,
-      );
-    } on TlsException catch (error, trace) {
-      throw ApiException.withInner(
-        HttpStatus.badRequest,
-        'TLS/SSL communication failed: $method $path',
-        error,
-        trace,
-      );
-    } on IOException catch (error, trace) {
-      throw ApiException.withInner(
-        HttpStatus.badRequest,
-        'I/O operation failed: $method $path',
-        error,
-        trace,
-      );
     } on ClientException catch (error, trace) {
+      // MANUAL_EDIT: dropped the dart:io-specific SocketException/
+      // TlsException/IOException catches (this library has no
+      // platform-specific dependency, needed for web/Jaspr). Those are all
+      // Exception subtypes, so they still land in the generic `on Exception`
+      // catch below with a less specific message.
       throw ApiException.withInner(
-        HttpStatus.badRequest,
+        _httpStatusBadRequest,
         'HTTP connection failed: $method $path',
         error,
         trace,
       );
     } on Exception catch (error, trace) {
       throw ApiException.withInner(
-        HttpStatus.badRequest,
+        _httpStatusBadRequest,
         'Exception occurred: $method $path',
         error,
         trace,
@@ -170,7 +154,7 @@ class ApiClient {
     }
 
     throw ApiException(
-      HttpStatus.badRequest,
+      _httpStatusBadRequest,
       'Invalid HTTP operation: $method $path',
     );
   }
@@ -942,14 +926,14 @@ class ApiClient {
       }
     } on Exception catch (error, trace) {
       throw ApiException.withInner(
-        HttpStatus.internalServerError,
+        _httpStatusInternalServerError,
         'Exception during deserialization.',
         error,
         trace,
       );
     }
     throw ApiException(
-      HttpStatus.internalServerError,
+      _httpStatusInternalServerError,
       'Could not find a suitable class for deserialization',
     );
   }

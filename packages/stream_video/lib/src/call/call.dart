@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -105,7 +104,7 @@ class Call {
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -131,7 +130,7 @@ class Call {
     required CallCreatedData data,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -162,7 +161,7 @@ class Call {
     required CallRingingData data,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -185,7 +184,7 @@ class Call {
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
     required StreamVideo streamVideo,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -274,7 +273,7 @@ class Call {
   final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
   final DynascaleManager dynascaleManager;
-  final InternetConnection networkMonitor;
+  final NetworkMonitor networkMonitor;
   final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
 
   CallCredentials? _credentials;
@@ -374,7 +373,7 @@ class Call {
   SfuReconnectionStrategy _reconnectStrategy =
       SfuReconnectionStrategy.unspecified;
   bool _isRejoinPending = false;
-  Future<InternetStatus>? _awaitNetworkAvailableFuture;
+  Future<NetworkStatus>? _awaitNetworkAvailableFuture;
   Future<Result<None>>? _awaitMigrationCompleteFuture;
   bool _initialized = false;
   bool _leaveCallTriggered = false;
@@ -515,7 +514,7 @@ class Call {
       _idReconnect,
       networkMonitor.onStatusChange.listen(
         (status) {
-          if (status == InternetStatus.disconnected) {
+          if (status == NetworkStatus.disconnected) {
             _logger.d(() => '[observeReconnectEvents] network disconnected');
             _reconnect(
               SfuReconnectionStrategy.fast,
@@ -1979,7 +1978,7 @@ class Call {
           final networkStatus = await _awaitNetworkAvailableFuture;
           _logger.v(() => '[reconnect] network: $networkStatus');
 
-          if (networkStatus == InternetStatus.disconnected) {
+          if (networkStatus == NetworkStatus.disconnected) {
             _logger.w(() => '[reconnect] reconnection timeout');
             _session?.trace('callReconnectFailed', {
               'strategy': strategy.name,
@@ -2165,7 +2164,7 @@ class Call {
   /// [CallPreferences.networkAvailabilityTimeout]. If the network keeps
   /// flickering (connecting then dropping within the stability window),
   /// the remaining budget shrinks on each iteration until it is exhausted.
-  Future<InternetStatus> _awaitNetworkAvailable({
+  Future<NetworkStatus> _awaitNetworkAvailable({
     Duration stabilityWindow = Duration.zero,
   }) async {
     final previousCheckInterval = networkMonitor.checkInterval;
@@ -2183,23 +2182,23 @@ class Call {
           _logger.w(
             () => '[_awaitNetworkAvailable] total budget exhausted',
           );
-          return InternetStatus.disconnected;
+          return NetworkStatus.disconnected;
         }
 
         final networkFuture = networkMonitor.onStatusChange
-            .startWithFuture(networkMonitor.internetStatus)
-            .firstWhere((status) => status == InternetStatus.connected)
+            .startWithFuture(networkMonitor.currentStatus)
+            .firstWhere((status) => status == NetworkStatus.connected)
             .timeout(
               remaining,
               onTimeout: () {
                 _logger.w(() => '[_awaitNetworkAvailable] timeout');
-                return InternetStatus.disconnected;
+                return NetworkStatus.disconnected;
               },
             );
 
         final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
           _logger.w(() => '[_awaitNetworkAvailable] call was left');
-          return InternetStatus.disconnected;
+          return NetworkStatus.disconnected;
         });
 
         // Race the network future against the call lifecycle cancellable
@@ -2211,9 +2210,9 @@ class Call {
                 ])
                 .asCancelable()
                 .storeIn(_idFastReconnectTimeout, _cancelables)
-                .valueOrDefault(InternetStatus.disconnected);
+                .valueOrDefault(NetworkStatus.disconnected);
 
-        if (connectionStatus == InternetStatus.disconnected) {
+        if (connectionStatus == NetworkStatus.disconnected) {
           return connectionStatus;
         }
 
@@ -2224,7 +2223,7 @@ class Call {
         // Verify the connection holds for the full stability window.
         try {
           await networkMonitor.onStatusChange
-              .where((s) => s == InternetStatus.disconnected)
+              .where((s) => s == NetworkStatus.disconnected)
               .first
               .timeout(stabilityWindow);
 
@@ -2244,11 +2243,11 @@ class Call {
                 '[_awaitNetworkAvailable] network stable for '
                 '${stabilityWindow.inSeconds}s',
           );
-          return InternetStatus.connected;
+          return NetworkStatus.connected;
         } catch (_) {
           // Stream closed or unexpected error — treat as disconnected so the
           // reconnect loop exits rather than spinning on a dead stream.
-          return InternetStatus.disconnected;
+          return NetworkStatus.disconnected;
         }
       }
     } finally {
@@ -4275,7 +4274,7 @@ class BaseCallFactory {
     required StreamVideo streamVideo,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
     required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,

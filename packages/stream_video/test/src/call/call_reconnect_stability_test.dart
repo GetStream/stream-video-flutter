@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
@@ -23,7 +22,7 @@ void main() {
   });
 
   group('Call reconnect network stability window', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
     late MockCoordinatorClient coordinatorClient;
     late MockCallSession callSession;
     late MockSessionFactory sessionFactory;
@@ -31,8 +30,8 @@ void main() {
     OnReconnectionNeeded? capturedCallback;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
       coordinatorClient = setupMockCoordinatorClient();
       callSession = setupMockCallSession();
@@ -79,7 +78,7 @@ void main() {
     Call buildCall({CallStateNotifier? stateManager}) {
       return createTestCall(
         stateManager: stateManager,
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -97,9 +96,9 @@ void main() {
 
         // Toggle network to trigger fast reconnect via _observeReconnectEvents.
         final stopwatch = Stopwatch()..start();
-        internetStatusController.add(InternetStatus.disconnected);
+        internetStatusController.add(NetworkStatus.disconnected);
         await Future<void>.delayed(const Duration(milliseconds: 10));
-        internetStatusController.add(InternetStatus.connected);
+        internetStatusController.add(NetworkStatus.connected);
 
         // fastReconnect must be invoked well before the 3s stability window
         // that the rejoin/migrate path applies. Allow generous slack for
@@ -224,7 +223,7 @@ void main() {
         // Halfway through the first stability window, drop the network so
         // the wait must restart from scratch.
         await Future<void>.delayed(const Duration(milliseconds: 1500));
-        internetStatusController.add(InternetStatus.disconnected);
+        internetStatusController.add(NetworkStatus.disconnected);
 
         // The rejoin must not have proceeded yet — the first window was
         // interrupted by the drop above.
@@ -242,7 +241,7 @@ void main() {
 
         // Restore connectivity and give the wait a full clean window.
         await Future<void>.delayed(const Duration(milliseconds: 100));
-        internetStatusController.add(InternetStatus.connected);
+        internetStatusController.add(NetworkStatus.connected);
         await Future<void>.delayed(const Duration(milliseconds: 3500));
 
         verify(
@@ -300,7 +299,7 @@ void main() {
         // shrunken remaining budget. Because the network never returns,
         // the bounded networkFuture times out and the reconnect fails.
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        internetStatusController.add(InternetStatus.disconnected);
+        internetStatusController.add(NetworkStatus.disconnected);
 
         // 1500ms budget total → ~1000ms remaining after the drop above.
         // Wait long enough for the bounded wait to time out and the

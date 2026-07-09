@@ -1,5 +1,15 @@
 abstract class NetworkMonitor {
   Stream<NetworkStatus> get onStatusChange;
+
+  /// A fresh, one-shot read of the current network status.
+  Future<NetworkStatus> get currentStatus;
+
+  /// The interval between connection checks.
+  Duration get checkInterval;
+
+  /// Updates the check interval and resets the polling timer to start
+  /// counting from now with the new interval.
+  void setIntervalAndResetTimer(Duration duration);
 }
 
 enum NetworkStatus {

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../stream_video.dart';
@@ -48,7 +47,7 @@ class CallSessionFactory {
     required DynascaleManager dynascaleManager,
     required OnReconnectionNeeded onReconnectionNeeded,
     required void Function(String trackId) onSuspendedAudioTrackRecorded,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     required StatsOptions statsOptions,
     required StreamVideo streamVideo,
     required StreamPeerConnectionFactory pcFactory,

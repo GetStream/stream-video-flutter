@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/shared_emitter.dart';
@@ -73,7 +72,7 @@ void main() {
         data: ringingData,
         coordinatorClient: mockCoordinatorClient,
         streamVideo: streamVideo,
-        networkMonitor: InternetConnection.createInstance(),
+        networkMonitor: HttpNetworkMonitor(settings: const NetworkMonitorSettings()),
       );
     }
 

@@ -17,12 +17,14 @@ dependencies:
   cached_network_image: ^3.4.1
   characters: ^1.4.0
   collection: ^1.19.1
+  connectivity_plus: ^7.0.0
   device_info_plus: ">=12.1.0 <14.0.0"
   equatable: ^2.0.7
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  internet_connection_checker_plus: ^3.0.0
   intl: ">=0.18.1 <=0.21.0"
   package_info_plus: ">=9.0.0 <11.0.0"
   permission_handler: ^12.0.1

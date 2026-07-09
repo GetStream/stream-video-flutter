@@ -12,7 +12,6 @@ library openapi.api;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:http/http.dart';
@@ -371,6 +370,12 @@ part 'model/ws_call_event.dart';
 /// An [ApiClient] instance that uses the default values obtained from
 /// the OpenAPI specification file.
 var defaultApiClient = ApiClient();
+
+// MANUAL_EDIT: local HTTP status constants replace dart:io's `HttpStatus` so
+// this library has no platform-specific dependency (needed for web/Jaspr).
+const int _httpStatusBadRequest = 400;
+const int _httpStatusInternalServerError = 500;
+const int _httpStatusNoContent = 204;
 
 const _delimiters = {'csv': ',', 'ssv': ' ', 'tsv': '\t', 'pipes': '|'};
 const _dateEpochMarker = 'epoch';

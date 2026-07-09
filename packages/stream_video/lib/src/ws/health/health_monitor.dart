@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-
 import '../../logger/impl/tagged_logger.dart';
 import 'network_monitor.dart';
 
@@ -166,11 +164,5 @@ class HealthMonitorImpl implements HealthMonitor {
     _logger.d(() => '[stopListeningNetworkChanges] no args');
     _networkChangeSubscription?.cancel();
     _networkChangeSubscription = null;
-  }
-
-  // ignore: unused_element
-  Future<bool> _isNetworkConnected() async {
-    final result = await Connectivity().checkConnectivity();
-    return !result.contains(ConnectivityResult.none);
   }
 }

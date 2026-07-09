@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc;
@@ -106,7 +105,7 @@ class CallSession extends Disposable {
   final RtcManagerFactory rtcManagerFactory;
   final OnReconnectionNeeded onReconnectionNeeded;
   final ClientPublishOptions? clientPublishOptions;
-  final InternetConnection networkMonitor;
+  final NetworkMonitor networkMonitor;
   final StatsOptions statsOptions;
   final Tracer _tracer;
   final Tracer _zonedTracer = Tracer(null);
@@ -122,7 +121,7 @@ class CallSession extends Disposable {
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
-  StreamSubscription<InternetStatus>? _networkStatusSubscription;
+  StreamSubscription<NetworkStatus>? _networkStatusSubscription;
 
   StatsReporter? statsReporter;
 

@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
-import '../../core/network_monitor_flutter.dart';
 import '../../errors/video_error_composer.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../logger/stream_log.dart';
@@ -27,7 +24,7 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
     required String apiKey,
     required String sfuUrl,
     required String sfuWsEndpoint,
-    required InternetConnection networkMonitor,
+    required NetworkMonitor networkMonitor,
     Iterable<String>? protocols,
   }) {
     final tag = '$_tag-$sessionSeq';
@@ -80,21 +77,19 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
   late final HealthMonitor healthMonitor = HealthMonitorImpl(
     'Sfu',
     this,
-    networkMonitor: NetworkMonitorFlutter.fromInternetConnection(
-      networkMonitor,
-    ),
+    networkMonitor: networkMonitor,
   );
 
   final int sessionSeq;
   final String sessionId;
-  final InternetConnection networkMonitor;
+  final NetworkMonitor networkMonitor;
 
   bool _manuallyClosed = false;
   bool _recreating = false;
 
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
-  StreamSubscription<InternetStatus>? _networkChangeSubscription;
+  StreamSubscription<NetworkStatus>? _networkChangeSubscription;
 
   @override
   Future<Result<None>> recreate() {

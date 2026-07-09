@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
@@ -120,15 +119,15 @@ void main() {
     test(
       'should reconnect when internet connection is lost and recovered',
       () async {
-        final internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-          InternetStatus.connected,
+        final internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+          NetworkStatus.connected,
         );
 
         final coordinatorClient = setupMockCoordinatorClient();
         final callSession = setupMockCallSession();
 
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -161,9 +160,9 @@ void main() {
           ),
         );
 
-        internetStatusController.add(InternetStatus.disconnected);
+        internetStatusController.add(NetworkStatus.disconnected);
         await Future<void>.delayed(Duration.zero);
-        internetStatusController.add(InternetStatus.connected);
+        internetStatusController.add(NetworkStatus.connected);
         await Future<void>.delayed(Duration.zero);
 
         verify(
@@ -193,8 +192,8 @@ void main() {
           ),
         );
 
-        final internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-          InternetStatus.connected,
+        final internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+          NetworkStatus.connected,
         );
 
         final coordinatorClient = setupMockCoordinatorClient();
@@ -222,7 +221,7 @@ void main() {
 
         final call = createTestCall(
           stateManager: customStateManager,
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -243,10 +242,10 @@ void main() {
         );
 
         // Simulate network disconnection to trigger reconnection
-        internetStatusController.add(InternetStatus.disconnected);
+        internetStatusController.add(NetworkStatus.disconnected);
         await Future<void>.delayed(const Duration(milliseconds: 200));
 
-        expect(internetStatusController.value, InternetStatus.disconnected);
+        expect(internetStatusController.value, NetworkStatus.disconnected);
         expect(fastReconnectCallCount, 0);
 
         await internetStatusController.close();
@@ -255,8 +254,8 @@ void main() {
     );
 
     test('should set audio input device', () async {
-      final internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      final internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
 
       final coordinatorClient = setupMockCoordinatorClient();
@@ -267,7 +266,7 @@ void main() {
       ).thenAnswer((_) => Future.value(const Result.success(none)));
 
       final call = createTestCall(
-        networkMonitor: setupMockInternetConnection(
+        networkMonitor: setupMockNetworkMonitor(
           statusStream: internetStatusController,
         ),
         coordinatorClient: coordinatorClient,
@@ -297,8 +296,8 @@ void main() {
     test(
       'should set audio input device when track missing, set later when unmute',
       () async {
-        final internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-          InternetStatus.connected,
+        final internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+          NetworkStatus.connected,
         );
 
         final coordinatorClient = setupMockCoordinatorClient();
@@ -331,7 +330,7 @@ void main() {
 
         final call = createTestCall(
           permissionManager: mockPermissionManager,
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,

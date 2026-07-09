@@ -3,13 +3,22 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/globals.dart';
 import 'package:stream_video/src/core/connection_state.dart';
-import 'package:stream_video/src/video_environment_collector.dart';
 import 'package:stream_video/stream_video.dart';
+
+class _FakeEnvironmentInfoProvider implements EnvironmentInfoProvider {
+  _FakeEnvironmentInfoProvider(this._collect);
+
+  final Future<VideoEnvironment> Function() _collect;
+
+  @override
+  Future<VideoEnvironment> collect() => _collect();
+}
 
 void main() {
   group('StreamVideo autoConnect after environment collection', () {
     late User user;
     late String userToken;
+    final defaultProvider = EnvironmentInfoProvider.instance;
 
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +33,7 @@ void main() {
     });
 
     tearDown(() async {
-      VideoEnvironmentCollector.override = null;
+      EnvironmentInfoProvider.instance = defaultProvider;
       await StreamVideo.reset();
     });
 
@@ -39,9 +48,9 @@ void main() {
     }
 
     test('autoConnect runs when environment collection throws', () async {
-      VideoEnvironmentCollector.override = () async {
+      EnvironmentInfoProvider.instance = _FakeEnvironmentInfoProvider(() async {
         throw Exception('collect failed');
-      };
+      });
 
       final streamVideo = StreamVideo.create(
         'test-api-key',
@@ -62,9 +71,9 @@ void main() {
     test(
       'autoConnect does not run when disabled despite env collection failure',
       () async {
-        VideoEnvironmentCollector.override = () async {
+        EnvironmentInfoProvider.instance = _FakeEnvironmentInfoProvider(() async {
           throw Exception('collect failed');
-        };
+        });
 
         final streamVideo = StreamVideo.create(
           'test-api-key',
@@ -82,10 +91,12 @@ void main() {
     test(
       'updates environment and autoConnects when collection succeeds',
       () async {
-        VideoEnvironmentCollector.override = () async => const VideoEnvironment(
-          sdkVersion: 'test-sdk',
-          osName: 'test-os',
-          appName: 'test-app',
+        EnvironmentInfoProvider.instance = _FakeEnvironmentInfoProvider(
+          () async => const VideoEnvironment(
+            sdkVersion: 'test-sdk',
+            osName: 'test-os',
+            appName: 'test-app',
+          ),
         );
 
         final streamVideo = StreamVideo.create(

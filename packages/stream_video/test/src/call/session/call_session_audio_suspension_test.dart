@@ -148,7 +148,7 @@ CallSession _buildTestSession({
     onReconnectionNeeded: (_, __) {},
     onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded ?? (_) {},
     sdpEditor: MockSdpEditor(),
-    networkMonitor: setupMockInternetConnection(),
+    networkMonitor: setupMockNetworkMonitor(),
     statsOptions: StatsOptions(
       enableRtcStats: false,
       reportingIntervalMs: 500,

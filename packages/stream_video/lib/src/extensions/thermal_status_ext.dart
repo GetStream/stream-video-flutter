@@ -1,41 +1,41 @@
-import 'package:thermal/thermal.dart';
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../platform/device_state_provider.dart';
 
-extension TherlalStatusExt on ThermalStatus {
+extension ThermalStatusExt on StreamThermalStatus {
   sfu_models.AndroidThermalState toAndroidThermalState() {
     return switch (this) {
-      ThermalStatus.none =>
+      StreamThermalStatus.none =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_NONE,
-      ThermalStatus.light =>
+      StreamThermalStatus.light =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_LIGHT,
-      ThermalStatus.moderate =>
+      StreamThermalStatus.moderate =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_MODERATE,
-      ThermalStatus.severe =>
+      StreamThermalStatus.severe =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_SEVERE,
-      ThermalStatus.critical =>
+      StreamThermalStatus.critical =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_CRITICAL,
-      ThermalStatus.emergency =>
+      StreamThermalStatus.emergency =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_EMERGENCY,
-      ThermalStatus.shutdown =>
+      StreamThermalStatus.shutdown =>
         sfu_models.AndroidThermalState.ANDROID_THERMAL_STATE_SHUTDOWN,
     };
   }
 
   sfu_models.AppleThermalState toAppleThermalState() {
     return switch (this) {
-      ThermalStatus.none =>
+      StreamThermalStatus.none =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_NOMINAL,
-      ThermalStatus.light =>
+      StreamThermalStatus.light =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_FAIR,
-      ThermalStatus.moderate =>
+      StreamThermalStatus.moderate =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_FAIR,
-      ThermalStatus.severe =>
+      StreamThermalStatus.severe =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_SERIOUS,
-      ThermalStatus.critical =>
+      StreamThermalStatus.critical =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_CRITICAL,
-      ThermalStatus.emergency =>
+      StreamThermalStatus.emergency =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_CRITICAL,
-      ThermalStatus.shutdown =>
+      StreamThermalStatus.shutdown =>
         sfu_models.AppleThermalState.APPLE_THERMAL_STATE_CRITICAL,
     };
   }

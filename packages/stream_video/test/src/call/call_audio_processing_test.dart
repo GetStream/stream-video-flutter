@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
@@ -71,15 +70,15 @@ void main() {
   });
 
   group('Call audio processing', () {
-    late BehaviorSubject<InternetStatus> internetStatusController;
+    late BehaviorSubject<NetworkStatus> internetStatusController;
     late MockCoordinatorClient coordinatorClient;
     late MockCallSession callSession;
     late MockStreamVideo mockStreamVideo;
     late MockPermissionsManager mockPermissionsManager;
 
     setUp(() {
-      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
-        InternetStatus.connected,
+      internetStatusController = BehaviorSubject<NetworkStatus>.seeded(
+        NetworkStatus.connected,
       );
       coordinatorClient = setupMockCoordinatorClient();
       callSession = setupMockCallSession();
@@ -99,7 +98,7 @@ void main() {
         when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(false);
 
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -125,7 +124,7 @@ void main() {
           ).thenReturn(false);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -156,7 +155,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(false));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -193,7 +192,7 @@ void main() {
           );
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -229,7 +228,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -268,7 +267,7 @@ void main() {
           );
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -304,7 +303,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -333,7 +332,7 @@ void main() {
         when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(false);
 
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -369,7 +368,7 @@ void main() {
         ).thenAnswer((_) async => const Result.success(none));
 
         final call = createTestCall(
-          networkMonitor: setupMockInternetConnection(
+          networkMonitor: setupMockNetworkMonitor(
             statusStream: internetStatusController,
           ),
           coordinatorClient: coordinatorClient,
@@ -416,7 +415,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -488,7 +487,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -517,7 +516,7 @@ void main() {
           when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -561,7 +560,7 @@ void main() {
           when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -605,7 +604,7 @@ void main() {
           when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(false);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -656,7 +655,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -678,9 +677,9 @@ void main() {
 
           // Trigger network reconnection — fast reconnect will fail,
           // causing a fallback to rejoin which hits the rebind path.
-          internetStatusController.add(InternetStatus.disconnected);
+          internetStatusController.add(NetworkStatus.disconnected);
           await Future<void>.delayed(Duration.zero);
-          internetStatusController.add(InternetStatus.connected);
+          internetStatusController.add(NetworkStatus.connected);
 
           // Fast reconnect failure now correctly propagates to the outer
           // reconnect loop, which runs a 3-second stability window before
@@ -698,7 +697,7 @@ void main() {
           when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -713,9 +712,9 @@ void main() {
           // No calls so far
           verifyNever(() => mockStreamVideo.setAudioProcessingEnabled(any()));
 
-          internetStatusController.add(InternetStatus.disconnected);
+          internetStatusController.add(NetworkStatus.disconnected);
           await Future<void>.delayed(Duration.zero);
-          internetStatusController.add(InternetStatus.connected);
+          internetStatusController.add(NetworkStatus.connected);
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
           // Still no calls — processing was not active so nothing to rebind
@@ -729,7 +728,7 @@ void main() {
           when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(false);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -740,9 +739,9 @@ void main() {
           final joinResult = await call.join();
           expect(joinResult.isSuccess, isTrue);
 
-          internetStatusController.add(InternetStatus.disconnected);
+          internetStatusController.add(NetworkStatus.disconnected);
           await Future<void>.delayed(Duration.zero);
-          internetStatusController.add(InternetStatus.connected);
+          internetStatusController.add(NetworkStatus.connected);
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
           verifyNever(() => mockStreamVideo.setAudioProcessingEnabled(any()));
@@ -818,7 +817,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(true));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -848,7 +847,7 @@ void main() {
         'returns error when hifi audio is not enabled',
         () async {
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -900,7 +899,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -962,7 +961,7 @@ void main() {
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,
@@ -1011,7 +1010,7 @@ void main() {
           when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(false);
 
           final call = createTestCall(
-            networkMonitor: setupMockInternetConnection(
+            networkMonitor: setupMockNetworkMonitor(
               statusStream: internetStatusController,
             ),
             coordinatorClient: coordinatorClient,

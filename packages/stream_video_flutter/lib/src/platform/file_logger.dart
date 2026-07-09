@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
-
-import '../../utils/standard.dart';
-import '../stream_logger.dart';
+import 'package:stream_video/stream_video.dart';
 
 const String _tag = 'SV:FileLogger';
 const int _defaultSize = 12 * 1024 * 1024;
@@ -82,9 +80,9 @@ class FileStreamLogger extends StreamLogger {
           currentFile = _file1;
         }
         _currentFile = currentFile;
-        _currentIO = currentFile.openWrite(mode: FileMode.append).also((it) {
-          _finalizer.attach(this, it, detach: this);
-        });
+        final io = currentFile.openWrite(mode: FileMode.append);
+        _finalizer.attach(this, io, detach: this);
+        _currentIO = io;
       }
       // ignore: empty_catches
     } catch (e) {}
@@ -109,9 +107,9 @@ class FileStreamLogger extends StreamLogger {
           ..deleteSync()
           ..createSync(recursive: true);
         _currentFile = currentFile;
-        _currentIO = currentFile.openWrite(mode: FileMode.append).also((it) {
-          _finalizer.attach(this, it, detach: this);
-        });
+        final io = currentFile.openWrite(mode: FileMode.append);
+        _finalizer.attach(this, io, detach: this);
+        _currentIO = io;
       }
     } catch (e, stk) {
       _logE(() => '[swapFiles] failed: $e; $stk');
@@ -137,9 +135,11 @@ class FileStreamLogger extends StreamLogger {
         ..createSync(recursive: true);
 
       _currentFile = _file0;
-      _currentIO = _currentFile?.openWrite(mode: FileMode.append).also((it) {
-        _finalizer.attach(this, it, detach: this);
-      });
+      final io = _currentFile?.openWrite(mode: FileMode.append);
+      if (io != null) {
+        _finalizer.attach(this, io, detach: this);
+      }
+      _currentIO = io;
       _logV(
         () =>
             '[clear] after; file0: ${_file0.lengthSync()}, '

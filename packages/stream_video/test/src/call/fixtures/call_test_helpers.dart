@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
@@ -31,7 +30,10 @@ void registerMockFallbackValues() {
   registerFallbackValue(
     DynascaleManager(stateManager: CallStateNotifier(createTestCallState())),
   );
-  registerFallbackValue(InternetConnection());
+  registerFallbackValue(
+    HttpNetworkMonitor(settings: const NetworkMonitorSettings()),
+  );
+  registerFallbackValue(Duration.zero);
   registerFallbackValue(
     StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
   );
@@ -49,7 +51,7 @@ Call createStubCall({
   StreamVideo? streamVideo,
   CallStateNotifier? stateManager,
   PermissionsManager? permissionManager,
-  InternetConnection? networkMonitor,
+  NetworkMonitor? networkMonitor,
   RetryPolicy? retryPolicy,
   SdpPolicy? sdpPolicy,
   RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
@@ -61,7 +63,7 @@ Call createStubCall({
     streamVideo: streamVideo ?? MockStreamVideo(),
     stateManager: stateManager ?? createTestCallStateManager(),
     permissionManager: permissionManager ?? MockPermissionsManager(),
-    networkMonitor: networkMonitor ?? MockInternetConnection(),
+    networkMonitor: networkMonitor ?? MockNetworkMonitor(),
     retryPolicy: retryPolicy ?? MockRetryPolicy(),
     sdpPolicy: sdpPolicy ?? const SdpPolicy(),
     rtcMediaDeviceNotifier:
@@ -76,7 +78,7 @@ Call createTestCall({
   StreamVideo? streamVideo,
   CallStateNotifier? stateManager,
   PermissionsManager? permissionManager,
-  InternetConnection? networkMonitor,
+  NetworkMonitor? networkMonitor,
   RetryPolicy? retryPolicy,
   SdpPolicy? sdpPolicy,
   RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
@@ -96,7 +98,7 @@ Call createTestCall({
           ),
         ),
     permissionManager: permissionManager ?? MockPermissionsManager(),
-    networkMonitor: networkMonitor ?? setupMockInternetConnection(),
+    networkMonitor: networkMonitor ?? setupMockNetworkMonitor(),
     retryPolicy: retryPolicy ?? setupMockRetryPolicy(),
     sdpPolicy: sdpPolicy ?? const SdpPolicy(),
     rtcMediaDeviceNotifier:
@@ -235,18 +237,19 @@ MockCoordinatorClient setupMockCoordinatorClient({
   return coordinatorClient;
 }
 
-MockInternetConnection setupMockInternetConnection({
-  BehaviorSubject<InternetStatus>? statusStream,
+MockNetworkMonitor setupMockNetworkMonitor({
+  BehaviorSubject<NetworkStatus>? statusStream,
 }) {
-  final internetConnection = MockInternetConnection();
-  when(() => internetConnection.onStatusChange).thenAnswer(
-    (_) => statusStream?.stream ?? Stream.value(InternetStatus.connected),
+  final networkMonitor = MockNetworkMonitor();
+  when(() => networkMonitor.onStatusChange).thenAnswer(
+    (_) => statusStream?.stream ?? Stream.value(NetworkStatus.connected),
   );
-  when(() => internetConnection.checkInterval).thenReturn(Duration.zero);
-  when(() => internetConnection.internetStatus).thenAnswer(
-    (_) async => statusStream?.value ?? InternetStatus.connected,
+  when(() => networkMonitor.checkInterval).thenReturn(Duration.zero);
+  when(() => networkMonitor.setIntervalAndResetTimer(any())).thenReturn(null);
+  when(() => networkMonitor.currentStatus).thenAnswer(
+    (_) async => statusStream?.value ?? NetworkStatus.connected,
   );
-  return internetConnection;
+  return networkMonitor;
 }
 
 MockRtcMediaDeviceNotifier setupMockRtcMediaDeviceNotifier() {

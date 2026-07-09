@@ -1,11 +1,11 @@
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'ws/health/network_monitor.dart';
 
 class NetworkMonitorSettings {
   const NetworkMonitorSettings({
     this.checkInterval = const Duration(seconds: 5),
     this.offlineCheckInterval = const Duration(seconds: 2),
     this.customEndpoints = const [],
-    this.internetConnectionInstance,
+    this.networkMonitor,
   });
 
   /// The interval between connection checks.
@@ -14,19 +14,16 @@ class NetworkMonitorSettings {
   /// The interval between connection checks when offline.
   final Duration offlineCheckInterval;
 
-  /// A list of custom options for checking internet connectivity.
-  ///
-  /// This allows you to specify custom URLs, headers, and timeout settings
-  /// for determining internet availability. The InternetConnection checker
-  /// will use these options when performing connectivity checks.
+  /// A list of custom endpoints for checking internet connectivity.
   final List<NetworkMonitorEndpoint> customEndpoints;
 
-  /// An instance of the InternetConnection class to use for connectivity checks.
+  /// A custom [NetworkMonitor] instance to use for connectivity checks.
   ///
-  /// This allows you to provide a custom implementation of the InternetConnection
-  /// class if you already have an existing instance in your app. If not provided,
-  /// a default implementation will be used.
-  final InternetConnection? internetConnectionInstance;
+  /// This allows you to provide your own implementation, or an instance you
+  /// already manage elsewhere in your app. If not provided, the platform's
+  /// default implementation is used (native: connectivity-triggered HTTP
+  /// checks via `stream_video_flutter`; web/Jaspr: periodic HTTP checks).
+  final NetworkMonitor? networkMonitor;
 }
 
 class NetworkMonitorEndpoint {
@@ -48,13 +45,4 @@ class NetworkMonitorEndpoint {
 
   /// List of HTTP status codes that are considered valid responses.
   final List<int> validCodes;
-
-  InternetCheckOption toInternetCheckOption() {
-    return InternetCheckOption(
-      uri: Uri.parse(url),
-      headers: headers,
-      timeout: timeout,
-      responseStatusFn: (response) => validCodes.contains(response.statusCode),
-    );
-  }
 }

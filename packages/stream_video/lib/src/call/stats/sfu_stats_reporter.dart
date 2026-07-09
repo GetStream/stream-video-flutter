@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:battery_plus/battery_plus.dart';
-import 'package:flutter/services.dart';
 import 'package:synchronized/synchronized.dart';
-import 'package:thermal/thermal.dart';
 
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../globals.dart';
@@ -14,6 +11,7 @@ import '../../../protobuf/video/sfu/models/models.pb.dart';
 import '../../extensions/thermal_status_ext.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
+import '../../platform/device_state_provider.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/models/sfu_error.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device.dart';
@@ -33,10 +31,12 @@ class SfuStatsReporter {
     _deviceTracer = Tracer('sfu-stats-device')
       ..setEnabled(statsOptions.enableRtcStats);
 
-    final sharedStream = _ThermalMonitor.stream;
+    final sharedStream = DeviceStateProvider.instance.thermalStatusStream;
     if (sharedStream != null) {
-      _thermalStatus = _ThermalMonitor.lastStatus;
-      _thermalStatusSubscription = sharedStream.listen((ThermalStatus status) {
+      _thermalStatus = DeviceStateProvider.instance.lastThermalStatus;
+      _thermalStatusSubscription = sharedStream.listen((
+        StreamThermalStatus status,
+      ) {
         _thermalStatus = status;
         _deviceTracer.trace('device.thermalState', status.name);
       });
@@ -76,11 +76,11 @@ class SfuStatsReporter {
   final _logger = taggedLogger(tag: 'SV:SfuStatsReporter');
 
   StreamSubscription<List<RtcMediaDevice>>? _mediaDeviceSubscription;
-  StreamSubscription<ThermalStatus>? _thermalStatusSubscription;
+  StreamSubscription<StreamThermalStatus>? _thermalStatusSubscription;
 
   List<String>? _availableAudioInputs;
   List<String>? _availableVideoInputs;
-  ThermalStatus? _thermalStatus;
+  StreamThermalStatus? _thermalStatus;
   bool? _lastLowPowerMode;
 
   late final Tracer _deviceTracer;
@@ -136,23 +136,16 @@ class SfuStatsReporter {
           return;
         }
 
-        final batterySaveModeAvailable =
-            CurrentPlatform.isAndroid ||
-            CurrentPlatform.isIos ||
-            CurrentPlatform.isMacOS ||
-            CurrentPlatform.isWindows;
-
         bool? lowPowerMode;
-        if (batterySaveModeAvailable) {
-          try {
-            lowPowerMode = await Battery().isInBatterySaveMode;
-            if (lowPowerMode != _lastLowPowerMode) {
-              _deviceTracer.trace('device.lowPowerMode', lowPowerMode);
-              _lastLowPowerMode = lowPowerMode;
-            }
-          } on PlatformException {
-            _logger.d(() => 'Failed to get battery save mode from the device');
+        try {
+          lowPowerMode = await DeviceStateProvider.instance
+              .isInBatterySaveMode();
+          if (lowPowerMode != _lastLowPowerMode) {
+            _deviceTracer.trace('device.lowPowerMode', lowPowerMode);
+            _lastLowPowerMode = lowPowerMode;
           }
+        } catch (_) {
+          _logger.d(() => 'Failed to get battery save mode from the device');
         }
 
         sfu_models.AndroidState? androidState;
@@ -320,37 +313,5 @@ class SfuStatsReporter {
     _mediaDeviceSubscription?.cancel();
     _thermalStatusSubscription?.cancel();
     _deviceTracer.dispose();
-  }
-}
-
-/// Shared, never-cancelled bridge to `Thermal().onThermalStatusChanged`.
-class _ThermalMonitor {
-  _ThermalMonitor._();
-
-  static StreamController<ThermalStatus>? _controller;
-  static ThermalStatus? _lastStatus;
-  static bool _initialized = false;
-
-  static ThermalStatus? get lastStatus => _lastStatus;
-
-  static Stream<ThermalStatus>? get stream {
-    final available = CurrentPlatform.isAndroid || CurrentPlatform.isIos;
-    if (!available) return null;
-    _ensureSubscribed();
-    return _controller?.stream;
-  }
-
-  static void _ensureSubscribed() {
-    if (_initialized) return;
-    _initialized = true;
-    _controller = StreamController<ThermalStatus>.broadcast();
-    try {
-      Thermal().onThermalStatusChanged.listen((ThermalStatus status) {
-        _lastStatus = status;
-        _controller?.add(status);
-      });
-    } catch (_) {
-      // Thermal plugin not available
-    }
   }
 }

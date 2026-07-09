@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:battery_plus/battery_plus.dart';
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
-import 'package:thermal/thermal.dart';
 
 import '../../models/models.dart';
-import '../../platform_detector/platform_detector.dart';
+import '../../platform/device_state_provider.dart';
 import '../../webrtc/model/stats/rtc_codec.dart';
 import '../../webrtc/model/stats/rtc_ice_candidate_pair.dart';
 import '../../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
@@ -19,18 +17,15 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
   StatsReporter({
     required this.rtcManager,
     required this.clientEnvironment,
-    Battery? battery,
-    Thermal? thermal,
+    DeviceStateProvider? deviceState,
   }) : super(null) {
-    _battery = battery ?? Battery();
-    _thermal = thermal ?? Thermal();
+    _deviceState = deviceState ?? DeviceStateProvider.instance;
   }
 
   final RtcManager rtcManager;
   final ClientEnvironment clientEnvironment;
 
-  late Battery _battery;
-  late Thermal _thermal;
+  late DeviceStateProvider _deviceState;
 
   CallMetrics? get currentMetrics => state;
 
@@ -211,15 +206,10 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
     // check battery and thermal state every 10th tick (by default every 100s)
     if (tick % 10 == 0) {
-      final batteryCheckAvailable =
-          CurrentPlatform.isAndroid ||
-          CurrentPlatform.isIos ||
-          CurrentPlatform.isMacOS ||
-          CurrentPlatform.isWindows;
-
       try {
-        if (batteryCheckAvailable) {
-          batteryLevel = await _battery.batteryLevel;
+        final level = await _deviceState.batteryLevel();
+        if (level != null) {
+          batteryLevel = level;
           batteryLevelHistory = <int>[
             ...state?.batteryLevelHistory.reversed.take(49).toList().reversed ??
                 [],
@@ -230,19 +220,16 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
         // Ignore battery read failures
       }
 
-      final thermalStatusAvailable =
-          CurrentPlatform.isAndroid || CurrentPlatform.isIos;
-
       try {
-        if (thermalStatusAvailable) {
-          final thermalStatus = await _thermal.thermalStatus;
+        final thermalStatus = await _deviceState.currentThermalStatus();
+        if (thermalStatus != null) {
           thermalStatusHistory = <int>[
             ...state?.thermalStatusHistory.reversed
                     .take(49)
                     .toList()
                     .reversed ??
                 [],
-            ThermalStatus.values.indexOf(thermalStatus),
+            thermalStatus.index,
           ];
         }
       } catch (_) {

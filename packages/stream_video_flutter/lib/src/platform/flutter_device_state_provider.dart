@@ -25,6 +25,17 @@ class FlutterDeviceStateProvider implements DeviceStateProvider {
   }
 
   @override
+  Future<StreamThermalStatus?> currentThermalStatus() async {
+    final available = CurrentPlatform.isAndroid || CurrentPlatform.isIos;
+    if (!available) return null;
+    try {
+      return _toDomain(await plugin.Thermal().thermalStatus);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
   Future<bool?> isInBatterySaveMode() async {
     final available =
         CurrentPlatform.isAndroid ||
@@ -34,6 +45,21 @@ class FlutterDeviceStateProvider implements DeviceStateProvider {
     if (!available) return null;
     try {
       return await Battery().isInBatterySaveMode;
+    } on PlatformException {
+      return null;
+    }
+  }
+
+  @override
+  Future<int?> batteryLevel() async {
+    final available =
+        CurrentPlatform.isAndroid ||
+        CurrentPlatform.isIos ||
+        CurrentPlatform.isMacOS ||
+        CurrentPlatform.isWindows;
+    if (!available) return null;
+    try {
+      return await Battery().batteryLevel;
     } on PlatformException {
       return null;
     }
