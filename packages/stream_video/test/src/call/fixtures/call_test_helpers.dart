@@ -132,6 +132,7 @@ MockCallStateNotifier createTestCallStateManager({
   when(() => stateManager.callStateStream).thenAnswer(
     (_) => callStateStream,
   );
+  when(() => stateManager.audioOutputSelectedByUser).thenReturn(false);
   when(
     () => stateManager.validateUserId(any()),
   ).thenAnswer((_) => Future.value(const Result.success(none)));
