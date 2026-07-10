@@ -70,6 +70,9 @@ enum Environment {
   final List<String> aliases;
   final List<String> baseUrls;
 
+  /// Whether this is a Pronto environment.
+  bool get isPronto => envName == 'pronto';
+
   String? getJoinUrl({required String callId, String? callType}) {
     switch (this) {
       case Environment.pronto:

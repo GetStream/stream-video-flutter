@@ -16,7 +16,7 @@ class StreamVideoRenderer extends StatefulWidget {
     required this.participant,
     required this.videoTrackType,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
-    this.videoFit = VideoFit.cover,
+    this.videoFit,
     this.onSizeChanged,
     this.persistTrackIfNotVisible = false,
     this.rendererScopePrefix,
@@ -35,7 +35,10 @@ class StreamVideoRenderer extends StatefulWidget {
   final WidgetBuilder placeholderBuilder;
 
   /// The scale type to use for the video renderer.
-  final VideoFit videoFit;
+  ///
+  /// When `null`, [defaultVideoFit] is used, which resolves to
+  /// [VideoFit.adaptive] on web and desktop and [VideoFit.cover] on mobile.
+  final VideoFit? videoFit;
 
   /// Called when the size of the widget changes.
   final ValueSetter<Size>? onSizeChanged;
@@ -247,6 +250,21 @@ enum VideoFit {
   /// Scale the video uniformly (maintain the video's aspect ratio)
   /// to cover the entire widget area.
   cover,
+
+  /// Automatically pick between [cover] and [contain] based on the video's
+  /// own orientation: landscape (or square) video fills the widget ([cover]),
+  /// while portrait/tall video is letterboxed so the whole frame stays
+  /// visible ([contain]).
+  adaptive,
+}
+
+/// The [VideoFit] used for participant video when none is explicitly set.
+///
+/// Resolves to [VideoFit.adaptive] on web and desktop, so portrait video is
+/// letterboxed instead of cropped, and to [VideoFit.cover] on mobile.
+VideoFit get defaultVideoFit {
+  if (CurrentPlatform.isMobile) return VideoFit.cover;
+  return VideoFit.adaptive;
 }
 
 /// A widget that renders a single video track.
@@ -256,7 +274,7 @@ class VideoTrackRenderer extends StatefulWidget {
     super.key,
     required this.videoTrack,
     this.mirror = false,
-    this.videoFit = VideoFit.cover,
+    this.videoFit,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
   });
 
@@ -267,7 +285,10 @@ class VideoTrackRenderer extends StatefulWidget {
   final bool mirror;
 
   /// The scale type of the video.
-  final VideoFit videoFit;
+  ///
+  /// When `null`, [defaultVideoFit] is used, which resolves to
+  /// [VideoFit.adaptive] on web and desktop and [VideoFit.cover] on mobile.
+  final VideoFit? videoFit;
 
   /// A builder for the placeholder.
   final WidgetBuilder placeholderBuilder;
@@ -313,23 +334,45 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    return !_isInitialized
-        ? widget.placeholderBuilder.call(context)
-        : rtc.RTCVideoView(
-            _videoRenderer,
-            mirror: widget.mirror,
-            objectFit: _getVideoViewObjectFit(widget.videoFit),
-            filterQuality: FilterQuality.medium,
-            placeholderBuilder: widget.placeholderBuilder,
-          );
+    if (!_isInitialized) {
+      return widget.placeholderBuilder.call(context);
+    }
+
+    final videoFit = widget.videoFit ?? defaultVideoFit;
+
+    // Listen to the renderer's value so [VideoFit.adaptive] can recompute the
+    // object fit whenever the incoming video dimensions or rotation change.
+    return ValueListenableBuilder<rtc.RTCVideoValue>(
+      valueListenable: _videoRenderer,
+      builder: (context, value, _) {
+        return rtc.RTCVideoView(
+          _videoRenderer,
+          mirror: widget.mirror,
+          objectFit: _getVideoViewObjectFit(videoFit, value),
+          filterQuality: FilterQuality.medium,
+          placeholderBuilder: widget.placeholderBuilder,
+        );
+      },
+    );
   }
 
-  rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(VideoFit videoFit) {
+  rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(
+    VideoFit videoFit,
+    rtc.RTCVideoValue value,
+  ) {
     switch (videoFit) {
       case VideoFit.cover:
         return rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
       case VideoFit.contain:
         return rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain;
+      case VideoFit.adaptive:
+        // [RTCVideoValue.aspectRatio] is rotation-aware and returns 1.0 until
+        // the first frame arrives, so tall/portrait video is letterboxed while
+        // landscape (or square, or not-yet-known) video fills the widget.
+        final isWide = value.aspectRatio >= 1.0;
+        return isWide
+            ? rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitCover
+            : rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain;
     }
   }
 }

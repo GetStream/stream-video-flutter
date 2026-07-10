@@ -30,7 +30,7 @@ abstract class TraceTag {
   static const String fastReconnectFailure = 'fastReconnect.failure';
   static const String publisherConnectionCheckStalled =
       'publisherConnectionCheck.stalled';
-  static const String callLeave = 'call.leave';
+  static const String callLeave = 'call.leaveReason';
   static const String trackPublished = 'trackPublished';
   static const String trackUnpublished = 'trackUnpublished';
   static const String changePublishQuality = 'changePublishQuality';
