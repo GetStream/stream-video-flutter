@@ -7,9 +7,16 @@ import '../di/injector.dart';
 import '../theme/app_palette.dart';
 
 class EnvironmentSwitcher extends StatefulWidget {
-  const EnvironmentSwitcher({super.key, required this.currentEnvironment});
+  const EnvironmentSwitcher({
+    super.key,
+    required this.currentEnvironment,
+    this.onEnvironmentChanged,
+  });
 
   final Environment currentEnvironment;
+
+  /// Called after the user selects a different environment.
+  final ValueChanged<Environment>? onEnvironmentChanged;
 
   @override
   State<EnvironmentSwitcher> createState() => _EnvironmentSwitcherState();
@@ -84,6 +91,8 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                         setState(() {
                           selectedEnvironment = env;
                         });
+
+                        widget.onEnvironmentChanged?.call(env);
                       },
                       child: Container(
                         width: 100,
