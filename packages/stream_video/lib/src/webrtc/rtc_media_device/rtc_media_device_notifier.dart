@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
+import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/extensions.dart';
@@ -177,7 +178,7 @@ class RtcMediaDeviceNotifier {
           values['voiceProcessingAGCEnabled'] as bool? ?? false;
 
       _tracer.trace(
-        'audioProcessingStateChanged',
+        TraceTag.audioProcessingStateChanged,
         {
           'stereoPlayoutEnabled': stereoPlayoutEnabled,
           'voiceProcessingEnabled': voiceProcessingEnabled,
@@ -243,7 +244,7 @@ class RtcMediaDeviceNotifier {
       ];
 
       _tracer.trace(
-        'navigator.mediaDevices.enumeratedevices',
+        TraceTag.enumerateDevices,
         mediaDevices.map((device) => device.toJson()).toList(),
       );
 
@@ -284,14 +285,14 @@ class RtcMediaDeviceNotifier {
   /// This does not affect the microphone or remote track subscriptions.
   /// Use as a global "mute all sounds" toggle or when the app goes to background.
   Future<void> pauseAudioPlayout() {
-    _tracer.trace('navigator.mediaDevices.pauseAudioPlayout', null);
+    _tracer.trace(TraceTag.pauseAudioPlayout, null);
     return rtc.Helper.pauseAudioPlayout();
   }
 
   /// Resumes audio output (playout) muted via [pauseAudioPlayout].
   /// Does not change microphone state or remote track subscriptions.
   Future<void> resumeAudioPlayout() {
-    _tracer.trace('navigator.mediaDevices.resumeAudioPlayout', null);
+    _tracer.trace(TraceTag.resumeAudioPlayout, null);
     return rtc.Helper.resumeAudioPlayout();
   }
 
@@ -301,7 +302,7 @@ class RtcMediaDeviceNotifier {
   /// To ensure you receive `onInterruptionEnd`, explicitly call
   /// [resumeAudioPlayout] (e.g., when the app resumes from background).
   Future<void> regainAndroidAudioFocus() {
-    _tracer.trace('navigator.mediaDevices.regainAndroidAudioFocus', null);
+    _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();
   }
 

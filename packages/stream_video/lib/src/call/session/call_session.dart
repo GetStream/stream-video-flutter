@@ -37,6 +37,7 @@ import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/stats_reporter.dart';
+import '../stats/trace_tag.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
 
@@ -158,7 +159,7 @@ class CallSession extends Disposable {
 
   void _observeNetworkStatus() {
     _networkStatusSubscription = networkMonitor.onStatusChange.listen((status) {
-      _tracer.trace('network.changed', status.name);
+      _tracer.trace(TraceTag.networkChanged, status.name);
     });
   }
 
@@ -301,7 +302,7 @@ class CallSession extends Disposable {
         unifiedSessionId: unifiedSessionId,
       );
 
-      _tracer.trace('joinRequest', joinRequest.toJson());
+      _tracer.trace(TraceTag.joinRequest, joinRequest.toJson());
 
       sfuWS.send(
         sfu_events.SfuRequest(
@@ -433,7 +434,7 @@ class CallSession extends Disposable {
         details: wsJoinDetails,
         retryCount: clientEventRetryCount,
       );
-      _tracer.trace('joinRequestTimeout', message);
+      _tracer.trace(TraceTag.joinRequestTimeout, message);
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     } catch (e, stk) {
@@ -476,7 +477,7 @@ class CallSession extends Disposable {
     try {
       _logger.d(() => '[fastReconnect] no args');
 
-      _tracer.trace('fastReconnect', reconnectDetails.toJson());
+      _tracer.trace(TraceTag.fastReconnect, reconnectDetails.toJson());
 
       final genericSdpFactory = await rtcManagerFactory.pcFactory
           .ensureNativeFactory();
@@ -564,10 +565,10 @@ class CallSession extends Disposable {
       }
 
       if (result.isSuccess) {
-        _tracer.trace('fastReconnect.success', null);
+        _tracer.trace(TraceTag.fastReconnectSuccess, null);
       } else {
         _tracer.trace(
-          'fastReconnect.failure',
+          TraceTag.fastReconnectFailure,
           result.getErrorOrNull()?.toString(),
         );
       }
@@ -575,7 +576,7 @@ class CallSession extends Disposable {
       return result;
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
-      _tracer.trace('fastReconnect.failure', e.toString());
+      _tracer.trace(TraceTag.fastReconnectFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     } finally {
       rtcManager?.subscriber.setReconnecting(false);
@@ -608,7 +609,7 @@ class CallSession extends Disposable {
                 'state after ${_publisherConnectionCheckDelay.inSeconds}s '
                 '— triggering reconnection',
           );
-          _tracer.trace('publisherConnectionCheck.stalled', {
+          _tracer.trace(TraceTag.publisherConnectionCheckStalled, {
             'iceState': iceState.toString(),
             'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
           });
@@ -627,7 +628,7 @@ class CallSession extends Disposable {
   void leave({String? reason}) {
     _logger.d(() => '[leave] reason: $reason');
     _isLeavingOrClosed = true;
-    _tracer.trace('call.leaveReason', reason);
+    _tracer.trace(TraceTag.callLeave, reason);
     sfuWS.leave(sessionId: sessionId, reason: reason);
   }
 
@@ -719,25 +720,25 @@ class CallSession extends Disposable {
       } else if (event is SfuParticipantLeftEvent) {
         await _onParticipantLeft(event);
       } else if (event is SfuTrackPublishedEvent) {
-        _tracer.trace('TrackPublished', event.toJson());
+        _tracer.trace(TraceTag.trackPublished, event.toJson());
         await _onTrackPublished(event);
       } else if (event is SfuTrackUnpublishedEvent) {
-        _tracer.trace('TrackUnpublish', event.toJson());
+        _tracer.trace(TraceTag.trackUnpublished, event.toJson());
         await _onTrackUnpublished(event);
       } else if (event is SfuChangePublishQualityEvent) {
-        _tracer.trace('PublishQualityChanged', event.toJson());
+        _tracer.trace(TraceTag.changePublishQuality, event.toJson());
         await _onPublishQualityChanged(event);
       } else if (event is SfuChangePublishOptionsEvent) {
-        _tracer.trace('PublishOptionsChanged', event.toJson());
+        _tracer.trace(TraceTag.changePublishOptions, event.toJson());
         await _onPublishOptionsChanged(event);
       } else if (event is SfuIceRestartEvent) {
         await _onIceRestart(event);
       } else if (event is SfuGoAwayEvent) {
-        _tracer.trace('GoAway', event.toJson());
+        _tracer.trace(TraceTag.goAway, event.toJson());
       } else if (event is SfuErrorEvent) {
-        _tracer.trace('Error', event.toJson());
+        _tracer.trace(TraceTag.error, event.toJson());
       } else if (event is SfuCallEndedEvent) {
-        _tracer.trace('CallEnded', event.toJson());
+        _tracer.trace(TraceTag.callEnded, event.toJson());
       }
 
       if (event is SfuJoinResponseEvent) {
@@ -749,7 +750,7 @@ class CallSession extends Disposable {
       } else if (event is SfuParticipantLeftEvent) {
         stateManager.sfuParticipantLeft(event);
       } else if (event is SfuConnectionQualityChangedEvent) {
-        _tracer.trace('ConnectionQualityChanged', event.toJson());
+        _tracer.trace(TraceTag.connectionQualityChanged, event.toJson());
         stateManager.sfuConnectionQualityChanged(event);
       } else if (event is SfuAudioLevelChangedEvent) {
         stateManager.sfuUpdateAudioLevelChanged(event);
@@ -762,6 +763,7 @@ class CallSession extends Disposable {
       } else if (event is SfuPinsUpdatedEvent) {
         stateManager.sfuPinsUpdated(event.pins);
       } else if (event is SfuInboundStateNotificationEvent) {
+        _tracer.trace(TraceTag.inboundVideoState, event.toJson());
         stateManager.sfuInboundStateNotification(event);
       }
     });
