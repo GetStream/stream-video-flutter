@@ -44,6 +44,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   build_and_deploy_ios:
     name: Build and Distribute Dogfooding Ios
