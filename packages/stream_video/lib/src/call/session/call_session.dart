@@ -405,6 +405,9 @@ class CallSession extends Disposable {
         webRtcVersion: switch (CurrentPlatform.type) {
           PlatformType.android => androidWebRTCVersion,
           PlatformType.ios => iosWebRTCVersion,
+          PlatformType.macOS => macOsWebRTCVersion,
+          PlatformType.windows => windowsWebRTCVersion,
+          PlatformType.linux => linuxWebRTCVersion,
           _ => '',
         },
       );

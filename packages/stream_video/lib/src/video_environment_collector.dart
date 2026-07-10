@@ -4,7 +4,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:system_info2/system_info2.dart';
 
 import '../globals.dart'
-    show androidWebRTCVersion, iosWebRTCVersion, streamVideoVersion;
+    show
+        androidWebRTCVersion,
+        iosWebRTCVersion,
+        linuxWebRTCVersion,
+        macOsWebRTCVersion,
+        streamVideoVersion,
+        windowsWebRTCVersion;
 import 'logger/stream_log.dart';
 import 'platform_detector/platform_detector.dart';
 import 'video_environment.dart';
@@ -66,14 +72,17 @@ class VideoEnvironmentCollector {
           osArchitecture = info.arch;
           deviceModel = info.model;
           deviceVersion = info.osRelease;
+          webrtcVersion = macOsWebRTCVersion;
         } else if (CurrentPlatform.isWindows) {
           final info = await DeviceInfoPlugin().windowsInfo;
           osVersion =
               '${info.majorVersion}.${info.minorVersion}.${info.buildNumber}';
           osArchitecture = info.buildLabEx;
+          webrtcVersion = windowsWebRTCVersion;
         } else if (CurrentPlatform.isLinux) {
           final info = await DeviceInfoPlugin().linuxInfo;
           osVersion = '${info.name} ${info.version}';
+          webrtcVersion = linuxWebRTCVersion;
         } else if (CurrentPlatform.isWeb) {
           final info = await DeviceInfoPlugin().webBrowserInfo;
           browserName = info.browserName.name;

@@ -279,6 +279,9 @@ class SfuStatsReporter {
             webrtcVersion: switch (CurrentPlatform.type) {
               PlatformType.android => androidWebRTCVersion,
               PlatformType.ios => iosWebRTCVersion,
+              PlatformType.macOS => macOsWebRTCVersion,
+              PlatformType.windows => windowsWebRTCVersion,
+              PlatformType.linux => linuxWebRTCVersion,
               _ => null,
             },
             telemetry: _calculateTelemetry(
