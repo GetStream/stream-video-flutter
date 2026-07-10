@@ -52,32 +52,35 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
     pc
       ..onRenegotiationNeeded = () {
-        tracer.trace('renegotiationNeeded', null);
+        tracer.trace('negotiationneeded', null);
         originalNegotiationNeeded?.call();
       }
       ..onIceConnectionState = (state) {
-        tracer.trace('iceConnectionStateChange', state.name);
+        tracer.trace('iceconnectionstatechange', state.name);
         originalIceConnectionState?.call(state);
       }
       ..onIceCandidate = (candidate) {
-        tracer.trace('iceCandidate', candidate.toMap());
+        tracer.trace('onicecandidate', candidate.toMap());
         originalIceCandidate?.call(candidate);
       }
       ..onTrack = (event) {
         final streams = event.streams.map((stream) => 'stream:${stream.id}');
-        tracer.trace('track', '${event.track.kind}:${event.track.id} $streams');
+        tracer.trace(
+          'ontrack',
+          '${event.track.kind}:${event.track.id} $streams',
+        );
         originalOnTrack?.call(event);
       }
       ..onIceGatheringState = (state) {
-        tracer.trace('iceGatheringStateChange', state.name);
+        tracer.trace('icegatheringstatechange', state.name);
         originalIceGatheringState?.call(state);
       }
       ..onSignalingState = (state) {
-        tracer.trace('signalingStateChange', state.name);
+        tracer.trace('signalingstatechange', state.name);
         originalSignalingState?.call(state);
       }
       ..onConnectionState = (state) {
-        tracer.trace('connectionStateChange', state.name);
+        tracer.trace('connectionstatechange', state.name);
 
         if (state ==
                 rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected ||
@@ -90,7 +93,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         originalConnectionState?.call(state);
       }
       ..onDataChannel = (channel) {
-        tracer.trace('onDataChannel', [channel.id, channel.label]);
+        tracer.trace('datachannel', [channel.id, channel.label]);
         originalDataChannel?.call(channel);
       };
   }
@@ -390,7 +393,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     if (result.isSuccess) {
       tracer.trace('createOffer.success', result.getDataOrNull()?.toMap());
     } else {
-      tracer.trace('createOffer.error', result.getErrorOrNull()?.toString());
+      tracer.trace('createOffer.failure', result.getErrorOrNull()?.toString());
     }
 
     return result;
@@ -408,7 +411,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     if (result.isSuccess) {
       tracer.trace('createAnswer.success', result.getDataOrNull()?.toMap());
     } else {
-      tracer.trace('createAnswer.error', result.getErrorOrNull()?.toString());
+      tracer.trace('createAnswer.failure', result.getErrorOrNull()?.toString());
     }
 
     return result;

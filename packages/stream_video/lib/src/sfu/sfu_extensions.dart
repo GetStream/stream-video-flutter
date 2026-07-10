@@ -17,6 +17,7 @@ import 'data/events/sfu_events.dart';
 import 'data/models/sfu_audio_bitrate.dart';
 import 'data/models/sfu_connection_info.dart';
 import 'data/models/sfu_connection_quality.dart';
+import 'data/models/sfu_inbound_video_state.dart';
 import 'data/models/sfu_model_mapper_extensions.dart';
 import 'data/models/sfu_participant.dart';
 
@@ -482,6 +483,28 @@ extension SfuTrackUnpublishedEventJsonX on SfuTrackUnpublishedEvent {
         'audioLevel': participant.audioLevel,
         'roles': participant.roles,
       },
+    };
+  }
+}
+
+extension SfuInboundStateNotificationEventJsonX
+    on SfuInboundStateNotificationEvent {
+  Map<String, dynamic> toJson() {
+    return {
+      'inboundVideoStates': inboundVideoStates
+          .map((state) => state.toJson())
+          .toList(),
+    };
+  }
+}
+
+extension SfuInboundVideoStateJsonX on SfuInboundVideoState {
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'sessionId': sessionId,
+      'trackType': trackType.toDTO().value,
+      'paused': paused,
     };
   }
 }

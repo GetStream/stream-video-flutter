@@ -716,25 +716,25 @@ class CallSession extends Disposable {
       } else if (event is SfuParticipantLeftEvent) {
         await _onParticipantLeft(event);
       } else if (event is SfuTrackPublishedEvent) {
-        _tracer.trace('TrackPublished', event.toJson());
+        _tracer.trace('trackPublished', event.toJson());
         await _onTrackPublished(event);
       } else if (event is SfuTrackUnpublishedEvent) {
-        _tracer.trace('TrackUnpublish', event.toJson());
+        _tracer.trace('trackUnpublished', event.toJson());
         await _onTrackUnpublished(event);
       } else if (event is SfuChangePublishQualityEvent) {
-        _tracer.trace('PublishQualityChanged', event.toJson());
+        _tracer.trace('changePublishQuality', event.toJson());
         await _onPublishQualityChanged(event);
       } else if (event is SfuChangePublishOptionsEvent) {
-        _tracer.trace('PublishOptionsChanged', event.toJson());
+        _tracer.trace('changePublishOptions', event.toJson());
         await _onPublishOptionsChanged(event);
       } else if (event is SfuIceRestartEvent) {
         await _onIceRestart(event);
       } else if (event is SfuGoAwayEvent) {
-        _tracer.trace('GoAway', event.toJson());
+        _tracer.trace('goAway', event.toJson());
       } else if (event is SfuErrorEvent) {
-        _tracer.trace('Error', event.toJson());
+        _tracer.trace('error', event.toJson());
       } else if (event is SfuCallEndedEvent) {
-        _tracer.trace('CallEnded', event.toJson());
+        _tracer.trace('callEnded', event.toJson());
       }
 
       if (event is SfuJoinResponseEvent) {
@@ -746,7 +746,7 @@ class CallSession extends Disposable {
       } else if (event is SfuParticipantLeftEvent) {
         stateManager.sfuParticipantLeft(event);
       } else if (event is SfuConnectionQualityChangedEvent) {
-        _tracer.trace('ConnectionQualityChanged', event.toJson());
+        _tracer.trace('connectionQualityChanged', event.toJson());
         stateManager.sfuConnectionQualityChanged(event);
       } else if (event is SfuAudioLevelChangedEvent) {
         stateManager.sfuUpdateAudioLevelChanged(event);
@@ -759,6 +759,7 @@ class CallSession extends Disposable {
       } else if (event is SfuPinsUpdatedEvent) {
         stateManager.sfuPinsUpdated(event.pins);
       } else if (event is SfuInboundStateNotificationEvent) {
+        _tracer.trace('inboundVideoState', event.toJson());
         stateManager.sfuInboundStateNotification(event);
       }
     });

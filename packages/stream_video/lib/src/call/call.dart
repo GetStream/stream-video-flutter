@@ -1135,7 +1135,7 @@ class Call {
                     '[join] $sfuMigrateReason for SFU: $sfuName, migrating...',
               );
 
-              _session?.trace('call_join_migrate', {
+              _session?.trace('callJoin.migrate', {
                 'migrateFrom': sfuName,
                 'reason': sfuMigrateReason,
               });
@@ -1306,7 +1306,7 @@ class Call {
           _suspendedTrackStates[trackId] = SuspendedTrackState.neverStarted;
         },
         onReconnectionNeeded: (pc, strategy) {
-          _session?.trace('pc_reconnection_needed', {
+          _session?.trace('pc.reconnectionNeeded', {
             'peerConnectionId': pc.type.name,
             'reconnectionStrategy': strategy.name,
           });
@@ -1823,7 +1823,7 @@ class Call {
           )) {
         _logger.w(() => '[onSfuEvent] socket disconnected');
 
-        _session?.trace('sfu_socket_disconnected', {
+        _session?.trace('sfuSocket.disconnected', {
           'closeCode': sfuEvent.reason.closeCode,
           'closeReason': sfuEvent.reason.closeReason,
         });
@@ -1840,7 +1840,7 @@ class Call {
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
-      _session?.trace('sfu_socket_failed', {
+      _session?.trace('sfuSocket.failed', {
         'error': sfuEvent.error.message,
       });
       await _reconnect(
@@ -1849,7 +1849,7 @@ class Call {
       );
     } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
-      _session?.trace('sfu_go_away', {
+      _session?.trace('sfuSocket.goAway', {
         'reason': sfuEvent.goAwayReason.name,
       });
       await _reconnect(
@@ -1859,7 +1859,7 @@ class Call {
     }
     // error event
     else if (sfuEvent is SfuErrorEvent) {
-      _session?.trace('sfu_error', {
+      _session?.trace('sfuSocket.error', {
         'code': sfuEvent.error.code.name,
         'error': sfuEvent.error.message,
         'strategy': sfuEvent.error.reconnectStrategy.name,
