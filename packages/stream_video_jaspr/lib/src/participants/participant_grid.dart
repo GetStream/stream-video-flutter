@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:stream_video/stream_video.dart';
@@ -5,6 +7,10 @@ import 'package:stream_video/stream_video.dart';
 import 'participant_tile.dart';
 
 /// Lays out all call participants in a responsive CSS grid.
+///
+/// The column count grows with the participant count (mirroring
+/// `stream_video_flutter`'s desktop grid: `floor(sqrt(n - 1)) + 1`), so e.g.
+/// 5-9 participants form a 3-column grid instead of a cramped 2-column list.
 class ParticipantGrid extends StatelessComponent {
   const ParticipantGrid({
     required this.call,
@@ -17,8 +23,22 @@ class ParticipantGrid extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
+    final columnCount = participants.length <= 1
+        ? 1
+        : sqrt(participants.length - 1).floor() + 1;
+
     return div(
       classes: 'svj-grid',
+      styles: Styles(
+        gridTemplate: GridTemplate(
+          columns: GridTracks([
+            for (var i = 0; i < columnCount; i++)
+              const GridTrack(
+                TrackSize.minmax(TrackSize(Unit.zero), TrackSize.fr(1)),
+              ),
+          ]),
+        ),
+      ),
       [
         for (final participant in participants)
           ParticipantTile(call: call, participant: participant),
@@ -31,9 +51,9 @@ class ParticipantGrid extends StatelessComponent {
     css('.svj-grid', [
       css('&').styles(
         display: .grid,
-        gridTemplate: const GridTemplate(
-          columns: GridTracks([GridTrack(TrackSize.fr(1))]),
-        ),
+        autoRows: const [
+          TrackSize.minmax(TrackSize(Unit.zero), TrackSize.fr(1)),
+        ],
         gap: Gap(row: 8.px, column: 8.px),
         width: 100.percent,
         height: 100.percent,
@@ -41,16 +61,6 @@ class ParticipantGrid extends StatelessComponent {
         boxSizing: .borderBox,
         backgroundColor: Colors.black,
       ),
-      css.media(MediaQuery.screen(minWidth: 640.px), [
-        css('&').styles(
-          gridTemplate: const GridTemplate(
-            columns: GridTracks([
-              GridTrack(TrackSize.fr(1)),
-              GridTrack(TrackSize.fr(1)),
-            ]),
-          ),
-        ),
-      ]),
     ]),
   ];
 }
