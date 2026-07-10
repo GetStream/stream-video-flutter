@@ -181,6 +181,8 @@ jobs:
     name: Build and Deploy Dogfooding Web
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_web == true }}
     steps:
       - name: Checkout code
