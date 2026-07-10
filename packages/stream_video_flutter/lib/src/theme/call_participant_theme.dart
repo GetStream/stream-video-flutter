@@ -10,7 +10,7 @@ import '../../stream_video_flutter.dart';
 class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
   const StreamCallParticipantThemeData({
-    this.videoFit = VideoFit.cover,
+    this.videoFit,
     this.backgroundColor = const Color(0xffB4B7BB),
     this.borderRadius = BorderRadius.zero,
     this.userAvatarTheme = const StreamUserAvatarThemeData(
@@ -48,8 +48,11 @@ class StreamCallParticipantThemeData with Diagnosticable {
   });
 
   // ignore: comment_references
-  /// The fit of the [VideoRenderer] widget
-  final VideoFit videoFit;
+  /// The fit of the [VideoRenderer] widget.
+  ///
+  /// When `null`, [defaultVideoFit] is used, which resolves to
+  /// [VideoFit.adaptive] on web and desktop and [VideoFit.cover] on mobile.
+  final VideoFit? videoFit;
 
   /// The background color of the call participant.
   final Color backgroundColor;
