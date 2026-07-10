@@ -46,7 +46,7 @@ All new features are always implemented for both Android and iOS when possible, 
 | Basic functionality                                                                        | ✅   | ✅       | ✅  | ✅    | ⚠️       | ⚠️    |
 | [Advanced features](#-features-)                                                           | ✅   | ✅       | ☑️  | ☑️    | ❌       | ❌    |
 | [Dogfooding app](https://github.com/GetStream/stream-video-flutter/tree/main/dogfooding)   | ✅   | ✅       | ☑️  | ☑️    | ❌       | ❌    |
-| Official support                                                                           | ✅   | ✅       |⚠️   | ⚠️    | ❌       | ❌    |
+| Official support                                                                           | ✅   | ✅       | ❌  | ❌    | ❌       | ❌    |
 
 ## 💡 Features 💡
 
