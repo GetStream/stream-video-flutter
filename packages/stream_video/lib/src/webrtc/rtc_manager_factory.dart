@@ -39,6 +39,7 @@ class RtcManagerFactory {
     List<SfuPublishOptions> publishOptions = const [],
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
+    int clientEventRetryCount = 0,
   }) async {
     _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
 
@@ -78,6 +79,8 @@ class RtcManagerFactory {
       stateManager: stateManager,
       streamVideo: streamVideo,
       pcFactory: pcFactory,
+      sfuId: callSessionConfig?.sfuName,
+      clientEventRetryCount: clientEventRetryCount,
     );
   }
 }

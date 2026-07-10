@@ -39,9 +39,10 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).thenAnswer(
-            (_) async => Result.failure(
+            (_) async => const Result.failure(
               VideoErrorWithCause(
                 message: 'SFU disconnect',
                 cause: SfuError(
@@ -83,6 +84,7 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).called(1);
 
@@ -119,6 +121,7 @@ void main() {
                 ),
                 isAnonymousUser: any(named: 'isAnonymousUser'),
                 unifiedSessionId: any(named: 'unifiedSessionId'),
+                clientEventRetryCount: any(named: 'clientEventRetryCount'),
               ),
             ).thenAnswer(
               (_) async => Result.failure(
@@ -160,6 +163,7 @@ void main() {
                 ),
                 isAnonymousUser: any(named: 'isAnonymousUser'),
                 unifiedSessionId: any(named: 'unifiedSessionId'),
+                clientEventRetryCount: any(named: 'clientEventRetryCount'),
               ),
               () => localCoordinator.joinCall(
                 callCid: any(named: 'callCid'),
@@ -177,6 +181,7 @@ void main() {
                 ),
                 isAnonymousUser: any(named: 'isAnonymousUser'),
                 unifiedSessionId: any(named: 'unifiedSessionId'),
+                clientEventRetryCount: any(named: 'clientEventRetryCount'),
               ),
               () => localCoordinator.joinCall(
                 callCid: any(named: 'callCid'),
@@ -194,6 +199,7 @@ void main() {
                 ),
                 isAnonymousUser: any(named: 'isAnonymousUser'),
                 unifiedSessionId: any(named: 'unifiedSessionId'),
+                clientEventRetryCount: any(named: 'clientEventRetryCount'),
               ),
             ]);
           },
@@ -214,9 +220,10 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).thenAnswer(
-            (_) async => Result.failure(
+            (_) async => const Result.failure(
               VideoErrorWithCause(
                 message: 'Internal server error',
                 cause: SfuError(
@@ -256,6 +263,7 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
             () => mockCallSession.start(
               reconnectDetails: any(named: 'reconnectDetails'),
@@ -265,6 +273,7 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
             () => coordinatorClient.joinCall(
               callCid: any(named: 'callCid'),
@@ -282,6 +291,7 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ]);
         },
@@ -300,11 +310,12 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).thenAnswer((_) async {
             callCount++;
             if (callCount == 1) {
-              return Result.failure(
+              return const Result.failure(
                 VideoErrorWithCause(
                   message: 'Participant not found',
                   cause: SfuError(
@@ -355,6 +366,7 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).called(2);
         },
@@ -374,9 +386,10 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).thenAnswer(
-            (_) async => Result.failure(
+            (_) async => const Result.failure(
               VideoErrorWithCause(
                 message: 'Media transport failure',
                 cause: SfuError(
@@ -407,6 +420,7 @@ void main() {
               ),
               isAnonymousUser: any(named: 'isAnonymousUser'),
               unifiedSessionId: any(named: 'unifiedSessionId'),
+              clientEventRetryCount: any(named: 'clientEventRetryCount'),
             ),
           ).called(3);
         },

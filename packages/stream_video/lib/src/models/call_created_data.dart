@@ -5,7 +5,7 @@ import 'call_cid.dart';
 import 'call_metadata.dart';
 
 @immutable
-class CallCreatedData with EquatableMixin {
+class CallCreatedData extends Equatable {
   const CallCreatedData({
     required this.callCid,
     required this.metadata,
