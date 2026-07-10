@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../protobuf/video/sfu/models/models.pb.dart';
+import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
 import '../sfu/data/models/sfu_codec.dart';
 import '../sfu/data/models/sfu_model_mapper_extensions.dart';
@@ -52,35 +53,35 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
     pc
       ..onRenegotiationNeeded = () {
-        tracer.trace('negotiationneeded', null);
+        tracer.trace(TraceTag.negotiationNeeded, null);
         originalNegotiationNeeded?.call();
       }
       ..onIceConnectionState = (state) {
-        tracer.trace('iceconnectionstatechange', state.name);
+        tracer.trace(TraceTag.iceConnectionStateChange, state.name);
         originalIceConnectionState?.call(state);
       }
       ..onIceCandidate = (candidate) {
-        tracer.trace('onicecandidate', candidate.toMap());
+        tracer.trace(TraceTag.onIceCandidate, candidate.toMap());
         originalIceCandidate?.call(candidate);
       }
       ..onTrack = (event) {
         final streams = event.streams.map((stream) => 'stream:${stream.id}');
         tracer.trace(
-          'ontrack',
+          TraceTag.onTrack,
           '${event.track.kind}:${event.track.id} $streams',
         );
         originalOnTrack?.call(event);
       }
       ..onIceGatheringState = (state) {
-        tracer.trace('icegatheringstatechange', state.name);
+        tracer.trace(TraceTag.iceGatheringStateChange, state.name);
         originalIceGatheringState?.call(state);
       }
       ..onSignalingState = (state) {
-        tracer.trace('signalingstatechange', state.name);
+        tracer.trace(TraceTag.signalingStateChange, state.name);
         originalSignalingState?.call(state);
       }
       ..onConnectionState = (state) {
-        tracer.trace('connectionstatechange', state.name);
+        tracer.trace(TraceTag.connectionStateChange, state.name);
 
         if (state ==
                 rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected ||
@@ -93,7 +94,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
         originalConnectionState?.call(state);
       }
       ..onDataChannel = (channel) {
-        tracer.trace('datachannel', [channel.id, channel.label]);
+        tracer.trace(TraceTag.dataChannel, [channel.id, channel.label]);
         originalDataChannel?.call(channel);
       };
   }
@@ -316,7 +317,7 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     List<Map<String, dynamic>> newRtcStats,
   ) async {
     final statsDiff = _diffCompression(newRtcStats, _previousStats);
-    tracer.trace('getstats', statsDiff);
+    tracer.trace(TraceTag.getStats, statsDiff);
     _previousStats = newRtcStats;
   }
 
@@ -386,14 +387,17 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   Future<Result<rtc.RTCSessionDescription>> createOffer([
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
-    tracer.trace('createOffer', mediaConstraints);
+    tracer.trace(TraceTag.createOffer, mediaConstraints);
 
     final result = await super.createOffer(mediaConstraints);
 
     if (result.isSuccess) {
-      tracer.trace('createOffer.success', result.getDataOrNull()?.toMap());
+      tracer.trace(TraceTag.createOfferSuccess, result.getDataOrNull()?.toMap());
     } else {
-      tracer.trace('createOffer.failure', result.getErrorOrNull()?.toString());
+      tracer.trace(
+        TraceTag.createOfferFailure,
+        result.getErrorOrNull()?.toString(),
+      );
     }
 
     return result;
@@ -404,14 +408,20 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     String offerSdp, [
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
-    tracer.trace('createAnswer', mediaConstraints);
+    tracer.trace(TraceTag.createAnswer, mediaConstraints);
 
     final result = await super.createAnswer(offerSdp, mediaConstraints);
 
     if (result.isSuccess) {
-      tracer.trace('createAnswer.success', result.getDataOrNull()?.toMap());
+      tracer.trace(
+        TraceTag.createAnswerSuccess,
+        result.getDataOrNull()?.toMap(),
+      );
     } else {
-      tracer.trace('createAnswer.failure', result.getErrorOrNull()?.toString());
+      tracer.trace(
+        TraceTag.createAnswerFailure,
+        result.getErrorOrNull()?.toString(),
+      );
     }
 
     return result;
@@ -421,15 +431,15 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   Future<Result<void>> setRemoteDescription(
     rtc.RTCSessionDescription sd,
   ) async {
-    tracer.trace('setRemoteDescription', sd.toMap());
+    tracer.trace(TraceTag.setRemoteDescription, sd.toMap());
 
     final result = await super.setRemoteDescription(sd);
 
     if (result.isSuccess) {
-      tracer.trace('setRemoteDescription.success', null);
+      tracer.trace(TraceTag.setRemoteDescriptionSuccess, null);
     } else {
       tracer.trace(
-        'setRemoteDescription.error',
+        TraceTag.setRemoteDescriptionError,
         result.getErrorOrNull()?.toString(),
       );
     }
@@ -441,15 +451,15 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   Future<Result<void>> setLocalDescription(
     rtc.RTCSessionDescription description,
   ) async {
-    tracer.trace('setLocalDescription', description.toMap());
+    tracer.trace(TraceTag.setLocalDescription, description.toMap());
 
     final result = await super.setLocalDescription(description);
 
     if (result.isSuccess) {
-      tracer.trace('setLocalDescription.success', null);
+      tracer.trace(TraceTag.setLocalDescriptionSuccess, null);
     } else {
       tracer.trace(
-        'setLocalDescription.error',
+        TraceTag.setLocalDescriptionError,
         result.getErrorOrNull()?.toString(),
       );
     }
@@ -459,15 +469,15 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
 
   @override
   Future<Result<None>> addIceCandidate(rtc.RTCIceCandidate candidate) async {
-    tracer.trace('addIceCandidate', candidate.toMap());
+    tracer.trace(TraceTag.addIceCandidate, candidate.toMap());
 
     final result = await super.addIceCandidate(candidate);
 
     if (result.isSuccess) {
-      tracer.trace('addIceCandidate.success', null);
+      tracer.trace(TraceTag.addIceCandidateSuccess, null);
     } else {
       tracer.trace(
-        'addIceCandidate.error',
+        TraceTag.addIceCandidateError,
         result.getErrorOrNull()?.toString(),
       );
     }

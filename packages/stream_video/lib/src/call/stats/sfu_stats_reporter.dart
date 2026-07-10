@@ -21,6 +21,7 @@ import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import 'trace_record.dart';
+import 'trace_tag.dart';
 import 'tracer.dart';
 
 class SfuStatsReporter {
@@ -38,7 +39,7 @@ class SfuStatsReporter {
       _thermalStatus = _ThermalMonitor.lastStatus;
       _thermalStatusSubscription = sharedStream.listen((ThermalStatus status) {
         _thermalStatus = status;
-        _deviceTracer.trace('device.thermalState', status.name);
+        _deviceTracer.trace(TraceTag.deviceThermalState, status.name);
       });
     }
 
@@ -147,7 +148,7 @@ class SfuStatsReporter {
           try {
             lowPowerMode = await Battery().isInBatterySaveMode;
             if (lowPowerMode != _lastLowPowerMode) {
-              _deviceTracer.trace('device.lowPowerMode', lowPowerMode);
+              _deviceTracer.trace(TraceTag.deviceLowPowerMode, lowPowerMode);
               _lastLowPowerMode = lowPowerMode;
             }
           } on PlatformException {
