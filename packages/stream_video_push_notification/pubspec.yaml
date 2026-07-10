@@ -25,7 +25,7 @@ dependencies:
   shared_preferences: ^2.5.3
   stream_video: ^1.4.1
   stream_video_flutter: ^1.4.1
-  stream_webrtc_flutter: ^3.0.0
+  stream_webrtc_flutter: ^3.0.1
   uuid: ^4.5.1
 
 dev_dependencies:
