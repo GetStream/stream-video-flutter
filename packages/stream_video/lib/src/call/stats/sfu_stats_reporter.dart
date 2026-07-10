@@ -92,7 +92,7 @@ class SfuStatsReporter {
 
   static const _flushTimeout = Duration(seconds: 2);
 
-  bool get _canSendSfuStats => _stopped && !_flushing;
+  bool get _shouldSkipSfuStats => _stopped && !_flushing;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -145,18 +145,18 @@ class SfuStatsReporter {
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    if (_canSendSfuStats) return;
+    if (_shouldSkipSfuStats) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_canSendSfuStats) return;
+        if (_shouldSkipSfuStats) return;
         final publisherStatsBundle = await callSession.rtcManager?.publisher
             ?.getStats();
 
-        if (_canSendSfuStats) return;
+        if (_shouldSkipSfuStats) return;
         final subscriberStatsBundle = await callSession.rtcManager?.subscriber
             .getStats();
 
-        if (_canSendSfuStats ||
+        if (_shouldSkipSfuStats ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
