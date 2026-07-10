@@ -3,14 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:system_info2/system_info2.dart';
 
-import '../globals.dart'
-    show
-        androidWebRTCVersion,
-        iosWebRTCVersion,
-        linuxWebRTCVersion,
-        macOsWebRTCVersion,
-        streamVideoVersion,
-        windowsWebRTCVersion;
+import '../globals.dart';
 import 'logger/stream_log.dart';
 import 'platform_detector/platform_detector.dart';
 import 'video_environment.dart';
