@@ -392,7 +392,10 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
     final result = await super.createOffer(mediaConstraints);
 
     if (result.isSuccess) {
-      tracer.trace(TraceTag.createOfferSuccess, result.getDataOrNull()?.toMap());
+      tracer.trace(
+        TraceTag.createOfferSuccess,
+        result.getDataOrNull()?.toMap(),
+      );
     } else {
       tracer.trace(
         TraceTag.createOfferFailure,
