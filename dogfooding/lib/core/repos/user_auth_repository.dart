@@ -17,13 +17,14 @@ class UserAuthRepository {
   Future<UserCredentials> login() async {
     final response = await videoClient.connect();
 
-    return response.fold(
-      success: (success) {
-        return UserCredentials(token: success.data, userInfo: currentUser);
-      },
-      failure: (failure) {
-        throw failure.error;
-      },
+    if (response is Failure) {
+      await videoClient.disconnect();
+      throw response.error;
+    }
+
+    return UserCredentials(
+      token: (response as Success<UserToken>).data,
+      userInfo: currentUser,
     );
   }
 
