@@ -3,6 +3,7 @@ import 'package:jaspr/jaspr.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../call/call_state_builder.dart';
+import '../icons/icons.dart';
 
 /// A basic control bar: toggle microphone, toggle camera, leave.
 class CallControls extends StatelessComponent {
@@ -19,19 +20,23 @@ class CallControls extends StatelessComponent {
         final local = state.localParticipant;
         return div(classes: 'svj-controls', [
           ControlButton(
-            label: local?.isAudioEnabled ?? false ? '\u{1F3A4}' : '\u{1F507}',
+            icon: local?.isAudioEnabled ?? false
+                ? StreamIcon.mic
+                : StreamIcon.micOff,
             onClick: () => call.setMicrophoneEnabled(
               enabled: !(local?.isAudioEnabled ?? false),
             ),
           ),
           ControlButton(
-            label: local?.isVideoEnabled ?? false ? '\u{1F4F9}' : '\u{1F4F7}',
+            icon: local?.isVideoEnabled ?? false
+                ? StreamIcon.camera
+                : StreamIcon.cameraOff,
             onClick: () => call.setCameraEnabled(
               enabled: !(local?.isVideoEnabled ?? false),
             ),
           ),
           ControlButton(
-            label: '\u{1F4DE}',
+            icon: StreamIcon.callEnd,
             danger: true,
             onClick: () {
               call.leave();
@@ -60,12 +65,12 @@ class CallControls extends StatelessComponent {
 
 class ControlButton extends StatelessComponent {
   const ControlButton({
-    required this.label,
+    required this.icon,
     required this.onClick,
     this.danger = false,
   });
 
-  final String label;
+  final StreamIcon icon;
   final void Function() onClick;
   final bool danger;
 
@@ -76,7 +81,7 @@ class ControlButton extends StatelessComponent {
           ? 'svj-control-btn svj-control-btn-danger'
           : 'svj-control-btn',
       onClick: onClick,
-      [.text(label)],
+      [StreamIconView(icon)],
     );
   }
 
@@ -92,7 +97,7 @@ class ControlButton extends StatelessComponent {
         cursor: .pointer,
         justifyContent: .center,
         alignItems: .center,
-        fontSize: 1.25.rem,
+        color: Colors.white,
         backgroundColor: const Color('#333'),
       ),
       css('&:hover').styles(backgroundColor: const Color('#444')),

@@ -53,8 +53,8 @@ class LoginScreenState extends State<LoginScreen> {
     css('.svj-login', [
       css('&').styles(
         display: .flex,
-        width: 100.vw,
-        height: 100.vh,
+        width: 100.percent,
+        height: 100.percent,
         alignItems: .center,
         justifyContent: .center,
         backgroundColor: const Color('#111'),

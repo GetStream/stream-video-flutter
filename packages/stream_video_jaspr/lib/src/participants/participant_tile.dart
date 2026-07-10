@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../icons/icons.dart';
 import '../renderer/stream_video_view.dart';
 
 /// A single participant's video tile with a name/mute-status badge.
@@ -26,7 +27,8 @@ class ParticipantTile extends StatelessComponent {
           .text(
             participant.name.isNotEmpty ? participant.name : participant.userId,
           ),
-          .text(participant.isAudioEnabled ? '' : ' \u{1F507}'),
+          if (!participant.isAudioEnabled)
+            const StreamIconView(StreamIcon.micOff, size: 14),
         ]),
       ],
     );
@@ -47,6 +49,9 @@ class ParticipantTile extends StatelessComponent {
     css('.svj-tile-badge', [
       css('&').styles(
         position: Position.absolute(bottom: 8.px, left: 8.px),
+        display: .flex,
+        alignItems: .center,
+        gap: Gap(row: Unit.zero, column: 4.px),
         padding: .symmetric(horizontal: 8.px, vertical: 4.px),
         radius: .circular(4.px),
         backgroundColor: const Color('#000000A0'),

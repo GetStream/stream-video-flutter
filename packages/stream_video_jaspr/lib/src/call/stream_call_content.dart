@@ -37,8 +37,8 @@ class StreamCallContent extends StatelessComponent {
       css('&').styles(
         display: .flex,
         flexDirection: .column,
-        width: 100.vw,
-        height: 100.vh,
+        width: 100.percent,
+        height: 100.percent,
         backgroundColor: Colors.black,
       ),
     ]),

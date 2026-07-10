@@ -1,3 +1,4 @@
+import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -10,6 +11,26 @@ class App extends StatefulComponent {
 
   @override
   State<App> createState() => _AppState();
+
+  @css
+  static List<StyleRule> get styles => [
+    css('html', [
+      css('&').styles(
+        margin: .zero,
+        padding: .zero,
+        height: 100.percent,
+        boxSizing: .borderBox,
+      ),
+    ]),
+    css('body', [
+      css('&').styles(
+        margin: .zero,
+        padding: .zero,
+        height: 100.percent,
+        boxSizing: .borderBox,
+      ),
+    ]),
+  ];
 }
 
 class _AppState extends State<App> {
