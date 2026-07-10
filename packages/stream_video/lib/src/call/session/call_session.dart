@@ -1142,6 +1142,9 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentAudioOutputDevice() async {
+    // Only re-apply an output the user explicitly selected.
+    if (!stateManager.audioOutputSelectedByUser) return;
+
     final state = stateManager.callStateStream.valueOrNull;
     final audioOutputDevice = state?.audioOutputDevice;
     if (audioOutputDevice != null) {

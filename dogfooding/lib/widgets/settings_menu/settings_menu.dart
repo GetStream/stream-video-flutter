@@ -203,6 +203,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         ),
       ] else if (widget.call.checkIfAudioOutputChangeSupported()) ...[
         ChooseAudioOutputMenuItem(
+          selectedLabel: _audioOutputDevice?.label,
           onPressed: () {
             if (CurrentPlatform.isIos) {
               _deviceNotifier.triggeriOSAudioRouteSelectionUI();

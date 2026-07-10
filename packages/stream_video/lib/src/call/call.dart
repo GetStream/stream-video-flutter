@@ -604,6 +604,19 @@ class Call {
             ),
           );
           break;
+        case AudioRouteChangedEvent _:
+          if (!CurrentPlatform.isIos) break;
+
+          final device = event.device;
+          if (state.value.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
+              false) {
+            break;
+          }
+
+          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
+          _stateManager.participantSetAudioOutputDevice(device: device);
+          _stateManager.audioOutputSelectedByUser = false;
+          break;
         default:
           return;
       }
@@ -3777,9 +3790,8 @@ class Call {
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
 
-      _stateManager.participantSetAudioOutputDevice(
-        device: device,
-      );
+      _stateManager.participantSetAudioOutputDevice(device: device);
+      _stateManager.audioOutputSelectedByUser = true;
     }
 
     return result;
