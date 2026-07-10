@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
           await widget.connectUser(user);
 
           _observeRingingEvents();
-          
+
           return const Result.success(none);
         },
       ),
