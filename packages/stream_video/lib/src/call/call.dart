@@ -1696,7 +1696,7 @@ class Call {
     _session = session;
     _unifiedSessionId ??= _session?.sessionId;
 
-    _sfuStatsReporter?.stop();
+    await _flushAndStopSfuStatsReporter();
     _subscriptions.cancel(_idSessionStats);
     _subscriptions.cancel(_idSessionEvents);
 
@@ -1763,7 +1763,6 @@ class Call {
     }
 
     if (_sfuStatsOptions != null) {
-      unawaited(_sfuStatsReporter?.sendSfuStats());
       _sfuStatsReporter =
           SfuStatsReporter(
             callSession: session,
@@ -2381,6 +2380,23 @@ class Call {
     return true;
   }
 
+  Future<void> _flushAndStopSfuStatsReporter() async {
+    final reporter = _sfuStatsReporter;
+    if (reporter == null) return;
+
+    final status = state.value.status;
+    if (status is CallStatusDisconnected) {
+      _session?.trace(
+        'call.leaveReason',
+        _sfuLeaveReason(status.reason),
+      );
+    }
+
+    await reporter.flush();
+    reporter.stop();
+    _sfuStatsReporter = null;
+  }
+
   String _sfuLeaveReason(DisconnectReason? reason) {
     if (reason == null) return 'user is leaving the call';
 
@@ -2420,7 +2436,7 @@ class Call {
       await operation.cancel();
     }
 
-    _sfuStatsReporter?.stop();
+    await _flushAndStopSfuStatsReporter();
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
 

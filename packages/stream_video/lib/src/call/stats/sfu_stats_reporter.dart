@@ -88,6 +88,11 @@ class SfuStatsReporter {
   Timer? _timer;
   int _reportCount = 0;
   bool _stopped = false;
+  bool _flushing = false;
+
+  static const _flushTimeout = Duration(seconds: 2);
+
+  bool get _shouldSkipSfuStats => _stopped && !_flushing;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -116,22 +121,42 @@ class SfuStatsReporter {
     }
   }
 
+  Future<void> flush() async {
+    if (_stopped) return;
+    _flushing = true;
+
+    final sendStatsFuture = sendSfuStats().whenComplete(() {
+      _flushing = false;
+    });
+
+    try {
+      await sendStatsFuture.timeout(
+        _flushTimeout,
+        onTimeout: () {
+          _logger.v(() => 'SFU stats flush timed out during sampling');
+        },
+      );
+    } catch (e) {
+      _logger.v(() => 'Failed to flush SFU stats: $e');
+    }
+  }
+
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    if (_stopped) return;
+    if (_shouldSkipSfuStats) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_stopped) return;
+        if (_shouldSkipSfuStats) return;
         final publisherStatsBundle = await callSession.rtcManager?.publisher
             ?.getStats();
 
-        if (_stopped) return;
+        if (_shouldSkipSfuStats) return;
         final subscriberStatsBundle = await callSession.rtcManager?.subscriber
             .getStats();
 
-        if (_stopped ||
+        if (_shouldSkipSfuStats ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
