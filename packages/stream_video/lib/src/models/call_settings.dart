@@ -7,7 +7,7 @@ import '../webrtc/model/rtc_video_encoding.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
 import 'call_egress.dart';
 
-class CallSettings with EquatableMixin {
+class CallSettings extends Equatable {
   const CallSettings({
     this.ring = const StreamRingSettings(),
     this.audio = const StreamAudioSettings(),
@@ -84,7 +84,7 @@ class CallSettings with EquatableMixin {
   }
 }
 
-abstract class AbstractSettings with EquatableMixin {
+abstract class AbstractSettings extends Equatable {
   const AbstractSettings();
 
   @override
@@ -94,7 +94,7 @@ abstract class AbstractSettings with EquatableMixin {
   List<Object?> get props => [];
 }
 
-abstract class MediaSettings with EquatableMixin {
+abstract class MediaSettings extends Equatable {
   const MediaSettings({required this.accessRequestEnabled});
 
   final bool accessRequestEnabled;

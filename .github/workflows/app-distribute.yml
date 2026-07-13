@@ -44,6 +44,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   build_and_deploy_ios:
     name: Build and Distribute Dogfooding Ios
@@ -177,6 +181,8 @@ jobs:
     name: Build and Deploy Dogfooding Web
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_web == true }}
     steps:
       - name: Checkout code

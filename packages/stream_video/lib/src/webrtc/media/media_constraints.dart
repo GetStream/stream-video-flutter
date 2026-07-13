@@ -1,6 +1,7 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
 
+import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../logger/stream_log.dart';
 import 'screen_share_constraints.dart';
@@ -57,14 +58,14 @@ extension MediaDevices on rtc_interface.MediaDevices {
 
     try {
       if (constraints is ScreenShareConstraints) {
-        tag = 'navigator.mediaDevices.getDisplayMedia';
+        tag = TraceTag.getDisplayMedia;
         tracer?.trace('$tag.$sequence', constraintsMap);
 
         stream = nativeFactory != null
             ? await nativeFactory.getDisplayMedia(constraintsMap)
             : await rtc.navigator.mediaDevices.getDisplayMedia(constraintsMap);
       } else {
-        tag = 'navigator.mediaDevices.getUserMedia';
+        tag = TraceTag.getUserMedia;
         tracer?.trace('$tag.$sequence', constraintsMap);
 
         stream = nativeFactory != null

@@ -26,11 +26,15 @@ class AppInjector {
 
   // Register dependencies
   static Future<void> init({Environment? forceEnvironment}) async {
-    // Google sign in
-    locator.registerSingletonAsync<GoogleSignIn>(() async {
-      await GoogleSignIn.instance.initialize(hostedDomain: 'getstream.io');
-      return GoogleSignIn.instance;
-    });
+    // Google sign in. On web we use Firebase Auth's popup flow instead of the
+    // google_sign_in plugin (see LoginScreen), so we only initialize the
+    // plugin on native platforms.
+    if (!kIsWeb) {
+      locator.registerSingletonAsync<GoogleSignIn>(() async {
+        await GoogleSignIn.instance.initialize(hostedDomain: 'getstream.io');
+        return GoogleSignIn.instance;
+      });
+    }
 
     // App Preferences
     final prefs = await SharedPreferences.getInstance();

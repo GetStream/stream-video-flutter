@@ -30,6 +30,19 @@
   - `UserType.authenticated` has been renamed to `UserType.regular`.
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
+
+## 1.4.2
+
+### ✅ Added
+
+- [iOS] `Call.state.audioOutputDevice` now stays in sync with the active native audio route when the output changes outside of `Call.setAudioOutputDevice` (e.g. via the native route-selection UI, or when the system re-routes on device connect/disconnect).
+- Added client-side call join telemetry (`ClientEventReporter`).
+
+### 🐞 Fixed
+
+- Fixed connection quality indicator blanking after reconnect.
+- Fixed SFU stats not being flushed on call end.
+
 ### ✅ Added
 
 - Added client-side call join telemetry (`ClientEventReporter`): the SDK reports each stage of the join funnel — `JoinInitiated`, `CoordinatorWS`, `CoordinatorJoin`, `WSJoin`, `PeerConnectionConnect` (publish/subscribe), `FirstVideoFrame`, and `FirstAudioFrame` — to the backend so join success/failure can be reconciled. Enabled by default; disable via `StreamVideoOptions.clientEventsReportingEnabled`.

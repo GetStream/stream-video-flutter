@@ -205,7 +205,9 @@ class SfuWebSocket {
           SfuSocketDisconnected(
             sessionId: sessionId,
             url: url,
-            reason: DisconnectionReason(closeReason: 'Unhealthy connection'),
+            reason: const DisconnectionReason(
+              closeReason: 'Unhealthy connection',
+            ),
           ),
         );
       case UserInitiated() || SystemInitiated() || ServerInitiated():

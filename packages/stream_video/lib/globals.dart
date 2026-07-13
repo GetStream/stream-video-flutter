@@ -10,6 +10,9 @@ const String openapiModelsVersion = '225.14.0';
 const String protocolModelsVersion = '1.48.0';
 const String androidWebRTCVersion = webrtc.androidWebRTCVersion;
 const String iosWebRTCVersion = webrtc.iosWebRTCVersion;
+const String macOsWebRTCVersion = webrtc.macOsWebRTCVersion;
+const String linuxWebRTCVersion = webrtc.linuxWebRTCVersion;
+const String windowsWebRTCVersion = webrtc.windowsWebRTCVersion;
 
 const String streamDefaultUserAgent =
     'stream-video-flutter-v$streamVideoVersion';

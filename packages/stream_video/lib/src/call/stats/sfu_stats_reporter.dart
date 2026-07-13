@@ -15,6 +15,7 @@ import '../../extensions/thermal_status_ext.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import 'trace_record.dart';
+import 'trace_tag.dart';
 import 'tracer.dart';
 
 class SfuStatsReporter {
@@ -32,7 +33,7 @@ class SfuStatsReporter {
       _thermalStatus = _ThermalMonitor.lastStatus;
       _thermalStatusSubscription = sharedStream.listen((ThermalStatus status) {
         _thermalStatus = status;
-        _deviceTracer.trace('device.thermalState', status.name);
+        _deviceTracer.trace(TraceTag.deviceThermalState, status.name);
       });
     }
 
@@ -82,6 +83,11 @@ class SfuStatsReporter {
   Timer? _timer;
   int _reportCount = 0;
   bool _stopped = false;
+  bool _flushing = false;
+
+  static const _flushTimeout = Duration(seconds: 2);
+
+  bool get _shouldSkipSfuStats => _stopped && !_flushing;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -110,22 +116,42 @@ class SfuStatsReporter {
     }
   }
 
+  Future<void> flush() async {
+    if (_stopped) return;
+    _flushing = true;
+
+    final sendStatsFuture = sendSfuStats().whenComplete(() {
+      _flushing = false;
+    });
+
+    try {
+      await sendStatsFuture.timeout(
+        _flushTimeout,
+        onTimeout: () {
+          _logger.v(() => 'SFU stats flush timed out during sampling');
+        },
+      );
+    } catch (e) {
+      _logger.v(() => 'Failed to flush SFU stats: $e');
+    }
+  }
+
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    if (_stopped) return;
+    if (_shouldSkipSfuStats) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_stopped) return;
+        if (_shouldSkipSfuStats) return;
         final publisherStatsBundle = await callSession.rtcManager?.publisher
             ?.getStats();
 
-        if (_stopped) return;
+        if (_shouldSkipSfuStats) return;
         final subscriberStatsBundle = await callSession.rtcManager?.subscriber
             .getStats();
 
-        if (_stopped ||
+        if (_shouldSkipSfuStats ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
@@ -141,7 +167,7 @@ class SfuStatsReporter {
           try {
             lowPowerMode = await Battery().isInBatterySaveMode;
             if (lowPowerMode != _lastLowPowerMode) {
-              _deviceTracer.trace('device.lowPowerMode', lowPowerMode);
+              _deviceTracer.trace(TraceTag.deviceLowPowerMode, lowPowerMode);
               _lastLowPowerMode = lowPowerMode;
             }
           } on PlatformException {
@@ -248,6 +274,9 @@ class SfuStatsReporter {
             webrtcVersion: switch (CurrentPlatform.type) {
               PlatformType.android => androidWebRTCVersion,
               PlatformType.ios => iosWebRTCVersion,
+              PlatformType.macOS => macOsWebRTCVersion,
+              PlatformType.windows => windowsWebRTCVersion,
+              PlatformType.linux => linuxWebRTCVersion,
               _ => null,
             },
             telemetry: _calculateTelemetry(

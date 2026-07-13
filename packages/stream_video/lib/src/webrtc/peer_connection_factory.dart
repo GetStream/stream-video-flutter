@@ -3,6 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../../stream_video.dart';
 import '../call/session/call_session_config.dart';
+import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
 import '../sfu/sfu_client.dart';
 import 'sdp/editor/sdp_editor.dart';
@@ -202,7 +203,7 @@ class StreamPeerConnectionFactory {
     tracer.setEnabled(statsOptions?.enableRtcStats ?? false);
 
     tracer.trace(
-      'create',
+      TraceTag.create,
       configuration.toMap()..addAll(
         {
           'url': callSessionConfig?.sfuName,

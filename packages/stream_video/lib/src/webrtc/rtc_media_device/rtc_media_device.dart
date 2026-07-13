@@ -23,7 +23,7 @@ enum RtcMediaDeviceKind {
   String toString() => alias;
 }
 
-class RtcMediaDevice with EquatableMixin {
+class RtcMediaDevice extends Equatable {
   const RtcMediaDevice({
     required this.id,
     required this.label,

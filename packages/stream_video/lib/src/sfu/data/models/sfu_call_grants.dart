@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class SfuCallGrants with EquatableMixin {
-  SfuCallGrants({
+class SfuCallGrants extends Equatable {
+  const SfuCallGrants({
     required this.canPublishAudio,
     required this.canPublishVideo,
     required this.canScreenShare,
