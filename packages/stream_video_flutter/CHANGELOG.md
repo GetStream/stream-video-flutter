@@ -8,7 +8,7 @@
 
 ### 🔄 Changed
 
-- Increased minimum Flutter version to 3.38.0.
+- Increased minimum Flutter version to 3.38.1.
 - Participant video fit now defaults per-platform when not explicitly set: `VideoFit.adaptive` on web and desktop (so portrait feeds such as phone cameras are shown in full instead of being cropped) and `VideoFit.cover` on mobile. Set `videoFit` explicitly on `StreamCallParticipantThemeData` (or the renderer widgets) to override.
 
 ## 1.4.1

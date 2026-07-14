@@ -7,7 +7,7 @@
 
 ### 🔄 Changed
 
-- Increased minimum Flutter version to 3.38.0.
+- Increased minimum Flutter version to 3.38.1.
 
 ### 🐞 Fixed
 
@@ -15,10 +15,6 @@
 - Fixed SFU stats not being flushed on call end.
 
 ## 1.4.1
-
-### 🔄 Changed
-
-- Increased minimum Flutter version to 3.38.0.
 
 ### 🐞 Fixed
 
