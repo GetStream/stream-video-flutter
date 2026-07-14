@@ -23,6 +23,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+platforms:
+  ios:
+  android:
+
 flutter:
   plugin:
     platforms:

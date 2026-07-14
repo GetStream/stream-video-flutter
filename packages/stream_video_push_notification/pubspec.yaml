@@ -36,6 +36,10 @@ dev_dependencies:
   json_serializable: ^6.11.1
   mocktail: ^1.0.4
 
+platforms:
+  android:
+  ios:
+
 flutter:
   plugin:
     platforms:

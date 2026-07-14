@@ -1,16 +1,12 @@
 # Stream Video Flutter Example App
 
-This example app showcases core features of the [Stream Video Flutter](https://pub.dev/packages/stream_video_flutter) package. It's a great starting point to see how the Stream Video SDK works in real-world scenarios.
+This example app showcases core features of the [Stream Video Flutter](https://pub.dev/packages/stream_video_flutter) package. It's a great starting point to see how the Stream Video SDK works in real-world scenarios. This example app should work on all platforms supported by Flutter, the dogfooding app is a more advanced example app that does not work on Windows and Linux.
 
 For a more advanced example of how to use the Stream Video Flutter package, check out the [dogfooding app here](https://github.com/GetStream/stream-video-flutter/tree/main/dogfooding).
 
 ## Features
 
-- **Video calls**: Explore core calling functionality.
-    - Create or join a meeting (with or without a lobby).
-    - Make direct calls to other users (with CallKit/ringing integration; calls work in the background).
-
-> Note: In this example, ringing does not work when the app is terminated. For a more robust implementation of ringing with background capabilities, see the [dogfooding app](https://github.com/GetStream/stream-video-flutter/tree/main/dogfooding).
+- **Video calls**: Explore core calling functionality. Create or join a meeting (with or without a lobby).
 
 ## Prerequisites
 

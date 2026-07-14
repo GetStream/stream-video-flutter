@@ -52,6 +52,14 @@ dev_dependencies:
   protoc_plugin: ^25.0.0
   pubspec_parse: ^1.2.1
 
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
 topics:
   - video
   - audio

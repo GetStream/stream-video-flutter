@@ -21,7 +21,6 @@ class _StartCallTabState extends State<StartCallTab>
   final _selectedUsers = <UserInfo>{};
 
   bool _callInProgress = false;
-  bool _ringingCall = true;
 
   @override
   void dispose() {
@@ -58,28 +57,9 @@ class _StartCallTabState extends State<StartCallTab>
           if (_callInProgress)
             const CircularProgressIndicator(strokeWidth: 2)
           else
-            Column(
-              children: [
-                Row(
-                  children: [
-                    const Text('Ringing', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 16),
-                    Switch(
-                      value: _ringingCall,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _ringingCall = !_ringingCall;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: _startCall,
-                  child: const Text('Start call'),
-                ),
-              ],
+            ElevatedButton(
+              onPressed: _startCall,
+              child: const Text('Start call'),
             ),
         ],
       ),
@@ -99,7 +79,6 @@ class _StartCallTabState extends State<StartCallTab>
       id: callId,
     );
     final result = await call.getOrCreate(
-      ringing: _ringingCall,
       memberIds: [for (final user in _selectedUsers) user.id],
     );
 
@@ -107,22 +86,18 @@ class _StartCallTabState extends State<StartCallTab>
       success: (data) {
         setState(() => _callInProgress = false);
 
-        if (_ringingCall) {
-          widget.onNavigateToCall(call);
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => StreamLobbyView(
-                call: call,
-                onJoinCallPressed: (options) {
-                  Navigator.of(context).pop();
-                  widget.onNavigateToCall(call, options: options);
-                },
-              ),
+        Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (context) => StreamLobbyView(
+              call: call,
+              onJoinCallPressed: (options) {
+                Navigator.of(context).pop();
+                widget.onNavigateToCall(call, options: options);
+              },
             ),
-          );
-        }
+          ),
+        );
       },
       failure: (error) {
         setState(() => _callInProgress = false);
