@@ -12,6 +12,7 @@ import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
     as signal_twirp;
+import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
@@ -116,13 +117,13 @@ class SfuClient {
     sfu.SendAnswerRequest request,
   ) async {
     try {
-      _tracer.trace('SendAnswer', request.toJson());
+      _tracer.trace(TraceTag.sendAnswer, request.toJson());
 
       return _executeWithRetry<sfu.SendAnswerResponse>(
         call: () => _client.sendAnswer(_withAuthHeaders(), request),
       );
     } catch (e, stk) {
-      _tracer.trace('SendAnswer.failure', e.toString());
+      _tracer.trace(TraceTag.sendAnswerFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -131,13 +132,13 @@ class SfuClient {
     sfu_models.ICETrickle request,
   ) async {
     try {
-      _tracer.trace('IceTrickle', request.toJson());
+      _tracer.trace(TraceTag.iceTrickle, request.toJson());
 
       return _executeWithRetry<sfu.ICETrickleResponse>(
         call: () => _client.iceTrickle(_withAuthHeaders(), request),
       );
     } catch (e, stk) {
-      _tracer.trace('IceTrickle.failure', e.toString());
+      _tracer.trace(TraceTag.iceTrickleFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -146,13 +147,13 @@ class SfuClient {
     sfu.ICERestartRequest request,
   ) async {
     try {
-      _tracer.trace('RestartIce', request.toJson());
+      _tracer.trace(TraceTag.iceRestart, request.toJson());
 
       return _executeWithRetry<sfu.ICERestartResponse>(
         call: () => _client.iceRestart(_withAuthHeaders(), request),
       );
     } catch (e, stk) {
-      _tracer.trace('RestartIce.failure', e.toString());
+      _tracer.trace(TraceTag.iceRestartFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -161,7 +162,7 @@ class SfuClient {
     sfu.SetPublisherRequest request,
   ) async {
     try {
-      _tracer.trace('SetPublisher', request.toJson());
+      _tracer.trace(TraceTag.setPublisher, request.toJson());
       _logger.v(() => '[setPublisher] request: ${request.stringify()}');
 
       final result = await _executeWithRetry<sfu.SetPublisherResponse>(
@@ -177,7 +178,7 @@ class SfuClient {
 
       return result;
     } catch (e, stk) {
-      _tracer.trace('SetPublisher.failure', e.toString());
+      _tracer.trace(TraceTag.setPublisherFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -186,7 +187,7 @@ class SfuClient {
     sfu.UpdateMuteStatesRequest request,
   ) async {
     try {
-      _tracer.trace('UpdateMuteState', request.toJson());
+      _tracer.trace(TraceTag.updateMuteStates, request.toJson());
       _logger.v(() => '[updateMuteState] request: $request');
 
       final result = await _executeWithRetry<sfu.UpdateMuteStatesResponse>(
@@ -202,7 +203,7 @@ class SfuClient {
 
       return result;
     } catch (e, stk) {
-      _tracer.trace('UpdateMuteState.failure', e.toString());
+      _tracer.trace(TraceTag.updateMuteStatesFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -211,7 +212,7 @@ class SfuClient {
     sfu.UpdateSubscriptionsRequest request,
   ) async {
     try {
-      _tracer.trace('UpdateSubscriptions', request.toJson());
+      _tracer.trace(TraceTag.updateSubscriptions, request.toJson());
       _logger.v(() => '[updateSubscriptions] request: $request');
 
       final result = await _executeWithRetry<sfu.UpdateSubscriptionsResponse>(
@@ -227,7 +228,7 @@ class SfuClient {
 
       return result;
     } catch (e, stk) {
-      _tracer.trace('UpdateSubscriptions.failure', e.toString());
+      _tracer.trace(TraceTag.updateSubscriptionsFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -236,7 +237,7 @@ class SfuClient {
     sfu.StartNoiseCancellationRequest request,
   ) async {
     try {
-      _tracer.trace('StartNoiseCancellation', request.toJson());
+      _tracer.trace(TraceTag.startNoiseCancellation, request.toJson());
       _logger.v(() => '[startNoiseCancellation] request: $request');
 
       final result =
@@ -254,7 +255,7 @@ class SfuClient {
 
       return result;
     } catch (e, stk) {
-      _tracer.trace('StartNoiseCancellation.failure', e.toString());
+      _tracer.trace(TraceTag.startNoiseCancellationFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -263,7 +264,7 @@ class SfuClient {
     sfu.StopNoiseCancellationRequest request,
   ) async {
     try {
-      _tracer.trace('StopNoiseCancellation', request.toJson());
+      _tracer.trace(TraceTag.stopNoiseCancellation, request.toJson());
       _logger.v(() => '[stopNoiseCancellation] request: $request');
 
       final result = await _executeWithRetry<sfu.StopNoiseCancellationResponse>(
@@ -279,7 +280,7 @@ class SfuClient {
 
       return result;
     } catch (e, stk) {
-      _tracer.trace('StopNoiseCancellation.failure', e.toString());
+      _tracer.trace(TraceTag.stopNoiseCancellationFailure, e.toString());
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }

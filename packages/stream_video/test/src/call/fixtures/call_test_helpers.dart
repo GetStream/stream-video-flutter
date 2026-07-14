@@ -132,6 +132,7 @@ MockCallStateNotifier createTestCallStateManager({
   when(() => stateManager.callStateStream).thenAnswer(
     (_) => callStateStream,
   );
+  when(() => stateManager.audioOutputSelectedByUser).thenReturn(false);
   when(
     () => stateManager.validateUserId(any()),
   ).thenAnswer((_) => Future.value(const Result.success(none)));
@@ -267,7 +268,7 @@ MockRetryPolicy setupMockRetryPolicy() {
 SfuCallState createTestSfuCallState() {
   return SfuCallState(
     participants: const [],
-    participantCount: SfuParticipantCount(total: 0, anonymous: 0),
+    participantCount: const SfuParticipantCount(total: 0, anonymous: 0),
     startedAt: DateTime.now(),
     pins: const [],
   );

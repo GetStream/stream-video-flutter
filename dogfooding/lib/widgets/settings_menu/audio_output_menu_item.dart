@@ -6,9 +6,16 @@ import '../../theme/app_palette.dart';
 import 'standard_action_menu_item.dart';
 
 class ChooseAudioOutputMenuItem extends StatelessWidget {
-  const ChooseAudioOutputMenuItem({required this.onPressed, super.key});
+  const ChooseAudioOutputMenuItem({
+    required this.onPressed,
+    this.selectedLabel,
+    super.key,
+  });
 
   final VoidCallback onPressed;
+
+  /// Label of the currently selected audio output, shown as a trailing hint.
+  final String? selectedLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +26,20 @@ class ChooseAudioOutputMenuItem extends StatelessWidget {
           icon: Icons.headphones,
           label: 'Choose audio output',
           onPressed: onPressed,
+          trailing: selectedLabel == null
+              ? null
+              : ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 160),
+                  child: Text(
+                    selectedLabel!,
+                    textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColorPalette.secondaryText,
+                    ),
+                  ),
+                ),
         ),
       ],
     );

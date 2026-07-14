@@ -25,6 +25,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   # Does a sanity check that packages at least pass analysis on the N-1
   # versions of Flutter stable if the package claims to support that version.

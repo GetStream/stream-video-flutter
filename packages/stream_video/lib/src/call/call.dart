@@ -68,6 +68,7 @@ import 'session/dynascale_manager.dart';
 import 'state/call_state_notifier.dart';
 import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
+import 'stats/trace_tag.dart';
 
 typedef OnCallPermissionRequest =
     void Function(
@@ -604,6 +605,19 @@ class Call {
             ),
           );
           break;
+        case AudioRouteChangedEvent _:
+          if (!CurrentPlatform.isIos) break;
+
+          final device = event.device;
+          if (state.value.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
+              false) {
+            break;
+          }
+
+          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
+          _stateManager.participantSetAudioOutputDevice(device: device);
+          _stateManager.audioOutputSelectedByUser = false;
+          break;
         default:
           return;
       }
@@ -900,7 +914,7 @@ class Call {
       }
     }
 
-    _session?.trace('call.accept', null);
+    _session?.trace(TraceTag.callAccept, null);
 
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
@@ -919,7 +933,7 @@ class Call {
     final state = this.state.value;
     _logger.i(() => '[reject] reason: $reason');
 
-    _session?.trace('call.reject', reason?.value);
+    _session?.trace(TraceTag.callReject, reason?.value);
     final result = await _coordinatorClient.rejectCall(
       cid: state.callCid,
       reason: reason?.value,
@@ -1135,7 +1149,7 @@ class Call {
                     '[join] $sfuMigrateReason for SFU: $sfuName, migrating...',
               );
 
-              _session?.trace('call_join_migrate', {
+              _session?.trace(TraceTag.callJoinMigrate, {
                 'migrateFrom': sfuName,
                 'reason': sfuMigrateReason,
               });
@@ -1306,7 +1320,7 @@ class Call {
           _suspendedTrackStates[trackId] = SuspendedTrackState.neverStarted;
         },
         onReconnectionNeeded: (pc, strategy) {
-          _session?.trace('pc_reconnection_needed', {
+          _session?.trace(TraceTag.pcReconnectionNeeded, {
             'peerConnectionId': pc.type.name,
             'reconnectionStrategy': strategy.name,
           });
@@ -1683,7 +1697,7 @@ class Call {
     _session = session;
     _unifiedSessionId ??= _session?.sessionId;
 
-    _sfuStatsReporter?.stop();
+    await _flushAndStopSfuStatsReporter();
     _subscriptions.cancel(_idSessionStats);
     _subscriptions.cancel(_idSessionEvents);
 
@@ -1750,7 +1764,6 @@ class Call {
     }
 
     if (_sfuStatsOptions != null) {
-      unawaited(_sfuStatsReporter?.sendSfuStats());
       _sfuStatsReporter =
           SfuStatsReporter(
             callSession: session,
@@ -1823,7 +1836,7 @@ class Call {
           )) {
         _logger.w(() => '[onSfuEvent] socket disconnected');
 
-        _session?.trace('sfu_socket_disconnected', {
+        _session?.trace(TraceTag.sfuSocketDisconnected, {
           'closeCode': sfuEvent.reason.closeCode,
           'closeReason': sfuEvent.reason.closeReason,
         });
@@ -1840,7 +1853,7 @@ class Call {
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
-      _session?.trace('sfu_socket_failed', {
+      _session?.trace(TraceTag.sfuSocketFailed, {
         'error': sfuEvent.error.message,
       });
       await _reconnect(
@@ -1849,7 +1862,7 @@ class Call {
       );
     } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
-      _session?.trace('sfu_go_away', {
+      _session?.trace(TraceTag.sfuSocketGoAway, {
         'reason': sfuEvent.goAwayReason.name,
       });
       await _reconnect(
@@ -1859,7 +1872,7 @@ class Call {
     }
     // error event
     else if (sfuEvent is SfuErrorEvent) {
-      _session?.trace('sfu_error', {
+      _session?.trace(TraceTag.sfuSocketError, {
         'code': sfuEvent.error.code.name,
         'error': sfuEvent.error.message,
         'strategy': sfuEvent.error.reconnectStrategy.name,
@@ -1961,7 +1974,7 @@ class Call {
           return;
         }
 
-        _session?.trace('callReconnect', {
+        _session?.trace(TraceTag.callReconnect, {
           'strategy': strategy.name,
           'reason': reconnectReason,
         });
@@ -1982,7 +1995,7 @@ class Call {
 
           if (networkStatus == InternetStatus.disconnected) {
             _logger.w(() => '[reconnect] reconnection timeout');
-            _session?.trace('callReconnectFailed', {
+            _session?.trace(TraceTag.callReconnectFailed, {
               'strategy': strategy.name,
               'error': 'reconnection timeout',
             });
@@ -1994,7 +2007,7 @@ class Call {
             _logger.w(
               () => '[reconnect] rejected (call was left during network wait)',
             );
-            _session?.trace('callReconnectFailed', {
+            _session?.trace(TraceTag.callReconnectFailed, {
               'strategy': strategy.name,
               'error': 'call was left',
             });
@@ -2031,7 +2044,7 @@ class Call {
           };
 
           if (reconnectResult.isSuccess) {
-            _session?.trace('callReconnectSuccess', {
+            _session?.trace(TraceTag.callReconnectSuccess, {
               'strategy': strategy.name,
             });
           } else {
@@ -2077,7 +2090,7 @@ class Call {
               _logger.w(() => '[reconnect] unrecoverable error');
               _stateManager.lifecycleCallReconnectingFailed();
 
-              _session?.trace('callReconnectFailed', {
+              _session?.trace(TraceTag.callReconnectFailed, {
                 'strategy': strategy.name,
                 'error': error.toString(),
               });
@@ -2235,7 +2248,7 @@ class Call {
                 '[_awaitNetworkAvailable] network dropped during '
                 '${stabilityWindow.inSeconds}s stability window, retrying',
           );
-          _session?.trace('awaitNetwork.unstable', {
+          _session?.trace(TraceTag.awaitNetworkUnstable, {
             'stabilityWindowSeconds': stabilityWindow.inSeconds,
           });
         } on TimeoutException {
@@ -2368,6 +2381,23 @@ class Call {
     return true;
   }
 
+  Future<void> _flushAndStopSfuStatsReporter() async {
+    final reporter = _sfuStatsReporter;
+    if (reporter == null) return;
+
+    final status = state.value.status;
+    if (status is CallStatusDisconnected) {
+      _session?.trace(
+        'call.leaveReason',
+        _sfuLeaveReason(status.reason),
+      );
+    }
+
+    await reporter.flush();
+    reporter.stop();
+    _sfuStatsReporter = null;
+  }
+
   String _sfuLeaveReason(DisconnectReason? reason) {
     if (reason == null) return 'user is leaving the call';
 
@@ -2407,7 +2437,7 @@ class Call {
       await operation.cancel();
     }
 
-    _sfuStatsReporter?.stop();
+    await _flushAndStopSfuStatsReporter();
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
 
@@ -3777,9 +3807,8 @@ class Call {
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
 
-      _stateManager.participantSetAudioOutputDevice(
-        device: device,
-      );
+      _stateManager.participantSetAudioOutputDevice(device: device);
+      _stateManager.audioOutputSelectedByUser = true;
     }
 
     return result;

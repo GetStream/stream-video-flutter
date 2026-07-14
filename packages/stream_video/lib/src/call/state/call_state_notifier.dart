@@ -38,6 +38,11 @@ class CallStateNotifier extends StateNotifier<CallState>
   late final MutableStateEmitterImpl<CallState> callStateStream;
   CallState get callState => callStateStream.value;
 
+  /// Whether the current [CallState.audioOutputDevice] was chosen explicitly by
+  /// the user (via `Call.setAudioOutputDevice`) rather than observed from a
+  /// passive OS audio-route change (`AudioRouteChangedEvent`).
+  bool audioOutputSelectedByUser = false;
+
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
     return callStateStream.valueStream
         .map(selector)

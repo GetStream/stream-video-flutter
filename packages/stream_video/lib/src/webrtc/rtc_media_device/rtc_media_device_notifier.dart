@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
+import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/extensions.dart';
@@ -27,6 +28,15 @@ class ScreenSharingStoppedEvent extends NativeWebRtcEvent {
 class ScreenSharingStartedEvent extends NativeWebRtcEvent {
   ScreenSharingStartedEvent({this.data});
   final Map<dynamic, dynamic>? data;
+}
+
+/// Emitted (iOS) when the active audio output route changes outside of an
+/// explicit [Call.setAudioOutputDevice] call, e.g. when the user picks a
+/// different output through the native route-selection UI
+/// ([RtcMediaDeviceNotifier.triggeriOSAudioRouteSelectionUI]).
+class AudioRouteChangedEvent extends NativeWebRtcEvent {
+  AudioRouteChangedEvent({required this.device});
+  final RtcMediaDevice device;
 }
 
 sealed class SpeechActivityEvent {
@@ -129,6 +139,17 @@ class RtcMediaDeviceNotifier {
               return ScreenSharingStoppedEvent(data: values);
             case 'screenSharingStarted':
               return ScreenSharingStartedEvent(data: values);
+            case 'onAudioRouteChange':
+              final deviceId = values?['deviceId'] as String?;
+              if (deviceId == null || deviceId.isEmpty) return null;
+              return AudioRouteChangedEvent(
+                device: RtcMediaDevice(
+                  id: deviceId,
+                  label: values?['label'] as String? ?? deviceId,
+                  groupId: values?['groupId'] as String?,
+                  kind: RtcMediaDeviceKind.audioOutput,
+                ),
+              );
             default:
               return null;
           }
@@ -157,7 +178,7 @@ class RtcMediaDeviceNotifier {
           values['voiceProcessingAGCEnabled'] as bool? ?? false;
 
       _tracer.trace(
-        'audioProcessingStateChanged',
+        TraceTag.audioProcessingStateChanged,
         {
           'stereoPlayoutEnabled': stereoPlayoutEnabled,
           'voiceProcessingEnabled': voiceProcessingEnabled,
@@ -223,7 +244,7 @@ class RtcMediaDeviceNotifier {
       ];
 
       _tracer.trace(
-        'navigator.mediaDevices.enumeratedevices',
+        TraceTag.enumerateDevices,
         mediaDevices.map((device) => device.toJson()).toList(),
       );
 
@@ -264,14 +285,14 @@ class RtcMediaDeviceNotifier {
   /// This does not affect the microphone or remote track subscriptions.
   /// Use as a global "mute all sounds" toggle or when the app goes to background.
   Future<void> pauseAudioPlayout() {
-    _tracer.trace('navigator.mediaDevices.pauseAudioPlayout', null);
+    _tracer.trace(TraceTag.pauseAudioPlayout, null);
     return rtc.Helper.pauseAudioPlayout();
   }
 
   /// Resumes audio output (playout) muted via [pauseAudioPlayout].
   /// Does not change microphone state or remote track subscriptions.
   Future<void> resumeAudioPlayout() {
-    _tracer.trace('navigator.mediaDevices.resumeAudioPlayout', null);
+    _tracer.trace(TraceTag.resumeAudioPlayout, null);
     return rtc.Helper.resumeAudioPlayout();
   }
 
@@ -281,7 +302,7 @@ class RtcMediaDeviceNotifier {
   /// To ensure you receive `onInterruptionEnd`, explicitly call
   /// [resumeAudioPlayout] (e.g., when the app resumes from background).
   Future<void> regainAndroidAudioFocus() {
-    _tracer.trace('navigator.mediaDevices.regainAndroidAudioFocus', null);
+    _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();
   }
 

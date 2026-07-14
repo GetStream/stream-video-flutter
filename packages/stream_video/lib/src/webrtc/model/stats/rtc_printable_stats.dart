@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class RtcPrintableStats with EquatableMixin {
+class RtcPrintableStats extends Equatable {
   const RtcPrintableStats({
     required this.local,
     required this.remote,
