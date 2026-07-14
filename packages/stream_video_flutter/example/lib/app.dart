@@ -1,16 +1,11 @@
 // ignore_for_file: unreachable_from_main
 
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'core/auth_repository.dart';
 import 'screen/login_screen.dart';
-import 'stream_video_sdk.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key, required this.connectUser});
