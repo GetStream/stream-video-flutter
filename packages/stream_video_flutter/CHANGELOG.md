@@ -1,8 +1,10 @@
-## Upcoming
+## 1.4.2
 
 ### ✅ Added
 
 - Added `VideoFit.adaptive`, which picks between `cover` and `contain` based on the video's own orientation: landscape/square video fills the tile while portrait/tall video is letterboxed so the whole frame stays visible.
+- [iOS] `Call.state.audioOutputDevice` now stays in sync with the active native audio route when the output changes outside of `Call.setAudioOutputDevice` (e.g. via the native route-selection UI, or when the system re-routes on device connect/disconnect).
+- Added client-side call join telemetry (`ClientEventReporter`).
 
 ### 🔄 Changed
 

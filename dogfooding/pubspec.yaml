@@ -1,5 +1,5 @@
 name: flutter_dogfooding
-version: 2.4.1+1
+version: 2.4.2+1
 publish_to: none
 description: Flutter Dogfooding App to showcase Video SDK.
 
@@ -39,11 +39,11 @@ dependencies:
   share_plus: ^13.0.0
   shared_preferences: ^2.5.3
   stream_chat_flutter: ^10.0.0
-  stream_video_filters: ^1.4.1
-  stream_video_flutter: ^1.4.1
-  stream_video_noise_cancellation: ^1.4.1
-  stream_video_push_notification: ^1.4.1
-  stream_video_screen_sharing: ^1.4.1
+  stream_video_filters: ^1.4.2
+  stream_video_flutter: ^1.4.2
+  stream_video_noise_cancellation: ^1.4.2
+  stream_video_push_notification: ^1.4.2
+  stream_video_screen_sharing: ^1.4.2
 
 dev_dependencies:
   build_runner: ^2.4.6

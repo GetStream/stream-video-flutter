@@ -1,4 +1,4 @@
-## Upcoming
+## 1.4.2
 * Increased minimum Flutter version to 3.38.0.
 
 ## 1.4.1
