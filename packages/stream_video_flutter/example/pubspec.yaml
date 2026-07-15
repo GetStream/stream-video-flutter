@@ -27,8 +27,8 @@ dependencies:
   rxdart: ^0.28.0
   share_plus: ^13.0.0
   shared_preferences: ^2.5.3
-  stream_video: ^1.4.1
-  stream_video_flutter: ^1.4.1
+  stream_video: ^1.4.2
+  stream_video_flutter: ^1.4.2
   stream_webrtc_flutter: ^3.0.1
 
 dev_dependencies:
