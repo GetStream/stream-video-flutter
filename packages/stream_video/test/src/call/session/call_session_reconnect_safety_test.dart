@@ -244,6 +244,73 @@ void main() {
         expect(called, 0);
       });
     });
+
+    test(
+      'renegotiates and escalates to rejoin when the publisher is wedged in '
+      '"have-local-offer" after the delay',
+      () {
+        fakeAsync((async) {
+          final reconnects =
+              <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+          final session = _buildTestSession(
+            onReconnectionNeeded: (pc, strategy) =>
+                reconnects.add((pc, strategy)),
+          );
+          // ICE progressed past "new", so the ICE-stall branch does NOT fire.
+          final wires = _wirePublisher(
+            session,
+            iceState: rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+          );
+          // ...but the publisher created a local offer and never completed
+          // SetPublisher, so it is stuck in have-local-offer.
+          when(() => wires.pc.signalingState).thenReturn(
+            rtc.RTCSignalingState.RTCSignalingStateHaveLocalOffer,
+          );
+
+          session.startPublisherConnectionCheck();
+          async
+            ..elapse(const Duration(seconds: 16))
+            ..flushMicrotasks();
+
+          // The recovery renegotiation cannot complete (no SFU connection in
+          // the test), so the watchdog falls back to a full rejoin.
+          expect(reconnects, hasLength(1));
+          expect(reconnects.single.$1, same(wires.publisher));
+          expect(reconnects.single.$2, SfuReconnectionStrategy.rejoin);
+        });
+      },
+    );
+
+    test(
+      'does NOT trigger recovery when the publisher signaling state is '
+      'stable',
+      () {
+        fakeAsync((async) {
+          var called = 0;
+          final session = _buildTestSession(
+            onReconnectionNeeded: (_, __) => called++,
+          );
+          final wires = _wirePublisher(
+            session,
+            iceState: rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+          );
+          when(() => wires.pc.signalingState).thenReturn(
+            rtc.RTCSignalingState.RTCSignalingStateStable,
+          );
+
+          session.startPublisherConnectionCheck();
+          async
+            ..elapse(const Duration(seconds: 16))
+            ..flushMicrotasks();
+
+          expect(
+            called,
+            0,
+            reason: 'publisher is connected and stable — nothing to recover',
+          );
+        });
+      },
+    );
   });
 
   group('CallSession.getReconnectDetails', () {

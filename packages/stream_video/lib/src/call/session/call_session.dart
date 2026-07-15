@@ -46,6 +46,8 @@ const _tag = 'SV:CallSession';
 const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 const _publisherConnectionCheckDelay = Duration(seconds: 15);
+const _maxPublisherNegotiationAttempts = 3;
+const _publisherNegotiationRetryDelay = Duration(milliseconds: 300);
 
 class CallSession extends Disposable {
   CallSession({
@@ -584,18 +586,18 @@ class CallSession extends Disposable {
     }
   }
 
-  /// Starts a one-shot timer that verifies the publisher's ICE transport
-  /// transitions out of the `new` state within [_publisherConnectionCheckDelay].
+  /// Checks after [_publisherConnectionCheckDelay] that the publisher finished
+  /// connecting.
   ///
-  /// If the transport is still `new` after the deadline, the SDP answer was
-  /// likely never received (e.g. network dropped before the SFU could reply)
-  /// and we trigger a reconnection.
+  /// Recovers two stalls: ICE still `new` (likely no SDP answer) → rejoin;
+  /// signaling `have-local-offer` (SetPublisher incomplete, no further
+  /// negotiation) → renegotiate, then rejoin if needed.
   void startPublisherConnectionCheck() {
     _publisherConnectionCheckTimer?.cancel();
 
     _publisherConnectionCheckTimer = Timer(
       _publisherConnectionCheckDelay,
-      () {
+      () async {
         if (_isLeavingOrClosed) return;
 
         final publisher = rtcManager?.publisher;
@@ -613,14 +615,45 @@ class CallSession extends Disposable {
             'iceState': iceState.toString(),
             'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
           });
+
           onReconnectionNeeded(publisher, SfuReconnectionStrategy.rejoin);
-        } else {
-          _logger.v(
-            () =>
-                '[publisherConnectionCheck] publisher ICE state: '
-                '$iceState — OK',
-          );
+          return;
         }
+
+        // Signaling stall: local offer created but SetPublisher never completed,
+        // leaving the peer connection wedged in `have-local-offer`. Negotiation
+        // won't resume on its own, so renegotiate and rejoin if recovery fails.
+        final signalingState = publisher.pc.signalingState;
+        if (signalingState ==
+            rtc.RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
+          _logger.w(
+            () =>
+                '[publisherConnectionCheck] publisher stuck in '
+                '"have-local-offer" after '
+                '${_publisherConnectionCheckDelay.inSeconds}s — renegotiating',
+          );
+          _tracer.trace(TraceTag.publisherConnectionCheckStalled, {
+            'signalingState': signalingState.toString(),
+            'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
+          });
+
+          final result = await _onRenegotiationNeeded(publisher);
+          if (result.isFailure && !_isLeavingOrClosed) {
+            _logger.w(
+              () =>
+                  '[publisherConnectionCheck] recovery renegotiation failed '
+                  '(${result.getErrorOrNull()}) — triggering rejoin',
+            );
+            onReconnectionNeeded(publisher, SfuReconnectionStrategy.rejoin);
+          }
+          return;
+        }
+
+        _logger.v(
+          () =>
+              '[publisherConnectionCheck] publisher ICE state: '
+              '$iceState — OK',
+        );
       },
     );
   }

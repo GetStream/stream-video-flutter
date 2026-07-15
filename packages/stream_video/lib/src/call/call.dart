@@ -2063,17 +2063,22 @@ class Call {
                 DateTime.now().difference(reconnectStartTime) >
                 _fastReconnectDeadline;
 
-            // don't immediately switch to the REJOIN strategy, but instead
-            // attempt to reconnect with the FAST strategy a few times first.
             final hasPendingRejoin = _isRejoinPending;
             _isRejoinPending = false;
+
+            final hasClosedPeerConnection =
+                (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
+                (_session?.rtcManager?.subscriber.isClosed() ?? false);
+
+            final hasReachedFastReconnectLimit =
+                fastReconnectAttemptsCount >= 2;
+
             final shouldRejoin =
                 hasPendingRejoin ||
                 mustPerformRejoin ||
                 wasMigrating ||
-                fastReconnectAttemptsCount >= 2 ||
-                !(_session?.rtcManager?.publisher?.isHealthy() ?? true) ||
-                !(_session?.rtcManager?.subscriber.isHealthy() ?? true);
+                hasReachedFastReconnectLimit ||
+                hasClosedPeerConnection;
 
             if (!shouldRejoin) {
               fastReconnectAttemptsCount++;
