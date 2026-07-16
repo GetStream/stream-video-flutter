@@ -46,8 +46,6 @@ const _tag = 'SV:CallSession';
 const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 const _publisherConnectionCheckDelay = Duration(seconds: 15);
-const _maxPublisherNegotiationAttempts = 3;
-const _publisherNegotiationRetryDelay = Duration(milliseconds: 300);
 
 class CallSession extends Disposable {
   CallSession({
