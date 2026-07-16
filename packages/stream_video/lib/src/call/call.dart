@@ -2073,7 +2073,11 @@ class Call {
             final hasReachedFastReconnectLimit =
                 fastReconnectAttemptsCount >= 2;
 
+            final isAlreadyRejoining =
+                _reconnectStrategy == SfuReconnectionStrategy.rejoin;
+
             final shouldRejoin =
+                isAlreadyRejoining ||
                 hasPendingRejoin ||
                 mustPerformRejoin ||
                 wasMigrating ||
