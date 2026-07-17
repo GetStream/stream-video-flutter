@@ -11,6 +11,10 @@
 
 ### 🐞 Fixed
 
+- Reconnection now keeps trying a fast reconnect for the full fast-reconnect deadline before escalating to a full rejoin.
+  - A failed ICE restart now triggers a fast reconnect and lets the reconnect loop decide when to escalate, rather than jumping straight to a rejoin.
+  - A `failed` peer-connection state now enters the reconnect loop with the fast strategy instead of forcing an immediate rejoin.
+  - A transient ICE `disconnected` state is no longer treated as unhealthy, only a permanently `closed` peer connection forces an immediate rejoin.
 - Fixed connection quality indicator blanking after reconnect.
 - Fixed SFU stats not being flushed on call end.
 

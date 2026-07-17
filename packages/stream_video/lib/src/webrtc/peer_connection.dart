@@ -5,7 +5,6 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
 import '../disposable.dart';
-import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
@@ -141,16 +140,7 @@ class StreamPeerConnection extends Disposable {
 
     restartIce().then((result) {
       if (result.isFailure) {
-        final error = result.getErrorOrNull();
-        if (error is VideoErrorWithCause && error.cause is SfuError) {
-          final sfuError = error.cause as SfuError;
-          if (sfuError.code == SfuErrorCode.participantSignalLost) {
-            onReconnectionNeeded?.call(this, SfuReconnectionStrategy.fast);
-            return;
-          }
-        }
-
-        onReconnectionNeeded?.call(this, SfuReconnectionStrategy.rejoin);
+        onReconnectionNeeded?.call(this, SfuReconnectionStrategy.fast);
       }
     });
   }
@@ -393,22 +383,28 @@ class StreamPeerConnection extends Disposable {
 
   /// Checks if the `RTCPeerConnection` is healthy.
   /// It checks the ICE connection state and the peer connection state.
-  /// If either state is `failed`, `disconnected`, or `closed`,
-  /// it returns `false`, otherwise it returns `true`.
+  /// A `failed` or `closed` state is considered unhealthy.
   bool isHealthy() {
     const failedStates = {
       rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
       rtc.RTCIceConnectionState.RTCIceConnectionStateClosed,
-      rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
       rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed,
       rtc.RTCPeerConnectionState.RTCPeerConnectionStateClosed,
-      rtc.RTCPeerConnectionState.RTCPeerConnectionStateDisconnected,
     };
 
     final iceState = pc.iceConnectionState;
     final connectionState = pc.connectionState;
     return !failedStates.contains(iceState) &&
         !failedStates.contains(connectionState);
+  }
+
+  /// Whether the `RTCPeerConnection` is permanently closed and therefore
+  /// cannot be recovered by an ICE restart / fast reconnect.
+  bool isClosed() {
+    return pc.iceConnectionState ==
+            rtc.RTCIceConnectionState.RTCIceConnectionStateClosed ||
+        pc.connectionState ==
+            rtc.RTCPeerConnectionState.RTCPeerConnectionStateClosed;
   }
 
   void _initRtcCallbacks() {
@@ -517,7 +513,7 @@ class StreamPeerConnection extends Disposable {
 
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
-      onReconnectionNeeded?.call(this, SfuReconnectionStrategy.rejoin);
+      onReconnectionNeeded?.call(this, SfuReconnectionStrategy.fast);
     } else {
       _logger.v(() => '[onConnectionState] state: $state');
     }
