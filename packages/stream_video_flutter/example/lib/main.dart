@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -7,7 +6,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'app.dart';
 import 'core/auth_repository.dart';
 import 'core/token_service.dart';
-import 'firebase_options.dart';
 import 'log_config.dart';
 import 'model/credentials.dart';
 import 'stream_video_options.dart';
@@ -19,8 +17,6 @@ Future<void> main() async {
   //useProxy('192.168.1.73:8888');
 
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await _setupLogger();
 

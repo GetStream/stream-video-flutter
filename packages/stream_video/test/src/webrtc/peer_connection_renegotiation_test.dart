@@ -190,7 +190,7 @@ void main() {
 
   group('StreamPeerConnection.onConnectionState', () {
     test(
-      'fires onReconnectionNeeded with rejoin when the peer enters Failed',
+      'fires onReconnectionNeeded with fast when the peer enters Failed',
       () {
         final pc = _FakeRtcPeerConnection();
         final sp = _build(pc: pc, type: StreamPeerType.publisher);
@@ -205,7 +205,7 @@ void main() {
 
         expect(calls, hasLength(1));
         expect(calls.single.$1, same(sp));
-        expect(calls.single.$2, SfuReconnectionStrategy.rejoin);
+        expect(calls.single.$2, SfuReconnectionStrategy.fast);
       },
     );
 

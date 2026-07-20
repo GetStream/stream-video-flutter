@@ -39,14 +39,15 @@ melos:
       dependencies:
         dart_webrtc: ^1.5.3+hotfix.2
         device_info_plus: ">=12.1.0 <14.0.0"
+        google_fonts: ^8.0.2
         package_info_plus: ">=9.0.0 <11.0.0"
         share_plus: ^13.0.0
         stream_chat_flutter: ^10.0.0
         stream_webrtc_flutter: ^3.0.1
-        stream_video_flutter: ^1.4.1
-        stream_video_noise_cancellation: ^1.4.1
-        stream_video_push_notification: ^1.4.1
-        stream_video_screen_sharing: ^1.4.1
+        stream_video_flutter: ^1.4.2
+        stream_video_noise_cancellation: ^1.4.2
+        stream_video_push_notification: ^1.4.2
+        stream_video_screen_sharing: ^1.4.2
 
   scripts:
     postclean:

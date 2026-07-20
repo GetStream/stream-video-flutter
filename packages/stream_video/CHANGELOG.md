@@ -38,8 +38,16 @@
 - [iOS] `Call.state.audioOutputDevice` now stays in sync with the active native audio route when the output changes outside of `Call.setAudioOutputDevice` (e.g. via the native route-selection UI, or when the system re-routes on device connect/disconnect).
 - Added client-side call join telemetry (`ClientEventReporter`).
 
+### 🔄 Changed
+
+- Increased minimum Flutter version to 3.38.1.
+
 ### 🐞 Fixed
 
+- Reconnection now keeps trying a fast reconnect for the full fast-reconnect deadline before escalating to a full rejoin.
+  - A failed ICE restart now triggers a fast reconnect and lets the reconnect loop decide when to escalate, rather than jumping straight to a rejoin.
+  - A `failed` peer-connection state now enters the reconnect loop with the fast strategy instead of forcing an immediate rejoin.
+  - A transient ICE `disconnected` state is no longer treated as unhealthy, only a permanently `closed` peer connection forces an immediate rejoin.
 - Fixed connection quality indicator blanking after reconnect.
 - Fixed SFU stats not being flushed on call end.
 
@@ -48,10 +56,6 @@
 - Added client-side call join telemetry (`ClientEventReporter`): the SDK reports each stage of the join funnel — `JoinInitiated`, `CoordinatorWS`, `CoordinatorJoin`, `WSJoin`, `PeerConnectionConnect` (publish/subscribe), `FirstVideoFrame`, and `FirstAudioFrame` — to the backend so join success/failure can be reconciled. Enabled by default; disable via `StreamVideoOptions.clientEventsReportingEnabled`.
 
 ## 1.4.1
-
-### 🔄 Changed
-
-- Increased minimum Flutter version to 3.38.0.
 
 ### 🐞 Fixed
 

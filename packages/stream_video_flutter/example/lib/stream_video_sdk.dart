@@ -1,5 +1,4 @@
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
 const _tag = 'StreamVideoSdk';
 
@@ -20,18 +19,6 @@ class StreamVideoSdk {
       apiKey,
       user: user.toUser(),
       userToken: userToken.rawValue,
-      pushNotificationManagerProvider:
-          StreamVideoPushNotificationManager.create(
-            iosPushProvider: const StreamVideoPushProvider.apn(
-              name: 'flutter-apn',
-            ),
-            androidPushProvider: const StreamVideoPushProvider.firebase(
-              name: 'flutter-firebase',
-            ),
-            pushConfiguration: const StreamVideoPushConfiguration(
-              ios: IOSPushConfiguration(iconName: 'IconMask'),
-            ),
-          ),
       options: options,
     );
   }

@@ -11,8 +11,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  stream_video: ^1.4.1
-  stream_video_push_notification: ^1.4.1
+  stream_video: ^1.4.2
+  stream_video_push_notification: ^1.4.2
 
 dev_dependencies:
   flutter_test:
