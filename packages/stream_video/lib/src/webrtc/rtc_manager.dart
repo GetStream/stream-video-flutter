@@ -811,6 +811,8 @@ extension PublisherRtcManager on RtcManager {
     tracks[audioTrack.trackId] = audioTrack;
     var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
 
+    var needsRenegotiation = false;
+
     for (final option in publishOptions) {
       if (option.trackType != audioTrack.trackType) continue;
 
@@ -819,7 +821,8 @@ extension PublisherRtcManager on RtcManager {
       final mediaTrackClone = await audioTrack.mediaTrack.clone();
       final trackToPublish = audioTrack.copyWith(mediaTrack: mediaTrackClone);
 
-      final cachedTransceiver = transceiversManager.get(option)?.transceiver;
+      final cachedBundle = transceiversManager.get(option);
+      final cachedTransceiver = cachedBundle?.transceiver;
       if (cachedTransceiver == null) {
         final transceiverResult = await _addTransceiver(
           trackToPublish,
@@ -854,6 +857,13 @@ extension PublisherRtcManager on RtcManager {
           trackPublishOptions: publishOptions,
         );
 
+        // Reusing a transceiver via replaceTrack does not fire
+        // onRenegotiationNeeded. If its previous negotiation never reached the
+        // SFU, the SFU still doesn't know about it, so force a renegotiation.
+        if (cachedBundle != null && !cachedBundle.negotiated) {
+          needsRenegotiation = true;
+        }
+
         _logger.v(
           () => '[publishAudioTrack] cached transceiver: $cachedTransceiver',
         );
@@ -862,6 +872,10 @@ extension PublisherRtcManager on RtcManager {
       updatedTrack = updatedTrack.copyWith(
         clonedTracks: [...updatedTrack.clonedTracks, mediaTrackClone],
       );
+    }
+
+    if (needsRenegotiation) {
+      _forceRenegotiation('[publishAudioTrack]');
     }
 
     // Notify listeners.
@@ -901,6 +915,8 @@ extension PublisherRtcManager on RtcManager {
       );
     }
 
+    var needsRenegotiation = false;
+
     for (final option in publishOptions) {
       if (option.trackType != videoTrack.trackType) continue;
 
@@ -909,7 +925,8 @@ extension PublisherRtcManager on RtcManager {
       final mediaTrackClone = await videoTrack.mediaTrack.clone();
       final trackToPublish = videoTrack.copyWith(mediaTrack: mediaTrackClone);
 
-      final cachedTransceiver = transceiversManager.get(option)?.transceiver;
+      final cachedBundle = transceiversManager.get(option);
+      final cachedTransceiver = cachedBundle?.transceiver;
       if (cachedTransceiver == null) {
         final transceiverResult = await _addTransceiver(
           trackToPublish,
@@ -936,6 +953,13 @@ extension PublisherRtcManager on RtcManager {
 
         transceiversManager.update(option, track: trackToPublish);
 
+        // Reusing a transceiver via replaceTrack does not fire
+        // onRenegotiationNeeded. If its previous negotiation never reached the
+        // SFU, the SFU still doesn't know about it, so force a renegotiation.
+        if (cachedBundle != null && !cachedBundle.negotiated) {
+          needsRenegotiation = true;
+        }
+
         _logger.v(
           () => '[publishVideoTrack] cached transceiver: $cachedTransceiver',
         );
@@ -944,6 +968,10 @@ extension PublisherRtcManager on RtcManager {
       updatedTrack = updatedTrack.copyWith(
         clonedTracks: [...updatedTrack.clonedTracks, mediaTrackClone],
       );
+    }
+
+    if (needsRenegotiation) {
+      _forceRenegotiation('[publishVideoTrack]');
     }
 
     // Notify listeners.
@@ -1000,6 +1028,20 @@ extension PublisherRtcManager on RtcManager {
         scalabilityMode: highestLayer.scalabilityMode,
       ),
     ];
+  }
+
+  /// Explicitly triggers a publisher renegotiation.
+  void _forceRenegotiation(String tag) {
+    final pub = publisher;
+    if (pub == null) return;
+
+    _logger.v(
+      () =>
+          '$tag forcing renegotiation for a reused transceiver the SFU never '
+          'acknowledged',
+    );
+
+    pub.onRenegotiationNeeded?.call(pub);
   }
 
   Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(

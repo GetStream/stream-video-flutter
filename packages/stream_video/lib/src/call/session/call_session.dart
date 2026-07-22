@@ -1141,6 +1141,8 @@ class CallSession extends Disposable {
             );
           }
         }
+
+        rtcManager?.transceiversManager.markNegotiated();
       } catch (e, stk) {
         _logger.e(() => '[negotiate] failed: $e\n$stk');
         return pc.rollbackLocalDescription();
