@@ -6,27 +6,28 @@ import stream_video_push_notification
 import stream_webrtc_flutter
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
     private let CHANNEL = "io.getstream.video.flutter.dogfooding.channel"
 
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        GeneratedPluginRegistrant.register(with: self)
-
         // Register for push notifications.
         StreamVideoPKDelegateManager.shared.registerForPushNotifications()
         UNUserNotificationCenter.current().delegate = self
 
-        let controller = window?.rootViewController as! FlutterViewController
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
         let channel = FlutterMethodChannel(
-            name: CHANNEL, binaryMessenger: controller.binaryMessenger)
+            name: CHANNEL, binaryMessenger: engineBridge.applicationRegistrar.messenger())
         channel.setMethodCallHandler { [weak self] (call, result) in
             self?.handleMethodCall(call: call, result: result)
         }
-
-        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
     // This method will be called when notification is received
