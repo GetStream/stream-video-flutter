@@ -1097,7 +1097,7 @@ class CallSession extends Disposable {
       return Result.error('SFU WS is not connected');
     }
 
-    await _negotiationLock.synchronized(() async {
+    return _negotiationLock.synchronized(() async {
       _logger.d(() => '[negotiate] type: ${pc.type}');
 
       final offer = await pc.createOffer();
@@ -1130,7 +1130,10 @@ class CallSession extends Disposable {
 
         if (pubResult is! Success<sfu.SetPublisherResponse>) {
           _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
-          return pc.rollbackLocalDescription();
+          await pc.rollbackLocalDescription();
+          return Result<void>.error(
+            'SetPublisher failed: ${pubResult.getErrorOrNull()}',
+          );
         }
 
         if (pubResult.data.hasSdp()) {
@@ -1139,15 +1142,21 @@ class CallSession extends Disposable {
             _logger.w(
               () => '[negotiate] #setRemoteAnswer; failed: $ansResult',
             );
+            return Result<void>.error(
+              'Failed to set remote answer: ${ansResult.getErrorOrNull()}',
+            );
           }
+
+          rtcManager?.transceiversManager.markNegotiated();
         }
+
+        return const Result.success(null);
       } catch (e, stk) {
         _logger.e(() => '[negotiate] failed: $e\n$stk');
-        return pc.rollbackLocalDescription();
+        await pc.rollbackLocalDescription();
+        return Result.failure(VideoErrors.compose(e, stk));
       }
     });
-
-    return const Result.success(null);
   }
 
   Future<void> _onRemoteTrackReceived(

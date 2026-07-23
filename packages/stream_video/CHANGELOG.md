@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
+
 ## 1.4.2
 
 ### ✅ Added

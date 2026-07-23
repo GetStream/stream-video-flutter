@@ -12,6 +12,7 @@ class TransceiverCache {
     required this.publishOption,
     required this.transceiver,
     required this.trackPublishOptions,
+    this.negotiated = false,
   });
 
   RtcLocalTrack track;
@@ -19,9 +20,13 @@ class TransceiverCache {
   RTCRtpTransceiver transceiver;
   RtcTrackPublishOptions trackPublishOptions;
 
+  /// Whether the SFU has acknowledged this transceiver through a completed
+  /// publisher negotiation.
+  bool negotiated;
+
   @override
   String toString() {
-    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}}';
+    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}, negotiated: $negotiated}';
   }
 }
 
@@ -108,6 +113,16 @@ class TransceiverManager {
   /// Provides all the items in the cache.
   List<TransceiverCache> items() {
     return _transceivers;
+  }
+
+  /// Marks every cached transceiver that currently has a sending track as
+  /// negotiated, i.e. acknowledged by the SFU after a completed negotiation.
+  void markNegotiated() {
+    for (final item in _transceivers) {
+      if (item.transceiver.sender.track != null) {
+        item.negotiated = true;
+      }
+    }
   }
 
   /// Init index of the transceiver in the cache.
