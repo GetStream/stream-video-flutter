@@ -11,7 +11,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_auth
   firebase_core
   gal
-  media_kit_video
   permission_handler_windows
   record_windows
   share_plus

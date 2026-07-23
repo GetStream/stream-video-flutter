@@ -217,13 +217,16 @@ class RtcManager extends Disposable {
     required String iceCandidate,
   }) async {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
+    final Result<AddIceCandidateResult>? result;
     if (peerType == StreamPeerType.publisher) {
-      return publisher?.addIceCandidate(candidate) ??
-          Result.error('no publisher created');
+      result = await publisher?.addIceCandidate(candidate);
+      if (result == null) return Result.error('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
-      return subscriber.addIceCandidate(candidate);
+      result = await subscriber.addIceCandidate(candidate);
+    } else {
+      return Result.error('unexpected peerType: $peerType');
     }
-    return Result.error('unexpected peerType: $peerType');
+    return result.map((_) => none);
   }
 
   void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {

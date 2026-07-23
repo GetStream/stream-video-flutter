@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:synchronized/synchronized.dart';
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
@@ -10,7 +11,6 @@ import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../sfu/sfu_client.dart';
-import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
 import 'model/stats/rtc_printable_stats.dart';
@@ -57,6 +57,16 @@ typedef OnTrack =
       StreamPeerConnection,
       rtc.RTCTrackEvent,
     );
+
+enum AddIceCandidateResult {
+  /// The candidate was applied to the peer connection immediately.
+  added,
+
+  /// The remote description was not set yet, so the candidate was buffered
+  /// and will be applied when [StreamPeerConnection.setRemoteDescription]
+  /// completes. This is a normal, deferred-success outcome — not a drop.
+  buffered,
+}
 
 /// Wrapper around the WebRTC connection that contains tracks.
 class StreamPeerConnection extends Disposable {
@@ -120,6 +130,9 @@ class StreamPeerConnection extends Disposable {
   void Function(rtc.RTCPeerConnectionState state)? onConnectionStateUpdated;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
+
+  /// Serializes [setRemoteDescription] and [addIceCandidate]
+  final _candidateLock = Lock();
 
   /// Attempts to restart ICE on the `RTCPeerConnection`.
   /// If the restart fails, this method will trigger onReconnectionNeeded with
@@ -264,17 +277,21 @@ class StreamPeerConnection extends Disposable {
   /// Sets the remote description and adds any pending ice candidates.
   Future<Result<void>> setRemoteDescription(
     rtc.RTCSessionDescription sd,
-  ) async {
-    try {
-      final result = await pc.setRemoteDescription(sd);
-      for (final candidate in _pendingCandidates) {
-        await pc.addCandidate(candidate);
+  ) {
+    return _candidateLock.synchronized(() async {
+      try {
+        final result = await pc.setRemoteDescription(sd);
+        // Flush buffered candidates.
+        final pending = List<rtc.RTCIceCandidate>.of(_pendingCandidates);
+        for (final candidate in pending) {
+          await pc.addCandidate(candidate);
+          _pendingCandidates.remove(candidate);
+        }
+        return Result.success(result);
+      } catch (e, stk) {
+        return Result.failure(VideoErrors.compose(e, stk));
       }
-      _pendingCandidates.clear();
-      return Result.success(result);
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
+    });
   }
 
   //Sets the local description
@@ -314,20 +331,25 @@ class StreamPeerConnection extends Disposable {
 
   /// Adds an ice candidate to the peer connection.
   ///
-  /// If the peer connection is not yet ready, the candidate is added to a list
-  /// of pending candidates.
-  Future<Result<None>> addIceCandidate(rtc.RTCIceCandidate candidate) async {
-    try {
-      final remoteDescription = await pc.getRemoteDescription();
-      if (remoteDescription == null) {
-        _pendingCandidates.add(candidate);
-        return Result.error('no remoteDescription set');
+  /// If the remote description has not been set yet, the candidate cannot be
+  /// applied immediately, so it is buffered in [_pendingCandidates] and flushed
+  /// by [setRemoteDescription].
+  Future<Result<AddIceCandidateResult>> addIceCandidate(
+    rtc.RTCIceCandidate candidate,
+  ) {
+    return _candidateLock.synchronized(() async {
+      try {
+        final remoteDescription = await pc.getRemoteDescription();
+        if (remoteDescription == null) {
+          _pendingCandidates.add(candidate);
+          return const Result.success(AddIceCandidateResult.buffered);
+        }
+        await pc.addCandidate(candidate);
+        return const Result.success(AddIceCandidateResult.added);
+      } catch (e, stk) {
+        return Result.failure(VideoErrors.compose(e, stk));
       }
-      await pc.addCandidate(candidate);
-      return const Result.success(none);
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
+    });
   }
 
   /// Adds a local [rtc.MediaStreamTrack] with audio to the current connection.

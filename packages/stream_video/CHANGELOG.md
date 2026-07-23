@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- Serialized remote-description and ICE-candidate handling so a candidate arriving mid-negotiation can no longer be dropped.
+
 ## 1.4.2
 
 ### ✅ Added

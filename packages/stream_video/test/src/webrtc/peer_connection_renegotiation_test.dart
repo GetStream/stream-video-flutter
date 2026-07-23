@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -91,6 +93,43 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   @override
   rtc.RTCIceConnectionState? get iceConnectionState =>
       stubbedIceConnectionState;
+
+  // --- Remote description / ICE candidate plumbing ------------------------
+
+  rtc.RTCSessionDescription? _remoteDescription;
+
+  /// Every candidate that reached [addCandidate] successfully, in order.
+  final addedCandidates = <rtc.RTCIceCandidate>[];
+
+  /// When non-null, [addCandidate] throws for this exact candidate. Used to
+  /// simulate a partial flush failure.
+  rtc.RTCIceCandidate? failOnCandidate;
+
+  /// When non-null, [setRemoteDescription] blocks on this until completed —
+  /// lets a test hold the operation "in flight" while another one is issued.
+  Completer<void>? setRemoteDescriptionGate;
+
+  @override
+  Future<rtc.RTCSessionDescription?> getRemoteDescription() async =>
+      _remoteDescription;
+
+  @override
+  Future<void> setRemoteDescription(
+    rtc.RTCSessionDescription description,
+  ) async {
+    if (setRemoteDescriptionGate != null) {
+      await setRemoteDescriptionGate!.future;
+    }
+    _remoteDescription = description;
+  }
+
+  @override
+  Future<void> addCandidate(rtc.RTCIceCandidate candidate) async {
+    if (failOnCandidate != null && identical(candidate, failOnCandidate)) {
+      throw Exception('addCandidate failed for $candidate');
+    }
+    addedCandidates.add(candidate);
+  }
 }
 
 StreamPeerConnection _build({
@@ -413,6 +452,87 @@ void main() {
       expect(received.single.$1, same(sp));
       expect(received.single.$2, same(candidate));
     });
+  });
+
+  group('StreamPeerConnection ICE candidate buffering', () {
+    rtc.RTCSessionDescription offer() =>
+        rtc.RTCSessionDescription('sdp', 'offer');
+
+    test(
+      'a candidate that arrives while setRemoteDescription is in flight is '
+      'applied exactly once and never stranded',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        // Hold setRemoteDescription open so addIceCandidate is issued
+        // concurrently, then release it.
+        final gate = Completer<void>();
+        pc.setRemoteDescriptionGate = gate;
+
+        final candidate = rtc.RTCIceCandidate('cand', 'mid', 0);
+
+        final setFuture = sp.setRemoteDescription(offer());
+        final addFuture = sp.addIceCandidate(candidate);
+
+        gate.complete();
+        final results = await Future.wait([setFuture, addFuture]);
+
+        expect(results[0].isSuccess, isTrue);
+        expect(results[1].isSuccess, isTrue);
+        expect(
+          pc.addedCandidates,
+          [candidate],
+          reason:
+              'the candidate must be applied exactly once regardless of which '
+              'operation acquires the lock first',
+        );
+      },
+    );
+
+    test(
+      'a partial flush failure keeps failed and unattempted candidates '
+      'buffered without re-applying the ones already added',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        final c1 = rtc.RTCIceCandidate('c1', 'mid', 0);
+        final c2 = rtc.RTCIceCandidate('c2', 'mid', 0);
+        final c3 = rtc.RTCIceCandidate('c3', 'mid', 0);
+
+        // Remote description not set yet -> all three buffer.
+        for (final c in [c1, c2, c3]) {
+          final r = await sp.addIceCandidate(c);
+          expect(r.getDataOrNull(), AddIceCandidateResult.buffered);
+        }
+        expect(pc.addedCandidates, isEmpty);
+
+        // Flush fails on c2: c1 applied then c2 throws.
+        pc.failOnCandidate = c2;
+        final firstFlush = await sp.setRemoteDescription(offer());
+
+        expect(firstFlush.isFailure, isTrue);
+        expect(
+          pc.addedCandidates,
+          [c1],
+          reason: 'only c1 was applied before c2 failed',
+        );
+
+        // Recover and flush again: c2 and c3 apply, c1 is NOT re-applied.
+        pc.failOnCandidate = null;
+        final secondFlush = await sp.setRemoteDescription(offer());
+
+        expect(secondFlush.isSuccess, isTrue);
+        expect(
+          pc.addedCandidates,
+          [c1, c2, c3],
+          reason:
+              'each candidate is applied exactly once — the already-added c1 '
+              'must not be re-applied on retry',
+        );
+      },
+    );
   });
 
   group('StreamPeerConnection.dispose', () {
