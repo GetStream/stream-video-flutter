@@ -1035,6 +1035,13 @@ extension PublisherRtcManager on RtcManager {
     final pub = publisher;
     if (pub == null) return;
 
+    if (pub.isReconnecting) {
+      _logger.v(
+        () => '$tag skipping forced renegotiation — reconnect in progress',
+      );
+      return;
+    }
+
     _logger.v(
       () =>
           '$tag forcing renegotiation for a reused transceiver the SFU never '
@@ -1042,6 +1049,18 @@ extension PublisherRtcManager on RtcManager {
     );
 
     pub.onRenegotiationNeeded?.call(pub);
+  }
+
+  /// Forces a publisher renegotiation if any transceiver sending [trackId]
+  /// was never acknowledged by the SFU.
+  void _renegotiateIfUnacknowledged(String trackId, String tag) {
+    final hasUnacknowledged = transceiversManager
+        .findAll((t) => t.track.trackId == trackId)
+        .any((t) => t.transceiver.sender.track != null && !t.negotiated);
+
+    if (hasUnacknowledged) {
+      _forceRenegotiation(tag);
+    }
   }
 
   Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
@@ -1223,6 +1242,7 @@ extension PublisherRtcManager on RtcManager {
       tracks[trackId] = updatedTrack;
       onLocalTrackMuted?.call(updatedTrack, false);
 
+      _renegotiateIfUnacknowledged(trackId, '[unmuteTrack]');
       return Result.success(updatedTrack);
     }
 
@@ -1230,6 +1250,7 @@ extension PublisherRtcManager on RtcManager {
     track.enable();
     onLocalTrackMuted?.call(track, false);
 
+    _renegotiateIfUnacknowledged(trackId, '[unmuteTrack]');
     return Result.success(track);
   }
 

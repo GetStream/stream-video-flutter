@@ -559,10 +559,10 @@ class Call {
       await _clear('status-disconnected');
     }
 
-    _sessionFactory.sdpEditor.opusDtxEnabled =
-        state.settings.audio.opusDtxEnabled;
-    _sessionFactory.sdpEditor.opusRedEnabled =
-        state.settings.audio.redundantCodingEnabled;
+    // Opus DTX/RED SDP editing is intentionally disabled to align with the
+    // iOS and Android SDKs, which do not munge DTX/RED on the publisher offer.
+    _sessionFactory.sdpEditor.opusDtxEnabled = false;
+    _sessionFactory.sdpEditor.opusRedEnabled = false;
   }
 
   StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {

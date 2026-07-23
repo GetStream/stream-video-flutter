@@ -88,6 +88,9 @@ class StreamPeerConnection extends Disposable {
   /// Flag to indicate that a reconnect is in progress.
   bool _isReconnecting = false;
 
+  /// Whether a reconnect is currently in progress for this peer connection.
+  bool get isReconnecting => _isReconnecting;
+
   void setReconnecting(bool value) {
     _logger.v(() => '[setReconnecting] #$type; value: $value');
     _isReconnecting = value;
