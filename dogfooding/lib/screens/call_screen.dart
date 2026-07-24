@@ -312,6 +312,9 @@ class _CallScreenState extends State<CallScreen> {
                           call: call,
                           disabledMicrophoneBackgroundColor:
                               AppColorPalette.appRed,
+                          // Keep the track alive on mute so speaking-while-
+                          // muted detection also works on iOS/macOS.
+                          stopTrackOnMute: false,
                         ),
                         ToggleCameraOption(
                           call: call,

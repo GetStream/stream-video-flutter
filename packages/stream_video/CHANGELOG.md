@@ -1,3 +1,10 @@
+## Upcoming
+
+### ✅ Added
+
+- Speaking-while-muted detection (`SpeakingWhileMutedRecognition`) now works on iOS, macOS and web (previously Android-only). On iOS/macOS it requires muting with `stopTrackOnMute: false`. Check the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/speaking-while-muted/) for details and per-platform requirements.
+- Added an optional `stopTrackOnMute` parameter to `Call.setMicrophoneEnabled`. The default (`true`, unchanged) stops and releases the audio track on mute; `false` keeps the track alive and sends silence instead. See the [documentation](https://getstream.io/video/docs/flutter/guides/camera-and-microphone/microphone-and-audio/) for the trade-offs.
+
 ## 1.4.2
 
 ### ✅ Added

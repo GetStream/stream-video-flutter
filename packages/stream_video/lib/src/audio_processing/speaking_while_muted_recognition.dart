@@ -4,7 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../stream_video.dart';
-import 'audio_recognition_webrtc.dart';
+import 'audio_recognition_factory_io.dart'
+    if (dart.library.js_interop) 'audio_recognition_factory_web.dart';
 
 /// The [SpeakingWhileMutedRecognition.stream] emits state changes when an increase in audio volume
 /// is detected while the user is muted.
@@ -17,6 +18,21 @@ import 'audio_recognition_webrtc.dart';
 ///
 /// - If no audio is detected for a period of time, or if the user unmutes,
 ///   the state reverts to `false`.
+///
+/// Platform behavior:
+/// - Android/iOS/macOS: detection is driven by speech-activity events from the
+///   native audio device module, no additional microphone capture is opened.
+/// - iOS/macOS: events are only delivered while the audio engine keeps
+///   capturing, so the microphone must be muted without stopping the track:
+///   `call.setMicrophoneEnabled(enabled: false, stopTrackOnMute: false)`.
+///   With the default mute (track stopped and released) no speech events
+///   arrive on these platforms. Note that keeping the track alive leaves the
+///   OS microphone-in-use indicator on while muted.
+/// - Web: browsers expose no such events, so a dedicated microphone stream is
+///   analysed with the Web Audio API while detection is active, which keeps
+///   the browser's "microphone in use" indicator on while muted.
+/// - Windows/Linux: not supported by the default implementation; supply a
+///   custom [AudioRecognition] to enable it there.
 ///
 /// Note:
 /// - Audio detection begins only after the user mutes themselves or is muted by someone else.
@@ -60,15 +76,28 @@ class SpeakingWhileMutedRecognition
   SpeakingWhileMutedRecognition({
     required this.call,
     AudioRecognition? audioRecognition,
-  }) : _audioRecognition = audioRecognition ?? AudioRecognitionWebRTC(),
-       super(const SpeakingWhileMutedState._(isSpeakingWhileMuted: false)) {
+  }) : super(const SpeakingWhileMutedState._(isSpeakingWhileMuted: false)) {
+    _audioRecognition =
+        audioRecognition ??
+        createPlatformAudioRecognition(
+          // Resolved lazily at each detection start so the web recognizer
+          // always monitors the currently selected microphone.
+          audioInputDeviceIdProvider: () =>
+              call.state.value.audioInputDevice?.id,
+        );
     _init();
   }
 
   final Call call;
-  final AudioRecognition _audioRecognition;
+  late final AudioRecognition _audioRecognition;
   StreamSubscription<void>? _callStateSubscription;
   bool _isActive = false;
+
+  /// The selected audio input reported by the most recent call-state event.
+  String? _lastSeenAudioInputDeviceId;
+
+  /// The selected audio input at the time detection was started.
+  String? _activeAudioInputDeviceId;
 
   void _init() {
     _callStateSubscription = call
@@ -77,16 +106,26 @@ class SpeakingWhileMutedRecognition
             isAudioEnabled: state.isAudioEnabled,
             canSendAudio: state.canSendAudio,
             status: state.status,
+            audioInputDeviceId: state.audioInputDevice?.id,
           ),
         )
         .listen((state) {
+          _lastSeenAudioInputDeviceId = state.audioInputDeviceId;
+
           if (state.status.isDisconnected) _stop();
           if (!(state.status.isJoined || state.status.isConnected)) return;
 
           if (state.isAudioEnabled) {
             _stop();
           } else if (state.canSendAudio) {
-            start();
+            if (_isActive &&
+                state.audioInputDeviceId != _activeAudioInputDeviceId) {
+              // The selected microphone changed while detecting — restart so
+              // detection follows the new device.
+              _restart();
+            } else {
+              start();
+            }
           }
         });
   }
@@ -100,6 +139,7 @@ class SpeakingWhileMutedRecognition
   Future<void> start() async {
     if (_isActive) return;
     _isActive = true;
+    _activeAudioInputDeviceId = _lastSeenAudioInputDeviceId;
     try {
       await _audioRecognition.start(
         onSoundStateChanged: (soundState) {
@@ -119,6 +159,11 @@ class SpeakingWhileMutedRecognition
     _isActive = false;
     state = const SpeakingWhileMutedState._(isSpeakingWhileMuted: false);
     await _audioRecognition.stop();
+  }
+
+  Future<void> _restart() async {
+    await _stop();
+    await start();
   }
 
   @override
