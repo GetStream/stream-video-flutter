@@ -1,3 +1,9 @@
+## Upcoming
+
+### ✅ Added
+
+- Added an optional `stopTrackOnMute` parameter to `ToggleMicrophoneOption`, passed through to `Call.setMicrophoneEnabled`. Set it to `false` to keep the audio track alive on mute — required on iOS/macOS for [speaking-while-muted detection](https://getstream.io/video/docs/flutter/ui-cookbook/speaking-while-muted/).
+
 ## 1.4.2
 
 ### ✅ Added

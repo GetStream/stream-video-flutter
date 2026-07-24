@@ -3656,9 +3656,14 @@ class Call {
   }
 
   /// Enables or disables the microphone for this call.
+  ///
+  /// [stopTrackOnMute] controls whether muting disables and stops (default: `true`)
+  /// or keeps the audio track alive but silent (`false`). On iOS/macOS, `false` keeps
+  /// muted-talker detection active but leaves the mic indicator on. When null, keeps default behavior.
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
+    bool? stopTrackOnMute,
   }) async {
     if (enabled &&
         state.value.isVideoModerated &&
@@ -3674,6 +3679,7 @@ class Call {
         await _session?.setMicrophoneEnabled(
           enabled,
           constraints: constraints,
+          stopTrackOnMute: stopTrackOnMute,
         ) ??
         Result.error('Session is null');
 

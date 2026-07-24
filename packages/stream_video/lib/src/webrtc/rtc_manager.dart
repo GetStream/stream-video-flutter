@@ -811,6 +811,12 @@ extension PublisherRtcManager on RtcManager {
     tracks[audioTrack.trackId] = audioTrack;
     var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
 
+    // Ensure a new live audio track isn't still muted by an existing ADM-level mute.
+    // ADM mute persists beyond sessions (per-call factory).
+    if (_isAdmLevelMuteSupported(audioTrack) && audioTrack.mediaTrack.enabled) {
+      await _setAdmMicrophoneMuted(false);
+    }
+
     for (final option in publishOptions) {
       if (option.trackType != audioTrack.trackType) continue;
 
@@ -1131,11 +1137,18 @@ extension PublisherRtcManager on RtcManager {
       return Result.error('Track is not local');
     }
 
+    // If [stopTrackOnMute] is true or unset, the track is stopped and released (default).
+    // If false, the track stays alive and is muted at the device level (iOS/macOS only).
     final track = originalTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
     tracks[trackId] = track;
 
+    final useAdmLevelMute =
+        !track.stopTrackOnMute && _isAdmLevelMuteSupported(track);
+
     track.disable();
-    if (track.stopTrackOnMute) {
+    if (useAdmLevelMute) {
+      await _setAdmMicrophoneMuted(true);
+    } else if (track.stopTrackOnMute) {
       // Releases the track and stops the permission indicator.
       await track.stop();
     }
@@ -1154,6 +1167,12 @@ extension PublisherRtcManager on RtcManager {
     if (track is! RtcLocalTrack) {
       _logger.w(() => 'unmuteTrack: track is not local');
       return Result.error('Track is not local');
+    }
+
+    // Lift the ADM-level mute applied for soft-muted (not stopped) audio
+    // tracks on iOS/macOS.
+    if (!track.stopTrackOnMute && _isAdmLevelMuteSupported(track)) {
+      await _setAdmMicrophoneMuted(false);
     }
 
     // If the track was released before, restart it.
@@ -1189,6 +1208,19 @@ extension PublisherRtcManager on RtcManager {
     onLocalTrackMuted?.call(track, false);
 
     return Result.success(track);
+  }
+
+  /// Returns true if [track] should use ADM mute (iOS/macOS audio only).
+  bool _isAdmLevelMuteSupported(RtcLocalTrack track) =>
+      (CurrentPlatform.isIos || CurrentPlatform.isMacOS) &&
+      track.trackType == SfuTrackType.audio;
+
+  Future<void> _setAdmMicrophoneMuted(bool muted) async {
+    try {
+      await pcFactory.setMicrophoneMuted(muted);
+    } catch (e, stk) {
+      _logger.w(() => '[setAdmMicrophoneMuted] failed: $e\n$stk');
+    }
   }
 
   Future<Result<RtcLocalAudioTrack>> createAudioTrack({
@@ -1495,11 +1527,13 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalTrack>> setMicrophoneEnabled({
     bool enabled = true,
     AudioConstraints? constraints,
+    bool? stopTrackOnMute,
   }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.audio,
       enabled: enabled,
       constraints: constraints,
+      stopTrackOnMute: stopTrackOnMute,
     );
   }
 
@@ -1544,6 +1578,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     required bool enabled,
     MediaConstraints? constraints,
+    bool? stopTrackOnMute,
   }) async {
     final track = getPublisherTrackByType(trackType);
 
@@ -1561,6 +1596,7 @@ extension RtcManagerTrackHelper on RtcManager {
       final toggledTrack = await _toggleTrackMuteState(
         track: track,
         muted: !enabled,
+        stopTrackOnMute: stopTrackOnMute,
       );
 
       return Result.success(toggledTrack);
@@ -1581,9 +1617,10 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<RtcLocalTrack> _toggleTrackMuteState({
     required RtcLocalTrack track,
     required bool muted,
+    bool? stopTrackOnMute,
   }) async {
     if (muted) {
-      await muteTrack(trackId: track.trackId);
+      await muteTrack(trackId: track.trackId, stopTrackOnMute: stopTrackOnMute);
 
       // If the track is a screen share track, mute the audio track as well.
       if (track.trackType == SfuTrackType.screenShare) {

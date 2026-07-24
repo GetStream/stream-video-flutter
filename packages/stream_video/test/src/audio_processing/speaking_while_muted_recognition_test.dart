@@ -10,6 +10,7 @@ typedef FilteredCallState = ({
   bool isAudioEnabled,
   bool canSendAudio,
   CallStatus status,
+  String? audioInputDeviceId,
 });
 
 void main() {
@@ -137,6 +138,60 @@ void main() {
       await sut.dispose();
     });
 
+    test(
+      'Test audio input device change while active restarts detection',
+      () async {
+        final sut = SpeakingWhileMutedRecognition(
+          call: call,
+          audioRecognition: audioRecognition,
+        );
+
+        callStateStreamController.add(
+          createCallState(isAudioEnabled: false, audioInputDeviceId: 'mic-a'),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(
+          () => audioRecognition.start(
+            onSoundStateChanged: any(named: 'onSoundStateChanged'),
+          ),
+        ).called(1);
+
+        // Switching the microphone while muted restarts detection so it
+        // follows the newly selected device.
+        callStateStreamController.add(
+          createCallState(isAudioEnabled: false, audioInputDeviceId: 'mic-b'),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(() => audioRecognition.stop()).called(1);
+        verify(
+          () => audioRecognition.start(
+            onSoundStateChanged: any(named: 'onSoundStateChanged'),
+          ),
+        ).called(1);
+
+        // Same device again — no restart.
+        callStateStreamController.add(
+          createCallState(
+            isAudioEnabled: false,
+            canSendAudio: true,
+            audioInputDeviceId: 'mic-b',
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verifyNever(() => audioRecognition.stop());
+        verifyNever(
+          () => audioRecognition.start(
+            onSoundStateChanged: any(named: 'onSoundStateChanged'),
+          ),
+        );
+
+        await sut.dispose();
+      },
+    );
+
     test('Test disconnecting from call', () async {
       final sut = SpeakingWhileMutedRecognition(
         call: call,
@@ -171,10 +226,12 @@ FilteredCallState createCallState({
   bool? isAudioEnabled,
   bool? canSendAudio,
   CallStatus? status,
+  String? audioInputDeviceId,
 }) {
   return (
     isAudioEnabled: isAudioEnabled ?? true,
     canSendAudio: canSendAudio ?? true,
     status: status ?? CallStatus.joined(),
+    audioInputDeviceId: audioInputDeviceId,
   );
 }

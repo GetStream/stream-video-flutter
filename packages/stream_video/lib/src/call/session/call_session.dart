@@ -1291,6 +1291,7 @@ class CallSession extends Disposable {
   Future<Result<RtcLocalTrack>> setMicrophoneEnabled(
     bool enabled, {
     AudioConstraints? constraints,
+    bool? stopTrackOnMute,
   }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
@@ -1301,6 +1302,7 @@ class CallSession extends Disposable {
       return rtcManager.setMicrophoneEnabled(
         enabled: enabled,
         constraints: constraints,
+        stopTrackOnMute: stopTrackOnMute,
       );
     });
 

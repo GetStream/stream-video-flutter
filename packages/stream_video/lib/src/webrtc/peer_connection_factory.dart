@@ -123,6 +123,23 @@ class StreamPeerConnectionFactory {
     await native.resumeAudio();
   }
 
+  /// Mutes / unmutes microphone capture at the audio-device-module level
+  /// while the audio engine keeps running. On iOS/macOS this arms Apple's
+  /// muted-talker detection, which powers speaking-while-muted events.
+  Future<void> setMicrophoneMuted(bool muted) async {
+    final native = _nativeFactory;
+    if (native == null) {
+      _logger.w(() => '[setMicrophoneMuted] no native factory');
+      return;
+    }
+    _logger.i(
+      () =>
+          '[setMicrophoneMuted] muted: $muted, '
+          'factoryId: ${native.factoryId}',
+    );
+    await native.setMicrophoneMuted(muted);
+  }
+
   Future<TracedStreamPeerConnection> makeSubscriber({
     required String sessionId,
     required SdpEditor sdpEditor,
