@@ -634,41 +634,52 @@ extension PublisherRtcManager on RtcManager {
     return track;
   }
 
-  String extractMid(
-    rtc.RTCRtpTransceiver transceiver,
-    int transceiverInitIndex,
+  /// Resolves the mid for [cache]'s track based on the current peer connection.
+  /// Returns null if not found.
+  String? resolveTrackMid(
+    TransceiverCache cache,
+    List<rtc.RTCRtpTransceiver> liveTransceivers,
     String? sdp,
   ) {
-    if (transceiver.mid.isNotEmpty) return transceiver.mid;
-    if (sdp == null) return '';
+    final trackId = cache.track.mediaTrack.id;
+    if (trackId == null) return null;
 
-    final track = transceiver.sender.track;
-    if (track == null) {
-      return '';
+    // 1. Authoritative: the current transceiver's mid, matched by track id.
+    final live = liveTransceivers.firstWhereOrNull(
+      (t) => t.sender.track?.id == trackId,
+    );
+    if (live != null && live.mid.isNotEmpty) return live.mid;
+
+    // 2. Fallback: the m-section for this track in the current offer SDP.
+    if (sdp != null) {
+      final media = (parse(sdp)['media'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .reversed
+          .firstWhereOrNull(
+            (m) => (m['msid'] as String?)?.contains(trackId) ?? false,
+          );
+      final mid = media?['mid'];
+      if (mid != null) return mid.toString();
     }
 
-    final parsedSdp = parse(sdp);
-    final media = (parsedSdp['media'] as List?)
-        ?.cast<Map<String, dynamic>>()
-        .reversed
-        .firstWhereOrNull(
-          (m) =>
-              m['type'] == track.kind &&
-              ((m['msid'] as String?)?.contains(track.id!) ?? true),
-        );
-
-    if (media != null && media['mid'] != null) return media['mid'].toString();
-    if (transceiverInitIndex == -1) return '';
-    return transceiverInitIndex.toString();
+    // 3. Unresolved — do NOT fall back to a positional/canonical index.
+    return null;
   }
 
   Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
     final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
+    final liveTransceivers =
+        await publisher?.pc.getTransceivers() ?? <rtc.RTCRtpTransceiver>[];
     final infos = <RtcTrackInfo>[];
 
     for (final item in transceiversManager.items()) {
       if (item.transceiver.sender.track == null) continue;
-      infos.add(_transceiverToTrackInfo(item, sdp: finalSdp));
+      final info = _transceiverToTrackInfo(
+        item,
+        sdp: finalSdp,
+        liveTransceivers: liveTransceivers,
+      );
+      if (info != null) infos.add(info);
     }
 
     return infos;
@@ -678,6 +689,8 @@ extension PublisherRtcManager on RtcManager {
     String? sdp,
   }) async {
     final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
+    final liveTransceivers =
+        await publisher?.pc.getTransceivers() ?? <rtc.RTCRtpTransceiver>[];
     final infos = <RtcTrackInfo>[];
 
     for (final publishOption in publishOptions) {
@@ -688,21 +701,33 @@ extension PublisherRtcManager on RtcManager {
       );
 
       if (item?.transceiver.sender.track == null) continue;
-      infos.add(_transceiverToTrackInfo(item!, sdp: finalSdp));
+      final info = _transceiverToTrackInfo(
+        item!,
+        sdp: finalSdp,
+        liveTransceivers: liveTransceivers,
+      );
+      if (info != null) infos.add(info);
     }
 
     return infos;
   }
 
-  RtcTrackInfo _transceiverToTrackInfo(
+  RtcTrackInfo? _transceiverToTrackInfo(
     TransceiverCache transceiverCache, {
+    required List<rtc.RTCRtpTransceiver> liveTransceivers,
     String? sdp,
   }) {
     final track = transceiverCache.track;
 
-    final transceiverInitialIndex = transceiversManager.indexOf(
-      transceiverCache.transceiver,
-    );
+    final mid = resolveTrackMid(transceiverCache, liveTransceivers, sdp);
+    if (mid == null) {
+      _logger.w(
+        () =>
+            '[transceiverToTrackInfo] could not resolve mid for track '
+            '${track.mediaTrack.id} (${track.trackType}); skipping announce',
+      );
+      return null;
+    }
 
     if (track is RtcLocalAudioTrack) {
       final audioSettings = stateManager.callState.settings.audio;
@@ -714,11 +739,7 @@ extension PublisherRtcManager on RtcManager {
         trackId: track.mediaTrack.id,
         trackType: track.trackType,
         publishOptionId: transceiverCache.publishOption.id,
-        mid: extractMid(
-          transceiverCache.transceiver,
-          transceiverInitialIndex,
-          sdp,
-        ),
+        mid: mid,
         layers: [],
         codec: transceiverCache.publishOption.codec,
         muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
@@ -736,11 +757,7 @@ extension PublisherRtcManager on RtcManager {
         trackId: track.mediaTrack.id,
         trackType: track.trackType,
         publishOptionId: transceiverCache.publishOption.id,
-        mid: extractMid(
-          transceiverCache.transceiver,
-          transceiverInitialIndex,
-          sdp,
-        ),
+        mid: mid,
         dtx: false,
         red: false,
         stereo: false,

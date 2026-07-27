@@ -1086,6 +1086,22 @@ class CallSession extends Disposable {
     _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 
+  /// Recovers from a failed publisher (re)negotiation.
+  Future<Result<void>> _recoverFailedPublisherNegotiation(
+    StreamPeerConnection pc,
+  ) async {
+    final hasRemoteDescription = await pc.pc.getRemoteDescription() != null;
+    if (hasRemoteDescription) {
+      return pc.rollbackLocalDescription();
+    }
+
+    _logger.w(
+      () => '[negotiate] initial publisher offer failed; escalating to rejoin.',
+    );
+    onReconnectionNeeded(pc, SfuReconnectionStrategy.rejoin);
+    return const Result.success(null);
+  }
+
   Future<Result<void>> _onRenegotiationNeeded(StreamPeerConnection pc) async {
     if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(() => '[negotiate] call is disconnected');
@@ -1102,9 +1118,10 @@ class CallSession extends Disposable {
 
       final offer = await pc.createOffer();
       if (offer is! Success<rtc.RTCSessionDescription>) {
-        return Result<void>.error(
-          'Failed to create offer: ${offer.getErrorOrNull()}',
+        _logger.w(
+          () => '[negotiate] createOffer failed: ${offer.getErrorOrNull()}',
         );
+        return _recoverFailedPublisherNegotiation(pc);
       }
 
       final sdp = offer.data.sdp;
@@ -1114,7 +1131,7 @@ class CallSession extends Disposable {
         _logger.w(
           () => '[negotiate] rejected(tracksInfo is empty): $tracksInfo',
         );
-        return pc.rollbackLocalDescription();
+        return _recoverFailedPublisherNegotiation(pc);
       }
 
       _logger.v(() => '[negotiate] announcing tracks: $tracksInfo');
@@ -1130,7 +1147,7 @@ class CallSession extends Disposable {
 
         if (pubResult is! Success<sfu.SetPublisherResponse>) {
           _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
-          return pc.rollbackLocalDescription();
+          return _recoverFailedPublisherNegotiation(pc);
         }
 
         if (pubResult.data.hasSdp()) {
@@ -1143,7 +1160,7 @@ class CallSession extends Disposable {
         }
       } catch (e, stk) {
         _logger.e(() => '[negotiate] failed: $e\n$stk');
-        return pc.rollbackLocalDescription();
+        return _recoverFailedPublisherNegotiation(pc);
       }
     });
 
