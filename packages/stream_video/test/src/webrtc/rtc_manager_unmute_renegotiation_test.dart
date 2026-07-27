@@ -48,15 +48,18 @@ void main() {
     registerMockFallbackValues();
   });
 
-  ({RtcManager manager, _MockTracedStreamPeerConnection publisher, List<StreamPeerConnection> renegotiations})
+  ({
+    RtcManager manager,
+    _MockTracedStreamPeerConnection publisher,
+    List<StreamPeerConnection> renegotiations,
+  })
   buildManager({required bool isReconnecting}) {
     final publisher = _MockTracedStreamPeerConnection();
     final subscriber = _MockTracedStreamPeerConnection();
 
     final renegotiations = <StreamPeerConnection>[];
     when(() => publisher.isReconnecting).thenReturn(isReconnecting);
-    when(() => publisher.onRenegotiationNeeded)
-        .thenReturn(renegotiations.add);
+    when(() => publisher.onRenegotiationNeeded).thenReturn(renegotiations.add);
 
     final manager = RtcManager(
       sessionId: 'test-session',
@@ -67,7 +70,9 @@ void main() {
       publishOptions: const [],
       stateManager: createTestCallStateManager(),
       streamVideo: setupMockStreamVideo(),
-      pcFactory: StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
+      pcFactory: StreamPeerConnectionFactory(
+        callCid: SampleCallData.defaultCid,
+      ),
     );
 
     return (
@@ -118,19 +123,21 @@ void main() {
       },
     );
 
-    test('does NOT renegotiate when the transceiver is already acknowledged',
-        () async {
-      final wires = buildManager(isReconnecting: false);
-      addUnmutableTrack(wires.manager, senderTrack: _MockMediaStreamTrack());
+    test(
+      'does NOT renegotiate when the transceiver is already acknowledged',
+      () async {
+        final wires = buildManager(isReconnecting: false);
+        addUnmutableTrack(wires.manager, senderTrack: _MockMediaStreamTrack());
 
-      // Simulate a completed negotiation (SFU answered).
-      wires.manager.transceiversManager.markNegotiated();
+        // Simulate a completed negotiation (SFU answered).
+        wires.manager.transceiversManager.markNegotiated();
 
-      final result = await wires.manager.unmuteTrack(trackId: _trackId);
+        final result = await wires.manager.unmuteTrack(trackId: _trackId);
 
-      expect(result.isSuccess, isTrue);
-      expect(wires.renegotiations, isEmpty);
-    });
+        expect(result.isSuccess, isTrue);
+        expect(wires.renegotiations, isEmpty);
+      },
+    );
 
     test(
       'does NOT renegotiate when the transceiver has no sending track '
