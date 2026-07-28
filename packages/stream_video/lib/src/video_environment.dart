@@ -68,18 +68,26 @@ extension VideoEnvironmentHeader on VideoEnvironment {
   /// Builds the `X-Stream-Client` header value.
   String get xStreamClientHeader => [
     'stream-video-flutter-v$sdkVersion',
-    if (appName case final name?) 'app=${_sanitizeHeaderValue(name)}',
-    if (appVersion case final version?)
-      'app_version=${_sanitizeHeaderValue(version)}',
-    switch ((osName, osVersion)) {
-      (final name, final version?) =>
-        'os=${_sanitizeHeaderValue(name)} ${_sanitizeHeaderValue(version)}',
-      (final name, null) => 'os=${_sanitizeHeaderValue(name)}',
-    },
-    if (deviceModel case final model?)
-      'device_model=${_sanitizeHeaderValue(model)}',
-    if (browserName case final name?) 'browser=${_sanitizeHeaderValue(name)}',
-  ].join('|');
+    _headerSegment('app', [appName]),
+    _headerSegment('app_version', [appVersion]),
+    _headerSegment('os', [osName, osVersion]),
+    _headerSegment('device_model', [deviceModel]),
+    _headerSegment('browser', [browserName]),
+  ].nonNulls.join('|');
+
+  /// Builds a single `key=value` header segment from [parts], joined by a space.
+  ///
+  /// Returns `null` when every part is null or sanitizes to an empty string, so
+  /// the header never contains a dangling `key=` segment.
+  static String? _headerSegment(String key, Iterable<String?> parts) {
+    final value = parts.nonNulls
+        .map(_sanitizeHeaderValue)
+        .where((part) => part.isNotEmpty)
+        .join(' ');
+
+    if (value.isEmpty) return null;
+    return '$key=$value';
+  }
 
   /// Removes characters that are not valid in an HTTP header field value.
   ///
