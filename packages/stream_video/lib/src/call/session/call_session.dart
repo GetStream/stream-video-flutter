@@ -1116,7 +1116,12 @@ class CallSession extends Disposable {
           () => '[negotiate] rejected(tracksInfo is empty): $tracksInfo',
         );
 
-        await pc.rollbackLocalDescription();
+        // Nothing to publish is a no-op, not a negotiation failure — but a
+        // failed rollback leaves the publisher wedged in `have-local-offer`,
+        // which is.
+        final rollback = await pc.rollbackLocalDescription();
+        if (rollback.isFailure) return rollback;
+
         return const Result.success(null);
       }
 
