@@ -140,6 +140,17 @@ class StreamPeerConnectionFactory {
     await native.setMicrophoneMuted(muted);
   }
 
+  /// Reads back the ADM microphone mute state, or `null` when there is no
+  /// native factory to ask.
+  Future<bool?> isMicrophoneMuted() async {
+    final native = _nativeFactory;
+    if (native == null) {
+      _logger.w(() => '[isMicrophoneMuted] no native factory');
+      return null;
+    }
+    return native.isMicrophoneMuted();
+  }
+
   Future<TracedStreamPeerConnection> makeSubscriber({
     required String sessionId,
     required SdpEditor sdpEditor,

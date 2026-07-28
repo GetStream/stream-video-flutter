@@ -788,7 +788,12 @@ extension PublisherRtcManager on RtcManager {
   }
 
   Future<Result<RtcLocalTrack>> publishTrack(RtcLocalTrack track) async {
-    if (track is RtcLocalAudioTrack) return publishAudioTrack(track: track);
+    if (track is RtcLocalAudioTrack) {
+      return publishAudioTrack(
+        track: track,
+        stopTrackOnMute: track.stopTrackOnMute,
+      );
+    }
     if (track is RtcLocalVideoTrack) return publishVideoTrack(track: track);
 
     return Result.error('Unsupported track type: ${track.runtimeType}');
@@ -873,6 +878,10 @@ extension PublisherRtcManager on RtcManager {
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
     tracks[updatedTrack.trackId] = updatedTrack;
+
+    // Republishing restarts capture, which drops the ADM mute. No-op when the
+    // ADM already matches the track being published.
+    await reconcileAdmMicrophoneMute();
 
     return Result.success(updatedTrack);
   }
@@ -1221,6 +1230,47 @@ extension PublisherRtcManager on RtcManager {
     } catch (e, stk) {
       _logger.w(() => '[setAdmMicrophoneMuted] failed: $e\n$stk');
     }
+  }
+
+  /// Reads the ADM's own mute state, or `null` when it cannot be determined.
+  Future<bool?> _getAdmMicrophoneMuted() async {
+    try {
+      return await pcFactory.isMicrophoneMuted();
+    } catch (e, stk) {
+      _logger.w(() => '[getAdmMicrophoneMuted] failed: $e\n$stk');
+      return null;
+    }
+  }
+
+  /// Syncs the ADM mute state with the local audio track, to avoid mismatches
+  /// after audio restarts or suspends. Idempotent: only updates when needed.
+  Future<void> reconcileAdmMicrophoneMute() async {
+    final track = getPublisherTrackByType(SfuTrackType.audio);
+    if (track == null) return;
+    if (!_isAdmLevelMuteSupported(track)) return;
+
+    final bool desiredMuted;
+    if (track.mediaTrack.enabled) {
+      // A live track must never stay silenced by a leftover ADM mute.
+      desiredMuted = false;
+    } else if (!track.stopTrackOnMute) {
+      // A disabled track is the SDK's muted state when using ADM-level mute.
+      desiredMuted = true;
+    } else {
+      // When the track is muted by stopping it, ADM mute is not used.
+      return;
+    }
+
+    final actual = await _getAdmMicrophoneMuted();
+    if (actual == desiredMuted) return;
+
+    _logger.w(
+      () =>
+          '[reconcileAdmMicrophoneMute] ADM mute out of sync '
+          '(adm reported: $actual, expected: $desiredMuted), re-applying for '
+          'track ${track.trackId}',
+    );
+    await _setAdmMicrophoneMuted(desiredMuted);
   }
 
   Future<Result<RtcLocalAudioTrack>> createAudioTrack({

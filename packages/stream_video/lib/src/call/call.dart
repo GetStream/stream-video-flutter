@@ -362,6 +362,11 @@ class Call {
     await _session?.resumeSuspendedAudioTracks(_suspendedTrackStates);
     _suspendedTrackStates.clear();
 
+    // Resuming restarts recording, which clears the native ADM's microphone
+    // mute, and re-enables tracks from a snapshot taken before the suspension.
+    // Reconcile once the tracks have settled.
+    await _session?.rtcManager?.reconcileAdmMicrophoneMute();
+
     _stateManager.state = _stateManager.callState.copyWith(
       isAudioSuspended: false,
     );

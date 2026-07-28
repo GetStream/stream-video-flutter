@@ -52,6 +52,7 @@ void main() {
   setUp(() {
     pcFactory = _MockStreamPeerConnectionFactory();
     when(() => pcFactory.setMicrophoneMuted(any())).thenAnswer((_) async {});
+    when(() => pcFactory.isMicrophoneMuted()).thenAnswer((_) async => false);
 
     final streamVideo = MockStreamVideo();
     when(() => streamVideo.options).thenReturn(
@@ -270,6 +271,129 @@ void main() {
 
         expect(result.isSuccess, isTrue);
         verifyNever(() => pcFactory.setMicrophoneMuted(any()));
+      });
+
+      test('unmute lifts the ADM mute even for a stop-on-mute track', () async {
+        // changeDefaultAudioConstraints (and republishing) can flip
+        // stopTrackOnMute back to true while an ADM mute is still applied.
+        // The unmute has to clear it regardless, otherwise the microphone
+        // stays silent while the SDK reports it live.
+        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio')
+          ..enabled = false;
+        final track = addAudioTrack(
+          mediaTrack: mediaTrack,
+          mediaStream: _FakeMediaStream(),
+        );
+        expect(track.stopTrackOnMute, isTrue);
+
+        try {
+          await rtcManager.unmuteTrack(trackId: track.trackId);
+        } catch (_) {
+          // The stop-on-mute branch recreates the track through platform
+          // channels, which are unavailable here. Only the ADM call before it
+          // matters for this test.
+        }
+
+        verify(() => pcFactory.setMicrophoneMuted(false)).called(1);
+      });
+
+      test('reconcile restores a mute the ADM dropped', () async {
+        // Anything that restarts capture (resumeAudio, an internal
+        // StartRecording) clears the ADM mute without telling the SDK.
+        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+        final track = addAudioTrack(
+          mediaTrack: mediaTrack,
+          mediaStream: _FakeMediaStream(),
+        );
+        await rtcManager.muteTrack(
+          trackId: track.trackId,
+          stopTrackOnMute: false,
+        );
+
+        // ADM reports unmuted while the SDK considers the track muted.
+        await rtcManager.reconcileAdmMicrophoneMute();
+
+        // Once for the mute itself, once for the re-assert.
+        verify(() => pcFactory.setMicrophoneMuted(true)).called(2);
+      });
+
+      test('reconcile lifts an ADM mute left on a live track', () async {
+        // Muting during an audio suspension and then resuming re-enables the
+        // track from the pre-suspension snapshot, leaving the ADM muted while
+        // the SDK reports the mic live — the direction where the user talks and
+        // nobody hears them.
+        when(() => pcFactory.isMicrophoneMuted()).thenAnswer((_) async => true);
+
+        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+        final track = addAudioTrack(
+          mediaTrack: mediaTrack,
+          mediaStream: _FakeMediaStream(),
+        );
+        await rtcManager.muteTrack(
+          trackId: track.trackId,
+          stopTrackOnMute: false,
+        );
+        // Re-enabled outside of unmuteTrack, as the resume path does.
+        mediaTrack.enabled = true;
+
+        await rtcManager.reconcileAdmMicrophoneMute();
+
+        verify(() => pcFactory.setMicrophoneMuted(false)).called(1);
+      });
+
+      test('reconcile is a no-op when the ADM already matches', () async {
+        when(() => pcFactory.isMicrophoneMuted()).thenAnswer((_) async => true);
+
+        final track = addAudioTrack(
+          mediaTrack: _FakeMediaStreamTrack(kind: 'audio'),
+          mediaStream: _FakeMediaStream(),
+        );
+        await rtcManager.muteTrack(
+          trackId: track.trackId,
+          stopTrackOnMute: false,
+        );
+
+        await rtcManager.reconcileAdmMicrophoneMute();
+
+        verify(() => pcFactory.setMicrophoneMuted(true)).called(1);
+        verifyNever(() => pcFactory.setMicrophoneMuted(false));
+      });
+
+      test('reconcile leaves a stopped-on-mute track alone', () async {
+        // The mute is expressed by stopping the track, so the ADM mute is not
+        // the mechanism and has no desired value to enforce.
+        when(() => pcFactory.isMicrophoneMuted()).thenAnswer((_) async => true);
+
+        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio')
+          ..enabled = false;
+        addAudioTrack(
+          mediaTrack: mediaTrack,
+          mediaStream: _FakeMediaStream(),
+        );
+
+        await rtcManager.reconcileAdmMicrophoneMute();
+
+        verifyNever(() => pcFactory.isMicrophoneMuted());
+        verifyNever(() => pcFactory.setMicrophoneMuted(any()));
+      });
+
+      test('republishing preserves the ADM-level mute opt-in', () async {
+        // publishAudioTrack defaults stopTrackOnMute to true; republishing an
+        // existing track must not silently downgrade its mute strategy, or the
+        // next mute would stop the track and kill speech detection.
+        final track = RtcLocalAudioTrack(
+          trackIdPrefix: 'test-publisher',
+          trackType: SfuTrackType.audio,
+          mediaStream: _FakeMediaStream(),
+          mediaTrack: _FakeMediaStreamTrack(kind: 'audio'),
+          mediaConstraints: const AudioConstraints(),
+          stopTrackOnMute: false,
+        );
+
+        final result = await rtcManager.publishTrack(track);
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getDataOrNull()!.stopTrackOnMute, isFalse);
       });
 
       test('ADM mute failure still leaves the track muted', () async {
