@@ -3,7 +3,6 @@
 ### 🐞 Fixed
 
 - Fixed the publisher announcing a stale track `mid` after a renegotiation or publish retry. It's now resolved from the current peer-connection state so the SFU can reliably match the track to its media.
-- Fixed the publisher getting permanently stuck after a failed initial publish, it now rejoins to rebuild the connection instead of rolling back into an unrecoverable state.
 
 ## 1.4.2
 
