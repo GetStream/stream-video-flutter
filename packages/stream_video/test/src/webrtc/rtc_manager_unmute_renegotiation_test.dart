@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
@@ -32,6 +33,13 @@ const _testCodec = SfuCodec(
 );
 
 const _trackId = 'test-track-id';
+const _mediaTrackId = 'test-media-track-id';
+
+final _publishOption = SfuPublishOptions(
+  id: 1,
+  codec: _testCodec,
+  trackType: SfuTrackType.video,
+);
 
 rtc.RTCRtpTransceiver _transceiverWithTrack(rtc.MediaStreamTrack? track) {
   final sender = _MockSender();
@@ -41,6 +49,21 @@ rtc.RTCRtpTransceiver _transceiverWithTrack(rtc.MediaStreamTrack? track) {
   when(() => transceiver.sender).thenReturn(sender);
   return transceiver;
 }
+
+/// The track info the cached transceiver would be announced with, i.e. what
+/// `getAnnouncedTracks` hands to `markNegotiated` after a completed negotiation.
+final _announcedTrackInfo = RtcTrackInfo(
+  trackId: _mediaTrackId,
+  trackType: SfuTrackType.video,
+  publishOptionId: 1,
+  mid: '0',
+  layers: const [],
+  codec: _testCodec,
+  muted: false,
+  dtx: false,
+  stereo: false,
+  red: false,
+);
 
 void main() {
   setUpAll(() {
@@ -88,18 +111,18 @@ void main() {
     RtcManager manager, {
     required rtc.MediaStreamTrack? senderTrack,
   }) {
+    final mediaTrack = _MockMediaStreamTrack();
+    when(() => mediaTrack.id).thenReturn(_mediaTrackId);
+
     final track = MockRtcLocalTrack();
     when(() => track.trackId).thenReturn(_trackId);
     when(() => track.stopTrackOnMute).thenReturn(false);
+    when(() => track.mediaTrack).thenReturn(mediaTrack);
     manager.tracks[_trackId] = track;
 
     manager.transceiversManager.add(
       track,
-      SfuPublishOptions(
-        id: 1,
-        codec: _testCodec,
-        trackType: SfuTrackType.video,
-      ),
+      _publishOption,
       _transceiverWithTrack(senderTrack),
       const RtcTrackPublishOptions(),
     );
@@ -129,8 +152,11 @@ void main() {
         final wires = buildManager(isReconnecting: false);
         addUnmutableTrack(wires.manager, senderTrack: _MockMediaStreamTrack());
 
-        // Simulate a completed negotiation (SFU answered).
-        wires.manager.transceiversManager.markNegotiated();
+        // Simulate a completed negotiation (SFU answered) that announced the
+        // cached transceiver.
+        wires.manager.transceiversManager.markNegotiated(
+          [_announcedTrackInfo],
+        );
 
         final result = await wires.manager.unmuteTrack(trackId: _trackId);
 

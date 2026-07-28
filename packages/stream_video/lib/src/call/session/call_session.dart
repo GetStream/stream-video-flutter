@@ -620,7 +620,8 @@ class CallSession extends Disposable {
 
         // Signaling stall: local offer created but SetPublisher never completed,
         // leaving the peer connection wedged in `have-local-offer`. Negotiation
-        // won't resume on its own, so renegotiate and rejoin if recovery fails.
+        // won't resume on its own, so renegotiate and fall back to a reconnect
+        // if the recovery fails.
         final signalingState = publisher.pc.signalingState;
         if (signalingState ==
             rtc.RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
@@ -640,9 +641,9 @@ class CallSession extends Disposable {
             _logger.w(
               () =>
                   '[publisherConnectionCheck] recovery renegotiation failed '
-                  '(${result.getErrorOrNull()}) — triggering rejoin',
+                  '(${result.getErrorOrNull()}) — triggering fast reconnect',
             );
-            onReconnectionNeeded(publisher, SfuReconnectionStrategy.rejoin);
+            onReconnectionNeeded(publisher, SfuReconnectionStrategy.fast);
           }
           return;
         }
@@ -1114,7 +1115,9 @@ class CallSession extends Disposable {
         _logger.w(
           () => '[negotiate] rejected(tracksInfo is empty): $tracksInfo',
         );
-        return pc.rollbackLocalDescription();
+
+        await pc.rollbackLocalDescription();
+        return const Result.success(null);
       }
 
       _logger.v(() => '[negotiate] announcing tracks: $tracksInfo');
@@ -1146,9 +1149,9 @@ class CallSession extends Disposable {
               'Failed to set remote answer: ${ansResult.getErrorOrNull()}',
             );
           }
-
-          rtcManager?.transceiversManager.markNegotiated();
         }
+
+        rtcManager?.transceiversManager.markNegotiated(tracksInfo);
 
         return const Result.success(null);
       } catch (e, stk) {

@@ -3,6 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_track_type.dart';
+import 'model/rtc_tracks_info.dart';
 import 'rtc_track/rtc_track.dart';
 import 'rtc_track/rtc_track_publish_options.dart';
 
@@ -115,13 +116,17 @@ class TransceiverManager {
     return _transceivers;
   }
 
-  /// Marks every cached transceiver that currently has a sending track as
-  /// negotiated, i.e. acknowledged by the SFU after a completed negotiation.
-  void markNegotiated() {
-    for (final item in _transceivers) {
-      if (item.transceiver.sender.track != null) {
-        item.negotiated = true;
-      }
+  /// Marks the cached transceivers that were part of [announced] as negotiated,
+  /// i.e. acknowledged by the SFU after a completed negotiation.
+  void markNegotiated(Iterable<RtcTrackInfo> announced) {
+    for (final info in announced) {
+      final item = find(
+        (c) =>
+            c.publishOption.id == info.publishOptionId &&
+            c.track.mediaTrack.id == info.trackId,
+      );
+
+      item?.negotiated = true;
     }
   }
 
