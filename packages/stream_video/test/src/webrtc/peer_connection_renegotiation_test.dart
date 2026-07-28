@@ -491,8 +491,8 @@ void main() {
     );
 
     test(
-      'a partial flush failure keeps failed and unattempted candidates '
-      'buffered without re-applying the ones already added',
+      'a candidate that fails to apply during the flush does not fail '
+      'setRemoteDescription, and the rest of the buffer still applies',
       () async {
         final pc = _FakeRtcPeerConnection();
         final sp = _build(pc: pc, type: StreamPeerType.subscriber);
@@ -508,29 +508,69 @@ void main() {
         }
         expect(pc.addedCandidates, isEmpty);
 
-        // Flush fails on c2: c1 applied then c2 throws.
+        // c2 is permanently invalid: it throws on every addCandidate attempt.
         pc.failOnCandidate = c2;
-        final firstFlush = await sp.setRemoteDescription(offer());
+        final flush = await sp.setRemoteDescription(offer());
 
-        expect(firstFlush.isFailure, isTrue);
         expect(
-          pc.addedCandidates,
-          [c1],
-          reason: 'only c1 was applied before c2 failed',
-        );
-
-        // Recover and flush again: c2 and c3 apply, c1 is NOT re-applied.
-        pc.failOnCandidate = null;
-        final secondFlush = await sp.setRemoteDescription(offer());
-
-        expect(secondFlush.isSuccess, isTrue);
-        expect(
-          pc.addedCandidates,
-          [c1, c2, c3],
+          flush.isSuccess,
+          isTrue,
           reason:
-              'each candidate is applied exactly once — the already-added c1 '
-              'must not be re-applied on retry',
+              'the remote description was applied — a bad candidate must not '
+              'turn that into a Failure, or onSubscriberOffer skips the answer '
+              'and negotiation stalls',
         );
+        expect(
+          pc.addedCandidates,
+          [c1, c3],
+          reason: 'c2 failing must not stop c3 from being applied',
+        );
+      },
+    );
+
+    test(
+      'a candidate that failed the flush is dropped, so it cannot poison '
+      'later renegotiations',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        final bad = rtc.RTCIceCandidate('bad', 'mid', 0);
+        await sp.addIceCandidate(bad);
+
+        // `bad` keeps throwing for the whole lifetime of the connection.
+        pc.failOnCandidate = bad;
+
+        expect((await sp.setRemoteDescription(offer())).isSuccess, isTrue);
+        expect(pc.addedCandidates, isEmpty);
+
+        // Renegotiation: the dropped candidate must not be retried, so nothing
+        // throws and the answer path stays healthy.
+        expect((await sp.setRemoteDescription(offer())).isSuccess, isTrue);
+        expect((await sp.setRemoteDescription(offer())).isSuccess, isTrue);
+        expect(pc.addedCandidates, isEmpty);
+      },
+    );
+
+    test(
+      'candidates buffered before the remote description are each applied '
+      'exactly once',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        final c1 = rtc.RTCIceCandidate('c1', 'mid', 0);
+        final c2 = rtc.RTCIceCandidate('c2', 'mid', 0);
+
+        await sp.addIceCandidate(c1);
+        await sp.addIceCandidate(c2);
+
+        await sp.setRemoteDescription(offer());
+        expect(pc.addedCandidates, [c1, c2]);
+
+        // A later renegotiation must not re-flush an already-drained buffer.
+        await sp.setRemoteDescription(offer());
+        expect(pc.addedCandidates, [c1, c2]);
       },
     );
   });

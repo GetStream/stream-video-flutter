@@ -280,17 +280,26 @@ class StreamPeerConnection extends Disposable {
   ) {
     return _candidateLock.synchronized(() async {
       try {
-        final result = await pc.setRemoteDescription(sd);
-        // Flush buffered candidates.
-        final pending = List<rtc.RTCIceCandidate>.of(_pendingCandidates);
-        for (final candidate in pending) {
-          await pc.addCandidate(candidate);
-          _pendingCandidates.remove(candidate);
-        }
-        return Result.success(result);
+        await pc.setRemoteDescription(sd);
       } catch (e, stk) {
         return Result.failure(VideoErrors.compose(e, stk));
       }
+
+      final pending = List<rtc.RTCIceCandidate>.of(_pendingCandidates);
+      _pendingCandidates.clear();
+      for (final candidate in pending) {
+        try {
+          await pc.addCandidate(candidate);
+        } catch (e) {
+          _logger.w(
+            () =>
+                '[setRemoteDescription] #$type; dropping candidate '
+                '${candidate.candidate}; failed: $e',
+          );
+        }
+      }
+
+      return const Result.success(null);
     });
   }
 
