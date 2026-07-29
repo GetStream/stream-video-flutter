@@ -123,31 +123,52 @@ class StreamPeerConnectionFactory {
     await native.resumeAudio();
   }
 
+  /// Whether ADM-level microphone mute is available on this platform.
+  static bool get isAppleAdmMicrophoneMuteSupported =>
+      rtc.NativePeerConnectionFactory.isAdmMicrophoneMuteSupported;
+
   /// Mutes / unmutes microphone capture at the audio-device-module level
-  /// while the audio engine keeps running. On iOS/macOS this arms Apple's
-  /// muted-talker detection, which powers speaking-while-muted events.
-  Future<void> setMicrophoneMuted(bool muted) async {
+  /// while the audio engine keeps running, arming Apple's muted-talker
+  /// detection, which powers speaking-while-muted events.
+  ///
+  /// No-op unless [isAppleAdmMicrophoneMuteSupported].
+  Future<void> setAppleAdmMicrophoneMuted(bool muted) async {
+    if (!isAppleAdmMicrophoneMuteSupported) {
+      _logger.w(
+        () => '[setAppleAdmMicrophoneMuted] unsupported platform, skipping',
+      );
+      return;
+    }
+
     final native = _nativeFactory;
     if (native == null) {
-      _logger.w(() => '[setMicrophoneMuted] no native factory');
+      _logger.w(() => '[setAppleAdmMicrophoneMuted] no native factory');
       return;
     }
     _logger.i(
       () =>
-          '[setMicrophoneMuted] muted: $muted, '
+          '[setAppleAdmMicrophoneMuted] muted: $muted, '
           'factoryId: ${native.factoryId}',
     );
     await native.setMicrophoneMuted(muted);
   }
 
-  /// Reads back the ADM microphone mute state, or `null` when there is no
-  /// native factory to ask.
-  Future<bool?> isMicrophoneMuted() async {
-    final native = _nativeFactory;
-    if (native == null) {
-      _logger.w(() => '[isMicrophoneMuted] no native factory');
+  /// Reads back the ADM microphone mute state, or `null` when it cannot be
+  /// asked: no native factory, or a platform without ADM-level mute.
+  Future<bool?> isAppleAdmMicrophoneMuted() async {
+    if (!isAppleAdmMicrophoneMuteSupported) {
+      _logger.w(
+        () => '[isAppleAdmMicrophoneMuted] unsupported platform, skipping',
+      );
       return null;
     }
+
+    final native = _nativeFactory;
+    if (native == null) {
+      _logger.w(() => '[isAppleAdmMicrophoneMuted] no native factory');
+      return null;
+    }
+
     return native.isMicrophoneMuted();
   }
 
