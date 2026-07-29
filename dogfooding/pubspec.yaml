@@ -10,7 +10,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  app_links: ^6.4.1
+  app_links: ^7.2.1
   collection: ^1.19.1
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
