@@ -126,7 +126,7 @@ melos:
 
     version:update:
       run: dart run tools/generate_version.dart
-      description: Sync streamVideoVersion in globals.dart with the pubspec version.
+      description: Sync streamVideoVersion in globals.dart and the dogfooding app version with the pubspec version.
 
     generate:all:
       run: melos run generate:dart && melos run generate:flutter
