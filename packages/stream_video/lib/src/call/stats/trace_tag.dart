@@ -31,6 +31,7 @@ abstract class TraceTag {
   static const String publisherConnectionCheckStalled =
       'publisherConnectionCheck.stalled';
   static const String callLeave = 'call.leaveReason';
+  static const String trackMidUnresolved = 'trackMid.unresolved';
   static const String trackPublished = 'trackPublished';
   static const String trackUnpublished = 'trackUnpublished';
   static const String changePublishQuality = 'changePublishQuality';

@@ -9,6 +9,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../stream_video.dart';
 import '../call/state/call_state_notifier.dart';
+import '../call/stats/trace_tag.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
@@ -612,6 +613,48 @@ class RtcManager extends Disposable {
   }
 }
 
+/// Returns the negotiated mid for [trackId] from [liveTransceivers] or, if absent,
+/// from the offer [sdp] for media type [kind]. Returns null if unresolved.
+@visibleForTesting
+String? resolveTrackMid({
+  required String? trackId,
+  required String? kind,
+  required List<rtc.RTCRtpTransceiver> liveTransceivers,
+  required String? sdp,
+}) {
+  if (trackId == null) return null;
+
+  // 1. Authoritative: the current transceiver's mid, matched by track id.
+  final live = liveTransceivers.firstWhereOrNull(
+    (t) => t.sender.track?.id == trackId,
+  );
+  if (live != null && live.mid.isNotEmpty) return live.mid;
+
+  // 2. Fallback: the m-section for this track in the current offer SDP.
+  //    Searched in reverse so a recycled m-line (the same track re-attached to
+  //    a later m-section) wins over the stale one it replaced.
+  if (sdp != null) {
+    try {
+      final media = (parse(sdp)['media'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .reversed
+          .firstWhereOrNull(
+            (m) =>
+                (kind == null || m['type'] == kind) &&
+                ((m['msid'] as String?)?.contains(trackId) ?? false),
+          );
+
+      final mid = media?['mid'];
+      if (mid != null) return mid.toString();
+    } catch (_) {
+      // Malformed SDP — treat as unresolved.
+    }
+  }
+
+  // 3. Unresolved — do NOT fall back to a positional/canonical index.
+  return null;
+}
+
 extension PublisherRtcManager on RtcManager {
   List<RtcLocalTrack> getPublisherTracks() {
     return [...tracks.values.whereType<RtcLocalTrack>()];
@@ -634,42 +677,41 @@ extension PublisherRtcManager on RtcManager {
     return track;
   }
 
-  /// Resolves the mid for [cache]'s track based on the current peer connection.
-  /// Returns null if not found.
-  String? resolveTrackMid(
-    TransceiverCache cache,
-    List<rtc.RTCRtpTransceiver> liveTransceivers,
-    String? sdp,
-  ) {
-    final trackId = cache.track.mediaTrack.id;
-    if (trackId == null) return null;
+  /// The transceivers currently on the publisher peer connection.
+  ///
+  /// Never throws as it would abort a renegotiation (leaving the
+  /// publisher in `have-local-offer`) or a whole reconnect.
+  Future<List<rtc.RTCRtpTransceiver>> _liveTransceivers() async {
+    final pc = publisher?.pc;
+    if (pc == null) return const [];
 
-    // 1. Authoritative: the current transceiver's mid, matched by track id.
-    final live = liveTransceivers.firstWhereOrNull(
-      (t) => t.sender.track?.id == trackId,
-    );
-    if (live != null && live.mid.isNotEmpty) return live.mid;
-
-    // 2. Fallback: the m-section for this track in the current offer SDP.
-    if (sdp != null) {
-      final media = (parse(sdp)['media'] as List?)
-          ?.cast<Map<String, dynamic>>()
-          .reversed
-          .firstWhereOrNull(
-            (m) => (m['msid'] as String?)?.contains(trackId) ?? false,
-          );
-      final mid = media?['mid'];
-      if (mid != null) return mid.toString();
+    try {
+      return await pc.getTransceivers();
+    } catch (e, stk) {
+      _logger.w(() => '[liveTransceivers] failed: $e\n$stk');
+      return const [];
     }
+  }
 
-    // 3. Unresolved — do NOT fall back to a positional/canonical index.
-    return null;
+  /// The SDP of the publisher's local description, or null when unavailable.
+  ///
+  /// Never throws as it would abort a renegotiation (leaving the
+  /// publisher in `have-local-offer`) or a whole reconnect.
+  Future<String?> _localSdp() async {
+    final pc = publisher?.pc;
+    if (pc == null) return null;
+
+    try {
+      return (await pc.getLocalDescription())?.sdp;
+    } catch (e, stk) {
+      _logger.w(() => '[localSdp] failed: $e\n$stk');
+      return null;
+    }
   }
 
   Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
-    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
-    final liveTransceivers =
-        await publisher?.pc.getTransceivers() ?? <rtc.RTCRtpTransceiver>[];
+    final finalSdp = sdp ?? await _localSdp();
+    final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
 
     for (final item in transceiversManager.items()) {
@@ -688,9 +730,8 @@ extension PublisherRtcManager on RtcManager {
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
-    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
-    final liveTransceivers =
-        await publisher?.pc.getTransceivers() ?? <rtc.RTCRtpTransceiver>[];
+    final finalSdp = sdp ?? await _localSdp();
+    final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
 
     for (final publishOption in publishOptions) {
@@ -719,13 +760,28 @@ extension PublisherRtcManager on RtcManager {
   }) {
     final track = transceiverCache.track;
 
-    final mid = resolveTrackMid(transceiverCache, liveTransceivers, sdp);
+    final mid = resolveTrackMid(
+      trackId: track.mediaTrack.id,
+      kind: track.mediaTrack.kind,
+      liveTransceivers: liveTransceivers,
+      sdp: sdp,
+    );
+
     if (mid == null) {
       _logger.w(
         () =>
             '[transceiverToTrackInfo] could not resolve mid for track '
             '${track.mediaTrack.id} (${track.trackType}); skipping announce',
       );
+
+      publisher?.tracer.trace(TraceTag.trackMidUnresolved, {
+        'trackId': track.mediaTrack.id,
+        'trackType': track.trackType.toString(),
+        'publishOptionId': transceiverCache.publishOption.id,
+        'liveTransceiverCount': liveTransceivers.length,
+        'hasSdp': sdp != null,
+      });
+
       return null;
     }
 
