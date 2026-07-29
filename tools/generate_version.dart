@@ -53,7 +53,8 @@ Future<void> main() async {
   // The dogfooding app follows the SDK version with its major bumped by one
   // (e.g. `1.4.2` -> `2.4.2`).
   final parts = cleanedVersion.split('.');
-  final dogfoodingVersion = '${int.parse(parts[0]) + 1}.${parts[1]}.${parts[2]}';
+  final dogfoodingVersion =
+      '${int.parse(parts[0]) + 1}.${parts[1]}.${parts[2]}';
 
   // Update the version in the dogfooding pubspec.yaml
   final dogfoodingPubspecPath = p.join(rootDir, 'dogfooding', 'pubspec.yaml');
@@ -65,5 +66,7 @@ Future<void> main() async {
 
   await File(dogfoodingPubspecPath).writeAsString(updatedDogfoodingPubspec);
 
-  print('✓ Successfully updated version to $dogfoodingVersion in $dogfoodingPubspecPath');
+  print(
+    '✓ Successfully updated version to $dogfoodingVersion in $dogfoodingPubspecPath',
+  );
 }
