@@ -3,8 +3,8 @@ import 'dart:io' show Directory, File;
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
-/// Updates the version constant in stream_video/lib/globals.dart based on
-/// the version in its pubspec.yaml file.
+/// Updates the version constant in stream_video/lib/globals.dart and the
+/// dogfooding app version based on the version in stream_video's pubspec.yaml.
 Future<void> main() async {
   // Target the stream_video package
   const packageName = 'stream_video';
