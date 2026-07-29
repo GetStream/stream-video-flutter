@@ -553,7 +553,15 @@ class CallSession extends Disposable {
       final publisher = rtcManager?.publisher;
       if (publisher != null) {
         _logger.v(() => '[fastReconnect] triggering publisher renegotiation');
-        await _onRenegotiationNeeded(publisher);
+        final renegotiation = await _onRenegotiationNeeded(publisher);
+        if (renegotiation is Failure) {
+          _logger.w(
+            () =>
+                '[fastReconnect] publisher renegotiation failed: '
+                '${renegotiation.error}',
+          );
+          result = renegotiation;
+        }
       }
 
       final remoteTracks = rtcManager!.tracks.values
