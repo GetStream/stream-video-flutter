@@ -9,8 +9,10 @@ void main() {
   const pubspecPath = 'packages/stream_video/pubspec.yaml';
   const globalsPath = 'packages/stream_video/lib/globals.dart';
 
-  final versionMatch = RegExp(r'^version:\s*(\S+)', multiLine: true)
-      .firstMatch(File(pubspecPath).readAsStringSync());
+  final versionMatch = RegExp(
+    r'^version:\s*(\S+)',
+    multiLine: true,
+  ).firstMatch(File(pubspecPath).readAsStringSync());
   if (versionMatch == null) {
     throw StateError('Could not find a version in $pubspecPath');
   }
