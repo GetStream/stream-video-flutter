@@ -53,7 +53,7 @@ melos:
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
-        post: dart run tools/generate_version.dart
+        post: melos run version:update
 
   scripts:
     postclean:
@@ -114,15 +114,19 @@ melos:
 
     lint:pub:
       run: |
-        dart run melos exec -c 1 --no-published --no-private --order-dependents -- \
+        melos exec -c 1 --no-published --no-private --order-dependents -- \
               "flutter pub publish -n"
       description: Dry-run `pub publish` for every publishable package (pre-publish gate).
 
     release:pub:
       run: |
-        dart run melos exec -c 1 --no-published --no-private --order-dependents -- \
+        melos exec -c 1 --no-published --no-private --order-dependents -- \
               "flutter pub publish -f"
       description: Publish every publishable package to pub.dev, in dependency order.
+
+    version:update:
+      run: dart run tools/generate_version.dart
+      description: Sync streamVideoVersion in globals.dart with the pubspec version.
 
     generate:all:
       run: melos run generate:dart && melos run generate:flutter

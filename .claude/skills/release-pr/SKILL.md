@@ -9,7 +9,6 @@ arguments: [version]
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
-  - Bash(dart *)
   - Bash(melos *)
   - Bash(which *)
   - Bash(grep *)
@@ -54,7 +53,7 @@ Run these checks. **If any fail, stop the skill, surface the failing check to th
 (no stashing uncommitted work, no force-pulling, no killing processes).
 
 - `git status --short -uno` clean after `git checkout main` + `git pull --ff-only`.
-- `dart run melos --version` succeeds.
+- `which melos` succeeds.
 - `gh auth status` succeeds.
 - `gh pr list --head release/v<version> --state all --json number` returns `[]`.
 - Latest CI on `main` is green: `gh run list --branch main --limit 5` — no failures on the most recent runs.
@@ -71,7 +70,7 @@ git checkout -b release/v<version>
 
 ### 2. Bump versions
 
-Edit these by hand, then let `dart run melos bootstrap` propagate the rest.
+Edit these by hand, then let `melos bs` propagate the rest.
 
 **Edit:**
 
@@ -86,16 +85,16 @@ Edit these by hand, then let `dart run melos bootstrap` propagate the rest.
 **Then run:**
 
 ```bash
-dart run melos bootstrap
+melos bs
 ```
 
-`dart run melos bootstrap` does the rest:
+`melos bs` does the rest:
 
 - Propagates the root `pubspec.yaml` deps block into every workspace pubspec — each package's intra-package
   `stream_video*` constraints, every `packages/*/example/pubspec.yaml`, and `dogfooding/pubspec.yaml`.
-- Fires the `command.bootstrap.hooks.post` hook, which runs `tools/generate_version.dart` and regenerates
-  `streamVideoVersion` in `packages/stream_video/lib/globals.dart` from the new pubspec version. (Don't hand-edit
-  `globals.dart`.)
+- Fires the `command.bootstrap.hooks.post: melos run version:update` hook, which runs `tools/generate_version.dart`
+  and regenerates `streamVideoVersion` in `packages/stream_video/lib/globals.dart` from the new pubspec version.
+  (Don't hand-edit `globals.dart`.)
 
 Verify the diff shape matches the previous release PR. Find its number with:
 
@@ -137,8 +136,8 @@ missing headers both fail pana.
 ### 4. Sanity-check
 
 ```bash
-dart run melos run analyze:error
-dart run melos run lint:pub
+melos run analyze
+melos run lint:pub
 ```
 
 If either fails, surface to the user and stop.
