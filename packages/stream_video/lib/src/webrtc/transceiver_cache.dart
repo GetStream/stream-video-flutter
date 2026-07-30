@@ -123,7 +123,9 @@ class TransceiverManager {
       final item = find(
         (c) =>
             c.publishOption.id == info.publishOptionId &&
-            c.track.mediaTrack.id == info.trackId,
+            c.publishOption.trackType == info.trackType &&
+            (c.transceiver.sender.track?.id ?? c.track.mediaTrack.id) ==
+                info.trackId,
       );
 
       item?.negotiated = true;

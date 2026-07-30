@@ -1117,7 +1117,25 @@ class CallSession extends Disposable {
       }
 
       final sdp = offer.data.sdp;
-      final tracksInfo = await rtcManager?.getAnnouncedTracks(sdp: sdp) ?? [];
+      final manager = rtcManager;
+      final tracksInfo = manager == null
+          ? const <RtcTrackInfo>[]
+          : await manager.getAnnouncedTracks(sdp: sdp);
+
+      if (tracksInfo == null) {
+        _logger.w(
+          () => '[negotiate] rejected(unresolved track mid); rolling back',
+        );
+
+        // Announcing a subset would leave the omitted m-lines sending media the
+        // SFU cannot map, so drop the whole offer. Failing here lets the caller
+        // recover — the publisher watchdog escalates to a rejoin.
+        await pc.rollbackLocalDescription();
+
+        return Result<void>.error(
+          'Could not resolve the mid of every published track',
+        );
+      }
 
       if (tracksInfo.isEmpty) {
         _logger.w(

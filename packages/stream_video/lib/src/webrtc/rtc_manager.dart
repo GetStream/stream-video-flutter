@@ -635,7 +635,10 @@ String? resolveTrackMid({
   final live = liveTransceivers.firstWhereOrNull(
     (t) => t.sender.track?.id == trackId,
   );
-  if (live != null && live.mid.isNotEmpty) return live.mid;
+  if (live != null) {
+    final liveMid = _midOf(live);
+    if (liveMid != null) return liveMid;
+  }
 
   // 2. Fallback: the m-section for this track in the current offer SDP.
   //    Searched in reverse so a recycled m-line (the same track re-attached to
@@ -658,8 +661,26 @@ String? resolveTrackMid({
     }
   }
 
-  // 3. Unresolved — do NOT fall back to a positional/canonical index.
+  // 3. Last resort: the mid carried by the transceiver we were handed.
+  final cachedMid = _midOf(transceiver);
+  if (cachedMid != null) return cachedMid;
+
+  // 4. Unresolved — do NOT fall back to a positional/canonical index.
   return null;
+}
+
+/// The mid of [transceiver], or null when it has none yet.
+///
+/// Reading `mid` is not safe on every platform: on web it null-asserts through
+/// to the JS transceiver, so it throws for one that has never been negotiated
+/// rather than reporting an empty mid the way the native implementations do.
+String? _midOf(rtc.RTCRtpTransceiver transceiver) {
+  try {
+    final mid = transceiver.mid;
+    return mid.isEmpty ? null : mid;
+  } catch (_) {
+    return null;
+  }
 }
 
 extension PublisherRtcManager on RtcManager {
@@ -716,7 +737,15 @@ extension PublisherRtcManager on RtcManager {
     }
   }
 
-  Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
+  /// The tracks to announce in `SetPublisher`, or null when the mid of at least
+  /// one sending transceiver could not be resolved.
+  ///
+  /// All-or-nothing on purpose: announcing a subset commits an offer whose
+  /// omitted m-lines keep sending media the SFU cannot map, and the SFU may read
+  /// a missing entry as an unpublish of a track that was working. A null tells
+  /// the caller to roll the offer back and retry instead. An empty list is a
+  /// different answer — nothing is sending, which is a legitimate no-op.
+  Future<List<RtcTrackInfo>?> getAnnouncedTracks({String? sdp}) async {
     final finalSdp = sdp ?? await _localSdp();
     final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
@@ -728,12 +757,20 @@ extension PublisherRtcManager on RtcManager {
         sdp: finalSdp,
         liveTransceivers: liveTransceivers,
       );
-      if (info != null) infos.add(info);
+
+      if (info == null) return null;
+      infos.add(info);
     }
 
     return infos;
   }
 
+  /// The tracks to report in `ReconnectDetails`.
+  ///
+  /// Best-effort, unlike [getAnnouncedTracks]: this runs against the previous
+  /// session, whose peer connection is often already closed, and there is no
+  /// offer to roll back. Aborting a reconnect over an unresolved mid is worse
+  /// than reporting what we do know, so unresolved tracks are dropped.
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
@@ -754,7 +791,12 @@ extension PublisherRtcManager on RtcManager {
         sdp: finalSdp,
         liveTransceivers: liveTransceivers,
       );
-      if (info != null) infos.add(info);
+
+      if (info == null) {
+        continue;
+      }
+
+      infos.add(info);
     }
 
     return infos;

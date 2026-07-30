@@ -36,6 +36,19 @@ class _FakeTransceiver extends Fake implements rtc.RTCRtpTransceiver {
   final rtc.RTCRtpSender sender;
 }
 
+/// A transceiver whose `mid` throws, like the web implementation does for a
+/// transceiver that has never been negotiated.
+class _ThrowingMidTransceiver extends Fake implements rtc.RTCRtpTransceiver {
+  _ThrowingMidTransceiver({required String trackId})
+    : sender = _FakeSender(_FakeMediaStreamTrack(trackId, 'video'));
+
+  @override
+  String get mid => throw TypeError();
+
+  @override
+  final rtc.RTCRtpSender sender;
+}
+
 /// SDP with two video m-sections. The first one is the recycled/inactive
 /// leftover (mid 1), the track is currently attached to the last one (mid 3).
 String _sdp({
@@ -180,6 +193,75 @@ void main() {
         transceiver: _FakeTransceiver(mid: '', hasTrack: false),
         liveTransceivers: [_FakeTransceiver(mid: '3', trackId: videoTrackId)],
         sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
+      );
+
+      expect(mid, isNull);
+    });
+
+    test('falls back to the mid on the given transceiver as a last resort', () {
+      // Both live sources are unavailable — a rejoin reading the previous
+      // session's publisher, which is already closed.
+      final mid = resolveTrackMid(
+        transceiver: _FakeTransceiver(mid: '4', trackId: videoTrackId),
+        liveTransceivers: const [],
+        sdp: null,
+      );
+
+      expect(mid, '4');
+    });
+
+    test('prefers the live mid over the one on the given transceiver', () {
+      final mid = resolveTrackMid(
+        // Stale snapshot: this transceiver was cached before the m-line moved.
+        transceiver: _FakeTransceiver(mid: '1', trackId: videoTrackId),
+        liveTransceivers: [_FakeTransceiver(mid: '7', trackId: videoTrackId)],
+        sdp: null,
+      );
+
+      expect(mid, '7');
+    });
+
+    test('prefers the SDP over the mid on the given transceiver', () {
+      final mid = resolveTrackMid(
+        transceiver: _FakeTransceiver(mid: '1', trackId: videoTrackId),
+        liveTransceivers: const [],
+        sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
+      );
+
+      expect(mid, '3');
+    });
+
+    test('returns null when reading the mid throws', () {
+      // On web `mid` reads through to the JS transceiver and null-asserts, so
+      // it throws for one that has never been negotiated.
+      final mid = resolveTrackMid(
+        transceiver: _ThrowingMidTransceiver(trackId: videoTrackId),
+        liveTransceivers: const [],
+        sdp: null,
+      );
+
+      expect(mid, isNull);
+    });
+
+    test('falls through to the SDP when the live mid throws', () {
+      // Same web behaviour, but hit through the live lookup: a matching
+      // transceiver that has never been negotiated must not abort the whole
+      // announce, it must let the SDP answer instead.
+      final mid = resolveTrackMid(
+        transceiver: _ThrowingMidTransceiver(trackId: videoTrackId),
+        liveTransceivers: [_ThrowingMidTransceiver(trackId: videoTrackId)],
+        sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
+      );
+
+      expect(mid, '3');
+    });
+
+    test('returns null when the live mid throws and nothing else '
+        'resolves', () {
+      final mid = resolveTrackMid(
+        transceiver: _ThrowingMidTransceiver(trackId: videoTrackId),
+        liveTransceivers: [_ThrowingMidTransceiver(trackId: videoTrackId)],
+        sdp: null,
       );
 
       expect(mid, isNull);

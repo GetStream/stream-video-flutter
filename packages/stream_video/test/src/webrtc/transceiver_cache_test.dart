@@ -25,6 +25,13 @@ class _MockMediaStreamTrack extends Mock implements rtc.MediaStreamTrack {}
 
 class _MockLocalTrack extends Mock implements RtcLocalTrack {}
 
+/// Builds a media track reporting [id].
+rtc.MediaStreamTrack _mediaTrack(String id) {
+  final track = _MockMediaStreamTrack();
+  when(() => track.id).thenReturn(id);
+  return track;
+}
+
 /// Builds a transceiver whose sender exposes [track] (nullable).
 rtc.RTCRtpTransceiver _transceiverWithTrack(rtc.MediaStreamTrack? track) {
   final sender = _MockSender();
@@ -180,6 +187,60 @@ void main() {
       manager.markNegotiated([_trackInfo('media-old', option)]);
 
       expect(manager.get(option)!.negotiated, isFalse);
+    });
+
+    test('marks a transceiver whose cached track went stale', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      // `RtcLocalTrack.recreate` attaches a new clone to the sender without
+      // rewriting the cached track, so the two ids disagree. The announce
+      // carries the sender's id, which is what must be matched here.
+      manager.add(
+        _localTrack('media-stale'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-current')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.markNegotiated([_trackInfo('media-current', option)]);
+
+      expect(manager.get(option)!.negotiated, isTrue);
+    });
+
+    test('ignores an announce that names neither the sent nor the cached '
+        'track', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-stale'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-current')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.markNegotiated([_trackInfo('media-other', option)]);
+
+      expect(manager.get(option)!.negotiated, isFalse);
+    });
+
+    test('ignores an announce for the same slot of another track type', () {
+      final manager = TransceiverManager();
+      final videoOption = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-1'),
+        videoOption,
+        _transceiverWithTrack(_mediaTrack('media-1')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.markNegotiated([
+        _trackInfo('media-1', _option(1, SfuTrackType.audio)),
+      ]);
+
+      expect(manager.get(videoOption)!.negotiated, isFalse);
     });
   });
 }
